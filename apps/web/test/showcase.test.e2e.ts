@@ -1,8 +1,18 @@
 import { expect } from 'playwright/test'
+import type { Page } from 'playwright'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
 import { router } from './showcase-router.ts'
+
+async function waitForShowcase(page: Page) {
+  // The browser entry awaits Remix hydration before it finishes evaluating.
+  await page
+    .locator('head script[type="module"][src]')
+    .evaluate(async (script: HTMLScriptElement) => {
+      await import(script.src)
+    })
+}
 
 it('hydrates previews across docs and deep-linked demo pages', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
@@ -37,9 +47,10 @@ it('hydrates previews across docs and deep-linked demo pages', async (t) => {
 
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/docs/input-message')
+  await waitForShowcase(page)
   const composer = page.locator('.doc-preview').first().getByRole('textbox', { name: 'Message' })
   await composer.press('Tab')
-  assert.equal(await composer.inputValue(), 'Why is every other input box so stiff?')
+  await expect(composer).toHaveValue('Why is every other input box so stiff?')
   await composer.fill('A message from the demo')
   await composer.press('Enter')
   await page.getByText('A message from the demo', { exact: true }).waitFor()
@@ -236,6 +247,7 @@ it('routes demo arrows to the focused widget or to slide navigation', async (t) 
 it('advances demo questions without focusing the title and preserves keyboard navigation in the answers', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.goto('/demo?c=ask-user-questions')
+  await waitForShowcase(page)
   const stage = page.locator('.site-demo-stage')
   await stage.getByRole('radio', { name: /^Designer/ }).click()
   await stage.getByText('Question 2 of 3', { exact: true }).waitFor()
@@ -245,6 +257,7 @@ it('advances demo questions without focusing the title and preserves keyboard na
   assert.ok(await page.evaluate(() => document.activeElement === document.body))
 
   await page.goto('/demo?c=ask-user-questions')
+  await waitForShowcase(page)
   await stage.getByRole('radio', { name: /^Designer/ }).press('Enter')
   const motion = stage.getByRole('radio', { name: /^Motion/ })
   await motion.waitFor()
