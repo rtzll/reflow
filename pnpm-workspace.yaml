@@ -4,10 +4,9 @@ packages:
 
 autoInstallPeers: false
 
-# Keep these until the pinned formatter and Remix test runner pick up the fixes.
+# Keep this until the pinned Remix test runner picks up the fixes.
 overrides:
-  'oxfmt>tinypool': 2.1.2
-  '@remix-run/test>esbuild': 0.28.1
+  '@remix-run/test>esbuild': 0.28.2
 
 allowBuilds:
-  esbuild@0.28.1: true
+  esbuild@0.28.2: true
