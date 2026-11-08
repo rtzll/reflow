@@ -87,6 +87,9 @@ it('preserves the gallery order and keeps previews above their footers', async (
     }
     await checkContainment()
     if (width === 1440) {
+      await expect(
+        gallery.locator('[data-component="ask-user-questions"]').getByText('Question 1 of 8'),
+      ).toBeVisible()
       const tile = (slug: string) =>
         gallery.locator(`article[data-component="${slug}"]`).boundingBox()
       const [table, dialog, datePicker, wideCalendar, tabs, thinking] = await Promise.all(
@@ -171,27 +174,6 @@ it('restores dismissed banners and allows clearing the selected feature', async 
   await feature.press('Space')
   assert.equal(await feature.getAttribute('aria-checked'), 'false')
   await feature.locator('path[data-check-at="1"]').waitFor({ state: 'attached' })
-})
-
-it('keeps the gallery question flow on step three until Continue and preserves the selected answers', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
-  await page.goto('/?theme=dark')
-  const questions = page.locator('.site-gallery [data-component="ask-user-questions"]')
-  await questions.getByText('Question 1 of 8', { exact: true }).waitFor()
-  await questions.getByRole('radio', { name: /^Designer/ }).click()
-  await questions.getByRole('radio', { name: /^Rounded/ }).click()
-  await questions.getByText('Question 3 of 8', { exact: true }).waitFor()
-  const next = questions.getByRole('button', { name: 'Continue' })
-  assert.equal(await next.isEnabled(), false)
-  const composer = questions.getByRole('checkbox', { name: /^InputMessage/ })
-  const thinking = questions.getByRole('checkbox', { name: /^ThinkingSteps/ })
-  await composer.click()
-  await thinking.click()
-  await next.click()
-  await questions.getByText('Question 4 of 8', { exact: true }).waitFor()
-  await questions.getByRole('button', { name: 'Back' }).click()
-  assert.equal(await composer.getAttribute('aria-checked'), 'true')
-  assert.equal(await thinking.getAttribute('aria-checked'), 'true')
 })
 
 it('moves the hovered switch thumb without jumping and settles a drag from the thumb position', async (t) => {

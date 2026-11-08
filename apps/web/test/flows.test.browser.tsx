@@ -3,6 +3,7 @@ import { equal, ok } from 'remix/assert'
 import { render } from 'remix/component/test'
 import { on, type Handle } from 'remix/component'
 import { describe, it } from 'remix/test'
+import { Example } from '../app/public/examples.tsx'
 
 function press(node: Element, key: string, options: KeyboardEventInit = {}) {
   node.dispatchEvent(
@@ -217,6 +218,41 @@ describe('Reflow flows', () => {
     equal(submitted?.a.skipped, true)
     equal(submitted?.b.selectedIds.join(), 'x')
   })
+})
+
+it('keeps the gallery question flow on step three until Continue and preserves the selected answers', async (t) => {
+  const { $, $$, act, cleanup } = render(<Example slug="ask-user-questions" showcase gallery />)
+  t.after(cleanup)
+
+  const progress = () => $('.rf-questions-header')?.textContent?.trim()
+  const option = (role: 'radio' | 'checkbox', name: string) => {
+    const row = Array.from($$(`[role="${role}"]`)).find((element) =>
+      element.textContent?.trim().startsWith(name),
+    )
+    ok(row instanceof HTMLElement, `Expected ${name} ${role}`)
+    return row
+  }
+
+  equal(progress(), 'Question 1 of 8')
+  await act(() => option('radio', 'Designer').click())
+  await act(() => option('radio', 'Rounded').click())
+  equal(progress(), 'Question 3 of 8')
+  const next = $('.rf-question-submit')
+  ok(next instanceof HTMLButtonElement)
+  equal($('.rf-question-submit-label')?.firstChild?.textContent, 'Continue')
+  equal(next.disabled, true)
+
+  await act(() => option('checkbox', 'InputMessage').click())
+  await act(() => option('checkbox', 'ThinkingSteps').click())
+  equal(progress(), 'Question 3 of 8')
+  equal(next.disabled, false)
+  await act(() => next.click())
+  equal(progress(), 'Question 4 of 8')
+  const back = Array.from($$('button')).find((button) => button.textContent?.trim() === 'Back')
+  ok(back instanceof HTMLButtonElement)
+  await act(() => back.click())
+  equal(option('checkbox', 'InputMessage').getAttribute('aria-checked'), 'true')
+  equal(option('checkbox', 'ThinkingSteps').getAttribute('aria-checked'), 'true')
 })
 
 it('supports externally controlled question steps, answers, completion, and reset', async (t) => {
