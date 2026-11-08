@@ -29,7 +29,7 @@ npm trusted publishing is configured on an existing package. To create it throug
 4. Run **Release** in `publish` mode on the **same commit**. It verifies the approved tarball's integrity, skips the existing npm version, and creates the matching GitHub tag and release.
 5. Before the next new version, configure the package's GitHub trusted publisher for owner `rtzll`, repository `reflow`, workflow `release.yml`, environment `npm`, with publishing permission. Complete that publish within npm's two-day activation window; otherwise recreate the connection.
 
-This one-time account setup uses [npm staged publishing](https://docs.npmjs.com/staged-publishing/). Later versions use [trusted publishing](https://docs.npmjs.com/trusted-publishers/) without a stored npm token. The workflow pins npm 12.2.0 on Node 24.
+This one-time account setup uses [npm staged publishing](https://docs.npmjs.com/staged-publishing/). Later versions use [trusted publishing](https://docs.npmjs.com/trusted-publishers/) without a stored npm token. The workflow pins npm 12.2.2 on Node 24.
 
 ## Subsequent releases
 
