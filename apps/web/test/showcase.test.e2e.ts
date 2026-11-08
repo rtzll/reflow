@@ -1,18 +1,8 @@
 import { expect } from 'playwright/test'
-import type { Page } from 'playwright'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { router } from './showcase-router.ts'
-
-async function waitForShowcase(page: Page) {
-  // The browser entry awaits Remix hydration before it finishes evaluating.
-  await page
-    .locator('head script[type="module"][src]')
-    .evaluate(async (script: HTMLScriptElement) => {
-      await import(script.src)
-    })
-}
+import { router, waitForShowcase } from './showcase-router.ts'
 
 it('hydrates previews across docs and deep-linked demo pages', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))

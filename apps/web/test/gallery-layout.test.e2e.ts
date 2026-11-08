@@ -1,7 +1,7 @@
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { router } from './showcase-router.ts'
+import { router, waitForShowcase } from './showcase-router.ts'
 
 it('preserves the gallery order and keeps previews above their footers', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
@@ -381,6 +381,7 @@ it('moves the inline menu focus ring and preserves its forced-colors fallback', 
   const page = await t.serve(await createTestServer(router.fetch))
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/docs/dropdown#basic')
+  await waitForShowcase(page)
   const menu = page.getByRole('menu', { name: 'Library' })
   await menu.press('ArrowDown')
   const first = menu.getByRole('menuitemradio', { name: 'Teamspaces' })

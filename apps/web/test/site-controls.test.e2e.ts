@@ -2,7 +2,7 @@ import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
 import { expect } from 'playwright/test'
-import { router } from './showcase-router.ts'
+import { router, waitForShowcase } from './showcase-router.ts'
 
 it('applies preferences immediately, updates previews and links, and persists through reload', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
@@ -46,8 +46,9 @@ it('applies preferences immediately, updates previews and links, and persists th
 
 it('keeps settings menus exclusive and dismisses them with pointer and keyboard input', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/docs')
-  await page.locator('[data-site-controls-ready]').waitFor({ state: 'attached' })
+  await waitForShowcase(page)
   const panel = page.locator('.site-right')
   const theme = panel.locator('[data-setting-trigger="theme"]')
   const accent = panel.locator('[data-setting-trigger="accent"]')
@@ -100,7 +101,10 @@ it('keeps settings menus exclusive and dismisses them with pointer and keyboard 
     '--rf-color-thumb',
     'rgb(20, 52, 86)',
   )
-  await accentPicker.getByRole('button', { name: 'Rose', exact: true }).press('Tab')
+  const rose = accentPicker.getByRole('button', { name: 'Rose', exact: true })
+  await rose.focus()
+  await expect(rose).toBeFocused()
+  await page.keyboard.press('Tab')
   await expect(accent).toHaveAttribute('aria-expanded', 'false')
 
   await theme.click()
