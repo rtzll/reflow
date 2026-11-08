@@ -41,7 +41,7 @@ pnpm --filter @reflow/web deploy:dry-run
 pnpm --filter @reflow/web exec remix doctor
 ```
 
-`test:deployment` rebuilds and starts a temporary local Worker. It checks documentation routes, asset content types and caching, missing and private-file URLs, browser hydration, playground edits, mobile composition, and server rendering with JavaScript disabled. It also inspects the bundles for local filesystem paths and verifies that the Node asset compiler is absent from the Worker. The browser and Worker are stopped afterward. CI runs the same checks without Cloudflare credentials.
+`test:deployment` rebuilds and starts a temporary local Worker. It checks asset content types and caching, missing and private-file URLs, playground edits, mobile composition, and server rendering with JavaScript disabled. It also checks hydration and overflow on every docs page in desktop dark and mobile light layouts. Set `REFLOW_SCREENSHOT_DIR` to an absolute directory to capture the Button and skill docs in both layouts. The test inspects the bundles for local filesystem paths and verifies that the Node asset compiler is absent from the Worker. The browser and Worker are stopped afterward. CI runs the same checks without Cloudflare credentials.
 
 The dry run checks packaging without uploading anything. These checks do not establish live account permissions, hostname availability, DNS, or TLS behavior.
 

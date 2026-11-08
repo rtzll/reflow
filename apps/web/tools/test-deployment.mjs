@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFile, readdir } from 'node:fs/promises'
 import { homedir } from 'node:os'
-import { resolve } from 'node:path'
+import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
 import { expect } from 'playwright/test'
@@ -81,11 +81,13 @@ try {
   browser = await chromium.launch()
   const page = await browser.newPage({ baseURL: origin })
   async function openShowcase(path) {
-    await page.goto(path)
+    const response = await page.goto(path)
+    assert.equal(response?.status(), 200, path)
     // The entry waits for Remix hydration before it finishes evaluating.
     await page.evaluate(async (entry) => {
       await import(entry)
     }, manifest.page.entry.href)
+    return response
   }
   const errors = []
   page.on('pageerror', (error) => errors.push(error.message))
@@ -103,14 +105,9 @@ try {
   await expect(page.locator('html')).toHaveAttribute('data-density', 'compact')
 
   const docs = await page
-    .locator('a[href^="/docs/"]')
+    .locator('.site-left a[href^="/docs/"]')
     .evaluateAll((links) => [...new Set(links.map((link) => new URL(link.href).pathname))])
   assert.ok(docs.length > 30)
-  for (const path of docs) {
-    const response = await fetch(origin + path)
-    assert.equal(response.status, 200, path)
-    assert.match(await response.text(), /<\/html>/, path)
-  }
 
   await openShowcase('/docs/button')
   await preview.getByRole('button', { name: 'Get started', exact: true }).click()
@@ -139,6 +136,51 @@ try {
   await noScript.goto('/docs/button')
   await expect(noScript.getByRole('region', { name: 'Button API reference' })).toBeVisible()
   assert.deepEqual(errors, [])
+
+  const catalogStart = performance.now()
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  for (const { width, height, theme } of [
+    { width: 1280, height: 720, theme: 'dark' },
+    { width: 390, height: 844, theme: 'light' },
+  ]) {
+    await page.setViewportSize({ width, height })
+    const overflow = []
+    for (const path of docs) {
+      const response = await openShowcase(`${path}?theme=${theme}&density=default&font=inter`)
+      if (theme === 'dark') assert.match(await response.text(), /<\/html>/, path)
+      const dimensions = await page.evaluate(() => ({
+        width: document.documentElement.clientWidth,
+        scroll: document.documentElement.scrollWidth,
+      }))
+      if (dimensions.scroll > dimensions.width + 1) {
+        const elements = await page.locator('main *').evaluateAll((nodes) =>
+          nodes
+            .filter(
+              (node) =>
+                node.getBoundingClientRect().right > document.documentElement.clientWidth + 1,
+            )
+            .slice(0, 5)
+            .map((node) => `${node.tagName}.${node.className}`),
+        )
+        overflow.push(
+          `${path}: ${dimensions.scroll}px in ${dimensions.width}px, ${elements.join(', ')}`,
+        )
+      }
+      assert.deepEqual(errors, [], `${path} at ${width}px`)
+      const slug = path.split('/').at(-1)
+      if (process.env.REFLOW_SCREENSHOT_DIR && ['button', 'skill'].includes(slug)) {
+        await page.screenshot({
+          path: join(process.env.REFLOW_SCREENSHOT_DIR, `reflow-${slug}-${width}.png`),
+          fullPage: false,
+          animations: 'disabled',
+        })
+      }
+    }
+    assert.equal(overflow.length, 0, overflow.join('\n'))
+  }
+  console.log(
+    `Hydrated ${docs.length} docs pages at both widths in ${((performance.now() - catalogStart) / 1000).toFixed(1)}s.`,
+  )
   console.log(
     `Local Worker checks passed: ${docs.length} docs routes, assets, 404s, hydration, playgrounds, mobile, and SSR without JavaScript.`,
   )

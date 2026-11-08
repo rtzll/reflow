@@ -17,6 +17,7 @@ pnpm format:check
 pnpm check
 pnpm --filter @reflow/web exec playwright install chromium
 pnpm test
+pnpm test:deployment
 pnpm test:package
 pnpm --filter @reflow/web exec remix doctor
 ```
@@ -25,7 +26,7 @@ pnpm --filter @reflow/web exec remix doctor
 
 CI runs the Reflow checks and browser tests with no reference server. For a visual comparison, open the same component, theme, density, viewport, and interaction state in the built-in browser. [Pinned Fluid Functionalism source](https://github.com/mickadesign/fluid-functionalism/tree/7e6ae290dd8f5a7657ae4a433a42e165bac3ece4)
 
-Checks run on pull requests and pushes to `main`; superseded check runs are cancelled. CI reuses the build from `pnpm check` by running `pnpm test:run`. The install smoke test then checks the packed artifact. Browser interaction coverage is retained; HTTP-only catalog rendering is a server test. Showcase tests import the router from `apps/web/test/showcase-router.ts`, which closes asset watchers after each suite so workers exit promptly. [Release preparation and enablement](releasing.md) are separate and require a manual trigger after migration.
+Checks run on pull requests and pushes to `main`; superseded check runs are cancelled. CI reuses the build from `pnpm check` by running `pnpm test:run`. The install smoke test then checks the packed artifact. The catalog's HTTP rendering is covered by a server test, and `pnpm test:deployment` checks hydration and overflow on every docs page at desktop and mobile widths. Showcase tests import the router from `apps/web/test/showcase-router.ts`, which closes asset watchers after each suite so workers exit promptly. [Release preparation and enablement](releasing.md) are separate and require a manual trigger after migration.
 
 ## Try a clean install
 

@@ -4,7 +4,14 @@ import { catalog } from '../app/catalog.tsx'
 import { router } from './showcase-router.ts'
 
 it('renders every documented component and includes the right assets', async () => {
+  const index = await router.fetch(new Request('http://localhost/docs'))
+  assert.equal(index.status, 200)
+  const indexHtml = await index.text()
   for (const entry of catalog) {
+    assert.ok(
+      indexHtml.includes(`href="/docs/${entry.slug}?`),
+      `${entry.slug} is missing from docs navigation`,
+    )
     const response = await router.fetch(
       new Request(`http://localhost/docs/${entry.slug}?theme=dark`),
     )
