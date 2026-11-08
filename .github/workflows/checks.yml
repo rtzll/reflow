@@ -31,6 +31,10 @@ jobs:
       - run: pnpm format:check
       - run: pnpm check
       - run: pnpm --filter @reflow/web exec playwright install --with-deps chromium
+      - name: Build and test the local Cloudflare deployment
+        run: |
+          pnpm test:deployment
+          pnpm --filter @reflow/web deploy:dry-run
       - run: pnpm test:run
       - run: pnpm --filter @reflow/web exec remix doctor
       - name: Pack and test the installable artifact
