@@ -101,10 +101,13 @@ it('keeps settings menus exclusive and dismisses them with pointer and keyboard 
     '--rf-color-thumb',
     'rgb(20, 52, 86)',
   )
-  const rose = accentPicker.getByRole('button', { name: 'Rose', exact: true })
-  await rose.focus()
-  await expect(rose).toBeFocused()
-  await page.keyboard.press('Tab')
+  const square = accentPicker.getByRole('application', { name: 'Saturation and brightness' })
+  await square.focus()
+  await expect(square).toBeFocused()
+  await page.keyboard.press('Shift+Tab')
+  await expect(accent).toBeFocused()
+  await page.keyboard.press('Shift+Tab')
+  await expect(theme).toBeFocused()
   await expect(accent).toHaveAttribute('aria-expanded', 'false')
 
   await theme.click()
