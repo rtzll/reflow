@@ -350,19 +350,17 @@ export function SidebarDemo(handle: Handle<{ variant: string; avatar: string }>)
       const sections: SidebarSection[] = wiki.map((group) => ({
         label: group.label,
         defaultCollapsed: group.open === false,
-        items: group.branches.map(
-          (branch): SidebarItem => ({
-            label: branch.label,
-            icon: <Icon name={branch.icon} />,
-            defaultExpanded: branch.open ?? false,
-            children: branch.pages.map((page) => ({
-              label: page.label,
-              href: `#${page.label.toLowerCase().replaceAll(' ', '-')}`,
-              icon: <Icon name={page.icon} />,
-              onClick: pick(`#${page.label.toLowerCase().replaceAll(' ', '-')}`),
-            })),
-          }),
-        ),
+        items: group.branches.map((branch): SidebarItem => ({
+          label: branch.label,
+          icon: <Icon name={branch.icon} />,
+          defaultExpanded: branch.open ?? false,
+          children: branch.pages.map((page) => ({
+            label: page.label,
+            href: `#${page.label.toLowerCase().replaceAll(' ', '-')}`,
+            icon: <Icon name={page.icon} />,
+            onClick: pick(`#${page.label.toLowerCase().replaceAll(' ', '-')}`),
+          })),
+        })),
       }))
       return (
         <SidebarFrame>
