@@ -8,6 +8,11 @@ coverage/
 .env
 .env.*
 !.env.example
+.dev.vars
+.dev.vars.*
+.wrangler/
+wrangler.local.jsonc
+apps/web/worker/env.d.ts
 *.tsbuildinfo
 playwright-report/
 test-results/
