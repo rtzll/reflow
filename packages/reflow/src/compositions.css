@@ -1,0 +1,1074 @@
+.rf-carousel-dots {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  isolation: isolate;
+  position: relative;
+}
+.rf-carousel-dots button {
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 10;
+  padding: 6px;
+  border: 0;
+  border-radius: 9999px;
+  outline: none;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+.rf-carousel-dots button:focus-visible {
+  box-shadow: 0 0 0 1px var(--rf-accent);
+}
+.rf-carousel-dot {
+  display: block;
+  position: relative;
+  width: 6px;
+  height: 6px;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--rf-fg), transparent 85%);
+  border-radius: 9999px;
+  transition: width var(--rf-spring-moderate);
+}
+.rf-carousel-dots [aria-current='true'] .rf-carousel-dot {
+  width: 24px;
+}
+.rf-carousel-dot > span {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--rf-fg), transparent 60%);
+  animation: rf-carousel-progress linear both;
+}
+/* Like the reference, hovering does not pause autoplay. Keyboard focus does:
+   moving content must stay stoppable for keyboard users (owner's decision). */
+.rf-carousel-dots:is(
+    [data-rf-autoplay]:not([data-rf-onscreen]),
+    [data-rf-paused],
+    :has(:focus-visible)
+  )
+  .rf-carousel-dot
+  > span {
+  animation-play-state: paused;
+}
+@keyframes rf-carousel-progress {
+  from {
+    transform: translateX(calc(6px - 100%));
+  }
+}
+[data-shape='sharp'] .rf-carousel-dots button,
+[data-shape='sharp'] .rf-carousel-dot,
+[data-shape='sharp'] .rf-carousel-dot > span,
+[data-shape='sharp'] .rf-carousel-dots > .rf-highlight {
+  border-radius: 0;
+}
+
+.rf-chat-message {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: flex-start;
+  justify-self: start;
+  gap: 6px;
+  max-width: 80%;
+  color: var(--rf-fg);
+}
+.rf-chat-message[data-role='user'] {
+  align-items: flex-end;
+  align-self: flex-end;
+  justify-self: end;
+}
+.rf-chat-message[data-animate] {
+  animation: rf-message-enter var(--rf-spring-moderate) both;
+  transform-origin: bottom left;
+}
+.rf-chat-message[data-animate][data-role='user'] {
+  transform-origin: bottom right;
+}
+.rf-chat-body {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  padding-block: 8px;
+  font: var(--rf-text-subtitle) / var(--rf-leading-subtitle) var(--rf-font);
+}
+.rf-chat-message[data-role='user'] .rf-chat-body {
+  background: color-mix(in oklab, var(--rf-neutral-fill), var(--rf-bg) 45%);
+  border-radius: var(--rf-radius);
+  padding-inline: 14px;
+  text-wrap: pretty;
+}
+.rf-chat-message[data-size='compact'] .rf-chat-body {
+  padding-block: 6px;
+}
+.rf-chat-message[data-role='user'][data-size='compact'] .rf-chat-body {
+  padding-inline: 12px;
+}
+.rf-chat-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--rf-muted);
+  padding-inline: 4px;
+  user-select: none;
+  font: var(--rf-text-caption) / var(--rf-leading-caption) var(--rf-font);
+}
+.rf-chat-time {
+  font-variant-numeric: tabular-nums;
+}
+.rf-chat-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.rf-chat-actions .rf-button {
+  --rf-control-height: 24px;
+  --rf-icon-size: 13px;
+}
+.rf-chat-actions
+  .rf-button:not(:disabled, [aria-disabled='true']):hover
+  :is(.rf-button-icon > svg, .rf-button-label > svg) {
+  stroke-width: 1.5;
+}
+@media (hover: hover) {
+  .rf-chat-meta {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 150ms;
+  }
+  .rf-chat-message:is(:hover, :focus-within) .rf-chat-meta {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+@keyframes rf-message-enter {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+    scale: 0.96;
+  }
+}
+.rf-chat-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-start;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.rf-chat-message[data-role='user'] .rf-chat-attachments {
+  justify-content: flex-end;
+}
+.rf-chat-thumb {
+  position: relative;
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  overflow: hidden;
+  background: var(--rf-neutral-fill);
+  outline: 1px solid rgba(0, 0, 0, 0.1);
+  outline-offset: -1px;
+  border-radius: var(--rf-radius);
+}
+[data-theme='dark'] .rf-chat-thumb {
+  outline-color: rgba(255, 255, 255, 0.1);
+}
+.rf-chat-thumb img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.rf-chat-thumb-glyph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--rf-muted);
+}
+.rf-chat-thumb a {
+  position: absolute;
+  inset: 0;
+}
+.rf-composer {
+  --rf-composer-edge: light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 18%));
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border: 0;
+  border-radius: var(--rf-panel-radius);
+  background: var(--rf-surface-2);
+  cursor: text;
+  box-shadow:
+    inset 0 1px 0 0 light-dark(transparent, rgb(255 255 255 / 1%)),
+    inset 0 0 0 1px light-dark(transparent, rgb(255 255 255 / 2%)),
+    0 0 0 1px light-dark(rgb(0 0 0 / 6%), transparent),
+    0 1px 1px -0.5px var(--rf-composer-edge);
+  transition:
+    box-shadow var(--rf-fast),
+    color var(--rf-fast);
+}
+/* The edge is one 1px ring that recolors in place, so hover and focus raise contrast without thickening the stroke. */
+@media (hover: hover) {
+  .rf-composer:hover:not(:has(textarea:disabled, textarea:focus-visible)) {
+    box-shadow:
+      0 0 0 1px var(--rf-border),
+      0 1px 1px -0.5px var(--rf-composer-edge);
+  }
+}
+.rf-composer:has(textarea:focus-visible) {
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--rf-fg) 20%, transparent),
+    0 1px 1px -0.5px var(--rf-composer-edge);
+}
+.rf-composer-field {
+  position: relative;
+  min-width: 0;
+  font: 16px / 24px var(--rf-font);
+}
+.rf-composer .rf-textarea {
+  display: inline-block;
+  vertical-align: baseline;
+  width: 100%;
+  box-shadow: none;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  max-height: 12em;
+  padding: 8px;
+  resize: none;
+  font-size: var(--rf-text-subtitle);
+  line-height: var(--rf-leading-subtitle);
+  cursor: text;
+}
+.rf-composer .rf-textarea:hover:not(:disabled) {
+  background: transparent;
+}
+.rf-composer-send {
+  gap: normal;
+}
+.rf-composer-send svg {
+  width: 19px;
+  height: 19px;
+}
+.rf-composer[data-size='compact'] .rf-composer-send svg {
+  width: 15px;
+  height: 15px;
+}
+.rf-composer-suggestion {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  padding: 8px;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-subtitle);
+  line-height: var(--rf-leading-subtitle);
+  font-variation-settings: var(--rf-weight-normal);
+  pointer-events: none;
+}
+.rf-composer-suggestion > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+}
+.rf-composer-suggestion > span > span {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.rf-composer-suggestion kbd {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  height: 18px;
+  padding-inline: 4px;
+  transform: translateY(-1px);
+  border: 1px solid var(--rf-border);
+  border-radius: 5px;
+  background: var(--rf-bg);
+  color: var(--rf-muted);
+  font: var(--rf-text-micro) / var(--rf-leading-micro) var(--rf-font);
+}
+.rf-composer[data-size='compact'] .rf-composer-suggestion kbd {
+  height: 16px;
+}
+.rf-composer-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.rf-composer-send,
+.rf-composer-right-actions {
+  margin-inline-start: auto;
+}
+.rf-composer-right-actions + .rf-composer-send {
+  margin-inline-start: 0;
+}
+.rf-composer-error {
+  color: var(--rf-danger);
+  margin: 2px 8px;
+}
+.rf-thinking {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px var(--rf-control-padding);
+  color: var(--rf-muted);
+}
+.rf-thinking > svg {
+  flex: none;
+}
+.rf-thinking > svg path {
+  animation: rf-thinking-morph 6s ease-in-out infinite;
+}
+.rf-thinking-words {
+  display: inline-grid;
+  overflow: hidden;
+}
+.rf-thinking-words > span {
+  grid-area: 1 / 1;
+}
+.rf-thinking-sizer {
+  visibility: hidden;
+}
+.rf-thinking-word {
+  background: linear-gradient(100deg, var(--rf-muted) 24%, var(--rf-fg) 50%, var(--rf-muted) 76%)
+    100% 0 / 260% 100%;
+  background-clip: text;
+  color: transparent;
+  animation:
+    rf-thinking-enter 240ms ease-out,
+    rf-thinking-shimmer 1.5s linear infinite;
+}
+.rf-thinking-steps {
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-panel-radius);
+  padding: 4px;
+}
+.rf-thinking-steps-disclosure {
+  border: 0;
+  padding: 0;
+}
+.rf-thinking-steps-disclosure > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: var(--rf-control-height);
+  padding-inline: var(--rf-control-padding);
+  list-style: none;
+  cursor: pointer;
+  font-variation-settings: var(--rf-weight-strong);
+}
+.rf-thinking-steps-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+.rf-thinking-steps-disclosure > summary:focus-visible {
+  outline: 1px solid var(--rf-accent);
+  border-radius: var(--rf-radius);
+}
+.rf-thinking-steps-disclosure[open] > summary > svg {
+  rotate: 90deg;
+}
+
+.rf-thinking-steps-disclosure > .rf-accordion {
+  width: auto;
+  margin-inline-start: var(--rf-control-padding);
+  border-inline-start: 1px solid var(--rf-border);
+  padding-inline-start: 8px;
+}
+.rf-step-title {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+.rf-step-title > span:first-child {
+  width: 14px;
+  color: var(--rf-muted);
+}
+.rf-step-title[data-status='active'] > span:first-child {
+  color: var(--rf-accent);
+}
+@keyframes rf-thinking-morph {
+  0%,
+  100% {
+    d: path(
+      'M 12 8 C 14.21 8 16 9.79 16 12 C 16 14.21 14.21 16 12 16 C 9.79 16 8 14.21 8 12 C 8 9.79 9.79 8 12 8 Z'
+    );
+  }
+  25%,
+  75% {
+    d: path(
+      'M 12 12 C 14 8.5 19 8.5 19 12 C 19 15.5 14 15.5 12 12 C 10 8.5 5 8.5 5 12 C 5 15.5 10 15.5 12 12 Z'
+    );
+  }
+  50% {
+    d: path(
+      'M 12 16 C 14.21 16 16 14.21 16 12 C 16 9.79 14.21 8 12 8 C 9.79 8 8 9.79 8 12 C 8 14.21 9.79 16 12 16 Z'
+    );
+  }
+}
+@keyframes rf-thinking-enter {
+  from {
+    opacity: 0;
+    translate: 0 65%;
+  }
+}
+@keyframes rf-thinking-shimmer {
+  to {
+    background-position: 0% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-carousel-dot,
+  .rf-carousel-dot > span,
+  .rf-thinking > svg path,
+  .rf-thinking-word {
+    animation: none;
+    transition: none;
+  }
+  .rf-carousel-dots[data-rf-autoplay] .rf-carousel-dot > span {
+    transform: translateX(calc(6px - 100%));
+  }
+  .rf-thinking-word {
+    background: none;
+    color: var(--rf-muted);
+  }
+  .rf-chat-message[data-animate],
+  .rf-chat-meta {
+    animation: none;
+    transition: none;
+  }
+}
+.rf-carousel-dots > .rf-highlight {
+  background: var(--rf-hover);
+  border-radius: 9999px;
+}
+.rf-queue-wrap {
+  min-inline-size: 0;
+}
+.rf-queue-toggle {
+  display: block;
+  margin-inline-start: auto;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: var(--rf-item-radius);
+  background: transparent;
+  color: var(--rf-muted);
+  font: inherit;
+  font-size: var(--rf-text-caption);
+  cursor: pointer;
+}
+.rf-queue-toggle:hover {
+  background: var(--rf-hover);
+}
+.rf-queue {
+  --rf-queue-row: 44px;
+  --rf-queue-gap: 5px;
+  position: relative;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  isolation: isolate;
+}
+.rf-queue-wrap[data-expanded] .rf-queue,
+.rf-queue:focus-within,
+.rf-queue[data-dragging] {
+  --rf-queue-spacing: var(--rf-queue-gap);
+}
+@media (hover: hover) {
+  .rf-queue:hover {
+    --rf-queue-spacing: var(--rf-queue-gap);
+  }
+}
+.rf-queue > li {
+  display: flex;
+  box-sizing: border-box;
+  min-inline-size: 0;
+  block-size: var(--rf-queue-row);
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-panel-radius);
+  background: var(--rf-surface-2);
+  padding: 0 8px;
+  cursor: grab;
+  z-index: calc(3 - var(--rf-queue-depth));
+  scale: calc(1 - var(--rf-queue-depth) * 0.035) 1;
+  transition:
+    margin-block-start var(--rf-spring-moderate),
+    scale var(--rf-spring-moderate),
+    translate var(--rf-spring-fast);
+}
+.rf-queue > li + li {
+  margin-block-start: var(
+    --rf-queue-spacing,
+    calc(var(--rf-queue-peek, 6px) - var(--rf-queue-row))
+  );
+}
+.rf-queue > li:nth-child(n + 4) {
+  --rf-queue-peek: 0px;
+  z-index: 0;
+}
+.rf-queue-wrap[data-expanded] .rf-queue > li,
+.rf-queue:focus-within > li,
+.rf-queue[data-dragging] > li {
+  scale: 1;
+  touch-action: none;
+}
+@media (hover: hover) {
+  .rf-queue:hover > li {
+    scale: 1;
+    touch-action: none;
+  }
+}
+.rf-queue > li[data-dragged] {
+  translate: 0 var(--rf-drag-offset);
+  z-index: 4;
+  cursor: grabbing;
+  transition: none;
+}
+.rf-queue-content {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rf-queue-actions {
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-queue > li {
+    transition: none;
+  }
+}
+
+.rf-attachment-image,
+.rf-attachment-file {
+  width: var(--rf-file-preview-size, 80px);
+  height: var(--rf-file-preview-size, 80px);
+  object-fit: cover;
+  border-radius: max(0px, calc(var(--rf-radius) - 2px));
+}
+.rf-attachment-file {
+  display: grid;
+  place-items: center;
+  background: var(--rf-muted-bg);
+  color: var(--rf-muted);
+  font-size: 12px;
+}
+.rf-composer .rf-textarea {
+  max-height: calc(var(--rf-composer-max-rows, 8) * 20px + 12px);
+}
+/* The prompts collapse like the reference: the region opens and closes its height with the moderate spring while the divider holds. */
+.rf-composer-suggestions-region {
+  display: grid;
+  flex: none;
+  grid-template-rows: 0fr;
+  margin: -4px -8px 0;
+  opacity: 0;
+  transition:
+    grid-template-rows var(--rf-spring-moderate),
+    opacity var(--rf-spring-moderate);
+}
+.rf-composer-suggestions-region[data-open] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.rf-composer-suggestions-region > div {
+  min-height: 0;
+  overflow: hidden;
+}
+.rf-composer-suggestions {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  margin-top: 8px;
+  padding: 6px 6px 0;
+  border-top: 1px solid color-mix(in oklab, var(--rf-border) 60%, transparent);
+  isolation: isolate;
+}
+.rf-composer-suggestions > [data-rf-hover-layer] {
+  border-radius: var(--rf-item-radius);
+  background: var(--rf-hover);
+}
+.rf-composer-suggestions [role='option'] {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding-inline: 10px;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-subtitle);
+  line-height: var(--rf-leading-subtitle);
+  font-variation-settings: var(--rf-weight-normal);
+  cursor: pointer;
+  transition: color var(--rf-fast);
+}
+.rf-composer[data-size='compact'] .rf-composer-suggestions [role='option'] {
+  height: 28px;
+  padding-inline: 8px;
+}
+.rf-composer-suggestions [role='option'][data-highlighted] {
+  color: var(--rf-fg);
+}
+.rf-composer-suggestions [role='option'][aria-disabled='true'] {
+  pointer-events: none;
+}
+.rf-composer-suggestions [role='option'] > span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding-block: 4px;
+  margin-block: -4px;
+  text-box: trim-both cap alphabetic;
+}
+.rf-composer-suggestions [role='option'] > svg {
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: opacity var(--rf-fast);
+}
+.rf-composer-suggestions [role='option'] > svg[data-idle] {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-composer-suggestions-region {
+    transition: none;
+  }
+}
+
+html[data-rf-message-transition]::view-transition-group(*) {
+  animation-duration: 160ms;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+html[data-rf-message-transition]::view-transition-group(root),
+html[data-rf-message-transition]::view-transition-new(root) {
+  animation: none;
+}
+html[data-rf-message-transition]::view-transition-old(root) {
+  display: none;
+}
+
+.rf-queue[hidden] {
+  display: none;
+}
+
+.rf-thinking-steps[data-variant='timeline'] {
+  box-sizing: border-box;
+  width: min(100%, 320px);
+  border: 0;
+  padding: 0;
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.rf-thinking-steps[data-variant='timeline'] > summary {
+  min-height: var(--rf-control-height);
+  gap: 10px;
+  border-radius: var(--rf-item-radius);
+  color: var(--rf-muted);
+  font-variation-settings: var(--rf-weight-normal);
+  transition:
+    background var(--rf-fast),
+    color var(--rf-fast);
+}
+.rf-thinking-disclosure-label {
+  display: inline-grid;
+}
+.rf-thinking-disclosure-label > span {
+  grid-area: 1 / 1;
+}
+.rf-thinking-disclosure-label > [aria-hidden='true'] {
+  visibility: hidden;
+  font-variation-settings: var(--rf-weight-strong);
+}
+.rf-thinking-steps[data-variant='timeline'][open] > summary .rf-thinking-disclosure-label {
+  color: var(--rf-fg);
+  font-variation-settings: var(--rf-weight-strong);
+}
+.rf-thinking-steps[data-variant='timeline'] > summary:hover,
+.rf-thinking-timeline-content details > summary:hover {
+  background: var(--rf-hover);
+  color: var(--rf-fg);
+}
+.rf-thinking-steps[data-variant='timeline'] > summary > svg {
+  width: var(--rf-icon-size);
+  height: var(--rf-icon-size);
+  transition: rotate var(--rf-fast) var(--rf-ease-out);
+}
+.rf-thinking-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 4px 12px 12px;
+}
+.rf-thinking-timeline > li {
+  display: grid;
+  grid-template-rows: 1fr;
+  animation: rf-thinking-step-grow var(--rf-spring-slow) backwards;
+}
+.rf-thinking-step-body {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  column-gap: 10px;
+  min-height: 0;
+  overflow: clip;
+}
+.rf-thinking-timeline-row {
+  padding: 6px 8px 6px 0;
+  animation: rf-thinking-step-enter 240ms ease-out var(--rf-step-delay, 0ms) both;
+}
+.rf-thinking-timeline > li {
+  padding-inline-start: 8px;
+}
+@keyframes rf-thinking-step-grow {
+  from {
+    grid-template-rows: 0fr;
+  }
+}
+
+.rf-thinking-timeline-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 8px;
+  color: var(--rf-muted);
+}
+.rf-thinking-timeline-icon > svg {
+  flex: none;
+  width: calc(var(--rf-icon-size) - 2px);
+  height: calc(var(--rf-icon-size) - 2px);
+}
+.rf-thinking-timeline-dot {
+  width: 6px;
+  height: 6px;
+  margin: 4px 0;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--rf-muted) 60%, transparent);
+}
+.rf-thinking-timeline > li:not(:last-child) .rf-thinking-timeline-icon::after {
+  content: '';
+  flex: 1;
+  width: 1px;
+  margin-top: 4px;
+  background: color-mix(in oklab, var(--rf-border) 60%, transparent);
+}
+.rf-thinking-timeline-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.rf-thinking-timeline-title {
+  color: var(--rf-fg);
+  font-variation-settings: var(--rf-weight-strong);
+}
+.rf-thinking-timeline-description,
+.rf-thinking-timeline-content {
+  color: var(--rf-muted);
+}
+.rf-thinking-timeline > li[data-status='active'] .rf-thinking-timeline-title {
+  width: fit-content;
+  color: transparent;
+  --rf-thinking-shimmer-base: light-dark(#a3a3a3, #525252);
+  --rf-thinking-shimmer-light: light-dark(#525252, #a3a3a3);
+  background: linear-gradient(
+      90deg,
+      var(--rf-thinking-shimmer-base) 35%,
+      var(--rf-thinking-shimmer-light) 50%,
+      var(--rf-thinking-shimmer-base) 65%
+    )
+    100% 0 / 300% 100%;
+  background-clip: text;
+  animation: rf-thinking-shimmer 1.5s ease-in-out infinite;
+}
+.rf-thinking-timeline-content details {
+  margin: 4px 0 0 -12px;
+}
+.rf-thinking-timeline-content details > summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 4px 12px;
+  border-radius: var(--rf-item-radius);
+  list-style: none;
+  cursor: pointer;
+}
+.rf-thinking-timeline-content details > summary::-webkit-details-marker {
+  display: none;
+}
+.rf-thinking-timeline-content details > summary::after {
+  content: '';
+  width: 5px;
+  height: 5px;
+  margin-inline: 5px;
+  border: solid currentColor;
+  border-width: 1px 1px 0 0;
+  rotate: 45deg;
+  transition: rotate var(--rf-fast) var(--rf-ease-out);
+}
+.rf-thinking-timeline-content details[open] > summary::after {
+  rotate: 135deg;
+}
+.rf-thinking-timeline-content details > summary:focus-visible {
+  outline: 1px solid var(--rf-accent);
+}
+.rf-thinking-timeline-content details > ul {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 2px 12px 0;
+  list-style: none;
+  font-size: var(--rf-text-caption);
+  line-height: var(--rf-leading-caption);
+}
+@keyframes rf-thinking-step-enter {
+  from {
+    opacity: 0;
+    translate: 0 -3px;
+  }
+}
+
+@supports (interpolate-size: allow-keywords) and selector(details::details-content) {
+  .rf-thinking-steps[data-variant='timeline'],
+  .rf-thinking-timeline-content details {
+    interpolate-size: allow-keywords;
+  }
+  .rf-thinking-steps[data-variant='timeline']::details-content,
+  .rf-thinking-timeline-content details::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size var(--rf-medium) var(--rf-ease-out),
+      content-visibility var(--rf-medium) allow-discrete;
+  }
+  .rf-thinking-steps[data-variant='timeline'][open]::details-content,
+  .rf-thinking-timeline-content details[open]::details-content {
+    block-size: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-thinking-timeline > li,
+  .rf-thinking-timeline > li[data-status='active'] .rf-thinking-timeline-title {
+    animation: none;
+  }
+  .rf-thinking-timeline > li[data-status='active'] .rf-thinking-timeline-title {
+    color: var(--rf-muted);
+    background: none;
+  }
+}
+
+/* Attached files: square thumbnails above the field, with a remove badge revealed on tile hover. */
+.rf-composer-files-region {
+  display: grid;
+  flex: none;
+  grid-template-rows: 0fr;
+  margin: 0;
+  opacity: 0;
+  transition:
+    grid-template-rows var(--rf-spring-moderate),
+    opacity var(--rf-spring-moderate);
+}
+.rf-composer-files-region[data-open] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.rf-composer-files-region > div {
+  min-height: 0;
+  overflow: hidden;
+}
+.rf-composer-files-region:not([data-open]) {
+  margin-block-end: -4px;
+}
+.rf-composer-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0 0 4px;
+}
+.rf-composer-files li {
+  position: relative;
+  flex: none;
+  cursor: default;
+  transition:
+    opacity var(--rf-spring-fast),
+    scale var(--rf-spring-fast);
+}
+@starting-style {
+  .rf-composer-files li {
+    opacity: 0;
+    scale: 0.9;
+  }
+}
+.rf-composer-files li[data-exiting] {
+  opacity: 0;
+  scale: 0.9;
+  transition-duration: var(--rf-exit-fast);
+  transition-timing-function: linear;
+  pointer-events: none;
+}
+.rf-file-thumb {
+  position: relative;
+  flex: none;
+  overflow: hidden;
+  width: var(--rf-file-preview-size, 80px);
+  height: var(--rf-file-preview-size, 80px);
+  border-radius: max(0px, calc(var(--rf-panel-radius) - 8px));
+  background: light-dark(#e5e5e5, #525252);
+  outline: 1px solid light-dark(rgb(0 0 0 / 10%), rgb(255 255 255 / 10%));
+  outline-offset: -1px;
+}
+.rf-file-thumb img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.rf-file-thumb > div {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--rf-muted);
+}
+.rf-file-thumb svg {
+  width: max(16px, calc(var(--rf-file-preview-size, 80px) * 0.35));
+  height: max(16px, calc(var(--rf-file-preview-size, 80px) * 0.35));
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.rf-composer-file-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 9999px;
+  background: #171717;
+  color: #fff;
+  cursor: pointer;
+  outline: none;
+  transition: opacity var(--rf-fast);
+}
+.rf-composer-file-remove::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+}
+.rf-composer-file-remove svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.rf-composer-file-remove:focus-visible {
+  box-shadow: 0 0 0 1px var(--rf-accent);
+}
+@media (hover: hover) {
+  .rf-composer-file-remove {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .rf-composer-files li:hover .rf-composer-file-remove,
+  .rf-composer-file-remove:focus-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+/* Dropping files: the edge ring takes the accent. */
+.rf-composer[data-dragover] {
+  box-shadow:
+    0 0 0 1px var(--rf-accent),
+    0 1px 1px -0.5px var(--rf-composer-edge);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-composer-files-region,
+  .rf-composer-files li {
+    transition: none;
+  }
+}
+
+.rf-thinking-step-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-block-start: 4px;
+}
+.rf-thinking-step-source {
+  display: inline-flex;
+  text-decoration: none;
+  border-radius: var(--rf-radius);
+}
+.rf-thinking-step-source:focus-visible {
+  outline: 1px solid var(--rf-accent);
+  outline-offset: 2px;
+}
+.rf-thinking-step-image {
+  margin: 6px 0 0;
+}
+.rf-thinking-step-image img {
+  display: block;
+  width: min(100%, 200px);
+  height: auto;
+  border-radius: var(--rf-panel-radius);
+  outline: 1px solid var(--rf-border);
+  outline-offset: -1px;
+}
+.rf-thinking-step-image figcaption {
+  margin-block-start: 4px;
+  color: var(--rf-muted);
+  font: var(--rf-text-caption) / var(--rf-leading-caption) var(--rf-font);
+}
+.rf-thinking-step-source,
+.rf-thinking-step-image {
+  animation: rf-thinking-part-enter 200ms ease-out var(--rf-thinking-part-delay, 0ms) both;
+}
+@keyframes rf-thinking-part-enter {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-thinking-timeline-row,
+  .rf-thinking-step-source,
+  .rf-thinking-step-image {
+    animation: none;
+  }
+  .rf-thinking-steps::details-content,
+  .rf-thinking-timeline-content details::details-content {
+    transition: none !important;
+  }
+}

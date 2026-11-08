@@ -1,0 +1,20 @@
+{
+  "name": "@reflow/web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch --import remix/node-tsx server.ts",
+    "start": "node --import remix/node-tsx server.ts",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@rtzll/reflow": "workspace:*",
+    "remix": "3.2.0"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  },
+  "engines": {
+    "node": ">=24.3.0"
+  }
+}

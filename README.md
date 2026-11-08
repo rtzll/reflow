@@ -1,0 +1,66 @@
+# Reflow
+
+Reflow is a native Remix 3 UI library. It brings spring motion, shared hover highlights, and keyboard-friendly controls to Remix’s component model. The showcase includes interactive examples, playgrounds, and copyable usage code. [Inspired by Fluid Functionalism](https://github.com/mickadesign/fluid-functionalism)
+
+Reflow is in development. `@rtzll/reflow` is not published to npm yet; install it from this repository. It uses Remix’s own component runtime, not React, and pins `remix@3.2.0` with `@remix-run/ui@0.13.1`. [Compatibility and installation](docs/integration.md)
+
+## Try it
+
+Use Node 24.3+ and pnpm 12.18.0. From this checkout, run the following commands.
+
+```sh
+pnpm install --frozen-lockfile
+pnpm dev
+```
+
+Open the address printed in the terminal. The gallery is at `/`, component docs at `/docs`, and focused demos at `/demo`.
+
+## Start a fresh app
+
+```sh
+pnpm starter /absolute/path/to/my-app
+cd /absolute/path/to/my-app
+pnpm check
+pnpm dev
+```
+
+Choose a new directory outside this checkout. The starter installs a local tarball of Reflow. Open the address printed by `pnpm dev`. It includes a sidebar, appearance controls, a notification form, and a dialog. [Clean install guide](docs/development.md#try-a-clean-install)
+
+## Use a component
+
+```tsx
+import { Dialog } from '@rtzll/reflow'
+import { clientEntry } from 'remix/component'
+
+export const Example = clientEntry(import.meta.url, function Example() {
+  return () => (
+    <Dialog title="Welcome" trigger="Open dialog">
+      <p>Your first Reflow component.</p>
+    </Dialog>
+  )
+})
+```
+
+Load `@rtzll/reflow/styles.css` in the page and enable Remix’s browser runtime. The starter includes both; for an existing app, follow the [integration guide](docs/integration.md).
+
+Theme, density, accent, shape, typography, and hover behavior are configurable through attributes and CSS variables. [Customization](docs/customization.md)
+
+## Components
+
+- **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `Field`, `Input`, `InputCopy`, `InputGroup`, `RadioGroup`, `Select`, `Slider`, `Switch`, `Textarea`
+- **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`
+- **Navigation and disclosure** · `Accordion`, `CarouselDots`, `Sidebar`, `Tabs`
+- **Menus and overlays** · `CommandMenu`, `Dialog`, `Dropdown`, `Tooltip`
+- **Display and feedback** · `Badge`, `Banner`, `Card`, `Table`
+- **Conversation** · `AskUserQuestions`, `ChatMessage`, `InputMessage`, `ThinkingIndicator`, `ThinkingSteps`
+
+Browse the [component coverage](docs/coverage.md#components) and [usage examples](apps/web/app/public/examples.tsx) directly in the repository, or run the showcase and visit `/docs` for props, examples, and playgrounds.
+
+Keyboard navigation, focus management, form behavior, reduced motion, server rendering, and hydration are part of the implementation and regression checks. Coverage varies by component; see [verification](docs/coverage.md#verification) and [known gaps](docs/coverage.md#current-work-and-remaining-refinements).
+
+## Use and change Reflow
+
+- Use the installed types and component docs for props and examples. For integrating Reflow into an app, see the [Reflow skill](skills/reflow/SKILL.md) and the [starter settings page](examples/starter/app/public/settings.tsx).
+- Run `pnpm check` and `pnpm test` for library changes. [Development guide](docs/development.md) · [Scope](docs/scope.md) · [Coverage and known gaps](docs/coverage.md)
+
+[MIT license](LICENSE) · [Third-party notices](packages/reflow/NOTICE)

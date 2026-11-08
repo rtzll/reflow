@@ -1,0 +1,9 @@
+{
+  "$schema": "./node_modules/remix/schema/remix.json",
+  "assets": {
+    "basePath": "/assets",
+    "allowFiles": ["app/public/**"],
+    "allowPackages": ["remix", "@rtzll/reflow"],
+    "denyFiles": ["**/*.d.ts"]
+  }
+}

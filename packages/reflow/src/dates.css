@@ -1,0 +1,628 @@
+.rf-calendar {
+  --rf-date-cell-size: var(--rf-control-height, 36px);
+  --rf-date-cell: min(
+    var(--rf-date-cell-size),
+    var(--rf-date-cell-limit, var(--rf-date-cell-size))
+  );
+  position: relative;
+  display: inline-grid;
+  box-sizing: border-box;
+  max-inline-size: 100%;
+  padding: 8px;
+  color: var(--rf-fg);
+  font-size: var(--rf-text-body, 13px);
+}
+
+.rf-calendar-header {
+  display: flex;
+  align-items: center;
+  block-size: var(--rf-date-cell);
+  margin-block-end: 4px;
+  padding-inline-start: 8px;
+}
+
+.rf-calendar-months-label {
+  margin-inline-end: auto;
+  order: 0;
+  text-box: trim-both cap alphabetic;
+  text-align: start;
+  font-variation-settings:
+    'wght' 550,
+    'opsz' 18;
+}
+
+.rf-calendar-nav,
+.rf-calendar-day {
+  appearance: none;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--rf-radius, 8px);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.rf-calendar-nav {
+  order: 1;
+  inline-size: var(--rf-date-cell);
+  block-size: var(--rf-date-cell);
+  color: var(--rf-muted);
+}
+
+.rf-calendar-nav svg {
+  transition: stroke-width var(--rf-fast);
+}
+
+.rf-calendar-nav:not(:disabled):is(:hover, :focus-visible) svg {
+  stroke-width: 2;
+}
+
+.rf-calendar-day:has(.rf-calendar-detail) {
+  gap: 8px;
+}
+
+.rf-calendar-nav:not(:disabled):hover {
+  color: var(--rf-fg);
+}
+
+[data-hover='standard'] .rf-calendar-nav:not(:disabled):hover,
+[data-hover='standard'] .rf-calendar-day:not([aria-disabled='true']):hover {
+  background: var(--rf-hover);
+  color: var(--rf-fg);
+}
+
+.rf-calendar-nav:disabled,
+.rf-calendar-day[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.rf-calendar-day[aria-disabled='true'] {
+  color: var(--rf-muted);
+}
+
+.rf-calendar-nav:focus-visible,
+.rf-calendar-day:focus-visible {
+  outline: 1px solid var(--rf-accent, #6b97ff);
+  outline-offset: -1px;
+}
+
+.rf-calendar-months {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.rf-calendar[data-orientation='vertical'] .rf-calendar-months {
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rf-calendar-grid {
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+
+.rf-calendar-grid th {
+  block-size: calc(var(--rf-date-cell) * 0.8);
+  block-size: round(down, calc(var(--rf-date-cell) * 0.8), 1px);
+  padding: 0;
+  font-size: var(--rf-text-caption, 12px);
+  line-height: var(--rf-leading-caption, 16px);
+  color: var(--rf-muted);
+  font-weight: 400;
+  text-align: center;
+}
+
+.rf-calendar-grid td {
+  box-sizing: border-box;
+  padding: 0;
+}
+
+.rf-calendar-grid td[data-in-range],
+.rf-calendar-grid td[data-preview] {
+  background: var(--rf-hover);
+}
+
+.rf-calendar-grid td[data-range-edge='start'] {
+  background: linear-gradient(to right, transparent 50%, var(--rf-hover) 50%);
+}
+
+.rf-calendar-grid td[data-range-edge='end'] {
+  background: linear-gradient(to right, var(--rf-hover) 50%, transparent 50%);
+}
+
+.rf-calendar-week {
+  inline-size: calc(var(--rf-date-cell) * 0.75);
+  font-size: var(--rf-text-caption, 12px);
+  line-height: var(--rf-leading-caption, 16px);
+  font-variant-numeric: tabular-nums;
+  opacity: 0.6;
+}
+
+.rf-calendar-grid tbody .rf-calendar-week {
+  block-size: var(--rf-date-cell);
+}
+
+.rf-calendar-day {
+  position: relative;
+  box-sizing: border-box;
+  inline-size: var(--rf-date-cell);
+  block-size: var(--rf-date-cell);
+  min-inline-size: 24px;
+  min-block-size: 24px;
+  font-variant-numeric: tabular-nums;
+  font-variation-settings: var(--rf-weight-normal, 'wght' 400, 'opsz' 14);
+}
+
+.rf-calendar-day[data-outside] {
+  color: var(--rf-muted);
+  opacity: 0.55;
+}
+
+.rf-calendar-day[aria-current='date'] {
+  font-variation-settings: var(--rf-weight-strong, 'wght' 550, 'opsz' 18);
+}
+
+.rf-calendar-day[aria-current='date']:not(:has(.rf-calendar-detail))::before {
+  content: '';
+  position: absolute;
+  inset-block-end: 14%;
+  inset-inline-start: calc(50% - 2px);
+  inline-size: 4px;
+  block-size: 4px;
+  border-radius: 100%;
+  background: currentColor;
+}
+
+.rf-calendar-day[data-selected],
+[data-hover='standard'] .rf-calendar-day[data-selected]:hover {
+  background: var(--rf-fg);
+  color: var(--rf-bg);
+}
+
+.rf-calendar-preview-end {
+  z-index: 1;
+  box-shadow: inset 0 0 0 1px var(--rf-accent, #6b97ff);
+}
+
+.rf-calendar-months:not([data-rf-has-selection]) .rf-calendar-day[data-rf-selected] {
+  box-shadow: inset 0 0 0 1px var(--rf-accent, #6b97ff);
+}
+
+@media (forced-colors: active) {
+  .rf-calendar-day[data-rf-selected] {
+    outline: 1px solid Highlight;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-calendar-nav svg {
+    transition: none;
+  }
+}
+
+.rf-calendar-day[data-booked] {
+  text-decoration: line-through;
+}
+
+.rf-calendar-detail {
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption, 12px);
+  line-height: var(--rf-leading-caption, 16px);
+  text-box: trim-both cap alphabetic;
+  white-space: nowrap;
+}
+
+.rf-calendar-status {
+  color: var(--rf-muted);
+  font-size: 11px;
+}
+
+.rf-calendar-status {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.rf-calendar-hover {
+  background: var(--rf-hover);
+}
+
+.rf-date-picker {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  min-inline-size: calc(var(--rf-control-height, 36px) * 4 + 16px);
+  max-inline-size: 100%;
+  block-size: var(--rf-control-height, 36px);
+  padding: 2px;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-radius, 8px);
+  font: var(--rf-text-body, 13px) / var(--rf-leading-body, 20px) var(--rf-font);
+}
+
+.rf-date-picker[data-variant='ghost'] {
+  min-inline-size: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  block-size: auto;
+  min-block-size: var(--rf-control-height, 36px);
+  flex-wrap: wrap;
+}
+
+.rf-date-picker[data-variant='ghost'] .rf-date-trigger {
+  block-size: var(--rf-control-height, 36px);
+}
+
+.rf-date-hover,
+.rf-date-preset-hover {
+  background: var(--rf-hover);
+}
+
+.rf-date-picker[data-variant='outline'] .rf-date-hover {
+  border-radius: max(0px, calc(var(--rf-radius, 8px) - 3px));
+}
+
+.rf-date-trigger {
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  justify-content: flex-start;
+  block-size: 100%;
+  gap: calc(var(--rf-icon-size, 16px) - 10px);
+  padding: 0 calc(var(--rf-control-padding, 12px) - 4px);
+  border: 0;
+  border-radius: max(0px, calc(var(--rf-radius, 8px) - 3px));
+  background: transparent;
+  color: var(--rf-fg);
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--rf-fast);
+}
+
+.rf-date-picker[data-variant='ghost'] .rf-date-trigger {
+  flex: none;
+  border-radius: var(--rf-radius, 8px);
+}
+
+.rf-date-trigger svg {
+  flex: none;
+  inline-size: var(--rf-icon-size, 16px);
+  block-size: var(--rf-icon-size, 16px);
+  color: var(--rf-muted);
+}
+
+/* The caption sits over a hidden copy of its widest forms, so the trigger keeps its width as the date changes. */
+.rf-date-caption {
+  display: inline-grid;
+  text-align: start;
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-date-caption > * {
+  grid-area: 1 / 1;
+}
+
+.rf-date-caption > span:first-child,
+.rf-date-preset-label > *,
+.rf-date-sizer,
+.rf-date-sizer * {
+  text-box: trim-both cap alphabetic;
+}
+
+.rf-date-sizer {
+  display: inline-flex;
+  visibility: hidden;
+  white-space: pre;
+  pointer-events: none;
+}
+
+.rf-date-sizer > span {
+  grid-area: auto;
+}
+
+.rf-date-sizer > span:not(:first-child) {
+  position: absolute;
+}
+
+.rf-date-stack {
+  display: inline-grid;
+}
+
+.rf-date-stack > * {
+  grid-area: 1 / 1;
+}
+
+.rf-date-trigger[data-placeholder]:not([aria-expanded='true']) {
+  color: var(--rf-muted);
+}
+
+[data-hover='standard'] .rf-date-trigger:hover:not(:disabled),
+[data-hover='standard'] .rf-date-time:hover {
+  background: var(--rf-hover);
+}
+
+.rf-date-trigger:focus-visible,
+.rf-date-time:has(input:focus-visible) {
+  outline: none;
+  box-shadow: 0 0 0 1px var(--rf-accent, #6b97ff);
+}
+
+.rf-date-picker:has(.rf-date-trigger:disabled) {
+  opacity: 0.5;
+}
+
+.rf-date-trigger:disabled {
+  cursor: default;
+}
+
+.rf-date-surface {
+  inline-size: max-content;
+  padding: 0;
+  border: 0;
+  border-radius: var(--rf-popup-radius, 12px);
+  background: var(--rf-surface-3);
+  box-shadow:
+    inset 0 1px light-dark(transparent, rgb(255 255 255 / 2%)),
+    inset 0 0 0 1px light-dark(transparent, rgb(255 255 255 / 2%)),
+    0 0 0 1px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 12%)),
+    0 1px 1px -0.5px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 18%)),
+    0 3px 3px -1.5px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 18%));
+}
+
+.rf-date-body {
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+}
+
+.rf-date-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.rf-date-preset-column {
+  flex: none;
+  box-sizing: border-box;
+  padding-inline-end: 4px;
+  border-block-end: 1px solid var(--rf-border);
+}
+
+.rf-date-presets {
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+}
+
+.rf-date-presets button,
+.rf-date-done {
+  position: relative;
+  display: flex;
+  align-items: center;
+  block-size: var(--rf-control-height, 36px);
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--rf-item-radius, 8px);
+  background: transparent;
+  color: var(--rf-muted);
+  font: inherit;
+  text-align: start;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--rf-fast);
+}
+
+.rf-date-presets button:hover,
+.rf-date-presets button[aria-pressed='true'] {
+  color: var(--rf-fg);
+}
+
+.rf-date-presets button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 1px var(--rf-accent, #6b97ff);
+}
+
+.rf-date-preset-label {
+  display: inline-grid;
+  font-variation-settings: var(--rf-weight-normal, 'wght' 400, 'opsz' 14);
+  transition: font-variation-settings var(--rf-fast);
+}
+
+.rf-date-preset-label > * {
+  grid-area: 1 / 1;
+}
+
+.rf-date-preset-label > [aria-hidden] {
+  visibility: hidden;
+  font-variation-settings: var(--rf-weight-strong, 'wght' 550, 'opsz' 18);
+}
+
+.rf-date-presets button[aria-pressed='true'] .rf-date-preset-label {
+  font-variation-settings: var(--rf-weight-strong, 'wght' 550, 'opsz' 18);
+}
+
+.rf-date-done:hover {
+  background: var(--rf-hover);
+  color: var(--rf-fg);
+}
+.rf-date-times {
+  display: flex;
+  gap: 12px;
+  align-items: end;
+  padding: 12px;
+  border-top: 1px solid var(--rf-border);
+}
+.rf-date-times label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--rf-muted);
+  font-size: 12px;
+}
+.rf-date-times input {
+  min-width: 0;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-radius);
+  padding: 6px;
+  color: var(--rf-fg);
+  background: transparent;
+  font: inherit;
+}
+.rf-date-done {
+  margin-left: auto;
+  background: var(--rf-muted-bg);
+}
+
+.rf-date-inline-times {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  min-block-size: var(--rf-control-height, 36px);
+}
+
+.rf-date-divider {
+  inline-size: 1px;
+  block-size: 16px;
+  margin-inline: 2px;
+  background: var(--rf-border);
+}
+
+.rf-date-time {
+  display: inline-flex;
+  align-items: center;
+  block-size: var(--rf-control-height, 36px);
+  gap: calc(var(--rf-icon-size, 16px) - 10px);
+  padding: 0 calc(var(--rf-control-padding, 12px) - 4px);
+  border-radius: var(--rf-radius, 8px);
+  cursor: text;
+}
+
+.rf-date-duration {
+  color: var(--rf-muted);
+  white-space: nowrap;
+}
+
+.rf-date-time svg {
+  flex: none;
+  inline-size: var(--rf-icon-size, 16px);
+  block-size: var(--rf-icon-size, 16px);
+  color: var(--rf-muted);
+}
+
+.rf-date-time-field {
+  display: inline-grid;
+}
+
+.rf-date-time-field > * {
+  grid-area: 1 / 1;
+}
+
+.rf-date-time-field > .rf-date-sizer {
+  display: block;
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-date-inline-times input {
+  inline-size: 100%;
+  block-size: var(--rf-leading-body, 20px);
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  color: var(--rf-fg);
+  background: transparent;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-date-inline-times input::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+.rf-date-time-field {
+  inline-size: 8ch;
+}
+.rf-time-surface {
+  width: 112px;
+  min-inline-size: 112px;
+  max-block-size: min(240px, var(--popover-available-height, 240px));
+  overflow-y: auto;
+  padding: 4px;
+}
+.rf-time-surface[data-duration] {
+  width: 180px;
+  min-inline-size: 180px;
+}
+.rf-time-list {
+  position: relative;
+  outline: none;
+}
+.rf-time-option {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: var(--rf-control-height, 36px);
+  padding-inline: 8px;
+  border-radius: var(--rf-radius, 8px);
+  color: var(--rf-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.rf-time-option[aria-selected='true'],
+.rf-time-option[data-highlighted] {
+  color: var(--rf-fg);
+}
+.rf-time-option[aria-selected='true'] {
+  font-variation-settings: var(--rf-weight-strong);
+}
+.rf-date-inline-times > .rf-date-duration {
+  margin-inline-end: 8px;
+}
+
+@media (min-width: 720px) {
+  .rf-date-surface[data-side-presets]:popover-open .rf-date-body {
+    flex-direction: row;
+  }
+  .rf-date-surface[data-side-presets] .rf-date-preset-column {
+    inline-size: 152px;
+    border-block-end: 0;
+    border-inline-end: 1px solid var(--rf-border);
+  }
+}
+
+.rf-date-clear {
+  display: grid;
+  place-items: center;
+  flex: none;
+  align-self: stretch;
+  width: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--rf-item-radius);
+  background: transparent;
+  color: var(--rf-muted);
+  cursor: pointer;
+}
+.rf-date-clear:hover:not(:disabled) {
+  color: var(--rf-fg);
+}
+.rf-date-clear:focus-visible {
+  outline: 1px solid var(--rf-accent);
+  outline-offset: -1px;
+}
+.rf-date-clear:disabled {
+  cursor: default;
+}

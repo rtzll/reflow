@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/remix/schema/remix.json",
+  "assets": {
+    "basePath": "/assets",
+    "mounts": {
+      "app": "app",
+      "npm": "../../node_modules",
+      "reflow": "../../packages/reflow/dist"
+    },
+    "allowFiles": [
+      "app/public/**",
+      "app/routes.ts",
+      "app/ui/showcase-client.ts",
+      "../../packages/reflow/dist/**"
+    ],
+    "allowPackages": ["remix", "@remix-run/ui", "@rtzll/reflow"],
+    "denyFiles": ["**/*.test.*", "**/*.d.ts"],
+    "files": { "extensions": [".ttf", ".woff2", ".svg", ".png", ".txt"] }
+  }
+}

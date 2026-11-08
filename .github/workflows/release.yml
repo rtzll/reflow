@@ -1,0 +1,70 @@
+name: Release
+
+# Preparation only: the repository variables are intentionally unset and the
+# library is still private. Enable only in the NEW repository after migration.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version already committed in packages/reflow/package.json (e.g. 0.1.0)'
+        required: true
+        type: string
+      mode:
+        description: 'Bootstrap stages the first npm version; publish uses trusted publishing.'
+        required: true
+        type: choice
+        default: publish
+        options: [publish, bootstrap]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-release
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    if: >-
+      vars.RELEASE_ENABLED == 'true' &&
+      vars.RELEASE_REPOSITORY_ID == format('{0}', github.repository_id) &&
+      github.repository == 'rtzll/reflow' &&
+      github.ref == 'refs/heads/main' &&
+      github.event.repository.private == false
+    uses: ./.github/workflows/checks.yml
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: npm
+    permissions:
+      contents: write
+      id-token: write
+    env:
+      RELEASE_ENABLED: ${{ vars.RELEASE_ENABLED }}
+      RELEASE_REPOSITORY_ID: ${{ vars.RELEASE_REPOSITORY_ID }}
+      RELEASE_VERSION: ${{ inputs.version }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - run: npm install --global npm@12.2.0 --ignore-scripts
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: npm-package
+          path: .artifacts
+      - name: Stage the first package for npm account setup
+        if: inputs.mode == 'bootstrap'
+        run: node tools/release.mjs bootstrap
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_BOOTSTRAP_TOKEN }}
+      - name: Publish the verified package and GitHub release
+        if: inputs.mode == 'publish'
+        run: node tools/release.mjs publish

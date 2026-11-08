@@ -1,0 +1,27 @@
+---
+name: reflow
+description: Build and refine Remix 3 interfaces with Reflow components, shared theme tokens, fluid hover, and restrained motion. Use when a project uses Reflow or asks to adopt its interaction patterns.
+---
+
+# Build with Reflow
+
+Inspect the project's package manifest and existing UI before making changes. Use the installed Reflow exports and types as the API reference. In the Reflow workspace, read `packages/reflow/src/index.ts`, the relevant source module, and its examples in `apps/web/app/public/component-demos.tsx`.
+
+Reflow uses the Remix 3 component runtime. Component setup runs once and returns a render function. Read changing props through `handle.props`, update local state in events, and call `handle.update()`. Browser interactions require a hydrated client entry. Follow the installed Remix documentation for unfamiliar APIs.
+
+## Composition
+
+Use `@rtzll/reflow` components and import `@rtzll/reflow/styles.css` once. Prefer the existing form-aware controls, dialogs, menu and combobox primitives. Preserve labels, field descriptions, reset behavior, disabled options, keyboard navigation and focus return when composing them.
+
+Apply theme settings on a common ancestor with `data-theme`, `data-accent`, `data-shape`, `data-density`, and `data-hover`. Use the `--rf-*` CSS properties from the installed stylesheet for surfaces, spacing, text and focus colors. Consumers can provide icons as slots without adding an icon runtime.
+
+## Interaction craft
+
+- Use one moving hover surface for a group. `fluidHover()` attaches to the host, rows use `data-rf-hover-item`, and its surface uses `data-rf-hover-layer`. A selection surface remains distinct from pointer hover. Do not move focus just because the pointer moved.
+- Reserve the width of active labels so increasing their font weight does not move adjacent controls. Keep icons and success feedback in stable slots.
+- Contract a button surface by a fixed pixel on press. Scaling the whole button distorts wide controls. Use the library's Button implementation.
+- Let a transition reverse when input changes. Reuse the shared motion settings and respect reduced motion. Avoid adding bounce to quiet form controls.
+- Keep clipboard feedback inside the existing field. Copy only after a user action. Report failure if access is denied.
+- Pause explanatory demo loops when the user interacts, when off screen, and when reduced motion is requested. Keep all demonstrated controls usable with the keyboard.
+
+When reviewing an interface, identify the concrete interactions that users will notice and improve those within the requested scope. Verify changes at their normal entry points, including keyboard, theme and density variants. Credit Fluid Functionalism when adapting its designs or source and preserve license notices.

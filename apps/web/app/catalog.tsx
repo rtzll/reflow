@@ -1,0 +1,308 @@
+import { bannerDefaults, bannerFragment } from './public/banner-example.tsx'
+import { conversationCode } from './public/chat-example.tsx'
+import { accordionItems, checkboxFruit, radioOptions } from './public/component-example-data.ts'
+import { cardPlaygroundCode } from './public/card-example-code.ts'
+import { questionCode, questionPlayground } from './public/question-example-data.ts'
+import { requestFormCode } from './public/request-form-example.tsx'
+import { carouselExampleCode } from './public/carousel-example.tsx'
+import { SystemPage } from './public/system-page.tsx'
+import { SkillPage } from './public/skill-page.tsx'
+import { Example } from './public/examples.tsx'
+import type { ShowcaseComponent } from './ui/site.tsx'
+
+const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 'props'>> = {
+  accordion: {
+    description: 'Expandable sections with arrow-key navigation and a shared hover highlight.',
+    code: `const items = ${JSON.stringify(accordionItems, null, 2)}\n\n<Accordion defaultValue="item-1" items={items} />`,
+  },
+  'ask-user-questions': {
+    description: 'A guided flow with choices, custom answers, skipping, and back navigation.',
+    code: questionCode(questionPlayground()),
+  },
+  badge: {
+    description: 'A compact label with solid and dot treatments.',
+    code: `<Badge color="violet">Fiction</Badge>\n<Badge color="amber">Science</Badge>\n<Badge color="green">Philosophy</Badge>\n<Badge color="blue">History</Badge>\n<Badge color="rose">Poetry</Badge>`,
+  },
+  banner: {
+    description:
+      'A status notice with an icon, a title, an optional description and up to three actions.',
+    code: bannerFragment(bannerDefaults),
+  },
+  calendar: {
+    description:
+      'An accessible calendar for selecting one date or a range, with month navigation and optional week numbers.',
+    code: `<Calendar label="Choose travel dates" mode="range" numberOfMonths={2} defaultMonth="2026-11-01" />`,
+  },
+  card: {
+    description:
+      'Composable content cards with optional selection and a shared highlight across a grid.',
+    code: cardPlaygroundCode({
+      orientation: 'card',
+      columns: '2',
+      border: 'none',
+      separated: false,
+      fluidHover: true,
+      media: true,
+      description: true,
+      selected: false,
+    }),
+  },
+  'carousel-dots': {
+    description:
+      'A set of slide controls with a moving hover surface and optional progress animation.',
+    code: carouselExampleCode(),
+  },
+  'chat-message': {
+    description: 'A chat message with user or assistant alignment and optional attachments.',
+    code: conversationCode,
+  },
+  checkbox: {
+    description: 'A native form checkbox with a drawn checkmark and an indeterminate state.',
+    code: `<Checkbox label="Accept terms and conditions" />`,
+  },
+  'checkbox-group': {
+    description: 'Multi-select options with a fluid highlight and adjacent selected surfaces.',
+    code: `const options = ${JSON.stringify(checkboxFruit)}\n\n<CheckboxGroup label="Fruit" hideLabel defaultValue={['apples']} options={options} />`,
+  },
+  'color-picker': {
+    description:
+      'A saturation and brightness surface with hue, opacity, swatches and a typed color value.',
+    code: `<ColorPicker name="accent" defaultValue="#6B97FF" />`,
+  },
+  combobox: {
+    description: 'An editable field that filters and selects from a list of options.',
+    code: `<Combobox label="Component" name="component" options={[\n  { value: 'button', label: 'Button' },\n  { value: 'tabs', label: 'Tabs' },\n]} />`,
+  },
+  'command-menu': {
+    description: 'Filter and invoke grouped actions with pointer or keyboard navigation.',
+    code: `<CommandMenu items={commands} onSelect={runCommand} trigger="Open commands" />`,
+  },
+  'date-picker': {
+    description: 'A date field with an anchored calendar and local ISO date values.',
+    code: `<DatePicker label="Start date" name="start" min="2026-11-01" />`,
+  },
+  dialog: {
+    description: 'A native modal dialog with focus return and animated presentation.',
+    code: `<Dialog title="Edit profile" trigger="Open dialog">\n  <Input aria-label="Display name" />\n</Dialog>`,
+  },
+  field: {
+    description:
+      'A label, form control, help text, and error with associated accessible descriptions.',
+    code: requestFormCode(),
+  },
+  input: {
+    description: 'A native single-line form control with shared sizes and focus styling.',
+    code: `<Input name="displayName" aria-label="Display name" />`,
+  },
+  'input-copy': {
+    description: 'A read-only field with clipboard action and feedback.',
+    code: `<InputCopy label="Invite link" value="https://reflow.example/invite" />`,
+  },
+  'input-group': {
+    description: 'Related input fields with a shared hover surface and validation messages.',
+    code: `<InputGroup>\n  <InputField label="Name" name="name" />\n  <InputField label="Email" name="email" type="email" />\n</InputGroup>`,
+  },
+  'input-message': {
+    description: 'A message composer with an expanding text area, attachments, and a send action.',
+    code: `<InputMessage onSend={({ text, files }) => send(text, files)} />`,
+  },
+  'radio-group': {
+    description: 'A native group of exclusive choices with a shared highlight.',
+    code: `const options = ${JSON.stringify(radioOptions)}\n\n<RadioGroup label="Options" hideLabel defaultValue="0" options={options} />`,
+  },
+  select: {
+    description:
+      'A form-aware menu for selecting one option, with keyboard navigation and typeahead.',
+    code: `<Select label="Role" name="role" options={[\n  { value: 'viewer', label: 'Viewer' },\n  { value: 'editor', label: 'Editor' },\n]} defaultValue="viewer" />`,
+  },
+  sidebar: {
+    description:
+      'Resizable workspace navigation with collapsible sections and a modal drawer on small screens.',
+    code: `<Sidebar sections={sections} activeHref="/overview" searchable>\n  <p>Workspace content</p>\n</Sidebar>`,
+  },
+  slider: {
+    description: 'A numeric slider with optional pips, editable values and range selection.',
+    code: `<Slider label="Volume" min={0} max={100} step={10} defaultValue={50} showSteps showValue />`,
+  },
+  switch: {
+    description: 'A native switch with an animated thumb and label.',
+    code: `<Switch label="Notifications" name="notifications" defaultChecked />`,
+  },
+  table: {
+    description: 'Semantic table elements with a fluid highlight across rows.',
+    code: `<Table>\n  <TableBody><TableRow><TableCell>Workspace</TableCell></TableRow></TableBody>\n</Table>`,
+  },
+  textarea: {
+    description: 'A multi-line form control that can grow with its content.',
+    code: `<Textarea name="notes" aria-label="Notes" autoResize />`,
+  },
+  'thinking-indicator': {
+    description: 'A working status with an animated icon and rotating visual label.',
+    code: `<ThinkingIndicator labels={['Thinking…', 'Refining…']} />`,
+  },
+  'thinking-steps': {
+    description: 'Expandable progress steps with visible and accessible status labels.',
+    code: `<ThinkingSteps steps={[\n  { value: 'review', title: 'Compare states', content: 'Check focus behavior.', status: 'active' },\n]} />`,
+  },
+  tooltip: {
+    description: 'An anchored description available by pointer and keyboard focus.',
+    code: `<Tooltip content="More information" renderTrigger={(props) => (\n  <Button {...props}>Hover me</Button>\n)} />`,
+  },
+  button: {
+    description:
+      'A button with a weight shift on hover, a surface that contracts on press, and a loading state.',
+    code: `import { Button } from '@rtzll/reflow'\n\n<Button variant="primary">Save changes</Button>`,
+    props: [
+      {
+        name: 'variant',
+        type: "'primary' | 'secondary' | 'tertiary' | 'ghost' | 'destructive'",
+        description: 'Visual treatment.',
+        defaultValue: 'primary',
+      },
+      {
+        name: 'loading',
+        type: 'boolean',
+        description: 'Shows progress and prevents repeat activation.',
+        defaultValue: 'false',
+      },
+      { name: 'href', type: 'string', description: 'Renders the control as a link.' },
+    ],
+  },
+  tabs: {
+    description:
+      'Switch between related views using a moving selection indicator and arrow-key navigation.',
+    code: `import { Tabs } from '@rtzll/reflow'\n\n<Tabs label="Workspace" defaultValue="item-1" items={[\n  { value: 'overview', label: 'Overview', panel: <p>Overview</p> },\n  { value: 'activity', label: 'Activity', panel: <p>Activity</p> },\n]} />`,
+    props: [
+      { name: 'items', type: 'TabItem[]', description: 'Tab labels and panel contents.' },
+      { name: 'defaultValue', type: 'string', description: 'Initially selected tab.' },
+      { name: 'value', type: 'string', description: 'Selected tab in controlled mode.' },
+    ],
+  },
+  dropdown: {
+    description: 'An anchored action menu with a shared hover highlight and keyboard navigation.',
+    code: `import { Dropdown } from '@rtzll/reflow'\n\n<Dropdown label="Options" items={[\n  { value: 'rename', label: 'Rename' },\n  { value: 'archive', label: 'Archive' },\n]} onSelect={(value) => console.log(value)} />`,
+    props: [
+      { name: 'label', type: 'RemixNode', description: 'Visible trigger label.' },
+      { name: 'items', type: 'DropdownItem[]', description: 'Available menu actions.' },
+      {
+        name: 'onSelect',
+        type: '(value: string) => void',
+        description: 'Called when an action is chosen.',
+      },
+    ],
+  },
+}
+
+const components = [
+  ['accordion', 'Accordion'],
+  ['ask-user-questions', 'AskUserQuestions'],
+  ['badge', 'Badge'],
+  ['banner', 'Banner'],
+  ['button', 'Button'],
+  ['calendar', 'Calendar'],
+  ['card', 'Card'],
+  ['carousel-dots', 'CarouselDots'],
+  ['chat-message', 'ChatMessage'],
+  ['checkbox', 'Checkbox'],
+  ['checkbox-group', 'CheckboxGroup'],
+  ['color-picker', 'ColorPicker'],
+  ['combobox', 'Combobox'],
+  ['command-menu', 'CommandMenu'],
+  ['date-picker', 'DatePicker'],
+  ['dialog', 'Dialog'],
+  ['dropdown', 'Dropdown'],
+  ['field', 'Field'],
+  ['input', 'Input'],
+  ['input-copy', 'InputCopy'],
+  ['input-group', 'InputGroup'],
+  ['input-message', 'InputMessage'],
+  ['radio-group', 'RadioGroup'],
+  ['select', 'Select'],
+  ['sidebar', 'Sidebar'],
+  ['slider', 'Slider'],
+  ['switch', 'Switch'],
+  ['table', 'Table'],
+  ['tabs', 'Tabs'],
+  ['textarea', 'Textarea'],
+  ['thinking-indicator', 'ThinkingIndicator'],
+  ['thinking-steps', 'ThinkingSteps'],
+  ['tooltip', 'Tooltip'],
+] as const
+
+const systems = [
+  [
+    'fluid-hover',
+    'Fluid Hover',
+    'Use a single moving surface to preview the item under the pointer.',
+  ],
+  [
+    'motion',
+    'Motion',
+    'Shared timing and spring curves keep transitions consistent between components.',
+  ],
+  ['reveal', 'Reveal', 'Play a short entrance when content reaches the viewport.'],
+  [
+    'scrollbars',
+    'Scrollbars',
+    'Use a thin scrollbar with native scrolling and a visible focus outline.',
+  ],
+  ['sizes', 'Sizes', 'Default and compact sizes share the same control scale.'],
+  ['skill', 'Skill', 'Teach your coding agent the components and the craft behind them.'],
+  [
+    'surfaces',
+    'Surfaces',
+    'Eight levels let controls and overlays sit on distinguishable surfaces.',
+  ],
+  [
+    'typography',
+    'Typography',
+    'Shared type roles and variable font axes give text a consistent rhythm.',
+  ],
+] as const
+
+const blocks = [
+  [
+    'app-sidebar',
+    'App Sidebar',
+    'A workspace shell with search, collapsible sections, and a user footer.',
+  ],
+  [
+    'settings-dialog',
+    'Settings Dialog',
+    'A dialog composed with the Reflow sidebar and form controls.',
+  ],
+  ['queued-stack', 'Queued Stack', 'Reorder, remove, and send messages from a compact queue.'],
+] as const
+
+export const catalog: readonly ShowcaseComponent[] = [
+  ...components.map(([slug, name]) => {
+    const details = previews[slug]
+    if (!details) return { slug, name, description: '' }
+    return { slug, name, ...details, preview: <Example slug={slug} /> }
+  }),
+  ...systems.map(([slug, name, description]) => ({
+    slug,
+    name,
+    description,
+    category: 'system',
+    preview: slug === 'skill' ? <SkillPage /> : <SystemPage slug={slug} />,
+  })),
+  ...blocks.map(([slug, name, description]) => ({
+    slug,
+    name,
+    description,
+    category: 'block',
+    preview: <Example slug={slug} />,
+  })),
+]
+
+export function galleryCatalog(avatar: string, gallery = false) {
+  return catalog.map((component) =>
+    component.preview == null
+      ? component
+      : {
+          ...component,
+          preview: <Example slug={component.slug} showcase gallery={gallery} avatar={avatar} />,
+        },
+  )
+}

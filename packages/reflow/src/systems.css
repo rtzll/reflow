@@ -1,0 +1,191 @@
+.rf-scroll-area {
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--rf-fg) 22%, transparent) transparent;
+  overscroll-behavior: contain;
+}
+.rf-scroll-area:focus-visible {
+  outline: 1px solid var(--rf-accent);
+}
+@media (pointer: coarse) {
+  .rf-scroll-area {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
+}
+
+[data-rf-scroll-fade] {
+  --rf-scroll-fade-top: 0px;
+  --rf-scroll-fade-bottom: 0px;
+  --rf-scroll-fade-left: 0px;
+  --rf-scroll-fade-right: 0px;
+  --rf-fade-y: linear-gradient(
+    to bottom,
+    transparent,
+    #000 var(--rf-scroll-fade-top),
+    #000 calc(100% - var(--rf-scroll-fade-bottom)),
+    transparent
+  );
+  --rf-fade-x: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--rf-scroll-fade-left),
+    #000 calc(100% - var(--rf-scroll-fade-right)),
+    transparent
+  );
+}
+[data-rf-scroll-fade='vertical'] {
+  mask-image: var(--rf-fade-y);
+}
+[data-rf-scroll-fade='horizontal'] {
+  mask-image: var(--rf-fade-x);
+}
+[data-rf-scroll-fade='both'] {
+  mask-image: var(--rf-fade-y), var(--rf-fade-x);
+  mask-composite: intersect;
+}
+
+.rf-scroll-root {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.rf-scroll-viewport {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+.rf-scroll-content {
+  min-width: 100%;
+}
+.rf-scroll-root[data-orientation='vertical'] > .rf-scroll-viewport {
+  overflow-x: hidden;
+}
+.rf-scroll-root[data-orientation='horizontal'] > .rf-scroll-viewport {
+  overflow-y: hidden;
+}
+.rf-scroll-root[data-orientation='horizontal'] .rf-scroll-content {
+  display: flex;
+  width: max-content;
+}
+.rf-scroll-track {
+  display: none;
+  position: absolute;
+  z-index: 20;
+  touch-action: none;
+  user-select: none;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease-out 160ms;
+}
+.rf-scroll-track[hidden] {
+  display: none !important;
+}
+.rf-scroll-track[data-orientation='vertical'] {
+  width: 10px;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+.rf-scroll-track[data-orientation='horizontal'] {
+  height: 10px;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+.rf-scroll-root[data-orientation='both'] > .rf-scroll-track[data-orientation='vertical'] {
+  bottom: 10px;
+}
+.rf-scroll-root[data-orientation='both'] > .rf-scroll-track[data-orientation='horizontal'] {
+  right: 10px;
+}
+.rf-scroll-thumb {
+  position: absolute;
+  display: block;
+  border-radius: var(--rf-radius);
+  background: light-dark(rgb(23 23 23 / 8%), rgb(245 245 245 / 8%));
+  transition:
+    background-color 160ms ease-in-out,
+    width 160ms ease-in-out,
+    height 160ms ease-in-out;
+}
+.rf-scroll-track[data-orientation='vertical'] > .rf-scroll-thumb {
+  width: 4px;
+  right: 3px;
+}
+.rf-scroll-track[data-orientation='horizontal'] > .rf-scroll-thumb {
+  height: 4px;
+  bottom: 3px;
+}
+.rf-scroll-track:hover > .rf-scroll-thumb {
+  background: light-dark(rgb(23 23 23 / 12%), rgb(245 245 245 / 12%));
+}
+.rf-scroll-track[data-orientation='vertical']:hover > .rf-scroll-thumb {
+  width: 6px;
+}
+.rf-scroll-track[data-orientation='horizontal']:hover > .rf-scroll-thumb {
+  height: 6px;
+}
+.rf-scroll-root[data-scroll-dragging] .rf-scroll-thumb {
+  background: light-dark(rgb(23 23 23 / 16%), rgb(245 245 245 / 16%));
+}
+.rf-scroll-root[data-scroll-visible] > .rf-scroll-track {
+  opacity: 1;
+  pointer-events: auto;
+  transition-duration: 160ms;
+  transition-delay: 0ms;
+}
+.rf-scroll-track:focus-visible {
+  outline: 1px solid var(--rf-accent);
+  outline-offset: -1px;
+}
+@media (pointer: fine) {
+  .rf-scroll-root[data-scroll-ready] > .rf-scroll-viewport {
+    scrollbar-width: none;
+  }
+  .rf-scroll-root[data-scroll-ready] > .rf-scroll-viewport::-webkit-scrollbar {
+    display: none;
+  }
+  .rf-scroll-root[data-scroll-ready] > .rf-scroll-track {
+    display: block;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-scroll-track,
+  .rf-scroll-thumb {
+    transition: none;
+  }
+}
+
+@keyframes rf-scroll-reveal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--rf-reveal-distance)) scale(var(--rf-reveal-scale));
+  }
+}
+@keyframes rf-scroll-reveal-leave {
+  to {
+    opacity: 0;
+    transform: translateY(calc(var(--rf-reveal-distance) * -1)) scale(var(--rf-reveal-scale));
+  }
+}
+@supports (animation-timeline: view()) {
+  [data-rf-reveal-scroll] {
+    /* Keep the timeline separate: CSS transformers can emit a shorthand
+       timeline syntax that browsers do not yet support. */
+    --rf-scroll-reveal-animation:
+      rf-scroll-reveal-enter 1ms linear both, rf-scroll-reveal-leave 1ms linear both;
+    animation: var(--rf-scroll-reveal-animation);
+    animation-timeline: view(), view();
+    animation-range:
+      entry var(--rf-reveal-scroll-start) entry var(--rf-reveal-scroll-range),
+      exit calc(100% - var(--rf-reveal-scroll-range)) exit
+        calc(100% - var(--rf-reveal-scroll-start));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-rf-reveal-scroll] {
+    animation: none;
+  }
+}

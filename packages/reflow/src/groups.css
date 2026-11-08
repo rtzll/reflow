@@ -1,0 +1,372 @@
+.rf-accordion {
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  position: relative;
+  width: 288px;
+}
+.rf-accordion-item {
+  min-width: 0;
+  position: relative;
+}
+/* The open tint is an overlay, so the item itself stays transparent. */
+.rf-accordion-tint {
+  background-color: light-dark(
+    color-mix(in oklab, #e5e5e5 20%, transparent),
+    color-mix(in oklab, #525252 12%, transparent)
+  );
+  border-radius: var(--rf-radius);
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  transition: opacity var(--rf-exit-moderate);
+  z-index: -2;
+}
+.rf-accordion-item[data-state='open'] > .rf-accordion-tint {
+  opacity: 1;
+  transition: opacity 120ms linear;
+}
+/* Hovering another row dims the open tint. */
+.rf-accordion:has(.rf-accordion-trigger[data-rf-hovered][aria-expanded='false'])
+  > .rf-accordion-item[data-state='open']
+  > .rf-accordion-tint {
+  opacity: 0.7;
+}
+/* highlight="trigger": the tint covers the open row only, and only on hover. */
+.rf-accordion[data-highlight='trigger'] > .rf-accordion-item > .rf-accordion-tint {
+  block-size: 36px;
+  bottom: auto;
+}
+.rf-accordion[data-highlight='trigger']
+  > .rf-accordion-item[data-state='open']:not(
+    :has(.rf-accordion-trigger[data-rf-hovered], .rf-accordion-trigger:hover)
+  )
+  > .rf-accordion-tint {
+  opacity: 0;
+  transition: opacity var(--rf-exit-moderate);
+}
+.rf-accordion-item > :is(h2, h3, h4, h5, h6) {
+  margin: 0;
+  font: inherit;
+}
+.rf-accordion-trigger {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--rf-radius);
+  color: var(--rf-fg);
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  gap: 8px;
+  min-height: var(--rf-control-height);
+  outline: none;
+  padding: 8px var(--rf-control-padding);
+  position: relative;
+  text-align: left;
+  user-select: none;
+  width: 100%;
+  z-index: 10;
+}
+.rf-accordion-label {
+  display: inline-grid;
+  flex: 1;
+  font-size: var(--rf-text-body);
+  line-height: var(--rf-leading-body);
+  text-align: left;
+}
+.rf-accordion-label > span {
+  grid-area: 1 / 1;
+}
+.rf-accordion-label > span:first-child {
+  font-variation-settings: var(--rf-weight-strong);
+  visibility: hidden;
+}
+.rf-accordion-label > span:last-child {
+  color: var(--rf-muted);
+  font-variation-settings: var(--rf-weight-normal);
+  transition:
+    color 80ms,
+    font-variation-settings 80ms;
+}
+.rf-accordion[data-variant='separated'] .rf-accordion-item + .rf-accordion-item {
+  border-block-start: 1px solid var(--rf-border);
+}
+.rf-accordion-trigger:focus-visible {
+  outline: 1px solid var(--rf-accent);
+  outline-offset: 1px;
+}
+.rf-accordion-trigger:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.rf-accordion-trigger:is([aria-expanded='true'], [data-rf-hovered], :focus-visible)
+  .rf-accordion-label
+  > span:last-child {
+  color: var(--rf-fg);
+}
+.rf-accordion-trigger[aria-expanded='true'] .rf-accordion-label > span:last-child {
+  font-variation-settings: var(--rf-weight-strong);
+}
+.rf-accordion-chevron {
+  align-items: center;
+  display: inline-flex;
+  flex-shrink: 0;
+  justify-content: center;
+  transition: transform var(--rf-spring-fast);
+}
+.rf-accordion-chevron > svg {
+  color: var(--rf-muted);
+  transition: color 80ms;
+}
+.rf-accordion-chevron [data-rf-icon-default] {
+  stroke-width: 1.5;
+  transition: stroke-width 80ms;
+}
+.rf-accordion-trigger[aria-expanded='true'] > .rf-accordion-chevron {
+  transform: rotate(90deg);
+}
+.rf-accordion-trigger:is([aria-expanded='true'], [data-rf-hovered], :focus-visible)
+  > .rf-accordion-chevron
+  > svg {
+  color: var(--rf-fg);
+}
+.rf-accordion-trigger:is([aria-expanded='true'], [data-rf-hovered], :focus-visible)
+  > .rf-accordion-chevron
+  [data-rf-icon-default] {
+  stroke-width: 2;
+}
+.rf-accordion-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows var(--rf-exit-fast),
+    opacity 40ms linear,
+    visibility 0s linear 60ms;
+  visibility: hidden;
+}
+.rf-accordion-panel > div {
+  min-height: 0;
+  overflow: hidden;
+}
+.rf-accordion-content {
+  color: var(--rf-muted);
+  font-size: var(--rf-text-body);
+  line-height: var(--rf-leading-body);
+  padding: 4px var(--rf-control-padding) 12px;
+}
+.rf-accordion-panel[data-state='open'] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition:
+    grid-template-rows var(--rf-spring-fast),
+    opacity 60ms linear,
+    visibility 0s;
+  visibility: visible;
+}
+
+.rf-choice-group {
+  border: 0;
+  margin: 0;
+  min-inline-size: 0;
+  padding: 0;
+}
+.rf-choice-group > legend {
+  font-weight: 550;
+  margin-block-end: 6px;
+  padding: 0 8px;
+}
+.rf-choice-group-list {
+  display: flex;
+  flex-direction: column;
+  isolation: isolate;
+  position: relative;
+}
+.rf-choice-group-list[data-orientation='horizontal'] {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.rf-choice-group-row {
+  border-radius: var(--rf-radius);
+  min-width: 0;
+  position: relative;
+}
+.rf-choice-group-row > .rf-choice {
+  width: 100%;
+  min-height: calc(var(--rf-control-height) + 4px);
+  padding: 5px var(--rf-control-padding);
+  color: var(--rf-muted);
+}
+.rf-choice-group-row[data-rf-hovered] > .rf-choice,
+.rf-choice-group-row > .rf-choice:has(input:is(:checked, :focus-visible)) {
+  color: var(--rf-fg);
+}
+.rf-choice-group-row:has(input:checked) {
+  background: var(--rf-active);
+}
+/* Checkbox rows: the check is always foreground; the box border darkens to
+   neutral-400 (neutral-500 dark) while the row is hovered or focused, and stays
+   transparent once checked. */
+.rf-choice-group-row > .rf-checkbox > .rf-checkbox-mark {
+  color: var(--rf-fg);
+}
+/* Keep a row outline available before the shared ring is mounted. */
+.rf-choice-group-row:has(> .rf-checkbox > input:focus-visible) {
+  outline: 1px solid var(--rf-accent);
+  outline-offset: 1px;
+}
+.rf-choice-group-row > .rf-checkbox:has(> input:focus-visible) > .rf-checkbox-mark {
+  box-shadow: none;
+}
+.rf-choice-group-row[data-rf-hovered]
+  > .rf-checkbox
+  > input:not(:checked, :indeterminate)
+  + .rf-checkbox-mark,
+.rf-choice-group-row
+  > .rf-checkbox:has(> input:focus-visible:not(:checked, :indeterminate))
+  > .rf-checkbox-mark {
+  border-color: light-dark(oklch(70.8% 0 0), oklch(55.6% 0 0));
+}
+.rf-choice-group-row > .rf-checkbox:hover > input:is(:checked, :indeterminate) + .rf-checkbox-mark {
+  border-color: transparent;
+}
+.rf-choice-group-row:has(input:checked):has(+ .rf-choice-group-row input:checked) {
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+}
+.rf-choice-group-row:has(input:checked) + .rf-choice-group-row:has(input:checked) {
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+}
+.rf-choice-group-list[data-orientation='horizontal'] .rf-choice-group-row {
+  border-radius: var(--rf-radius);
+}
+.rf-choice-group-row[aria-disabled='true'] {
+  opacity: 0.45;
+}
+.rf-choice-group-row small {
+  display: block;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption);
+}
+.rf-radio {
+  align-items: center;
+  color: var(--rf-muted);
+  cursor: pointer;
+  display: flex;
+  gap: var(--rf-gap);
+  min-height: calc(var(--rf-control-height) + 4px);
+  padding: 12px var(--rf-control-padding);
+}
+.rf-radio-body {
+  display: grid;
+  justify-items: start;
+  min-width: 0;
+}
+.rf-radio-text {
+  display: inline-grid;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.rf-radio-sizer,
+.rf-radio-label {
+  grid-area: 1 / 1;
+  text-box: trim-both cap alphabetic;
+}
+.rf-radio-sizer {
+  visibility: hidden;
+  font-variation-settings: var(--rf-weight-strong);
+}
+.rf-radio-label {
+  font-variation-settings: var(--rf-weight-normal);
+  transition:
+    color var(--rf-fast),
+    font-variation-settings var(--rf-fast);
+}
+.rf-radio:is([data-rf-hovered], :focus-within, :has(:checked)) {
+  color: var(--rf-fg);
+}
+.rf-radio:has(:checked) .rf-radio-label {
+  font-variation-settings: var(--rf-weight-strong);
+}
+.rf-radio:has(:disabled) {
+  cursor: default;
+}
+.rf-radio > input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  opacity: 0;
+  margin: 0;
+}
+.rf-radio-mark {
+  border: 1.5px solid var(--rf-border);
+  border-radius: 50%;
+  transition: border-color var(--rf-fast);
+  display: grid;
+  height: var(--rf-icon-size);
+  place-items: center;
+  width: var(--rf-icon-size);
+  flex: none;
+}
+.rf-radio-mark::after {
+  content: '';
+  border-radius: inherit;
+  height: calc(var(--rf-icon-size) / 2);
+  width: calc(var(--rf-icon-size) / 2);
+  background: currentColor;
+  scale: 0;
+  transition: scale var(--rf-fast) var(--rf-ease-out);
+}
+.rf-radio input:checked + .rf-radio-mark {
+  border-color: transparent;
+}
+.rf-radio input:checked + .rf-radio-mark::after {
+  scale: 1;
+}
+.rf-radio:has(input:focus-visible) {
+  outline: 1px solid var(--rf-accent);
+  outline-offset: 1px;
+}
+.rf-radio:not(:has(:checked)):is([data-rf-hovered], :focus-within) .rf-radio-mark {
+  border-color: light-dark(oklch(70.8% 0 0), oklch(55.6% 0 0));
+}
+[data-hover='standard'] .rf-choice-group-row:not([aria-disabled='true']):hover,
+[data-hover='standard'] .rf-accordion-trigger:not(:disabled):hover,
+.rf-accordion[data-variant='separated'] .rf-accordion-trigger:not(:disabled):hover {
+  background: var(--rf-hover);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-accordion-item,
+  .rf-accordion-tint,
+  .rf-accordion-panel,
+  .rf-accordion-chevron,
+  .rf-radio-mark::after {
+    animation: none;
+    transition: none;
+  }
+}
+.rf-accordion > [data-rf-hover-layer],
+.rf-choice-group-list > [data-rf-hover-layer] {
+  background: var(--rf-hover);
+}
+
+.rf-choice-selection {
+  background: var(--rf-active);
+}
+.rf-choice-group-list[data-rf-has-selection] > .rf-radio:has(input:checked) {
+  background: transparent;
+}
+
+@media (forced-colors: none) {
+  .rf-accordion:has(> .rf-focus-ring[data-visible])
+    > .rf-accordion-item
+    > :is(h2, h3, h4, h5, h6)
+    > .rf-accordion-trigger:focus-visible,
+  .rf-choice-group-list:has(> .rf-focus-ring[data-visible])
+    > .rf-choice-group-row:has(input:focus-visible) {
+    outline-color: transparent;
+  }
+}

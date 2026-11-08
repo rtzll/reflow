@@ -1,0 +1,585 @@
+/* One surface slides behind the current item, leaving its hit target intact. */
+[data-rf-hover-host] {
+  position: relative;
+  isolation: isolate;
+}
+
+.rf-highlight {
+  position: absolute;
+  z-index: -1;
+  inset: 0 auto auto 0;
+  pointer-events: none;
+  opacity: 0;
+  border-radius: var(--rf-radius, 8px);
+  transition: opacity 80ms ease;
+}
+
+.rf-highlight[data-visible] {
+  opacity: 1;
+}
+
+.rf-highlight[data-moving] {
+  transition:
+    var(--rf-highlight-travel),
+    opacity 80ms ease;
+}
+
+.rf-focus-ring {
+  z-index: 2;
+}
+
+.rf-focus-ring::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 1px solid var(--rf-accent, #6b97ff);
+  border-radius: calc(var(--rf-radius, 8px) + 2px);
+}
+
+.rf-focus-ring:not([data-visible]) {
+  transition: opacity var(--rf-exit-fast);
+}
+
+@media (forced-colors: none) {
+  .rf-tabs-list:has(> .rf-focus-ring[data-visible]) .rf-tab:focus-visible,
+  .rf-menu-list:has(> .rf-focus-ring[data-visible]) > .rf-menu-entry > .rf-menu-item:focus-visible {
+    outline-color: transparent;
+  }
+}
+
+@media (forced-colors: active) {
+  .rf-focus-ring {
+    display: none;
+  }
+}
+
+[data-hover='standard'] [data-rf-hover-layer] {
+  display: none;
+}
+
+.rf-tabs {
+  max-inline-size: 100%;
+  color: var(--rf-fg);
+}
+
+.rf-tabs-list {
+  display: flex;
+  align-items: center;
+  max-inline-size: calc(100% + 8px);
+  padding: 4px;
+  margin: -4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.rf-tab {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  gap: var(--rf-gap, 8px);
+  min-block-size: var(--rf-control-height, 36px);
+  padding: 0 var(--rf-control-padding, 12px);
+  border: 0;
+  border-radius: var(--rf-radius, 8px);
+  outline: none;
+  background: transparent;
+  color: var(--rf-fg);
+  font: inherit;
+  font-size: var(--rf-text-body, 13px);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* The label and icon carry the colour and weight, as in the reference. */
+.rf-tab-label > span,
+.rf-tab-icon {
+  color: var(--rf-muted, #737373);
+  transition:
+    color 80ms ease,
+    font-variation-settings 80ms ease;
+}
+
+.rf-tab-label > span {
+  font-variation-settings: var(--rf-weight-normal);
+}
+
+:is(.rf-tab[aria-selected='true'], .rf-tab[data-rf-hovered], .rf-tab:focus-visible)
+  :is(.rf-tab-label > span, .rf-tab-icon) {
+  color: var(--rf-fg);
+}
+
+.rf-tab[aria-selected='true'] .rf-tab-label > span {
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.rf-tabs-list:not([data-rf-has-selection]) .rf-tab[aria-selected='true'] {
+  background: var(--rf-active);
+}
+
+.rf-tab:focus-visible {
+  outline: 1px solid var(--rf-accent, #6b97ff);
+  outline-offset: 1px;
+}
+
+.rf-tab:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.rf-tab-selection {
+  background: var(--rf-active);
+}
+
+.rf-tab-hover {
+  background: var(--rf-active);
+}
+
+.rf-tab-hover[data-visible] {
+  opacity: 0.4;
+}
+
+.rf-tabs-list:has(.rf-tab-hover[data-visible]) .rf-tab-selection {
+  opacity: 0.8;
+}
+
+.rf-tabs[data-variant='underline'] .rf-tab-selection,
+.rf-tabs[data-variant='underline']
+  .rf-tabs-list:not([data-rf-has-selection])
+  .rf-tab[aria-selected='true'] {
+  border-radius: 0;
+  background: linear-gradient(var(--rf-accent), var(--rf-accent)) bottom / 100% 2px no-repeat;
+}
+
+.rf-tab-icon,
+.rf-menu-icon,
+.rf-menu-check {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.rf-tab-icon svg {
+  inline-size: var(--rf-icon-size, 16px);
+  block-size: var(--rf-icon-size, 16px);
+}
+
+.rf-menu-icon svg {
+  inline-size: 16px;
+  block-size: 16px;
+}
+
+/* Size the label at its selected weight so the surrounding tabs stay put. */
+.rf-tab-label {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.rf-tab-label::before,
+.rf-tab-label > span {
+  grid-area: 1 / 1;
+  text-box: trim-both cap alphabetic;
+}
+
+.rf-tab-label::before {
+  content: attr(data-label);
+  visibility: hidden;
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.rf-tab[data-active-label] {
+  gap: 0;
+}
+
+.rf-tab[data-active-label] .rf-tab-label {
+  grid-template-columns: 0fr;
+  margin-inline-start: 0;
+  transition:
+    grid-template-columns 150ms ease,
+    margin 150ms ease;
+}
+
+.rf-tab[data-active-label][aria-selected='true'] .rf-tab-label {
+  grid-template-columns: 1fr;
+  margin-inline-start: max(6px, var(--rf-gap, 8px));
+}
+
+.rf-tab[data-active-label] .rf-tab-label::before,
+.rf-tab[data-active-label] .rf-tab-label > span {
+  min-inline-size: 0;
+  overflow: hidden;
+}
+
+.rf-tab-panel {
+  margin-block-start: 12px;
+}
+
+.rf-tab-panel:empty {
+  display: none;
+}
+
+.rf-dropdown {
+  display: inline-block;
+  max-inline-size: 100%;
+}
+
+.rf-menu-surface {
+  --rf-menu-rest-transform: translateY(-4px) scaleY(0.96);
+  box-sizing: border-box;
+  margin: 0;
+  inline-size: 288px;
+  max-inline-size: calc(100vw - 16px);
+  padding: 0;
+  border: 1px solid var(--rf-border, #dedede);
+  border-radius: var(--rf-panel-radius, 12px);
+  background: var(--rf-surface-2, var(--rf-bg, white));
+  color: var(--rf-fg);
+  box-shadow:
+    0 12px 28px rgb(0 0 0 / 14%),
+    0 2px 5px rgb(0 0 0 / 8%);
+  /* Reference popup motion: drop 4px and grow from 96% height on the fast
+     spring; leave on the fast exit tween. The closed state carries the exit
+     transition, the open state the enter transition. */
+  opacity: 0;
+  transform: var(--rf-menu-rest-transform);
+  transform-origin: top;
+  transition:
+    opacity var(--rf-exit-fast),
+    transform var(--rf-exit-fast),
+    display var(--rf-exit-fast) allow-discrete,
+    overlay var(--rf-exit-fast) allow-discrete;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+
+.rf-menu-surface[data-anchor-placement^='top'] {
+  --rf-menu-rest-transform: translateY(4px) scaleY(0.96);
+  transform-origin: bottom;
+}
+
+/* Submenus open sideways and can flip toward the opposite viewport edge. */
+.rf-menu-surface[data-menu-submenu] {
+  --rf-menu-rest-transform: scaleY(0.96);
+  inline-size: 224px;
+  transform-origin: left;
+}
+
+.rf-menu-surface[data-menu-submenu][data-anchor-placement^='left'] {
+  transform-origin: right;
+}
+
+.rf-dropdown-surface {
+  border: 0;
+  background: var(--rf-surface-3, white);
+  box-shadow:
+    inset 0 1px light-dark(transparent, rgb(255 255 255 / 2%)),
+    inset 0 0 0 1px light-dark(transparent, rgb(255 255 255 / 2%)),
+    0 0 0 1px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 12%)),
+    0 1px 1px -0.5px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 18%)),
+    0 3px 3px -1.5px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 18%));
+}
+
+.rf-dropdown-surface:not([data-inline]) {
+  max-height: 480px;
+  overscroll-behavior: contain;
+}
+
+/* A submenu floats one elevation step above the menu that opened it. */
+.rf-dropdown-surface[data-menu-submenu] {
+  background: var(--rf-surface-5, white);
+}
+
+.rf-dropdown-surface .rf-menu-search {
+  background: inherit;
+}
+
+.rf-menu-surface:popover-open {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--rf-spring-fast),
+    transform var(--rf-spring-fast),
+    display var(--rf-spring-fast) allow-discrete,
+    overlay var(--rf-spring-fast) allow-discrete;
+}
+
+@starting-style {
+  .rf-menu-surface:popover-open {
+    opacity: 0;
+    transform: var(--rf-menu-rest-transform);
+  }
+}
+
+.rf-menu-list {
+  padding: 4px;
+  outline: none;
+}
+
+.rf-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: var(--rf-control-height, 36px);
+  padding: 0 8px;
+  border-radius: var(--rf-radius, 8px);
+  outline: none;
+  color: var(--rf-fg);
+  font-size: var(--rf-text-body, 13px);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Label, icon and chevron carry the muted/foreground colour, as in the reference. */
+.rf-menu-label > span,
+.rf-menu-icon,
+.rf-menu-chevron {
+  color: var(--rf-muted, #737373);
+}
+
+.rf-menu-chevron {
+  flex: none;
+  transition: color var(--rf-fast);
+}
+
+.rf-menu-item:is([data-highlighted], [aria-checked='true'])
+  :is(.rf-menu-label > span, .rf-menu-icon, .rf-menu-chevron),
+.rf-menu-item[aria-expanded='true'] .rf-menu-chevron {
+  color: var(--rf-fg);
+}
+
+.rf-menu-item[aria-checked='true'] {
+  background: var(--rf-active);
+}
+
+.rf-menu-item[aria-disabled='true'] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.rf-menu-item:focus-visible {
+  outline: 1px solid var(--rf-accent, #6b97ff);
+  outline-offset: -1px;
+}
+
+/* As in the reference: the label is stacked over an invisible copy at the
+   checked weight, both trimmed to the cap height with matching padding and
+   negative margin so truncation does not clip ascenders. */
+.rf-menu-label {
+  display: inline-grid;
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.rf-menu-label::before,
+.rf-menu-label > span {
+  grid-area: 1 / 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-block: 0.25em;
+  margin-block: -0.25em;
+  text-box: trim-both cap alphabetic;
+}
+
+.rf-menu-label::before {
+  content: attr(data-label);
+  visibility: hidden;
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.rf-menu-label > span {
+  font-variation-settings: var(--rf-weight-normal);
+  transition:
+    color var(--rf-fast),
+    font-variation-settings var(--rf-fast);
+}
+
+.rf-menu-item[aria-checked='true'] .rf-menu-label > span {
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.rf-menu-check {
+  visibility: hidden;
+  transition: visibility 0s linear 40ms;
+}
+
+.rf-menu-check path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 40ms ease-in;
+}
+
+.rf-menu-item[aria-checked='true'] .rf-menu-check {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.rf-menu-item[aria-checked='true'] .rf-menu-check path {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 80ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-menu-item .rf-menu-check,
+  .rf-menu-item .rf-menu-check path {
+    transition: none;
+  }
+}
+
+.rf-menu-hover {
+  border-radius: var(--rf-radius, 8px);
+  background: var(--rf-hover);
+}
+
+.rf-menu-separator {
+  height: 1px;
+  margin: 4px -4px;
+  background: color-mix(in oklab, var(--rf-border, #dedede) 60%, transparent);
+}
+
+.rf-menu-shortcut {
+  flex: none;
+  padding: 1px 4px;
+  border: 1px solid var(--rf-border, #dedede);
+  border-radius: 4px;
+  color: var(--rf-muted, #737373);
+  font: inherit;
+  font-size: 11px;
+}
+
+[data-hover='standard'] .rf-menu-item[data-highlighted] {
+  background: var(--rf-hover);
+}
+
+@media (hover: hover) {
+  [data-hover='standard'] .rf-tab:not(:disabled):hover {
+    background-color: var(--rf-hover);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-highlight[data-moving],
+  .rf-tab[data-active-label] .rf-tab-label,
+  .rf-menu-surface {
+    transition: opacity 80ms ease;
+  }
+
+  .rf-menu-surface {
+    transition:
+      opacity var(--rf-exit-fast),
+      display var(--rf-exit-fast) allow-discrete,
+      overlay var(--rf-exit-fast) allow-discrete;
+  }
+
+  .rf-menu-surface:popover-open {
+    transition:
+      opacity var(--rf-spring-fast),
+      display var(--rf-spring-fast) allow-discrete,
+      overlay var(--rf-spring-fast) allow-discrete;
+  }
+
+  .rf-menu-surface {
+    transform: none;
+  }
+
+  @starting-style {
+    .rf-menu-surface:popover-open {
+      transform: none;
+    }
+  }
+}
+
+.rf-menu-search {
+  position: sticky;
+  z-index: 1;
+  inset-block-start: 0;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--rf-gap, 8px);
+  block-size: var(--rf-control-height, 36px);
+  padding-inline: 12px;
+  border: 0 solid color-mix(in oklab, var(--rf-border, #dedede) 60%, transparent);
+  border-block-end-width: 1px;
+  background: var(--rf-surface-2, var(--rf-bg, white));
+}
+
+.rf-menu-search > svg {
+  flex: none;
+  inline-size: var(--rf-icon-size, 16px);
+  block-size: var(--rf-icon-size, 16px);
+  color: var(--rf-muted, #737373);
+  stroke-width: 1.5;
+  transition:
+    color var(--rf-fast),
+    stroke-width var(--rf-fast);
+}
+
+.rf-menu-search:focus-within > svg {
+  color: var(--rf-fg);
+  stroke-width: 2;
+}
+
+.rf-menu-search input {
+  box-sizing: content-box;
+  flex: 1;
+  min-inline-size: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  background: transparent;
+  color: var(--rf-fg);
+  font: inherit;
+  font-size: var(--rf-text-body, 13px);
+  line-height: 24px;
+}
+
+.rf-menu-search input::placeholder {
+  color: var(--rf-muted, #737373);
+}
+
+.rf-menu-search + .rf-menu-list {
+  padding-block-start: 2px;
+}
+
+.rf-menu-empty {
+  margin-block: 2px;
+  padding: 24px 8px;
+  text-align: center;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-body, 13px);
+}
+
+.rf-dropdown-surface[data-inline] {
+  max-inline-size: 100%;
+  opacity: 1;
+  transform: none;
+}
+.rf-menu-group-label {
+  padding: 6px 8px;
+  font: var(--rf-text-caption) / var(--rf-leading-caption) var(--rf-font);
+  color: var(--rf-muted);
+}
+
+.rf-menu-shortcut {
+  display: inline-flex;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+}
+.rf-menu-shortcut kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 3px;
+  border: 1px solid var(--rf-border);
+  border-radius: 4px;
+  background: var(--rf-muted-bg);
+  color: var(--rf-muted);
+  font: 11px / 1 var(--rf-font);
+}

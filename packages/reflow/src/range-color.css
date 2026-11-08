@@ -1,0 +1,517 @@
+.rf-slider {
+  --rf-slider-inset: 10px;
+  --rf-slider-pill-radius: calc(infinity * 1px);
+  --rf-slider-edge-radius: 9999px;
+  display: grid;
+  inline-size: min(100%, 18rem);
+  min-inline-size: 0;
+  color: var(--rf-fg);
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+  font-variation-settings: var(--rf-weight-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+[data-shape='sharp'] .rf-slider {
+  --rf-slider-pill-radius: 0px;
+  --rf-slider-edge-radius: 0px;
+}
+.rf-slider[data-disabled] {
+  opacity: 0.5;
+}
+
+.rf-slider-label {
+  display: none;
+  color: var(--rf-muted);
+}
+
+.rf-slider:not([data-show-value]) .rf-slider-label,
+.rf-slider[data-value-position='tooltip'] .rf-slider-label {
+  display: block;
+}
+
+.rf-slider-body {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rf-slider:is([data-value-position='left'], [data-value-position='right']) .rf-slider-body {
+  margin-block-end: 8px;
+}
+
+.rf-slider:is(
+    [data-value-position='top'],
+    [data-value-position='bottom'],
+    [data-value-position='tooltip']
+  )
+  .rf-slider-body {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.rf-slider-track {
+  position: relative;
+  flex: 1;
+  block-size: 36px;
+  min-inline-size: 3rem;
+  min-block-size: 36px;
+  cursor: ew-resize;
+  touch-action: pan-y;
+}
+
+.rf-slider:is([data-value-position='top'], [data-value-position='bottom']) .rf-slider-track {
+  min-block-size: 20px;
+}
+
+.rf-slider[data-disabled] .rf-slider-track {
+  cursor: default;
+}
+
+.rf-slider-line {
+  position: absolute;
+  inset-inline: 1px;
+  top: 50%;
+  box-sizing: border-box;
+  height: 18px;
+  transform: translateY(-50%);
+  overflow: hidden;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-slider-pill-radius);
+  pointer-events: none;
+}
+
+.rf-slider-fill,
+.rf-slider-preview {
+  position: absolute;
+  inset-block: 0;
+}
+
+.rf-slider-preview {
+  /* L1186-1200: the leading end (the cursor side) is rounded, the thumb end hides under the knob. */
+  border-radius: 0 var(--rf-slider-edge-radius) var(--rf-slider-edge-radius) 0;
+  animation: rf-slider-preview-in 150ms ease-out both;
+}
+.rf-slider-preview[data-edge='start'] {
+  border-radius: var(--rf-slider-edge-radius) 0 0 var(--rf-slider-edge-radius);
+}
+
+.rf-slider-fill {
+  inset-inline-start: calc(var(--rf-slider-start) + var(--rf-slider-compact-start));
+  inset-inline-end: calc(100% - var(--rf-slider-end) - var(--rf-slider-compact-end));
+  /* bg-selected/50, dark:bg-accent/40 in the reference. */
+  background: light-dark(rgb(212 212 212 / 50%), rgb(82 82 82 / 40%));
+}
+
+.rf-slider-preview {
+  inset-inline-start: calc(var(--rf-slider-preview-start) + var(--rf-slider-preview-compact-start));
+  inset-inline-end: calc(
+    100% - var(--rf-slider-preview-end) - var(--rf-slider-preview-compact-end)
+  );
+  background: light-dark(rgb(229 229 229 / 40%), rgb(82 82 82 / 40%));
+}
+
+.rf-slider-ticks,
+.rf-slider-rail {
+  position: absolute;
+  inset-block: 0;
+  inset-inline: var(--rf-slider-inset);
+  pointer-events: none;
+}
+
+.rf-slider-tick {
+  display: none;
+  position: absolute;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: calc(infinity * 1px);
+  background: var(--rf-muted);
+  opacity: 0.3;
+  transform: translate(-50%, -50%);
+  transition:
+    scale var(--rf-spring-moderate),
+    opacity var(--rf-spring-fast);
+}
+
+.rf-slider[data-show-steps] .rf-slider-tick {
+  display: block;
+}
+.rf-slider:not([data-disabled]) .rf-slider-track:hover .rf-slider-tick {
+  scale: 1.25;
+}
+.rf-slider-tick[data-behind-fill] {
+  opacity: 0;
+}
+
+.rf-slider-rail > input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+
+.rf-slider-thumb {
+  position: absolute;
+  top: 50%;
+  left: var(--rf-slider-thumb-position);
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  transform: translate(-50%, -50%);
+  border: var(--rf-slider-thumb-border-width, 0px) solid var(--rf-slider-thumb-border, currentcolor);
+  border-radius: var(--rf-slider-pill-radius);
+  background: var(--rf-slider-thumb-color, #fff);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
+}
+
+.rf-slider-pips-mask {
+  display: none;
+}
+
+.rf-slider-track:not([data-dragging]) :is(.rf-slider-thumb, .rf-slider-fill) {
+  transition:
+    left var(--rf-spring-moderate),
+    inset-inline-start var(--rf-spring-moderate),
+    inset-inline-end var(--rf-spring-moderate);
+}
+
+.rf-slider-rail > input:focus-visible + .rf-slider-thumb {
+  outline: 1px solid var(--rf-accent);
+  outline-offset: 3px;
+}
+
+.rf-slider-values,
+.rf-slider-readout {
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: 4px;
+}
+
+.rf-slider-values {
+  color: var(--rf-muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* L327-333: weight, not color, signals hover or press; the sizers stay semibold so the width never changes. */
+.rf-slider-values {
+  transition: font-variation-settings 100ms;
+  font-variation-settings: var(--rf-weight-normal);
+}
+.rf-slider:not([data-disabled]):has(.rf-slider-track:is(:hover, [data-dragging]))
+  .rf-slider-values {
+  font-variation-settings: var(--rf-weight-strong);
+}
+.rf-slider-value-sizer {
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.rf-slider-value {
+  position: relative;
+  display: grid;
+  min-inline-size: 2ch;
+  align-items: center;
+}
+
+.rf-slider-value > span,
+.rf-slider-value > input {
+  grid-area: 1 / 1;
+}
+
+.rf-slider-value > span {
+  pointer-events: none;
+}
+.rf-slider-value-sizer,
+.rf-slider-value:focus-within > .rf-slider-number {
+  visibility: hidden;
+}
+
+.rf-slider-value > input {
+  position: absolute;
+  inset-inline-start: -2px;
+  inline-size: calc(100% + 4px);
+  box-sizing: border-box;
+  min-inline-size: 0;
+  height: var(--rf-leading-body);
+  padding: 0 2px;
+  border: 0;
+  border-block-end: 1px solid transparent;
+  background: transparent;
+  color: transparent;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  text-align: inherit;
+  appearance: textfield;
+}
+
+.rf-slider-value > input::-webkit-inner-spin-button,
+.rf-slider-value > input::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.rf-slider-value > input:not(:disabled):hover,
+.rf-slider-value > input:focus {
+  border-color: var(--rf-border);
+}
+.rf-slider-value > input:focus {
+  background: var(--rf-bg);
+  color: var(--rf-fg);
+}
+.rf-slider-value > input:focus-visible {
+  outline: 1px solid var(--rf-accent);
+}
+
+.rf-slider-tooltip,
+.rf-slider-hover-tooltip {
+  position: absolute;
+  z-index: 2;
+  inset-block-end: calc(100% + 6px);
+  left: 50%;
+  padding: 4px 8px;
+  transform: translateX(-50%);
+  border-radius: var(--rf-item-radius);
+  background: var(--rf-fg);
+  color: var(--rf-bg);
+  font-size: 12px;
+  line-height: 16px;
+  font-variation-settings: var(--rf-weight-normal);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.rf-slider-tooltip {
+  transition: opacity var(--rf-fast);
+}
+/* L1130-1139: the hover bubble sits at top: -20px of the 36px track, so it overlaps the track by 4px. */
+/* The reference bubble is an inline span, so its box is the font content area (15px) plus 8px of padding: 23px, 2px below the wrapper's top. */
+.rf-slider-hover-tooltip {
+  inset-block: -18px auto;
+  padding-block: 3.5px;
+}
+.rf-slider[data-variant='scrubber'] .rf-slider-hover-tooltip {
+  inset-block: auto calc(100% + 7px);
+}
+/* L1124-1134: the bubble waits 100ms, then enters with spring.fast (opacity and y 4 -> 0). */
+.rf-slider-hover-tooltip {
+  animation: rf-slider-tooltip-in var(--rf-spring-fast) 100ms both;
+}
+.rf-slider-track:hover .rf-slider-tooltip,
+.rf-slider-rail > input:focus-visible + .rf-slider-thumb > .rf-slider-tooltip {
+  opacity: 1;
+}
+.rf-slider-track[data-dragging] :is(.rf-slider-preview, .rf-slider-hover-tooltip) {
+  display: none;
+}
+@keyframes rf-slider-preview-show {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes rf-slider-preview-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes rf-slider-tooltip-in {
+  from {
+    opacity: 0;
+    translate: 0 4px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-slider-hover-tooltip {
+    animation: rf-slider-preview-in var(--rf-spring-fast) 100ms both;
+    opacity: 1;
+    translate: none;
+  }
+}
+
+/* The default size uses a bordered row. Compact size and range-only options
+   keep the pill track, even when the surrounding density is default. */
+:is(
+  .rf-slider[data-layout='comfortable'],
+  .rf-slider:not([data-layout]):not([data-density='compact'] *)
+) {
+  --rf-slider-inset: 13px;
+  font-variation-settings: normal;
+
+  .rf-slider-body {
+    display: grid;
+    margin-block-end: 0;
+    gap: 0;
+  }
+
+  :is(.rf-slider-track, .rf-slider-label, .rf-slider-values) {
+    grid-area: 1 / 1;
+  }
+  .rf-slider-label,
+  .rf-slider-values {
+    z-index: 5;
+    padding-inline: 17px;
+    pointer-events: none;
+    transition: color var(--rf-spring-fast);
+  }
+
+  .rf-slider-label {
+    display: block;
+    justify-self: start;
+  }
+  .rf-slider-values {
+    justify-self: end;
+    text-align: end;
+  }
+  .rf-slider-value-label {
+    display: none;
+  }
+  .rf-slider-values,
+  &:not([data-disabled]):has(.rf-slider-track:is(:hover, [data-dragging])) .rf-slider-values {
+    line-height: var(--rf-leading-body);
+    font-variation-settings: inherit;
+    transition: color var(--rf-spring-fast);
+  }
+  .rf-slider-preview {
+    border-radius: 0;
+  }
+  .rf-slider-value > input {
+    pointer-events: auto;
+  }
+
+  /* L1578: active means hovered or keyboard-focused (:focus-visible), so a pointer press never counts as focus. */
+  &:not([data-disabled]):is(:hover, :has(input:focus-visible))
+    :is(.rf-slider-label, .rf-slider-values) {
+    color: var(--rf-fg);
+  }
+
+  .rf-slider-track {
+    block-size: 32px;
+    min-block-size: 32px;
+    outline: 1px solid transparent;
+    outline-offset: 2px;
+    transition: outline-color var(--rf-spring-fast);
+  }
+  .rf-slider-track:has(input:focus-visible) {
+    outline-color: var(--rf-accent);
+  }
+  .rf-slider-line {
+    inset: 0;
+    height: auto;
+    transform: none;
+    border-radius: var(--rf-item-radius);
+  }
+
+  .rf-slider-fill {
+    inset-inline-start: 0;
+    inset-inline-end: calc(100% - var(--rf-slider-end) - var(--rf-slider-pips-end));
+    background: var(--rf-active);
+  }
+
+  &[data-at-min] .rf-slider-fill {
+    inset-inline-end: 100%;
+  }
+  .rf-slider-preview {
+    inset-inline-start: var(--rf-slider-preview-start);
+    inset-inline-end: calc(100% - var(--rf-slider-preview-end));
+  }
+
+  .rf-slider-ticks {
+    z-index: 1;
+    inset-inline: 14.5px;
+  }
+  .rf-slider-pips-mask {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    z-index: 2;
+    inset: 0 9px;
+    color: transparent;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+  .rf-slider-pips-mask > span {
+    padding-inline: 8px;
+    background: var(--rf-bg);
+  }
+  .rf-slider-pips-mask > span:last-child {
+    margin-inline-start: auto;
+  }
+  :is(.rf-slider-fill, .rf-slider-preview) {
+    z-index: 3;
+  }
+  .rf-slider-rail {
+    z-index: 4;
+  }
+
+  .rf-slider-tick {
+    display: block;
+    width: 5px;
+    height: 5px;
+    scale: none;
+    transition:
+      background-color var(--rf-spring-fast),
+      opacity var(--rf-spring-fast);
+  }
+  &:not([data-disabled]) .rf-slider-track:hover .rf-slider-tick {
+    scale: none;
+  }
+  .rf-slider-tick[data-current] {
+    background: var(--rf-fg);
+  }
+  &[data-at-min] .rf-slider-tick[data-current] {
+    opacity: 1;
+  }
+
+  .rf-slider-thumb {
+    width: 2px;
+    height: 14px;
+    border: 0;
+    background: color-mix(in srgb, var(--rf-fg) 25%, transparent);
+    box-shadow: none;
+    transition:
+      height var(--rf-spring-fast),
+      background-color var(--rf-spring-fast);
+  }
+  .rf-slider-track:not([data-dragging]) .rf-slider-thumb {
+    transition:
+      left var(--rf-spring-moderate),
+      height var(--rf-spring-fast),
+      background-color var(--rf-spring-fast);
+  }
+
+  &:not([data-disabled]):is(:hover, :has(input:focus-visible)) .rf-slider-thumb {
+    height: 16px;
+  }
+  &:not([data-disabled]):hover .rf-slider-thumb {
+    background: color-mix(in srgb, var(--rf-fg) 50%, transparent);
+  }
+  .rf-slider-rail > input:focus-visible + .rf-slider-thumb {
+    outline: none;
+    background: var(--rf-fg);
+  }
+
+  &[data-variant='scrubber'] {
+    --rf-slider-inset: 1px;
+
+    .rf-slider-fill {
+      inset-inline-end: calc(100% - var(--rf-slider-end));
+    }
+    .rf-slider-tick {
+      display: none;
+    }
+    .rf-slider-thumb {
+      left: max(8px, calc(var(--rf-slider-thumb-position) - 8px));
+    }
+  }
+}

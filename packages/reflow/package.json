@@ -1,0 +1,58 @@
+{
+  "name": "@rtzll/reflow",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && cp src/*.css dist/",
+    "check": "tsc -p tsconfig.json --noEmit"
+  },
+  "peerDependencies": {
+    "remix": "3.2.0"
+  },
+  "devDependencies": {
+    "remix": "3.2.0"
+  },
+  "dependencies": {
+    "@remix-run/ui": "0.13.1"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rtzll/reflow.git",
+    "directory": "packages/reflow"
+  },
+  "description": "Native Remix 3 components with fluid motion, shared hover, and keyboard-friendly controls.",
+  "author": "Christian Rotzoll",
+  "keywords": [
+    "remix",
+    "components",
+    "ui",
+    "motion",
+    "accessibility"
+  ],
+  "homepage": "https://github.com/rtzll/reflow#readme",
+  "bugs": {
+    "url": "https://github.com/rtzll/reflow/issues"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}

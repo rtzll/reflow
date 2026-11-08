@@ -1,0 +1,101 @@
+body {
+  margin: 0;
+  font: 14px/1.5 var(--rf-font);
+}
+
+.starter {
+  box-sizing: border-box;
+  min-block-size: 100dvh;
+  padding: clamp(12px, 4vw, 48px);
+  background: var(--rf-bg);
+  color: var(--rf-fg);
+}
+
+.starter > .rf-sidebar-layout {
+  max-inline-size: 940px;
+  min-block-size: 640px;
+  margin-inline: auto;
+}
+
+.starter-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: 36px;
+  padding-inline: 8px;
+  font-weight: 600;
+}
+
+.starter-content {
+  display: grid;
+  gap: 24px;
+  max-inline-size: 560px;
+  padding: 16px clamp(12px, 4vw, 32px) 32px;
+}
+
+.starter-content h1,
+.starter-content h2,
+.starter-content p {
+  margin: 0;
+}
+
+.starter-content h1 {
+  font-size: clamp(24px, 4vw, 32px);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+.starter-content h2 {
+  font-size: 16px;
+}
+
+.starter-content p {
+  color: var(--rf-muted);
+}
+
+.starter-content header {
+  display: grid;
+  gap: 8px;
+}
+
+.starter-section {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  padding-block-start: 16px;
+  border-block-start: 1px solid var(--rf-border);
+}
+
+.starter-section > form,
+.starter-setting {
+  inline-size: 100%;
+}
+
+.starter-setting,
+.starter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.starter-setting {
+  justify-content: space-between;
+  padding-block: 6px;
+}
+
+.starter-setting label[for] {
+  font-weight: 550;
+}
+
+.starter-setting .rf-select {
+  min-inline-size: 108px;
+}
+
+.starter-actions {
+  margin-block-start: 12px;
+}
+
+.starter-section [role='status'] {
+  margin-block-start: 8px;
+}

@@ -1,0 +1,48 @@
+name: Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+
+concurrency:
+  group: checks-${{ github.event_name }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@f53f5227a9e83886ab598c617f3c170fab62f0d3 # v6
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm format:check
+      - run: pnpm check
+      - run: pnpm --filter @reflow/web exec playwright install --with-deps chromium
+      - run: pnpm test:run
+      - run: pnpm --filter @reflow/web exec remix doctor
+      - name: Pack and test the installable artifact
+        run: |
+          mkdir -p .artifacts
+          pnpm --filter @rtzll/reflow pack --out "$GITHUB_WORKSPACE/.artifacts/rtzll-reflow.tgz"
+          node tools/check-package.mjs .artifacts/rtzll-reflow.tgz
+      - name: Pass the tested artifact to the release workflow
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: npm-package
+          path: .artifacts/rtzll-reflow.tgz
+          if-no-files-found: error
+          retention-days: 7
