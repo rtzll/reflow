@@ -16,7 +16,7 @@
     "remix": "3.2.0"
   },
   "devDependencies": {
-    "@types/node": "24.10.1",
+    "@types/node": "24.19.2",
     "typescript": "7.0.2"
   }
 }
