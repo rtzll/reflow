@@ -7,7 +7,7 @@ import { router, waitForShowcase } from './showcase-router.ts'
 it('applies preferences immediately, updates previews and links, and persists through reload', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.goto('/?theme=light')
-  await page.locator('[data-site-controls-ready]').waitFor({ state: 'attached' })
+  await waitForShowcase(page)
   const panel = page.locator('.site-right')
   await panel.locator('[data-setting-trigger="theme"]').click()
   await panel.getByRole('menuitemradio', { name: 'Dark', exact: true }).click()
@@ -263,7 +263,7 @@ it('opens global search with Mod+K, applies commands, and shows individual short
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
   await page.goto('/?theme=dark')
-  await page.locator('[data-site-controls-ready]').waitFor({ state: 'attached' })
+  await waitForShowcase(page)
   assert.equal(await page.locator('.site-left .site-search kbd').count(), 2)
   await page.locator('body').press('ControlOrMeta+k')
   const dialog = page.getByRole('dialog', { name: 'Search Reflow' })
@@ -280,7 +280,7 @@ it('opens global search with Mod+K, applies commands, and shows individual short
   await page.waitForURL(
     (url) => url.pathname === '/docs/date-picker' && url.searchParams.get('theme') === 'light',
   )
-  await page.locator('[data-site-controls-ready]').waitFor({ state: 'attached' })
+  await waitForShowcase(page)
   await page.locator('body').press('?')
   const help = page.getByRole('dialog', { name: 'Keyboard shortcuts' })
   await help.waitFor()
@@ -298,7 +298,7 @@ it('browses a custom heading family and restores its weight and stylesheet', asy
     await route.fulfill({ status: 200, contentType: 'text/css', body: '' })
   })
   await page.goto('/docs/typography?font=inter')
-  await page.locator('[data-site-controls-ready]').waitFor({ state: 'attached' })
+  await waitForShowcase(page)
   assert.equal(requestedFonts.length, 0)
   const panel = page.locator('.site-right')
   await panel.locator('[data-setting-trigger="font"]').click()
@@ -323,7 +323,7 @@ it('browses a custom heading family and restores its weight and stylesheet', asy
   await page.goto('/docs/typography')
   assert.equal(await page.locator('html').getAttribute('data-font'), 'google:Playfair Display')
   assert.equal(await page.locator('html').getAttribute('data-font-weight'), '700')
-  await page.locator('[data-site-controls-ready]').waitFor({ state: 'attached' })
+  await waitForShowcase(page)
   await page.locator('body').press('f')
   assert.equal(await page.locator('html').getAttribute('data-font'), 'inter')
   await page.locator('body').press('f')
@@ -359,7 +359,7 @@ it('preserves explicit default settings through links and search despite older c
     assert.equal(target.searchParams.get(key), value)
   await reveal.click()
   await page.waitForURL((url) => url.pathname === '/docs/reveal')
-  await page.locator('[data-site-controls-ready]').waitFor({ state: 'attached' })
+  await waitForShowcase(page)
   for (const [key, value] of Object.entries({
     theme: 'system',
     accent: 'blue',
@@ -380,12 +380,14 @@ it('preserves explicit default settings through links and search despite older c
   }))
     assert.equal(await page.locator('html').getAttribute(`data-${key}`), value)
   await page.goto('/docs/button?theme=dark&accent=red')
+  await waitForShowcase(page)
   const trigger = page.locator('.site-right [data-setting-trigger="accent"]')
   const currentColor = page.locator('.site-right .site-accent-panel input[aria-label="Hex value"]')
   await trigger.click()
   assert.equal((await currentColor.inputValue()).toUpperCase(), 'FF6467')
   await page.emulateMedia({ colorScheme: 'dark' })
   await page.goto('/docs/button?theme=system&accent=red')
+  await waitForShowcase(page)
   await trigger.click()
   await page.waitForFunction(
     () =>

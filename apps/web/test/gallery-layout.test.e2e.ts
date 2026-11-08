@@ -1,3 +1,4 @@
+import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
@@ -340,7 +341,7 @@ it('supports the queue, nested menus, and a compact picker on a touch viewport',
   const mobile = await context.newPage()
   mobile.setDefaultTimeout(8000)
   await mobile.goto('/docs/queued-stack')
-  await mobile.locator('[data-site-controls-ready]').waitFor({ state: 'attached' })
+  await waitForShowcase(mobile)
   const pile = mobile.getByRole('list', { name: 'Queued messages' })
   const height = (await pile.boundingBox())!.height
   await pile.getByText('Draft a short intro', { exact: true }).tap()
@@ -350,6 +351,7 @@ it('supports the queue, nested menus, and a compact picker on a touch viewport',
   assert.equal((await pile.boundingBox())!.height, height)
 
   await mobile.goto('/docs/dropdown#submenus')
+  await waitForShowcase(mobile)
   await mobile.getByRole('button', { name: 'Q3 report.pdf' }).tap()
   await mobile.getByRole('menuitem', { name: 'Move to' }).tap()
   await mobile.getByRole('menuitem', { name: 'Inbox', exact: true }).waitFor()
@@ -383,24 +385,27 @@ it('moves the inline menu focus ring and preserves its forced-colors fallback', 
   await page.goto('/docs/dropdown#basic')
   await waitForShowcase(page)
   const menu = page.getByRole('menu', { name: 'Library' })
-  await menu.press('ArrowDown')
   const first = menu.getByRole('menuitemradio', { name: 'Teamspaces' })
-  const ring = menu.locator('[data-rf-focus-layer]')
-  await menu.locator('[data-rf-focus-layer][data-visible]').waitFor()
-  const start = await ring.evaluate((node) => (node as HTMLElement).style.transform)
-
-  await first.press('ArrowDown')
   const second = menu.getByRole('menuitemradio', { name: 'Recents' })
-  await page.waitForFunction((initial) => {
-    const list = document.querySelector('[role="menu"][aria-label="Library"]')
-    return list?.querySelector<HTMLElement>('[data-rf-focus-layer]')?.style.transform !== initial
-  }, start)
-  assert.ok(await second.evaluate((row) => row === document.activeElement))
+  const ring = menu.locator('[data-rf-focus-layer]')
+  const ringOffset = () =>
+    ring.evaluate((node) => {
+      const row = node.parentElement?.querySelector('[role="menuitemradio"]:focus')
+      if (!row || !node.hasAttribute('data-visible')) return Infinity
+      return Math.abs(node.getBoundingClientRect().top - row.getBoundingClientRect().top)
+    })
+
+  await menu.press('ArrowDown')
+  await expect(first).toBeFocused()
+  await expect.poll(ringOffset).toBeLessThan(1)
+  await page.keyboard.press('ArrowDown')
+  await expect(second).toBeFocused()
+  await expect.poll(ringOffset).toBeLessThan(1)
   assert.equal(await first.getAttribute('aria-checked'), 'true')
   assert.equal(await ring.evaluate((node) => getComputedStyle(node, '::before').top), '-2px')
   assert.equal(await ring.evaluate((node) => getComputedStyle(node).transitionProperty), 'opacity')
 
   await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' })
-  await ring.waitFor({ state: 'hidden' })
-  assert.equal(await second.evaluate((row) => getComputedStyle(row).outlineStyle), 'solid')
+  await expect(ring).toBeHidden()
+  await expect(second).toHaveCSS('outline-style', 'solid')
 })

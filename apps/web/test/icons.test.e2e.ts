@@ -1,12 +1,12 @@
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { router } from './showcase-router.ts'
+import { router, waitForShowcase } from './showcase-router.ts'
 
 it('switches real icon geometry in place and remembers the selection across routes', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.goto('/')
-  await page.locator('[data-site-controls-ready]').waitFor({ state: 'attached' })
+  await waitForShowcase(page)
   const icon = page.locator('.site-main [data-rf-icon="home"]').first()
   const trigger = page.locator('.site-right [data-setting-trigger="icons"]')
   const geometry = () =>

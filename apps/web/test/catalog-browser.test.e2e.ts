@@ -3,7 +3,7 @@ import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
 import { join } from 'node:path'
 import { catalog } from '../app/catalog.tsx'
-import { router } from './showcase-router.ts'
+import { router, waitForShowcase } from './showcase-router.ts'
 
 for (const layout of [
   { name: 'desktop dark', width: 1280, height: 720, theme: 'dark' },
@@ -18,7 +18,7 @@ for (const layout of [
     const overflow: string[] = []
     for (const entry of catalog) {
       await page.goto(`/docs/${entry.slug}?theme=${layout.theme}&density=default&font=inter`)
-      await page.locator('[data-site-controls-ready]').waitFor({ state: 'attached' })
+      await waitForShowcase(page)
       const dimensions = await page.evaluate(() => ({
         width: document.documentElement.clientWidth,
         scroll: document.documentElement.scrollWidth,

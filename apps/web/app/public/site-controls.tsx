@@ -108,8 +108,7 @@ export const SiteControls = clientEntry(
       if (!open) handle.queueTask(() => invoker?.focus({ preventScroll: true }))
     }
 
-    const mount = ref((node, signal) => {
-      node.setAttribute('data-site-controls-ready', '')
+    const mount = ref((_node, signal) => {
       mac = /Mac|iPhone|iPad/.test(navigator.platform)
       void handle.update()
       for (const cap of document.querySelectorAll('[data-platform-key]'))
