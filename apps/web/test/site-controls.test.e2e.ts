@@ -82,30 +82,15 @@ it('keeps settings menus exclusive and dismisses them with pointer and keyboard 
   assert.equal(await theme.getAttribute('aria-expanded'), 'true')
   assert.equal(await page.locator('[data-setting-menu][open]').count(), 1)
   await page.keyboard.press('Escape')
-  await accent.click()
-  await accentPicker.getByRole('slider', { name: 'Hue' }).waitFor()
-  const color = accentPicker.getByRole('textbox', { name: 'Hex value' })
-  await color.fill('123456')
-  await color.press('Enter')
-  assert.equal(await page.locator('html').getAttribute('data-accent'), '#123456')
-  assert.equal(await accent.getAttribute('aria-expanded'), 'true')
-  await accentPicker.getByRole('button', { name: 'HEX', exact: true }).click()
-  await page.getByRole('menuitemradio', { name: 'RGB', exact: true }).click()
-  assert.equal(await page.locator('html').getAttribute('data-accent'), '#123456')
-  const red = accentPicker.getByRole('textbox', { name: 'Red', exact: true })
-  await red.fill('20')
-  await red.press('Enter')
-  assert.equal(await page.locator('html').getAttribute('data-accent'), '#143456')
-  // Wait for the picker to render the committed color before moving focus.
-  await expect(accentPicker.locator('.rf-color-square')).toHaveCSS(
-    '--rf-color-thumb',
-    'rgb(20, 52, 86)',
-  )
+
+  await accent.press('ArrowDown')
+  await expect(accentPicker).toBeFocused()
+  await page.keyboard.press('Tab')
   const square = accentPicker.getByRole('application', { name: 'Saturation and brightness' })
-  await square.focus()
   await expect(square).toBeFocused()
   await page.keyboard.press('Shift+Tab')
   await expect(accent).toBeFocused()
+  await expect(accent).toHaveAttribute('aria-expanded', 'true')
   await page.keyboard.press('Shift+Tab')
   await expect(theme).toBeFocused()
   await expect(accent).toHaveAttribute('aria-expanded', 'false')
@@ -130,6 +115,36 @@ it('keeps settings menus exclusive and dismisses them with pointer and keyboard 
   await mobileTheme.click()
   assert.equal(await mobileAccent.getAttribute('aria-expanded'), 'false')
   assert.equal(await mobileTheme.getAttribute('aria-expanded'), 'true')
+})
+
+it('keeps the accent picker open while committing hex and RGB edits', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.goto('/docs')
+  await waitForShowcase(page)
+  const panel = page.locator('.site-right')
+  const accent = panel.locator('[data-setting-trigger="accent"]')
+  const picker = panel.getByRole('dialog', { name: 'Accent', exact: true })
+  const root = page.locator('html')
+
+  await accent.click()
+  const hex = picker.getByRole('textbox', { name: 'Hex value' })
+  await hex.fill('123456')
+  await hex.press('Enter')
+  await expect(root).toHaveAttribute('data-accent', '#123456')
+  await expect(accent).toHaveAttribute('aria-expanded', 'true')
+
+  await picker.getByRole('button', { name: 'HEX', exact: true }).click()
+  const rgb = picker.getByRole('menuitemradio', { name: 'RGB', exact: true })
+  await rgb.click()
+  await expect(rgb).toBeHidden()
+  await expect(root).toHaveAttribute('data-accent', '#123456')
+
+  const red = picker.getByRole('textbox', { name: 'Red', exact: true })
+  await red.fill('20')
+  await red.press('Enter')
+  await expect(root).toHaveAttribute('data-accent', '#143456')
+  await expect(picker.locator('.rf-color-square')).toHaveCSS('--rf-color-thumb', 'rgb(20, 52, 86)')
+  await expect(accent).toHaveAttribute('aria-expanded', 'true')
 })
 
 it('opens a full-height mobile drawer and keeps page interaction behind it', async (t) => {
