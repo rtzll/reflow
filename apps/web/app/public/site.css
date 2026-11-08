@@ -467,6 +467,9 @@ html[data-density='compact'] .site-nav a {
 .site-gallery [data-component='command-menu'] .site-preview-stage {
   padding-block: 32px;
 }
+.site-gallery [data-component='ask-user-questions'] .site-preview-stage {
+  padding-block: 64px;
+}
 
 .example-gallery-calendar {
   display: grid;
