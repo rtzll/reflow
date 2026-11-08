@@ -1,5 +1,7 @@
 import { clientEntry, on, type Handle } from 'remix/component'
 
+export const reflowInstallCommand = 'pnpm add --save-exact @rtzll/reflow@0.1.0 remix@3.2.0'
+
 export function buildInstallPrompt() {
   const settings = ['theme', 'accent', 'shape', 'density', 'hover', 'font', 'fontWeight']
     .flatMap((key) => {
@@ -11,7 +13,7 @@ export function buildInstallPrompt() {
   const iconPreference = icons
     ? ` The showcase icon preference is ${icons}; use compatible icons or consumer-supplied SVGs if appropriate. Reflow does not require an icon package.`
     : ''
-  return `Build a Remix 3 application with Reflow, inspired by Fluid Functionalism. Use the Reflow workspace at https://github.com/rtzll/reflow. Read docs/development.md and skills/reflow/SKILL.md. Install the locked workspace dependencies with pnpm install --frozen-lockfile and run pnpm dev to inspect the examples. Use the reusable @rtzll/reflow package and its stylesheet, with Remix's component runtime and official UI primitives. Apply these showcase settings on the root element: ${settings}.${iconPreference} Reuse the documented components, preserve keyboard and form behavior, and respect reduced motion. Use the project's existing runtime dependencies.`
+  return `Build a Remix 3 application with Reflow, inspired by Fluid Functionalism. Install the published package and its Remix peer dependency from your app's root with ${reflowInstallCommand}. Follow https://github.com/rtzll/reflow/blob/main/docs/integration.md to serve @rtzll/reflow/styles.css and enable Remix's browser runtime. Use the Reflow skill at https://github.com/rtzll/reflow/blob/main/skills/reflow/SKILL.md for component guidance. Apply these showcase settings on the root element: ${settings}.${iconPreference} Reuse the documented components, preserve keyboard and form behavior, and respect reduced motion. Use the project's existing runtime dependencies.`
 }
 
 export const InstallPromptButton = clientEntry(

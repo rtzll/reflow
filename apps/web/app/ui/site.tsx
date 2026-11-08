@@ -9,7 +9,7 @@ import { componentApi, componentDefaults } from '../docs-data.ts'
 import { fontWeights } from '../public/google-fonts.ts'
 import { fontCatalog } from '../public/google-font-catalog.ts'
 import { SiteControls } from '../public/site-controls.tsx'
-import { InstallPromptButton } from '../public/install-prompt.tsx'
+import { InstallPromptButton, reflowInstallCommand } from '../public/install-prompt.tsx'
 import { AccentPicker } from '../public/accent-picker.tsx'
 import { DemoCustomize, DemoPlayground } from '../public/demo-playground.tsx'
 
@@ -615,9 +615,9 @@ function Introduction(handle: Handle<{ settings: Settings; next?: ShowcaseCompon
             <h2>Native to Remix</h2>
             <p>
               Components use the Remix component runtime, official UI primitives, and browser APIs.
-              The showcase renders the same components you can import from the workspace package.
-              Style them with the shared tokens for surfaces, type, sizes, and radii, or supply your
-              own content in their slots.
+              The showcase renders the same components you can install from npm. Style them with the
+              shared tokens for surfaces, type, sizes, and radii, or supply your own content in
+              their slots.
             </p>
           </div>
           <div>
@@ -630,27 +630,32 @@ function Introduction(handle: Handle<{ settings: Settings; next?: ShowcaseCompon
             </p>
           </div>
         </section>
-        <section class="site-doc-section site-intro-install">
+        <section id="installation" class="site-doc-section site-intro-install">
           <h2>Installation</h2>
           <div>
             <p>
-              <span aria-hidden="true">1</span> Install dependencies from the Reflow workspace.
+              <span aria-hidden="true">1</span> Install Reflow and Remix from your app's root.
             </p>
-            <CopyCode code="pnpm install --frozen-lockfile" />
+            <CopyCode code={reflowInstallCommand} />
           </div>
           <div>
             <p>
-              <span aria-hidden="true">2</span> Start the showcase.
+              <span aria-hidden="true">2</span> Import the components you need.
             </p>
-            <CopyCode code="pnpm dev" />
+            <CopyCode code="import { Button } from '@rtzll/reflow'" />
           </div>
           <p>
-            Use the workspace package and stylesheet in your Remix app. Open the component docs for
-            examples and API details.
+            Serve <code>@rtzll/reflow/styles.css</code> through the Remix asset server and enable
+            Remix's browser runtime for interactive components. Follow the{' '}
+            <a href="https://github.com/rtzll/reflow/blob/main/docs/integration.md">
+              integration guide
+            </a>{' '}
+            for the full setup.
           </p>
-          <CopyCode
-            code={"import { Button } from '@rtzll/reflow'\nimport '@rtzll/reflow/styles.css'"}
-          />
+          <p>
+            <a href="https://www.npmjs.com/package/@rtzll/reflow">View on npm</a> ·{' '}
+            <a href="https://github.com/rtzll/reflow/releases">Release notes</a>
+          </p>
         </section>
         <section class="site-doc-section">
           <h2>Icons</h2>
@@ -720,7 +725,7 @@ function ComponentDoc(
               <section class="site-doc-install">
                 <div>
                   <h2>Installation</h2>
-                  <p>Import from the Reflow workspace package.</p>
+                  <p>Import from the @rtzll/reflow package.</p>
                 </div>
                 <CopyAction
                   label="Copy import"

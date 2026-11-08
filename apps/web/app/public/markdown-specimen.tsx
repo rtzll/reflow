@@ -38,11 +38,10 @@ Every component shares **three motion tiers**, and hover *glides* to the item un
 
 ## Install
 
-Use the workspace package and its stylesheet. Replace ~~duplicated controls~~ repeated markup with reusable components.
+Install Reflow from npm and serve its stylesheet through Remix. Replace ~~duplicated controls~~ repeated markup with reusable components.
 
 \`\`\`tsx
 import { Button } from '@rtzll/reflow'
-import '@rtzll/reflow/styles.css'
 
 <Button>Continue</Button>
 \`\`\`

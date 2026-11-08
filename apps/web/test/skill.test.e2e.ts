@@ -58,6 +58,7 @@ it('copies an installation prompt that includes the active preferences', async (
     'fontWeight: 600',
   ])
     assert.ok(prompt.includes(setting), setting)
+  assert.ok(prompt.includes('pnpm add --save-exact @rtzll/reflow@0.1.0 remix@3.2.0'))
   assert.ok(prompt.includes('skills/reflow/SKILL.md'))
   assert.ok(prompt.includes('showcase icon preference is tabler'))
   assert.ok(prompt.includes('Reflow does not require an icon package'))
