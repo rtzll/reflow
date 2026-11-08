@@ -2,7 +2,15 @@
 
 Reflow is a native Remix 3 UI library. It brings spring motion, shared hover highlights, and keyboard-friendly controls to Remix’s component model. The showcase includes interactive examples, playgrounds, and copyable usage code. [Inspired by Fluid Functionalism](https://github.com/mickadesign/fluid-functionalism)
 
-Reflow is in development. `@rtzll/reflow` is not published to npm yet; install it from this repository. It uses Remix’s own component runtime, not React, and pins `remix@3.2.0` with `@remix-run/ui@0.13.1`. [Compatibility and installation](docs/integration.md)
+Reflow is in early development and tracks unstable Remix APIs. [npm package](https://www.npmjs.com/package/@rtzll/reflow) · [GitHub releases](https://github.com/rtzll/reflow/releases)
+
+## Install
+
+```sh
+pnpm add --save-exact @rtzll/reflow@0.1.0 remix@3.2.0
+```
+
+Reflow includes `@remix-run/ui@0.13.1`. See the [integration guide](docs/integration.md) for compatibility, styles, and browser setup.
 
 ## Try it
 

@@ -27,7 +27,7 @@ No React runtime, Radix, Base UI, Motion, third-party calendar/editor package, o
 
 ## Architecture direction
 
-The pnpm workspace has two packages. `packages/reflow` exports ESM components, TypeScript declarations, and a stylesheet as `@rtzll/reflow`. `apps/web` uses those public exports for the gallery, documentation, and focused demo. The package is not published to npm yet.
+The pnpm workspace has two packages. `packages/reflow` exports ESM components, TypeScript declarations, and a stylesheet as [`@rtzll/reflow` on npm](https://www.npmjs.com/package/@rtzll/reflow). `apps/web` uses those public exports for the gallery, documentation, and focused demo.
 
 Separate reusable geometry, color, date, and state logic from DOM measurement and Remix component lifecycle integration. Share hover, motion, focus, density, and surface behavior instead of reimplementing it in every component.
 

@@ -1,6 +1,6 @@
 # Integrate Reflow
 
-Reflow uses Remix 3's component runtime. It is not a React library and does not use the Remix 2 React APIs. `@rtzll/reflow` is at version `0.1.0` and is not published to npm yet. Install a local tarball from this repository using the steps below.
+Reflow uses Remix 3's component runtime. The package is available on [npm](https://www.npmjs.com/package/@rtzll/reflow).
 
 ## Compatibility
 
@@ -9,6 +9,16 @@ Use Node 24.3+ and pnpm 12.18.0 for the documented workflow. Reflow requires `re
 Use ESM (`"type": "module"`) and configure TypeScript with `"jsx": "react-jsx"` and `"jsxImportSource": "remix/component"`. The JSX compiler option does not introduce a React dependency. See the [starter tsconfig](../examples/starter/tsconfig.json) for the complete configuration.
 
 ## Install into an existing app
+
+From your app's root, install Reflow and its Remix peer dependency:
+
+```sh
+pnpm add --save-exact @rtzll/reflow@0.1.0 remix@3.2.0
+```
+
+For a new project, the [starter command](development.md#try-a-clean-install) generates an app wired up to a local build of Reflow.
+
+### Test a local build
 
 From the Reflow checkout, install dependencies, build, and create a tarball:
 
@@ -26,7 +36,7 @@ cp /absolute/path/to/rtzll-reflow.tgz vendor/rtzll-reflow.tgz
 pnpm add ./vendor/rtzll-reflow.tgz remix@3.2.0 --save-exact
 ```
 
-Keep the tarball and lockfile with the app so `pnpm install --frozen-lockfile` works in another checkout. The tarball is a snapshot: library edits require rebuilding, repacking, and reinstalling it. For a new project, the [starter command](development.md#try-a-clean-install) automates this setup.
+Keep the tarball and lockfile with the app so `pnpm install --frozen-lockfile` works in another checkout. Library edits require rebuilding, repacking, and reinstalling the tarball.
 
 ## Serve the library and stylesheet
 
