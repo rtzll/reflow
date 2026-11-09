@@ -554,6 +554,8 @@ interface Scrub {
   travel: number
   moved: boolean
   mouse: boolean
+  /** Whether the previous move came under the pointer lock. */
+  locked: boolean
   lock?: AbortController
 }
 
@@ -685,6 +687,7 @@ function ColorField(handle: Handle<FieldProps>) {
                       travel: 0,
                       moved: false,
                       mouse: event.pointerType === 'mouse',
+                      locked: false,
                     }
                     event.currentTarget.setPointerCapture(event.pointerId)
                   }),
@@ -694,7 +697,13 @@ function ColorField(handle: Handle<FieldProps>) {
                     const element = event.currentTarget
                     // Under the pointer lock clientX stands still; movementX carries the travel.
                     const locked = element.ownerDocument.pointerLockElement === element
-                    scrub.travel += locked ? event.movementX : event.clientX - scrub.lastX
+                    // The move that crosses into or out of the lock is not travel:
+                    // granting the lock can warp the cursor, and leaving it lets
+                    // clientX jump back to where the cursor really is.
+                    if (locked === scrub.locked) {
+                      scrub.travel += locked ? event.movementX : event.clientX - scrub.lastX
+                    }
+                    scrub.locked = locked
                     scrub.lastX = event.clientX
                     if (!scrub.moved && Math.abs(scrub.travel) < 2) return
                     scrub.moved = true

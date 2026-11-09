@@ -804,18 +804,32 @@ it('scrubs a color channel with a locked pointer and a virtual cursor', async (t
   await expect(cursor).toBeVisible()
   const start = (await cursor.boundingBox())!
   await moveTo(-30)
-  await expect(alpha).toHaveValue('70%')
+  // 30px of travel, less the one move that crossed into the lock.
+  const percent = async () => Number.parseInt(await alpha.inputValue(), 10)
+  await expect.poll(percent).toBeLessThanOrEqual(72)
+  assert.ok((await percent()) >= 68)
   const moved = (await cursor.boundingBox())!
   assert.ok(moved.x < start.x - 15, 'The virtual cursor should follow the drag')
   await page.mouse.up()
   await expect(cursor).toBeHidden()
   assert.equal(await page.evaluate(() => !!document.pointerLockElement), false)
-  await expect(alpha).toHaveValue('70%')
+  const settled = await percent()
+  assert.ok(settled >= 68 && settled <= 72, `scrubbed to ${settled}%`)
   await expect(alpha).not.toBeFocused()
 })
 
+// Whether a headless browser grants pointer lock differs by platform, so this
+// refuses it outright, as a browser does when the page may not lock.
+const refusePointerLock = () => {
+  Element.prototype.requestPointerLock = function () {
+    queueMicrotask(() => document.dispatchEvent(new Event('pointerlockerror')))
+    return Promise.reject(new DOMException('Pointer lock refused', 'NotSupportedError'))
+  } as Element['requestPointerLock']
+}
+
 it('keeps scrubbing on the OS cursor when the pointer lock is refused', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
+  await page.addInitScript(refusePointerLock)
   await page.goto('/docs/color-picker')
   await waitForShowcase(page)
   const { alpha, moveTo } = await pressAlpha(page)
