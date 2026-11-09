@@ -441,38 +441,45 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: var(--rf-control-height);
-  height: var(--rf-control-height);
+  width: var(--rf-icon-size);
+  height: var(--rf-icon-size);
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
 
-.rf-button-spinner path {
-  stroke-dasharray: 15 85;
-  animation:
-    rf-button-spinner 2s linear infinite,
-    rf-button-spinner-dash 4s ease-in-out infinite;
+.rf-button-spinner g {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: rf-button-spinner-turn 1s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 }
 
-@keyframes rf-button-spinner {
+.rf-button-spinner circle {
+  /* A nonzero dash keeps Safari's round caps visible as dots. */
+  stroke-dasharray: 0.01 49.99;
+  stroke-dashoffset: -25;
+  animation: rf-button-spinner-breathe 1s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes rf-button-spinner-turn {
   to {
-    stroke-dashoffset: -100;
+    transform: rotate(360deg);
   }
 }
 
-@keyframes rf-button-spinner-dash {
+@keyframes rf-button-spinner-breathe {
   0%,
   100% {
-    stroke-dasharray: 15 85;
+    stroke-dasharray: 0.01 49.99;
+    stroke-dashoffset: -25;
   }
   50% {
-    stroke-dasharray: 40 60;
+    stroke-dasharray: 26 24;
+    stroke-dashoffset: -12;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rf-button-spinner path {
-    stroke-dasharray: none;
+  .rf-button-spinner :is(g, circle) {
     animation: none;
   }
 }

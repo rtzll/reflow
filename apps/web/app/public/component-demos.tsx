@@ -305,7 +305,7 @@ export const componentExamples: Record<string, readonly DocumentationExample[]> 
     demo(
       'Loading & Disabled',
       'loading',
-      `<Button loading>Loading</Button>\n<Button variant="secondary" loading>Saving</Button>\n<Button disabled>Disabled</Button>`,
+      `<Button loading>Click me</Button>\n<Button variant="secondary" loading>Saving</Button>\n<Button disabled>Disabled</Button>`,
       'The first button starts a brief loading state when clicked.',
     ),
     demo('Sizes', 'sizes', `<Button>Default</Button>\n<Button size="compact">Compact</Button>`),
@@ -1354,7 +1354,7 @@ export function ComponentDemo(
           return (
             <div class="doc-demo-row">
               <Button loading={loading} mix={loadingClick}>
-                {loading ? 'Loading' : 'Click me'}
+                Click me
               </Button>
               <Button variant="secondary" loading>
                 Saving

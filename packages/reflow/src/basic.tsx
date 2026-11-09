@@ -52,14 +52,19 @@ export function Button(handle: Handle<ButtonProps>) {
           )}
         </span>
         {props.loading && (
-          <svg class="rf-button-spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="M12 12C14 8.5 19 8.5 19 12C19 15.5 14 15.5 12 12C10 8.5 5 8.5 5 12C5 15.5 10 15.5 12 12Z"
-              stroke="currentColor"
-              stroke-width="1.125"
-              stroke-linecap="round"
-              pathLength="100"
-            />
+          <svg class="rf-button-spinner" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <g>
+              <circle
+                cx="8"
+                cy="8"
+                r="6.25"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                pathLength="100"
+                transform="rotate(-90 8 8)"
+              />
+            </g>
           </svg>
         )}
       </>

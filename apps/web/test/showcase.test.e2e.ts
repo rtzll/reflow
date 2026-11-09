@@ -117,6 +117,26 @@ it('updates the live playground and copied code while preserving replay and insp
   )
 })
 
+it('keeps the loading Button label and size while showing the two-dot spinner', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.goto('/docs/button')
+  await waitForShowcase(page)
+  const button = page.getByRole('button', { name: 'Click me', exact: true })
+  const width = () => button.evaluate((element) => element.getBoundingClientRect().width)
+  const idleWidth = await width()
+  await button.click()
+  await expect(button).toHaveAttribute('aria-busy', 'true')
+  await expect(button).toBeDisabled()
+  assert.equal(await width(), idleWidth)
+  const circle = button.locator('.rf-button-spinner circle')
+  assert.equal(
+    await circle.evaluate((element) => getComputedStyle(element).animationDuration),
+    '1s',
+  )
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  assert.equal(await circle.evaluate((element) => getComputedStyle(element).animationName), 'none')
+})
+
 it('customizes the focused Button demo and keeps the reference slide order', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.goto('/demo?c=button&theme=dark')
