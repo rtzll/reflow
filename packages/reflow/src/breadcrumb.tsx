@@ -1,7 +1,8 @@
-import { on, ref } from 'remix/component'
+import { attrs, on, ref } from 'remix/component'
 import type { Handle, RemixNode } from 'remix/component'
 import { Icon } from './icon.tsx'
 import { Dropdown, fluidHover, type DropdownItem } from './interactive.tsx'
+import { Tooltip, type TooltipTriggerProps } from './overlays.tsx'
 
 export interface BreadcrumbItem {
   label: string
@@ -40,14 +41,27 @@ export function Breadcrumb(handle: Handle<BreadcrumbProps>) {
   // Natural widths per step, remembered so a hidden step returns as soon as it fits.
   let widths: number[] = []
   let ellipsisWidth = 0
+  // Steps whose label is cut, by index, read as the pointer or keyboard focus
+  // arrives; and the step whose menu is open, whose full name stays hidden.
+  let cut = new Set<number>()
+  let menuOpen: number | undefined
 
   const listRef = ref((node, signal) => {
     if (!(node instanceof HTMLOListElement)) return
     list = node
     const observer = new ResizeObserver(() => measure())
     if (node.parentElement) observer.observe(node.parentElement)
+    const menus = new MutationObserver(() => {
+      const open = node.querySelector<HTMLElement>('[data-rf-step][aria-expanded="true"]')
+      const next = open ? Number(open.dataset.rfStep) : undefined
+      if (next === menuOpen) return
+      menuOpen = next
+      void handle.update()
+    })
+    menus.observe(node, { subtree: true, attributeFilter: ['aria-expanded'] })
     signal.addEventListener('abort', () => {
       observer.disconnect()
+      menus.disconnect()
       if (list === node) list = null
     })
   })
@@ -97,16 +111,20 @@ export function Breadcrumb(handle: Handle<BreadcrumbProps>) {
     }
   }
 
-  // Show the full name of a cut step on hover and focus.
-  function showFullName(event: Event) {
+  // Whether a step's label is cut, read as the pointer or keyboard focus
+  // arrives: cheap, and current when its tooltip could show.
+  function checkCut(event: Event) {
     const crumb =
-      event.target instanceof Element
-        ? event.target.closest<HTMLElement>('.rf-breadcrumb-crumb')
-        : null
+      event.target instanceof Element ? event.target.closest<HTMLElement>('[data-rf-step]') : null
     const label = crumb?.querySelector<HTMLElement>('.rf-breadcrumb-label')
     if (!crumb || !label) return
-    if (label.scrollWidth > label.clientWidth + 0.5) crumb.title = label.textContent ?? ''
-    else crumb.removeAttribute('title')
+    const index = Number(crumb.dataset.rfStep)
+    const isCut = label.scrollWidth > label.clientWidth + 0.5
+    if (isCut === cut.has(index)) return
+    cut = new Set(cut)
+    if (isCut) cut.add(index)
+    else cut.delete(index)
+    void handle.update()
   }
 
   return () => {
@@ -129,29 +147,58 @@ export function Breadcrumb(handle: Handle<BreadcrumbProps>) {
       </>
     )
 
+    // The full name of a cut step, in the library tooltip under it, as in
+    // the reference. It stays closed while the name fits and while the
+    // step's own menu is open, so it never stacks on the menu. The step is
+    // described by the tooltip only while its name is cut.
+    const withFullName = (
+      item: BreadcrumbItem,
+      index: number,
+      render: (trigger: TooltipTriggerProps) => RemixNode,
+    ) => (
+      <Tooltip
+        content={item.label}
+        side="bottom"
+        open={cut.has(index) && menuOpen !== index ? undefined : false}
+        renderTrigger={(props) =>
+          render(cut.has(index) ? props : { 'aria-describedby': '', mix: props.mix })
+        }
+      />
+    )
+    const described = (trigger: TooltipTriggerProps) => trigger['aria-describedby'] || undefined
+
     const step = (item: BreadcrumbItem, index: number) => {
       const last = index === items.length - 1
       if (last) {
-        return (
+        return withFullName(item, index, (trigger) => (
           <span
             class="rf-breadcrumb-crumb rf-breadcrumb-page"
             role="link"
             aria-disabled="true"
             aria-current="page"
+            aria-describedby={described(trigger)}
+            data-rf-step={index}
+            mix={trigger.mix}
           >
             {content(item)}
           </span>
-        )
+        ))
       }
-      if (item.menu) {
-        return (
+      const menu = item.menu
+      if (menu) {
+        return withFullName(item, index, (trigger) => (
           <Dropdown
             label={item.label}
             variant="bare"
             triggerClass="rf-breadcrumb-crumb"
+            triggerMix={[
+              trigger.mix,
+              attrs({ 'data-rf-step': String(index) }),
+              described(trigger) && attrs({ 'aria-describedby': described(trigger)! }),
+            ]}
             size={size}
             openOnHover={openOnHover}
-            items={item.menu}
+            items={menu}
             onSelect={item.onMenuSelect}
             triggerContent={
               <>
@@ -160,14 +207,20 @@ export function Breadcrumb(handle: Handle<BreadcrumbProps>) {
               </>
             }
           />
-        )
+        ))
       }
-      return (
-        <a class="rf-breadcrumb-crumb" href={item.href}>
+      return withFullName(item, index, (trigger) => (
+        <a
+          class="rf-breadcrumb-crumb"
+          href={item.href}
+          aria-describedby={described(trigger)}
+          data-rf-step={index}
+          mix={trigger.mix}
+        >
           {content(item)}
           {trailing}
         </a>
-      )
+      ))
     }
 
     const hiddenItems = items.slice(1, 1 + hide)
@@ -217,8 +270,8 @@ export function Breadcrumb(handle: Handle<BreadcrumbProps>) {
         data-separator={separator === undefined ? 'chevron' : undefined}
         mix={[
           fluidHover({ axis: 'x', focusSelector: ':has(:focus-visible)' }),
-          on<HTMLElement, 'pointerover'>('pointerover', showFullName),
-          on<HTMLElement, 'focusin'>('focusin', showFullName),
+          on<HTMLElement, 'pointerover'>('pointerover', checkCut),
+          on<HTMLElement, 'focusin'>('focusin', checkCut),
         ]}
       >
         <span class="rf-highlight rf-breadcrumb-hover" aria-hidden="true" data-rf-hover-layer />

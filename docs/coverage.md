@@ -24,7 +24,7 @@ Grouped controls and inline Dropdowns share a fast focus ring with the same 2px 
 | AskUserQuestions | Multi-step questions, single/multiple choices, custom answer, skip and navigation, submit shortcut | Reflow composition. Single choices advance, multi-select and free text use Continue, and digits select options. Hidden inputs integrate with forms, and the completion screen is opt-in. |
 | Badge | Status/color treatments and both densities | Markup and CSS |
 | Banner | Status variants, actions, dismiss/collapse, fixed placement | Reflow composition |
-| Breadcrumb | Trail to the current page, shared hover, step menus, truncation with the full name, collapse on overflow | Native nav, ordered list and links, with Dropdown for step and ellipsis menus. A cut step shows its full name in a native title rather than the reference Tooltip. |
+| Breadcrumb | Trail to the current page, shared hover, step menus, truncation with the full name, collapse on overflow | Native nav, ordered list and links, with Dropdown for step and ellipsis menus. A cut step shows its full name in a Tooltip under it, closed while its menu is open. |
 | Button | Variants, density, loading, icons, hover weight and press feedback | Native button/link |
 | Calendar | Single date/range, multiple months, disabled dates, week numbers, hover/range bands | Local date logic and accessible grid |
 | Card | Composable layouts, slots, dividers, two-dimensional hover | Markup and shared hover |

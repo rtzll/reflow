@@ -1,6 +1,6 @@
 import { shortcutKeys } from './shortcut.ts'
 import { attrs, on, ref } from 'remix/component'
-import type { Handle, RemixNode } from 'remix/component'
+import type { Handle, MixInput, RemixNode } from 'remix/component'
 import { spring } from '@remix-run/ui/animation'
 import * as menu from '@remix-run/ui/menu'
 import * as tabs from '@remix-run/ui/tabs'
@@ -413,6 +413,8 @@ export interface DropdownProps {
   /** `bare` renders an unstyled button trigger that takes its look from `triggerClass`, for sidebar rows and actions. */
   variant?: 'outline' | 'ghost' | 'bare'
   triggerClass?: string
+  /** Extra behavior on the trigger, such as a Tooltip's trigger props. */
+  triggerMix?: MixInput
   /** Which side of the trigger the menu opens on. Default bottom. */
   side?: 'top' | 'bottom'
   searchable?: boolean
@@ -591,6 +593,7 @@ export function Dropdown(handle: Handle<DropdownProps>) {
                   offset: 6,
                 }),
                 hoverMix,
+                handle.props.triggerMix,
               ]}
             >
               {handle.props.triggerContent ?? label}
@@ -619,6 +622,7 @@ export function Dropdown(handle: Handle<DropdownProps>) {
                   offset: 6,
                 }),
                 hoverMix,
+                handle.props.triggerMix,
               ]}
             >
               {handle.props.triggerContent ?? label}

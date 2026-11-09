@@ -567,12 +567,39 @@ it('glides one hover along the breadcrumb, names cut steps, and collapses on ove
   await items.nth(0).hover()
   await expect.poll(aligned).toBeLessThan(1)
 
+  // A cut step shows its full name in the library tooltip under it, as in the
+  // reference; a step that fits shows none.
   const long = page.locator('#long-step-name .rf-breadcrumb-crumb').nth(1)
+  const tooltip = page.locator('.rf-tooltip[data-open]')
   await long.hover()
-  await expect(long).toHaveAttribute('title', 'Quarterly planning and roadmap reviews')
+  await expect(tooltip).toHaveText('Quarterly planning and roadmap reviews')
+  await expect(tooltip).toHaveAttribute('data-side', 'bottom')
+  const tooltipId = await tooltip.getAttribute('id')
+  await expect(long).toHaveAttribute('aria-describedby', tooltipId!)
+  await expect(long).not.toHaveAttribute('title')
+  const below = await page.evaluate(
+    ([crumb, tip]) => tip!.getBoundingClientRect().top >= crumb!.getBoundingClientRect().bottom,
+    [await long.elementHandle(), await tooltip.elementHandle()],
+  )
+  assert.ok(below, 'The full name should sit under the step')
   const short = page.locator('#long-step-name .rf-breadcrumb-crumb').first()
   await short.hover()
-  await expect(short).not.toHaveAttribute('title')
+  await expect(tooltip).toHaveCount(0)
+  await page.waitForTimeout(400)
+  await expect(tooltip).toHaveCount(0)
+  await expect(short).not.toHaveAttribute('aria-describedby')
+
+  // A cut step that opens a menu keeps its tooltip closed while the menu is open.
+  const menuStep = page.locator('#open-on-click .rf-breadcrumb [aria-haspopup]')
+  await menuStep.evaluate((node) => ((node as HTMLElement).style.maxInlineSize = '60px'))
+  await menuStep.hover()
+  await expect(tooltip).toHaveText('Components')
+  await menuStep.focus()
+  await page.keyboard.press('Enter')
+  await expect(menuStep).toHaveAttribute('aria-expanded', 'true')
+  await expect(tooltip).toHaveCount(0)
+  await page.keyboard.press('Escape')
+  await page.mouse.move(0, 0)
 
   const frame = page.locator('#collapse-on-overflow .doc-demo-breadcrumb-resize')
   const trail = frame.locator('.rf-breadcrumb-item')
@@ -583,7 +610,7 @@ it('glides one hover along the breadcrumb, names cut steps, and collapses on ove
   const ellipsis = frame.getByRole('button', { name: /Show \d hidden steps?/ })
   await expect(ellipsis).toHaveCount(1)
   assert.equal(await frame.locator('[aria-current="page"]').textContent(), 'Breadcrumb')
-  assert.equal(await trail.first().textContent(), 'Home')
+  assert.equal(await trail.first().locator('.rf-breadcrumb-crumb').textContent(), 'Home')
   const fits = await frame.evaluate((node) => {
     const list = node.querySelector('.rf-breadcrumb-list') as HTMLElement
     return list.scrollWidth <= node.querySelector('.rf-breadcrumb')!.clientWidth + 1
