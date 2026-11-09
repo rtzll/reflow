@@ -242,10 +242,17 @@ export function Tooltip(handle: Handle<TooltipProps>) {
     handle.props.onOpenChange?.(next)
   }
 
+  function menuIsOpen() {
+    return (
+      trigger?.getAttribute('aria-haspopup') === 'menu' &&
+      trigger.getAttribute('aria-expanded') === 'true'
+    )
+  }
+
   // The tooltip is shown when `open` forces it, otherwise when hover or focus asks for it.
   function sync() {
     const visible = handle.props.open ?? internalOpen
-    if (visible) open()
+    if (visible && !menuIsOpen()) open()
     else close()
   }
 
@@ -258,7 +265,7 @@ export function Tooltip(handle: Handle<TooltipProps>) {
 
   function show() {
     clearTimeout(hideTimer)
-    if (!trigger?.isConnected || !popup?.isConnected || dismissed) return
+    if (!trigger?.isConnected || !popup?.isConnected || dismissed || menuIsOpen()) return
     setInternal(true)
     sync()
   }
@@ -307,6 +314,13 @@ export function Tooltip(handle: Handle<TooltipProps>) {
   const triggerMix = ref((element, signal) => {
     if (!(element instanceof HTMLElement)) return
     trigger = element
+    if (element.getAttribute('aria-haspopup') === 'menu') {
+      const observer = new MutationObserver(() => {
+        if (menuIsOpen()) hide()
+      })
+      observer.observe(element, { attributeFilter: ['aria-expanded'] })
+      signal.addEventListener('abort', () => observer.disconnect(), { once: true })
+    }
     element.addEventListener(
       'pointerenter',
       (event) => {

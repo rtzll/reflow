@@ -41,27 +41,16 @@ export function Breadcrumb(handle: Handle<BreadcrumbProps>) {
   // Natural widths per step, remembered so a hidden step returns as soon as it fits.
   let widths: number[] = []
   let ellipsisWidth = 0
-  // Steps whose label is cut, by index, read as the pointer or keyboard focus
-  // arrives; and the step whose menu is open, whose full name stays hidden.
+  // Steps whose label is cut, by index, read as the pointer or keyboard focus arrives.
   let cut = new Set<number>()
-  let menuOpen: number | undefined
 
   const listRef = ref((node, signal) => {
     if (!(node instanceof HTMLOListElement)) return
     list = node
     const observer = new ResizeObserver(() => measure())
     if (node.parentElement) observer.observe(node.parentElement)
-    const menus = new MutationObserver(() => {
-      const open = node.querySelector<HTMLElement>('[data-rf-step][aria-expanded="true"]')
-      const next = open ? Number(open.dataset.rfStep) : undefined
-      if (next === menuOpen) return
-      menuOpen = next
-      void handle.update()
-    })
-    menus.observe(node, { subtree: true, attributeFilter: ['aria-expanded'] })
     signal.addEventListener('abort', () => {
       observer.disconnect()
-      menus.disconnect()
       if (list === node) list = null
     })
   })
@@ -155,9 +144,7 @@ export function Breadcrumb(handle: Handle<BreadcrumbProps>) {
     )
 
     // The full name of a cut step, in the library tooltip under it, as in
-    // the reference. It stays closed while the name fits and while the
-    // step's own menu is open, so it never stacks on the menu. The step is
-    // described by the tooltip only while its name is cut.
+    // the reference. The step is described by the tooltip only while its name is cut.
     const withFullName = (
       item: BreadcrumbItem,
       index: number,
@@ -166,7 +153,7 @@ export function Breadcrumb(handle: Handle<BreadcrumbProps>) {
       <Tooltip
         content={item.label}
         side="bottom"
-        open={cut.has(index) && menuOpen !== index ? undefined : false}
+        open={cut.has(index) ? undefined : false}
         renderTrigger={(props) =>
           render(cut.has(index) ? props : { 'aria-describedby': '', mix: props.mix })
         }

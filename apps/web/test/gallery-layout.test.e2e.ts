@@ -606,6 +606,38 @@ it('renders a fitting gallery breadcrumb before hydration', async (t) => {
   )
 })
 
+it('can reopen either gallery breadcrumb menu after switching and selecting', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/')
+  await waitForShowcase(page)
+  const trail = page.locator('[data-component="breadcrumb"] .rf-breadcrumb')
+  const ellipsis = trail.getByRole('button', { name: 'Show 3 hidden steps' })
+  const drafts = trail.getByRole('button', { name: 'Drafts' })
+  const website = trail.getByRole('menuitem', { name: 'Website' })
+  const published = trail.getByRole('menuitemradio', { name: 'Published' })
+
+  await ellipsis.hover()
+  await expect(website).toBeVisible()
+  await drafts.hover()
+  await expect(published).toBeVisible()
+  await expect(ellipsis).toHaveAttribute('aria-expanded', 'false')
+
+  await ellipsis.hover()
+  await expect(website).toBeVisible()
+  await ellipsis.click()
+  await website.click()
+  await expect(page).toHaveURL(/#website$/)
+  await expect(ellipsis).toHaveAttribute('aria-expanded', 'false')
+
+  await drafts.hover()
+  await expect(published).toBeVisible()
+  await published.click()
+  await expect(trail.getByRole('button', { name: 'Published' })).toBeVisible()
+  await ellipsis.hover()
+  await expect(website).toBeVisible()
+})
+
 it('glides one hover along the breadcrumb, names cut steps, and collapses on overflow', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.emulateMedia({ reducedMotion: 'reduce' })
