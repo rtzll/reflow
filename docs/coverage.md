@@ -1,6 +1,6 @@
 # Component coverage
 
-All 33 components from the initial Fluid Functionalism catalog have a Reflow implementation, a docs page, and an interactive demo. Breadcrumb, added upstream later, is the 34th; it has a docs page and playground but no gallery card or focused demo slide yet. Fluid Functionalism remains the design reference. [Pinned upstream source](https://github.com/mickadesign/fluid-functionalism/tree/7e6ae290dd8f5a7657ae4a433a42e165bac3ece4)
+All 33 components from the initial Fluid Functionalism catalog have a Reflow implementation, a docs page, and an interactive demo. Breadcrumb, added upstream in commit `2bfb830023e46ea9bcf5d326e015d4511ab9ef38`, is the 34th; it has a docs page and playground but no gallery card or focused demo slide yet. Fluid Functionalism remains the design reference. [Pinned upstream source](https://github.com/mickadesign/fluid-functionalism/tree/7e6ae290dd8f5a7657ae4a433a42e165bac3ece4)
 
 ## Current work and remaining refinements
 

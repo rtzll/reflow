@@ -58,7 +58,7 @@ The workspace pins Remix 3.2.0 and Remix UI 0.13.1. Reflow wraps the independent
 
 ## References
 
-- [Fluid Functionalism source](https://github.com/mickadesign/fluid-functionalism), initial inspected commit `7e6ae290dd8f5a7657ae4a433a42e165bac3ece4`.
+- [Fluid Functionalism source](https://github.com/mickadesign/fluid-functionalism), initial inspected commit `7e6ae290dd8f5a7657ae4a433a42e165bac3ece4`. Breadcrumb and Dropdown's `openOnHover` follow commit `2bfb830023e46ea9bcf5d326e015d4511ab9ef38`.
 - [Upstream showcase](https://www.fluidfunctionalism.com/) and [focused demo](https://www.fluidfunctionalism.com/demo).
 - [Upstream MIT license](https://github.com/mickadesign/fluid-functionalism/blob/main/LICENSE) is included in `packages/reflow/NOTICE`. The Inter font used by the website has a separate SIL Open Font License notice next to its asset.
 - [Remix rendering guide](https://docs.remix.run/rendering-ui/).
