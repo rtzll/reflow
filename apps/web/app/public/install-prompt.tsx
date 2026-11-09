@@ -1,4 +1,5 @@
 import { clientEntry, on, type Handle } from 'remix/component'
+import { settingRows, sharedSettingsHref } from './site-settings.ts'
 
 export const reflowInstallCommand = 'pnpm add --save-exact @rtzll/reflow@0.1.0 remix@3.2.0'
 
@@ -96,3 +97,68 @@ export function SystemInstallation(handle: Handle<{ topic?: string; skill?: bool
     </section>
   )
 }
+
+/** The current page with the settings that differ from the defaults. */
+export function currentShareHref() {
+  const settings = Object.fromEntries(
+    settingRows.map((row) => [row.key, document.documentElement.dataset[row.key] ?? '']),
+  )
+  return sharedSettingsHref(location.href, settings)
+}
+
+/** Copies a link that opens the current page with these settings. */
+export const ShareSettingsButton = clientEntry(
+  import.meta.url,
+  function ShareSettingsButton(handle: Handle) {
+    let copied = false
+    let timer: ReturnType<typeof setTimeout> | undefined
+    handle.signal.addEventListener('abort', () => clearTimeout(timer), { once: true })
+    async function copy() {
+      try {
+        await navigator.clipboard.writeText(currentShareHref())
+        copied = true
+      } catch {
+        copied = false
+      }
+      if (handle.signal.aborted) return
+      handle.update()
+      clearTimeout(timer)
+      timer = setTimeout(() => {
+        copied = false
+        handle.update()
+      }, 2200)
+    }
+    return () => (
+      <span class="site-copy-action">
+        <button
+          type="button"
+          class="site-icon-button"
+          aria-label="Copy link with these settings"
+          title="Copy link with these settings"
+          mix={on('click', copy)}
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            {copied ? (
+              <path d="m5 12 4 4L19 6" />
+            ) : (
+              <path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7" />
+            )}
+          </svg>
+        </button>
+        <span class="site-sr-only" role="status">
+          {copied ? 'Link copied' : ''}
+        </span>
+      </span>
+    )
+  },
+)

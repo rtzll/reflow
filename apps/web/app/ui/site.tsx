@@ -9,7 +9,11 @@ import { componentApi, componentDefaults } from '../docs-data.ts'
 import { fontWeights } from '../public/google-fonts.ts'
 import { fontCatalog } from '../public/google-font-catalog.ts'
 import { SiteControls } from '../public/site-controls.tsx'
-import { InstallPromptButton, reflowInstallCommand } from '../public/install-prompt.tsx'
+import {
+  InstallPromptButton,
+  reflowInstallCommand,
+  ShareSettingsButton,
+} from '../public/install-prompt.tsx'
 import { AccentPicker } from '../public/accent-picker.tsx'
 import { DemoCustomize, DemoPlayground } from '../public/demo-playground.tsx'
 
@@ -41,13 +45,10 @@ interface PageLink {
   href: string
 }
 
-function pageHref(path: string, settings: Settings, query: Record<string, string> = {}) {
-  let params = new URLSearchParams(query)
-  for (let row of settingRows) {
-    let value = settings[row.key]
-    params.set(row.key, value)
-  }
-  let search = params.toString()
+// Settings live in cookies, so internal links stay clean. Shared links add them
+// on purpose; the server saves them and redirects to the clean URL.
+function pageHref(path: string, query: Record<string, string> = {}) {
+  let search = new URLSearchParams(query).toString()
   return search ? `${path}?${search}` : path
 }
 
@@ -152,7 +153,7 @@ function Sidebar(handle: Handle<SidebarProps>) {
           {entries.map((entry) => (
             <li key={entry.slug}>
               <a
-                href={pageHref(routes.component.href({ slug: entry.slug }), settings)}
+                href={pageHref(routes.component.href({ slug: entry.slug }))}
                 aria-current={page === 'component' && slug === entry.slug ? 'page' : undefined}
               >
                 {entry.name}
@@ -182,7 +183,7 @@ function Sidebar(handle: Handle<SidebarProps>) {
         <ul class="site-primary-nav">
           <li>
             <a
-              href={pageHref(routes.gallery.href(), settings)}
+              href={pageHref(routes.gallery.href())}
               aria-current={page === 'gallery' && !search ? 'page' : undefined}
             >
               Showcase
@@ -190,14 +191,14 @@ function Sidebar(handle: Handle<SidebarProps>) {
           </li>
           <li>
             <a
-              href={pageHref(routes.docs.href(), settings)}
+              href={pageHref(routes.docs.href())}
               aria-current={page === 'docs' ? 'page' : undefined}
             >
               Introduction
             </a>
           </li>
           <li>
-            <a href={pageHref(routes.demo.href(), settings)}>Demo</a>
+            <a href={pageHref(routes.demo.href())}>Demo</a>
           </li>
         </ul>
         {systems.length ? group('System', systems) : null}
@@ -237,6 +238,7 @@ function SettingsPanel(handle: Handle<{ settings: Settings }>) {
       <section class="site-settings" aria-label="Customize Reflow">
         <div class="site-settings-heading">
           <h2>Make them yours</h2>
+          <ShareSettingsButton />
           <a
             class="site-icon-button"
             href="https://github.com/rtzll/reflow"
@@ -503,22 +505,17 @@ function Gallery(
         <header class="site-gallery-heading">
           <div class="site-title-row">
             <h1>{term ? 'Search results' : 'Reflow'}</h1>
-            <PageArrows
-              next={{ href: pageHref(routes.docs.href(), settings), name: 'Introduction' }}
-            />
+            <PageArrows next={{ href: pageHref(routes.docs.href()), name: 'Introduction' }} />
           </div>
           <p>{term ? `Results for “${search}”.` : 'Fluid components for Remix.'}</p>
           <div class="site-actions">
             {!term && <InstallPromptButton />}
-            <a
-              class="site-button site-button-secondary"
-              href={pageHref(routes.docs.href(), settings)}
-            >
+            <a class="site-button site-button-secondary" href={pageHref(routes.docs.href())}>
               Learn more
             </a>
             <a
               class="site-button site-button-ghost site-gallery-demo"
-              href={pageHref(routes.demo.href(), settings)}
+              href={pageHref(routes.demo.href())}
             >
               See demo
             </a>
@@ -540,7 +537,7 @@ function Gallery(
                 </div>
                 <footer class="site-preview-footer">
                   <a
-                    href={pageHref(routes.component.href({ slug: entry.slug }), settings)}
+                    href={pageHref(routes.component.href({ slug: entry.slug }))}
                     aria-label={`View ${entry.name} documentation`}
                   >
                     {entry.name}
@@ -570,11 +567,11 @@ function Introduction(handle: Handle<{ settings: Settings; next?: ShowcaseCompon
           <div class="site-title-row">
             <h1>Introduction</h1>
             <PageArrows
-              previous={{ href: pageHref(routes.gallery.href(), settings), name: 'Showcase' }}
+              previous={{ href: pageHref(routes.gallery.href()), name: 'Showcase' }}
               next={
                 next
                   ? {
-                      href: pageHref(routes.component.href({ slug: next.slug }), settings),
+                      href: pageHref(routes.component.href({ slug: next.slug })),
                       name: next.name,
                     }
                   : undefined
@@ -624,7 +621,8 @@ function Introduction(handle: Handle<{ settings: Settings; next?: ShowcaseCompon
               Try a different theme, accent, heading font, radius, size, icon family, or hover
               style. Changes update the examples as you make them. Use <kbd>T</kbd>, <kbd>A</kbd>,
               and <kbd>R</kbd> to cycle theme, accent, and radius from the keyboard. Your settings
-              appear in the URL so you can share a particular look.
+              are remembered on this device. To share a particular look, copy a link with your
+              settings from the panel.
             </p>
           </div>
         </section>
@@ -687,7 +685,7 @@ function ComponentDoc(
           <header>
             <h1>Component not found</h1>
           </header>
-          <a href={pageHref(routes.docs.href(), settings)}>Back to documentation</a>
+          <a href={pageHref(routes.docs.href())}>Back to documentation</a>
         </article>
       )
     const examples = componentExamples[component.slug] ?? []
@@ -742,7 +740,7 @@ function ComponentDoc(
                   <h2>{firstTitle}</h2>
                   <a
                     class="doc-demo-link"
-                    href={pageHref(routes.demo.href(), settings, { c: component.slug })}
+                    href={pageHref(routes.demo.href(), { c: component.slug })}
                   >
                     Open demo <span aria-hidden="true">↗</span>
                   </a>
@@ -917,7 +915,7 @@ function Demo(
     const settingsSlide = current?.slug === 'settings'
     const customizable = current && customizableSlides.has(current.slug)
     let slideHref = (slide: ShowcaseComponent, scale = fit) =>
-      pageHref(routes.demo.href(), settings, { c: slide.slug, ...(scale ? { fit: '1' } : {}) })
+      pageHref(routes.demo.href(), { c: slide.slug, ...(scale ? { fit: '1' } : {}) })
     let prev = slides[position - 1]
     let next = slides[position + 1]
     return (
@@ -933,16 +931,10 @@ function Demo(
           </div>
           <p>Fluid components for Remix.</p>
           <div class="site-actions">
-            <a
-              class="site-button site-button-primary"
-              href={pageHref(routes.docs.href(), settings)}
-            >
+            <a class="site-button site-button-primary" href={pageHref(routes.docs.href())}>
               Learn more
             </a>
-            <a
-              class="site-button site-button-tertiary"
-              href={pageHref(routes.gallery.href(), settings)}
-            >
+            <a class="site-button site-button-tertiary" href={pageHref(routes.gallery.href())}>
               Showcase
             </a>
           </div>
@@ -974,7 +966,7 @@ function Demo(
                   <span class="site-demo-footer-label">{current.name}</span>
                 ) : (
                   <a
-                    href={pageHref(routes.component.href({ slug: current.slug }), settings)}
+                    href={pageHref(routes.component.href({ slug: current.slug }))}
                     aria-label={`View ${current.name} documentation`}
                   >
                     {current.name}
@@ -1149,15 +1141,15 @@ export function Showcase(handle: Handle<ShowcaseProps>) {
               previous={
                 previous
                   ? {
-                      href: pageHref(routes.component.href({ slug: previous.slug }), settings),
+                      href: pageHref(routes.component.href({ slug: previous.slug })),
                       name: previous.name,
                     }
-                  : { href: pageHref(routes.docs.href(), settings), name: 'Introduction' }
+                  : { href: pageHref(routes.docs.href()), name: 'Introduction' }
               }
               next={
                 next
                   ? {
-                      href: pageHref(routes.component.href({ slug: next.slug }), settings),
+                      href: pageHref(routes.component.href({ slug: next.slug })),
                       name: next.name,
                     }
                   : undefined

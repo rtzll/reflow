@@ -2,7 +2,7 @@ import { routes } from '../routes.ts'
 import { FontPicker } from './font-picker.tsx'
 import { CommandMenu, Dialog, Icon } from '@rtzll/reflow'
 import { clientEntry, ref, type Handle } from 'remix/component'
-import { buildInstallPrompt } from './install-prompt.tsx'
+import { buildInstallPrompt, currentShareHref } from './install-prompt.tsx'
 import { accentCss, applySetting, settingLabel, settingRows } from './site-settings.ts'
 
 interface SitePage {
@@ -226,10 +226,11 @@ export const SiteControls = clientEntry(
         setOpen('help', true)
         return
       }
-      if (value === 'action:copy') {
-        void navigator.clipboard.writeText(buildInstallPrompt()).then(
+      if (value === 'action:copy' || value === 'action:share') {
+        const share = value === 'action:share'
+        void navigator.clipboard.writeText(share ? currentShareHref() : buildInstallPrompt()).then(
           () => {
-            notice = 'Install prompt copied'
+            notice = share ? 'Link copied' : 'Install prompt copied'
             void handle.update()
           },
           () => {
@@ -242,10 +243,6 @@ export const SiteControls = clientEntry(
       }
       const href = value.slice(5)
       const url = new URL(href, location.href)
-      for (const row of settingRows) {
-        const setting = document.documentElement.dataset[row.key]
-        if (setting) url.searchParams.set(row.key, setting)
-      }
       try {
         localStorage.setItem(
           'reflow_recent_pages',
@@ -357,6 +354,13 @@ export const SiteControls = clientEntry(
           label: 'Copy install prompt',
           group: 'Actions',
           icon: <Icon name="copy" />,
+        },
+        {
+          value: 'action:share',
+          label: 'Copy link with these settings',
+          group: 'Actions',
+          keywords: ['share', 'url', 'preferences'],
+          icon: <Icon name="link" />,
         },
       ]
       return (

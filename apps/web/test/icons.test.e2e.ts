@@ -53,7 +53,7 @@ it('switches real icon geometry in place and remembers the selection across rout
   assert.equal(await page.locator('html').getAttribute('data-icons'), 'lucide')
   await page.locator('body').press('i')
   assert.equal(await page.locator('html').getAttribute('data-icons'), 'tabler')
-  assert.ok(page.url().includes('icons=tabler'))
+  assert.equal(new URL(page.url()).search, '')
   await page.goto('/docs/select')
   const selectIcon = page.locator('.doc-preview [data-rf-icon="chevron-down"]').first()
   const visibleFamily = (node: Element) =>

@@ -4,7 +4,7 @@ import { it } from 'remix/test'
 import { expect } from 'playwright/test'
 import { router, waitForShowcase } from './showcase-router.ts'
 
-it('applies preferences immediately, updates previews and links, and persists through reload', async (t) => {
+it('applies preferences immediately, keeps links clean, and persists through reload', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.goto('/?theme=light')
   await waitForShowcase(page)
@@ -35,7 +35,8 @@ it('applies preferences immediately, updates previews and links, and persists th
   const introduction = page
     .locator('.site-left')
     .getByRole('link', { name: 'Introduction', exact: true })
-  assert.ok((await introduction.getAttribute('href'))?.includes('accent=violet'))
+  assert.equal(await introduction.getAttribute('href'), '/docs')
+  assert.equal(new URL(page.url()).search, '')
   await page.goto('/docs')
   assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark')
   assert.equal(await page.locator('html').getAttribute('data-accent'), 'violet')
@@ -228,7 +229,9 @@ it('server-renders native settings disclosures before client enhancement', async
   const context = await page.context().browser()!.newContext({ javaScriptEnabled: false })
   try {
     const unenhanced = await context.newPage()
-    await unenhanced.goto(page.url())
+    // A shared link applies its settings without JavaScript too.
+    await unenhanced.goto(new URL('/docs?theme=dark', page.url()).href)
+    assert.equal(new URL(unenhanced.url()).search, '')
     const panel = unenhanced.locator('.site-right')
     const accent = panel.locator('[data-setting-trigger="accent"]')
     const theme = panel.locator('[data-setting-trigger="theme"]')
@@ -277,10 +280,9 @@ it('opens global search with Mod+K, applies commands, and shows individual short
   await dialog.waitFor()
   await input.fill('DatePicker')
   await input.press('Enter')
-  await page.waitForURL(
-    (url) => url.pathname === '/docs/date-picker' && url.searchParams.get('theme') === 'light',
-  )
+  await page.waitForURL((url) => url.pathname === '/docs/date-picker' && url.search === '')
   await waitForShowcase(page)
+  assert.equal(await page.locator('html').getAttribute('data-theme'), 'light')
   await page.locator('body').press('?')
   const help = page.getByRole('dialog', { name: 'Keyboard shortcuts' })
   await help.waitFor()
@@ -340,7 +342,7 @@ it('browses a custom heading family and restores its weight and stylesheet', asy
   assert.equal(await panel.getByRole('menuitemradio', { name: '700', exact: true }).count(), 0)
 })
 
-it('preserves explicit default settings through links and search despite older cookies', async (t) => {
+it('saves the settings of a shared link over older cookies and shows the clean URL', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.goto('/')
   await page.context().addCookies([
@@ -348,37 +350,41 @@ it('preserves explicit default settings through links and search despite older c
     { name: 'reflow_accent', value: 'violet', url: page.url() },
     { name: 'reflow_density', value: 'compact', url: page.url() },
   ])
-  await page.goto('/docs/button?theme=system&accent=blue&density=default')
-  const reveal = page.locator('.site-left').getByRole('link', { name: 'Reveal', exact: true })
-  const target = new URL((await reveal.getAttribute('href'))!, page.url())
-  for (const [key, value] of Object.entries({
-    theme: 'system',
-    accent: 'blue',
-    density: 'default',
-  }))
-    assert.equal(target.searchParams.get(key), value)
-  await reveal.click()
-  await page.waitForURL((url) => url.pathname === '/docs/reveal')
+  const shared = { theme: 'system', accent: 'blue', density: 'default' }
+  await page.goto('/docs/button?theme=system&accent=blue&density=default&view=code#examples')
+  const url = new URL(page.url())
+  assert.equal(url.pathname + url.search + url.hash, '/docs/button?view=code#examples')
   await waitForShowcase(page)
-  for (const [key, value] of Object.entries({
-    theme: 'system',
-    accent: 'blue',
-    density: 'default',
-  }))
+  for (const [key, value] of Object.entries(shared))
     assert.equal(await page.locator('html').getAttribute(`data-${key}`), value)
+  const reveal = page.locator('.site-left').getByRole('link', { name: 'Reveal', exact: true })
+  assert.equal(await reveal.getAttribute('href'), '/docs/reveal')
+  await reveal.click()
+  await page.waitForURL((url) => url.pathname === '/docs/reveal' && url.search === '')
+  for (const [key, value] of Object.entries(shared))
+    assert.equal(await page.locator('html').getAttribute(`data-${key}`), value)
+
+  // Sharing copies only the settings that differ from the defaults.
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+  await waitForShowcase(page)
+  await page.locator('body').press('t')
+  await page
+    .locator('.site-right')
+    .getByRole('button', { name: 'Copy link with these settings' })
+    .click()
+  await expect
+    .poll(() => page.evaluate(() => navigator.clipboard.readText()))
+    .toBe(new URL('/docs/reveal?theme=light', page.url()).href)
   await page.locator('body').press('ControlOrMeta+k')
   const search = page
     .getByRole('dialog', { name: 'Search Reflow' })
     .getByRole('combobox', { name: 'Search commands' })
-  await search.fill('Accordion')
+  await page.evaluate(() => navigator.clipboard.writeText(''))
+  await search.fill('Copy link')
   await search.press('Enter')
-  await page.waitForURL((url) => url.pathname === '/docs/accordion')
-  for (const [key, value] of Object.entries({
-    theme: 'system',
-    accent: 'blue',
-    density: 'default',
-  }))
-    assert.equal(await page.locator('html').getAttribute(`data-${key}`), value)
+  await expect
+    .poll(() => page.evaluate(() => navigator.clipboard.readText()))
+    .toBe(new URL('/docs/reveal?theme=light', page.url()).href)
   await page.goto('/docs/button?theme=dark&accent=red')
   await waitForShowcase(page)
   const trigger = page.locator('.site-right [data-setting-trigger="accent"]')

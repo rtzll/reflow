@@ -5,6 +5,7 @@ import { Document } from '../document.tsx'
 import type { AppContext } from '../router.ts'
 import { routes } from '../routes.ts'
 import { readSettings, Showcase, type ShowcaseProps } from '../ui/site.tsx'
+import { settingCookies, settingRows, withoutSettings } from '../public/site-settings.ts'
 
 // Former block pages now live as examples on their component pages.
 const moved: Record<string, string> = {
@@ -13,7 +14,18 @@ const moved: Record<string, string> = {
 }
 
 async function show(context: AppContext, page: ShowcaseProps['page'], slug?: string) {
-  const query = new URL(context.request.url).search
+  const url = new URL(context.request.url)
+  const query = url.search
+  // A shared link carries settings: save them as the visitor's own and show
+  // the clean URL. The browser keeps the #fragment across the redirect.
+  if (settingRows.some((row) => url.searchParams.has(row.key))) {
+    const headers = new Headers({
+      location: `${url.pathname}${withoutSettings(query)}`,
+      'cache-control': 'no-store',
+    })
+    for (const cookie of settingCookies(query)) headers.append('set-cookie', cookie)
+    return new Response(null, { status: 302, headers })
+  }
   const settings = readSettings(query, context.request.headers.get('cookie') ?? '')
   const target = page === 'component' && slug ? moved[slug] : undefined
   if (target) {

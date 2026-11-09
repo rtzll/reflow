@@ -124,6 +124,44 @@ export function readSettings(search: string, cookie = ''): Settings {
   return settings
 }
 
+/** Cookies that keep each valid setting in `search`, as the browser writes them. */
+export function settingCookies(search: string) {
+  const query = new URLSearchParams(search)
+  const cookies: string[] = []
+  for (const row of settingRows) {
+    const value = query.get(row.key)
+    if (value === null || !validSetting(row.key, value)) continue
+    cookies.push(settingCookie(`reflow_${row.key}`, value))
+    if (row.key === 'font' && value.startsWith('google:'))
+      cookies.push(settingCookie('reflow_custom_font', value))
+  }
+  return cookies
+}
+
+function settingCookie(name: string, value: string) {
+  return `${name}=${encodeURIComponent(value)}; path=/; max-age=31536000; samesite=lax`
+}
+
+/** Removes every setting from `search`, keeping other parameters. */
+export function withoutSettings(search: string) {
+  const query = new URLSearchParams(search)
+  for (const row of settingRows) query.delete(row.key)
+  const rest = query.toString()
+  return rest ? `?${rest}` : ''
+}
+
+/** A link to `href` that carries the settings that differ from the defaults. */
+export function sharedSettingsHref(href: string, settings: Partial<Record<SettingKey, string>>) {
+  const url = new URL(href)
+  url.hash = ''
+  for (const row of settingRows) {
+    const value = settings[row.key]
+    if (value && value !== row.defaultValue && validSetting(row.key, value))
+      url.searchParams.set(row.key, value)
+  }
+  return url.href
+}
+
 export function accentCss(value: string) {
   if (/^#[a-fA-F0-9]{6}$/.test(value)) return value
   const [light, dark] = accents[value as keyof typeof accents] ?? accents.blue
@@ -138,7 +176,7 @@ export function applySetting(key: SettingKey, value: string) {
     if (family) {
       document.documentElement.style.setProperty('--rf-heading-font', JSON.stringify(family))
       document.documentElement.dataset.customFont = value
-      document.cookie = `reflow_custom_font=${encodeURIComponent(value)}; path=/; max-age=31536000; samesite=lax`
+      document.cookie = settingCookie('reflow_custom_font', value)
       for (const choice of document.querySelectorAll<HTMLButtonElement>('[data-font-current]')) {
         choice.hidden = false
         choice.dataset.value = value
@@ -174,22 +212,8 @@ export function applySetting(key: SettingKey, value: string) {
     else document.documentElement.style.setProperty('--rf-heading-weight', value)
   }
   if (key === 'accent') document.documentElement.style.setProperty('--rf-accent', accentCss(value))
-  document.cookie = `reflow_${key}=${encodeURIComponent(value)}; path=/; max-age=31536000; samesite=lax`
-  const url = new URL(location.href)
+  document.cookie = settingCookie(`reflow_${key}`, value)
   const row = settingRows.find((row) => row.key === key)!
-  url.searchParams.set(key, value)
-  history.replaceState(history.state, '', url)
-  for (const link of document.querySelectorAll<HTMLAnchorElement>('a[href]')) {
-    if (link.getAttribute('href')?.startsWith('#')) continue
-    const target = new URL(link.href, location.href)
-    if (target.origin !== location.origin || target.pathname.startsWith('/assets/')) continue
-    target.searchParams.set(key, value)
-    link.href = target.href
-  }
-  for (const input of document.querySelectorAll<HTMLInputElement>(
-    `input[type="hidden"][name="${key}"]`,
-  ))
-    input.value = value
   for (const trigger of document.querySelectorAll<HTMLElement>(`[data-setting-trigger="${key}"]`)) {
     const label = trigger.querySelector('[data-setting-label]')
     if (label) label.textContent = settingLabel(value)

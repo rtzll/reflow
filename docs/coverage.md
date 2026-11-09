@@ -62,7 +62,7 @@ Grouped controls and inline Dropdowns share a fast focus ring with the same 2px 
 - Motion includes shared spring curves, interruptible sliding indicators, faster exits, and reduced motion behavior.
 - Reveal supports viewport entry and scroll-linked progress. ScrollArea uses native scrolling with custom desktop thumbs, keyboard and drag input, dynamic edge fades, and native coarse-pointer scrolling.
 - Sizes, surfaces, and typography use shared CSS variables. Inter and Geist Serif are bundled locally. The optional searchable Google Fonts catalog loads only the selected family; custom weights persist with the other preferences. The typography page includes an editable Markdown specimen.
-- Theme, accent, heading font, shape, density, and hover mode update immediately across the website. Cookies preserve preferences across navigation, and URLs carry explicit settings. Keyboard accelerators and global command search operate on the same settings.
+- Theme, accent, heading font, shape, density, and hover mode update immediately across the website. Cookies preserve preferences, so internal links and the address bar stay clean. A copied share link carries the settings that differ from the defaults. Opening it saves them as the visitor's own and redirects to the clean URL. Keyboard accelerators and global command search operate on the same settings.
 
 The eighth system is the bundled `skills/reflow/SKILL.md`. Its documentation includes four cursor-driven comparisons that pause for pointer and keyboard interaction and can be replayed.
 
@@ -83,7 +83,7 @@ The former `/docs/app-sidebar` and `/docs/settings-dialog` pages redirect to Sid
 ## Showcase
 
 - Overview grid with 29 preview cards, docs index and detail pages, and a focused demo with direct component links.
-- Responsive layout, copyable usage examples, URL settings, and Reflow branding with upstream attribution.
+- Responsive layout, copyable usage examples, shareable settings links, and Reflow branding with upstream attribution.
 - All 35 component pages include a live preview, replay, inspection, highlighted code, and public API tables. All but QueuedStack also have playground controls and further examples.
 - Installation prompts include the active preferences and direct agents to the bundled Reflow skill.
 - Global command search opens with Cmd/Ctrl K. Shortcut help uses individual keycaps and labeled icons.

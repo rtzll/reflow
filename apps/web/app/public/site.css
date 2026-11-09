@@ -221,6 +221,10 @@ html[data-density='compact'] .site-nav a {
   font-size: 12px;
   font-weight: 500;
 }
+/* The share and GitHub actions sit together at the end of the heading. */
+.site-settings-heading h2 {
+  margin-inline-end: auto;
+}
 .site-settings form {
   margin-top: 6px;
 }

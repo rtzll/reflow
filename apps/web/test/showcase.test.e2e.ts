@@ -32,8 +32,7 @@ it('hydrates previews across docs and deep-linked demo pages', async (t) => {
   const detail = page.getByRole('link', { name: 'View Dropdown documentation' })
   const detailUrl = new URL((await detail.getAttribute('href'))!, page.url())
   assert.equal(detailUrl.pathname, '/docs/dropdown')
-  assert.equal(detailUrl.searchParams.get('theme'), 'dark')
-  assert.equal(detailUrl.searchParams.get('accent'), 'blue')
+  assert.equal(detailUrl.search, '')
 
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/docs/input-message')
@@ -66,7 +65,8 @@ it('collapses closed accordion panels and keeps the code example linkable', asyn
     ),
   )
   assert.ok(page.url().includes('view=code'))
-  assert.ok(page.url().includes('theme=dark'))
+  assert.ok(!page.url().includes('theme='))
+  assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark')
 })
 
 it('updates the live playground and copied code while preserving replay and inspection', async (t) => {
@@ -206,7 +206,8 @@ it('routes demo arrows to the focused widget or to slide navigation', async (t) 
   await page.keyboard.press('ArrowRight')
   await page.getByRole('link', { name: 'View Accordion documentation' }).waitFor()
   assert.equal(new URL(page.url()).searchParams.get('fit'), '1')
-  assert.equal(new URL(page.url()).searchParams.get('theme'), 'dark')
+  assert.equal(new URL(page.url()).searchParams.get('theme'), null)
+  assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark')
 
   await page.goto('/demo?c=slider')
   const slider = stage.getByRole('slider', { name: 'Opacity', exact: true })
