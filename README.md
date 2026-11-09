@@ -64,13 +64,13 @@ Theme, density, accent, shape, typography, and hover behavior are configurable t
 - **Display and feedback** · `Badge`, `Banner`, `Card`, `Table`
 - **Conversation** · `AskUserQuestions`, `ChatMessage`, `InputMessage`, `QueuedStack`, `ThinkingIndicator`, `ThinkingSteps`
 
-Browse the [component coverage](docs/coverage.md#components) and [usage examples](apps/web/app/public/examples.tsx) directly in the repository, or run the showcase and visit `/docs` for props, examples, and playgrounds.
+Browse the [component catalog and roadmap](docs/components.md) and [usage examples](apps/web/app/public/examples.tsx) directly in the repository, or run the showcase and visit `/docs` for props, examples, and playgrounds.
 
-Keyboard navigation, focus management, form behavior, reduced motion, server rendering, and hydration are part of the implementation and regression checks. Coverage varies by component; see [verification](docs/coverage.md#verification) and [known gaps](docs/coverage.md#current-work-and-remaining-refinements).
+Keyboard navigation, focus management, form behavior, reduced motion, server rendering, and hydration are part of the implementation and regression checks. See [verification](docs/development.md#verification) and the [known gap and deliberate differences](docs/scope.md#relationship-to-fluid-functionalism).
 
 ## Use and change Reflow
 
 - Use the installed types and component docs for props and examples. For integrating Reflow into an app, see the [Reflow skill](skills/reflow/SKILL.md) and the [starter settings page](examples/starter/app/public/settings.tsx).
-- Run `pnpm check` and `pnpm test` for library changes. [Development guide](docs/development.md) · [Scope](docs/scope.md) · [Coverage and known gaps](docs/coverage.md)
+- Run `pnpm check` and `pnpm test` for library changes. [Development guide](docs/development.md) · [Scope](docs/scope.md) · [Components](docs/components.md)
 
 [MIT license](LICENSE) · [Third-party notices](packages/reflow/NOTICE)

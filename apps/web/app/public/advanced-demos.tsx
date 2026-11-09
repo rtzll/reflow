@@ -402,7 +402,7 @@ export function RichThinkingSteps(handle: Handle<{ variant: string; previewImage
                 'Read README.md',
                 'Read integration.md',
                 'Read customization.md',
-                'Read coverage.md',
+                'Read components.md',
               ]}
             />
           ),

@@ -1,12 +1,12 @@
 # Scope
 
-Reflow is a native Remix 3 component library and showcase inspired by Fluid Functionalism. The target is comparable component coverage, behavior, visual restraint, and motion quality, expressed through Remix APIs rather than React compatibility.
+Reflow is a native Remix 3 component library and showcase inspired by Fluid Functionalism. The goal is upstream's behavior, visual restraint, and motion quality, expressed through Remix APIs rather than React compatibility, across upstream's catalog and the components Reflow adds.
 
-The initial library and website are running, with examples for all 33 components. [Component coverage](coverage.md) tracks remaining behavior and visual differences.
+The library covers the Fluid Functionalism catalog and now grows beyond it. [Components](components.md) lists the catalog, what every component needs before it ships, and the roadmap.
 
 ## Deliverables
 
-1. A reusable component library covering all 33 components in the initial upstream catalog, plus shared systems. Upstream blocks map to components or examples.
+1. A reusable component library covering the upstream catalog, plus shared systems and Reflow's own components. Upstream blocks map to components or examples.
 2. A Remix showcase using those same components: an interactive overview, individual component documentation and playgrounds, and a focused demo carousel.
 3. Behavioral and visual validation across keyboard, pointer, touch, light/dark themes, compact/default sizes, reduced motion, server rendering, and hydration.
 4. A deployable showcase and a documented package installation workflow. Hosting is configured separately from source and package releases.
@@ -43,7 +43,7 @@ Separate reusable geometry, color, date, and state logic from DOM measurement an
 
 ## Next work
 
-- Refine motion and the upstream block mappings listed in [component coverage](coverage.md).
+- Build the components in the [roadmap](components.md#roadmap), one at a time.
 - Keep keyboard, touch, reduced motion, SSR, and hydration behavior covered by regression checks.
 - Validate changes through the showcase and the independently installed starter.
 - Prepare source, package, and showcase releases separately; see [release preparation](releasing.md).
@@ -55,6 +55,35 @@ The approach is feasible, but full equivalence is a library project, not a mecha
 Calendars, rich editing within composed experiences, attachment previews, color manipulation, drag/reorder interactions, and nested popup edge cases need deeper audit. If an upstream feature depends on a substantial external subsystem, record its exact behavior and implementation cost; do not silently remove it or add an unapproved runtime dependency. Native HTML alone does not guarantee equivalent behavior.
 
 The workspace pins Remix 3.2.0 and Remix UI 0.13.1. Reflow wraps the independently versioned Remix UI primitives so its app and consumers can use the same component API. The committed lockfile pins transitive packages.
+
+## Relationship to Fluid Functionalism
+
+Fluid Functionalism stays a source. New upstream components are adopted as they appear, as Breadcrumb was, and existing ones are kept close to upstream's look and motion. The pinned commits are listed under [references](#references). Components Reflow adds on its own follow its [definition of done](components.md#definition-of-done) instead.
+
+### Deliberate differences
+
+- **Keyboard and touch.** Carousel autoplay pauses on keyboard focus. InputMessage can expose a visible attach button, and clickable cards require an accessible label.
+- **Sidebar.** Parent rows can be links with separate expanders. On mobile the rail opens as a viewport-height modal drawer with Escape and focus return. The workspace and profile menus mark keyboard focus with a row highlight rather than the moving ring.
+- **Forms and surfaces.** AskUserQuestions can submit through a surrounding form and optionally show a completion screen. Field choice cards keep the stronger checked border. CommandMenu's shortcut footer is opt-in.
+- **CommandMenu.** The header line strengthens once rows scroll under it, as upstream's code intends; upstream's own line never strengthens because its scroll root clips it.
+
+### Known gap
+
+PDF attachments show a document glyph. Upstream renders the first page, which needs a separate PDF subsystem.
+
+### Upstream blocks
+
+The upstream registry also installs seven blocks: compositions copied into an app. Reflow's docs have no Blocks section; every page documents something imported from `@rtzll/reflow`, and each block maps to a component or an example:
+
+| Upstream block | In Reflow |
+| --- | --- |
+| `queued-stack` | The QueuedStack component, exported from the package. |
+| `sidebar-app` | The Sidebar page. Its examples show workspace switching, nested projects, search and profile controls. |
+| `dialog-sidebar` | The Dialog page's "With a sidebar" example, also used on the Sidebar page, in the gallery and in the focused demo. Its sections and fields are app-specific, so it stays in the showcase. |
+| `sidebar-workspace-header`, `sidebar-user-footer` | The Sidebar page's Header & footer example, whose code includes both menus as Dropdowns with a bare `rf-sidebar-row` trigger. |
+| `sidebar-search-field`, `sidebar-inset-topbar` | Built into Sidebar: the `searchable` filter field and the collapse/mobile toolbar. Supply breadcrumbs and trailing actions through the toolbar slot. |
+
+The former `/docs/app-sidebar` and `/docs/settings-dialog` pages redirect to Sidebar and to Dialog's "With a sidebar" example.
 
 ## References
 

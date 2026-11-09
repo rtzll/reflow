@@ -43,4 +43,4 @@ Components respond to `prefers-reduced-motion`. Reduced motion limits movement; 
 
 The showcase's preference panel, cookies, and share links belong to the app. Library consumers own preference controls and persistence. Apply saved values in the server-rendered document and use the same initial values in the browser. The [starter settings page](../examples/starter/app/public/settings.tsx) demonstrates the controls; its [controller](../examples/starter/app/actions/controller.tsx) reads URL preferences.
 
-See [integration](integration.md) for stylesheet and browser-runtime setup, and [coverage](coverage.md) for component-specific differences and remaining refinements.
+See [integration](integration.md) for stylesheet and browser-runtime setup, and [components](components.md) for the catalog and roadmap. Deliberate differences from Fluid Functionalism are listed in [scope](scope.md#deliberate-differences).
