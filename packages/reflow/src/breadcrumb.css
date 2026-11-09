@@ -156,3 +156,10 @@
     transition: none;
   }
 }
+
+/* Step and ellipsis menus fit their entries, as in the reference, rather than
+   taking the fixed Dropdown width. */
+.rf-breadcrumb .rf-dropdown-surface {
+  inline-size: max-content;
+  min-inline-size: 8rem;
+}

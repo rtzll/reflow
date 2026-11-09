@@ -582,6 +582,11 @@ it('glides one hover along the breadcrumb, names cut steps, and collapses on ove
   assert.ok(fits, 'The collapsed trail should fit its container')
   await ellipsis.click()
   await expect(page.getByRole('menuitem', { name: 'Workspace' })).toBeVisible()
+  // Menus fit their entries, not the fixed 288px Dropdown width.
+  const menuWidth = await frame
+    .locator('.rf-dropdown-surface:popover-open')
+    .evaluate((node) => node.getBoundingClientRect().width)
+  assert.ok(menuWidth >= 128 && menuWidth < 200, `menu width ${menuWidth}`)
   await page.keyboard.press('Escape')
   await frame.evaluate((node) => ((node as HTMLElement).style.inlineSize = '560px'))
   await expect(trail).toHaveCount(5)
