@@ -171,29 +171,42 @@ export function RichThinkingSteps(handle: Handle<{ variant: string; previewImage
   let inView = false
   let paused = false
   let reduced = false
-  let timer: ReturnType<typeof setInterval> | undefined
+  let timer: ReturnType<typeof setTimeout> | undefined
+  // The reference's schedules: when each step appears, in ms from the start,
+  // the last entry marking every step complete. Text streams 3 characters
+  // every 16ms once its step appears.
+  const schedules: Record<string, readonly number[]> = {
+    streaming: [400, 1800, 3200, 4200, 5200],
+    full: [400, 1600, 2800, 3800, 5000, 6200, 7200],
+  }
+  // Time left before the next tick, kept across a pause.
+  let remaining: number | undefined
+  let due = 0
   function limit() {
     const variant = handle.props.variant
-    return variant === 'streaming-text'
-      ? researchText.length
-      : variant === 'full'
-        ? 7
-        : variant === 'streaming'
-          ? 4
-          : 1
+    return variant === 'streaming-text' ? researchText.length : (schedules[variant]?.length ?? 1)
+  }
+  function gap() {
+    const variant = handle.props.variant
+    if (variant === 'streaming-text') return progress === 0 ? 400 : 16
+    const schedule = schedules[variant] ?? [400]
+    return (schedule[progress] ?? 0) - (schedule[progress - 1] ?? 0)
   }
   function synchronize() {
-    clearInterval(timer)
+    if (timer !== undefined) remaining = Math.max(0, due - performance.now())
+    clearTimeout(timer)
+    timer = undefined
     if (!inView || paused || reduced || progress >= limit()) return
-    const text = handle.props.variant === 'streaming-text'
-    timer = setInterval(
-      () => {
-        progress = Math.min(limit(), progress + (text ? 3 : 1))
-        handle.update()
-        if (progress === limit()) clearInterval(timer)
-      },
-      text ? 45 : 700,
-    )
+    const wait = remaining ?? gap()
+    remaining = undefined
+    due = performance.now() + wait
+    timer = setTimeout(() => {
+      timer = undefined
+      const text = handle.props.variant === 'streaming-text'
+      progress = Math.min(limit(), progress + (text ? 3 : 1))
+      handle.update()
+      synchronize()
+    }, wait)
   }
   const stream = ref((element, signal) => {
     if (handle.props.variant === 'rich') return
@@ -217,7 +230,7 @@ export function RichThinkingSteps(handle: Handle<{ variant: string; previewImage
     signal.addEventListener(
       'abort',
       () => {
-        clearInterval(timer)
+        clearTimeout(timer)
         observer.disconnect()
       },
       { once: true },
@@ -237,10 +250,13 @@ export function RichThinkingSteps(handle: Handle<{ variant: string; previewImage
     const sources = (
       <div class="doc-research-content">
         <ThinkingStepSources>
-          <ThinkingStepSource href="https://github.com/rtzll/reflow/blob/main/docs/integration.md">
+          <ThinkingStepSource
+            href="https://github.com/rtzll/reflow/blob/main/docs/integration.md"
+            delay={50}
+          >
             Documentation
           </ThinkingStepSource>
-          <ThinkingStepSource href="https://github.com/rtzll/reflow" delay={45}>
+          <ThinkingStepSource href="https://github.com/rtzll/reflow" delay={100}>
             Source
           </ThinkingStepSource>
         </ThinkingStepSources>
@@ -333,9 +349,9 @@ export function RichThinkingSteps(handle: Handle<{ variant: string; previewImage
           icon: <Icon name="search" />,
           content: (
             <ThinkingStepSources>
-              <ThinkingStepSource>x.com</ThinkingStepSource>
-              <ThinkingStepSource delay={45}>instagram.com</ThinkingStepSource>
-              <ThinkingStepSource delay={90}>github.com</ThinkingStepSource>
+              <ThinkingStepSource delay={50}>x.com</ThinkingStepSource>
+              <ThinkingStepSource delay={100}>instagram.com</ThinkingStepSource>
+              <ThinkingStepSource delay={150}>github.com</ThinkingStepSource>
             </ThinkingStepSources>
           ),
         },
@@ -368,9 +384,9 @@ export function RichThinkingSteps(handle: Handle<{ variant: string; previewImage
           icon: <Icon name="search" />,
           content: (
             <ThinkingStepSources>
-              <ThinkingStepSource>figma.com</ThinkingStepSource>
-              <ThinkingStepSource delay={45}>behance.net</ThinkingStepSource>
-              <ThinkingStepSource delay={90}>google.com</ThinkingStepSource>
+              <ThinkingStepSource delay={50}>figma.com</ThinkingStepSource>
+              <ThinkingStepSource delay={100}>behance.net</ThinkingStepSource>
+              <ThinkingStepSource delay={150}>google.com</ThinkingStepSource>
             </ThinkingStepSources>
           ),
         },
@@ -402,6 +418,7 @@ export function RichThinkingSteps(handle: Handle<{ variant: string; previewImage
             mix={on('click', () => {
               if (finished) {
                 progress = 0
+                remaining = undefined
                 open = true
               }
               paused = finished ? false : !paused
@@ -424,7 +441,8 @@ export function RichThinkingSteps(handle: Handle<{ variant: string; previewImage
             staged
               ? steps.map((step, index) => ({
                   ...step,
-                  content: index < progress - Number(variant === 'full') ? step.content : undefined,
+                  // A step shows its sources and details once it completes.
+                  content: finished || index < progress - 1 ? step.content : undefined,
                   status:
                     finished || index < progress - 1
                       ? 'complete'

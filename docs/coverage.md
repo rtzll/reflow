@@ -53,7 +53,7 @@ Grouped controls and inline Dropdowns share a fast focus ring with the same 2px 
 | Tabs | Accessible tab relationships, keyboard navigation and moving indicator | Remix tabs |
 | Textarea | Multiline input with automatic sizing | Native textarea |
 | ThinkingIndicator | Accessible status, animated SVG and rotating text | SVG, Remix animation and local state |
-| ThinkingSteps | Expandable progress steps, nested disclosures, sources, images and sequential presentation | Accordion and timeline variants, reusable step content, and controlled outer disclosure. Stream timing and compact geometry have not been measured against the reference. |
+| ThinkingSteps | Expandable progress steps, nested disclosures, sources, images and sequential presentation | Accordion and timeline variants, reusable step content, and controlled outer disclosure. Step and part entrances, the demos' stream timing, and the geometry at both sizes match the reference. |
 | Tooltip | Pointer/focus trigger, placement, dismissal and accessible association | Remix positioning plus local tooltip behavior |
 
 ## Shared systems

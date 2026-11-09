@@ -730,10 +730,12 @@ html[data-rf-message-transition]::view-transition-old(root) {
   column-gap: 10px;
   min-height: 0;
   overflow: clip;
+  /* As in the reference: the step opens its height on the slow spring, and
+     its icon and text fade in once that space starts opening. */
+  animation: rf-thinking-step-enter 240ms ease-out 80ms both;
 }
 .rf-thinking-timeline-row {
   padding: 6px 8px 6px 0;
-  animation: rf-thinking-step-enter 240ms ease-out var(--rf-step-delay, 0ms) both;
 }
 .rf-thinking-timeline > li {
   padding-inline-start: 8px;
@@ -748,7 +750,8 @@ html[data-rf-message-transition]::view-transition-old(root) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 8px;
+  /* The connector stops where the step's text ends, as in the reference. */
+  padding-block: 8px 6px;
   color: var(--rf-muted);
 }
 .rf-thinking-timeline-icon > svg {
@@ -843,7 +846,6 @@ html[data-rf-message-transition]::view-transition-old(root) {
 @keyframes rf-thinking-step-enter {
   from {
     opacity: 0;
-    translate: 0 -3px;
   }
 }
 
@@ -1051,18 +1053,36 @@ html[data-rf-message-transition]::view-transition-old(root) {
   color: var(--rf-muted);
   font: var(--rf-text-caption) / var(--rf-leading-caption) var(--rf-font);
 }
-.rf-thinking-step-source,
-.rf-thinking-step-image {
-  animation: rf-thinking-part-enter 200ms ease-out var(--rf-thinking-part-delay, 0ms) both;
+/* As in the reference: a source chip scales up on the moderate spring as it
+   unblurs; an image fades in as it unblurs. */
+.rf-thinking-step-source {
+  animation:
+    rf-thinking-source-enter var(--rf-spring-moderate) var(--rf-thinking-part-delay, 0ms) both,
+    rf-thinking-part-unblur 120ms ease-out var(--rf-thinking-part-delay, 0ms) both;
 }
-@keyframes rf-thinking-part-enter {
+.rf-thinking-step-image {
+  animation:
+    rf-thinking-part-fade 200ms ease-out var(--rf-thinking-part-delay, 0ms) both,
+    rf-thinking-part-unblur 150ms ease-out var(--rf-thinking-part-delay, 0ms) both;
+}
+@keyframes rf-thinking-source-enter {
   from {
     opacity: 0;
+    scale: 0.85;
+  }
+}
+@keyframes rf-thinking-part-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes rf-thinking-part-unblur {
+  from {
     filter: blur(4px);
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .rf-thinking-timeline-row,
+  .rf-thinking-step-body,
   .rf-thinking-step-source,
   .rf-thinking-step-image {
     animation: none;

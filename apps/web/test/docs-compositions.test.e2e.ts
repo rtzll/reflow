@@ -104,3 +104,66 @@ it('keeps workspace switching, project creation and profile controls functional 
   await profile.getByRole('button', { name: 'Done', exact: true }).click()
   await example.getByRole('button', { name: 'Sam', exact: true }).waitFor()
 })
+
+it('streams thinking steps on the reference schedule and ends the connector with the text', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.goto('/docs/thinking-steps')
+  // When each step appears and when every step completes, from the page clock.
+  await page.evaluate(() => {
+    const marks: number[] = []
+    ;(window as unknown as { marks: number[] }).marks = marks
+    let seen = 0
+    let done = false
+    const tick = () => {
+      const steps = document.querySelectorAll('#streaming .rf-thinking-timeline > li')
+      if (steps.length > seen) {
+        seen = steps.length
+        marks.push(performance.now())
+      }
+      const complete = Array.from(steps).every(
+        (step) => step.getAttribute('data-status') === 'complete',
+      )
+      if (!done && seen === 4 && complete) {
+        done = true
+        marks.push(performance.now())
+      }
+      if (!done) requestAnimationFrame(tick)
+    }
+    requestAnimationFrame(tick)
+  })
+  await page.locator('#streaming .doc-preview').scrollIntoViewIfNeeded()
+  await page.waitForFunction(
+    () => (window as unknown as { marks: number[] }).marks.length === 5,
+    undefined,
+    { timeout: 10_000 },
+  )
+  const marks = await page.evaluate(() => (window as unknown as { marks: number[] }).marks)
+  const gaps = marks.slice(1).map((mark, index) => mark - marks[index]!)
+  // The reference: steps at 400, 1800, 3200 and 4200ms, all complete at 5200ms.
+  const expected = [1400, 1400, 1000, 1000]
+  gaps.forEach((gap, index) =>
+    assert.ok(Math.abs(gap - expected[index]!) < 250, `gap ${index}: ${Math.round(gap)}ms`),
+  )
+
+  // The connector stops where a step's text ends, so a one-line step draws none.
+  const lines = await page.locator('#basic .rf-thinking-timeline > li').evaluateAll((steps) =>
+    steps.slice(0, 2).map((step) => {
+      const icon = step.querySelector('.rf-thinking-timeline-icon')!
+      const row = step.querySelector('.rf-thinking-timeline-row')!
+      const line = parseFloat(getComputedStyle(icon, '::after').height)
+      const iconBottom = icon.getBoundingClientRect().bottom
+      const textBottom = row.getBoundingClientRect().bottom - 6
+      return { line, gap: iconBottom - 6 - textBottom }
+    }),
+  )
+  assert.equal(lines[0]!.line, 0)
+  assert.ok(lines[1]!.line > 20)
+  assert.ok(Math.abs(lines[1]!.gap) < 1)
+
+  // Source chips scale up as they unblur.
+  const chip = page.locator('#streaming .rf-thinking-step-source').first()
+  assert.match(
+    await chip.evaluate((node) => getComputedStyle(node).animationName),
+    /rf-thinking-source-enter/,
+  )
+})

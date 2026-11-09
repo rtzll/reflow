@@ -960,12 +960,8 @@ export function ThinkingSteps(handle: Handle<ThinkingStepsProps>) {
         <ol class="rf-thinking-timeline">
           {steps
             .filter((step) => step.status !== 'pending')
-            .map((step, index) => (
-              <li
-                key={step.value}
-                data-status={step.status ?? 'complete'}
-                style={{ '--rf-step-delay': `${Math.min(index, 6) * 24}ms` }}
-              >
+            .map((step) => (
+              <li key={step.value} data-status={step.status ?? 'complete'}>
                 <div class="rf-thinking-step-body">
                   <span class="rf-thinking-timeline-icon" aria-hidden="true">
                     {step.icon ?? <span class="rf-thinking-timeline-dot" />}

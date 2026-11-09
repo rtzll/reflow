@@ -113,8 +113,8 @@ export function ControlledQuestions(handle: Handle) {
   title: "Searching sources",
   content: <>
     <ThinkingStepSources>
-      <ThinkingStepSource href="/docs">Documentation</ThinkingStepSource>
-      <ThinkingStepSource delay={45}>Source</ThinkingStepSource>
+      <ThinkingStepSource href="/docs" delay={50}>Documentation</ThinkingStepSource>
+      <ThinkingStepSource delay={100}>Source</ThinkingStepSource>
     </ThinkingStepSources>
     <ThinkingStepDetails summary="Explored four files" details={files} />
   </>,
