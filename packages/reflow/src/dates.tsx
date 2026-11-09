@@ -354,6 +354,7 @@ export function Calendar(handle: Handle<CalendarProps>) {
               {...trigger}
               type="button"
               class="rf-calendar-nav"
+              data-direction={direction === 'left' ? 'previous' : 'next'}
               data-rf-hover-item
               aria-label={label}
               disabled={disabled}
@@ -409,11 +410,20 @@ export function Calendar(handle: Handle<CalendarProps>) {
       focusDay(next)
     }
 
+    // As in the reference: side by side, each title is centered over its
+    // month, previous sits at the far left and next at the far right. One
+    // month, or months stacked, keep the title left and both arrows together
+    // on the first month's right.
+    const sideBySide = months.length > 1 && orientation !== 'vertical'
+    const previousDisabled = firstMonth <= monthStart(min)
+    const nextDisabled = firstMonth >= monthStart(max)
+
     return (
       <section
         class="rf-calendar"
         aria-label={label}
         data-orientation={orientation}
+        data-week-numbers={showWeekNumbers ? '' : undefined}
         style={
           cellSize && Number.isFinite(cellSize) && cellSize > 0
             ? { '--rf-date-cell-size': `${cellSize}px` }
@@ -450,8 +460,8 @@ export function Calendar(handle: Handle<CalendarProps>) {
 
             return (
               <div class="rf-calendar-month" key={index}>
-                <div class="rf-calendar-header">
-                  {index === 0 && monthButton('left', firstMonth <= monthStart(min))}
+                <div class="rf-calendar-header" data-centered={sideBySide ? '' : undefined}>
+                  {sideBySide && index === 0 && monthButton('left', previousDisabled)}
                   <div
                     class="rf-calendar-months-label"
                     aria-live={index === 0 ? 'polite' : undefined}
@@ -459,8 +469,14 @@ export function Calendar(handle: Handle<CalendarProps>) {
                   >
                     {monthLabel.format(month)}
                   </div>
-                  {index === months.length - 1 &&
-                    monthButton('right', firstMonth >= monthStart(max))}
+                  {sideBySide
+                    ? index === months.length - 1 && monthButton('right', nextDisabled)
+                    : index === 0 && (
+                        <>
+                          {monthButton('left', previousDisabled)}
+                          {monthButton('right', nextDisabled)}
+                        </>
+                      )}
                 </div>
                 <table class="rf-calendar-grid" role="grid" aria-label={monthLabel.format(month)}>
                   <thead>

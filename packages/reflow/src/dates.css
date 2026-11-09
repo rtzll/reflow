@@ -31,6 +31,42 @@
     'opsz' 18;
 }
 
+/* With week numbers, the title belongs to the days: it starts past the
+   week column. */
+.rf-calendar[data-week-numbers] .rf-calendar-header {
+  padding-inline-start: calc(var(--rf-date-cell) * 0.75 + 8px);
+}
+
+/* Months side by side, as in the reference: each title centered over its
+   days, previous at the far left, next at the far right. */
+.rf-calendar-header[data-centered] {
+  position: relative;
+  justify-content: center;
+  padding-inline: 0;
+}
+.rf-calendar[data-week-numbers] .rf-calendar-header[data-centered] {
+  padding-inline-start: calc(var(--rf-date-cell) * 0.75);
+}
+.rf-calendar-header[data-centered] .rf-calendar-months-label {
+  margin-inline-end: 0;
+  text-align: center;
+}
+.rf-calendar-header[data-centered] .rf-calendar-nav {
+  position: absolute;
+  inset-block-start: 0;
+}
+.rf-calendar-header[data-centered] .rf-calendar-nav[data-direction='previous'] {
+  inset-inline-start: 0;
+}
+.rf-calendar[data-week-numbers]
+  .rf-calendar-header[data-centered]
+  .rf-calendar-nav[data-direction='previous'] {
+  inset-inline-start: calc(var(--rf-date-cell) * 0.75);
+}
+.rf-calendar-header[data-centered] .rf-calendar-nav[data-direction='next'] {
+  inset-inline-end: 0;
+}
+
 .rf-calendar-nav,
 .rf-calendar-day {
   appearance: none;

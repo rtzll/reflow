@@ -943,3 +943,48 @@ it('anchors docs previews 48px below the header, as the reference does', async (
   await waitForShowcase(page)
   assert.equal((await offset('.doc-preview-stage[data-playground]', '[role="grid"]')).y, 88)
 })
+
+it('lays out calendar headers like the reference for one, side-by-side and stacked months', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await page.goto('/docs/calendar')
+  await waitForShowcase(page)
+  const layout = (example: string) =>
+    page.locator(`#${example} .rf-calendar`).evaluate((calendar) =>
+      Array.from(calendar.querySelectorAll('.rf-calendar-month'), (month) => {
+        const box = (node: Element | null) => node?.getBoundingClientRect()
+        const grid = box(month.querySelector('tbody tr:first-child td:not(.rf-calendar-week)'))!
+        const row = box(month.querySelector('tbody tr:first-child'))!
+        const days = { left: grid.left, right: row.right }
+        const title = box(month.querySelector('.rf-calendar-months-label'))!
+        const previous = box(month.querySelector('[aria-label="Previous month"]'))
+        const next = box(month.querySelector('[aria-label="Next month"]'))
+        return {
+          titleCenter: Math.round(title.left + title.width / 2 - (days.left + days.right) / 2),
+          titleLeft: Math.round(title.left - days.left),
+          previous: previous ? Math.round(previous.left - days.left) : null,
+          next: next ? Math.round(days.right - next.right) : null,
+          nextAfterPrevious: !!previous && !!next && next.left >= previous.right,
+          arrowsAfterTitle: !!previous && previous.left >= title.right,
+        }
+      }),
+    )
+
+  // Side by side: titles centered over their days, previous at the far left,
+  // next at the far right.
+  const range = await layout('range')
+  assert.equal(range.length, 2)
+  for (const month of range) assert.ok(Math.abs(month.titleCenter) <= 1, JSON.stringify(month))
+  assert.equal(range[0]!.previous, 0)
+  assert.equal(range[0]!.next, null)
+  assert.equal(range[1]!.previous, null)
+  assert.equal(range[1]!.next, 0)
+
+  // One month and stacked months: title left, both arrows together after it.
+  for (const example of ['single', 'stacked-months']) {
+    const [first, ...rest] = await layout(example)
+    assert.ok(first!.arrowsAfterTitle && first!.nextAfterPrevious, example)
+    assert.equal(first!.next, 0, example)
+    for (const month of rest) assert.deepEqual([month.previous, month.next], [null, null], example)
+  }
+})
