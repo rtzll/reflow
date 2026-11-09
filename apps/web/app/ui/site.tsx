@@ -230,25 +230,32 @@ function SettingIcon(handle: Handle<{ setting: string; value: string }>) {
   )
 }
 
-function SettingsPanel(handle: Handle<{ settings: Settings }>) {
+function SettingsPanel(handle: Handle<{ settings: Settings; variant?: 'rail' | 'sheet' }>) {
   return () => {
-    let { settings } = handle.props
+    let { settings, variant = 'rail' } = handle.props
     const customFont = fontCatalog.find((font) => `google:${font.n}` === settings.font)
     const availableWeights = customFont ? fontWeights(customFont).map(String) : []
+    const github = (
+      <a
+        class="site-icon-button"
+        href="https://github.com/rtzll/reflow"
+        aria-label="Reflow on GitHub"
+        title="Reflow on GitHub"
+      >
+        <Icon name="github" />
+      </a>
+    )
     return (
       <section class="site-settings" aria-label="Customize Reflow">
-        <div class="site-settings-heading">
+        <div class={variant === 'sheet' ? 'site-sheet-heading' : 'site-settings-heading'}>
           <h2>Make them yours</h2>
-          <ResetSettingsButton settings={settings} />
-          <ShareSettingsButton />
-          <a
-            class="site-icon-button"
-            href="https://github.com/rtzll/reflow"
-            aria-label="Reflow on GitHub"
-            title="Reflow on GitHub"
-          >
-            <Icon name="github" />
-          </a>
+          {variant === 'rail' ? (
+            <>
+              <ResetSettingsButton settings={settings} />
+              <ShareSettingsButton />
+            </>
+          ) : null}
+          {github}
         </div>
         {settingRows.map((row) => (
           <div
@@ -1091,28 +1098,11 @@ export function Showcase(handle: Handle<ShowcaseProps>) {
             id="site-mobile-panel"
             class="site-mobile-panel"
             aria-label="Navigation and settings"
+            tabindex={-1}
           >
-            <button
-              class="site-icon-button site-mobile-dismiss"
-              type="button"
-              aria-label="Close navigation"
-              hidden
-            >
-              <ReflowIcon name="x" />
-            </button>
             <div class="site-mobile-content">
-              <SettingsPanel settings={settings} />
+              <SettingsPanel settings={settings} variant="sheet" />
               <SiteCredit />
-              {page === 'component' &&
-                components[currentIndex] &&
-                !components[currentIndex].category && (
-                  <div data-rmx-key={`playground-controls:${components[currentIndex].slug}`}>
-                    <PlaygroundControls
-                      slug={components[currentIndex].slug}
-                      name={components[currentIndex].name}
-                    />
-                  </div>
-                )}
               <Sidebar
                 components={components}
                 settings={settings}

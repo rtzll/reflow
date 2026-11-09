@@ -19,14 +19,13 @@ function enhanceMobileNavigation() {
   const disclosure = document.querySelector<HTMLDetailsElement>('.site-mobile')
   const drawer = disclosure?.querySelector('dialog')
   const trigger = disclosure?.querySelector('summary')
-  const close = drawer?.querySelector<HTMLButtonElement>('.site-mobile-dismiss')
-  if (!disclosure || !drawer || !trigger || !close) return
+  if (!disclosure || !drawer || !trigger) return
 
   const mobile = matchMedia('(width < 1280px)')
   const openDrawer = () => {
     disclosure.open = true
     drawer.showModal()
-    close.focus({ preventScroll: true })
+    drawer.focus({ preventScroll: true })
   }
 
   const closeDrawer = () => {
@@ -43,13 +42,11 @@ function enhanceMobileNavigation() {
   trigger.setAttribute('aria-haspopup', 'dialog')
   trigger.setAttribute('aria-keyshortcuts', '[')
   trigger.title = 'Open navigation ['
-  close.hidden = false
   if (disclosure.open && mobile.matches) openDrawer()
   trigger.addEventListener('click', (event) => {
     event.preventDefault()
     openDrawer()
   })
-  close.addEventListener('click', closeDrawer)
   drawer.addEventListener('click', (event) => {
     if (event.target === drawer && event.clientX >= drawer.getBoundingClientRect().right)
       closeDrawer()

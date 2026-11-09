@@ -225,6 +225,25 @@ html[data-density='compact'] .site-nav a {
 .site-settings-heading h2 {
   margin-inline-end: auto;
 }
+/* Mobile sheet: one title line and a single GitHub control. */
+.site-sheet-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 40px;
+  margin-inline: 8px;
+}
+.site-sheet-heading h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+.site-sheet-heading .site-icon-button {
+  flex: none;
+}
 .site-settings form {
   margin-top: 6px;
 }
@@ -906,12 +925,15 @@ body:has(.site-demo) {
     position: fixed;
     inset: 0;
   }
-  .site-mobile:not([data-enhanced])[open] > summary,
-  .site-mobile-dismiss {
+  .site-mobile:not([data-enhanced])[open] > summary {
     position: fixed;
     z-index: 100;
-    inset: 8px auto auto calc(var(--site-drawer-width) - 40px);
+    top: 16px;
+    left: calc(var(--site-drawer-width) - 48px);
     background: var(--rf-surface-2);
+  }
+  .site-mobile:not([data-enhanced])[open] .site-sheet-heading {
+    padding-right: 52px;
   }
   .site-mobile:not([data-enhanced])[open] .site-mobile-open-icon {
     display: none;
@@ -935,6 +957,9 @@ body:has(.site-demo) {
     color: inherit;
     overflow: hidden;
   }
+  .site-mobile-panel:focus {
+    outline: none;
+  }
   .site-mobile:not([open]) > .site-mobile-panel {
     display: none;
   }
@@ -944,15 +969,6 @@ body:has(.site-demo) {
     overflow: auto;
     overscroll-behavior: contain;
     scrollbar-width: thin;
-  }
-  .site-mobile-content .site-settings-heading {
-    min-height: 40px;
-    padding-right: 32px;
-    border: 0;
-  }
-  .site-mobile-content .site-settings-heading h2 {
-    font-size: 16px;
-    font-weight: 600;
   }
   .site-mobile-content [data-setting-label] {
     min-width: 0;
@@ -1308,14 +1324,11 @@ html[data-font='geist-serif'] {
   }
 }
 @media (pointer: coarse) {
-  .site-mobile-toggle,
-  .site-mobile-dismiss {
-    touch-action: manipulation;
-  }
   .site-mobile-toggle {
     position: relative;
+    touch-action: manipulation;
   }
-  :is(.site-mobile-toggle, .site-mobile-dismiss)::after {
+  .site-mobile-toggle::after {
     content: '';
     position: absolute;
     inset: -8px;

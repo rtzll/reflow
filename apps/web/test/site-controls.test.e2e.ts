@@ -162,9 +162,17 @@ it('opens a full-height mobile drawer and keeps page interaction behind it', asy
   await drawer.waitFor()
   assert.ok(await drawer.evaluate((panel) => panel.matches(':modal')))
   assert.deepEqual(await drawer.boundingBox(), { x: 0, y: 0, width: 288, height: 844 })
-  const close = drawer.getByRole('button', { name: 'Close navigation' })
   const theme = drawer.locator('[data-setting-trigger="theme"]')
-  assert.ok(await close.evaluate((button) => button === document.activeElement))
+  assert.ok(await drawer.evaluate((panel) => panel === document.activeElement))
+  assert.equal(await drawer.getByRole('button', { name: 'Close navigation' }).count(), 0)
+  assert.equal(await drawer.getByRole('button', { name: 'Reset settings to defaults' }).count(), 0)
+  assert.equal(await drawer.getByRole('button', { name: 'Copy link with these settings' }).count(), 0)
+  assert.equal(await drawer.locator('.doc-playground-controls').count(), 0)
+  const title = (await drawer.locator('.site-sheet-heading h2').boundingBox())!
+  const github = (await drawer.getByRole('link', { name: 'Reflow on GitHub' }).boundingBox())!
+  assert.equal(await drawer.locator('.site-sheet-heading h2').innerText(), 'Make them yours')
+  assert.ok(title.height < 24)
+  assert.ok(Math.abs(title.y + title.height / 2 - (github.y + github.height / 2)) < 4)
   assert.deepEqual(
     await theme
       .locator('[data-theme-icon]')
@@ -185,7 +193,7 @@ it('opens a full-height mobile drawer and keeps page interaction behind it', asy
     main.focus()
     main.addEventListener('click', () => main.setAttribute('data-background-clicked', ''))
   })
-  assert.ok(await close.evaluate((button) => button === document.activeElement))
+  assert.ok(await drawer.evaluate((panel) => panel === document.activeElement))
 
   await theme.press('ArrowDown')
   await page.keyboard.press('Escape')
@@ -210,7 +218,7 @@ it('opens a full-height mobile drawer and keeps page interaction behind it', asy
   await page.setViewportSize({ width: 320, height: 568 })
   await trigger.click()
   assert.deepEqual(await drawer.boundingBox(), { x: 0, y: 0, width: 288, height: 568 })
-  await close.click()
+  await page.mouse.click(304, 200)
   await drawer.waitFor({ state: 'hidden' })
 
   await page.setViewportSize({ width: 1000, height: 780 })
@@ -221,6 +229,7 @@ it('opens a full-height mobile drawer and keeps page interaction behind it', asy
   await drawer.waitFor({ state: 'hidden' })
   await page.locator('.site-left').waitFor()
   await page.locator('dialog:modal').waitFor({ state: 'detached' })
+  await page.locator('.site-right').getByRole('button', { name: 'Reset settings to defaults' }).waitFor()
 })
 
 it('server-renders native settings disclosures before client enhancement', async (t) => {
