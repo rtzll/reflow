@@ -202,13 +202,6 @@ export function enhanceShowcaseSound() {
   document.addEventListener('click', unlockFromGesture, options)
   document.addEventListener('keydown', unlockFromGesture, options)
 
-  document.addEventListener('click', (event) => {
-    if (event.defaultPrevented || !(event.target instanceof Element)) return
-    const button = event.target.closest(
-      '.site-preview-stage button[data-slot="button"]:not(:disabled, [aria-disabled="true"], [aria-haspopup="dialog"])',
-    )
-    if (button && !button.closest('dialog')) play('tap')
-  })
   document.addEventListener('change', (event) => {
     const input = event.target
     if (!(input instanceof Element) || !input.closest('.site-preview-stage')) return

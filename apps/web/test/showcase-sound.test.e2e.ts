@@ -90,6 +90,13 @@ it('plays quiet cues on committed changes and stays silent when muted', async (t
       () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
     )
 
+  await visit('/docs/button')
+  const button = page.getByRole('button', { name: 'Click me', exact: true })
+  await button.click()
+  await expect(button).toHaveAttribute('aria-busy', 'true')
+  await settle()
+  expect(await audioStarts()).toBe(0)
+
   await visit('/docs/combobox')
   const single = page.locator('#basic')
   const framework = single.getByRole('combobox', { name: 'Framework' })
