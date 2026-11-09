@@ -1845,13 +1845,22 @@
 }
 
 .system-size-toolbar {
+  container-type: inline-size;
   display: grid;
   gap: 32px;
   width: 100%;
 }
+.system-stage:has(> .system-size-toolbar) {
+  padding: 48px 32px;
+}
+@media (width < 640px) {
+  .system-stage:has(> .system-size-toolbar) {
+    padding: 24px 16px;
+  }
+}
 .system-size-row {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   min-width: 0;
 }
 .system-size-row > span {
@@ -1867,7 +1876,7 @@
 }
 .system-size-controls {
   position: relative;
-  padding-inline-end: 50px;
+  padding-inline-end: 44px;
 }
 .system-size-controls::before {
   content: '';
@@ -1883,31 +1892,32 @@
   display: contents;
 }
 .system-size-actions .rf-select {
-  width: 132px;
+  flex: 0 1 144px;
+  inline-size: 144px;
+}
+.system-size-actions .rf-select .rf-picker-trigger {
+  min-inline-size: 0;
 }
 .system-size-search {
-  position: relative;
-  display: block;
-  width: 108px;
-}
-.system-size-search > svg {
-  position: absolute;
-  top: 50%;
-  left: 9px;
-  translate: 0 -50%;
-  color: var(--rf-muted);
-  pointer-events: none;
-}
-.system-size-search input {
-  padding-inline-start: 30px;
+  flex: 0 1 96px;
+  inline-size: 96px;
 }
 .system-size-guide {
   position: absolute;
+  inset-block: 0;
   inset-inline-end: 0;
-  color: var(--rf-accent);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--rf-fg);
   white-space: nowrap;
   font-size: var(--rf-text-caption);
+  font-variant-numeric: tabular-nums;
+  font-variation-settings: var(--rf-weight-strong);
   pointer-events: none;
+}
+.system-size-guide > svg {
+  color: var(--rf-accent);
 }
 .system-size-result {
   display: flex;
@@ -1921,7 +1931,7 @@
   border: 1px solid var(--rf-border);
   border-radius: var(--rf-radius);
 }
-@media (max-width: 820px) and (min-width: 721px), (max-width: 639px) {
+@container (width < 560px) {
   .system-size-controls {
     padding-inline-end: 0;
     flex-wrap: wrap;
@@ -1932,14 +1942,19 @@
   }
   .system-size-actions {
     flex-wrap: wrap;
-    margin-inline-start: 0;
-  }
-}
-@media (max-width: 639px) {
-  .system-size-actions:not([data-show-filters]) {
-    margin-inline-start: auto;
+    justify-content: flex-end;
   }
   .system-size-actions:not([data-show-filters]) .system-size-filters {
     display: none;
+  }
+  .system-size-actions[data-show-filters] {
+    flex-basis: 100%;
+  }
+  .system-size-actions[data-show-filters] .system-size-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--rf-gap);
+    flex-basis: 100%;
+    order: 1;
   }
 }

@@ -4,6 +4,48 @@ import { it } from 'remix/test'
 import { expect } from 'playwright/test'
 import { router, waitForShowcase } from './showcase-router.ts'
 
+it('fits the size toolbar controls and height guides without overlap', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/docs/sizes')
+  await waitForShowcase(page)
+
+  for (const [density, height, gap] of [
+    ['default', 36, 8],
+    ['compact', 28, 4],
+  ] as const) {
+    const row = page.locator(`.system-size-row[data-density="${density}"]`)
+    const geometry = await row.evaluate((node) => {
+      const rect = (selector: string) => node.querySelector(selector)!.getBoundingClientRect()
+      const controls = [
+        '.rf-tabs',
+        '.system-size-search',
+        '.rf-select .rf-picker-trigger',
+        'button[aria-label="Filter"]',
+        '.system-size-actions > .rf-button:last-child',
+      ].map(rect)
+      return {
+        heights: controls.map((box) => box.height),
+        gaps: controls.slice(1).map((box, index) => box.left - controls[index].right),
+        guide: rect('.system-size-guide > svg').height,
+      }
+    })
+    assert.deepEqual(geometry.heights, Array(5).fill(height))
+    assert.ok(geometry.gaps.every((value) => value >= gap - 0.5))
+    assert.equal(geometry.guide, height)
+  }
+
+  await page.setViewportSize({ width: 390, height: 844 })
+  const row = page.locator('.system-size-row[data-density="default"]')
+  const search = row.getByRole('textbox', { name: 'default search' })
+  await expect(row.locator('.system-size-guide')).toBeHidden()
+  await expect(search).toBeHidden()
+  await row.getByRole('button', { name: 'Filter' }).click()
+  await expect(search).toBeFocused()
+  await search.fill('Website')
+  await expect(row.getByRole('status')).toHaveText('Website')
+})
+
 it('aligns the three hover axes and keeps the card grid interactive', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1440, height: 900 })

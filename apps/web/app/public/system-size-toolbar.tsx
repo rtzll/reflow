@@ -1,4 +1,4 @@
-import { Button, Icon, Input, Select, Tabs } from '@rtzll/reflow'
+import { Button, Icon, InputField, InputGroup, Select, Tabs } from '@rtzll/reflow'
 import { on, ref, type Handle } from 'remix/component'
 
 const sortOptions = [
@@ -6,6 +6,37 @@ const sortOptions = [
   { value: 'created', label: 'Created' },
   { value: 'name', label: 'Name' },
 ]
+
+function viewIcon(path: string) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      stroke-linecap="round"
+    >
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <path d={path} />
+    </svg>
+  )
+}
+
+function FilterIcon() {
+  return () => (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      stroke-linecap="round"
+    >
+      <path d="M4 7h16M7 12h10m-7 5h4" />
+    </svg>
+  )
+}
 
 function SizeToolbarRow(handle: Handle<{ density: 'default' | 'compact' }>) {
   let view = 'table'
@@ -51,27 +82,26 @@ function SizeToolbarRow(handle: Handle<{ density: 'default' | 'compact' }>) {
               update()
             }}
             items={[
-              { label: 'Table', value: 'table', icon: <Icon name="menu" /> },
-              { label: 'Board', value: 'board', icon: <Icon name="file" /> },
+              { label: 'Table', value: 'table', icon: viewIcon('M3 9h18M9 9v12') },
+              { label: 'Board', value: 'board', icon: viewIcon('M8 7v6m4-6v10m4-10v4') },
             ]}
           />
           <div class="system-size-actions" data-show-filters={showFilters || undefined}>
             <div class="system-size-filters" id={`size-${density}-filters`}>
-              <label class="system-size-search">
-                <Icon name="search" />
-                <Input
-                  aria-label={`${density} search`}
+              <InputGroup class="system-size-search">
+                <InputField
+                  label={`${density} search`}
+                  labelHidden
+                  icon={<Icon name="search" />}
                   placeholder="Search…"
                   value={query}
-                  mix={[
-                    captureSearch,
-                    on<HTMLInputElement, 'input'>('input', (event) => {
-                      query = event.currentTarget.value
-                      update()
-                    }),
-                  ]}
+                  mix={captureSearch}
+                  onChange={(value) => {
+                    query = value
+                    update()
+                  }}
                 />
-              </label>
+              </InputGroup>
               <Select
                 label={`${density} sort order`}
                 options={sortOptions}
@@ -89,16 +119,7 @@ function SizeToolbarRow(handle: Handle<{ density: 'default' | 'compact' }>) {
               aria-controls={`size-${density}-filters`}
               mix={on('click', focusFilters)}
             >
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-              >
-                <path d="M4 7h16M7 12h10m-7 5h4" />
-              </svg>
+              <FilterIcon />
             </Button>
             <Button
               leadingIcon={<Icon name="plus" />}
@@ -111,7 +132,21 @@ function SizeToolbarRow(handle: Handle<{ density: 'default' | 'compact' }>) {
             </Button>
           </div>
           <span class="system-size-guide" aria-hidden="true">
-            ↕ {height}px
+            <svg
+              width="8"
+              height={height}
+              viewBox={`0 0 8 ${height}`}
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.25"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d={`M4 1.5V${height - 1.5}M1.5 5 4 1.5 6.5 5M1.5 ${height - 5} 4 ${height - 1.5} 6.5 ${height - 5}`}
+              />
+            </svg>
+            <span>{height}px</span>
           </span>
         </div>
         {showResults && (
