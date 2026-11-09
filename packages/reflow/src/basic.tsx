@@ -722,8 +722,33 @@ export type BannerProps = StyledProps<'div'> & {
   onDismiss?: () => void
 }
 
+const focusableSelector =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
+/** Where keyboard focus goes when a banner holding it closes, as in the
+ *  reference: the first focusable element after it, else the last before it. */
+function focusNeighbour(banner: Element) {
+  const candidates = Array.from(
+    banner.ownerDocument.querySelectorAll<HTMLElement>(focusableSelector),
+  ).filter((node) => !banner.contains(node) && !node.closest('[inert]') && node.checkVisibility())
+  const after = candidates.find(
+    (node) => banner.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING,
+  )
+  const before = candidates
+    .filter((node) => banner.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_PRECEDING)
+    .pop()
+  ;(after ?? before)?.focus({ preventScroll: true })
+}
+
 export function Banner(handle: Handle<BannerProps>) {
   let dismissed = false
+  let root: Element | null = null
+  let wasVisible = true
+  // Set when the dismiss button held focus, so the close hands it on.
+  let handOff = false
+  const rootRef = ref((node) => {
+    root = node
+  })
 
   return () => {
     const {
@@ -743,9 +768,22 @@ export function Banner(handle: Handle<BannerProps>) {
       ...props
     } = handle.props
     const visible = open ?? !dismissed
+    if (wasVisible && !visible && handOff) {
+      handOff = false
+      handle.queueTask(() => {
+        if (root) focusNeighbour(root)
+      })
+    }
+    if (visible) handOff = false
+    wasVisible = visible
 
     return (
-      <div class="rf-banner-collapse" data-open={visible ? 'true' : 'false'} data-variant={variant}>
+      <div
+        class="rf-banner-collapse"
+        data-open={visible ? 'true' : 'false'}
+        data-variant={variant}
+        mix={rootRef}
+      >
         <div class="rf-banner-overflow" inert={!visible} aria-hidden={!visible || undefined}>
           <div
             {...props}
@@ -765,7 +803,8 @@ export function Banner(handle: Handle<BannerProps>) {
                 type="button"
                 class="rf-banner-dismiss"
                 aria-label={dismissLabel}
-                mix={on('click', () => {
+                mix={on('click', (event) => {
+                  handOff = event.currentTarget === document.activeElement
                   onDismiss?.()
                   if (open === undefined) {
                     dismissed = true
