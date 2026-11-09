@@ -1,0 +1,69 @@
+/* Popover: a panel anchored to its trigger. It shares the menu surfaces'
+   elevation and motion: it drops 4px and grows from 96% on the fast spring,
+   toward the trigger's side, and leaves on the fast exit. */
+.rf-popover {
+  display: inline-block;
+  max-inline-size: 100%;
+}
+
+.rf-popover-surface {
+  gap: 12px;
+  inline-size: max-content;
+  min-inline-size: 200px;
+  max-inline-size: min(320px, calc(100vw - 16px));
+  padding: 12px;
+  border: 0;
+  outline: none;
+  background: var(--rf-surface-3, white);
+  box-shadow:
+    inset 0 1px light-dark(transparent, rgb(255 255 255 / 2%)),
+    inset 0 0 0 1px light-dark(transparent, rgb(255 255 255 / 2%)),
+    0 0 0 1px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 12%)),
+    0 1px 1px -0.5px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 18%)),
+    0 3px 3px -1.5px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 18%)),
+    0 12px 28px light-dark(rgb(0 0 0 / 10%), rgb(0 0 0 / 24%));
+  font-size: var(--rf-text-body, 13px);
+  line-height: var(--rf-leading-body, 20px);
+}
+/* Only while open: a display value on the closed panel would override the
+   browser's hiding, leaving an invisible panel that catches clicks. */
+.rf-popover-surface:popover-open {
+  display: grid;
+}
+.rf-popover-surface[data-density='compact'] {
+  gap: 8px;
+  padding: 10px;
+}
+
+/* Beside the trigger, the panel slides in sideways instead. */
+.rf-popover-surface[data-anchor-placement^='left'] {
+  --rf-menu-rest-transform: translateX(4px) scaleX(0.96);
+  transform-origin: right;
+}
+.rf-popover-surface[data-anchor-placement^='right'] {
+  --rf-menu-rest-transform: translateX(-4px) scaleX(0.96);
+  transform-origin: left;
+}
+
+.rf-popover-header {
+  display: grid;
+  gap: 4px;
+}
+.rf-popover-title {
+  margin: 0;
+  color: var(--rf-fg);
+  font-size: inherit;
+  line-height: inherit;
+  font-variation-settings: var(--rf-weight-strong);
+}
+.rf-popover-description {
+  margin: 0;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption, 12px);
+  line-height: var(--rf-leading-caption, 16px);
+}
+.rf-popover-body {
+  display: grid;
+  gap: 8px;
+  min-inline-size: 0;
+}

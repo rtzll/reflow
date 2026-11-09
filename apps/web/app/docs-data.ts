@@ -2721,6 +2721,99 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  popover: [
+    {
+      name: 'Popover',
+      props: [
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Names the panel when it has no visible title.',
+          required: false,
+        },
+        {
+          name: 'title',
+          type: 'RemixNode',
+          description: 'A visible heading that names the panel.',
+          required: false,
+        },
+        {
+          name: 'description',
+          type: 'RemixNode',
+          description: 'Supporting text under the title, announced with the panel.',
+          required: false,
+        },
+        {
+          name: 'children',
+          type: 'RemixNode',
+          description: 'The panel content.',
+          required: false,
+        },
+        {
+          name: 'trigger',
+          type: 'RemixNode',
+          description: 'Contents of the button that opens the panel.',
+          required: false,
+        },
+        {
+          name: 'triggerVariant',
+          type: 'ButtonProps["variant"]',
+          description: 'Appearance of the built-in trigger button. Default secondary.',
+          required: false,
+        },
+        {
+          name: 'triggerSize',
+          type: 'ButtonProps["size"]',
+          description: 'Size of the built-in trigger button.',
+          required: false,
+        },
+        {
+          name: 'renderTrigger',
+          type: '(props: PopoverTriggerProps) => RemixNode',
+          description: 'Renders your own trigger; spread the props onto a focusable element.',
+          required: false,
+        },
+        {
+          name: 'open',
+          type: 'boolean',
+          description: 'Whether the panel is open, when controlled by the parent.',
+          required: false,
+        },
+        {
+          name: 'defaultOpen',
+          type: 'boolean',
+          description: 'Whether the panel starts open when uncontrolled.',
+          required: false,
+        },
+        {
+          name: 'onOpenChange',
+          type: '((open: boolean) => void)',
+          description:
+            'Called when the trigger, Escape or an outside click opens or closes the panel.',
+          required: false,
+        },
+        {
+          name: 'placement',
+          type: 'PopoverPlacement',
+          description:
+            'Which side of the trigger the panel opens on, flipping when there is no room. Default bottom.',
+          required: false,
+        },
+        {
+          name: 'offset',
+          type: 'number',
+          description: 'Distance from the trigger in pixels. Default 8.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: '"default" | "compact"',
+          description: 'Tightens the panel padding and the built-in trigger.',
+          required: false,
+        },
+      ],
+    },
+  ],
   'radio-group': [
     {
       name: 'RadioGroup',

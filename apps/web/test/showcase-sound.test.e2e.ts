@@ -226,3 +226,18 @@ it('plays a cue on manual carousel changes and leaves autoplay silent', async (t
   await archive.press('Enter')
   expect(await audioStarts()).toBe(before)
 })
+
+it('plays open and close cues for a Popover', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  const audioStarts = await trackAudio(page)
+  await page.goto('/docs/popover')
+  await waitForShowcase(page)
+  const trigger = page.locator('#basic').getByRole('button', { name: 'Dimensions', exact: true })
+  await trigger.click()
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  await expect.poll(audioStarts).toBeGreaterThan(0)
+  const opened = await audioStarts()
+  await page.keyboard.press('Escape')
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+  await expect.poll(audioStarts).toBeGreaterThan(opened)
+})

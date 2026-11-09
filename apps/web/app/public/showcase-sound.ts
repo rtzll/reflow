@@ -232,6 +232,13 @@ export function enhanceShowcaseSound() {
       const dialog = event.target
       if (dialog instanceof HTMLDialogElement && dialog.matches('.rf-dialog')) {
         play(dialog.open ? 'open' : 'close')
+      } else if (
+        event instanceof ToggleEvent &&
+        dialog instanceof HTMLElement &&
+        dialog.matches('.rf-popover-surface') &&
+        dialog.closest('.site-preview-stage')
+      ) {
+        play(event.newState === 'open' ? 'open' : 'close', { emphasis: 'subtle' })
       }
     },
     { capture: true },

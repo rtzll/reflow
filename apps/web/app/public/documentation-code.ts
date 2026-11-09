@@ -249,6 +249,15 @@ ${opening} label="Fruit" options={options} defaultValue={['apples']} />`
       return `const options = ${JSON.stringify(radioOptions)}
 
 ${opening} label="Options" options={options} defaultValue="0" />`
+    case 'popover': {
+      const title = values.title
+        ? ' title="Dimensions" description="Set the size of the selected frame."'
+        : ' label="Dimensions"'
+      const placement =
+        values.placement && values.placement !== 'bottom' ? ` placement="${values.placement}"` : ''
+      const compact = values.size === 'compact' ? ' size="compact"' : ''
+      return `<Popover${title} trigger="Dimensions"${placement}${compact}>\n  <Input name="width" defaultValue="100%" />\n  <Input name="height" defaultValue="auto" />\n</Popover>`
+    }
     case 'segmented-control': {
       const content = String(values.content ?? 'Text')
       const options =

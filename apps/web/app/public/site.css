@@ -2917,6 +2917,32 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
   justify-content: flex-start;
 }
 
+.doc-popover-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  inline-size: 240px;
+  max-inline-size: 100%;
+}
+.doc-popover-fields label {
+  display: grid;
+  gap: 4px;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption);
+}
+.doc-popover-form {
+  display: grid;
+  gap: 12px;
+}
+.doc-popover-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.doc-popover-note {
+  margin: 0;
+  color: var(--rf-muted);
+}
 .doc-demo-segmented-fill {
   inline-size: min(100%, 360px);
 }

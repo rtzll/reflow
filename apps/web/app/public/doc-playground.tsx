@@ -5,6 +5,7 @@ import { RequestFormExample } from './request-form-example.tsx'
 import { DropdownPlayground } from './dropdown-example.tsx'
 import { BreadcrumbDemo } from './breadcrumb-example.tsx'
 import { SegmentedControlDemo } from './segmented-control-example.tsx'
+import { PopoverDemo } from './popover-example.tsx'
 import { paletteCommands, paletteGroups, paletteSuggestions } from './component-demos.tsx'
 import { SoundCombobox } from './sound-combobox.tsx'
 import { playCopySuccess } from './showcase-sound.ts'
@@ -264,6 +265,11 @@ export const playgroundControls: Record<string, readonly Control[]> = {
     choice('orientation', 'Layout', ['vertical', 'horizontal']),
     toggle('hideLabel', 'Hide label', true),
     disabled,
+  ],
+  popover: [
+    choice('placement', 'Placement', ['bottom', 'top', 'right', 'left']),
+    toggle('title', 'Title'),
+    size,
   ],
   'segmented-control': [
     choice('content', 'Content', ['Text', 'Icons', 'Icon only']),
@@ -776,6 +782,15 @@ export function PlaygroundExample(
             dismissOnBackdrop={Boolean(v.dismissOnBackdrop)}
             description="Add a new teamspace to organize your projects and collaborate with your team."
             footer={(close) => <Button mix={on('click', close)}>Create</Button>}
+          />
+        )
+      case 'popover':
+        return (
+          <PopoverDemo
+            variant="playground"
+            size={density}
+            placement={String(v.placement) as 'bottom' | 'top' | 'right' | 'left'}
+            title={Boolean(v.title)}
           />
         )
       case 'segmented-control':

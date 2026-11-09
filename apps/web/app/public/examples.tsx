@@ -1,5 +1,6 @@
 import { BreadcrumbDemo } from './breadcrumb-example.tsx'
 import { SegmentedControlDemo } from './segmented-control-example.tsx'
+import { PopoverDemo } from './popover-example.tsx'
 import { paletteCommands, paletteSuggestions } from './palette-example-data.tsx'
 import { accents } from './site-settings.ts'
 import { ChatExample } from './chat-example.tsx'
@@ -272,6 +273,8 @@ export const Example = clientEntry(
               />
             </div>
           )
+        case 'popover':
+          return <PopoverDemo variant="playground" placement="bottom" />
         case 'segmented-control':
           return <SegmentedControlDemo variant="playground" />
         case 'breadcrumb':

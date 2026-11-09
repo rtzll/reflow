@@ -40,6 +40,7 @@ import { on, ref, type Handle, type RemixNode } from 'remix/component'
 import { DropdownDemo } from './dropdown-example.tsx'
 import { BreadcrumbDemo } from './breadcrumb-example.tsx'
 import { SegmentedControlDemo } from './segmented-control-example.tsx'
+import { PopoverDemo } from './popover-example.tsx'
 import { SoundCombobox } from './sound-combobox.tsx'
 import { playCopySuccess } from './showcase-sound.ts'
 import {
@@ -905,6 +906,42 @@ export const componentExamples: Record<string, readonly DocumentationExample[]> 
       `<InputMessage onSend={async ({ text, files }) => {\n  await saveMessage(text, files)\n}} />`,
     ),
     demo('Disabled', 'disabled', `<InputMessage disabled onSend={sendMessage} />`),
+  ],
+  popover: [
+    demo(
+      'Basic',
+      'basic',
+      `<Popover label="Dimensions" trigger="Dimensions">\n  <Input name="width" defaultValue="100%" />\n  <Input name="height" defaultValue="auto" />\n</Popover>`,
+      'A click opens the panel and moves focus to its first field; Escape or a click outside closes it and returns focus to the trigger.',
+    ),
+    demo(
+      'Title and description',
+      'title',
+      `<Popover title="Share this page" description="Anyone with the link can view it." trigger="Share">\n  <InputCopy label="Link" value={url} />\n</Popover>`,
+      'A visible title names the panel; without one, pass label.',
+    ),
+    demo(
+      'Placement',
+      'placement',
+      `<Popover label="Details" trigger="Top" placement="top">…</Popover>`,
+      'The panel flips to the other side when there is no room.',
+    ),
+    demo(
+      'Custom trigger',
+      'trigger',
+      `<Popover title="Display" placement="bottom-end" renderTrigger={(trigger) => (\n  <Button variant="ghost" size="icon" aria-label="Display settings" {...trigger}>\n    <Icon name="settings" />\n  </Button>\n)}>…</Popover>`,
+    ),
+    demo(
+      'Controlled',
+      'controlled',
+      `<Popover title="Dimensions" trigger="Dimensions" open={open} onOpenChange={setOpen}>\n  <form onSubmit={apply}>…</form>\n</Popover>`,
+      'Close the panel from your own actions, such as Apply and Cancel.',
+    ),
+    demo(
+      'Compact',
+      'compact',
+      `<Popover label="Dimensions" trigger="Dimensions" size="compact">…</Popover>`,
+    ),
   ],
   'radio-group': [
     demo(
@@ -2051,6 +2088,8 @@ export function ComponentDemo(
             </div>
           )
         return <SettingsDialogExample />
+      case 'popover':
+        return <PopoverDemo variant={variant} />
       case 'segmented-control':
         return <SegmentedControlDemo variant={variant} />
       case 'breadcrumb':

@@ -150,6 +150,10 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
     description: 'A working status with an animated icon and rotating visual label.',
     code: `<ThinkingIndicator labels={['Thinking…', 'Refining…']} />`,
   },
+  popover: {
+    description: 'A panel anchored to a trigger for filters, inline settings, or sharing.',
+    code: `<Popover label="Dimensions" trigger="Dimensions">\n  <Input name="width" defaultValue="100%" />\n</Popover>`,
+  },
   'queued-stack': {
     description: 'Reorder, remove, and send messages from a compact queue.',
     code: `<QueuedStack\n  messages={[{ id: 'q1', content: 'Summarise the Q3 board deck' }]}\n  onOrderChange={reorder}\n  onRemove={remove}\n  onSend={send}\n/>`,
@@ -231,6 +235,7 @@ const components = [
   ['input-copy', 'InputCopy'],
   ['input-group', 'InputGroup'],
   ['input-message', 'InputMessage'],
+  ['popover', 'Popover'],
   ['queued-stack', 'QueuedStack'],
   ['radio-group', 'RadioGroup'],
   ['segmented-control', 'SegmentedControl'],
