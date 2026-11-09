@@ -17,6 +17,21 @@ const keyboardWidgets = [
   '.site-accent-panel',
 ].join(', ')
 
+// The settings rail has no scroll of its own: when it is taller than the
+// window it sticks with its end in view instead of its top.
+function pinSettingsRail() {
+  const rail = document.querySelector<HTMLElement>('.site-right')
+  if (!rail) return
+  const update = () =>
+    rail.style.setProperty(
+      '--site-right-top',
+      `${Math.min(0, window.innerHeight - rail.offsetHeight)}px`,
+    )
+  new ResizeObserver(update).observe(rail)
+  window.addEventListener('resize', update)
+  update()
+}
+
 function enhanceMobileNavigation() {
   const disclosure = document.querySelector<HTMLDetailsElement>('.site-mobile')
   const drawer = disclosure?.querySelector('dialog')
@@ -65,6 +80,7 @@ function enhanceMobileNavigation() {
 export function enhanceShowcase() {
   enhanceShowcaseSound()
   enhanceMobileNavigation()
+  pinSettingsRail()
   const menus = Array.from(document.querySelectorAll<HTMLDetailsElement>('[data-setting-menu]'))
   function setMenuOpen(menu: HTMLDetailsElement, open: boolean) {
     menu.open = open

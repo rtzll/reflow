@@ -102,8 +102,8 @@ html[data-density='compact'] :is(.site-layout, .site-demo) {
   background: var(--rf-surface-3, var(--rf-bg));
 }
 
-.site-left,
-.site-right {
+/* The navigation keeps a scroll of its own and never hands it on to the page. */
+.site-left {
   position: sticky;
   top: 0;
   align-self: start;
@@ -114,9 +114,18 @@ html[data-density='compact'] :is(.site-layout, .site-demo) {
   scrollbar-color: transparent transparent;
 }
 
-.site-left:hover,
-.site-right:hover {
+.site-left:hover {
   scrollbar-color: var(--rf-border) transparent;
+}
+
+/* The settings rail reads as page background, so the wheel over it scrolls
+   the page. Taller than the window, it rides up with the page until its end
+   is in view, then stays: the showcase script keeps --site-right-top at the
+   window height minus the rail's, never below zero. */
+.site-right {
+  position: sticky;
+  top: var(--site-right-top, 0px);
+  align-self: start;
 }
 
 .site-left {

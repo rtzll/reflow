@@ -455,3 +455,41 @@ it('saves the settings of a shared link over older cookies and shows the clean U
         ?.value.toUpperCase() === 'E7000B',
   )
 })
+
+it('scrolls the page from over the right rail and keeps the left rail self-contained', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/docs/button')
+  await waitForShowcase(page)
+  const right = page.locator('.site-right')
+  const left = page.locator('.site-left')
+  const scrollY = () => page.evaluate(() => Math.round(window.scrollY))
+  const centre = async (locator: typeof right) => {
+    const box = (await locator.boundingBox())!
+    return { x: box.x + box.width / 2, y: 450 }
+  }
+
+  // The right rail reads as page background: it has no scroll of its own,
+  // so the wheel over it moves the page.
+  assert.equal(await right.evaluate((rail) => getComputedStyle(rail).overflowY), 'visible')
+  const overRight = await centre(right)
+  await page.mouse.move(overRight.x, overRight.y)
+  await page.mouse.wheel(0, 600)
+  await expect.poll(scrollY).toBeGreaterThan(0)
+
+  // Taller than the window, the rail rides up with the page until its end is in view.
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+  await expect
+    .poll(() => right.evaluate((rail) => rail.getBoundingClientRect().bottom - innerHeight))
+    .toBeLessThanOrEqual(1)
+
+  // The navigation keeps its own scroll and never hands it on to the page.
+  await page.evaluate(() => window.scrollTo(0, 0))
+  await expect.poll(scrollY).toBe(0)
+  const overLeft = await centre(left)
+  await page.mouse.move(overLeft.x, overLeft.y)
+  await page.mouse.wheel(0, 4000)
+  await expect.poll(() => left.evaluate((nav) => nav.scrollTop)).toBeGreaterThan(0)
+  await page.waitForTimeout(300)
+  assert.equal(await scrollY(), 0)
+})
