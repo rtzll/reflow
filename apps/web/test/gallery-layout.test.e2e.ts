@@ -468,3 +468,52 @@ it('animates the accordion panel height on the first open as on later opens', as
   const second = await sample()
   assert.ok(animates(second), `Second open did not animate: ${second.join(' ')}`)
 })
+
+it('strengthens the command list header line and drops the end line at the bottom', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.goto('/docs/command-menu')
+  await waitForShowcase(page)
+  const marked = await page.evaluate(() => {
+    const root = Array.from(document.querySelectorAll<HTMLElement>('.rf-command-scroll')).find(
+      (node) => {
+        const viewport = node.querySelector<HTMLElement>(':scope > .rf-scroll-viewport')
+        return (
+          node.checkVisibility() &&
+          !!viewport &&
+          viewport.scrollHeight > viewport.clientHeight + 100 &&
+          node.nextElementSibling !== null
+        )
+      },
+    )
+    root?.setAttribute('data-test-scroll', '')
+    return !!root
+  })
+  assert.ok(marked, 'Expected a scrollable command list followed by a footer')
+  const list = page.locator('[data-test-scroll]')
+  const lines = (scrollTop: number) =>
+    list.evaluate(async (root, scrollTop) => {
+      const viewport = root.querySelector<HTMLElement>(':scope > .rf-scroll-viewport')!
+      viewport.scrollTop = scrollTop
+      for (let i = 0; i < 3; i++) await new Promise((resolve) => requestAnimationFrame(resolve))
+      return {
+        top: getComputedStyle(root, '::before').backgroundColor,
+        end: getComputedStyle(root, '::after').opacity,
+      }
+    }, scrollTop)
+  const border = await list.evaluate((root) => {
+    const probe = document.createElement('span')
+    probe.style.color = 'var(--rf-border)'
+    root.append(probe)
+    const color = getComputedStyle(probe).color
+    probe.remove()
+    return color
+  })
+
+  const rest = await lines(0)
+  assert.notEqual(rest.top, border)
+  assert.equal(rest.end, '1')
+  const scrolled = await lines(80)
+  assert.equal(scrolled.top, border)
+  const end = await lines(1e6)
+  assert.equal(end.end, '0')
+})
