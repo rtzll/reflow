@@ -654,7 +654,7 @@ export const Example = clientEntry(
                       <InputField
                         type="url"
                         label="Website"
-                        placeholder="fluidfunctionalism.com"
+                        placeholder="https://reflow.christianrotzoll.com/"
                         icon={<Icon name="globe" />}
                       />
                     )}
