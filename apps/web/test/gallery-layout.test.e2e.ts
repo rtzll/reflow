@@ -517,3 +517,22 @@ it('strengthens the command list header line and drops the end line at the botto
   const end = await lines(1e6)
   assert.equal(end.end, '0')
 })
+
+it('previews a dropdown on hover, keeps it across the gap, and closes it on leave', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.goto('/docs/dropdown')
+  await waitForShowcase(page)
+  const trigger = page.getByRole('button', { name: 'Recent' }).locator('visible=true').first()
+  await trigger.scrollIntoViewIfNeeded()
+  const focused = await page.evaluate(() => document.activeElement?.tagName)
+  await trigger.hover()
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  assert.equal(await page.evaluate(() => document.activeElement?.tagName), focused)
+  const row = page.getByRole('menuitem', { name: 'Roadmap' })
+  await row.hover()
+  await page.waitForTimeout(300)
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  const box = (await trigger.boundingBox())!
+  await page.mouse.move(box.x - 200, box.y - 200)
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+})

@@ -185,6 +185,19 @@ export function DropdownDemo(handle: Handle<DropdownDemoProps>) {
             }}
           />
         )
+      case 'hover':
+        return (
+          <Dropdown
+            label="Recent"
+            variant="ghost"
+            openOnHover
+            items={['Q3 report.pdf', 'Roadmap', 'Design review', 'Hiring plan'].map((name) => ({
+              value: name,
+              label: name,
+              icon: icon('clock'),
+            }))}
+          />
+        )
       case 'submenus':
         return (
           <Dropdown

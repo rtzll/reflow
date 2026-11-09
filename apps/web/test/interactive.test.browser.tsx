@@ -226,3 +226,95 @@ it('flips a dropdown above the trigger and keeps its submenu inside the viewport
   await act(() => press(document.activeElement!, 'Escape'))
   await waitFor(() => document.activeElement === trigger)
 })
+
+describe('Dropdown openOnHover', () => {
+  const pointer = (node: Element, type: string, pointerType = 'mouse') =>
+    node.dispatchEvent(
+      new PointerEvent(type, {
+        pointerType,
+        bubbles: type !== 'pointerenter' && type !== 'pointerleave',
+      }),
+    )
+  const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+  function setup(t: { after(fn: () => void): void }) {
+    const outside = document.createElement('button')
+    outside.textContent = 'Outside'
+    document.body.append(outside)
+    const result = render(
+      <Dropdown
+        label="Recent"
+        openOnHover
+        delay={20}
+        closeDelay={40}
+        items={[
+          { value: 'one', label: 'One' },
+          { value: 'two', label: 'Two' },
+        ]}
+      />,
+    )
+    t.after(() => {
+      result.cleanup()
+      outside.remove()
+    })
+    const trigger = result.$('button[aria-haspopup="menu"]')
+    const surface = result.$('.rf-dropdown-surface')
+    ok(trigger instanceof HTMLElement)
+    ok(surface instanceof HTMLElement)
+    const expanded = () => trigger.getAttribute('aria-expanded') === 'true'
+    return { ...result, outside, trigger, surface, expanded }
+  }
+
+  it('opens after the rest delay without moving focus and closes after the close delay', async (t) => {
+    const { outside, trigger, expanded } = setup(t)
+    outside.focus()
+    pointer(trigger, 'pointerenter')
+    await wait(5)
+    equal(expanded(), false)
+    await waitFor(expanded)
+    await wait(30)
+    equal(document.activeElement, outside)
+    pointer(trigger, 'pointerleave')
+    await waitFor(() => !expanded())
+    equal(document.activeElement, outside)
+  })
+
+  it('keeps the menu while the pointer crosses into it, then closes when it leaves', async (t) => {
+    const { trigger, surface, expanded } = setup(t)
+    pointer(trigger, 'pointerenter')
+    await waitFor(expanded)
+    pointer(trigger, 'pointerleave')
+    await wait(15)
+    pointer(surface, 'pointerenter')
+    await wait(100)
+    equal(expanded(), true)
+    pointer(surface, 'pointerleave')
+    await waitFor(() => !expanded())
+  })
+
+  it('leaves a click-opened menu alone and pins a hover-opened one on click', async (t) => {
+    const { act, trigger, expanded } = setup(t)
+    await act(() => trigger.click())
+    equal(expanded(), true)
+    pointer(trigger, 'pointerenter')
+    pointer(trigger, 'pointerleave')
+    await wait(100)
+    equal(expanded(), true, 'A click-opened menu stays')
+
+    await act(() => press(document.activeElement!, 'Escape'))
+    await waitFor(() => !expanded())
+    pointer(trigger, 'pointerenter')
+    await waitFor(expanded)
+    await act(() => trigger.click())
+    pointer(trigger, 'pointerleave')
+    await wait(100)
+    equal(expanded(), true, 'A click pins a hover-opened menu')
+  })
+
+  it('ignores touch hover', async (t) => {
+    const { trigger, expanded } = setup(t)
+    pointer(trigger, 'pointerenter', 'touch')
+    await wait(60)
+    equal(expanded(), false)
+  })
+})

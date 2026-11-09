@@ -577,6 +577,12 @@ export const componentExamples: Record<string, readonly DocumentationExample[]> 
       'The same menu behind a trigger: pass label, variant and items.',
     ),
     demo(
+      'Open on hover',
+      'hover',
+      `<Dropdown label="Recent" variant="ghost" openOnHover items={recent} onSelect={open} />`,
+      'Rest the pointer on the trigger to preview the menu; it closes when the pointer leaves both. Click to keep it open.',
+    ),
+    demo(
       'Submenus',
       'submenus',
       `<Dropdown label="Q3 report.pdf" variant="ghost" chevron={false} items={[

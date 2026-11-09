@@ -36,7 +36,7 @@ Grouped controls and inline Dropdowns share a fast focus ring with the same 2px 
 | CommandMenu | Search, grouped commands, keyboard selection, shortcuts, modal presentation | Remix primitives and Reflow dialog |
 | DatePicker | Single/range selection, presets, optional time selection | Calendar plus popover |
 | Dialog | Modal/nonmodal behavior, focus return, dismissal, sizes, animated exit cleanup | Native dialog and local integration |
-| Dropdown | Actions, selection, search, submenus and safe pointer travel | Remix menu/popover |
+| Dropdown | Actions, selection, search, submenus, safe pointer travel and open on hover | Remix menu/popover |
 | Field | Labels, descriptions, errors, fieldsets, choice-card layouts | Semantic HTML and Remix form utilities |
 | Input | Text/number behavior as applicable, disabled/error states and focus styling | Native input |
 | InputCopy | Read-only value, clipboard action and feedback | Input, button, Clipboard API |

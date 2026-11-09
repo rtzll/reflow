@@ -424,9 +424,104 @@ export interface DropdownProps {
   chevron?: boolean
   /** Text shown when a search matches nothing. */
   emptyMessage?: string
+  /** Opens the menu when a mouse rests on the trigger and closes it once the pointer leaves the trigger and the menu. A click pins it open; touch and the keyboard open it as usual. */
+  openOnHover?: boolean
+  /** With openOnHover: ms the pointer rests on the trigger before the menu opens. Default 100. */
+  delay?: number
+  /** With openOnHover: ms before the menu closes once the pointer has left, long enough to cross the gap to the menu. Default 150. */
+  closeDelay?: number
+}
+
+/** The part of a menu context the hover control drives. */
+interface HoverMenu {
+  readonly isOpen: boolean
+  readonly state: string
+  open(options?: { strategy?: 'list' | 'none' }): Promise<void>
+  closeAll(options?: { focusRoot?: boolean }): Promise<void>
+}
+
+/**
+ * One timer shared by a hover-opening trigger and its menu surface, as in the
+ * reference. A menu opened by hover closes when the pointer leaves both; one
+ * opened by a click or the keyboard, or pinned by a click, stays until it is
+ * dismissed as usual. A hover open is a preview, so it leaves focus in place.
+ */
+function createHoverControl(signal: AbortSignal) {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  let menu: HoverMenu | undefined
+  // True while the open menu is one the hover timer opened.
+  let hoverOpened = false
+  const cancel = () => clearTimeout(timer)
+  signal.addEventListener('abort', cancel, { once: true })
+  return {
+    attach(next: HoverMenu) {
+      menu = next
+    },
+    cancel,
+    enter(delay: number) {
+      cancel()
+      const open = () => {
+        // A menu already open from a click or a pin stays the reader's.
+        if (!menu || menu.isOpen) return
+        // The menu ignores opens while a close is still settling; keep
+        // asking while the pointer rests on the trigger.
+        if (menu.state !== 'idle') {
+          timer = setTimeout(open, 16)
+          return
+        }
+        hoverOpened = true
+        void menu.open({ strategy: 'none' })
+      }
+      timer = setTimeout(open, delay)
+    },
+    leave(closeDelay: number) {
+      cancel()
+      timer = setTimeout(() => {
+        if (!menu || !hoverOpened) return
+        hoverOpened = false
+        if (menu.isOpen) void menu.closeAll({ focusRoot: false })
+      }, closeDelay)
+    },
+    /** A click on a hover-opened trigger pins the menu instead of closing it. Returns true when it pinned. */
+    pin() {
+      cancel()
+      const pinned = hoverOpened && !!menu?.isOpen
+      hoverOpened = false
+      return pinned
+    },
+    /** Any other open (click, keyboard) belongs to the reader. */
+    release() {
+      hoverOpened = false
+    },
+  }
+}
+
+type HoverControl = ReturnType<typeof createHoverControl>
+
+function hoverTrigger(hover: HoverControl, delay: number, closeDelay: number) {
+  return [
+    on<HTMLElement, 'pointerenter'>('pointerenter', (event) => {
+      if (event.pointerType === 'mouse') hover.enter(delay)
+    }),
+    on<HTMLElement, 'pointerleave'>('pointerleave', (event) => {
+      if (event.pointerType === 'mouse') hover.leave(closeDelay)
+    }),
+    // Capture runs before the menu trigger's own click toggle.
+    on<HTMLElement, 'click'>(
+      'click',
+      (event) => {
+        if (!hover.pin()) return
+        event.preventDefault()
+        event.stopImmediatePropagation()
+      },
+      true,
+    ),
+    on<HTMLElement, 'keydown'>('keydown', () => hover.release()),
+  ]
 }
 
 export function Dropdown(handle: Handle<DropdownProps>) {
+  const hover = createHoverControl(handle.signal)
   let query = ''
   let created: DropdownItem[] = []
   const createValue = `${handle.id}-create`
@@ -445,7 +540,11 @@ export function Dropdown(handle: Handle<DropdownProps>) {
       variant = 'outline',
       searchable,
       searchPlaceholder = 'Search…',
+      delay = 100,
+      closeDelay = 150,
     } = handle.props
+    const hovering = !!handle.props.openOnHover && !handle.props.inline
+    const hoverMix = hovering ? hoverTrigger(hover, delay, closeDelay) : undefined
     const allItems = [
       ...items,
       ...created.filter((entry) => !items.some((item) => item.value === entry.value)),
@@ -486,10 +585,13 @@ export function Dropdown(handle: Handle<DropdownProps>) {
               type="button"
               aria-label={label}
               class={`rf-dropdown-trigger ${handle.props.triggerClass ?? ''}`}
-              mix={menu.trigger({
-                placement: `${handle.props.side ?? 'bottom'}-${align}`,
-                offset: 6,
-              })}
+              mix={[
+                menu.trigger({
+                  placement: `${handle.props.side ?? 'bottom'}-${align}`,
+                  offset: 6,
+                }),
+                hoverMix,
+              ]}
             >
               {handle.props.triggerContent ?? label}
             </button>
@@ -511,16 +613,20 @@ export function Dropdown(handle: Handle<DropdownProps>) {
                   </svg>
                 )
               }
-              mix={menu.trigger({
-                placement: `${handle.props.side ?? 'bottom'}-${align}`,
-                offset: 6,
-              })}
+              mix={[
+                menu.trigger({
+                  placement: `${handle.props.side ?? 'bottom'}-${align}`,
+                  offset: 6,
+                }),
+                hoverMix,
+              ]}
             >
               {handle.props.triggerContent ?? label}
             </Button>
           )}
           <DropdownSurface
             inline={handle.props.inline}
+            hover={hovering ? { control: hover, closeDelay } : undefined}
             items={displayedItems}
             emptyMessage={handle.props.emptyMessage}
             search={
@@ -554,9 +660,12 @@ function DropdownSurface(
     search?: MenuSearch
     inline?: boolean
     emptyMessage?: string
+    /** Set on the root surface of an openOnHover Dropdown. */
+    hover?: { control: HoverControl; closeDelay: number }
   }>,
 ) {
   const context = handle.context.get(menu.Context)
+  handle.props.hover?.control.attach(context)
   const highlight = fluidHover({ highlightedSelector: '[data-highlighted]' })
   const checked = new Map<string, boolean>()
 
@@ -621,6 +730,18 @@ function DropdownSurface(
         data-inline={handle.props.inline || undefined}
         mix={[
           !handle.props.inline && menu.popover(),
+          // A hover-opened menu stays while the pointer is over it, submenus
+          // included (they render inside this surface), and closes once the
+          // pointer leaves both the menu and its trigger.
+          handle.props.hover && [
+            on<HTMLElement, 'pointerenter'>('pointerenter', (event) => {
+              if (event.pointerType === 'mouse') handle.props.hover?.control.cancel()
+            }),
+            on<HTMLElement, 'pointerleave'>('pointerleave', (event) => {
+              const hover = handle.props.hover
+              if (event.pointerType === 'mouse' && hover) hover.control.leave(hover.closeDelay)
+            }),
+          ],
           search &&
             on('toggle', (event) => {
               if (event.newState === 'open') field?.focus()

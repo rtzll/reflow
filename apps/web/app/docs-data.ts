@@ -2005,6 +2005,26 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           description: 'Receives the newly created option.',
           required: false,
         },
+        {
+          name: 'openOnHover',
+          type: 'boolean',
+          description:
+            'Opens the menu when a mouse rests on the trigger and closes it once the pointer leaves the trigger and the menu. A click pins it open; touch and the keyboard open it as usual.',
+          required: false,
+        },
+        {
+          name: 'delay',
+          type: 'number',
+          description: 'With openOnHover: ms the pointer rests before the menu opens. Default 100.',
+          required: false,
+        },
+        {
+          name: 'closeDelay',
+          type: 'number',
+          description:
+            'With openOnHover: ms before the menu closes once the pointer has left. Default 150.',
+          required: false,
+        },
       ],
     },
     {
