@@ -52,6 +52,7 @@ it('applies the preset stagger through WAAPI and cancels reveal on removal', asy
   await waitFor(() => element.getAnimations().length > 0)
   const animation = element.getAnimations()[0]
   equal(animation.effect?.getTiming().delay, 120)
+  equal((animation.effect as KeyframeEffect).getKeyframes()[0].opacity, '0')
   cleanup()
   equal(animation.playState, 'idle')
 })

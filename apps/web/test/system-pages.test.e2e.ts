@@ -48,6 +48,43 @@ it('aligns the three hover axes and keeps the card grid interactive', async (t) 
   await expect(draft).toHaveAttribute('data-selected', 'true')
 })
 
+it('staggers the landing hero on both presets and on replay', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.setViewportSize({ width: 1440, height: 1100 })
+  await page.addInitScript(() => {
+    const animate = HTMLElement.prototype.animate
+    HTMLElement.prototype.animate = function (frames, options) {
+      const animation = animate.call(this, frames, options)
+      if (this.parentElement?.matches('.system-reveal-hero')) {
+        this.dataset.revealDelay = String(animation.effect?.getTiming().delay)
+      }
+      return animation
+    }
+  })
+  await page.goto('/docs/reveal')
+  await waitForShowcase(page)
+
+  const frame = page.locator('[data-reveal-kind="landing"]')
+  const heroItems = frame.locator('.system-reveal-hero > *')
+  const delays = () =>
+    heroItems.evaluateAll((items) => items.map((item) => item.getAttribute('data-reveal-delay')))
+  await frame.scrollIntoViewIfNeeded()
+  await expect.poll(delays).toEqual(['0', '100', '200', '300', '300'])
+
+  await frame.getByRole('tab', { name: 'Subtle' }).click()
+  await expect.poll(delays).toEqual(['0', '60', '120', '180', '180'])
+
+  const viewport = frame.getByRole('region', { name: 'landing preset example' })
+  await viewport.evaluate((node) => {
+    node.scrollTop = 150
+    for (const item of node.querySelectorAll('[data-reveal-delay]'))
+      item.removeAttribute('data-reveal-delay')
+  })
+  await frame.getByRole('button', { name: 'Replay' }).click()
+  assert.equal(await viewport.evaluate((node) => node.scrollTop), 0)
+  await expect.poll(delays).toEqual(['0', '60', '120', '180', '180'])
+})
+
 it('uses the native viewport through the custom scrollbar and follows scroll reveal progress', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.goto('/docs/scrollbars')

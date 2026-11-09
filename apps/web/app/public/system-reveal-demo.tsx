@@ -103,15 +103,28 @@ function LandingIllustration(handle: Handle<{ preset: Preset }>) {
         <span>Sign in</span>
       </header>
       <div class="system-reveal-site-content">
-        <section class="system-reveal-hero" mix={reveal({ preset: handle.props.preset })}>
-          <small>The shared inbox for support teams</small>
-          <h3>Every email, answered once.</h3>
-          <p>Claim a thread, reply together, and see who is waiting on you.</p>
-          <div class="system-reveal-cta" aria-hidden="true">
+        <section class="system-reveal-hero">
+          <small mix={reveal({ preset: handle.props.preset, index: 0 })}>
+            The shared inbox for support teams
+          </small>
+          <h3 mix={reveal({ preset: handle.props.preset, index: 1 })}>
+            Every email, answered once.
+          </h3>
+          <p mix={reveal({ preset: handle.props.preset, index: 2 })}>
+            Claim a thread, reply together, and see who is waiting on you.
+          </p>
+          <div
+            class="system-reveal-cta"
+            aria-hidden="true"
+            mix={reveal({ preset: handle.props.preset, index: 3 })}
+          >
             <span>Start free</span>
             <span>Book a demo</span>
           </div>
-          <div class="system-reveal-app-shot">
+          <div
+            class="system-reveal-app-shot"
+            mix={reveal({ preset: handle.props.preset, index: 3 })}
+          >
             <InboxIllustration />
           </div>
         </section>

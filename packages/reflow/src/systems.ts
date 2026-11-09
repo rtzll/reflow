@@ -73,7 +73,11 @@ export function reveal(options: RevealOptions = {}) {
       observer.disconnect()
       animation = element.animate(
         [
-          { opacity: 0.3, translate: `0 ${preset?.distance ?? 6}px`, scale: preset?.scale ?? 1 },
+          {
+            opacity: preset ? 0 : 0.3,
+            translate: `0 ${preset?.distance ?? 6}px`,
+            scale: preset?.scale ?? 1,
+          },
           { opacity: 1, translate: '0 0', scale: 1 },
         ],
         {
