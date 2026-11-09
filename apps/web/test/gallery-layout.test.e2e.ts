@@ -861,3 +861,44 @@ it('glides earlier chat messages up when a new one is sent', async (t) => {
   const between = samples.filter((top) => top < first - 4 && top > last + 4)
   assert.ok(between.length >= 2, `Expected a glide, got ${samples.map(Math.round).join(', ')}`)
 })
+
+it('fills the InputMessage playground and demo with the conversation, composer at the bottom', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await page.goto('/docs/input-message')
+  await waitForShowcase(page)
+  const stage = page.locator('.doc-preview-stage[data-playground][data-component="input-message"]')
+  const edges = (frame: string) =>
+    page
+      .locator(frame)
+      .first()
+      .evaluate((node) => {
+        const box = node.getBoundingClientRect()
+        const transcript = node.querySelector('.doc-composer-transcript')!.getBoundingClientRect()
+        const composer = node.querySelector('.rf-composer')!.getBoundingClientRect()
+        return {
+          top: Math.round(transcript.top - box.top),
+          bottom: Math.round(box.bottom - composer.bottom),
+          height: Math.round(box.height),
+        }
+      })
+  // As in the reference: 16px from the stage's top and bottom edges.
+  await stage.scrollIntoViewIfNeeded()
+  const playground = await edges(
+    '.doc-preview-stage[data-playground][data-component="input-message"]',
+  )
+  assert.deepEqual(playground, { top: 16, bottom: 16, height: 560 })
+
+  // The demo's conversation column is the reference's 480px, inside the card.
+  for (const width of [1280, 375]) {
+    await page.setViewportSize({ width, height: 900 })
+    await page.goto('/demo?c=input-message')
+    await waitForShowcase(page)
+    const fits = await page.locator('.site-demo-card').evaluate((card) => {
+      const column = card.querySelector('.doc-composer-preview')!.getBoundingClientRect()
+      const footer = card.querySelector('.site-preview-footer')!.getBoundingClientRect()
+      return { height: Math.round(column.height), inside: column.bottom <= footer.top }
+    })
+    assert.deepEqual(fits, { height: 480, inside: true }, `at ${width}px`)
+  }
+})

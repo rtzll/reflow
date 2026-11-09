@@ -2336,6 +2336,24 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
 }
 .site-demo-stage .doc-composer-preview {
   width: min(100%, 420px);
+  height: 480px;
+}
+/* Scaled up to fill the card, a shorter conversation lands at the same size. */
+.site-demo-example[data-fit] .doc-composer-preview {
+  height: 320px;
+}
+/* The card grows to hold the conversation where its aspect ratio would not. */
+.site-demo-card:has(.doc-composer-preview) {
+  min-height: 568px;
+}
+/* As in the reference: the conversation fills the playground from the top and
+   the composer rests at the bottom, so the transcript has the whole stage to
+   grow into before it scrolls. */
+.doc-preview-stage[data-playground][data-component='input-message'] .doc-example-content {
+  align-self: stretch;
+}
+.doc-preview-stage[data-playground][data-component='input-message'] .doc-composer-preview {
+  height: calc(560px - 32px);
 }
 .example-sidebar-playground {
   width: 100%;
