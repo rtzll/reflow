@@ -3,7 +3,13 @@ import { FontPicker } from './font-picker.tsx'
 import { CommandMenu, Dialog, Icon } from '@rtzll/reflow'
 import { clientEntry, ref, type Handle } from 'remix/component'
 import { buildInstallPrompt, currentShareHref } from './install-prompt.tsx'
-import { accentCss, applySetting, settingLabel, settingRows } from './site-settings.ts'
+import {
+  accentCss,
+  applySetting,
+  resetSettings,
+  settingLabel,
+  settingRows,
+} from './site-settings.ts'
 
 interface SitePage {
   name: string
@@ -226,6 +232,13 @@ export const SiteControls = clientEntry(
         setOpen('help', true)
         return
       }
+      if (value === 'action:reset') {
+        resetSettings()
+        notice = 'Settings reset to defaults'
+        setOpen('search', false)
+        void handle.update()
+        return
+      }
       if (value === 'action:copy' || value === 'action:share') {
         const share = value === 'action:share'
         void navigator.clipboard.writeText(share ? currentShareHref() : buildInstallPrompt()).then(
@@ -361,6 +374,13 @@ export const SiteControls = clientEntry(
           group: 'Actions',
           keywords: ['share', 'url', 'preferences'],
           icon: <Icon name="link" />,
+        },
+        {
+          value: 'action:reset',
+          label: 'Reset settings',
+          group: 'Actions',
+          keywords: ['defaults', 'preferences', 'clear'],
+          icon: <Icon name="rotate-ccw" />,
         },
       ]
       return (

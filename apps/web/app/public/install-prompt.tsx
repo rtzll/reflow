@@ -1,5 +1,11 @@
 import { clientEntry, on, type Handle } from 'remix/component'
-import { settingRows, sharedSettingsHref } from './site-settings.ts'
+import {
+  atDefaults,
+  resetSettings,
+  settingRows,
+  sharedSettingsHref,
+  type Settings,
+} from './site-settings.ts'
 
 export const reflowInstallCommand = 'pnpm add --save-exact @rtzll/reflow@0.1.0 remix@3.2.0'
 
@@ -100,10 +106,7 @@ export function SystemInstallation(handle: Handle<{ topic?: string; skill?: bool
 
 /** The current page with the settings that differ from the defaults. */
 export function currentShareHref() {
-  const settings = Object.fromEntries(
-    settingRows.map((row) => [row.key, document.documentElement.dataset[row.key] ?? '']),
-  )
-  return sharedSettingsHref(location.href, settings)
+  return sharedSettingsHref(location.href, currentSettings())
 }
 
 /** Copies a link that opens the current page with these settings. */
@@ -159,6 +162,53 @@ export const ShareSettingsButton = clientEntry(
           {copied ? 'Link copied' : ''}
         </span>
       </span>
+    )
+  },
+)
+
+function currentSettings() {
+  return Object.fromEntries(
+    settingRows.map((row) => [row.key, document.documentElement.dataset[row.key] ?? '']),
+  )
+}
+
+/** Returns every setting to its default; disabled while they already are. */
+export const ResetSettingsButton = clientEntry(
+  import.meta.url,
+  function ResetSettingsButton(handle: Handle<{ settings: Settings }>) {
+    let clean = atDefaults(handle.props.settings)
+    if (typeof window !== 'undefined')
+      window.addEventListener(
+        'reflow:settings-change',
+        () => {
+          clean = atDefaults(currentSettings())
+          handle.update()
+        },
+        { signal: handle.signal },
+      )
+    return () => (
+      <button
+        type="button"
+        class="site-icon-button"
+        aria-label="Reset settings to defaults"
+        title="Reset settings to defaults"
+        disabled={clean}
+        mix={on('click', resetSettings)}
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.7"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5" />
+        </svg>
+      </button>
     )
   },
 )

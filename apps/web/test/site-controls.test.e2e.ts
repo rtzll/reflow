@@ -385,6 +385,28 @@ it('saves the settings of a shared link over older cookies and shows the clean U
   await expect
     .poll(() => page.evaluate(() => navigator.clipboard.readText()))
     .toBe(new URL('/docs/reveal?theme=light', page.url()).href)
+
+  // Reset returns every setting to its default and is unavailable once there.
+  const reset = page
+    .locator('.site-right')
+    .getByRole('button', { name: 'Reset settings to defaults' })
+  await expect(reset).toBeEnabled()
+  await page.locator('body').press('r')
+  await reset.click()
+  assert.equal(await page.locator('html').getAttribute('data-theme'), 'system')
+  assert.equal(await page.locator('html').getAttribute('data-shape'), 'rounded')
+  await expect(reset).toBeDisabled()
+  await page.reload()
+  await waitForShowcase(page)
+  assert.equal(await page.locator('html').getAttribute('data-theme'), 'system')
+  await expect(reset).toBeDisabled()
+  await page.locator('body').press('t')
+  await expect(reset).toBeEnabled()
+  await page.locator('body').press('ControlOrMeta+k')
+  await search.fill('Reset settings')
+  await search.press('Enter')
+  assert.equal(await page.locator('html').getAttribute('data-theme'), 'system')
+  await expect(reset).toBeDisabled()
   await page.goto('/docs/button?theme=dark&accent=red')
   await waitForShowcase(page)
   const trigger = page.locator('.site-right [data-setting-trigger="accent"]')

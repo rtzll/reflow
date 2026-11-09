@@ -150,6 +150,18 @@ export function withoutSettings(search: string) {
   return rest ? `?${rest}` : ''
 }
 
+/** Whether every setting is at its default. */
+export function atDefaults(settings: Partial<Record<SettingKey, string>>) {
+  return settingRows.every((row) => (settings[row.key] ?? row.defaultValue) === row.defaultValue)
+}
+
+/** Returns every setting to its default, as if chosen in the panel. */
+export function resetSettings() {
+  for (const row of settingRows)
+    if (document.documentElement.dataset[row.key] !== row.defaultValue)
+      applySetting(row.key, row.defaultValue)
+}
+
 /** A link to `href` that carries the settings that differ from the defaults. */
 export function sharedSettingsHref(href: string, settings: Partial<Record<SettingKey, string>>) {
   const url = new URL(href)

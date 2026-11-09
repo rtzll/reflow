@@ -12,6 +12,7 @@ import { SiteControls } from '../public/site-controls.tsx'
 import {
   InstallPromptButton,
   reflowInstallCommand,
+  ResetSettingsButton,
   ShareSettingsButton,
 } from '../public/install-prompt.tsx'
 import { AccentPicker } from '../public/accent-picker.tsx'
@@ -238,6 +239,7 @@ function SettingsPanel(handle: Handle<{ settings: Settings }>) {
       <section class="site-settings" aria-label="Customize Reflow">
         <div class="site-settings-heading">
           <h2>Make them yours</h2>
+          <ResetSettingsButton settings={settings} />
           <ShareSettingsButton />
           <a
             class="site-icon-button"
