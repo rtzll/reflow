@@ -227,6 +227,7 @@ export const DocPreview = clientEntry(
               class="site-preview-stage doc-preview-stage"
               data-playground={!handle.props.variant ? '' : undefined}
               data-component={handle.props.slug}
+              data-variant={handle.props.variant}
               data-inspecting={inspect ? '' : undefined}
               mix={trackPlayback}
             >

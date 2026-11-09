@@ -1441,8 +1441,10 @@ html[data-font='geist-serif'] {
 }
 .doc-preview-stage {
   position: relative;
-  min-height: 200px;
-  padding: 40px;
+  /* The reference's stage: it hugs its example past 120px, so the example
+     starts 48px below the header and stays put as it grows or shrinks. */
+  min-height: 120px;
+  padding: 48px 32px;
   overflow: visible;
   border-radius: inherit;
 }
@@ -1747,7 +1749,7 @@ html[data-font='geist-serif'] {
 }
 @media (max-width: 640px) {
   .doc-preview-stage {
-    padding: 32px 16px;
+    padding-inline: 16px;
   }
   .doc-preview-toolbar {
     min-height: 61px;
@@ -1850,11 +1852,6 @@ html[data-font='geist-serif'] {
 .doc-preview-stage[data-playground][data-component='card'] {
   min-height: 600px;
 }
-@media (min-width: 641px) {
-  .doc-preview-stage[data-component='card'] {
-    padding-inline: 32px;
-  }
-}
 .doc-preview-stage[data-playground][data-component='color-picker'] {
   min-height: 443px;
 }
@@ -1880,7 +1877,102 @@ html[data-font='geist-serif'] {
   padding-block: 48px;
 }
 .doc-preview-stage[data-playground][data-component='thinking-steps'] {
-  min-height: 148px;
+  min-height: 120px;
+}
+/* The reference's stage sizes for examples that open, grow or move: a menu
+   or calendar gets room to open into, and a picker whose popup opens below
+   it is pinned to the top. */
+.doc-preview-stage[data-playground][data-component='chat-message'] {
+  min-height: 220px;
+}
+.doc-preview-stage[data-component='chat-message'][data-variant='roles'] {
+  min-height: 160px;
+}
+.doc-preview-stage[data-component='chat-message'][data-variant='attachments'] {
+  min-height: 200px;
+}
+.doc-preview-stage[data-component='calendar']:is(
+    [data-variant='single'],
+    [data-variant='range'],
+    [data-variant='booked'],
+    [data-variant='available'],
+    [data-variant='weeks']
+  ) {
+  min-height: 360px;
+}
+.doc-preview-stage[data-component='calendar'][data-variant='size'] {
+  min-height: 420px;
+}
+.doc-preview-stage[data-component='combobox']:is(
+    [data-variant='multiple'],
+    [data-variant='create'],
+    [data-variant='hide'],
+    [data-variant='long']
+  ),
+.doc-preview-stage[data-component='dropdown']:is(
+    [data-variant='submenus'],
+    [data-variant='multiple'],
+    [data-variant='search'],
+    [data-variant='search-multiple'],
+    [data-variant='create']
+  ) {
+  min-height: 160px;
+}
+.doc-preview-stage[data-component='command-menu'][data-variant]:not([data-variant='dialog']) {
+  min-height: 400px;
+}
+.doc-preview-stage[data-component='date-picker']:is(
+    [data-variant='date'],
+    [data-variant='time'],
+    [data-variant='timeStep']
+  ) {
+  min-height: 420px;
+}
+.doc-preview-stage[data-component='date-picker']:is(
+    [data-variant='presets'],
+    [data-variant='booked']
+  ) {
+  min-height: 460px;
+}
+/* The reference's pickers start at the top so their popups open downward:
+   the date picker's trigger at the top left, the calendar centered. */
+.doc-preview-stage[data-playground][data-component='date-picker'] {
+  padding: 64px 24px;
+  place-items: start;
+}
+.doc-preview-stage[data-playground][data-component='date-picker'] > .doc-example-content {
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+.doc-preview-stage[data-playground][data-component='calendar'] {
+  padding-block: 40px;
+  place-items: start center;
+}
+.doc-preview-stage[data-playground][data-component='calendar'] > .doc-example-content {
+  align-items: flex-start;
+}
+.doc-preview-stage[data-component='tooltip'][data-variant='cursor'] {
+  min-height: 220px;
+}
+.doc-preview-stage[data-component='card'] {
+  padding: 16px;
+}
+.doc-preview-stage[data-component='date-picker'][data-variant],
+.doc-preview-stage[data-playground]:is(
+    [data-component='combobox'],
+    [data-component='dropdown'],
+    [data-component='command-menu']
+  ) {
+  place-items: start center;
+}
+.doc-preview-stage[data-component='date-picker'][data-variant] > .doc-example-content,
+.doc-preview-stage[data-playground]:is(
+    [data-component='combobox'],
+    [data-component='dropdown'],
+    [data-component='command-menu']
+  )
+  > .doc-example-content {
+  align-items: flex-start;
 }
 .doc-section-heading + .doc-preview {
   margin-top: -8px;
@@ -2321,6 +2413,27 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
 .doc-preview-stage[data-component='input-message'] {
   min-height: 280px;
   padding: 48px 32px;
+}
+.doc-preview-stage[data-component='input-message'][data-variant='suggestions'] {
+  min-height: 360px;
+}
+@media (max-width: 640px) {
+  .doc-preview-stage[data-component='input-message'] {
+    padding-inline: 16px;
+  }
+  .doc-preview-stage[data-component='ask-user-questions'] {
+    padding: 16px;
+  }
+}
+/* Conversations dock to the bottom of a fixed-height stage, as in a chat. */
+.doc-preview-stage[data-component='input-message']:is(
+    [data-variant='attachments'],
+    [data-variant='streaming']
+  ) {
+  height: 440px;
+  min-height: 0;
+  padding: 16px;
+  place-items: end center;
 }
 .doc-preview-stage[data-playground][data-component='input-message'] {
   min-height: 560px;

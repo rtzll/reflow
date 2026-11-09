@@ -902,3 +902,44 @@ it('fills the InputMessage playground and demo with the conversation, composer a
     assert.deepEqual(fits, { height: 480, inside: true }, `at ${width}px`)
   }
 })
+
+it('anchors docs previews 48px below the header, as the reference does', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  const offset = (frame: string, target: string) =>
+    page.locator(frame).evaluate((stage, target) => {
+      const box = stage.getBoundingClientRect()
+      const node = stage.querySelector(target)!.getBoundingClientRect()
+      return { x: Math.round(node.left - box.left), y: Math.round(node.top - box.top) }
+    }, target)
+
+  // A collapsing example stays in place: the stage hugs it instead of centering it.
+  await page.goto('/docs/thinking-steps')
+  await waitForShowcase(page)
+  const stage = '#basic .doc-preview-stage'
+  const summary = page.locator('#basic .rf-thinking-steps-disclosure > summary')
+  assert.equal((await offset(stage, '.rf-thinking-steps')).y, 48)
+  const open = await offset(stage, '.rf-thinking-steps-disclosure > summary')
+  await summary.click()
+  await page.locator('#basic .rf-thinking-steps-disclosure:not([open])').waitFor()
+  assert.equal((await offset(stage, '.rf-thinking-steps-disclosure > summary')).y, open.y)
+
+  // A one-line example gets the reference's 120px stage, not a tall centered one.
+  await page.goto('/docs/breadcrumb')
+  await waitForShowcase(page)
+  assert.equal((await offset('#basic .doc-preview-stage', 'nav')).y, 48)
+  assert.ok(
+    (await page
+      .locator('#basic .doc-preview-stage')
+      .evaluate((n) => n.getBoundingClientRect().height)) < 140,
+  )
+
+  // Pickers start at the top so their popups open downward.
+  await page.goto('/docs/date-picker')
+  await waitForShowcase(page)
+  assert.deepEqual(await offset('.doc-preview-stage[data-playground]', 'button'), { x: 24, y: 64 })
+  await page.goto('/docs/calendar')
+  await waitForShowcase(page)
+  assert.equal((await offset('.doc-preview-stage[data-playground]', '[role="grid"]')).y, 88)
+})
