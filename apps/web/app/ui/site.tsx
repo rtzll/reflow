@@ -141,7 +141,6 @@ function Sidebar(handle: Handle<SidebarProps>) {
   return () => {
     let { components, settings, page, slug, search } = handle.props
     let systems = components.filter((component) => component.category?.toLowerCase() === 'system')
-    let blocks = components.filter((component) => component.category === 'block')
     let controls = components.filter((component) => !component.category)
     let group = (label: string, entries: readonly ShowcaseComponent[]) => (
       <div class="site-nav-group">
@@ -203,7 +202,6 @@ function Sidebar(handle: Handle<SidebarProps>) {
         </ul>
         {systems.length ? group('System', systems) : null}
         {group('Components', controls)}
-        {blocks.length ? group('Blocks', blocks) : null}
       </nav>
     )
   }
@@ -699,6 +697,7 @@ function ComponentDoc(
         'chat-message': 'Conversation',
         'color-picker': 'Default',
         dialog: 'Basic',
+        'queued-stack': 'Basic',
         field: 'Form',
         slider: 'Compact',
         'thinking-steps': 'Basic',

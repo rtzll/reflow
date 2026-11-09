@@ -388,83 +388,85 @@ export const PlaygroundControls = clientEntry(
       )
       handle.update()
     }
-    return () => (
-      <section
-        class="doc-playground-controls"
-        mix={synchronize}
-        aria-label={`${handle.props.name} playground settings`}
-      >
-        <div class="doc-playground-heading">
-          <h2>Playground variant</h2>
-          <button
-            type="button"
-            class="site-icon-button"
-            title="Reset playground"
-            aria-label="Reset playground"
-            disabled={!ready}
-            mix={on('click', reset)}
-          >
-            <Icon name="rotate-ccw" />
-          </button>
-        </div>
-        <h3>{handle.props.name}</h3>
-        {(playgroundControls[handle.props.slug] ?? []).map((control) => (
-          <label class="doc-playground-setting" key={control.name}>
-            <span>{control.label}</span>
-            {typeof control.initial === 'boolean' ? (
-              <Switch
-                aria-label={control.label}
-                disabled={
-                  !ready ||
-                  (handle.props.slug === 'sidebar' &&
-                    ((control.name === 'nestedRows' && values.rowKind !== 'menu') ||
-                      (['childIcons', 'childBadges'].includes(control.name) &&
-                        !(values.rowKind === 'menu' && values.nestedRows)) ||
-                      (control.name === 'stackedCallouts' && values.callout === 'none')))
-                }
-                size="compact"
-                checked={Boolean(values[control.name])}
-                onCheckedChange={(value) => update(control.name, value)}
-              />
-            ) : control.options ? (
-              <select
-                aria-label={control.label}
-                disabled={
-                  !ready ||
-                  (handle.props.slug === 'sidebar' &&
-                    control.name === 'childActions' &&
-                    !(values.rowKind === 'menu' && values.nestedRows))
-                }
-                value={String(values[control.name])}
-                mix={on<HTMLSelectElement, 'change'>('change', (event) =>
-                  update(control.name, event.currentTarget.value),
-                )}
-              >
-                {control.options.map((option) => (
-                  <option value={option} key={option}>
-                    {option[0].toUpperCase() + option.slice(1)}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <input
-                aria-label={control.label}
-                disabled={
-                  !ready ||
-                  (handle.props.slug === 'sidebar' &&
-                    control.name === 'childActions' &&
-                    !(values.rowKind === 'menu' && values.nestedRows))
-                }
-                value={String(values[control.name])}
-                mix={on<HTMLInputElement, 'input'>('input', (event) =>
-                  update(control.name, event.currentTarget.value),
-                )}
-              />
-            )}
-          </label>
-        ))}
-      </section>
-    )
+    // A component without playground settings shows no empty panel.
+    return () =>
+      playgroundControls[handle.props.slug] ? (
+        <section
+          class="doc-playground-controls"
+          mix={synchronize}
+          aria-label={`${handle.props.name} playground settings`}
+        >
+          <div class="doc-playground-heading">
+            <h2>Playground variant</h2>
+            <button
+              type="button"
+              class="site-icon-button"
+              title="Reset playground"
+              aria-label="Reset playground"
+              disabled={!ready}
+              mix={on('click', reset)}
+            >
+              <Icon name="rotate-ccw" />
+            </button>
+          </div>
+          <h3>{handle.props.name}</h3>
+          {(playgroundControls[handle.props.slug] ?? []).map((control) => (
+            <label class="doc-playground-setting" key={control.name}>
+              <span>{control.label}</span>
+              {typeof control.initial === 'boolean' ? (
+                <Switch
+                  aria-label={control.label}
+                  disabled={
+                    !ready ||
+                    (handle.props.slug === 'sidebar' &&
+                      ((control.name === 'nestedRows' && values.rowKind !== 'menu') ||
+                        (['childIcons', 'childBadges'].includes(control.name) &&
+                          !(values.rowKind === 'menu' && values.nestedRows)) ||
+                        (control.name === 'stackedCallouts' && values.callout === 'none')))
+                  }
+                  size="compact"
+                  checked={Boolean(values[control.name])}
+                  onCheckedChange={(value) => update(control.name, value)}
+                />
+              ) : control.options ? (
+                <select
+                  aria-label={control.label}
+                  disabled={
+                    !ready ||
+                    (handle.props.slug === 'sidebar' &&
+                      control.name === 'childActions' &&
+                      !(values.rowKind === 'menu' && values.nestedRows))
+                  }
+                  value={String(values[control.name])}
+                  mix={on<HTMLSelectElement, 'change'>('change', (event) =>
+                    update(control.name, event.currentTarget.value),
+                  )}
+                >
+                  {control.options.map((option) => (
+                    <option value={option} key={option}>
+                      {option[0].toUpperCase() + option.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  aria-label={control.label}
+                  disabled={
+                    !ready ||
+                    (handle.props.slug === 'sidebar' &&
+                      control.name === 'childActions' &&
+                      !(values.rowKind === 'menu' && values.nestedRows))
+                  }
+                  value={String(values[control.name])}
+                  mix={on<HTMLInputElement, 'input'>('input', (event) =>
+                    update(control.name, event.currentTarget.value),
+                  )}
+                />
+              )}
+            </label>
+          ))}
+        </section>
+      ) : null
   },
 )
 

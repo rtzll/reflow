@@ -1,6 +1,6 @@
 # Component coverage
 
-All 33 components from the initial Fluid Functionalism catalog have a Reflow implementation, a docs page, and an interactive demo. Breadcrumb, added upstream in commit `2bfb830023e46ea9bcf5d326e015d4511ab9ef38`, is the 34th; it has a docs page and playground but no gallery card or focused demo slide yet. Fluid Functionalism remains the design reference. [Pinned upstream source](https://github.com/mickadesign/fluid-functionalism/tree/7e6ae290dd8f5a7657ae4a433a42e165bac3ece4)
+All 33 components from the initial Fluid Functionalism catalog have a Reflow implementation, a docs page, and an interactive demo. Breadcrumb, added upstream in commit `2bfb830023e46ea9bcf5d326e015d4511ab9ef38`, is the 34th; it has a docs page and playground but no gallery card or focused demo slide yet. QueuedStack, a block upstream, is the 35th: the package exports it, so the docs list it as a component. Fluid Functionalism remains the design reference. [Pinned upstream source](https://github.com/mickadesign/fluid-functionalism/tree/7e6ae290dd8f5a7657ae4a433a42e165bac3ece4)
 
 ## Current work and remaining refinements
 
@@ -8,7 +8,7 @@ QueuedStack now expands on hover, keyboard focus, and tap, with live pointer reo
 
 Remaining visual refinements include moving checkbox selection surfaces, ColorPicker scrub feedback, and ChatMessage append motion. PDF attachments use a document glyph. First-page rendering depends on a separate PDF subsystem in the reference.
 
-Grouped controls and inline Dropdowns share a fast focus ring with the same 2px outer spacing as the reference. Keyboard focus remains separate from selection, and forced-colors mode uses row outlines. Most triggered Dropdowns use a static inset outline. The Sidebar's workspace and profile menus fit within the rail and show keyboard focus with a row highlight or a forced-colors outline.
+Grouped controls and inline Dropdowns share a fast focus ring with the same 2px outer spacing as the reference. Keyboard focus remains separate from selection, and forced-colors mode uses row outlines. Most triggered Dropdowns use a static inset outline; the ColorPicker format menu moves its focus ring and marks the current format with a selection fill. The Sidebar's workspace and profile menus fit within the rail and show keyboard focus with a row highlight or a forced-colors outline.
 
 ## Intentional differences
 
@@ -34,7 +34,7 @@ Grouped controls and inline Dropdowns share a fast focus ring with the same 2px 
 | CheckboxGroup | Multiple selection and merged adjacent selection surfaces | Checkbox plus shared group logic |
 | ColorPicker | Color formats (hex, RGB, HSL, OKLCH), alpha, swatches, pointer/keyboard editing of the square and rails, scrubbable channel fields, format menu, eyedropper where supported, popover trigger with optional remove | Local color logic with shared Slider and menu. Channel scrubbing uses pointer capture. |
 | Combobox | Filtering, keyboard navigation, multiple chips, create option | Remix popover with Reflow filtering, listbox semantics, keyboard navigation, and form values. One implementation covers single selection, multiple chips, and option creation. The pinned Remix Combobox primitive commits a single value. |
-| CommandMenu | Search, grouped commands, keyboard selection, shortcuts, modal presentation | Remix primitives and Reflow dialog |
+| CommandMenu | Search, grouped commands, keyboard selection, shortcuts, modal presentation, scroll-linked list dividers | Remix primitives and Reflow dialog. The dividers use CSS scroll-driven animations where supported. |
 | DatePicker | Single/range selection, presets, optional time selection | Calendar plus popover |
 | Dialog | Modal/nonmodal behavior, focus return, dismissal, sizes, animated exit cleanup | Native dialog and local integration |
 | Dropdown | Actions, selection, search, submenus, safe pointer travel and open on hover | Remix menu/popover |
@@ -43,6 +43,7 @@ Grouped controls and inline Dropdowns share a fast focus ring with the same 2px 
 | InputCopy | Read-only value, clipboard action and feedback | Input, button, Clipboard API |
 | InputGroup | Group hover, label transitions, validation states | Field/input composition |
 | InputMessage | Resizing composer, attachments/drop, actions, send behavior and upstream variants | Native editing and file APIs with keyboard prompts, an optional attachment control, and queued message transitions |
+| QueuedStack | Reorder by drag or keyboard, edit/remove/send actions, and a transition into the sent bubble | Compact pile that expands on hover, keyboard focus and tap, reorders during a pointer drag, and uses a native view transition into the sent bubble |
 | RadioGroup | Exclusive selection, keyboard/form behavior, hover and selection motion | Native radios and shared hover |
 | Select | Keyboard/typeahead behavior, controlled selection, icons and visual variants | Remix select |
 | Sidebar | Sections, resizing, collapse, keyboard shortcuts, mobile drawer | Reflow composition with roving focus, pointer and keyboard resizing, animated collapse and peek, and a modal mobile drawer |
@@ -52,7 +53,7 @@ Grouped controls and inline Dropdowns share a fast focus ring with the same 2px 
 | Tabs | Accessible tab relationships, keyboard navigation and moving indicator | Remix tabs |
 | Textarea | Multiline input with automatic sizing | Native textarea |
 | ThinkingIndicator | Accessible status, animated SVG and rotating text | SVG, Remix animation and local state |
-| ThinkingSteps | Expandable progress steps, nested disclosures, sources, images and sequential presentation | Accordion and timeline variants, reusable step content, and controlled outer disclosure |
+| ThinkingSteps | Expandable progress steps, nested disclosures, sources, images and sequential presentation | Accordion and timeline variants, reusable step content, and controlled outer disclosure. Stream timing and compact geometry have not been measured against the reference. |
 | Tooltip | Pointer/focus trigger, placement, dismissal and accessible association | Remix positioning plus local tooltip behavior |
 
 ## Shared systems
@@ -65,24 +66,25 @@ Grouped controls and inline Dropdowns share a fast focus ring with the same 2px 
 
 The eighth system is the bundled `skills/reflow/SKILL.md`. Its documentation includes four cursor-driven comparisons that pause for pointer and keyboard interaction and can be replayed.
 
-## Composed blocks and groups
+## Upstream blocks
 
-The pinned upstream registry lists seven blocks. Reflow's catalog lists three. The four other blocks appear as parts of examples or the Sidebar library, with different levels of reuse.
+The upstream registry also installs seven blocks: compositions copied into an app. Reflow's docs have no Blocks section. Every page documents something imported from `@rtzll/reflow`, and each block maps to a component or an example:
 
-| Group or block | What Reflow has | Remaining gap |
-| --- | --- | --- |
-| ThinkingSteps | A timeline with pending/active/complete states, controlled outer disclosure, nested details that retain their state, linked source badges, images with captions, and pausable demos. | The disclosure accepts a custom heading and body alongside the array-based API. Stream timing and compact geometry still differ from or have not been measured against the reference. |
-| QueuedStack | Reorder by drag or keyboard, edit/remove/send actions, and a native view transition into a sent bubble. | Reflow now uses a compact pile with hover, keyboard focus, and tap expansion. The queue reorders during a pointer drag. |
-| App Sidebar / `sidebar-app` | Workspace switching, nested projects, search, profile controls and an inset main area are demonstrated. | Use Sidebar’s header, footer, and toolbar slots for workspace and user controls, breadcrumbs, and actions. The showcase demonstrates the shell with app-owned workspace state. |
-| Settings Dialog / `dialog-sidebar` | Sidebar docs, Dialog docs, gallery and focused demo share the five-section Settings example. | The shared composition stays in the showcase because its sections and form fields are app-specific. Library consumers can compose their own with Dialog, Sidebar, and form controls. |
-| `sidebar-workspace-header`, `sidebar-user-footer` | The docs and playground reuse a workspace header and a user footer with dropdowns. The Sidebar Header & footer example's code includes both as Dropdowns with a bare `rf-sidebar-row` trigger. | Upstream installs them as registry blocks. Reflow provides copyable compositions rather than package exports or separate catalog cards. |
-| `sidebar-search-field`, `sidebar-inset-topbar` | Sidebar provides a filter field and collapse/mobile toolbar. | Supply breadcrumbs and trailing actions through the toolbar slot. The filter field is part of Sidebar navigation. |
+| Upstream block | In Reflow |
+| --- | --- |
+| `queued-stack` | The QueuedStack component, exported from the package. |
+| `sidebar-app` | The Sidebar page. Its examples show workspace switching, nested projects, search and profile controls. |
+| `dialog-sidebar` | The Dialog page's "With a sidebar" example, also used on the Sidebar page, in the gallery and in the focused demo. Its sections and fields are app-specific, so it stays in the showcase. |
+| `sidebar-workspace-header`, `sidebar-user-footer` | The Sidebar page's Header & footer example, whose code includes both menus as Dropdowns with a bare `rf-sidebar-row` trigger. |
+| `sidebar-search-field`, `sidebar-inset-topbar` | Built into Sidebar: the `searchable` filter field and the collapse/mobile toolbar. Supply breadcrumbs and trailing actions through the toolbar slot. |
+
+The former `/docs/app-sidebar` and `/docs/settings-dialog` pages redirect to Sidebar and to Dialog's "With a sidebar" example.
 
 ## Showcase
 
 - Overview grid with 29 preview cards, docs index and detail pages, and a focused demo with direct component links.
 - Responsive layout, copyable usage examples, URL settings, and Reflow branding with upstream attribution.
-- All 34 component pages include live playground controls, multiple working examples, replay, inspection, highlighted code, and public API tables.
+- All 35 component pages include a live preview, replay, inspection, highlighted code, and public API tables. All but QueuedStack also have playground controls and further examples.
 - Installation prompts include the active preferences and direct agents to the bundled Reflow skill.
 - Global command search opens with Cmd/Ctrl K. Shortcut help uses individual keycaps and labeled icons.
 

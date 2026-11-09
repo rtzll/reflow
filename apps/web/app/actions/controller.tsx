@@ -6,9 +6,23 @@ import type { AppContext } from '../router.ts'
 import { routes } from '../routes.ts'
 import { readSettings, Showcase, type ShowcaseProps } from '../ui/site.tsx'
 
+// Former block pages now live as examples on their component pages.
+const moved: Record<string, string> = {
+  'app-sidebar': '/docs/sidebar',
+  'settings-dialog': '/docs/dialog#with-a-sidebar',
+}
+
 async function show(context: AppContext, page: ShowcaseProps['page'], slug?: string) {
   const query = new URL(context.request.url).search
   const settings = readSettings(query, context.request.headers.get('cookie') ?? '')
+  const target = page === 'component' && slug ? moved[slug] : undefined
+  if (target) {
+    const [path, hash = ''] = target.split('#')
+    return Response.redirect(
+      new URL(`${path}${query}${hash && `#${hash}`}`, context.request.url),
+      301,
+    )
+  }
   const component = catalog.find((entry) => entry.slug === slug)
   if (page === 'component' && !component)
     return new Response('Component not found', { status: 404 })

@@ -145,6 +145,10 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
     description: 'A working status with an animated icon and rotating visual label.',
     code: `<ThinkingIndicator labels={['Thinking…', 'Refining…']} />`,
   },
+  'queued-stack': {
+    description: 'Reorder, remove, and send messages from a compact queue.',
+    code: `<QueuedStack\n  messages={[{ id: 'q1', content: 'Summarise the Q3 board deck' }]}\n  onOrderChange={reorder}\n  onRemove={remove}\n  onSend={send}\n/>`,
+  },
   'thinking-steps': {
     description: 'Expandable progress steps with visible and accessible status labels.',
     code: `<ThinkingSteps steps={[\n  { value: 'review', title: 'Compare states', content: 'Check focus behavior.', status: 'active' },\n]} />`,
@@ -222,6 +226,7 @@ const components = [
   ['input-copy', 'InputCopy'],
   ['input-group', 'InputGroup'],
   ['input-message', 'InputMessage'],
+  ['queued-stack', 'QueuedStack'],
   ['radio-group', 'RadioGroup'],
   ['select', 'Select'],
   ['sidebar', 'Sidebar'],
@@ -266,20 +271,6 @@ const systems = [
   ],
 ] as const
 
-const blocks = [
-  [
-    'app-sidebar',
-    'App Sidebar',
-    'A workspace shell with search, collapsible sections, and a user footer.',
-  ],
-  [
-    'settings-dialog',
-    'Settings Dialog',
-    'A dialog composed with the Reflow sidebar and form controls.',
-  ],
-  ['queued-stack', 'Queued Stack', 'Reorder, remove, and send messages from a compact queue.'],
-] as const
-
 export const catalog: readonly ShowcaseComponent[] = [
   ...components.map(([slug, name]) => {
     const details = previews[slug]
@@ -292,13 +283,6 @@ export const catalog: readonly ShowcaseComponent[] = [
     description,
     category: 'system',
     preview: slug === 'skill' ? <SkillPage /> : <SystemPage slug={slug} />,
-  })),
-  ...blocks.map(([slug, name, description]) => ({
-    slug,
-    name,
-    description,
-    category: 'block',
-    preview: <Example slug={slug} />,
   })),
 ]
 

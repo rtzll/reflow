@@ -62,7 +62,7 @@ Theme, density, accent, shape, typography, and hover behavior are configurable t
 - **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `CarouselDots`, `Sidebar`, `Tabs`
 - **Menus and overlays** · `CommandMenu`, `Dialog`, `Dropdown`, `Tooltip`
 - **Display and feedback** · `Badge`, `Banner`, `Card`, `Table`
-- **Conversation** · `AskUserQuestions`, `ChatMessage`, `InputMessage`, `ThinkingIndicator`, `ThinkingSteps`
+- **Conversation** · `AskUserQuestions`, `ChatMessage`, `InputMessage`, `QueuedStack`, `ThinkingIndicator`, `ThinkingSteps`
 
 Browse the [component coverage](docs/coverage.md#components) and [usage examples](apps/web/app/public/examples.tsx) directly in the repository, or run the showcase and visit `/docs` for props, examples, and playgrounds.
 

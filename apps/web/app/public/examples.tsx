@@ -1,4 +1,3 @@
-import { SettingsDialogExample } from './settings-dialog-example.tsx'
 import { BreadcrumbDemo } from './breadcrumb-example.tsx'
 import { paletteCommands, paletteSuggestions } from './palette-example-data.tsx'
 import { accents } from './site-settings.ts'
@@ -734,7 +733,6 @@ export const Example = clientEntry(
               }))}
             />
           )
-        case 'app-sidebar':
         case 'sidebar':
           if (handle.props.showcase && handle.props.slug === 'sidebar' && handle.props.avatar)
             return <GallerySidebar avatar={handle.props.avatar} />
@@ -947,8 +945,6 @@ export const Example = clientEntry(
               )}
             />
           )
-        case 'settings-dialog':
-          return <SettingsDialogExample />
         case 'queued-stack':
           return (
             <div className="example-wide">

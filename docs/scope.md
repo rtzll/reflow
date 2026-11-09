@@ -6,7 +6,7 @@ The initial library and website are running, with examples for all 33 components
 
 ## Deliverables
 
-1. A reusable component library covering all 33 components in the initial upstream catalog, plus shared systems and composed blocks.
+1. A reusable component library covering all 33 components in the initial upstream catalog, plus shared systems. Upstream blocks map to components or examples.
 2. A Remix showcase using those same components: an interactive overview, individual component documentation and playgrounds, and a focused demo carousel.
 3. Behavioral and visual validation across keyboard, pointer, touch, light/dark themes, compact/default sizes, reduced motion, server rendering, and hydration.
 4. A deployable showcase and a documented package installation workflow. Hosting is configured separately from source and package releases.
@@ -43,7 +43,7 @@ Separate reusable geometry, color, date, and state logic from DOM measurement an
 
 ## Next work
 
-- Refine motion and composed blocks listed in [component coverage](coverage.md).
+- Refine motion and the upstream block mappings listed in [component coverage](coverage.md).
 - Keep keyboard, touch, reduced motion, SSR, and hydration behavior covered by regression checks.
 - Validate changes through the showcase and the independently installed starter.
 - Prepare source, package, and showcase releases separately; see [release preparation](releasing.md).
