@@ -1096,6 +1096,9 @@ html[data-font='geist-serif'] {
   width: 12px;
   height: 12px;
   color: var(--rf-muted);
+  /* Lucide draws the chevron inside the icon box, so the stroke stops short
+     of the accent dot. Scale it from the center until the stroke meets the dot. */
+  transform: scale(1.71);
 }
 .site-setting-icon {
   display: inline-flex;
@@ -1207,9 +1210,11 @@ html[data-font='geist-serif'] {
   width: 100%;
   box-shadow: none;
 }
-.site-setting [data-setting-icon='accent'] .site-accent-swatch {
-  width: 16px;
-  height: 16px;
+/* The accent dot stands in for the row's chevron, so it takes the same 12px slot.
+   A larger dot shifts the shortcut key and hangs past the other rows. */
+.site-setting [data-setting-icon='accent'] {
+  width: 12px;
+  height: 12px;
 }
 .site-shortcuts-button {
   display: flex;
