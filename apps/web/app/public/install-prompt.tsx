@@ -7,7 +7,7 @@ import {
   type Settings,
 } from './site-settings.ts'
 
-export const reflowInstallCommand = 'pnpm add --save-exact @rtzll/reflow@0.1.0 remix@3.2.0'
+export const reflowInstallCommand = 'pnpm add --save-exact @rtzll/reflow@0.2.0 remix@3.2.0'
 
 export function buildInstallPrompt() {
   const settings = ['theme', 'accent', 'shape', 'density', 'hover', 'font', 'fontWeight']

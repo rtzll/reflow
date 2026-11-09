@@ -13,7 +13,7 @@ Use ESM (`"type": "module"`) and configure TypeScript with `"jsx": "react-jsx"` 
 From your app's root, install Reflow and its Remix peer dependency:
 
 ```sh
-pnpm add --save-exact @rtzll/reflow@0.1.0 remix@3.2.0
+pnpm add --save-exact @rtzll/reflow@0.2.0 remix@3.2.0
 ```
 
 For a new project, the [starter command](development.md#try-a-clean-install) generates an app wired up to a local build of Reflow.

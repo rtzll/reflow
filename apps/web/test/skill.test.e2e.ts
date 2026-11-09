@@ -1,7 +1,12 @@
+import { readFileSync } from 'node:fs'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
 import { router } from './showcase-router.ts'
+
+const { version } = JSON.parse(
+  readFileSync(new URL('../../../packages/reflow/package.json', import.meta.url), 'utf8'),
+) as { version: string }
 
 it('lets the visitor take over skill examples and replay their initial state', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
@@ -58,7 +63,7 @@ it('copies an installation prompt that includes the active preferences', async (
     'fontWeight: 600',
   ])
     assert.ok(prompt.includes(setting), setting)
-  assert.ok(prompt.includes('pnpm add --save-exact @rtzll/reflow@0.1.0 remix@3.2.0'))
+  assert.ok(prompt.includes(`pnpm add --save-exact @rtzll/reflow@${version} remix@3.2.0`))
   assert.ok(prompt.includes('skills/reflow/SKILL.md'))
   assert.ok(prompt.includes('showcase icon preference is tabler'))
   assert.ok(prompt.includes('Reflow does not require an icon package'))
