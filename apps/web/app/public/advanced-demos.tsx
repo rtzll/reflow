@@ -1,4 +1,5 @@
 import { advancedSource } from './advanced-code.ts'
+import { play } from 'cuelume'
 import { on, ref, type Handle } from 'remix/component'
 import {
   AskUserQuestions,
@@ -217,6 +218,7 @@ export function RichThinkingSteps(handle: Handle<{ variant: string; previewImage
       const text = handle.props.variant === 'streaming-text'
       progress = Math.min(limit(), progress + (text ? 3 : 1))
       handle.update()
+      if (progress === limit()) play('ready', { emphasis: 'subtle' })
       synchronize()
     }, wait)
   }

@@ -17,6 +17,9 @@ import {
   datePickerOffset,
 } from './component-example-data.ts'
 import { RequestFormExample } from './request-form-example.tsx'
+import { SoundCombobox } from './sound-combobox.tsx'
+import { playCopySuccess } from './showcase-sound.ts'
+import { play } from 'cuelume'
 import {
   Accordion,
   AskUserQuestions,
@@ -34,7 +37,6 @@ import {
   Checkbox,
   CheckboxGroup,
   ColorPicker,
-  Combobox,
   CommandMenu,
   DatePicker,
   Dialog,
@@ -566,7 +568,7 @@ export const Example = clientEntry(
         case 'combobox':
           return (
             <div class="example-combobox">
-              <Combobox
+              <SoundCombobox
                 label="Components"
                 placeholder="Add components…"
                 emptyMessage="No component found."
@@ -633,7 +635,10 @@ export const Example = clientEntry(
               className="example-block"
               style={{ width: handle.props.showcase ? 'min(100%, 420px)' : 'min(100%, 288px)' }}
             >
-              <InputCopy value="pnpm add remix @remix-run/ui @remix-run/component" />
+              <InputCopy
+                value="pnpm add remix @remix-run/ui @remix-run/component"
+                onCopy={playCopySuccess}
+              />
             </div>
           )
         case 'input-group':
@@ -682,6 +687,7 @@ export const Example = clientEntry(
                   message =
                     text || `Attached ${files.length} ${files.length === 1 ? 'file' : 'files'}`
                   handle.update()
+                  play('success')
                 }}
               />
               {message && <ChatMessage role="user">{message}</ChatMessage>}

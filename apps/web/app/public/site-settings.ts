@@ -80,7 +80,8 @@ export const settingRows = [
 ] as const
 
 export type SettingKey = (typeof settingRows)[number]['key']
-export type Settings = Record<SettingKey, string> & { customFont?: string }
+export type Settings = Record<SettingKey, string> & { customFont?: string; soundEnabled: boolean }
+export const soundPreferenceKey = 'reflow_sound'
 
 export function settingLabel(value: string) {
   if (value.startsWith('google:')) return value.slice(7)
@@ -98,9 +99,8 @@ export function validSetting(key: SettingKey, value: string) {
   )
 }
 
-export function readSettings(search: string, cookie = ''): Settings {
-  const query = new URLSearchParams(search)
-  const cookies = new Map(
+export function readSettingCookies(cookie: string) {
+  return new Map(
     cookie.split(';').map((entry) => {
       const index = entry.indexOf('=')
       const name = entry.slice(0, index).trim()
@@ -111,17 +111,22 @@ export function readSettings(search: string, cookie = ''): Settings {
       }
     }),
   )
+}
+
+export function readSettings(search: string, cookie = ''): Settings {
+  const query = new URLSearchParams(search)
+  const cookies = readSettingCookies(cookie)
   const settings = Object.fromEntries(
     settingRows.map((row) => {
       const value = query.get(row.key) ?? cookies.get(`reflow_${row.key}`) ?? row.defaultValue
       return [row.key, validSetting(row.key, value) ? value : row.defaultValue]
     }),
-  ) as Settings
+  ) as Omit<Settings, 'soundEnabled'>
   const customFont = settings.font.startsWith('google:')
     ? settings.font
     : cookies.get('reflow_custom_font')
   if (customFont && validSetting('font', customFont)) settings.customFont = customFont
-  return settings
+  return { ...settings, soundEnabled: cookies.get(soundPreferenceKey) !== 'off' }
 }
 
 /** Cookies that keep each valid setting in `search`, as the browser writes them. */
@@ -138,7 +143,7 @@ export function settingCookies(search: string) {
   return cookies
 }
 
-function settingCookie(name: string, value: string) {
+export function settingCookie(name: string, value: string) {
   return `${name}=${encodeURIComponent(value)}; path=/; max-age=31536000; samesite=lax`
 }
 

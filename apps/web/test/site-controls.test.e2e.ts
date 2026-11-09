@@ -76,7 +76,7 @@ it('keeps settings menus exclusive and dismisses them with pointer and keyboard 
   await theme.press('Enter')
   await page.keyboard.press('Tab')
   assert.equal(await theme.getAttribute('aria-expanded'), 'false')
-  assert.ok(await accent.evaluate((trigger) => trigger === document.activeElement))
+  await expect(accent).toBeFocused()
   await accent.click()
   await theme.click()
   assert.equal(await accent.getAttribute('aria-expanded'), 'false')
@@ -102,6 +102,11 @@ it('keeps settings menus exclusive and dismisses them with pointer and keyboard 
   await theme.click()
   await accent.focus()
   assert.equal(await theme.getAttribute('aria-expanded'), 'false')
+
+  await panel.locator('[data-setting-trigger="hover"]').press('Tab')
+  await expect(panel.getByRole('switch', { name: 'Sound effects' })).toBeFocused()
+  await page.keyboard.press('Tab')
+  await expect(panel.getByRole('button', { name: 'Copy install prompt' })).toBeFocused()
 
   await page.setViewportSize({ width: 390, height: 844 })
   const mobile = page.locator('.site-mobile')

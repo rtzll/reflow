@@ -1,5 +1,6 @@
-import { on, type Handle } from 'remix/component'
+import { on, ref, type Handle } from 'remix/component'
 import { CarouselDots } from '@rtzll/reflow'
+import { play } from 'cuelume'
 
 const slides = ['Inbox', 'Drafts', 'Sent', 'Archive']
 const slideNames = (count: number) =>
@@ -11,13 +12,29 @@ export function CarouselExample(
   let index = 0
   let direction = 1
   let paused = false
+  const manualNavigation = ref<HTMLDivElement>((element, signal) => {
+    element.addEventListener(
+      'click',
+      (event) => {
+        const button =
+          event.target instanceof Element ? event.target.closest('.rf-carousel-dots button') : null
+        if (!button) return
+        const dots = [...element.querySelectorAll('.rf-carousel-dots button')]
+        const previous = dots.findIndex((dot) => dot.getAttribute('aria-current') === 'true')
+        const next = dots.indexOf(button)
+        if (next === -1 || next === previous) return
+        play('navigate', { emphasis: 'subtle', direction: next < previous ? 'back' : 'forward' })
+      },
+      { capture: true, signal },
+    )
+  })
 
   return () => {
     const { count = 4, autoplay, duration = 3000 } = handle.props
     const names = slideNames(count)
     const active = index % names.length
     return (
-      <div class="example-carousel">
+      <div class="example-carousel" mix={manualNavigation}>
         <div
           class="example-carousel-card"
           mix={[

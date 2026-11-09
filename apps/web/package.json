@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@rtzll/reflow": "workspace:*",
+    "cuelume": "0.2.8",
     "remix": "3.2.0"
   },
   "devDependencies": {

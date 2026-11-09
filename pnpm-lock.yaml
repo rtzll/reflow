@@ -187,6 +187,9 @@ importers:
       '@rtzll/reflow':
         specifier: workspace:*
         version: link:../../packages/reflow
+      cuelume:
+        specifier: 0.2.8
+        version: 0.2.8
       remix:
         specifier: 3.2.0
         version: 3.2.0(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(playwright@1.65.0)
@@ -1686,6 +1689,9 @@ packages:
     resolution: {integrity: sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ==}
     engines: {node: '>=18'}
 
+  cuelume@0.2.8:
+    resolution: {integrity: sha512-jnwAdMMUK4emaUWRd9l2RjpfixAMFOFrVkjoVK59FIfk7D3Vuvt+vBBJvU/J+2EiXrDlduialwDKJZorS5Nxqg==}
+
   detect-libc@2.1.2:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
@@ -3009,6 +3015,8 @@ snapshots:
   convert-source-map@2.0.0: {}
 
   cookie@1.1.1: {}
+
+  cuelume@0.2.8: {}
 
   detect-libc@2.1.2: {}
 

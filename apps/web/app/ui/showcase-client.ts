@@ -1,4 +1,6 @@
+import { play } from 'cuelume'
 import { applySetting, settingRows, type SettingKey } from '../public/site-settings.ts'
+import { enhanceShowcaseSound, playCopyError } from '../public/showcase-sound.ts'
 
 const keyboardWidgets = [
   'textarea',
@@ -61,6 +63,7 @@ function enhanceMobileNavigation() {
 }
 
 export function enhanceShowcase() {
+  enhanceShowcaseSound()
   enhanceMobileNavigation()
   const menus = Array.from(document.querySelectorAll<HTMLDetailsElement>('[data-setting-menu]'))
   function setMenuOpen(menu: HTMLDetailsElement, open: boolean) {
@@ -126,6 +129,7 @@ export function enhanceShowcase() {
       const option = event.target.closest<HTMLButtonElement>('[data-setting]')
       if (option) {
         applySetting(option.dataset.setting as SettingKey, option.dataset.value!)
+        play('select')
         closeMenu()
       } else if (event.target.closest('[data-font-browse]')) closeMenu()
     })
@@ -191,8 +195,10 @@ export function enhanceShowcase() {
         await navigator.clipboard.writeText(code)
         status.textContent = 'Code copied.'
         button.title = 'Copied'
+        play('success')
       } catch {
         status.textContent = 'Copy failed.'
+        playCopyError()
       }
     })
   }
@@ -246,6 +252,7 @@ export function enhanceShowcase() {
           : setting.options
       const current = document.documentElement.dataset[setting.key] ?? setting.defaultValue
       applySetting(setting.key, values[(values.indexOf(current) + 1) % values.length])
+      play('select')
     }
   })
 }

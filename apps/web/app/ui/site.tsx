@@ -1,4 +1,4 @@
-import { Icon as ReflowIcon, type IconName } from '@rtzll/reflow'
+import { Icon as ReflowIcon, Switch, type IconName } from '@rtzll/reflow'
 import type { Handle, RemixNode } from 'remix/component'
 import type { ExampleImages } from '../assets.ts'
 import { routes } from '../routes.ts'
@@ -89,44 +89,73 @@ function Icon(
   }
 }
 
-function PageArrows(handle: Handle<{ previous?: PageLink; next?: PageLink; slides?: boolean }>) {
+function HeadingControls(
+  handle: Handle<{ previous?: PageLink; next?: PageLink; slides?: boolean; soundEnabled: boolean }>,
+) {
   return () => {
-    let { previous, next, slides } = handle.props
+    let { previous, next, slides, soundEnabled } = handle.props
     return (
-      <nav class="site-page-arrows" aria-label={slides ? 'Slides' : 'Adjacent pages'}>
-        {(['previous', 'next'] as const).map((direction) => {
-          let link = direction === 'previous' ? previous : next
-          let name = direction === 'previous' ? 'Previous' : 'Next'
-          let label = slides
-            ? `${name} slide`
-            : link
-              ? `${name}: ${link.name}`
-              : `No ${direction} page`
-          return link ? (
-            <a
-              key={direction}
-              class={`site-icon-button site-arrow-${direction}`}
-              href={link.href}
-              aria-label={label}
-              title={link.name}
-              data-site-arrow={slides ? direction : undefined}
-              data-rmx-reset-focus={slides ? 'manual' : undefined}
-            >
-              <Icon name="arrow" />
-            </a>
-          ) : (
-            <button
-              key={direction}
-              type="button"
-              class={`site-icon-button site-arrow-${direction}`}
-              disabled
-              aria-label={label}
-            >
-              <Icon name="arrow" />
-            </button>
-          )
-        })}
-      </nav>
+      <div class="site-heading-controls">
+        <button
+          class="site-icon-button site-sound"
+          type="button"
+          data-site-sound=""
+          aria-label="Showcase sound"
+          aria-pressed={soundEnabled}
+          title={soundEnabled ? 'Mute showcase sound' : 'Enable showcase sound'}
+          disabled
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M11 5 6 9H3v6h3l5 4Z" />
+            <path class="site-sound-waves" d="M15 9a4 4 0 0 1 0 6m3-9a8 8 0 0 1 0 12" />
+            <path class="site-sound-muted" d="m16 9 5 6m0-6-5 6" />
+          </svg>
+        </button>
+        <nav class="site-page-arrows" aria-label={slides ? 'Slides' : 'Adjacent pages'}>
+          {(['previous', 'next'] as const).map((direction) => {
+            let link = direction === 'previous' ? previous : next
+            let name = direction === 'previous' ? 'Previous' : 'Next'
+            let label = slides
+              ? `${name} slide`
+              : link
+                ? `${name}: ${link.name}`
+                : `No ${direction} page`
+            return link ? (
+              <a
+                key={direction}
+                class={`site-icon-button site-arrow-${direction}`}
+                href={link.href}
+                aria-label={label}
+                title={link.name}
+                data-site-arrow={slides ? direction : undefined}
+                data-rmx-reset-focus={slides ? 'manual' : undefined}
+              >
+                <Icon name="arrow" />
+              </a>
+            ) : (
+              <button
+                key={direction}
+                type="button"
+                class={`site-icon-button site-arrow-${direction}`}
+                disabled
+                aria-label={label}
+              >
+                <Icon name="arrow" />
+              </button>
+            )
+          })}
+        </nav>
+      </div>
     )
   }
 }
@@ -354,6 +383,15 @@ function SettingsPanel(handle: Handle<{ settings: Settings; variant?: 'rail' | '
             </details>
           </div>
         ))}
+        <label class="site-setting site-sound-setting">
+          <span>Sound effects</span>
+          <Switch
+            size="compact"
+            defaultChecked={settings.soundEnabled}
+            disabled
+            data-site-sound-switch=""
+          />
+        </label>
         <div class="site-settings-install">
           <InstallPromptButton />
         </div>
@@ -516,7 +554,10 @@ function Gallery(
         <header class="site-gallery-heading">
           <div class="site-title-row">
             <h1>{term ? 'Search results' : 'Reflow'}</h1>
-            <PageArrows next={{ href: pageHref(routes.docs.href()), name: 'Introduction' }} />
+            <HeadingControls
+              next={{ href: pageHref(routes.docs.href()), name: 'Introduction' }}
+              soundEnabled={settings.soundEnabled}
+            />
           </div>
           <p>{term ? `Results for “${search}”.` : 'Fluid components for Remix.'}</p>
           <div class="site-actions">
@@ -577,7 +618,8 @@ function Introduction(handle: Handle<{ settings: Settings; next?: ShowcaseCompon
         <header>
           <div class="site-title-row">
             <h1>Introduction</h1>
-            <PageArrows
+            <HeadingControls
+              soundEnabled={settings.soundEnabled}
               previous={{ href: pageHref(routes.gallery.href()), name: 'Showcase' }}
               next={
                 next
@@ -721,7 +763,7 @@ function ComponentDoc(
         <header>
           <div class="site-title-row">
             <h1>{component.slug === 'skill' ? '/reflow skill' : component.name}</h1>
-            <PageArrows previous={previous} next={next} />
+            <HeadingControls previous={previous} next={next} soundEnabled={settings.soundEnabled} />
           </div>
           <p>{component.description}</p>
         </header>
@@ -938,8 +980,9 @@ function Demo(
         <header class="site-demo-heading">
           <div class="site-title-row">
             <h1>Reflow</h1>
-            <PageArrows
+            <HeadingControls
               slides
+              soundEnabled={settings.soundEnabled}
               previous={prev ? { href: slideHref(prev), name: prev.name } : undefined}
               next={next ? { href: slideHref(next), name: next.name } : undefined}
             />

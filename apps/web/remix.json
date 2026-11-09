@@ -13,7 +13,7 @@
       "app/ui/showcase-client.ts",
       "../../packages/reflow/dist/**"
     ],
-    "allowPackages": ["remix", "@remix-run/ui", "@rtzll/reflow"],
+    "allowPackages": ["remix", "@remix-run/ui", "@rtzll/reflow", "cuelume"],
     "denyFiles": ["**/*.test.*", "**/*.d.ts"],
     "files": { "extensions": [".ttf", ".woff2", ".svg", ".png", ".txt"] }
   }

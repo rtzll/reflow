@@ -8,6 +8,7 @@ import {
   type BannerStatus,
 } from '@rtzll/reflow'
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
+import { playCopyError } from './showcase-sound.ts'
 
 export const bannerStatuses = ['default', 'info', 'success', 'warning', 'error'] as const
 const messages: Record<
@@ -143,6 +144,7 @@ export function BannerPreview(handle: Handle) {
       copyLabel = 'Copied'
     } catch {
       copyLabel = 'Copy failed'
+      playCopyError()
     }
     if (!handle.signal.aborted) handle.update()
   }

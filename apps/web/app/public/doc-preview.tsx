@@ -5,6 +5,7 @@ import { Example } from './examples.tsx'
 import { PreviewInspector } from './preview-inspector.tsx'
 import { documentationCode, playgroundFragment } from './documentation-code.ts'
 import { ComponentDemo } from './component-demos.tsx'
+import { playCopyError } from './showcase-sound.ts'
 import { initialPlayground, PlaygroundExample, type PlaygroundValues } from './doc-playground.tsx'
 
 const sharedPlaygroundDefaults = new Set([
@@ -277,6 +278,7 @@ export const DocPreview = clientEntry(
                     copyFailed = false
                   } catch {
                     copyFailed = true
+                    playCopyError()
                   }
                   handle.update()
                 })}

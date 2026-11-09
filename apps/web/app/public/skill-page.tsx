@@ -1,6 +1,7 @@
 import { Button, fluidHover, InputCopy, Tabs } from '@rtzll/reflow'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import { SystemInstallation } from './install-prompt.tsx'
+import { playCopyError, playCopySuccess } from './showcase-sound.ts'
 
 type DemoKind = 'tabs' | 'menu' | 'copy' | 'press'
 const labels = ['Overview', 'Activity', 'Settings']
@@ -204,6 +205,7 @@ export function SkillComparison(handle: Handle<{ kind: DemoKind }>) {
                 choose(0, 1)
               } catch {
                 choose(0, 2)
+                playCopyError()
               }
             })}
           >
@@ -217,6 +219,7 @@ export function SkillComparison(handle: Handle<{ kind: DemoKind }>) {
       ) : (
         <InputCopy
           value="skills/reflow/SKILL.md"
+          onCopy={playCopySuccess}
           align="left"
           data-demo-copied={previewCopySide === 1 || undefined}
         />

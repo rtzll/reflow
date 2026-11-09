@@ -40,6 +40,8 @@ import { on, ref, type Handle, type RemixNode } from 'remix/component'
 import { DropdownDemo } from './dropdown-example.tsx'
 import { BreadcrumbDemo } from './breadcrumb-example.tsx'
 import { SegmentedControlDemo } from './segmented-control-example.tsx'
+import { SoundCombobox } from './sound-combobox.tsx'
+import { playCopySuccess } from './showcase-sound.ts'
 import {
   Accordion,
   AskUserQuestions,
@@ -66,7 +68,6 @@ import {
   Checkbox,
   CheckboxGroup,
   ColorPicker,
-  Combobox,
   CommandMenu,
   CommandShortcut,
   DatePicker,
@@ -1804,7 +1805,7 @@ export function ComponentDemo(
           <div class="doc-demo-stack">
             <div class={variant === 'error' || variant === 'variants' ? 'doc-demo-row' : undefined}>
               <div>
-                <Combobox
+                <SoundCombobox
                   label={label}
                   options={choices}
                   multiple={multiple}
@@ -1831,7 +1832,7 @@ export function ComponentDemo(
                 )}
               </div>
               {variant === 'error' && (
-                <Combobox
+                <SoundCombobox
                   label="Disabled framework"
                   options={frameworks}
                   placeholder="Disabled"
@@ -1839,7 +1840,7 @@ export function ComponentDemo(
                 />
               )}
               {variant === 'variants' && (
-                <Combobox
+                <SoundCombobox
                   label="Ghost framework"
                   options={frameworks}
                   placeholder="Select a framework…"
@@ -2263,8 +2264,8 @@ export function ComponentDemo(
         if (variant === 'left')
           return (
             <div class="doc-demo-copy doc-demo-stack">
-              <InputCopy align="left" value={command} />
-              <InputCopy variant="button" align="left" value={command} />
+              <InputCopy align="left" value={command} onCopy={playCopySuccess} />
+              <InputCopy variant="button" align="left" value={command} onCopy={playCopySuccess} />
             </div>
           )
         if (variant === 'disabled')
@@ -2276,6 +2277,7 @@ export function ComponentDemo(
                 label="Share link"
                 value="https://reflow.example/r/input-copy"
                 onCopy={() => {
+                  playCopySuccess()
                   copyCount++
                   handle.update()
                 }}
@@ -2289,6 +2291,7 @@ export function ComponentDemo(
           <InputCopy
             label={variant === 'label' ? 'Install command' : undefined}
             value={command}
+            onCopy={playCopySuccess}
             variant={variant === 'button' ? 'button' : 'icon'}
           />,
         )

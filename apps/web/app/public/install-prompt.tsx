@@ -1,3 +1,5 @@
+import { play } from 'cuelume'
+import { playCopyError } from './showcase-sound.ts'
 import { clientEntry, on, type Handle } from 'remix/component'
 import {
   atDefaults,
@@ -41,8 +43,10 @@ export const InstallPromptButton = clientEntry(
               : '')
         await navigator.clipboard.writeText(prompt)
         status = 'Copied'
+        play('success')
       } catch {
         status = 'Copy failed. Check clipboard access.'
+        playCopyError()
       }
       if (handle.signal.aborted) return
       handle.update()
@@ -122,6 +126,7 @@ export const ShareSettingsButton = clientEntry(
         copied = true
       } catch {
         copied = false
+        playCopyError()
       }
       if (handle.signal.aborted) return
       handle.update()

@@ -266,6 +266,9 @@ html[data-density='compact'] .site-nav a {
 .site-setting:focus-within {
   background: var(--rf-hover);
 }
+.site-sound-setting {
+  cursor: pointer;
+}
 .site-setting-control {
   display: flex;
   align-items: center;
@@ -421,12 +424,28 @@ html[data-density='compact'] .site-nav a {
   background: transparent;
   color: var(--rf-muted);
 }
+.site-sound:disabled,
+.site-sound-setting .rf-choice:has(input:disabled) {
+  opacity: 1;
+}
+.site-heading-controls,
 .site-page-arrows {
   display: flex;
   flex: none;
   align-items: center;
   gap: 4px;
+}
+.site-heading-controls {
   margin-block: -4px;
+}
+.site-sound[aria-pressed='true'] .site-sound-muted,
+.site-sound[aria-pressed='false'] .site-sound-waves {
+  display: none;
+}
+@media (width >= 1280px) {
+  html:not([data-right-collapsed]) .site-layout .site-sound {
+    display: none;
+  }
 }
 .site-arrow-previous svg {
   transform: rotate(180deg);

@@ -3,6 +3,7 @@ import { FontPicker } from './font-picker.tsx'
 import { CommandMenu, Dialog, Icon } from '@rtzll/reflow'
 import { clientEntry, ref, type Handle } from 'remix/component'
 import { buildInstallPrompt, currentShareHref } from './install-prompt.tsx'
+import { playCopyError } from './showcase-sound.ts'
 import {
   accentCss,
   applySetting,
@@ -248,6 +249,7 @@ export const SiteControls = clientEntry(
           },
           () => {
             notice = 'Copy failed. Check clipboard access.'
+            playCopyError()
             void handle.update()
           },
         )

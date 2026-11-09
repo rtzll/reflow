@@ -6,6 +6,8 @@ import { DropdownPlayground } from './dropdown-example.tsx'
 import { BreadcrumbDemo } from './breadcrumb-example.tsx'
 import { SegmentedControlDemo } from './segmented-control-example.tsx'
 import { paletteCommands, paletteGroups, paletteSuggestions } from './component-demos.tsx'
+import { SoundCombobox } from './sound-combobox.tsx'
+import { playCopySuccess } from './showcase-sound.ts'
 import {
   datePickerBooked,
   datePickerPresets,
@@ -35,7 +37,6 @@ import {
   Checkbox,
   CheckboxGroup,
   ColorPicker,
-  Combobox,
   CommandMenu,
   DatePicker,
   Dialog,
@@ -688,7 +689,7 @@ export function PlaygroundExample(
       case 'combobox':
         return (
           <div class="example-combobox">
-            <Combobox
+            <SoundCombobox
               label="Components"
               placeholder={v.multiple ? 'Add components…' : 'Pick a component…'}
               options={componentOptions}
@@ -846,6 +847,7 @@ export function PlaygroundExample(
         return (
           <InputCopy
             value="pnpm install remix @remix-run/ui"
+            onCopy={playCopySuccess}
             variant={v.variant === 'button' ? 'button' : 'icon'}
             align={v.align === 'left' ? 'left' : 'right'}
             disabled={disabled}

@@ -31,6 +31,7 @@ import { SkillComparison } from './skill-page.tsx'
 import { highlightedCode } from './doc-preview.tsx'
 import { PreviewInspector } from './preview-inspector.tsx'
 import { MarkdownSpecimen } from './markdown-specimen.tsx'
+import { playCopyError } from './showcase-sound.ts'
 
 function SystemFrame(
   handle: Handle<{
@@ -52,6 +53,7 @@ function SystemFrame(
       copyStatus = 'Copied'
     } catch {
       copyStatus = 'Copy failed'
+      playCopyError()
     }
     if (handle.signal.aborted) return
     handle.update()

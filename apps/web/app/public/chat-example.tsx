@@ -1,5 +1,6 @@
 import { on, type Handle } from 'remix/component'
 import { Button, ChatMessage, Icon } from '@rtzll/reflow'
+import { playCopyError } from './showcase-sound.ts'
 
 const conversation = [
   {
@@ -71,7 +72,7 @@ export function ChatExample(
                         copied = index
                         handle.update()
                       } catch {
-                        // Leave the copy action available when clipboard access is denied.
+                        playCopyError()
                       }
                     })}
                   >
