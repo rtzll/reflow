@@ -138,6 +138,46 @@
   gap: 4px;
 }
 
+/* Stacked months, as in the reference: one weekday row above them, kept in
+   view while a short popup scrolls, 16px between the months, and arrows that
+   page up and down. */
+.rf-calendar[data-stacked] .rf-calendar-months {
+  gap: 16px;
+}
+.rf-calendar-weekdays {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 2;
+  display: flex;
+  margin-block-end: 16px;
+  background: inherit;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption, 12px);
+  line-height: var(--rf-leading-caption, 16px);
+}
+.rf-calendar-weekdays > span {
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: var(--rf-date-cell);
+  block-size: calc(var(--rf-date-cell) * 0.8);
+  block-size: round(down, calc(var(--rf-date-cell) * 0.8), 1px);
+}
+.rf-calendar-weekdays > .rf-calendar-weekdays-week {
+  inline-size: calc(var(--rf-date-cell) * 0.75);
+}
+.rf-calendar[data-stacked] .rf-calendar-grid thead {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.rf-calendar[data-stacked] .rf-calendar-nav svg {
+  rotate: 90deg;
+}
+
 .rf-calendar-grid {
   border-collapse: separate;
   border-spacing: 0;

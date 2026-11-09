@@ -1000,3 +1000,53 @@ it('lays out calendar headers like the reference for one, side-by-side and stack
     for (const month of rest) assert.deepEqual([month.previous, month.next], [null, null], example)
   }
 })
+
+it('shows stacked months under one weekday row with up and down arrows, as the reference does', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await page.goto('/docs/calendar')
+  await waitForShowcase(page)
+  const stacked = await page.locator('#stacked-months .rf-calendar').evaluate((calendar) => {
+    const weeks = Array.from(calendar.querySelectorAll('.rf-calendar-grid tbody tr:first-child'))
+    const origin = weeks[0]!.getBoundingClientRect().top
+    const at = (node: Element | null) => Math.round(node!.getBoundingClientRect().top - origin)
+    const rows = Array.from(calendar.querySelectorAll('.rf-calendar-weekdays'))
+    const headers = Array.from(calendar.querySelectorAll('.rf-calendar-grid thead'))
+    const titles = Array.from(calendar.querySelectorAll('.rf-calendar-header'))
+    const turn = (direction: string) =>
+      getComputedStyle(calendar.querySelector(`[data-direction="${direction}"] svg`)!).rotate
+    return {
+      rows: rows.length,
+      rowHidden: rows[0]?.getAttribute('aria-hidden'),
+      rowTop: at(rows[0] ?? null),
+      titleTops: titles.map(at),
+      secondWeek: at(weeks[1] ?? null),
+      headersShown: headers.filter((head) => head.getBoundingClientRect().height > 1).length,
+      headerCells: calendar.querySelectorAll('.rf-calendar-grid thead th').length,
+      // Stacked months page up and down: previous's left chevron turns to
+      // point up, next's right chevron to point down.
+      turns: [turn('previous'), turn('next')],
+    }
+  })
+  // The reference: weekdays 84px above the first week, a title row 40px
+  // above it, the next month's title 196px below it and its first week 236px.
+  assert.deepEqual(stacked, {
+    rows: 1,
+    rowHidden: 'true',
+    rowTop: -84,
+    titleTops: [-40, 196],
+    secondWeek: 236,
+    headersShown: 0,
+    headerCells: 14,
+    turns: ['90deg', '90deg'],
+  })
+
+  // Side by side keeps a weekday header in each month.
+  const sideBySide = await page.locator('#range .rf-calendar').evaluate((calendar) => ({
+    rows: calendar.querySelectorAll('.rf-calendar-weekdays').length,
+    headersShown: Array.from(calendar.querySelectorAll('.rf-calendar-grid thead')).filter(
+      (head) => head.getBoundingClientRect().height > 1,
+    ).length,
+  }))
+  assert.deepEqual(sideBySide, { rows: 0, headersShown: 2 })
+})

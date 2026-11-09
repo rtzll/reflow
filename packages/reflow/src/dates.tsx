@@ -415,6 +415,9 @@ export function Calendar(handle: Handle<CalendarProps>) {
     // month, or months stacked, keep the title left and both arrows together
     // on the first month's right.
     const sideBySide = months.length > 1 && orientation !== 'vertical'
+    // Stacked months share one weekday row above them, as in the reference;
+    // each month's own header stays in its table for screen readers.
+    const stacked = months.length > 1 && orientation === 'vertical'
     const previousDisabled = firstMonth <= monthStart(min)
     const nextDisabled = firstMonth >= monthStart(max)
 
@@ -424,12 +427,21 @@ export function Calendar(handle: Handle<CalendarProps>) {
         aria-label={label}
         data-orientation={orientation}
         data-week-numbers={showWeekNumbers ? '' : undefined}
+        data-stacked={stacked ? '' : undefined}
         style={
           cellSize && Number.isFinite(cellSize) && cellSize > 0
             ? { '--rf-date-cell-size': `${cellSize}px` }
             : undefined
         }
       >
+        {stacked && (
+          <div class="rf-calendar-weekdays" aria-hidden="true">
+            {showWeekNumbers && <span class="rf-calendar-weekdays-week" />}
+            {weekdays.map((weekday) => (
+              <span key={weekday}>{weekday.slice(0, 2)}</span>
+            ))}
+          </div>
+        )}
         <div
           class="rf-calendar-months"
           mix={[
