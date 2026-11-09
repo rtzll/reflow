@@ -882,6 +882,7 @@ const demoOrder = [
   'input-copy',
   'carousel-dots',
   'breadcrumb',
+  'segmented-control',
 ]
 
 const customizableSlides = new Set([
@@ -897,6 +898,7 @@ const customizableSlides = new Set([
   'date-picker',
   'dropdown',
   'input-message',
+  'segmented-control',
   'sidebar',
 ])
 

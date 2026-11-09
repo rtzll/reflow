@@ -4,7 +4,7 @@ Reflow started as a native Remix port of the [Fluid Functionalism](https://githu
 
 ## Catalog
 
-- **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `Field`, `Input`, `InputCopy`, `InputGroup`, `RadioGroup`, `Select`, `Slider`, `Switch`, `Textarea`
+- **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `Field`, `Input`, `InputCopy`, `InputGroup`, `RadioGroup`, `SegmentedControl`, `Select`, `Slider`, `Switch`, `Textarea`
 - **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`
 - **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `CarouselDots`, `Sidebar`, `Tabs`
 - **Menus and overlays** · `CommandMenu`, `Dialog`, `Dropdown`, `Tooltip`
@@ -52,7 +52,7 @@ Built in this order, one component at a time, with a short design note (API, beh
 
 | Wave | Component | Conceptual references | Builds on |
 | --- | --- | --- | --- |
-| 1 | `SegmentedControl` | Apple's segmented control | Tabs and RadioGroup's moving fill; native radios for forms |
+| 1 | `SegmentedControl` (shipped) | Apple's segmented control | Tabs and RadioGroup's moving fill; native radios for forms |
 | 1 | `Popover`, then `HoverCard` | Radix and Astryx concepts | Tooltip's anchoring; Dropdown's hover intent and safe pointer travel |
 | 2 | `Toaster` and `toast()` | [sonner](https://github.com/emilkowalski/sonner) | QueuedStack's pile; Banner's status icons |
 | 2 | `Drawer` | [vaul](https://github.com/emilkowalski/vaul) | Dialog's native `<dialog>` and focus return; the Sidebar's mobile drawer can move onto it |

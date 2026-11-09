@@ -4,6 +4,7 @@ import { questionPlayground } from './question-example-data.ts'
 import { RequestFormExample } from './request-form-example.tsx'
 import { DropdownPlayground } from './dropdown-example.tsx'
 import { BreadcrumbDemo } from './breadcrumb-example.tsx'
+import { SegmentedControlDemo } from './segmented-control-example.tsx'
 import { paletteCommands, paletteGroups, paletteSuggestions } from './component-demos.tsx'
 import {
   datePickerBooked,
@@ -261,6 +262,12 @@ export const playgroundControls: Record<string, readonly Control[]> = {
   'radio-group': [
     choice('orientation', 'Layout', ['vertical', 'horizontal']),
     toggle('hideLabel', 'Hide label', true),
+    disabled,
+  ],
+  'segmented-control': [
+    choice('content', 'Content', ['Text', 'Icons', 'Icon only']),
+    toggle('fill', 'Fill width'),
+    size,
     disabled,
   ],
   select: [choice('variant', 'Variant', ['bordered', 'ghost']), disabled, size],
@@ -768,6 +775,16 @@ export function PlaygroundExample(
             dismissOnBackdrop={Boolean(v.dismissOnBackdrop)}
             description="Add a new teamspace to organize your projects and collaborate with your team."
             footer={(close) => <Button mix={on('click', close)}>Create</Button>}
+          />
+        )
+      case 'segmented-control':
+        return (
+          <SegmentedControlDemo
+            variant="playground"
+            size={density}
+            content={String(v.content)}
+            fill={Boolean(v.fill)}
+            disabled={Boolean(v.disabled)}
           />
         )
       case 'breadcrumb':

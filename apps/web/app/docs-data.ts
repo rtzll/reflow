@@ -2818,6 +2818,105 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  'segmented-control': [
+    {
+      name: 'SegmentedControl',
+      props: [
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Names the group for screen readers.',
+          required: true,
+        },
+        {
+          name: 'options',
+          type: 'readonly SegmentedControlOption[]',
+          description: 'The segments, in order.',
+          required: true,
+        },
+        {
+          name: 'value',
+          type: 'string',
+          description: 'The selected option when controlled by the parent.',
+          required: false,
+        },
+        {
+          name: 'defaultValue',
+          type: 'string',
+          description:
+            'The option selected first when uncontrolled. Defaults to the first enabled option, so the control is never empty.',
+          required: false,
+        },
+        {
+          name: 'onValueChange',
+          type: '((value: string) => void)',
+          description: 'Called when the selection changes.',
+          required: false,
+        },
+        {
+          name: 'name',
+          type: 'string',
+          description: 'Submits the selected value with a surrounding form.',
+          required: false,
+        },
+        {
+          name: 'disabled',
+          type: 'boolean',
+          description: 'Disables every segment.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: '"default" | "compact"',
+          description: 'Pins the control to 36px with 28px segments, or 28px with 24px.',
+          required: false,
+        },
+        {
+          name: 'fill',
+          type: 'boolean',
+          description: 'Stretches the control to its container, with equal-width segments.',
+          required: false,
+        },
+      ],
+    },
+    {
+      name: 'SegmentedControlOption',
+      props: [
+        {
+          name: 'value',
+          type: 'string',
+          description: 'The value the segment selects and submits.',
+          required: true,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description:
+            'The segment text; for an icon-only segment, its accessible name and tooltip.',
+          required: true,
+        },
+        {
+          name: 'icon',
+          type: 'RemixNode',
+          description: 'Leading icon.',
+          required: false,
+        },
+        {
+          name: 'iconOnly',
+          type: 'boolean',
+          description:
+            'Shows only the icon; the label stays for screen readers and appears in a tooltip.',
+          required: false,
+        },
+        {
+          name: 'disabled',
+          type: 'boolean',
+          description: 'Makes the segment unavailable.',
+          required: false,
+        },
+      ],
+    },
+  ],
   select: [
     {
       name: 'Select',

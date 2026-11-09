@@ -1,4 +1,5 @@
 import { BreadcrumbDemo } from './breadcrumb-example.tsx'
+import { SegmentedControlDemo } from './segmented-control-example.tsx'
 import { paletteCommands, paletteSuggestions } from './palette-example-data.tsx'
 import { accents } from './site-settings.ts'
 import { ChatExample } from './chat-example.tsx'
@@ -269,6 +270,8 @@ export const Example = clientEntry(
               />
             </div>
           )
+        case 'segmented-control':
+          return <SegmentedControlDemo variant="playground" />
         case 'breadcrumb':
           return <BreadcrumbDemo variant={handle.props.showcase ? 'showcase' : 'menu'} />
         case 'dropdown':

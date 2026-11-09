@@ -2883,6 +2883,16 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
   justify-content: flex-start;
 }
 
+.doc-demo-segmented-fill {
+  inline-size: min(100%, 360px);
+}
+.doc-demo-segmented-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
 .example-breadcrumb {
   inline-size: min(100%, 420px);
   min-inline-size: 0;

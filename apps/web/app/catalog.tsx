@@ -115,6 +115,11 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
     description: 'A native group of exclusive choices with a shared highlight.',
     code: `const options = ${JSON.stringify(radioOptions)}\n\n<RadioGroup label="Options" hideLabel defaultValue="0" options={options} />`,
   },
+  'segmented-control': {
+    description:
+      'One choice from a short row of options, with a raised thumb that glides between them.',
+    code: `<SegmentedControl label="Period" options={[\n  { value: 'day', label: 'Day' },\n  { value: 'week', label: 'Week' },\n  { value: 'month', label: 'Month' },\n]} />`,
+  },
   select: {
     description:
       'A form-aware menu for selecting one option, with keyboard navigation and typeahead.',
@@ -228,6 +233,7 @@ const components = [
   ['input-message', 'InputMessage'],
   ['queued-stack', 'QueuedStack'],
   ['radio-group', 'RadioGroup'],
+  ['segmented-control', 'SegmentedControl'],
   ['select', 'Select'],
   ['sidebar', 'Sidebar'],
   ['slider', 'Slider'],

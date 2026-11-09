@@ -10,6 +10,7 @@ export * from './flows.tsx'
 export * from './range-color.tsx'
 export * from './color-picker.tsx'
 export * from './breadcrumb.tsx'
+export * from './segmented-control.tsx'
 export * from './systems.ts'
 export * from './queued-stack.tsx'
 

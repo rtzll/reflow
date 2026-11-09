@@ -39,6 +39,7 @@ import {
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
 import { DropdownDemo } from './dropdown-example.tsx'
 import { BreadcrumbDemo } from './breadcrumb-example.tsx'
+import { SegmentedControlDemo } from './segmented-control-example.tsx'
 import {
   Accordion,
   AskUserQuestions,
@@ -914,6 +915,52 @@ export const componentExamples: Record<string, readonly DocumentationExample[]> 
       'Horizontal',
       'horizontal',
       `<RadioGroup label="Size" orientation="horizontal" options={options} />`,
+    ),
+  ],
+  'segmented-control': [
+    demo(
+      'Basic',
+      'basic',
+      `<SegmentedControl label="Period" options={[\n  { value: 'day', label: 'Day' },\n  { value: 'week', label: 'Week' },\n  { value: 'month', label: 'Month' },\n  { value: 'year', label: 'Year' },\n]} />`,
+      'Without a value or default, the first option is selected: a segmented control is never empty.',
+    ),
+    demo(
+      'With icons',
+      'icons',
+      `<SegmentedControl label="View" options={[\n  { value: 'list', label: 'List', icon: <Icon name="menu" /> },\n  { value: 'board', label: 'Board', icon: <Icon name="square-library" /> },\n  { value: 'calendar', label: 'Calendar', icon: <Icon name="calendar" /> },\n]} />`,
+    ),
+    demo(
+      'Icon only',
+      'icon-only',
+      `<SegmentedControl label="Theme" defaultValue="system" options={[\n  { value: 'light', label: 'Light', icon: <Icon name="sun" />, iconOnly: true },\n  { value: 'dark', label: 'Dark', icon: <Icon name="moon" />, iconOnly: true },\n  { value: 'system', label: 'System', icon: <Icon name="monitor" />, iconOnly: true },\n]} />`,
+      'The label stays for screen readers and shows in a tooltip on hover.',
+    ),
+    demo(
+      'Fill width',
+      'fill',
+      `<SegmentedControl label="Period" fill options={periods} />`,
+      'Stretches to its container with equal-width segments.',
+    ),
+    demo(
+      'Compact',
+      'compact',
+      `<SegmentedControl label="Period" size="compact" options={periods} />`,
+    ),
+    demo(
+      'Disabled option',
+      'disabled',
+      `<SegmentedControl label="Period" options={periods.map((option) => ({\n  ...option,\n  disabled: option.value === 'year',\n}))} />`,
+    ),
+    demo(
+      'In a form',
+      'form',
+      `<form>\n  <SegmentedControl label="Period" name="period" options={periods} />\n  <Button type="submit">Apply</Button>\n</form>`,
+      'Each segment is a native radio, so the value submits with the form and resets with it. Arrow keys move the selection.',
+    ),
+    demo(
+      'Controlled',
+      'controlled',
+      `<SegmentedControl label="Period" options={periods}\n  value={period} onValueChange={setPeriod} />`,
     ),
   ],
   select: [
@@ -2003,6 +2050,8 @@ export function ComponentDemo(
             </div>
           )
         return <SettingsDialogExample />
+      case 'segmented-control':
+        return <SegmentedControlDemo variant={variant} />
       case 'breadcrumb':
         return <BreadcrumbDemo variant={variant} />
       case 'dropdown':

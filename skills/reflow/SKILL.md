@@ -11,7 +11,7 @@ Reflow uses the Remix 3 component runtime. Component setup runs once and returns
 
 ## Composition
 
-Use `@rtzll/reflow` components and import `@rtzll/reflow/styles.css` once. Prefer the existing form-aware controls, dialogs, menu and combobox primitives. Preserve labels, field descriptions, reset behavior, disabled options, keyboard navigation and focus return when composing them.
+Use `@rtzll/reflow` components and import `@rtzll/reflow/styles.css` once. Prefer the existing form-aware controls, dialogs, menu and combobox primitives. Preserve labels, field descriptions, reset behavior, disabled options, keyboard navigation and focus return when composing them. For one choice among a few short options in a row, such as a view or a time range, use SegmentedControl; Tabs switch between panels, and RadioGroup suits longer lists or options with descriptions.
 
 Apply theme settings on a common ancestor with `data-theme`, `data-accent`, `data-shape`, `data-density`, and `data-hover`. Use the `--rf-*` CSS properties from the installed stylesheet for surfaces, spacing, text and focus colors. Consumers can provide icons as slots without adding an icon runtime.
 

@@ -120,7 +120,7 @@ it('updates the live playground and copied code while preserving replay and insp
 it('customizes the focused Button demo and keeps the reference slide order', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.goto('/demo?c=button&theme=dark')
-  const slide = page.getByRole('article', { name: 'Slide 8 of 26: Button' })
+  const slide = page.getByRole('article', { name: 'Slide 8 of 27: Button' })
   const stage = slide.locator('.site-demo-stage')
   assert.equal(await stage.getByRole('button').count(), 1)
   await stage.getByRole('button', { name: 'Get started', exact: true }).waitFor()
@@ -138,14 +138,14 @@ it('customizes the focused Button demo and keeps the reference slide order', asy
   assert.equal(await panel.isVisible(), false)
   await page.getByRole('link', { name: 'Go to Make them yours' }).click()
   await page
-    .getByRole('article', { name: 'Slide 23 of 26: Make them yours' })
+    .getByRole('article', { name: 'Slide 23 of 27: Make them yours' })
     .getByRole('heading', { name: 'Make them yours' })
     .waitFor()
   await page.goto('/demo?c=tooltip&theme=dark')
   await page.getByRole('link', { name: 'View Tooltip documentation' }).waitFor()
   // Breadcrumb joins the deck after the named slides, with its playground.
   await page.goto('/demo?c=breadcrumb&theme=dark')
-  const breadcrumb = page.getByRole('article', { name: 'Slide 26 of 26: Breadcrumb' })
+  const breadcrumb = page.getByRole('article', { name: 'Slide 26 of 27: Breadcrumb' })
   await breadcrumb.locator('.site-demo-stage nav[aria-label="Breadcrumb"]').waitFor()
   await breadcrumb.locator('summary[aria-label="Customize Breadcrumb"]').waitFor()
 })
@@ -159,7 +159,7 @@ it('loads each demo with its own defaults during carousel navigation', async (t)
   const documentStart = await page.evaluate(() => performance.timeOrigin)
   const next = page.getByRole('link', { name: 'Next slide', exact: true })
   const button = page
-    .getByRole('article', { name: 'Slide 8 of 26: Button' })
+    .getByRole('article', { name: 'Slide 8 of 27: Button' })
     .locator('.site-demo-stage')
     .getByRole('button')
 

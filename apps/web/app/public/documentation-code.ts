@@ -141,6 +141,7 @@ export function playgroundFragment(slug: string, values: PlaygroundValues): stri
     'input-group': 'InputGroup',
     'input-message': 'InputMessage',
     'radio-group': 'RadioGroup',
+    'segmented-control': 'SegmentedControl',
     'thinking-indicator': 'ThinkingIndicator',
     'thinking-steps': 'ThinkingSteps',
   }
@@ -248,6 +249,18 @@ ${opening} label="Fruit" options={options} defaultValue={['apples']} />`
       return `const options = ${JSON.stringify(radioOptions)}
 
 ${opening} label="Options" options={options} defaultValue="0" />`
+    case 'segmented-control': {
+      const content = String(values.content ?? 'Text')
+      const options =
+        content === 'Icons'
+          ? `[\n  { value: 'list', label: 'List', icon: <Icon name="menu" /> },\n  { value: 'board', label: 'Board', icon: <Icon name="square-library" /> },\n  { value: 'calendar', label: 'Calendar', icon: <Icon name="calendar" /> },\n]`
+          : content === 'Icon only'
+            ? `[\n  { value: 'light', label: 'Light', icon: <Icon name="sun" />, iconOnly: true },\n  { value: 'dark', label: 'Dark', icon: <Icon name="moon" />, iconOnly: true },\n  { value: 'system', label: 'System', icon: <Icon name="monitor" />, iconOnly: true },\n]`
+            : `[\n  { value: 'day', label: 'Day' },\n  { value: 'week', label: 'Week' },\n  { value: 'month', label: 'Month' },\n  { value: 'year', label: 'Year' },\n]`
+      const name = content === 'Icon only' ? 'Theme' : content === 'Icons' ? 'View' : 'Period'
+      const extra = `${values.fill ? ' fill' : ''}${values.size === 'compact' ? ' size="compact"' : ''}${values.disabled ? ' disabled' : ''}`
+      return `<SegmentedControl label="${name}"${extra} options={${options}} />`
+    }
     case 'select':
       return `${opening} label="Fruit" options={options} />`
     case 'combobox':
