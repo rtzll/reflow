@@ -474,7 +474,7 @@ const galleryOrder = [
   'badge',
   'sidebar',
   'radio-group',
-  'chat-message',
+  'segmented-control',
   'thinking-steps',
   'tabs',
   'checkbox-group',
@@ -492,6 +492,9 @@ const galleryOrder = [
   'dialog',
   'calendar',
   'date-picker',
+  'chat-message',
+  'popover',
+  'hover-card',
 ]
 
 const wideCards = new Set([
@@ -507,6 +510,7 @@ const wideCards = new Set([
   'carousel-dots',
   'table',
   'calendar',
+  'chat-message',
 ])
 
 const tallCards = new Set([
@@ -516,6 +520,7 @@ const tallCards = new Set([
   'thinking-steps',
   'ask-user-questions',
   'carousel-dots',
+  'chat-message',
 ])
 const rightCards = new Set([
   'color-picker',

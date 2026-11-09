@@ -21,7 +21,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'badge',
     'sidebar',
     'radio-group',
-    'chat-message',
+    'segmented-control',
     'thinking-steps',
     'tabs',
     'checkbox-group',
@@ -39,6 +39,9 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'dialog',
     'calendar',
     'date-picker',
+    'chat-message',
+    'popover',
+    'hover-card',
   ]
   const gallery = page.locator('.site-gallery')
   for (const width of [1440, 1280, 768, 390]) {
@@ -110,6 +113,16 @@ it('preserves the gallery order and keeps previews above their footers', async (
       assert.ok(datePicker!.x < wideCalendar!.x)
       assert.equal(tabs!.y, thinking!.y)
       assert.ok(tabs!.x < thinking!.x)
+      // The last band: a large conversation on the left, two smalls stacked beside it.
+      const [chat, popover, hoverCard] = await Promise.all(
+        ['chat-message', 'popover', 'hover-card'].map(tile),
+      )
+      assert.ok(chat!.width > popover!.width * 1.9, 'the conversation spans two columns')
+      assert.equal(chat!.y, popover!.y)
+      assert.ok(popover!.x > chat!.x)
+      assert.equal(popover!.x, hoverCard!.x)
+      assert.ok(hoverCard!.y > popover!.y)
+      assert.equal(Math.round(chat!.y + chat!.height), Math.round(hoverCard!.y + hoverCard!.height))
       const accordion = gallery.locator('[data-component="accordion"]')
       await accordion.getByRole('button', { name: 'Accessibility', exact: true }).click()
       await checkContainment()

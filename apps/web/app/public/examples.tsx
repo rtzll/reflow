@@ -518,6 +518,24 @@ export const Example = clientEntry(
         case 'carousel-dots':
           return <CarouselExample autoplay={handle.props.showcase} duration={2400} />
         case 'chat-message':
+          if (handle.props.gallery)
+            return (
+              <div className="example-chat-gallery">
+                <ChatMessage role="user" animate={false}>
+                  What does “good design” actually mean?
+                </ChatMessage>
+                <ChatMessage role="assistant" animate={false}>
+                  Mostly that you stop noticing it. It lets you do what you came to do, and it feels
+                  right while you do it.
+                </ChatMessage>
+                <ChatMessage role="user" animate={false}>
+                  So function over form?
+                </ChatMessage>
+                <ChatMessage role="assistant" animate={false}>
+                  Not quite. Something that feels good to use is, in a real sense, working better.
+                </ChatMessage>
+              </div>
+            )
           return handle.props.showcase ? (
             <div className="example-chat-tile">
               <ChatMessage role="user" size="compact" animate={false}>

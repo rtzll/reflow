@@ -40,6 +40,11 @@
   display: grid;
   gap: 4px;
 }
+.example-chat-gallery {
+  width: min(100%, 480px);
+  display: grid;
+  gap: 8px;
+}
 .example-chat-thread {
   width: min(100%, 568px);
   display: grid;
