@@ -68,3 +68,15 @@ it('copies an installation prompt that includes the active preferences', async (
   assert.ok(prompt.includes('showcase icon preference is tabler'))
   assert.ok(prompt.includes('Reflow does not require an icon package'))
 })
+
+it('copies a prompt that installs the skill with npx and audits the project', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+  await page.goto('/docs/skill')
+  await page.getByRole('button', { name: 'Copy prompt', exact: true }).first().click()
+  await page.getByRole('button', { name: 'Copied', exact: true }).waitFor()
+  assert.equal(
+    await page.evaluate(() => navigator.clipboard.readText()),
+    'Install the reflow skill with `npx skills add rtzll/reflow -g -y` (skip this if you already have it). Then read its SKILL.md and use it to audit this project.',
+  )
+})

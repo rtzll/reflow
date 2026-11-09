@@ -11,6 +11,15 @@ import {
 
 export const reflowInstallCommand = 'pnpm add --save-exact @rtzll/reflow@0.3.0 remix@3.2.0'
 
+/** Installs the Reflow skill from the repository with the skills CLI. Global
+ *  (-g) keeps it out of the user's project; -y skips the CLI's questions,
+ *  which an agent's shell can't answer. */
+export const skillInstallCommand = 'npx skills add rtzll/reflow -g -y'
+
+/** The skill page's prompt: install the skill, then run it once on the
+ *  project. Naming the skill lets an agent that already has it skip the install. */
+export const skillInstallPrompt = `Install the reflow skill with \`${skillInstallCommand}\` (skip this if you already have it). Then read its SKILL.md and use it to audit this project.`
+
 export function buildInstallPrompt() {
   const settings = ['theme', 'accent', 'shape', 'density', 'hover', 'font', 'fontWeight']
     .flatMap((key) => {
@@ -36,7 +45,7 @@ export const InstallPromptButton = clientEntry(
     async function copy() {
       try {
         const prompt = handle.props.skill
-          ? 'Use the Reflow skill from skills/reflow/SKILL.md in the Reflow repository. Copy its folder into the project’s .agents/skills/reflow directory, read it, inspect the current Remix 3 UI, and apply the relevant component and interaction guidance within the requested scope. Repository: https://github.com/rtzll/reflow.'
+          ? skillInstallPrompt
           : buildInstallPrompt() +
             (handle.props.topic
               ? ` Focus on the ${handle.props.topic} system documented at /docs/${handle.props.topic} in the Reflow showcase.`
