@@ -36,6 +36,9 @@ it('renders the saved sound state before the browser initializes audio', async (
   await page.reload()
   await expect(sound).toBeVisible()
   await expect(sound).not.toBeChecked()
+  const credit = page.locator('.site-right').getByRole('link', { name: 'Cuelume', exact: true })
+  await expect(credit).toBeVisible()
+  await expect(credit).toHaveAttribute('href', 'https://cuelume.dev/')
 
   await page.setViewportSize({ width: 390, height: 844 })
   const shortcut = page.getByRole('button', { name: 'Showcase sound' })

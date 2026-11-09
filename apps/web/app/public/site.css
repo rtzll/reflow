@@ -306,13 +306,15 @@ html[data-density='compact'] .site-nav a {
 }
 
 .site-credit {
+  margin: auto 8px 0;
+  color: var(--rf-muted);
+}
+.site-credit > div {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
   min-height: 32px;
-  margin: auto 8px 0;
-  color: var(--rf-muted);
 }
 .site-credit a:hover {
   color: var(--rf-fg);

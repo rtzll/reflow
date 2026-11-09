@@ -411,8 +411,14 @@ function ShortcutsButton() {
 function SiteCredit() {
   return () => (
     <div class="site-credit">
-      <span>Inspired by</span>
-      <a href="https://www.fluidfunctionalism.com/">Fluid Functionalism</a>
+      <div>
+        <span>Inspired by</span>
+        <a href="https://www.fluidfunctionalism.com/">Fluid Functionalism</a>
+      </div>
+      <div>
+        <span>Sound effects by</span>
+        <a href="https://cuelume.dev/">Cuelume</a>
+      </div>
     </div>
   )
 }
