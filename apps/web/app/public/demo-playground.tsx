@@ -1,3 +1,4 @@
+import { fluidHover } from '@rtzll/reflow'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import {
   initialPlayground,
@@ -40,6 +41,30 @@ export const DemoPlayground = clientEntry(
           avatar={handle.props.avatar}
         />
       </fieldset>
+    )
+  },
+)
+
+export const DemoPagination = clientEntry(
+  import.meta.url,
+  function DemoPagination(
+    handle: Handle<{ currentHref: string; links: readonly { href: string; name: string }[] }>,
+  ) {
+    const highlight = fluidHover({ axis: 'both', fastHover: true })
+    return () => (
+      <nav class="site-demo-pagination" aria-label="Choose a slide" mix={highlight}>
+        <span class="rf-highlight" aria-hidden="true" data-rf-hover-layer="" />
+        {handle.props.links.map(({ href, name }) => (
+          <a
+            key={href}
+            href={href}
+            aria-label={`Go to ${name}`}
+            aria-current={href === handle.props.currentHref ? 'page' : undefined}
+            title={name}
+            data-rf-hover-item=""
+          />
+        ))}
+      </nav>
     )
   },
 )

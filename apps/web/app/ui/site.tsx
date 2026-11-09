@@ -16,7 +16,7 @@ import {
   ShareSettingsButton,
 } from '../public/install-prompt.tsx'
 import { AccentPicker } from '../public/accent-picker.tsx'
-import { DemoCustomize, DemoPlayground } from '../public/demo-playground.tsx'
+import { DemoCustomize, DemoPagination, DemoPlayground } from '../public/demo-playground.tsx'
 
 import { settingRows, settingLabel, readSettings, type Settings } from '../public/site-settings.ts'
 export { readSettings } from '../public/site-settings.ts'
@@ -878,11 +878,11 @@ const demoOrder = [
   'thinking-indicator',
   'thinking-steps',
   'banner',
-  'settings',
   'input-copy',
   'carousel-dots',
   'breadcrumb',
   'segmented-control',
+  'settings',
 ]
 
 const customizableSlides = new Set([
@@ -1002,17 +1002,10 @@ function Demo(
                 </div>
               </footer>
             </article>
-            <nav class="site-demo-pagination" aria-label="Choose a slide">
-              {slides.map((slide) => (
-                <a
-                  key={slide.slug}
-                  href={slideHref(slide)}
-                  aria-label={`Go to ${slide.name}`}
-                  aria-current={slide.slug === current.slug ? 'page' : undefined}
-                  title={slide.name}
-                />
-              ))}
-            </nav>
+            <DemoPagination
+              currentHref={slideHref(current)}
+              links={slides.map((slide) => ({ href: slideHref(slide), name: slide.name }))}
+            />
           </>
         ) : (
           <p class="site-empty">No component previews are available yet.</p>

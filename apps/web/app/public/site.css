@@ -841,6 +841,8 @@ body:has(.site-demo) {
   min-height: 390px;
 }
 .site-demo-pagination {
+  position: relative;
+  isolation: isolate;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -848,18 +850,24 @@ body:has(.site-demo) {
   gap: 0;
   margin-top: 32px;
 }
+.site-demo-pagination > .rf-highlight {
+  border-radius: var(--rf-radius);
+  background: var(--rf-hover);
+}
 .site-demo-pagination a {
+  position: relative;
   display: grid;
   min-width: 16px;
   height: 26px;
   place-items: center;
-  padding-inline: 4px;
+  padding-inline: 6px;
+  border-radius: var(--rf-radius);
 }
 .site-demo-pagination a::after {
   content: '';
   width: 6px;
   height: 6px;
-  border-radius: 12px;
+  border-radius: min(12px, var(--rf-radius));
   background: var(--rf-muted);
   opacity: 0.75;
   transition:
