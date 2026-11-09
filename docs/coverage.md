@@ -8,7 +8,7 @@ QueuedStack now expands on hover, keyboard focus, and tap, with live pointer reo
 
 Remaining visual refinements include moving checkbox selection surfaces, ColorPicker scrub feedback, and ChatMessage append motion. PDF attachments use a document glyph. First-page rendering depends on a separate PDF subsystem in the reference.
 
-Grouped controls and inline Dropdowns share a fast focus ring with the same 2px outer spacing as the reference. Keyboard focus remains separate from selection, and forced-colors mode uses row outlines. Most triggered Dropdowns use a static inset outline; the ColorPicker format menu moves its focus ring and marks the current format with a selection fill. The Sidebar's workspace and profile menus fit within the rail and show keyboard focus with a row highlight or a forced-colors outline.
+Grouped controls and inline Dropdowns share a fast focus ring with the same 2px outer spacing as the reference. Keyboard focus remains separate from selection, and forced-colors mode uses row outlines. Triggered Dropdown menus move the same focus ring between rows; the ColorPicker format menu also marks the current format with a selection fill. The Sidebar's workspace and profile menus fit within the rail and show keyboard focus with a row highlight or a forced-colors outline.
 
 ## Intentional differences
 

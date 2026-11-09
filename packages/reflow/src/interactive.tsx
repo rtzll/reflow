@@ -839,9 +839,8 @@ function DropdownSurface(
           ]}
         >
           <span class="rf-highlight rf-menu-hover" aria-hidden="true" data-rf-hover-layer />
-          {handle.props.inline && (
-            <span class="rf-highlight rf-focus-ring" aria-hidden="true" data-rf-focus-layer />
-          )}
+          {/* As in the reference, one focus ring glides between rows on keyboard navigation. */}
+          <span class="rf-highlight rf-focus-ring" aria-hidden="true" data-rf-focus-layer />
           {items.length === 0 && search && (
             <div class="rf-menu-empty" role="status">
               {handle.props.emptyMessage ?? 'No results'}

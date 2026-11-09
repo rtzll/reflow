@@ -401,6 +401,47 @@ it('moves the inline menu focus ring and preserves its forced-colors fallback', 
   await expect(second).toHaveCSS('outline-style', 'solid')
 })
 
+it('moves one focus ring between the rows of a triggered menu', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/docs/dropdown#triggered-menu')
+  await waitForShowcase(page)
+  const trigger = page.locator('#triggered-menu .rf-dropdown-trigger')
+  await trigger.focus()
+  await page.keyboard.press('Enter')
+  const list = page.locator('#triggered-menu [role="menu"]')
+  await expect(list).toBeVisible()
+  const ring = list.locator(':scope > [data-rf-focus-layer]')
+  const ringOffset = () =>
+    list.evaluate((node) => {
+      const ring = node.querySelector(':scope > [data-rf-focus-layer]')
+      const row = node.querySelector('[role^="menuitem"]:focus-visible')
+      if (!ring || !row || !ring.hasAttribute('data-visible')) return Infinity
+      const a = ring.getBoundingClientRect()
+      const b = row.getBoundingClientRect()
+      return Math.abs(a.top - b.top) + Math.abs(a.height - b.height)
+    })
+  await page.keyboard.press('ArrowDown')
+  await expect.poll(ringOffset).toBeLessThan(1)
+  const firstTop = await ring.evaluate((node) => node.getBoundingClientRect().top)
+  await page.keyboard.press('ArrowDown')
+  await expect.poll(ringOffset).toBeLessThan(1)
+  const secondTop = await ring.evaluate((node) => node.getBoundingClientRect().top)
+  assert.ok(secondTop > firstTop, 'The ring should move down to the next row')
+  // The row's own outline gives way to the ring, as in the inline menu.
+  const focused = list.locator('[role^="menuitem"]:focus-visible')
+  await expect(focused).toHaveCSS('outline-color', 'rgba(0, 0, 0, 0)')
+  await page.keyboard.press('Escape')
+  await expect(list).toBeHidden()
+
+  await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' })
+  await trigger.focus()
+  await page.keyboard.press('Enter')
+  await page.keyboard.press('ArrowDown')
+  await expect(ring).toBeHidden()
+  await expect(list.locator('[role^="menuitem"]:focus-visible')).toHaveCSS('outline-style', 'solid')
+})
+
 it('marks the checked color format and moves a focus ring between formats', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.emulateMedia({ reducedMotion: 'reduce' })

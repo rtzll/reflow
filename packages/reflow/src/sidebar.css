@@ -184,6 +184,14 @@
     }
   }
 }
+/* These menus mark keyboard focus with the row highlight, not the moving ring. */
+:is(.rf-sidebar-header, .rf-sidebar-footer)
+  .rf-sidebar-row
+  + .rf-dropdown-surface
+  > .rf-menu-list
+  > .rf-focus-ring {
+  display: none;
+}
 .rf-sidebar-row {
   position: relative;
   display: flex;
