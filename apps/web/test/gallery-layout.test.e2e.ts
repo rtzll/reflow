@@ -1050,3 +1050,42 @@ it('shows stacked months under one weekday row with up and down arrows, as the r
   }))
   assert.deepEqual(sideBySide, { rows: 0, headersShown: 2 })
 })
+
+it('fills the proposed range end like a selected day, with a faint inner ring', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' })
+  await page.goto('/docs/calendar?theme=dark')
+  await waitForShowcase(page)
+  const calendar = page.locator('#range .rf-calendar')
+  const day = (label: string) => calendar.getByRole('button', { name: label, exact: false }).first()
+  await day('November 10').click()
+  await day('November 26').hover()
+  const end = calendar.locator('.rf-calendar-preview-end')
+  await expect(end).toHaveAttribute('data-visible', '')
+  const look = await calendar.evaluate((node) => {
+    const layer = node.querySelector<HTMLElement>('.rf-calendar-preview-end')!
+    const target = node.querySelector<HTMLElement>('.rf-calendar-day[data-rf-selected]')!
+    const start = node.querySelector<HTMLElement>('.rf-calendar-day[data-selected]')!
+    const ring = getComputedStyle(layer, '::before')
+    const a = layer.getBoundingClientRect()
+    const b = target.getBoundingClientRect()
+    return {
+      // The same solid fill and text as the selected start day.
+      fill: getComputedStyle(layer).backgroundColor === getComputedStyle(start).backgroundColor,
+      text: getComputedStyle(target).color === getComputedStyle(start).color,
+      shadow: getComputedStyle(layer).boxShadow,
+      ring: [ring.borderTopWidth, ring.inset, ring.opacity],
+      onDay: Math.abs(a.left - b.left) + Math.abs(a.top - b.top) < 1,
+      label: target.textContent?.trim(),
+    }
+  })
+  assert.deepEqual(look, {
+    fill: true,
+    text: true,
+    shadow: 'none',
+    ring: ['1px', '1px', '0.4'],
+    onDay: true,
+    label: '26',
+  })
+})
