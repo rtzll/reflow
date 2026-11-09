@@ -443,7 +443,12 @@ function FormatMenu(
     onChange: (format: ColorFormat) => void
   }>,
 ) {
-  const highlight = fluidHover({ highlightedSelector: '[data-highlighted]' })
+  // As in the reference: the checked format keeps its own background, the
+  // hover grows out of it, and one focus ring glides between rows.
+  const highlight = fluidHover({
+    highlightedSelector: '[data-highlighted]',
+    selectedSelector: '[aria-checked="true"]',
+  })
   return () => {
     const { value, disabled, onChange } = handle.props
     return (
@@ -468,7 +473,13 @@ function FormatMenu(
             mix={menu.popover()}
           >
             <div class="rf-menu-list" mix={[menu.list(), highlight]}>
+              <span
+                class="rf-highlight rf-menu-selection"
+                aria-hidden="true"
+                data-rf-selection-layer
+              />
               <span class="rf-highlight rf-menu-hover" aria-hidden="true" data-rf-hover-layer />
+              <span class="rf-highlight rf-focus-ring" aria-hidden="true" data-rf-focus-layer />
               {formats.map((format) => (
                 <div
                   key={format}

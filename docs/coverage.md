@@ -6,7 +6,7 @@ All 33 components from the initial Fluid Functionalism catalog have a Reflow imp
 
 QueuedStack now expands on hover, keyboard focus, and tap, with live pointer reordering. Dropdown menus cap long lists and follow the resolved placement when they animate. Tabs, CheckboxGroup, RadioGroup, and Accordion share a moving keyboard focus ring. RadioGroup also moves the selection fill. Calendar has month transitions, a moving range endpoint, and navigation hints. DatePicker’s Clearable setting is available in the playground and copied code.
 
-Remaining visual refinements include moving checkbox selection surfaces, CommandMenu scroll dividers, ColorPicker selection motion and scrub feedback, Accordion first-open motion, and ChatMessage append motion. PDF attachments use a document glyph. First-page rendering depends on a separate PDF subsystem in the reference.
+Remaining visual refinements include moving checkbox selection surfaces, CommandMenu scroll dividers, ColorPicker scrub feedback, Accordion first-open motion, and ChatMessage append motion. PDF attachments use a document glyph. First-page rendering depends on a separate PDF subsystem in the reference.
 
 Grouped controls and inline Dropdowns share a fast focus ring with the same 2px outer spacing as the reference. Keyboard focus remains separate from selection, and forced-colors mode uses row outlines. Most triggered Dropdowns use a static inset outline. The Sidebar's workspace and profile menus fit within the rail and show keyboard focus with a row highlight or a forced-colors outline.
 

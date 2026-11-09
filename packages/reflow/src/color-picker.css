@@ -234,6 +234,19 @@
   padding: 0;
 }
 
+.rf-color-format-surface .rf-menu-selection {
+  border-radius: var(--rf-radius, 8px);
+  background: var(--rf-active);
+}
+
+@media (forced-colors: none) {
+  .rf-color-format-surface
+    .rf-menu-list:has(> .rf-focus-ring[data-visible])
+    > .rf-menu-item:focus-visible {
+    outline-color: transparent;
+  }
+}
+
 .rf-color-format-surface .rf-menu-item {
   gap: 0;
   min-block-size: 0;

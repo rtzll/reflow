@@ -391,3 +391,45 @@ it('moves the inline menu focus ring and preserves its forced-colors fallback', 
   await expect(ring).toBeHidden()
   await expect(second).toHaveCSS('outline-style', 'solid')
 })
+
+it('marks the checked color format and moves a focus ring between formats', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/docs/color-picker')
+  await waitForShowcase(page)
+  const trigger = page.locator('.rf-color-format-trigger').locator('visible=true').first()
+  await trigger.focus()
+  await page.keyboard.press('Enter')
+  const menu = page.getByRole('menu', { name: 'Color format' }).locator('visible=true')
+  await expect(menu).toHaveCount(1)
+  const offset = (layer: string, row: string) =>
+    menu.evaluate(
+      (list, [layer, row]) => {
+        const node = list.querySelector(`:scope > ${layer}`)
+        const target = list.querySelector(row)
+        if (!node || !target || !node.hasAttribute('data-visible')) return Infinity
+        return Math.abs(node.getBoundingClientRect().top - target.getBoundingClientRect().top)
+      },
+      [layer, row],
+    )
+
+  await expect
+    .poll(() => offset('[data-rf-selection-layer]', '[aria-checked="true"]'))
+    .toBeLessThan(1)
+  await page.keyboard.press('ArrowDown')
+  await expect
+    .poll(() => offset('[data-rf-focus-layer]', '[role^="menuitem"]:focus'))
+    .toBeLessThan(1)
+  const focused = await menu.evaluate((list) => list.querySelector(':focus')?.textContent)
+  await page.keyboard.press('ArrowDown')
+  await expect
+    .poll(() => menu.evaluate((list) => list.querySelector(':focus')?.textContent))
+    .not.toBe(focused)
+  await expect
+    .poll(() => offset('[data-rf-focus-layer]', '[role^="menuitem"]:focus'))
+    .toBeLessThan(1)
+  assert.equal(
+    await menu.locator(':focus').evaluate((row) => getComputedStyle(row).outlineColor),
+    'rgba(0, 0, 0, 0)',
+  )
+})
