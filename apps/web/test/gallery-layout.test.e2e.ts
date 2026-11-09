@@ -521,7 +521,11 @@ it('animates the accordion panel height on the first open as on later opens', as
   assert.ok(animates(first), `First open did not animate: ${first.join(' ')}`)
   await trigger.click()
   await expect(trigger).toHaveAttribute('aria-expanded', 'false')
-  await page.waitForTimeout(400)
+  const panel = page
+    .locator('.rf-accordion-item')
+    .filter({ has: trigger })
+    .locator('.rf-accordion-panel')
+  await expect(panel).toHaveCSS('grid-template-rows', '0px')
   const second = await sample()
   assert.ok(animates(second), `Second open did not animate: ${second.join(' ')}`)
 })
