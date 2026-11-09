@@ -537,13 +537,55 @@
   color: var(--rf-muted);
 }
 .system-axes {
-  width: min(100%, 420px);
+  width: min(100%, 448px);
   display: grid;
-  justify-items: center;
-  gap: 18px;
+  gap: 32px;
 }
-.system-axes > .rf-card-group {
-  width: 100%;
+.system-stage:has(> .system-axes) {
+  padding: 16px;
+}
+@media (width >= 640px) {
+  .system-stage:has(> .system-axes) {
+    padding: 48px 32px;
+  }
+}
+.system-axis {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.system-axis-label {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  color: var(--rf-muted);
+  font-size: 12px;
+}
+.system-axis-label code {
+  padding-inline: 4px;
+  border-radius: 4px;
+  background: var(--rf-hover);
+  color: var(--rf-fg);
+}
+.system-axis .system-hover-demo {
+  width: min(100%, 224px);
+}
+.system-axis .system-hover-list {
+  padding: 3px;
+  border: 1px solid color-mix(in oklab, var(--rf-border) 65%, transparent);
+  border-radius: var(--rf-panel-radius);
+  background: var(--rf-surface-3);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 18%);
+}
+.system-axis .system-hover-list button {
+  padding-inline: 8px;
+  color: var(--rf-muted);
+}
+.system-axis
+  .system-hover-list
+  button:is([data-rf-hovered], [aria-pressed='true'], :focus-visible) {
+  color: var(--rf-fg);
 }
 .system-motion-demo {
   display: grid;

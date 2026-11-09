@@ -1,7 +1,52 @@
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { router } from './showcase-router.ts'
+import { expect } from 'playwright/test'
+import { router, waitForShowcase } from './showcase-router.ts'
+
+it('aligns the three hover axes and keeps the card grid interactive', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/docs/fluid-hover')
+  await waitForShowcase(page)
+
+  const axes = page.locator('.system-axes')
+  await expect(axes.getByRole('tab', { name: 'Settings' })).toBeVisible()
+  const measure = () =>
+    axes.evaluate((demo) => {
+      const { left, right } = demo.getBoundingClientRect()
+      const list = demo.querySelector('.system-hover-list')!.getBoundingClientRect()
+      const cards = [...demo.querySelectorAll('.rf-card')]
+      const first = cards[0].getBoundingClientRect()
+      const second = cards[1].getBoundingClientRect()
+      const heading = cards[0].querySelector('.rf-card-title')!.getBoundingClientRect()
+      return {
+        listInset: Math.round(list.left - left),
+        gridInset: Math.round(first.left - left),
+        gridGap: Math.round(second.left - first.right),
+        titleInset: Math.round(heading.left - first.left),
+        fits: second.right <= right + 1,
+      }
+    })
+
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 900 })
+    const layout = await measure()
+    assert.equal(layout.listInset, 0)
+    assert.equal(layout.gridInset, 0)
+    assert.equal(layout.gridGap, 8)
+    assert.ok(layout.titleInset > 0 && layout.fits)
+  }
+
+  const draft = axes
+    .locator('.rf-card')
+    .filter({ has: page.getByRole('heading', { name: 'Drafts' }) })
+  const target = draft.getByRole('button', { name: 'Drafts' })
+  await target.hover()
+  await expect(draft).toHaveAttribute('data-rf-hovered', '')
+  await target.click()
+  await expect(draft).toHaveAttribute('data-selected', 'true')
+})
 
 it('uses the native viewport through the custom scrollbar and follows scroll reveal progress', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))

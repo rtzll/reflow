@@ -2,6 +2,7 @@ import {
   Button,
   Card,
   CardGroup,
+  CardHeader,
   CardTitle,
   CardDescription,
   Checkbox,
@@ -173,8 +174,10 @@ function HoverComparisonFrame(handle: Handle) {
   )
 }
 
-function HoverList(handle: Handle<{ nearest?: boolean; count?: number; math?: boolean }>) {
-  let selected = handle.props.count ? 'Message 001' : 'Inbox'
+function HoverList(
+  handle: Handle<{ nearest?: boolean; count?: number; math?: boolean; defaultSelected?: string }>,
+) {
+  let selected = handle.props.defaultSelected
   let moves = 0
   let row = ''
   let pointer = 0
@@ -264,11 +267,32 @@ function HoverList(handle: Handle<{ nearest?: boolean; count?: number; math?: bo
   )
 }
 
-function GridDemo(handle: Handle) {
-  let selected = 'Inbox'
+function AxisBlock(
+  handle: Handle<{ axis: 'x' | 'y' | 'both'; hint: string; children: RemixNode }>,
+) {
   return () => (
-    <CardGroup columns={2}>
-      {['Inbox', 'Drafts', 'Sent', 'Trash'].map((label) => (
+    <div class="system-axis">
+      <div class="system-axis-label">
+        <code>axis="{handle.props.axis}"</code>
+        <span>{handle.props.hint}</span>
+      </div>
+      {handle.props.children}
+    </div>
+  )
+}
+
+const folders = [
+  { label: 'Inbox', description: 'Everything new lands here.' },
+  { label: 'Drafts', description: 'Unsent, saved as you type.' },
+  { label: 'Sent', description: 'Delivered and archived.' },
+  { label: 'Trash', description: 'Emptied after 30 days.' },
+]
+
+function GridDemo(handle: Handle) {
+  let selected: string | undefined
+  return () => (
+    <CardGroup columns={2} border="outlined" separated>
+      {folders.map(({ label, description }) => (
         <Card
           key={label}
           label={label}
@@ -278,10 +302,10 @@ function GridDemo(handle: Handle) {
             handle.update()
           }}
         >
-          <CardTitle>{label}</CardTitle>
-          <CardDescription>
-            {selected === label ? 'Selected folder' : 'Choose this folder'}
-          </CardDescription>
+          <CardHeader>
+            <CardTitle>{label}</CardTitle>
+            <CardDescription>{description}</CardDescription>
+          </CardHeader>
         </Card>
       ))}
     </CardGroup>
@@ -1087,12 +1111,12 @@ export const SystemPage = clientEntry(
                     '<div mix={fluidHover({ nearest: true })}>\n  <span class="rf-highlight" data-rf-hover-layer />\n  <button data-rf-hover-item>Inbox</button>\n</div>'
                   }
                 >
-                  <HoverList nearest math />
+                  <HoverList nearest math defaultSelected="Inbox" />
                 </SystemFrame>
               </SystemSection>
               <SystemSection
                 title="3 axes"
-                description="Use the same interaction for horizontal tabs, vertical lists, and grids."
+                description="Nearest hover follows the tab strip, runs down the list, or finds the closest card in the grid."
               >
                 <SystemFrame
                   code={
@@ -1100,19 +1124,22 @@ export const SystemPage = clientEntry(
                   }
                 >
                   <div class="system-axes">
-                    <code>axis="x"</code>
-                    <Tabs
-                      label="Folders"
-                      defaultValue="Library"
-                      items={['Library', 'Recents', 'Favorites'].map((label) => ({
-                        value: label,
-                        label,
-                      }))}
-                    />
-                    <code>axis="y"</code>
-                    <HoverList nearest />
-                    <code>axis="both"</code>
-                    <GridDemo />
+                    <AxisBlock axis="x" hint="Strips · tabs">
+                      <Tabs
+                        label="Folders"
+                        defaultValue="Library"
+                        items={['Library', 'Recents', 'Favorites', 'Settings'].map((label) => ({
+                          value: label,
+                          label,
+                        }))}
+                      />
+                    </AxisBlock>
+                    <AxisBlock axis="y" hint="Lists · menus, tables, radios">
+                      <HoverList nearest />
+                    </AxisBlock>
+                    <AxisBlock axis="both" hint="Grids · card groups">
+                      <GridDemo />
+                    </AxisBlock>
                   </div>
                 </SystemFrame>
               </SystemSection>
@@ -1131,7 +1158,7 @@ export const SystemPage = clientEntry(
                 <SystemFrame
                   code={'fluidHover({ nearest: true }) // one surface shared by 200 rows'}
                 >
-                  <HoverList nearest count={200} />
+                  <HoverList nearest count={200} defaultSelected="Message 001" />
                 </SystemFrame>
               </SystemSection>
               <div class="system-hover-guidance">
