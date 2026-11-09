@@ -412,3 +412,18 @@ it('keeps the gallery Combobox aligned and scrollable after a third choice wraps
   // The popup plays its exit tween before it hides.
   await list.waitFor({ state: 'hidden', timeout: 1000 })
 })
+
+it('smooths text with grayscale antialiasing across the site, as the reference does', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.goto('/docs/button')
+  for (const selector of ['body', '.site-doc h1', '.rf-button']) {
+    assert.equal(
+      await page
+        .locator(selector)
+        .first()
+        .evaluate((node) => getComputedStyle(node).getPropertyValue('-webkit-font-smoothing')),
+      'antialiased',
+      selector,
+    )
+  }
+})

@@ -21,6 +21,11 @@ html[data-accent='pink'] {
 
 body {
   margin: 0;
+  /* As in the reference: grayscale antialiasing everywhere, popovers and
+     dialogs included, so text keeps its weight instead of macOS's heavier
+     subpixel rendering. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .site-layout,
