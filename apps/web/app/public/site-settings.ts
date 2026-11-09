@@ -54,7 +54,7 @@ export const settingRows = [
     label: 'Radius',
     shortcut: 'R',
     options: ['sharp', 'rounded', 'pill'],
-    defaultValue: 'rounded',
+    defaultValue: 'sharp',
   },
   {
     key: 'density',

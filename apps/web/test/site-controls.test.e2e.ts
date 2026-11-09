@@ -23,12 +23,12 @@ it('applies preferences immediately, keeps links clean, and persists through rel
     'light-dark(#7F22FE, #A684FF)',
   )
   await page.locator('body').press('r')
-  assert.equal(await page.locator('html').getAttribute('data-shape'), 'pill')
+  assert.equal(await page.locator('html').getAttribute('data-shape'), 'rounded')
   assert.equal(
     await panel
       .locator('[data-setting-trigger="shape"] [data-setting-icon]')
       .getAttribute('data-value'),
-    'pill',
+    'rounded',
   )
   await page.locator('body').press('f')
   assert.equal(await page.locator('html').getAttribute('data-font'), 'geist-serif')
@@ -409,7 +409,7 @@ it('saves the settings of a shared link over older cookies and shows the clean U
   await page.locator('body').press('r')
   await reset.click()
   assert.equal(await page.locator('html').getAttribute('data-theme'), 'system')
-  assert.equal(await page.locator('html').getAttribute('data-shape'), 'rounded')
+  assert.equal(await page.locator('html').getAttribute('data-shape'), 'sharp')
   await expect(reset).toBeDisabled()
   await page.reload()
   await waitForShowcase(page)
