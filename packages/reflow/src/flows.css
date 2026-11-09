@@ -141,7 +141,10 @@
    rows continue below and goes at the end, which is why the footer draws no
    line of its own. Without a footer the list is the panel's last child and
    that line would double the panel edge, so it is dropped. The lines ride the
-   scroll root because the viewport's fade mask would erase them. */
+   scroll root because the viewport's fade mask would erase them.
+   This follows the reference's intent, not its pixels: there the stronger
+   line sits on the root's border, which the root's overflow clip hides, so
+   its header line never strengthens. Keep the strengthening. */
 .rf-command-scroll::before,
 .rf-command-scroll::after {
   content: '';
