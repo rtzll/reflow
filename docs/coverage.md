@@ -6,7 +6,7 @@ All 33 components from the initial Fluid Functionalism catalog have a Reflow imp
 
 QueuedStack now expands on hover, keyboard focus, and tap, with live pointer reordering. Dropdown menus cap long lists and follow the resolved placement when they animate. Tabs, CheckboxGroup, RadioGroup, and Accordion share a moving keyboard focus ring. RadioGroup also moves the selection fill, and CheckboxGroup's checked fill grows, merges and splits between runs of checked rows. Calendar has month transitions, a moving range endpoint, and navigation hints. DatePicker’s Clearable setting is available in the playground and copied code.
 
-Remaining visual refinements include ChatMessage append motion. PDF attachments use a document glyph. First-page rendering depends on a separate PDF subsystem in the reference.
+PDF attachments use a document glyph. First-page rendering depends on a separate PDF subsystem in the reference.
 
 Grouped controls and inline Dropdowns share a fast focus ring with the same 2px outer spacing as the reference. Keyboard focus remains separate from selection, and forced-colors mode uses row outlines. Triggered Dropdown menus move the same focus ring between rows; the ColorPicker format menu also marks the current format with a selection fill. The Sidebar's workspace and profile menus fit within the rail and show keyboard focus with a row highlight or a forced-colors outline.
 
@@ -29,7 +29,7 @@ Grouped controls and inline Dropdowns share a fast focus ring with the same 2px 
 | Calendar | Single date/range, multiple months, disabled dates, week numbers, hover/range bands | Local date logic and accessible grid |
 | Card | Composable layouts, slots, dividers, two-dimensional hover | Markup and shared hover |
 | CarouselDots | Selected position, autoplay progress, pointer and keyboard operation | Native buttons and local state |
-| ChatMessage | Conversation layout, entry motion, attachments | Conversation rows, spring entry, and 64px image or document thumbnails |
+| ChatMessage | Conversation layout, entry motion, attachments | Conversation rows, spring entry, a glide to the new place when the conversation re-renders around a message, and 64px image or document thumbnails |
 | Checkbox | Checked/mixed/disabled behavior, form participation, animated check | Native checkbox |
 | CheckboxGroup | Multiple selection and merged adjacent selection surfaces | Checkbox plus shared group logic. Vertical groups draw one moving fill per run of checked rows; horizontal groups fill each checked row. |
 | ColorPicker | Color formats (hex, RGB, HSL, OKLCH), alpha, swatches, pointer/keyboard editing of the square and rails, scrubbable channel fields, format menu, eyedropper where supported, popover trigger with optional remove | Local color logic with shared Slider and menu. Channel scrubbing locks the pointer and draws a ↔ cursor that wraps at the viewport edges, as in the reference; where the lock is refused it scrubs on the OS cursor. |

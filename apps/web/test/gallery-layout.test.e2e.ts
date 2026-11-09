@@ -825,3 +825,39 @@ it('keeps scrubbing on the OS cursor when the pointer lock is refused', async (t
   await page.mouse.up()
   await expect(alpha).toHaveValue('70%')
 })
+
+it('glides earlier chat messages up when a new one is sent', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.goto('/docs/input-message')
+  await waitForShowcase(page)
+  const box = page.locator('.doc-composer-preview textarea').first()
+  await box.scrollIntoViewIfNeeded()
+  for (let i = 1; i <= 7; i++) {
+    await box.fill(`Message ${i}`)
+    await box.press('Enter')
+  }
+  const earlier = page.getByText('Message 6', { exact: true })
+  await earlier.waitFor()
+  await page.waitForTimeout(400)
+  // Sample the earlier message's place on screen every frame across the next send.
+  await earlier.evaluate((node) => {
+    const samples: number[] = []
+    ;(window as unknown as { samples: number[] }).samples = samples
+    const start = performance.now()
+    const tick = () => {
+      samples.push(node.getBoundingClientRect().top)
+      if (performance.now() - start < 600) requestAnimationFrame(tick)
+    }
+    requestAnimationFrame(tick)
+  })
+  await box.fill('Message 8')
+  await box.press('Enter')
+  await page.waitForTimeout(800)
+  const samples = await page.evaluate(() => (window as unknown as { samples: number[] }).samples)
+  const first = samples[0]!
+  const last = samples[samples.length - 1]!
+  assert.ok(last < first - 20, `The message should move up (${first} → ${last})`)
+  // It passes through the space between, rather than jumping in one frame.
+  const between = samples.filter((top) => top < first - 4 && top > last + 4)
+  assert.ok(between.length >= 2, `Expected a glide, got ${samples.map(Math.round).join(', ')}`)
+})

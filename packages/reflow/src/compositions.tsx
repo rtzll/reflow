@@ -1,10 +1,12 @@
 import { Icon } from './icon.tsx'
 import { messageTransitionName, transitionMessage } from './message-transition.ts'
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
+import { prefersReducedMotion } from '@remix-run/ui/animation'
 import { Badge, Button, Textarea, type BadgeColor, type ControlSize } from './basic.tsx'
 import { Accordion } from './groups.tsx'
 import { QueuedStack } from './queued-stack.tsx'
 import { fluidHover } from './interactive.tsx'
+import { motion } from './systems.ts'
 import { Tooltip } from './overlays.tsx'
 
 export interface CarouselDotsProps {
@@ -93,8 +95,78 @@ export interface ChatMessageProps {
 }
 
 export function ChatMessage(handle: Handle<ChatMessageProps>) {
+  // As in the reference, a message glides to its new place when the
+  // conversation re-renders around it, such as earlier messages moving up as a
+  // new one is sent and the transcript scrolls to it. Its place is read before
+  // the update lands and again on the next frame, once the transcript has
+  // scrolled. A message still playing its entrance does not glide.
+  let element: HTMLElement | null = null
+  let entered = false
+  let glide: Animation | undefined
+
+  const track = ref((node, signal) => {
+    if (!(node instanceof HTMLElement)) return
+    element = node
+    entered = !node.hasAttribute('data-animate') || node.getAnimations().length === 0
+    const settle = (event: AnimationEvent) => {
+      if (event.target === node) entered = true
+    }
+    node.addEventListener('animationend', settle, { signal })
+    node.addEventListener('animationcancel', settle, { signal })
+    signal.addEventListener(
+      'abort',
+      () => {
+        glide?.cancel()
+        if (element === node) element = null
+      },
+      { once: true },
+    )
+  })
+
+  function followMove() {
+    const node = element
+    if (
+      !node ||
+      !entered ||
+      !node.isConnected ||
+      prefersReducedMotion() ||
+      document.documentElement.hasAttribute('data-rf-message-transition')
+    )
+      return
+    // Where the message shows now, a glide in flight included.
+    const before = node.getBoundingClientRect().top
+    const glideFrom = (shown: number) => {
+      if (element !== node || !node.isConnected) return
+      glide?.cancel()
+      const offset = shown - node.getBoundingClientRect().top
+      if (Math.abs(offset) < 0.5) return
+      glide = node.animate(
+        [{ transform: `translateY(${offset}px)` }, { transform: 'none' }],
+        motion.moderate,
+      )
+      // A starting animation holds its first frame from now, not from its
+      // first tick, so the next paint already shows the old place.
+      glide.currentTime = 0
+    }
+    // Glide as soon as the update lands, so no frame shows the jump. If the
+    // transcript scrolls before the next frame, the glide restarts from the
+    // same place against the scrolled layout.
+    handle.queueTask(() => {
+      glideFrom(before)
+      const started = glide
+      const shown = node.getBoundingClientRect().top
+      requestAnimationFrame(() => {
+        // The message has not been painted elsewhere yet, so a restart is seamless.
+        if (glide === started && Math.abs(node.getBoundingClientRect().top - shown) >= 0.5) {
+          glideFrom(before)
+        }
+      })
+    })
+  }
+
   return () => {
     const { role, label, attachments, children, size, time, actions, animate = true } = handle.props
+    followMove()
     return (
       <article
         class="rf-chat-message"
@@ -102,6 +174,7 @@ export function ChatMessage(handle: Handle<ChatMessageProps>) {
         data-size={size}
         data-animate={animate ? '' : undefined}
         aria-label={label ?? (role === 'user' ? 'You' : 'Assistant')}
+        mix={track}
       >
         {attachments?.length ? (
           <ul class="rf-chat-attachments" aria-label="Attachments">
