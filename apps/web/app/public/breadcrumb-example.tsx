@@ -29,6 +29,14 @@ const deep: BreadcrumbItem[] = [
   { label: 'Breadcrumb' },
 ]
 
+const showcaseSteps: BreadcrumbItem[] = [
+  { label: 'Home', href: '#home' },
+  { label: 'Projects', href: '#projects' },
+  { label: 'Website', href: '#website' },
+  { label: 'Design', href: '#design' },
+]
+const showcaseSections = ['Drafts', 'Published', 'Archive']
+
 export interface BreadcrumbDemoProps {
   variant: string
   size?: 'default' | 'compact'
@@ -39,6 +47,7 @@ export interface BreadcrumbDemoProps {
 /** The Breadcrumb docs demos and playground: every trail is a real Reflow Breadcrumb. */
 export function BreadcrumbDemo(handle: Handle<BreadcrumbDemoProps>) {
   let section = sections[0]
+  let showcaseSection = showcaseSections[0]
   return () => {
     const { variant, size } = handle.props
     const sectionMenu: BreadcrumbItem = {
@@ -55,6 +64,36 @@ export function BreadcrumbDemo(handle: Handle<BreadcrumbDemoProps>) {
       },
     }
     switch (variant) {
+      // The gallery card, as in the reference: the trail fits its card, middle
+      // steps fold behind the ellipsis as the card narrows, and the last step
+      // opens its sections on hover.
+      case 'showcase':
+        return (
+          <div class="example-breadcrumb">
+            <Breadcrumb
+              collapse
+              openOnHover
+              size={size}
+              items={[
+                ...showcaseSteps,
+                {
+                  label: showcaseSection,
+                  menu: showcaseSections.map((name) => ({
+                    value: name,
+                    label: name,
+                    type: 'radio',
+                    checked: name === showcaseSection,
+                  })),
+                  onMenuSelect: (value) => {
+                    showcaseSection = value
+                    void handle.update()
+                  },
+                },
+                { label: 'Roadmap.md' },
+              ]}
+            />
+          </div>
+        )
       case 'icons':
         return <Breadcrumb items={withIcons} size={size} />
       case 'long':

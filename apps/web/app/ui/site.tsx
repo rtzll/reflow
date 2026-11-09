@@ -436,6 +436,7 @@ const galleryOrder = [
   'input-group',
   'carousel-dots',
   'button',
+  'breadcrumb',
   'table',
   'dialog',
   'calendar',
@@ -463,6 +464,7 @@ const tallCards = new Set([
   'sidebar',
   'thinking-steps',
   'ask-user-questions',
+  'carousel-dots',
 ])
 const rightCards = new Set([
   'color-picker',
@@ -872,12 +874,14 @@ const demoOrder = [
   'settings',
   'input-copy',
   'carousel-dots',
+  'breadcrumb',
 ]
 
 const customizableSlides = new Set([
   'accordion',
   'ask-user-questions',
   'banner',
+  'breadcrumb',
   'button',
   'calendar',
   'card',

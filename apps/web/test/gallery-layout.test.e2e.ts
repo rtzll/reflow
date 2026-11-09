@@ -33,6 +33,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'input-group',
     'carousel-dots',
     'button',
+    'breadcrumb',
     'table',
     'dialog',
     'calendar',
@@ -50,6 +51,14 @@ it('preserves the gallery order and keeps previews above their footers', async (
       expected,
     )
     assert.equal(await gallery.locator('[data-component="card"] .rf-card').count(), 4)
+    // The Breadcrumb card fits its trail to the card: middle steps fold behind
+    // the ellipsis, while the first step, the section menu and the page stay.
+    // In a small card the page name truncates, as in the reference.
+    const trail = gallery.locator('[data-component="breadcrumb"] .rf-breadcrumb')
+    await trail.getByRole('button', { name: 'Drafts' }).waitFor()
+    assert.equal(await trail.locator('[aria-current="page"]').textContent(), 'Roadmap.md')
+    assert.equal(await trail.locator('a').first().textContent(), 'Home')
+    await trail.locator('li[data-ellipsis]').waitFor()
     assert.equal(
       await gallery.locator('[data-component="color-picker"] .rf-color-swatch').count(),
       17,

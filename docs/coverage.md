@@ -1,6 +1,6 @@
 # Component coverage
 
-All 33 components from the initial Fluid Functionalism catalog have a Reflow implementation, a docs page, and an interactive demo. Breadcrumb, added upstream in commit `2bfb830023e46ea9bcf5d326e015d4511ab9ef38`, is the 34th; it has a docs page and playground but no gallery card or focused demo slide yet. QueuedStack, a block upstream, is the 35th: the package exports it, so the docs list it as a component. Fluid Functionalism remains the design reference. [Pinned upstream source](https://github.com/mickadesign/fluid-functionalism/tree/7e6ae290dd8f5a7657ae4a433a42e165bac3ece4)
+All 33 components from the initial Fluid Functionalism catalog have a Reflow implementation, a docs page, and an interactive demo. Breadcrumb, added upstream in commit `2bfb830023e46ea9bcf5d326e015d4511ab9ef38`, is the 34th; it has a docs page, playground, gallery card and focused demo slide. QueuedStack, a block upstream, is the 35th: the package exports it, so the docs list it as a component. Fluid Functionalism remains the design reference. [Pinned upstream source](https://github.com/mickadesign/fluid-functionalism/tree/7e6ae290dd8f5a7657ae4a433a42e165bac3ece4)
 
 ## Current work and remaining refinements
 
@@ -82,7 +82,7 @@ The former `/docs/app-sidebar` and `/docs/settings-dialog` pages redirect to Sid
 
 ## Showcase
 
-- Overview grid with 29 preview cards, docs index and detail pages, and a focused demo with direct component links.
+- Overview grid with 30 preview cards, docs index and detail pages, and a focused demo with direct component links.
 - Responsive layout, copyable usage examples, shareable settings links, and Reflow branding with upstream attribution.
 - All 35 component pages include a live preview, replay, inspection, highlighted code, and public API tables. All but QueuedStack also have playground controls and further examples.
 - Installation prompts include the active preferences and direct agents to the bundled Reflow skill.

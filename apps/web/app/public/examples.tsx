@@ -270,7 +270,7 @@ export const Example = clientEntry(
             </div>
           )
         case 'breadcrumb':
-          return <BreadcrumbDemo variant="menu" />
+          return <BreadcrumbDemo variant={handle.props.showcase ? 'showcase' : 'menu'} />
         case 'dropdown':
           if (handle.props.gallery) {
             return (
