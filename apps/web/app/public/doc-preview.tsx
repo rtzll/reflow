@@ -91,6 +91,35 @@ export const DocPreview = clientEntry(
     }
     let inspect = false
     let revision = 0
+    // A streaming example reports whether it is playing, paused or finished;
+    // the header button then plays, pauses and replays it, as in the
+    // reference. Other examples keep a plain replay.
+    let playback: 'playing' | 'paused' | 'finished' | undefined
+    let stage: HTMLElement | null = null
+    const trackPlayback = ref((element, signal) => {
+      if (!(element instanceof HTMLElement)) return
+      stage = element
+      element.addEventListener(
+        'reflow:playback',
+        ((event: CustomEvent<{ state: 'playing' | 'paused' | 'finished' }>) => {
+          playback = event.detail.state
+          handle.update()
+        }) as EventListener,
+        { signal },
+      )
+    })
+    function playOrReplay() {
+      if (playback === 'playing' || playback === 'paused') {
+        const action = playback === 'playing' ? 'pause' : 'play'
+        stage
+          ?.closest('[data-component-preview]')
+          ?.dispatchEvent(new CustomEvent('reflow:playback-control', { detail: { action } }))
+        return
+      }
+      playback = undefined
+      revision++
+      handle.update()
+    }
     let copied = false
     let copyFailed = false
     return () => {
@@ -98,6 +127,12 @@ export const DocPreview = clientEntry(
         handle.props.slug,
         playground ? playgroundFragment(handle.props.slug, playground) : handle.props.code,
       )
+      const playbackLabel =
+        playback === 'playing'
+          ? 'Pause example'
+          : playback === 'paused'
+            ? 'Play example'
+            : 'Replay example'
       return (
         <div class="site-preview-card doc-preview" data-component-preview="" mix={listenPlayground}>
           <div class="doc-preview-toolbar">
@@ -170,14 +205,15 @@ export const DocPreview = clientEntry(
                 type="button"
                 disabled={!ready}
                 class="site-icon-button"
-                title="Replay example"
-                aria-label="Replay example"
-                mix={on('click', () => {
-                  revision++
-                  handle.update()
-                })}
+                title={playbackLabel}
+                aria-label={playbackLabel}
+                mix={on('click', playOrReplay)}
               >
-                <Icon name="rotate-ccw" />
+                <Icon
+                  name={
+                    playback === 'playing' ? 'pause' : playback === 'paused' ? 'play' : 'rotate-ccw'
+                  }
+                />
               </button>
             </div>
           </div>
@@ -192,6 +228,7 @@ export const DocPreview = clientEntry(
               data-playground={!handle.props.variant ? '' : undefined}
               data-component={handle.props.slug}
               data-inspecting={inspect ? '' : undefined}
+              mix={trackPlayback}
             >
               <fieldset class="doc-example-content demo-hydration" disabled={!ready} key={revision}>
                 {playground ? (

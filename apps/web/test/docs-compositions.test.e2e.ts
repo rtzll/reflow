@@ -167,3 +167,34 @@ it('streams thinking steps on the reference schedule and ends the connector with
     /rf-thinking-source-enter/,
   )
 })
+
+it('plays, pauses and replays a streaming example from the preview header', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.goto('/docs/thinking-steps')
+  const preview = page.locator('#full-example .doc-preview')
+  const steps = preview.locator('.rf-thinking-timeline > li')
+  const button = (name: string) => preview.getByRole('button', { name, exact: true })
+  // The header carries the only playback control, as in the reference.
+  assert.equal(
+    await preview.locator('.doc-preview-stage button', { hasText: /Pause|Play|Replay/ }).count(),
+    0,
+  )
+  await preview.scrollIntoViewIfNeeded()
+  await button('Pause example').waitFor()
+  assert.equal(await button('Pause example').locator('[data-rf-icon="pause"]').count(), 1)
+  await steps.first().waitFor()
+
+  await button('Pause example').click()
+  await button('Play example').waitFor()
+  const held = await steps.count()
+  await page.waitForTimeout(1500)
+  assert.equal(await steps.count(), held)
+
+  await button('Play example').click()
+  await button('Replay example').waitFor({ timeout: 12_000 })
+  assert.equal(await steps.count(), 6)
+
+  await button('Replay example').click()
+  await button('Pause example').waitFor()
+  assert.ok((await steps.count()) < 6)
+})

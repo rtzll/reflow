@@ -612,6 +612,26 @@ export const showcaseIcons = {
         ['path', { d: 'M5 12l14 0' }],
       ],
     },
+    pause: {
+      viewBox: '0 0 24 24',
+      paint: {
+        fill: 'none',
+        stroke: 'currentColor',
+        'stroke-width': 1.6,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+      },
+      nodes: [
+        [
+          'path',
+          { d: 'M6 6a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1l0 -12' },
+        ],
+        [
+          'path',
+          { d: 'M14 6a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1l0 -12' },
+        ],
+      ],
+    },
     'rotate-ccw': {
       viewBox: '0 0 24 24',
       paint: {
@@ -1163,6 +1183,18 @@ export const showcaseIcons = {
           'path',
           {
             d: 'M222,128a6,6,0,0,1-6,6H134v82a6,6,0,0,1-12,0V134H40a6,6,0,0,1,0-12h82V40a6,6,0,0,1,12,0v82h82A6,6,0,0,1,222,128Z',
+          },
+        ],
+      ],
+    },
+    pause: {
+      viewBox: '0 0 256 256',
+      paint: { fill: 'currentColor', stroke: 'none' },
+      nodes: [
+        [
+          'path',
+          {
+            d: 'M200,34H160a14,14,0,0,0-14,14V208a14,14,0,0,0,14,14h40a14,14,0,0,0,14-14V48A14,14,0,0,0,200,34Zm2,174a2,2,0,0,1-2,2H160a2,2,0,0,1-2-2V48a2,2,0,0,1,2-2h40a2,2,0,0,1,2,2ZM96,34H56A14,14,0,0,0,42,48V208a14,14,0,0,0,14,14H96a14,14,0,0,0,14-14V48A14,14,0,0,0,96,34Zm2,174a2,2,0,0,1-2,2H56a2,2,0,0,1-2-2V48a2,2,0,0,1,2-2H96a2,2,0,0,1,2,2Z',
           },
         ],
       ],
@@ -2523,6 +2555,34 @@ export const showcaseIcons = {
             stroke: 'currentColor',
             'stroke-linecap': 'round',
             'stroke-linejoin': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+      ],
+    },
+    pause: {
+      viewBox: '0 0 24 24',
+      paint: {
+        fill: 'none',
+        stroke: 'currentColor',
+        'stroke-width': 1.6,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+      },
+      nodes: [
+        [
+          'path',
+          {
+            d: 'M4 7C4 5.58579 4 4.87868 4.43934 4.43934C4.87868 4 5.58579 4 7 4C8.41421 4 9.12132 4 9.56066 4.43934C10 4.87868 10 5.58579 10 7V17C10 18.4142 10 19.1213 9.56066 19.5607C9.12132 20 8.41421 20 7 20C5.58579 20 4.87868 20 4.43934 19.5607C4 19.1213 4 18.4142 4 17V7Z',
+            stroke: 'currentColor',
+            'stroke-width': '1.5',
+          },
+        ],
+        [
+          'path',
+          {
+            d: 'M14 7C14 5.58579 14 4.87868 14.4393 4.43934C14.8787 4 15.5858 4 17 4C18.4142 4 19.1213 4 19.5607 4.43934C20 4.87868 20 5.58579 20 7V17C20 18.4142 20 19.1213 19.5607 19.5607C19.1213 20 18.4142 20 17 20C15.5858 20 14.8787 20 14.4393 19.5607C14 19.1213 14 18.4142 14 17V7Z',
+            stroke: 'currentColor',
             'stroke-width': '1.5',
           },
         ],

@@ -2755,11 +2755,6 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
 .rf-sidebar-avatar {
   object-fit: cover;
 }
-.doc-thinking-playback {
-  display: flex;
-  margin-inline-start: auto;
-}
-
 .example-gallery-calendar .rf-calendar-header {
   position: relative;
   justify-content: flex-end;

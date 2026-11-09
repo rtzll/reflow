@@ -192,7 +192,19 @@ export function RichThinkingSteps(handle: Handle<{ variant: string; previewImage
     const schedule = schedules[variant] ?? [400]
     return (schedule[progress] ?? 0) - (schedule[progress - 1] ?? 0)
   }
+  // The preview frame's header button plays, pauses and replays the stream,
+  // as in the reference; the demo reports its state for that button.
+  let host: HTMLElement | null = null
+  let reported: string | undefined
+  function report() {
+    const state =
+      progress >= limit() ? 'finished' : inView && !paused && !reduced ? 'playing' : 'paused'
+    if (!host || state === reported) return
+    reported = state
+    host.dispatchEvent(new CustomEvent('reflow:playback', { bubbles: true, detail: { state } }))
+  }
   function synchronize() {
+    report()
     if (timer !== undefined) remaining = Math.max(0, due - performance.now())
     clearTimeout(timer)
     timer = undefined
@@ -209,7 +221,9 @@ export function RichThinkingSteps(handle: Handle<{ variant: string; previewImage
     }, wait)
   }
   const stream = ref((element, signal) => {
-    if (handle.props.variant === 'rich') return
+    if (handle.props.variant === 'rich' || !(element instanceof HTMLElement)) return
+    host = element
+    const frame = element.closest<HTMLElement>('[data-component-preview]') ?? element
     const motion = matchMedia('(prefers-reduced-motion: reduce)')
     const preference = () => {
       reduced = motion.matches
@@ -219,14 +233,29 @@ export function RichThinkingSteps(handle: Handle<{ variant: string; previewImage
     }
     motion.addEventListener('change', preference, { signal })
     preference()
+    // As in the reference: play once half the example is in view, pause when
+    // it scrolls away, and forget a manual pause once it has left the screen.
     const observer = new IntersectionObserver(
       ([entry]) => {
-        inView = entry.isIntersecting
+        if (!entry) return
+        if (entry.intersectionRatio >= 0.5) inView = true
+        else if (entry.intersectionRatio < 0.1) {
+          inView = false
+          paused = false
+        }
         synchronize()
       },
-      { threshold: 0.15 },
+      { threshold: [0.1, 0.5] },
     )
-    observer.observe(element)
+    observer.observe(frame)
+    frame.addEventListener(
+      'reflow:playback-control',
+      ((event: CustomEvent<{ action: 'play' | 'pause' }>) => {
+        paused = event.detail.action === 'pause'
+        synchronize()
+      }) as EventListener,
+      { signal },
+    )
     signal.addEventListener(
       'abort',
       () => {
@@ -410,25 +439,6 @@ export function RichThinkingSteps(handle: Handle<{ variant: string; previewImage
     const finished = progress >= limit()
     return (
       <div class="doc-thinking-timeline" mix={stream}>
-        {variant !== 'rich' && !reduced && (
-          <Button
-            class="doc-thinking-playback"
-            size="compact"
-            variant="ghost"
-            mix={on('click', () => {
-              if (finished) {
-                progress = 0
-                remaining = undefined
-                open = true
-              }
-              paused = finished ? false : !paused
-              synchronize()
-              handle.update()
-            })}
-          >
-            {finished ? 'Replay' : paused ? 'Play' : 'Pause'}
-          </Button>
-        )}
         <ThinkingSteps
           label={label}
           variant="timeline"
