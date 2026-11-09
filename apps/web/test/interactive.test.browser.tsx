@@ -1,4 +1,4 @@
-import { Dropdown, Tabs } from '@rtzll/reflow'
+import { Breadcrumb, Dropdown, Tabs } from '@rtzll/reflow'
 import { equal, ok } from 'remix/assert'
 import { render } from 'remix/component/test'
 import { describe, it } from 'remix/test'
@@ -316,5 +316,71 @@ describe('Dropdown openOnHover', () => {
     pointer(trigger, 'pointerenter', 'touch')
     await wait(60)
     equal(expanded(), false)
+  })
+})
+
+describe('Breadcrumb', () => {
+  it('renders a labelled trail that ends on the current page', async (t) => {
+    const { $, cleanup } = render(
+      <Breadcrumb
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Components', href: '/docs' },
+          { label: 'Breadcrumb' },
+        ]}
+      />,
+    )
+    t.after(cleanup)
+    const nav = $('nav')
+    ok(nav instanceof HTMLElement)
+    equal(nav.getAttribute('aria-label'), 'Breadcrumb')
+    const links = Array.from(nav.querySelectorAll('ol > li a'))
+    equal(links.length, 2)
+    equal(links[1]?.getAttribute('href'), '/docs')
+    const page = nav.querySelector('[aria-current="page"]')
+    equal(page?.textContent, 'Breadcrumb')
+    equal(page?.closest('a'), null)
+    equal(nav.querySelectorAll('.rf-breadcrumb-separator').length, 2)
+    ok(
+      Array.from(nav.querySelectorAll('.rf-breadcrumb-separator')).every(
+        (node) => node.getAttribute('aria-hidden') === 'true',
+      ),
+    )
+  })
+
+  it('opens a step menu from its crumb and reports the choice', async (t) => {
+    let chosen = ''
+    const { $, act, cleanup } = render(
+      <Breadcrumb
+        separator={null}
+        items={[
+          { label: 'Home', href: '/' },
+          {
+            label: 'Components',
+            menu: [
+              { value: 'components', label: 'Components' },
+              { value: 'systems', label: 'Systems' },
+            ],
+            onMenuSelect: (value) => {
+              chosen = value
+            },
+          },
+          { label: 'Breadcrumb' },
+        ]}
+      />,
+    )
+    t.after(cleanup)
+    equal($('.rf-breadcrumb-separator'), null)
+    const trigger = $('button[aria-haspopup="menu"]')
+    ok(trigger instanceof HTMLElement)
+    equal(trigger.textContent?.trim(), 'Components')
+    await act(() => trigger.click())
+    equal(trigger.getAttribute('aria-expanded'), 'true')
+    const systems = Array.from(document.querySelectorAll('[role="menuitem"]')).find(
+      (item) => item.textContent === 'Systems',
+    )
+    ok(systems instanceof HTMLElement)
+    await act(() => systems.click())
+    await waitFor(() => chosen === 'systems')
   })
 })

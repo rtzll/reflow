@@ -536,3 +536,53 @@ it('previews a dropdown on hover, keeps it across the gap, and closes it on leav
   await page.mouse.move(box.x - 200, box.y - 200)
   await expect(trigger).toHaveAttribute('aria-expanded', 'false')
 })
+
+it('glides one hover along the breadcrumb, names cut steps, and collapses on overflow', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/docs/breadcrumb')
+  await waitForShowcase(page)
+
+  const basic = page.locator('#basic .rf-breadcrumb').first()
+  const layer = basic.locator('[data-rf-hover-layer]')
+  const items = basic.locator('.rf-breadcrumb-item')
+  await items.nth(1).hover()
+  await expect(layer).toHaveAttribute('data-visible', '')
+  const aligned = () =>
+    basic.evaluate((nav) => {
+      const layer = nav.querySelector(':scope > [data-rf-hover-layer]')!.getBoundingClientRect()
+      const item = nav.querySelector('[data-rf-hovered]')?.getBoundingClientRect()
+      return item ? Math.abs(layer.left - item.left) + Math.abs(layer.width - item.width) : Infinity
+    })
+  await expect.poll(aligned).toBeLessThan(1)
+  await items.nth(0).hover()
+  await expect.poll(aligned).toBeLessThan(1)
+
+  const long = page.locator('#long-step-name .rf-breadcrumb-crumb').nth(1)
+  await long.hover()
+  await expect(long).toHaveAttribute('title', 'Quarterly planning and roadmap reviews')
+  const short = page.locator('#long-step-name .rf-breadcrumb-crumb').first()
+  await short.hover()
+  await expect(short).not.toHaveAttribute('title')
+
+  const frame = page.locator('#collapse-on-overflow .doc-demo-breadcrumb-resize')
+  const trail = frame.locator('.rf-breadcrumb-item')
+  await frame.evaluate((node) => ((node as HTMLElement).style.inlineSize = '560px'))
+  await expect(frame.getByRole('button', { name: /hidden step/ })).toHaveCount(0)
+  await expect(trail).toHaveCount(5)
+  await frame.evaluate((node) => ((node as HTMLElement).style.inlineSize = '240px'))
+  const ellipsis = frame.getByRole('button', { name: /Show \d hidden steps?/ })
+  await expect(ellipsis).toHaveCount(1)
+  assert.equal(await frame.locator('[aria-current="page"]').textContent(), 'Breadcrumb')
+  assert.equal(await trail.first().textContent(), 'Home')
+  const fits = await frame.evaluate((node) => {
+    const list = node.querySelector('.rf-breadcrumb-list') as HTMLElement
+    return list.scrollWidth <= node.querySelector('.rf-breadcrumb')!.clientWidth + 1
+  })
+  assert.ok(fits, 'The collapsed trail should fit its container')
+  await ellipsis.click()
+  await expect(page.getByRole('menuitem', { name: 'Workspace' })).toBeVisible()
+  await page.keyboard.press('Escape')
+  await frame.evaluate((node) => ((node as HTMLElement).style.inlineSize = '560px'))
+  await expect(trail).toHaveCount(5)
+})

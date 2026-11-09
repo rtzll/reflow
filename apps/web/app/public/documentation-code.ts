@@ -260,6 +260,14 @@ ${opening} label="Components" placeholder="${values.multiple ? 'Add componentsâ€
       return `<CommandMenu items={commands}${values.modal ? ' trigger="Open command menu"' : ''}${values.filters ? " filters={['Actions', 'Go to', 'Help']}" : ''} suggestions={['calendar', 'new-file', 'settings']} />`
     case 'dialog':
       return `${opening} modal={${values.modal}} title="Create teamspace" trigger="Open dialog" />`
+    case 'breadcrumb': {
+      const compact = values.size === 'compact' ? ' size="compact"' : ''
+      const separator = values.separator === 'slash' ? ' separator={<span>/</span>}' : ''
+      const items = values.icons
+        ? `[\n  { label: 'Home', href: '/', icon: <Icon name="home" /> },\n  { label: 'Projects', href: '/projects', icon: <Icon name="folder" /> },\n  { label: 'Q3 report.pdf', icon: <Icon name="file" /> },\n]`
+        : `[\n  { label: 'Home', href: '/' },\n  { label: section, menu: sections.map((name) => ({ value: name, label: name, type: 'radio', checked: name === section })), onMenuSelect: setSection },\n  { label: 'Breadcrumb' },\n]`
+      return `<Breadcrumb openOnHover${compact}${separator} items={${items}} />`
+    }
     case 'dropdown':
       return `${opening} label={selectedLabel} items={items} onSelect={selectItem} />`
     case 'field':

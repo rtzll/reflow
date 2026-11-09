@@ -28,6 +28,11 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       'A status notice with an icon, a title, an optional description and up to three actions.',
     code: bannerFragment(bannerDefaults),
   },
+  breadcrumb: {
+    description:
+      'A trail of links to the current page with a shared hover, step menus, and collapse on overflow.',
+    code: `<Breadcrumb items={[\n  { label: 'Home', href: '/' },\n  { label: 'Components', href: '/docs' },\n  { label: 'Breadcrumb' },\n]} />`,
+  },
   calendar: {
     description:
       'An accessible calendar for selecting one date or a range, with month navigation and optional week numbers.',
@@ -198,6 +203,7 @@ const components = [
   ['ask-user-questions', 'AskUserQuestions'],
   ['badge', 'Badge'],
   ['banner', 'Banner'],
+  ['breadcrumb', 'Breadcrumb'],
   ['button', 'Button'],
   ['calendar', 'Calendar'],
   ['card', 'Card'],

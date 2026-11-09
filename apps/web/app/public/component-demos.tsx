@@ -38,6 +38,7 @@ import {
 } from './card-example-code.ts'
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
 import { DropdownDemo } from './dropdown-example.tsx'
+import { BreadcrumbDemo } from './breadcrumb-example.tsx'
 import {
   Accordion,
   AskUserQuestions,
@@ -221,6 +222,48 @@ export const componentExamples: Record<string, readonly DocumentationExample[]> 
     demo('Solid', 'solid', badgeExampleCode(badgeGenres, ['solid'])),
     demo('Dot', 'dot', badgeExampleCode(badgeGenres, ['dot'])),
     demo('Colors', 'colors', badgeExampleCode(badgeColorNames, ['solid', 'dot'])),
+  ],
+  breadcrumb: [
+    demo(
+      'Basic',
+      'basic',
+      `<Breadcrumb items={[\n  { label: 'Home', href: '/' },\n  { label: 'Components', href: '/docs' },\n  { label: 'Breadcrumb' },\n]} />`,
+      'Every step shares one hover; the separator is part of each step, so the highlight never goes dark between them.',
+    ),
+    demo(
+      'With icons',
+      'icons',
+      `<Breadcrumb items={[\n  { label: 'Home', href: '/', icon: <Icon name="home" /> },\n  { label: 'Projects', href: '/projects', icon: <Icon name="folder" /> },\n  { label: 'Q3 report.pdf', icon: <Icon name="file" /> },\n]} />`,
+    ),
+    demo(
+      'Long step name',
+      'long',
+      `<Breadcrumb items={[\n  { label: 'Home', href: '/' },\n  { label: 'Quarterly planning and roadmap reviews', href: '/planning' },\n  { label: 'Engineering hiring plan for the second half of the year' },\n]} />`,
+      'A link stops at 12rem and truncates; the current page takes the room that is left. Hover or focus a cut step for its full name.',
+    ),
+    demo(
+      'Dropdown on a step',
+      'menu',
+      `<Breadcrumb openOnHover items={[\n  { label: 'Home', href: '/' },\n  { label: section, onMenuSelect: setSection, menu: sections.map((name) => ({\n    value: name, label: name, type: 'radio', checked: name === section,\n  })) },\n  { label: 'Breadcrumb' },\n]} />`,
+      'Rest on Components to open its siblings. The chevron turns down to say the step opens a menu.',
+    ),
+    demo(
+      'Open on click',
+      'click',
+      `<Breadcrumb items={[home, { label: section, menu: siblings, onMenuSelect: setSection }, page]} />`,
+      'Leave openOnHover off and step menus open on click, the Dropdown default.',
+    ),
+    demo(
+      'Collapse on overflow',
+      'collapse',
+      `<Breadcrumb collapse openOnHover items={steps} />`,
+      'Drag the corner to narrow the trail. Middle steps fold into an ellipsis menu; the first step, the last link and the page stay.',
+    ),
+    demo(
+      'Custom separator',
+      'separator',
+      `<Breadcrumb separator={<span>/</span>} items={steps} />`,
+    ),
   ],
   banner: [
     demo(
@@ -1960,6 +2003,8 @@ export function ComponentDemo(
             </div>
           )
         return <SettingsDialogExample />
+      case 'breadcrumb':
+        return <BreadcrumbDemo variant={variant} />
       case 'dropdown':
         return <DropdownDemo variant={variant} />
       case 'field':

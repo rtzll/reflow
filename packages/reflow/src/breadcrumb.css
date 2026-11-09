@@ -1,0 +1,158 @@
+/* Breadcrumb: a trail of steps on one fluid hover scope. Each step carries
+   its trailing separator, so steps sit flush and the highlight never goes
+   dark between them. Values from the reference: 28px steps (24px compact),
+   8px (6px) side padding, a 6px (4px) icon gap. */
+.rf-breadcrumb {
+  --rf-crumb-height: 28px;
+  --rf-crumb-padding: 8px;
+  --rf-crumb-gap: 6px;
+  --rf-crumb-icon: 16px;
+  --rf-crumb-separator: 14px;
+  --rf-crumb-max: 12rem;
+  min-inline-size: 0;
+}
+.rf-breadcrumb[data-density='compact'],
+[data-density='compact'] .rf-breadcrumb:not([data-density='default']) {
+  --rf-crumb-height: 24px;
+  --rf-crumb-padding: 6px;
+  --rf-crumb-gap: 4px;
+  --rf-crumb-icon: 14px;
+  --rf-crumb-separator: 12px;
+  --rf-crumb-max: 10rem;
+}
+
+.rf-breadcrumb-list {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-body);
+  line-height: var(--rf-leading-body);
+}
+
+/* Steps keep their width; only the current page gives way and truncates. */
+.rf-breadcrumb-item {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  min-inline-size: 0;
+}
+.rf-breadcrumb-item:has(> [aria-current='page']) {
+  flex-shrink: 1;
+}
+.rf-breadcrumb-item > .rf-dropdown {
+  display: inline-flex;
+  min-inline-size: 0;
+}
+
+.rf-breadcrumb-crumb {
+  appearance: none;
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--rf-crumb-gap);
+  box-sizing: border-box;
+  min-inline-size: 0;
+  max-inline-size: var(--rf-crumb-max);
+  block-size: var(--rf-crumb-height);
+  padding: 0 var(--rf-crumb-padding);
+  border: 0;
+  border-radius: var(--rf-item-radius, 8px);
+  outline: none;
+  background: transparent;
+  color: var(--rf-muted);
+  font: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 80ms ease;
+}
+/* The separator's glyph carries its own side bearing. */
+.rf-breadcrumb-item:not(:last-child) .rf-breadcrumb-crumb:has(> .rf-breadcrumb-separator) {
+  padding-inline-end: var(--rf-crumb-gap);
+}
+.rf-breadcrumb-crumb > svg,
+.rf-breadcrumb-crumb > :not(.rf-breadcrumb-separator) svg {
+  flex: none;
+  inline-size: var(--rf-crumb-icon);
+  block-size: var(--rf-crumb-icon);
+}
+.rf-breadcrumb-label {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rf-breadcrumb-page {
+  flex-shrink: 1;
+  max-inline-size: none;
+  color: var(--rf-fg);
+  cursor: default;
+}
+
+.rf-breadcrumb-item[data-rf-hovered] .rf-breadcrumb-crumb,
+.rf-breadcrumb-crumb:focus-visible,
+.rf-breadcrumb-crumb[aria-expanded='true'] {
+  color: var(--rf-fg);
+}
+.rf-breadcrumb-crumb:focus-visible {
+  outline: 1px solid var(--rf-accent, #6b97ff);
+  outline-offset: -1px;
+}
+@media (forced-colors: none) {
+  .rf-breadcrumb:has(> .rf-focus-ring[data-visible]) .rf-breadcrumb-crumb:focus-visible {
+    outline-color: transparent;
+  }
+}
+@media (hover: hover) {
+  [data-hover='standard'] .rf-breadcrumb-crumb:not(.rf-breadcrumb-page):hover {
+    background: var(--rf-hover);
+    color: var(--rf-fg);
+  }
+}
+
+.rf-breadcrumb-hover {
+  border-radius: var(--rf-item-radius, 8px);
+  background: var(--rf-hover);
+}
+
+.rf-breadcrumb-separator {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  color: var(--rf-muted);
+  user-select: none;
+}
+.rf-breadcrumb-separator > svg {
+  inline-size: var(--rf-crumb-separator);
+  block-size: var(--rf-crumb-separator);
+}
+.rf-breadcrumb-item:last-child .rf-breadcrumb-separator {
+  display: none;
+}
+/* A step that opens a menu says so: its chevron turns down on hover, on
+   keyboard focus and while the menu is open. A link's chevron stays put. */
+.rf-breadcrumb[data-separator='chevron'] [aria-haspopup] > .rf-breadcrumb-separator {
+  transition: transform 150ms ease-out;
+}
+.rf-breadcrumb[data-separator='chevron']
+  :is(
+    .rf-breadcrumb-item[data-rf-hovered] [aria-haspopup],
+    [aria-haspopup]:focus-visible,
+    [aria-haspopup][aria-expanded='true']
+  )
+  > .rf-breadcrumb-separator {
+  transform: rotate(90deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-breadcrumb [aria-haspopup] > .rf-breadcrumb-separator,
+  .rf-breadcrumb-crumb {
+    transition: none;
+  }
+}

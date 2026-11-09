@@ -2738,3 +2738,18 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
 .site-gallery [data-component='button'] .example-row {
   justify-content: flex-start;
 }
+
+.doc-demo-breadcrumb-narrow {
+  inline-size: min(100%, 360px);
+}
+.doc-demo-breadcrumb-resize {
+  box-sizing: border-box;
+  inline-size: min(100%, 560px);
+  min-inline-size: 180px;
+  max-inline-size: 100%;
+  padding: 8px;
+  overflow: hidden;
+  resize: horizontal;
+  border: 1px dashed color-mix(in oklab, var(--rf-border) 80%, transparent);
+  border-radius: var(--rf-radius);
+}

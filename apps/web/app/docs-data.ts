@@ -1935,6 +1935,76 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  breadcrumb: [
+    {
+      name: 'Breadcrumb',
+      props: [
+        {
+          name: 'items',
+          type: 'readonly BreadcrumbItem[]',
+          description: 'The trail, ending with the current page.',
+          required: true,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Names the navigation landmark.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: '"default" | "compact"',
+          description: 'Pins the trail to 28px steps and 13px text, or 24px and 12px.',
+          required: false,
+        },
+        {
+          name: 'separator',
+          type: 'RemixNode | null',
+          description: 'Trailing glyph of every step but the last, such as a slash. null drops it.',
+          required: false,
+        },
+        {
+          name: 'collapse',
+          type: 'boolean',
+          description:
+            'Hides middle steps behind an ellipsis menu while the trail is wider than its container. The first step, the last link and the current page stay; past that the page name truncates.',
+          required: false,
+        },
+        {
+          name: 'openOnHover',
+          type: 'boolean',
+          description: 'Opens step menus and the ellipsis menu when a mouse rests on them.',
+          required: false,
+        },
+      ],
+    },
+    {
+      name: 'BreadcrumbItem',
+      props: [
+        { name: 'label', type: 'string', description: 'Step name.', required: true },
+        {
+          name: 'href',
+          type: 'string',
+          description: 'Where the step goes. The last item is the current page and is not a link.',
+          required: false,
+        },
+        { name: 'icon', type: 'RemixNode', description: 'Leading icon.', required: false },
+        {
+          name: 'menu',
+          type: 'readonly DropdownItem[]',
+          description:
+            'Turns a step before the current page into a menu trigger, such as its siblings. Its chevron points down while the menu is open.',
+          required: false,
+        },
+        {
+          name: 'onMenuSelect',
+          type: '((value: string, checked?: boolean) => void)',
+          description: 'Called when an item in the step menu is selected.',
+          required: false,
+        },
+      ],
+    },
+  ],
   dropdown: [
     {
       name: 'Dropdown',
@@ -3744,6 +3814,12 @@ export const componentDefaults: Record<string, Record<string, string>> = {
     contrast: 'low',
     variant: 'inline',
     dismissLabel: 'Dismiss',
+  },
+  Breadcrumb: {
+    label: 'Breadcrumb',
+    separator: 'chevron-right icon',
+    collapse: 'false',
+    openOnHover: 'false',
   },
   Button: { variant: 'primary' },
   Calendar: {

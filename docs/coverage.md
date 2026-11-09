@@ -1,6 +1,6 @@
 # Component coverage
 
-All 33 components from the initial Fluid Functionalism catalog have a Reflow implementation, a docs page, and an interactive demo. Fluid Functionalism remains the design reference. [Pinned upstream source](https://github.com/mickadesign/fluid-functionalism/tree/7e6ae290dd8f5a7657ae4a433a42e165bac3ece4)
+All 33 components from the initial Fluid Functionalism catalog have a Reflow implementation, a docs page, and an interactive demo. Breadcrumb, added upstream later, is the 34th; it has a docs page and playground but no gallery card or focused demo slide yet. Fluid Functionalism remains the design reference. [Pinned upstream source](https://github.com/mickadesign/fluid-functionalism/tree/7e6ae290dd8f5a7657ae4a433a42e165bac3ece4)
 
 ## Current work and remaining refinements
 
@@ -24,6 +24,7 @@ Grouped controls and inline Dropdowns share a fast focus ring with the same 2px 
 | AskUserQuestions | Multi-step questions, single/multiple choices, custom answer, skip and navigation, submit shortcut | Reflow composition. Single choices advance, multi-select and free text use Continue, and digits select options. Hidden inputs integrate with forms, and the completion screen is opt-in. |
 | Badge | Status/color treatments and both densities | Markup and CSS |
 | Banner | Status variants, actions, dismiss/collapse, fixed placement | Reflow composition |
+| Breadcrumb | Trail to the current page, shared hover, step menus, truncation with the full name, collapse on overflow | Native nav, ordered list and links, with Dropdown for step and ellipsis menus. A cut step shows its full name in a native title rather than the reference Tooltip. |
 | Button | Variants, density, loading, icons, hover weight and press feedback | Native button/link |
 | Calendar | Single date/range, multiple months, disabled dates, week numbers, hover/range bands | Local date logic and accessible grid |
 | Card | Composable layouts, slots, dividers, two-dimensional hover | Markup and shared hover |
@@ -81,7 +82,7 @@ The pinned upstream registry lists seven blocks. Reflow's catalog lists three. T
 
 - Overview grid with 29 preview cards, docs index and detail pages, and a focused demo with direct component links.
 - Responsive layout, copyable usage examples, URL settings, and Reflow branding with upstream attribution.
-- All 33 component pages include live playground controls, multiple working examples, replay, inspection, highlighted code, and public API tables.
+- All 34 component pages include live playground controls, multiple working examples, replay, inspection, highlighted code, and public API tables.
 - Installation prompts include the active preferences and direct agents to the bundled Reflow skill.
 - Global command search opens with Cmd/Ctrl K. Shortcut help uses individual keycaps and labeled icons.
 

@@ -3,6 +3,7 @@ import { CarouselExample } from './carousel-example.tsx'
 import { questionPlayground } from './question-example-data.ts'
 import { RequestFormExample } from './request-form-example.tsx'
 import { DropdownPlayground } from './dropdown-example.tsx'
+import { BreadcrumbDemo } from './breadcrumb-example.tsx'
 import { paletteCommands, paletteGroups, paletteSuggestions } from './component-demos.tsx'
 import {
   datePickerBooked,
@@ -216,6 +217,11 @@ export const playgroundControls: Record<string, readonly Control[]> = {
     toggle('modal', 'Modal', true),
     toggle('showCloseButton', 'Close button', true),
     toggle('dismissOnBackdrop', 'Backdrop dismiss', true),
+  ],
+  breadcrumb: [
+    choice('separator', 'Separator', ['chevron', 'slash']),
+    toggle('icons', 'Icons'),
+    size,
   ],
   dropdown: [
     choice('mode', 'Mode', ['Menu', 'Inline panel']),
@@ -760,6 +766,15 @@ export function PlaygroundExample(
             dismissOnBackdrop={Boolean(v.dismissOnBackdrop)}
             description="Add a new teamspace to organize your projects and collaborate with your team."
             footer={(close) => <Button mix={on('click', close)}>Create</Button>}
+          />
+        )
+      case 'breadcrumb':
+        return (
+          <BreadcrumbDemo
+            variant="playground"
+            size={density}
+            separator={v.separator === 'slash' ? 'slash' : 'chevron'}
+            icons={Boolean(v.icons)}
           />
         )
       case 'dropdown':
