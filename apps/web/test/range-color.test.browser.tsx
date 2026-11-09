@@ -12,7 +12,7 @@ import { deepEqual, equal, ok } from 'remix/assert'
 import { render } from 'remix/component/test'
 import { on } from 'remix/component'
 import type { Handle } from 'remix/component'
-import { it } from 'remix/test'
+import { describe, it } from 'remix/test'
 
 function press(node: Element, key: string) {
   node.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }))
@@ -237,4 +237,53 @@ it('converts OKLCH edits to submitted sRGB while retaining opacity', async (t) =
   await act(() => commit(lightness, '50'))
   const submitted = String(new FormData(form).get('color'))
   ok(submitted.startsWith('#') && submitted.endsWith('80'))
+})
+
+// As in the reference's color-picker-sync tests.
+describe('ColorPicker controlled value', () => {
+  function Controlled(handle: Handle<{ initial: string; format: 'hex' | 'hsl' | 'oklch' }>) {
+    let value = handle.props.initial
+    return () => (
+      <div>
+        <ColorPicker
+          value={value}
+          defaultFormat={handle.props.format}
+          hideEyedropper
+          onValueChange={(next) => {
+            value = next
+            handle.update()
+          }}
+        />
+        {['#00FF00', '#808080', 'hsl(200, 100%, 50%)'].map((next) => (
+          <button
+            type="button"
+            data-set={next}
+            mix={on('click', () => {
+              value = next
+              handle.update()
+            })}
+          />
+        ))}
+      </div>
+    )
+  }
+
+  it('shows a value changed from outside', async (t) => {
+    const { $, act, cleanup } = render(<Controlled initial="#FF0000" format="hex" />)
+    t.after(cleanup)
+    const hex = () => ($('input[aria-label="Hex value"]') as HTMLInputElement).value.toUpperCase()
+    ok(hex().includes('FF0000'))
+    await act(() => ($('[data-set="#00FF00"]') as HTMLElement).click())
+    ok(hex().includes('00FF00'), hex())
+  })
+
+  it('keeps the held hue when the outside value is a gray', async (t) => {
+    const { $, act, cleanup } = render(<Controlled initial="hsl(200, 100%, 50%)" format="hsl" />)
+    t.after(cleanup)
+    const hue = () => ($('input[aria-label=Hue]') as HTMLInputElement).value
+    equal(hue(), '200')
+    await act(() => ($('[data-set="#808080"]') as HTMLElement).click())
+    equal(($('input[aria-label=Saturation]') as HTMLInputElement).value, '0')
+    equal(hue(), '200')
+  })
 })

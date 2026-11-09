@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { motion } from '@rtzll/reflow'
 import { equal } from 'remix/assert'
 import { it } from 'remix/test'
@@ -20,5 +20,39 @@ it('keeps the CSS spring tokens identical to the motion tiers', () => {
       normalizeCss(String(motion[tier])),
       `--rf-spring-${tier} differs from motion.${tier}`,
     )
+  }
+})
+
+const stylesheets = () => {
+  const dirs = [
+    new URL('../../../packages/reflow/src/', import.meta.url),
+    new URL('../app/public/', import.meta.url),
+  ]
+  return dirs.flatMap((dir) =>
+    readdirSync(dir)
+      .filter((file) => file.endsWith('.css'))
+      .map((file) => ({ file, css: readFileSync(new URL(file, dir), 'utf8') })),
+  )
+}
+
+// As in the reference's UI polish checks: `all` animates layout and paint
+// properties nobody meant to move.
+it('never transitions all', () => {
+  for (const { file, css } of stylesheets()) {
+    const found = css.match(/transition(-property)?:\s*all\b[^;]*;/)
+    equal(found?.[0], undefined, `${file} transitions all`)
+  }
+})
+
+// The build's CSS transformer folds animation-timeline into a literal
+// animation shorthand, a syntax browsers reject, which drops the animation.
+// Rules with a timeline keep their shorthand behind a variable.
+it('keeps scroll-driven animation shorthands behind a variable', () => {
+  for (const { file, css } of stylesheets()) {
+    for (const [, body] of css.matchAll(/\{([^{}]*animation-timeline[^{}]*)\}/g)) {
+      const shorthand = body.match(/(?:^|[;\s])animation:\s*([^;]+);/)?.[1]
+      if (shorthand === undefined) continue
+      equal(shorthand.trim().startsWith('var('), true, `${file}: animation: ${shorthand.trim()}`)
+    }
   }
 })
