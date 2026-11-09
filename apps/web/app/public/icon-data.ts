@@ -748,6 +748,139 @@ export const showcaseIcons = {
         ['path', { d: 'M6 6l12 12' }],
       ],
     },
+    play: {
+      viewBox: '0 0 24 24',
+      paint: {
+        fill: 'none',
+        stroke: 'currentColor',
+        'stroke-width': 1.6,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+      },
+      nodes: [['path', { d: 'M7 4v16l13 -8l-13 -8' }]],
+    },
+    rocket: {
+      viewBox: '0 0 24 24',
+      paint: {
+        fill: 'none',
+        stroke: 'currentColor',
+        'stroke-width': 1.6,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+      },
+      nodes: [
+        [
+          'path',
+          {
+            d: 'M4 13a8 8 0 0 1 7 7a6 6 0 0 0 3 -5a9 9 0 0 0 6 -8a3 3 0 0 0 -3 -3a9 9 0 0 0 -8 6a6 6 0 0 0 -5 3',
+          },
+        ],
+        ['path', { d: 'M7 14a6 6 0 0 0 -3 6a6 6 0 0 0 6 -3' }],
+        ['path', { d: 'M14 9a1 1 0 1 0 2 0a1 1 0 1 0 -2 0' }],
+      ],
+    },
+    image: {
+      viewBox: '0 0 24 24',
+      paint: {
+        fill: 'none',
+        stroke: 'currentColor',
+        'stroke-width': 1.6,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+      },
+      nodes: [
+        ['path', { d: 'M15 8h.01' }],
+        [
+          'path',
+          { d: 'M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12' },
+        ],
+        ['path', { d: 'M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5' }],
+        ['path', { d: 'M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3' }],
+      ],
+    },
+    cpu: {
+      viewBox: '0 0 24 24',
+      paint: {
+        fill: 'none',
+        stroke: 'currentColor',
+        'stroke-width': 1.6,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+      },
+      nodes: [
+        [
+          'path',
+          { d: 'M5 6a1 1 0 0 1 1 -1h12a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-12a1 1 0 0 1 -1 -1l0 -12' },
+        ],
+        ['path', { d: 'M9 9h6v6h-6l0 -6' }],
+        ['path', { d: 'M3 10h2' }],
+        ['path', { d: 'M3 14h2' }],
+        ['path', { d: 'M10 3v2' }],
+        ['path', { d: 'M14 3v2' }],
+        ['path', { d: 'M21 10h-2' }],
+        ['path', { d: 'M21 14h-2' }],
+        ['path', { d: 'M14 21v-2' }],
+        ['path', { d: 'M10 21v-2' }],
+      ],
+    },
+    book: {
+      viewBox: '0 0 24 24',
+      paint: {
+        fill: 'none',
+        stroke: 'currentColor',
+        'stroke-width': 1.6,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+      },
+      nodes: [
+        ['path', { d: 'M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0' }],
+        ['path', { d: 'M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0' }],
+        ['path', { d: 'M3 6l0 13' }],
+        ['path', { d: 'M12 6l0 13' }],
+        ['path', { d: 'M21 6l0 13' }],
+      ],
+    },
+    'corner-down-right': {
+      viewBox: '0 0 24 24',
+      paint: {
+        fill: 'none',
+        stroke: 'currentColor',
+        'stroke-width': 1.6,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+      },
+      nodes: [['path', { d: 'M6 6v6a3 3 0 0 0 3 3h10l-4 -4m0 8l4 -4' }]],
+    },
+    'more-horizontal': {
+      viewBox: '0 0 24 24',
+      paint: {
+        fill: 'none',
+        stroke: 'currentColor',
+        'stroke-width': 1.6,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+      },
+      nodes: [
+        ['path', { d: 'M4 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0' }],
+        ['path', { d: 'M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0' }],
+        ['path', { d: 'M18 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0' }],
+      ],
+    },
+    'more-vertical': {
+      viewBox: '0 0 24 24',
+      paint: {
+        fill: 'none',
+        stroke: 'currentColor',
+        'stroke-width': 1.6,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+      },
+      nodes: [
+        ['path', { d: 'M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0' }],
+        ['path', { d: 'M11 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0' }],
+        ['path', { d: 'M11 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0' }],
+      ],
+    },
   },
   phosphor: {
     clock: {
@@ -1279,6 +1412,102 @@ export const showcaseIcons = {
           'path',
           {
             d: 'M204.24,195.76a6,6,0,1,1-8.48,8.48L128,136.49,60.24,204.24a6,6,0,0,1-8.48-8.48L119.51,128,51.76,60.24a6,6,0,0,1,8.48-8.48L128,119.51l67.76-67.75a6,6,0,0,1,8.48,8.48L136.49,128Z',
+          },
+        ],
+      ],
+    },
+    play: {
+      viewBox: '0 0 256 256',
+      paint: { fill: 'currentColor', stroke: 'none' },
+      nodes: [
+        [
+          'path',
+          {
+            d: 'M231.36,116.19,87.28,28.06a14,14,0,0,0-14.18-.27A13.69,13.69,0,0,0,66,39.87V216.13a13.69,13.69,0,0,0,7.1,12.08,14,14,0,0,0,14.18-.27l144.08-88.13a13.82,13.82,0,0,0,0-23.62Zm-6.26,13.38L81,217.7a2,2,0,0,1-2.06,0,1.78,1.78,0,0,1-1-1.61V39.87a1.78,1.78,0,0,1,1-1.61A2.06,2.06,0,0,1,80,38a2,2,0,0,1,1,.31L225.1,126.43a1.82,1.82,0,0,1,0,3.14Z',
+          },
+        ],
+      ],
+    },
+    rocket: {
+      viewBox: '0 0 256 256',
+      paint: { fill: 'currentColor', stroke: 'none' },
+      nodes: [
+        [
+          'path',
+          {
+            d: 'M150,224a6,6,0,0,1-6,6H112a6,6,0,0,1,0-12h32A6,6,0,0,1,150,224ZM128,110a10,10,0,1,0-10-10A10,10,0,0,0,128,110Zm93.67,45.4L209.31,211A14,14,0,0,1,187,219l-27.79-21H96.82L69,219a14,14,0,0,1-22.34-8L34.33,155.4a14.06,14.06,0,0,1,2.91-12l29-34.76a121.28,121.28,0,0,1,8.48-36.71c12.72-31.88,35.52-51.88,44.73-59a14,14,0,0,1,17.16,0c9.21,7.12,32,27.12,44.73,59a121.28,121.28,0,0,1,8.48,36.71l29,34.76A14.06,14.06,0,0,1,221.67,155.4ZM98.26,186h59.48c21.93-38.46,26.12-75.33,12.43-109.62-11.95-30-34.35-48.87-40.93-54a2,2,0,0,0-2.48,0c-6.58,5.09-29,24-40.93,54C72.14,110.67,76.33,147.54,98.26,186ZM87,190.4c-12-21.49-18.9-42.6-20.62-63.19L46.46,151.08a2,2,0,0,0-.42,1.71l12.37,55.64a2,2,0,0,0,3.2,1.13l.13-.11Zm122.57-39.32-19.89-23.87c-1.72,20.59-8.6,41.7-20.62,63.19l25.23,19,.13.11a2,2,0,0,0,3.2-1.13L210,152.79A2,2,0,0,0,209.54,151.08Z',
+          },
+        ],
+      ],
+    },
+    image: {
+      viewBox: '0 0 256 256',
+      paint: { fill: 'currentColor', stroke: 'none' },
+      nodes: [
+        [
+          'path',
+          {
+            d: 'M216,42H40A14,14,0,0,0,26,56V200a14,14,0,0,0,14,14H216a14,14,0,0,0,14-14V56A14,14,0,0,0,216,42ZM40,54H216a2,2,0,0,1,2,2V163.57L188.53,134.1a14,14,0,0,0-19.8,0l-21.42,21.42L101.9,110.1a14,14,0,0,0-19.8,0L38,154.2V56A2,2,0,0,1,40,54ZM38,200V171.17l52.58-52.58a2,2,0,0,1,2.84,0L176.83,202H40A2,2,0,0,1,38,200Zm178,2H193.8l-38-38,21.41-21.42a2,2,0,0,1,2.83,0l38,38V200A2,2,0,0,1,216,202ZM146,100a10,10,0,1,1,10,10A10,10,0,0,1,146,100Z',
+          },
+        ],
+      ],
+    },
+    cpu: {
+      viewBox: '0 0 256 256',
+      paint: { fill: 'currentColor', stroke: 'none' },
+      nodes: [
+        [
+          'path',
+          {
+            d: 'M152,98H104a6,6,0,0,0-6,6v48a6,6,0,0,0,6,6h48a6,6,0,0,0,6-6V104A6,6,0,0,0,152,98Zm-6,48H110V110h36Zm86,0H214V110h18a6,6,0,0,0,0-12H214V56a14,14,0,0,0-14-14H158V24a6,6,0,0,0-12,0V42H110V24a6,6,0,0,0-12,0V42H56A14,14,0,0,0,42,56V98H24a6,6,0,0,0,0,12H42v36H24a6,6,0,0,0,0,12H42v42a14,14,0,0,0,14,14H98v18a6,6,0,0,0,12,0V214h36v18a6,6,0,0,0,12,0V214h42a14,14,0,0,0,14-14V158h18a6,6,0,0,0,0-12Zm-30,54a2,2,0,0,1-2,2H56a2,2,0,0,1-2-2V56a2,2,0,0,1,2-2H200a2,2,0,0,1,2,2Z',
+          },
+        ],
+      ],
+    },
+    book: {
+      viewBox: '0 0 256 256',
+      paint: { fill: 'currentColor', stroke: 'none' },
+      nodes: [
+        [
+          'path',
+          {
+            d: 'M208,26H72A30,30,0,0,0,42,56V224a6,6,0,0,0,6,6H192a6,6,0,0,0,0-12H54v-2a18,18,0,0,1,18-18H208a6,6,0,0,0,6-6V32A6,6,0,0,0,208,26Zm-6,160H72a29.87,29.87,0,0,0-18,6V56A18,18,0,0,1,72,38H202Z',
+          },
+        ],
+      ],
+    },
+    'corner-down-right': {
+      viewBox: '0 0 256 256',
+      paint: { fill: 'currentColor', stroke: 'none' },
+      nodes: [
+        [
+          'path',
+          {
+            d: 'M220.24,180.24l-48,48a6,6,0,0,1-8.48-8.48L201.51,182H72a6,6,0,0,1-6-6V32a6,6,0,0,1,12,0V170H201.51l-37.75-37.76a6,6,0,1,1,8.48-8.48l48,48A6,6,0,0,1,220.24,180.24Z',
+          },
+        ],
+      ],
+    },
+    'more-horizontal': {
+      viewBox: '0 0 256 256',
+      paint: { fill: 'currentColor', stroke: 'none' },
+      nodes: [
+        [
+          'path',
+          {
+            d: 'M138,128a10,10,0,1,1-10-10A10,10,0,0,1,138,128ZM60,118a10,10,0,1,0,10,10A10,10,0,0,0,60,118Zm136,0a10,10,0,1,0,10,10A10,10,0,0,0,196,118Z',
+          },
+        ],
+      ],
+    },
+    'more-vertical': {
+      viewBox: '0 0 256 256',
+      paint: { fill: 'currentColor', stroke: 'none' },
+      nodes: [
+        [
+          'path',
+          {
+            d: 'M118,60a10,10,0,1,1,10,10A10,10,0,0,1,118,60Zm10,58a10,10,0,1,0,10,10A10,10,0,0,0,128,118Zm0,68a10,10,0,1,0,10,10A10,10,0,0,0,128,186Z',
           },
         ],
       ],
@@ -2560,34 +2789,6 @@ export const showcaseIcons = {
         ],
       ],
     },
-    pause: {
-      viewBox: '0 0 24 24',
-      paint: {
-        fill: 'none',
-        stroke: 'currentColor',
-        'stroke-width': 1.6,
-        'stroke-linecap': 'round',
-        'stroke-linejoin': 'round',
-      },
-      nodes: [
-        [
-          'path',
-          {
-            d: 'M4 7C4 5.58579 4 4.87868 4.43934 4.43934C4.87868 4 5.58579 4 7 4C8.41421 4 9.12132 4 9.56066 4.43934C10 4.87868 10 5.58579 10 7V17C10 18.4142 10 19.1213 9.56066 19.5607C9.12132 20 8.41421 20 7 20C5.58579 20 4.87868 20 4.43934 19.5607C4 19.1213 4 18.4142 4 17V7Z',
-            stroke: 'currentColor',
-            'stroke-width': '1.5',
-          },
-        ],
-        [
-          'path',
-          {
-            d: 'M14 7C14 5.58579 14 4.87868 14.4393 4.43934C14.8787 4 15.5858 4 17 4C18.4142 4 19.1213 4 19.5607 4.43934C20 4.87868 20 5.58579 20 7V17C20 18.4142 20 19.1213 19.5607 19.5607C19.1213 20 18.4142 20 17 20C15.5858 20 14.8787 20 14.4393 19.5607C14 19.1213 14 18.4142 14 17V7Z',
-            stroke: 'currentColor',
-            'stroke-width': '1.5',
-          },
-        ],
-      ],
-    },
     'rotate-ccw': {
       viewBox: '0 0 24 24',
       paint: {
@@ -2793,6 +2994,368 @@ export const showcaseIcons = {
             'stroke-width': '1.5',
           },
         ],
+      ],
+    },
+    play: {
+      viewBox: '0 0 24 24',
+      paint: {
+        fill: 'none',
+        stroke: 'currentColor',
+        'stroke-width': 1.6,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+      },
+      nodes: [['polygon', { points: '6 3 20 12 6 21 6 3' }]],
+    },
+    rocket: {
+      viewBox: '0 0 24 24',
+      paint: {
+        fill: 'none',
+        stroke: 'currentColor',
+        'stroke-width': 1.6,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+      },
+      nodes: [
+        [
+          'path',
+          {
+            d: 'M11.8013 6.48949L13.2869 5.00392C14.9596 3.3312 17.1495 2.63737 19.4671 2.52399C20.3686 2.47989 20.8193 2.45784 21.1807 2.81928C21.5422 3.18071 21.5201 3.63143 21.476 4.53289C21.3626 6.8505 20.6688 9.04042 18.9961 10.7131L17.5105 12.1987C16.2871 13.4221 15.9393 13.77 16.1961 15.097C16.4496 16.1107 16.6949 17.0923 15.9578 17.8294C15.0637 18.7235 14.2481 18.7235 13.354 17.8294L6.17058 10.646C5.27649 9.75188 5.27646 8.9363 6.17058 8.04219C6.90767 7.30509 7.88929 7.55044 8.90297 7.80389C10.23 8.06073 10.5779 7.71289 11.8013 6.48949Z',
+            stroke: 'currentColor',
+            'stroke-linejoin': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+        [
+          'path',
+          {
+            d: 'M2.5 21.5L7.5 16.5',
+            stroke: 'currentColor',
+            'stroke-linecap': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+        [
+          'path',
+          {
+            d: 'M8.5 21.5L10.5 19.5',
+            stroke: 'currentColor',
+            'stroke-linecap': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+        [
+          'path',
+          {
+            d: 'M2.5 15.5L4.5 13.5',
+            stroke: 'currentColor',
+            'stroke-linecap': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+        [
+          'path',
+          {
+            d: 'M17.125 7H17M17.25 7C17.25 7.13807 17.1381 7.25 17 7.25C16.8619 7.25 16.75 7.13807 16.75 7C16.75 6.86193 16.8619 6.75 17 6.75C17.1381 6.75 17.25 6.86193 17.25 7Z',
+            stroke: 'currentColor',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+      ],
+    },
+    image: {
+      viewBox: '0 0 24 24',
+      paint: {
+        fill: 'none',
+        stroke: 'currentColor',
+        'stroke-width': 1.6,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+      },
+      nodes: [
+        [
+          'circle',
+          {
+            cx: '7.5',
+            cy: '7.5',
+            r: '1.5',
+            stroke: 'currentColor',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+        [
+          'path',
+          {
+            d: 'M2.5 12C2.5 7.52166 2.5 5.28249 3.89124 3.89124C5.28249 2.5 7.52166 2.5 12 2.5C16.4783 2.5 18.7175 2.5 20.1088 3.89124C21.5 5.28249 21.5 7.52166 21.5 12C21.5 16.4783 21.5 18.7175 20.1088 20.1088C18.7175 21.5 16.4783 21.5 12 21.5C7.52166 21.5 5.28249 21.5 3.89124 20.1088C2.5 18.7175 2.5 16.4783 2.5 12Z',
+            stroke: 'currentColor',
+            'stroke-width': '1.5',
+          },
+        ],
+        [
+          'path',
+          {
+            d: 'M5 21C9.37246 15.775 14.2741 8.88406 21.4975 13.5424',
+            stroke: 'currentColor',
+            'stroke-width': '1.5',
+          },
+        ],
+      ],
+    },
+    cpu: {
+      viewBox: '0 0 24 24',
+      paint: {
+        fill: 'none',
+        stroke: 'currentColor',
+        'stroke-width': 1.6,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+      },
+      nodes: [
+        [
+          'path',
+          {
+            d: 'M4 12C4 8.22876 4 6.34315 5.17157 5.17157C6.34315 4 8.22876 4 12 4C15.7712 4 17.6569 4 18.8284 5.17157C20 6.34315 20 8.22876 20 12C20 15.7712 20 17.6569 18.8284 18.8284C17.6569 20 15.7712 20 12 20C8.22876 20 6.34315 20 5.17157 18.8284C4 17.6569 4 15.7712 4 12Z',
+            stroke: 'currentColor',
+            'stroke-linejoin': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+        [
+          'path',
+          {
+            d: 'M9.5 2V4',
+            stroke: 'currentColor',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+        [
+          'path',
+          {
+            d: 'M14.5 2V4',
+            stroke: 'currentColor',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+        [
+          'path',
+          {
+            d: 'M9.5 20V22',
+            stroke: 'currentColor',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+        [
+          'path',
+          {
+            d: 'M14.5 20V22',
+            stroke: 'currentColor',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+        [
+          'path',
+          {
+            d: 'M13 9L9 13',
+            stroke: 'currentColor',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+        [
+          'path',
+          {
+            d: 'M15 13L13 15',
+            stroke: 'currentColor',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+        [
+          'path',
+          {
+            d: 'M22 14.5L20 14.5',
+            stroke: 'currentColor',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+        [
+          'path',
+          {
+            d: 'M4 9.5L2 9.5',
+            stroke: 'currentColor',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+        [
+          'path',
+          {
+            d: 'M4 14.5L2 14.5',
+            stroke: 'currentColor',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+        [
+          'path',
+          {
+            d: 'M22 9.5L20 9.5',
+            stroke: 'currentColor',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+      ],
+    },
+    book: {
+      viewBox: '0 0 24 24',
+      paint: {
+        fill: 'none',
+        stroke: 'currentColor',
+        'stroke-width': 1.6,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+      },
+      nodes: [
+        [
+          'path',
+          {
+            d: 'M15.5 7H8.5M12.499 11H8.49902',
+            stroke: 'currentColor',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+        [
+          'path',
+          {
+            d: 'M20 22H6C4.89543 22 4 21.1046 4 20M4 20C4 18.8954 4.89543 18 6 18H20V6C20 4.11438 20 3.17157 19.4142 2.58579C18.8284 2 17.8856 2 16 2H10C7.17157 2 5.75736 2 4.87868 2.87868C4 3.75736 4 5.17157 4 8V20Z',
+            stroke: 'currentColor',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+        [
+          'path',
+          {
+            d: 'M19.5 18C19.5 18 18.5 18.7628 18.5 20C18.5 21.2372 19.5 22 19.5 22',
+            stroke: 'currentColor',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+      ],
+    },
+    'corner-down-right': {
+      viewBox: '0 0 24 24',
+      paint: {
+        fill: 'none',
+        stroke: 'currentColor',
+        'stroke-width': 1.6,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+      },
+      nodes: [
+        [
+          'path',
+          {
+            d: 'M4 3V5.07692C4 7.07786 4 8.07833 4.14533 8.91545C4.94529 13.5235 8.90656 17.1376 13.9574 17.8674C14.8749 18 16.8068 18 19 18',
+            stroke: 'currentColor',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+        [
+          'path',
+          {
+            d: 'M17 21C17.6068 20.4102 20 18.8403 20 18C20 17.1597 17.6068 15.5898 17 15',
+            stroke: 'currentColor',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+      ],
+    },
+    'more-horizontal': {
+      viewBox: '0 0 24 24',
+      paint: {
+        fill: 'none',
+        stroke: 'currentColor',
+        'stroke-width': 1.6,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+      },
+      nodes: [
+        [
+          'path',
+          {
+            d: 'M6.00449 12.5V12M18.0045 12.5V12M12.0045 12.5V12M7.00449 12.5C7.00449 11.9477 6.55677 11.5 6.00449 11.5C5.4522 11.5 5.00449 11.9477 5.00449 12.5C5.00449 13.0523 5.4522 13.5 6.00449 13.5C6.55677 13.5 7.00449 13.0523 7.00449 12.5ZM19.0045 12.5C19.0045 11.9477 18.5568 11.5 18.0045 11.5C17.4522 11.5 17.0045 11.9477 17.0045 12.5C17.0045 13.0523 17.4522 13.5 18.0045 13.5C18.5568 13.5 19.0045 13.0523 19.0045 12.5ZM13.0045 12.5C13.0045 11.9477 12.5568 11.5 12.0045 11.5C11.4522 11.5 11.0045 11.9477 11.0045 12.5C11.0045 13.0523 11.4522 13.5 12.0045 13.5C12.5568 13.5 13.0045 13.0523 13.0045 12.5Z',
+            stroke: 'currentColor',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+      ],
+    },
+    'more-vertical': {
+      viewBox: '0 0 24 24',
+      paint: {
+        fill: 'none',
+        stroke: 'currentColor',
+        'stroke-width': 1.6,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+      },
+      nodes: [
+        [
+          'path',
+          {
+            d: 'M11.9967 12.5V12M11.9967 6.5V6M11.9967 18.5V18M12.9967 12.5C12.9967 11.9477 12.549 11.5 11.9967 11.5C11.4444 11.5 10.9967 11.9477 10.9967 12.5C10.9967 13.0523 11.4444 13.5 11.9967 13.5C12.549 13.5 12.9967 13.0523 12.9967 12.5ZM12.9967 6.5C12.9967 5.94772 12.549 5.5 11.9967 5.5C11.4444 5.5 10.9967 5.94772 10.9967 6.5C10.9967 7.05228 11.4444 7.5 11.9967 7.5C12.549 7.5 12.9967 7.05228 12.9967 6.5ZM12.9967 18.5C12.9967 17.9477 12.549 17.5 11.9967 17.5C11.4444 17.5 10.9967 17.9477 10.9967 18.5C10.9967 19.0523 11.4444 19.5 11.9967 19.5C12.549 19.5 12.9967 19.0523 12.9967 18.5Z',
+            stroke: 'currentColor',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+            'stroke-width': '1.5',
+          },
+        ],
+      ],
+    },
+    pause: {
+      viewBox: '0 0 24 24',
+      paint: {
+        fill: 'none',
+        stroke: 'currentColor',
+        'stroke-width': 1.6,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+      },
+      nodes: [
+        ['rect', { x: '14', y: '3', width: '5', height: '18', rx: '1' }],
+        ['rect', { x: '5', y: '3', width: '5', height: '18', rx: '1' }],
       ],
     },
   },
