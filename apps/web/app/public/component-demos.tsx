@@ -923,7 +923,39 @@ export const componentExamples: Record<string, readonly DocumentationExample[]> 
     demo(
       'Header & footer',
       'header',
-      `<Sidebar sections={sections} header={<WorkspaceMenu />} footer={<UserMenu />} searchable>\n  Workspace content\n</Sidebar>`,
+      `// The header and footer rows are Dropdowns with a bare sidebar-row trigger.
+const workspaceMenu = (
+  <Dropdown label="Switch workspace" variant="bare" triggerClass="rf-sidebar-row"
+    items={['Aurora AI', 'Northwind', 'Contoso'].map((name) => ({
+      value: name, label: name, type: 'radio', checked: name === workspace,
+    }))}
+    onSelect={setWorkspace}
+    triggerContent={<>
+      <span class="rf-sidebar-tile" aria-hidden="true">{workspace[0]}</span>
+      <span class="rf-sidebar-row-name">{workspace}</span>
+      <Icon name="chevron-down" />
+    </>} />
+)
+
+const userMenu = (
+  <Dropdown label="Open user menu" variant="bare" triggerClass="rf-sidebar-row" side="top"
+    items={[
+      { value: 'profile', label: 'Profile', icon: <Icon name="users" /> },
+      { value: 'settings', label: 'Settings', icon: <Icon name="settings" /> },
+      { value: 'logout', label: 'Log out', icon: <Icon name="chevron-left" /> },
+    ]}
+    onSelect={runAccountAction}
+    triggerContent={<>
+      <img class="rf-sidebar-avatar" src={user.avatar} width="20" height="20" alt="" />
+      <span class="rf-sidebar-row-name rf-sidebar-row-plain">{user.name}</span>
+      <span class="rf-sidebar-row-trailing" aria-hidden="true"><Icon name="chevrons-up-down" /></span>
+    </>} />
+)
+
+<Sidebar sections={sections} header={workspaceMenu} footer={userMenu} searchable>
+  Workspace content
+</Sidebar>`,
+      'The workspace switcher and user menu are Dropdowns in the header and footer slots. Copy them as a starting point for your own.',
     ),
     demo(
       'Callouts',
