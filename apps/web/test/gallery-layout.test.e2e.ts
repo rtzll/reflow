@@ -961,6 +961,17 @@ it('anchors docs previews 48px below the header, as the reference does', async (
     456,
   )
 
+  // The accordion playground supplies its own inset in the reference.
+  await page.goto('/docs/accordion')
+  await waitForShowcase(page)
+  const accordion = '.doc-preview-stage[data-playground][data-component="accordion"]'
+  assert.deepEqual(await offset(accordion, '.doc-example-content'), { x: 24, y: 40 })
+  await page.locator(accordion).getByRole('button', { name: 'Styling', exact: true }).click()
+  assert.equal((await offset(accordion, '.rf-accordion')).y, 40)
+  await page.setViewportSize({ width: 390, height: 844 })
+  assert.deepEqual(await offset(accordion, '.doc-example-content'), { x: 16, y: 40 })
+  await page.setViewportSize({ width: 1280, height: 900 })
+
   // Pickers start at the top so their popups open downward.
   await page.goto('/docs/date-picker')
   await waitForShowcase(page)

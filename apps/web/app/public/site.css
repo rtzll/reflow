@@ -1839,7 +1839,12 @@ html[data-font='geist-serif'] {
   padding: 48px 32px;
 }
 .doc-preview-stage[data-component='accordion'][data-playground] {
-  padding: 0;
+  padding: 40px 16px;
+}
+@media (width >= 640px) {
+  .doc-preview-stage[data-component='accordion'][data-playground] {
+    padding-inline: 24px;
+  }
 }
 .doc-preview-stage[data-component='accordion'] .doc-example-content {
   align-items: flex-start;
