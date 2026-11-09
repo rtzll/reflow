@@ -1,6 +1,7 @@
 import { BreadcrumbDemo } from './breadcrumb-example.tsx'
 import { SegmentedControlDemo } from './segmented-control-example.tsx'
 import { PopoverDemo } from './popover-example.tsx'
+import { HoverCardDemo } from './hover-card-example.tsx'
 import { paletteCommands, paletteSuggestions } from './palette-example-data.tsx'
 import { accents } from './site-settings.ts'
 import { ChatExample } from './chat-example.tsx'
@@ -273,6 +274,8 @@ export const Example = clientEntry(
               />
             </div>
           )
+        case 'hover-card':
+          return <HoverCardDemo variant="basic" />
         case 'popover':
           return <PopoverDemo variant="playground" placement="bottom" />
         case 'segmented-control':

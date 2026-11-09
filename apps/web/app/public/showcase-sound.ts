@@ -235,7 +235,8 @@ export function enhanceShowcaseSound() {
       } else if (
         event instanceof ToggleEvent &&
         dialog instanceof HTMLElement &&
-        dialog.matches('.rf-popover-surface') &&
+        // Hover card previews share the surface but stay silent.
+        dialog.matches('.rf-popover-surface:not(.rf-hover-card)') &&
         dialog.closest('.site-preview-stage')
       ) {
         play(event.newState === 'open' ? 'open' : 'close', { emphasis: 'subtle' })

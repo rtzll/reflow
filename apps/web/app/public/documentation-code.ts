@@ -140,6 +140,7 @@ export function playgroundFragment(slug: string, values: PlaygroundValues): stri
     'input-copy': 'InputCopy',
     'input-group': 'InputGroup',
     'input-message': 'InputMessage',
+    'hover-card': 'HoverCard',
     'radio-group': 'RadioGroup',
     'segmented-control': 'SegmentedControl',
     'thinking-indicator': 'ThinkingIndicator',
@@ -249,6 +250,14 @@ ${opening} label="Fruit" options={options} defaultValue={['apples']} />`
       return `const options = ${JSON.stringify(radioOptions)}
 
 ${opening} label="Options" options={options} defaultValue="0" />`
+    case 'hover-card': {
+      const placement =
+        values.placement && values.placement !== 'bottom' ? ` placement="${values.placement}"` : ''
+      const delay =
+        values.openDelay && values.openDelay !== '500' ? ` openDelay={${values.openDelay}}` : ''
+      const compact = values.size === 'compact' ? ' size="compact"' : ''
+      return `<HoverCard${placement}${delay}${compact} renderTrigger={(trigger) => (\n  <a href="/u/reflow" {...trigger}>@reflow</a>\n)}>\n  <Profile user={user} />\n</HoverCard>`
+    }
     case 'popover': {
       const title = values.title
         ? ' title="Dimensions" description="Set the size of the selected frame."'

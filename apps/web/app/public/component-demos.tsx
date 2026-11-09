@@ -41,6 +41,7 @@ import { DropdownDemo } from './dropdown-example.tsx'
 import { BreadcrumbDemo } from './breadcrumb-example.tsx'
 import { SegmentedControlDemo } from './segmented-control-example.tsx'
 import { PopoverDemo } from './popover-example.tsx'
+import { HoverCardDemo } from './hover-card-example.tsx'
 import { SoundCombobox } from './sound-combobox.tsx'
 import { playCopySuccess } from './showcase-sound.ts'
 import {
@@ -906,6 +907,36 @@ export const componentExamples: Record<string, readonly DocumentationExample[]> 
       `<InputMessage onSend={async ({ text, files }) => {\n  await saveMessage(text, files)\n}} />`,
     ),
     demo('Disabled', 'disabled', `<InputMessage disabled onSend={sendMessage} />`),
+  ],
+  'hover-card': [
+    demo(
+      'Basic',
+      'basic',
+      `<HoverCard renderTrigger={(trigger) => (\n  <a href="/u/reflow" {...trigger}>@reflow</a>\n)}>\n  <Profile user={user} />\n</HoverCard>`,
+      'Rest the pointer on the name, or tab to it. Move into the card to use it; it closes shortly after the pointer leaves both, or on Escape.',
+    ),
+    demo(
+      'Link preview',
+      'link',
+      `<p>Reflow is built on <HoverCard renderTrigger={(trigger) => (\n  <a href="https://remix.run" {...trigger}>Remix 3</a>\n)}>\n  <LinkPreview url="https://remix.run" />\n</HoverCard>.</p>`,
+      'The trigger stays an ordinary link: a click or a tap follows it.',
+    ),
+    demo(
+      'Placement',
+      'placement',
+      `<HoverCard placement="top" renderTrigger={(trigger) => (\n  <a href="/u/reflow" {...trigger}>@reflow</a>\n)}>…</HoverCard>`,
+    ),
+    demo(
+      'Instant',
+      'instant',
+      `<HoverCard openDelay={0} closeDelay={100} renderTrigger={(trigger) => (\n  <a href="/u/reflow" {...trigger}>@reflow</a>\n)}>…</HoverCard>`,
+      'Without the open delay the card follows the pointer at once. The default 500ms waits for intent.',
+    ),
+    demo(
+      'Compact',
+      'compact',
+      `<HoverCard size="compact" renderTrigger={(trigger) => (\n  <a href="/u/reflow" {...trigger}>@reflow</a>\n)}>…</HoverCard>`,
+    ),
   ],
   popover: [
     demo(
@@ -2088,6 +2119,8 @@ export function ComponentDemo(
             </div>
           )
         return <SettingsDialogExample />
+      case 'hover-card':
+        return <HoverCardDemo variant={variant} />
       case 'popover':
         return <PopoverDemo variant={variant} />
       case 'segmented-control':

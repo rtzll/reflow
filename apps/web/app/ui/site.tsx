@@ -931,6 +931,7 @@ const demoOrder = [
   'breadcrumb',
   'segmented-control',
   'popover',
+  'hover-card',
   'settings',
 ]
 
@@ -946,6 +947,7 @@ const customizableSlides = new Set([
   'command-menu',
   'date-picker',
   'dropdown',
+  'hover-card',
   'input-message',
   'popover',
   'segmented-control',

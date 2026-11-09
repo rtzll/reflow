@@ -241,3 +241,14 @@ it('plays open and close cues for a Popover', async (t) => {
   await expect(trigger).toHaveAttribute('aria-expanded', 'false')
   await expect.poll(audioStarts).toBeGreaterThan(opened)
 })
+
+it('keeps HoverCard previews silent', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  const audioStarts = await trackAudio(page)
+  await page.goto('/docs/hover-card')
+  await waitForShowcase(page)
+  await page.locator('#basic .doc-hover-trigger').hover()
+  await expect(page.locator('#basic .rf-hover-card')).toBeVisible()
+  await page.waitForTimeout(200)
+  expect(await audioStarts()).toBe(0)
+})

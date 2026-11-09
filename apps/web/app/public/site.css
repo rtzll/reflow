@@ -2917,6 +2917,58 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
   justify-content: flex-start;
 }
 
+.doc-hover-trigger {
+  color: var(--rf-fg);
+  font-variation-settings: var(--rf-weight-strong);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, var(--rf-fg) 30%, transparent);
+  text-underline-offset: 3px;
+}
+.doc-hover-sentence {
+  max-inline-size: 360px;
+  margin: 0;
+  color: var(--rf-muted);
+  text-align: center;
+}
+.doc-hover-profile {
+  display: flex;
+  gap: 12px;
+  inline-size: 280px;
+  max-inline-size: 100%;
+}
+.doc-hover-avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: 40px;
+  block-size: 40px;
+  border-radius: 999px;
+  background: var(--rf-accent);
+  color: white;
+  font-variation-settings: var(--rf-weight-strong);
+}
+.doc-hover-profile[data-density='compact'] .doc-hover-avatar {
+  inline-size: 32px;
+  block-size: 32px;
+}
+.doc-hover-profile-text,
+.doc-hover-link {
+  display: grid;
+  gap: 2px;
+  min-inline-size: 0;
+}
+.doc-hover-profile-text p,
+.doc-hover-link p {
+  margin: 4px 0;
+}
+.doc-hover-link {
+  inline-size: 260px;
+  max-inline-size: 100%;
+}
+.doc-hover-muted {
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption);
+}
 .doc-popover-fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -2721,6 +2721,76 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  'hover-card': [
+    {
+      name: 'HoverCard',
+      props: [
+        {
+          name: 'renderTrigger',
+          type: '(props: HoverCardTriggerProps) => RemixNode',
+          description: 'Renders the trigger, usually a link; spread the props onto it.',
+          required: true,
+        },
+        {
+          name: 'children',
+          type: 'RemixNode',
+          description: 'The card content.',
+          required: false,
+        },
+        {
+          name: 'open',
+          type: 'boolean',
+          description: 'Whether the card is open, when controlled by the parent.',
+          required: false,
+        },
+        {
+          name: 'defaultOpen',
+          type: 'boolean',
+          description: 'Whether the card starts open when uncontrolled.',
+          required: false,
+        },
+        {
+          name: 'onOpenChange',
+          type: '((open: boolean) => void)',
+          description: 'Called when hovering, focus or Escape opens or closes the card.',
+          required: false,
+        },
+        {
+          name: 'placement',
+          type: 'PopoverPlacement',
+          description:
+            'Which side of the trigger the card opens on, flipping when there is no room. Default bottom.',
+          required: false,
+        },
+        {
+          name: 'offset',
+          type: 'number',
+          description: 'Distance from the trigger in pixels. Default 8.',
+          required: false,
+        },
+        {
+          name: 'openDelay',
+          type: 'number',
+          description:
+            'Milliseconds the pointer rests on the trigger, or focus stays on it, before the card opens. Default 500.',
+          required: false,
+        },
+        {
+          name: 'closeDelay',
+          type: 'number',
+          description:
+            'Milliseconds after the pointer leaves the trigger and the card before it closes. Default 200.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: '"default" | "compact"',
+          description: 'Tightens the card padding.',
+          required: false,
+        },
+      ],
+    },
+  ],
   popover: [
     {
       name: 'Popover',

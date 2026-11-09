@@ -12,6 +12,7 @@ export * from './color-picker.tsx'
 export * from './breadcrumb.tsx'
 export * from './segmented-control.tsx'
 export * from './popover.tsx'
+export * from './hover-card.tsx'
 export * from './systems.ts'
 export * from './queued-stack.tsx'
 

@@ -95,6 +95,10 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       'A label, form control, help text, and error with associated accessible descriptions.',
     code: requestFormCode(),
   },
+  'hover-card': {
+    description: 'A preview card for a link or a name, shown while the pointer rests on it.',
+    code: `<HoverCard renderTrigger={(trigger) => <a href="/u/reflow" {...trigger}>@reflow</a>}>\n  <p>Fluid components for Remix.</p>\n</HoverCard>`,
+  },
   input: {
     description: 'A native single-line form control with shared sizes and focus styling.',
     code: `<Input name="displayName" aria-label="Display name" />`,
@@ -231,6 +235,7 @@ const components = [
   ['dialog', 'Dialog'],
   ['dropdown', 'Dropdown'],
   ['field', 'Field'],
+  ['hover-card', 'HoverCard'],
   ['input', 'Input'],
   ['input-copy', 'InputCopy'],
   ['input-group', 'InputGroup'],

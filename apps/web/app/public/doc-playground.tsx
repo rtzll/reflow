@@ -6,6 +6,7 @@ import { DropdownPlayground } from './dropdown-example.tsx'
 import { BreadcrumbDemo } from './breadcrumb-example.tsx'
 import { SegmentedControlDemo } from './segmented-control-example.tsx'
 import { PopoverDemo } from './popover-example.tsx'
+import { HoverCardDemo } from './hover-card-example.tsx'
 import { paletteCommands, paletteGroups, paletteSuggestions } from './component-demos.tsx'
 import { SoundCombobox } from './sound-combobox.tsx'
 import { playCopySuccess } from './showcase-sound.ts'
@@ -265,6 +266,11 @@ export const playgroundControls: Record<string, readonly Control[]> = {
     choice('orientation', 'Layout', ['vertical', 'horizontal']),
     toggle('hideLabel', 'Hide label', true),
     disabled,
+  ],
+  'hover-card': [
+    choice('placement', 'Placement', ['bottom', 'top', 'right', 'left']),
+    choice('openDelay', 'Open delay', ['500', '200', '0']),
+    size,
   ],
   popover: [
     choice('placement', 'Placement', ['bottom', 'top', 'right', 'left']),
@@ -782,6 +788,15 @@ export function PlaygroundExample(
             dismissOnBackdrop={Boolean(v.dismissOnBackdrop)}
             description="Add a new teamspace to organize your projects and collaborate with your team."
             footer={(close) => <Button mix={on('click', close)}>Create</Button>}
+          />
+        )
+      case 'hover-card':
+        return (
+          <HoverCardDemo
+            variant="playground"
+            size={density}
+            placement={String(v.placement) as 'bottom' | 'top' | 'right' | 'left'}
+            openDelay={Number(v.openDelay)}
           />
         )
       case 'popover':
