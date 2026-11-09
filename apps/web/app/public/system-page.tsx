@@ -26,7 +26,7 @@ import { fontStylesheet, fontWeights, type GoogleFont } from './google-fonts.ts'
 import { HoverComparison, HoverPlayback } from './system-hover-comparison.tsx'
 import { RevealPresetDemo } from './system-reveal-demo.tsx'
 import { SurfaceInvite, SurfaceTokens } from './system-surfaces-demo.tsx'
-import { SizeToolbar } from './system-size-toolbar.tsx'
+import { CompactRegionDemo, SizeToolbar } from './system-size-toolbar.tsx'
 import { SkillComparison } from './skill-page.tsx'
 import { highlightedCode } from './doc-preview.tsx'
 import { PreviewInspector } from './preview-inspector.tsx'
@@ -754,72 +754,6 @@ function TypeScale() {
   )
 }
 
-function DensityDemo(handle: Handle) {
-  let density = 'compact'
-  let query = ''
-  let measured = ''
-  let selected = ['Design system']
-  const measurement = ref<HTMLDivElement>((element, signal) => {
-    const input = element.querySelector('input')!
-    const observer = new ResizeObserver(() => {
-      const style = getComputedStyle(input)
-      const next = `${Math.round(input.getBoundingClientRect().height)}px control · ${style.fontSize} type · ${style.lineHeight} line height`
-      if (measured !== next) {
-        measured = next
-        handle.update()
-      }
-    })
-    observer.observe(input)
-    signal.addEventListener('abort', () => observer.disconnect(), { once: true })
-  })
-  return () => (
-    <div class="system-density-demo">
-      <Tabs
-        label="Region density"
-        value={density}
-        onValueChange={(value) => {
-          density = value
-          handle.update()
-        }}
-        items={[
-          { value: 'default', label: 'Default' },
-          { value: 'compact', label: 'Compact' },
-        ]}
-      />
-      <div data-density={density} class="system-density-region" mix={measurement}>
-        <Input
-          aria-label="Filter example projects"
-          placeholder="Filter projects…"
-          value={query}
-          mix={on<HTMLInputElement, 'input'>('input', (event) => {
-            query = event.currentTarget.value
-            handle.update()
-          })}
-        />
-        {['Design system', 'Website', 'Mobile app']
-          .filter((label) => label.toLowerCase().includes(query.toLowerCase()))
-          .map((label) => (
-            <Checkbox
-              key={label}
-              label={label}
-              checked={selected.includes(label)}
-              onCheckedChange={(checked) => {
-                selected = checked
-                  ? [...selected, label]
-                  : selected.filter((item) => item !== label)
-                handle.update()
-              }}
-            />
-          ))}
-        <span class="example-note" role="status">
-          {selected.length} selected
-        </span>
-      </div>
-      <output class="system-hover-metrics">{measured}</output>
-    </div>
-  )
-}
-
 function SurfaceDemo(handle: Handle) {
   let range: [number, number] = [1, 4]
   return () => {
@@ -1456,15 +1390,9 @@ export const SystemPage = clientEntry(
               </SystemSection>
               <SystemSection
                 title="Compact regions"
-                description="Set density on an ancestor to scale a whole group. Switch the example and compare the measured control height."
+                description="Set density on a region to scale its controls together. The toolbar and its sort menu inherit the same row height."
               >
-                <SystemFrame
-                  code={
-                    '<section data-density="compact">\n  <Input aria-label="Search" />\n  <Button>Search</Button>\n</section>'
-                  }
-                >
-                  <DensityDemo />
-                </SystemFrame>
+                <CompactRegionDemo />
               </SystemSection>
               <SystemSection
                 title="Token reference"

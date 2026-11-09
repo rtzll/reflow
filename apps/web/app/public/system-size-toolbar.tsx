@@ -1,4 +1,4 @@
-import { Button, Icon, InputField, InputGroup, Select, Tabs } from '@rtzll/reflow'
+import { Button, Dropdown, Icon, InputField, InputGroup, Select, Tabs } from '@rtzll/reflow'
 import { on, ref, type Handle } from 'remix/component'
 
 const sortOptions = [
@@ -166,6 +166,78 @@ export function SizeToolbar() {
     <div class="system-size-toolbar">
       <SizeToolbarRow density="default" />
       <SizeToolbarRow density="compact" />
+    </div>
+  )
+}
+
+export function CompactRegionDemo(handle: Handle) {
+  let density = 'compact'
+  return () => (
+    <div class="site-preview-card system-density-demo">
+      <div class="system-density-header">
+        <Tabs
+          label="Region density"
+          value={density}
+          onValueChange={(value) => {
+            density = value
+            handle.update()
+          }}
+          items={[
+            { value: 'default', label: 'Default' },
+            { value: 'compact', label: 'Compact' },
+          ]}
+        />
+      </div>
+      <div class="system-density-stage">
+        <div class="system-density-specimen">
+          <div class="system-density-region" data-density={density} inert>
+            <div class="system-density-toolbar">
+              <Button variant="tertiary" active trailingIcon={<Icon name="chevron-down" />}>
+                Last updated
+              </Button>
+              <Button
+                variant="tertiary"
+                size={density === 'compact' ? 'icon-compact' : 'icon'}
+                aria-label="Filter"
+              >
+                <FilterIcon />
+              </Button>
+              <Button leadingIcon={<Icon name="plus" />}>New</Button>
+            </div>
+            <Dropdown
+              inline
+              label="Sort order"
+              items={sortOptions.map((option) => ({
+                ...option,
+                type: 'radio',
+                checked: option.value === 'updated',
+              }))}
+            />
+          </div>
+          <div class="system-density-callout" aria-hidden="true">
+            <svg
+              width="104"
+              height="64"
+              viewBox="0 0 104 64"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M100 8Q58 14 10 54m1-6-1 6 6-1" />
+            </svg>
+            <span>
+              The menu inherits
+              <br />
+              the region’s density
+            </span>
+          </div>
+          <span class="site-sr-only" role="status">
+            The toolbar and sort menu use {density === 'compact' ? '28' : '36'} pixel rows.
+          </span>
+        </div>
+      </div>
     </div>
   )
 }

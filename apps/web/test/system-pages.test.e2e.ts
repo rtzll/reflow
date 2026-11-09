@@ -46,6 +46,31 @@ it('fits the size toolbar controls and height guides without overlap', async (t)
   await expect(row.getByRole('status')).toHaveText('Website')
 })
 
+it('applies region density to both the Sizes toolbar and its inline sort menu', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/docs/sizes')
+  await waitForShowcase(page)
+  const demo = page.locator('.system-density-demo')
+  const header = demo.getByRole('tablist', { name: 'Region density' })
+  const menu = demo.locator('.rf-dropdown-surface[data-inline]')
+  await expect(header.getByRole('tab', { name: 'Compact' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  )
+  await expect(menu.locator('.rf-menu-item')).toHaveText(['Last updated', 'Created', 'Name'])
+  const heights = () =>
+    demo
+      .locator('.system-density-toolbar > button, .rf-menu-item')
+      .evaluateAll((items) => items.map((item) => item.getBoundingClientRect().height))
+  assert.deepEqual(await heights(), Array(6).fill(28))
+  await header.getByRole('tab', { name: 'Default' }).click()
+  await expect.poll(heights).toEqual(Array(6).fill(36))
+  await page.setViewportSize({ width: 390, height: 844 })
+  await expect(demo.locator('.system-density-callout')).toBeHidden()
+  await expect(menu).toBeVisible()
+})
+
 it('aligns the three hover axes and keeps the card grid interactive', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1440, height: 900 })
