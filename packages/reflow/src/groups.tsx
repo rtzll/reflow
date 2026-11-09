@@ -3,6 +3,7 @@ import * as accordion from '@remix-run/ui/accordion'
 import { on, type Handle, type RemixNode } from 'remix/component'
 import { Checkbox } from './basic.tsx'
 import { fluidHover } from './interactive.tsx'
+import { selectionRuns } from './selection-runs.ts'
 
 export interface AccordionItem {
   value: string
@@ -99,6 +100,9 @@ export interface CheckboxGroupProps extends GroupProps {
 }
 
 export function CheckboxGroup(handle: Handle<CheckboxGroupProps>) {
+  // The checked fill moves with the selection, as in the reference. A
+  // controlled value changes without a change event, so each render resyncs.
+  const runs = selectionRuns()
   return () => {
     const {
       options,
@@ -111,6 +115,8 @@ export function CheckboxGroup(handle: Handle<CheckboxGroupProps>) {
       onValueChange,
       orientation = 'vertical',
     } = handle.props
+    const vertical = orientation !== 'horizontal'
+    if (vertical) handle.queueTask(runs.sync)
     return (
       <fieldset class="rf-choice-group" disabled={disabled}>
         <legend class={hideLabel ? 'rf-basic-sr-only' : undefined}>{label}</legend>
@@ -118,6 +124,7 @@ export function CheckboxGroup(handle: Handle<CheckboxGroupProps>) {
           class="rf-choice-group-list"
           data-orientation={orientation}
           mix={[
+            vertical && runs.mix,
             fluidHover({
               axis: orientation === 'horizontal' ? 'x' : 'y',
               focusSelector: ':has(input:focus-visible)',
@@ -154,6 +161,7 @@ export function CheckboxGroup(handle: Handle<CheckboxGroupProps>) {
               }),
           ]}
         >
+          {vertical && <div class="rf-choice-runs" aria-hidden="true" data-rf-selection-runs />}
           <div class="rf-highlight" aria-hidden="true" data-rf-hover-layer />
           <div class="rf-highlight rf-focus-ring" aria-hidden="true" data-rf-focus-layer />
           {options.map((option) => (

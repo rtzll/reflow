@@ -243,6 +243,40 @@
 .rf-choice-group-list[data-orientation='horizontal'] .rf-choice-group-row {
   border-radius: var(--rf-radius);
 }
+/* Once hydrated, a vertical group draws its checked fill as moving blocks, one
+   per run of checked rows, under the hover fill; the rows draw none. */
+.rf-choice-runs {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+}
+.rf-choice-run {
+  position: absolute;
+  background: var(--rf-active);
+  transition:
+    top var(--rf-spring-moderate),
+    left var(--rf-spring-moderate),
+    width var(--rf-spring-moderate),
+    height var(--rf-spring-moderate),
+    border-radius var(--rf-spring-moderate) var(--rf-corner-delay, 0ms),
+    opacity 80ms ease;
+}
+.rf-choice-run[data-instant] {
+  transition: none;
+}
+.rf-choice-run[data-leaving] {
+  opacity: 0;
+  transition: opacity var(--rf-exit-moderate);
+}
+.rf-choice-group-list[data-rf-selection-blocks] > .rf-choice-group-row:has(input:checked) {
+  background: transparent;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-choice-run:not([data-leaving]) {
+    transition: opacity 80ms ease;
+  }
+}
 .rf-choice-group-row[aria-disabled='true'] {
   opacity: 0.45;
 }

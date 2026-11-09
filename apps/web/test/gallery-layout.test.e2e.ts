@@ -668,3 +668,90 @@ it('glides one hover along the breadcrumb, names cut steps, and collapses on ove
   await frame.evaluate((node) => ((node as HTMLElement).style.inlineSize = '560px'))
   await expect(trail).toHaveCount(5)
 })
+
+it('grows, merges and splits the checked fill in a CheckboxGroup', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.goto('/docs/checkbox-group')
+  await waitForShowcase(page)
+  const group = page.getByRole('group', { name: 'Fruit' }).first()
+  const list = group.locator('.rf-choice-group-list')
+  const row = (name: string) => group.locator('.rf-choice-group-row', { hasText: name })
+  // Each fill block's box, and each checked row's own background.
+  const read = () =>
+    list.evaluate((node) => {
+      const base = node.getBoundingClientRect()
+      const box = (element: Element) => {
+        const rect = element.getBoundingClientRect()
+        return { top: Math.round(rect.top - base.top), bottom: Math.round(rect.bottom - base.top) }
+      }
+      return {
+        blocks: Array.from(node.querySelectorAll('.rf-choice-run:not([data-leaving])'), box),
+        rows: Array.from(node.querySelectorAll('.rf-choice-group-row'), box),
+        rowFill: Array.from(
+          node.querySelectorAll('.rf-choice-group-row:has(input:checked)'),
+          (element) => getComputedStyle(element).backgroundColor,
+        ),
+      }
+    })
+  const settled = async (spans: [number, number][]) => {
+    await expect
+      .poll(async () => {
+        const { blocks, rows } = await read()
+        return blocks
+          .map((block) => {
+            const span = spans.find(
+              ([from, to]) =>
+                Math.abs(block.top - rows[from]!.top) <= 1 &&
+                Math.abs(block.bottom - rows[to]!.bottom) <= 1,
+            )
+            return span ? span.join('-') : `${block.top}-${block.bottom}`
+          })
+          .sort()
+          .join(' ')
+      })
+      .toBe(spans.map((span) => span.join('-')).join(' '))
+  }
+
+  // Apples starts checked: one block, and the row draws no fill of its own.
+  await settled([[0, 0]])
+  assert.deepEqual((await read()).rowFill, ['rgba(0, 0, 0, 0)'])
+  const first = await list.locator('.rf-choice-run').elementHandle()
+
+  // Checking the neighbour grows the same block over both rows.
+  await row('Bananas').click()
+  await settled([[0, 1]])
+  assert.ok(await first!.evaluate((node) => node.isConnected))
+
+  // A run that is not adjacent gets its own block.
+  await row('Bananas').click()
+  await row('Cherries').click()
+  await settled([
+    [0, 0],
+    [2, 2],
+  ])
+
+  // Bridging the two runs: the halves meet in the middle of the bridge row,
+  // then become one block.
+  await row('Bananas').click()
+  const meeting = await read()
+  const mid = Math.round((meeting.rows[1]!.top + meeting.rows[1]!.bottom) / 2)
+  await expect
+    .poll(async () => {
+      const { blocks } = await read()
+      return blocks.length === 2 && blocks.every((b) => b.top === mid || b.bottom === mid)
+    })
+    .toBe(true)
+  await settled([[0, 2]])
+
+  // Unchecking the middle row splits the block back into two.
+  await row('Bananas').click()
+  await settled([
+    [0, 0],
+    [2, 2],
+  ])
+  // Toggling the bridge row mid-flight settles on the final selection.
+  const bridgeRow = row('Bananas')
+  for (let i = 0; i < 3; i++) await bridgeRow.click({ delay: 0 })
+  await settled([[0, 2]])
+  await expect(list.locator('.rf-choice-run')).toHaveCount(1)
+})
