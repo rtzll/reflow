@@ -78,6 +78,8 @@ it('uses the focused Sidebar workspace, shortcuts, section actions and user menu
   assert.equal(await shell.getByRole('link', { name: 'New thread 2' }).count(), 0)
   await shell.getByRole('link', { name: 'Summarise the Q3 board deck' }).waitFor()
   await expect(workspace).toHaveAttribute('aria-expanded', 'false')
+  // Remix restores focus after the exit transition and then accepts another open.
+  await expect(workspace).toBeFocused()
   await workspace.click()
   await expect(workspace).toHaveAttribute('aria-expanded', 'true')
   await page.getByRole('menuitemradio', { name: 'Acme Inc' }).click()
@@ -89,6 +91,7 @@ it('uses the focused Sidebar workspace, shortcuts, section actions and user menu
   await page.getByRole('menuitem', { name: 'Log out' }).click()
   assert.match((await user.textContent()) ?? '', /Signed out/)
   await expect(user).toHaveAttribute('aria-expanded', 'false')
+  await expect(user).toBeFocused()
   await user.click()
   await expect(user).toHaveAttribute('aria-expanded', 'true')
   await page.getByRole('menuitem', { name: 'Sign in' }).click()
