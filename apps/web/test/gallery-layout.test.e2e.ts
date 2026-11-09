@@ -618,12 +618,15 @@ it('can reopen either gallery breadcrumb menu after switching and selecting', as
   const published = trail.getByRole('menuitemradio', { name: 'Published' })
 
   await ellipsis.hover()
+  await expect(ellipsis).toHaveAttribute('aria-expanded', 'true')
   await expect(website).toBeVisible()
   await drafts.hover()
+  await expect(drafts).toHaveAttribute('aria-expanded', 'true')
   await expect(published).toBeVisible()
   await expect(ellipsis).toHaveAttribute('aria-expanded', 'false')
 
   await ellipsis.hover()
+  await expect(ellipsis).toHaveAttribute('aria-expanded', 'true')
   await expect(website).toBeVisible()
   await ellipsis.click()
   await website.click()
@@ -631,10 +634,12 @@ it('can reopen either gallery breadcrumb menu after switching and selecting', as
   await expect(ellipsis).toHaveAttribute('aria-expanded', 'false')
 
   await drafts.hover()
+  await expect(drafts).toHaveAttribute('aria-expanded', 'true')
   await expect(published).toBeVisible()
   await published.click()
   await expect(trail.getByRole('button', { name: 'Published' })).toBeVisible()
   await ellipsis.hover()
+  await expect(ellipsis).toHaveAttribute('aria-expanded', 'true')
   await expect(website).toBeVisible()
 })
 
