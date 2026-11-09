@@ -2530,11 +2530,6 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
   place-items: center;
   width: min(100%, 560px);
 }
-.doc-command-palette:not([data-dialog]) {
-  box-sizing: border-box;
-  min-height: 400px;
-  padding-block: 48px;
-}
 .doc-command-palette .rf-command[data-in-dialog] {
   block-size: min(440px, 76dvh);
 }

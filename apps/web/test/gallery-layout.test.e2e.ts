@@ -935,6 +935,18 @@ it('anchors docs previews 48px below the header, as the reference does', async (
       .evaluate((n) => n.getBoundingClientRect().height)) < 140,
   )
 
+  // A command menu stage is the reference's: its 360px panel plus the
+  // stage's own padding, with no second layer of padding around it.
+  await page.goto('/docs/command-menu')
+  await waitForShowcase(page)
+  assert.equal((await offset('#basic .doc-preview-stage', '.rf-command')).y, 48)
+  assert.equal(
+    await page
+      .locator('#basic .doc-preview-stage')
+      .evaluate((n) => n.getBoundingClientRect().height),
+    456,
+  )
+
   // Pickers start at the top so their popups open downward.
   await page.goto('/docs/date-picker')
   await waitForShowcase(page)
