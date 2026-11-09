@@ -6,7 +6,7 @@ All 33 components from the initial Fluid Functionalism catalog have a Reflow imp
 
 QueuedStack now expands on hover, keyboard focus, and tap, with live pointer reordering. Dropdown menus cap long lists and follow the resolved placement when they animate. Tabs, CheckboxGroup, RadioGroup, and Accordion share a moving keyboard focus ring. RadioGroup also moves the selection fill, and CheckboxGroup's checked fill grows, merges and splits between runs of checked rows. Calendar has month transitions, a moving range endpoint, and navigation hints. DatePicker’s Clearable setting is available in the playground and copied code.
 
-Remaining visual refinements include ColorPicker scrub feedback and ChatMessage append motion. PDF attachments use a document glyph. First-page rendering depends on a separate PDF subsystem in the reference.
+Remaining visual refinements include ChatMessage append motion. PDF attachments use a document glyph. First-page rendering depends on a separate PDF subsystem in the reference.
 
 Grouped controls and inline Dropdowns share a fast focus ring with the same 2px outer spacing as the reference. Keyboard focus remains separate from selection, and forced-colors mode uses row outlines. Triggered Dropdown menus move the same focus ring between rows; the ColorPicker format menu also marks the current format with a selection fill. The Sidebar's workspace and profile menus fit within the rail and show keyboard focus with a row highlight or a forced-colors outline.
 
@@ -32,7 +32,7 @@ Grouped controls and inline Dropdowns share a fast focus ring with the same 2px 
 | ChatMessage | Conversation layout, entry motion, attachments | Conversation rows, spring entry, and 64px image or document thumbnails |
 | Checkbox | Checked/mixed/disabled behavior, form participation, animated check | Native checkbox |
 | CheckboxGroup | Multiple selection and merged adjacent selection surfaces | Checkbox plus shared group logic. Vertical groups draw one moving fill per run of checked rows; horizontal groups fill each checked row. |
-| ColorPicker | Color formats (hex, RGB, HSL, OKLCH), alpha, swatches, pointer/keyboard editing of the square and rails, scrubbable channel fields, format menu, eyedropper where supported, popover trigger with optional remove | Local color logic with shared Slider and menu. Channel scrubbing uses pointer capture. |
+| ColorPicker | Color formats (hex, RGB, HSL, OKLCH), alpha, swatches, pointer/keyboard editing of the square and rails, scrubbable channel fields, format menu, eyedropper where supported, popover trigger with optional remove | Local color logic with shared Slider and menu. Channel scrubbing locks the pointer and draws a ↔ cursor that wraps at the viewport edges, as in the reference; where the lock is refused it scrubs on the OS cursor. |
 | Combobox | Filtering, keyboard navigation, multiple chips, create option | Remix popover with Reflow filtering, listbox semantics, keyboard navigation, and form values. One implementation covers single selection, multiple chips, and option creation. The pinned Remix Combobox primitive commits a single value. |
 | CommandMenu | Search, grouped commands, keyboard selection, shortcuts, modal presentation, scroll-linked list dividers | Remix primitives and Reflow dialog. The dividers use CSS scroll-driven animations where supported. |
 | DatePicker | Single/range selection, presets, optional time selection | Calendar plus popover |

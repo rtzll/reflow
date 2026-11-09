@@ -527,11 +527,81 @@ interface FieldProps {
   percent?: boolean
 }
 
+// The stand-in for the OS cursor while a channel scrub holds the pointer lock,
+// as in the reference: a black ↔ arrow with a white stroke and a drop shadow,
+// legible on any surface. It lives in the top layer so it also shows over a
+// ColorPicker inside a popover.
+function scrubCursor(doc: Document) {
+  let cursor = doc.querySelector<HTMLElement>(':scope > body > .rf-scrub-cursor')
+  if (cursor) return cursor
+  cursor = doc.createElement('div')
+  cursor.className = 'rf-scrub-cursor'
+  cursor.setAttribute('popover', 'manual')
+  cursor.setAttribute('aria-hidden', 'true')
+  cursor.innerHTML =
+    '<svg width="24" height="14" viewBox="0 0 24 14" fill="#000" stroke="#fff" stroke-width="1"><path d="M0.5 7l5-5v3.5h13V2l5 5-5 5V8.5h-13V12l-5-5z"/></svg>'
+  doc.body.append(cursor)
+  return cursor
+}
+
+interface Scrub {
+  id: number
+  start: number
+  /** Where the press landed, which the virtual cursor travels from. */
+  x: number
+  y: number
+  lastX: number
+  travel: number
+  moved: boolean
+  mouse: boolean
+  lock?: AbortController
+}
+
 function ColorField(handle: Handle<FieldProps>) {
   let draft: string | undefined
   let editing = false
-  let scrubbing: { id: number; x: number; start: number; moved: boolean } | undefined
+  let scrubbing: Scrub | undefined
   let input: HTMLInputElement | null = null
+
+  // Drag travel is unbounded under the pointer lock; the drawn cursor wraps
+  // at the viewport edges instead of stopping.
+  function placeCursor(scrub: Scrub, element: HTMLElement) {
+    const doc = element.ownerDocument
+    const cursor = scrubCursor(doc)
+    const width = doc.documentElement.clientWidth
+    const x = (((scrub.x + scrub.travel) % width) + width) % width
+    cursor.style.left = `${x - 12}px`
+    cursor.style.top = `${scrub.y - 7}px`
+  }
+
+  function lockPointer(scrub: Scrub, element: HTMLElement) {
+    const doc = element.ownerDocument
+    if (scrub.lock || !scrub.mouse || !element.requestPointerLock) return
+    scrub.lock = new AbortController()
+    doc.addEventListener(
+      'pointerlockchange',
+      () => {
+        const cursor = scrubCursor(doc)
+        if (doc.pointerLockElement === element && scrubbing === scrub) {
+          placeCursor(scrub, element)
+          cursor.showPopover?.()
+        } else {
+          cursor.hidePopover?.()
+          scrub.lock?.abort()
+        }
+      },
+      { signal: scrub.lock.signal },
+    )
+    // Without the lock (refused, or unsupported) the scrub carries on with the
+    // OS cursor.
+    void Promise.resolve(element.requestPointerLock()).catch(() => scrub.lock?.abort())
+  }
+
+  function endScrub(element: HTMLElement) {
+    const doc = element.ownerDocument
+    if (doc.pointerLockElement === element) doc.exitPointerLock()
+    doc.querySelector<HTMLElement>(':scope > body > .rf-scrub-cursor')?.hidePopover?.()
+  }
 
   const inputRef = ref((node, signal) => {
     if (!(node instanceof HTMLInputElement)) return
@@ -608,23 +678,35 @@ function ColorField(handle: Handle<FieldProps>) {
                     if (disabled || editing || !event.isPrimary || event.button !== 0) return
                     scrubbing = {
                       id: event.pointerId,
-                      x: event.clientX,
                       start: numeric(value),
+                      x: event.clientX,
+                      y: event.clientY,
+                      lastX: event.clientX,
+                      travel: 0,
                       moved: false,
+                      mouse: event.pointerType === 'mouse',
                     }
                     event.currentTarget.setPointerCapture(event.pointerId)
                   }),
                   on<HTMLSpanElement, 'pointermove'>('pointermove', (event) => {
-                    if (!scrubbing || scrubbing.id !== event.pointerId) return
-                    const travel = event.clientX - scrubbing.x
-                    if (!scrubbing.moved && Math.abs(travel) < 2) return
-                    scrubbing.moved = true
-                    if (Number.isNaN(scrubbing.start)) return
-                    commitNumber(scrubbing.start + Math.round(travel) * step)
+                    const scrub = scrubbing
+                    if (!scrub || scrub.id !== event.pointerId) return
+                    const element = event.currentTarget
+                    // Under the pointer lock clientX stands still; movementX carries the travel.
+                    const locked = element.ownerDocument.pointerLockElement === element
+                    scrub.travel += locked ? event.movementX : event.clientX - scrub.lastX
+                    scrub.lastX = event.clientX
+                    if (!scrub.moved && Math.abs(scrub.travel) < 2) return
+                    scrub.moved = true
+                    lockPointer(scrub, element)
+                    if (locked) placeCursor(scrub, element)
+                    if (Number.isNaN(scrub.start)) return
+                    commitNumber(scrub.start + Math.round(scrub.travel) * step)
                   }),
-                  on<HTMLSpanElement, 'pointerup'>('pointerup', () => {
+                  on<HTMLSpanElement, 'pointerup'>('pointerup', (event) => {
                     const moved = scrubbing?.moved
                     scrubbing = undefined
+                    endScrub(event.currentTarget)
                     if (moved) return
                     editing = true
                     handle.update()
@@ -633,8 +715,9 @@ function ColorField(handle: Handle<FieldProps>) {
                       input?.select()
                     })
                   }),
-                  on<HTMLSpanElement, 'pointercancel'>('pointercancel', () => {
+                  on<HTMLSpanElement, 'pointercancel'>('pointercancel', (event) => {
                     scrubbing = undefined
+                    endScrub(event.currentTarget)
                   }),
                 ]
               : undefined

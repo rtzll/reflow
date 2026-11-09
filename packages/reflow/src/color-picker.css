@@ -297,6 +297,22 @@
   cursor: ew-resize;
 }
 
+/* The drawn cursor of a locked-pointer scrub. */
+.rf-scrub-cursor {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: visible;
+  background: transparent;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.4));
+}
+.rf-scrub-cursor > svg {
+  display: block;
+}
+
 .rf-color-field[data-editing] .rf-color-field-body {
   cursor: text;
 }

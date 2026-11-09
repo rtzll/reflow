@@ -1,3 +1,4 @@
+import type { Page } from 'playwright'
 import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
@@ -754,4 +755,73 @@ it('grows, merges and splits the checked fill in a CheckboxGroup', async (t) => 
   for (let i = 0; i < 3; i++) await bridgeRow.click({ delay: 0 })
   await settled([[0, 2]])
   await expect(list.locator('.rf-choice-run')).toHaveCount(1)
+})
+
+// Headless Chromium refuses pointer lock, so this stands in for a browser
+// that grants it: the lock is recorded and announced as a real one would be.
+const grantPointerLock = () => {
+  let locked: Element | null = null
+  Object.defineProperty(Document.prototype, 'pointerLockElement', {
+    configurable: true,
+    get: () => locked,
+  })
+  Element.prototype.requestPointerLock = function (this: Element) {
+    locked = this
+    queueMicrotask(() => document.dispatchEvent(new Event('pointerlockchange')))
+    return Promise.resolve()
+  } as Element['requestPointerLock']
+  Document.prototype.exitPointerLock = function () {
+    locked = null
+    document.dispatchEvent(new Event('pointerlockchange'))
+  }
+}
+
+async function pressAlpha(page: Page) {
+  const alpha = page
+    .locator('.rf-color-field input[aria-label="Alpha"]')
+    .locator('visible=true')
+    .first()
+  const body = alpha.locator('xpath=..')
+  await body.scrollIntoViewIfNeeded()
+  const box = (await body.boundingBox())!
+  const x = box.x + box.width / 2
+  const y = box.y + box.height / 2
+  await page.mouse.move(x, y)
+  await page.mouse.down()
+  return { alpha, moveTo: (dx: number) => page.mouse.move(x + dx, y, { steps: 5 }) }
+}
+
+it('scrubs a color channel with a locked pointer and a virtual cursor', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.addInitScript(grantPointerLock)
+  await page.goto('/docs/color-picker')
+  await waitForShowcase(page)
+  const cursor = page.locator('.rf-scrub-cursor')
+  const { alpha, moveTo } = await pressAlpha(page)
+  await moveTo(-10)
+  // The OS cursor is locked and hidden; a drawn ↔ arrow stands in for it.
+  await expect.poll(() => page.evaluate(() => !!document.pointerLockElement)).toBe(true)
+  await expect(cursor).toBeVisible()
+  const start = (await cursor.boundingBox())!
+  await moveTo(-30)
+  await expect(alpha).toHaveValue('70%')
+  const moved = (await cursor.boundingBox())!
+  assert.ok(moved.x < start.x - 15, 'The virtual cursor should follow the drag')
+  await page.mouse.up()
+  await expect(cursor).toBeHidden()
+  assert.equal(await page.evaluate(() => !!document.pointerLockElement), false)
+  await expect(alpha).toHaveValue('70%')
+  await expect(alpha).not.toBeFocused()
+})
+
+it('keeps scrubbing on the OS cursor when the pointer lock is refused', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.goto('/docs/color-picker')
+  await waitForShowcase(page)
+  const { alpha, moveTo } = await pressAlpha(page)
+  await moveTo(-30)
+  await expect(alpha).toHaveValue('70%')
+  await expect(page.locator('.rf-scrub-cursor')).toBeHidden()
+  await page.mouse.up()
+  await expect(alpha).toHaveValue('70%')
 })
