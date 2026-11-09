@@ -37,7 +37,7 @@ const fallbackEllipsisWidth = 44
  */
 export function Breadcrumb(handle: Handle<BreadcrumbProps>) {
   let list: HTMLOListElement | null = null
-  let hidden = 0
+  let hidden: number | undefined
   // Natural widths per step, remembered so a hidden step returns as soon as it fits.
   let widths: number[] = []
   let ellipsisWidth = 0
@@ -79,30 +79,34 @@ export function Breadcrumb(handle: Handle<BreadcrumbProps>) {
 
   function measure() {
     const nav = list?.parentElement
-    if (!list || !nav) return
+    if (!list || !nav || !handle.props.collapse) return
     const count = handle.props.items.length
+    const maxHidden = Math.max(0, count - 3)
     const items = Array.from(list.children) as HTMLElement[]
     const steps = items.filter((item) => !item.hasAttribute('data-ellipsis'))
     const ellipsis = items.find((item) => item.hasAttribute('data-ellipsis'))
     if (ellipsis) ellipsisWidth = naturalWidth(ellipsis)
-    // The rendered steps are 0, then hidden + 1 onward.
-    steps.forEach((item, i) => {
-      const index = hidden > 0 && i > 0 ? i + hidden : i
-      if (index < count) widths[index] = naturalWidth(item)
-    })
+    const measuring = nav.querySelector('.rf-breadcrumb-measure > ol')
+    if (measuring) {
+      widths = Array.from(measuring.children, (item) => item.getBoundingClientRect().width)
+    } else {
+      // The rendered steps are 0, then hidden + 1 onward.
+      const hiddenCount = Math.min(hidden ?? 0, maxHidden)
+      steps.forEach((item, i) => {
+        const index = i === 0 ? i : i + hiddenCount
+        if (index < count) widths[index] = naturalWidth(item)
+      })
+    }
     let next = 0
-    if (handle.props.collapse) {
-      const available = nav.clientWidth
-      const width = (i: number) => widths[i] ?? 0
-      let total = 0
-      for (let i = 0; i < count; i++) total += width(i)
-      const maxHidden = Math.max(0, count - 3)
-      if (total > available + 0.5) {
-        let shown = total + (ellipsisWidth || fallbackEllipsisWidth)
-        while (next < maxHidden && shown > available + 0.5) {
-          shown -= width(1 + next)
-          next++
-        }
+    const available = nav.clientWidth
+    const width = (i: number) => widths[i] ?? 0
+    let total = 0
+    for (let i = 0; i < count; i++) total += width(i)
+    if (total > available + 0.5) {
+      let shown = total + (ellipsisWidth || fallbackEllipsisWidth)
+      while (next < maxHidden && shown > available + 0.5) {
+        shown -= width(1 + next)
+        next++
       }
     }
     if (next !== hidden) {
@@ -130,7 +134,10 @@ export function Breadcrumb(handle: Handle<BreadcrumbProps>) {
   return () => {
     const { items, label = 'Breadcrumb', size, separator, collapse, openOnHover } = handle.props
     widths.length = items.length
-    const hide = collapse ? Math.min(hidden, Math.max(0, items.length - 3)) : 0
+    const maxHidden = Math.max(0, items.length - 3)
+    if (!collapse) hidden = undefined
+    // Start with the shortest usable trail, then restore the steps that fit.
+    const hide = collapse ? Math.min(hidden ?? maxHidden, maxHidden) : 0
     // Every render: a label change can change a step's width.
     if (collapse) handle.queueTask(() => measure())
 
@@ -279,6 +286,27 @@ export function Breadcrumb(handle: Handle<BreadcrumbProps>) {
         <ol class="rf-breadcrumb-list" mix={listRef}>
           {rows}
         </ol>
+        {collapse && hidden === undefined && maxHidden > 0 && (
+          <div class="rf-breadcrumb-measure" aria-hidden="true" inert>
+            <ol class="rf-breadcrumb-list">
+              {items.map((item, index) => {
+                const last = index === items.length - 1
+                return (
+                  <li key={index} class="rf-breadcrumb-item">
+                    <span
+                      class={
+                        last ? 'rf-breadcrumb-crumb rf-breadcrumb-page' : 'rf-breadcrumb-crumb'
+                      }
+                    >
+                      {content(item)}
+                      {!last && trailing}
+                    </span>
+                  </li>
+                )
+              })}
+            </ol>
+          </div>
+        )}
       </nav>
     )
   }

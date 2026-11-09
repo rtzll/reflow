@@ -33,6 +33,16 @@
   font-size: var(--rf-text-body);
   line-height: var(--rf-leading-body);
 }
+.rf-breadcrumb-measure {
+  position: absolute;
+  inline-size: 0;
+  block-size: 0;
+  overflow: clip;
+  visibility: hidden;
+}
+.rf-breadcrumb-measure > .rf-breadcrumb-list {
+  inline-size: max-content;
+}
 
 /* Steps keep their width; only the current page gives way and truncates. */
 .rf-breadcrumb-item {

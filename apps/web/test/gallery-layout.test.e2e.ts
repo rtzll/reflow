@@ -588,6 +588,24 @@ it('previews a dropdown on hover, keeps it across the gap, and closes it on leav
   await expect(trigger).toHaveAttribute('aria-expanded', 'false')
 })
 
+it('renders a fitting gallery breadcrumb before hydration', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.route('**/*', (route) =>
+    route.request().resourceType() === 'script' ? route.abort() : route.continue(),
+  )
+  await page.goto('/')
+  const trail = page.locator('[data-component="breadcrumb"] .rf-breadcrumb')
+  await expect(trail.getByRole('button', { name: 'Show 3 hidden steps' })).toBeVisible()
+  await expect(trail.getByRole('link', { name: 'Roadmap.md' })).toBeVisible()
+  assert.ok(
+    await trail.evaluate((nav) => {
+      const list = nav.querySelector(':scope > .rf-breadcrumb-list')!
+      return list.scrollWidth <= nav.clientWidth + 1
+    }),
+  )
+})
+
 it('glides one hover along the breadcrumb, names cut steps, and collapses on overflow', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.emulateMedia({ reducedMotion: 'reduce' })
