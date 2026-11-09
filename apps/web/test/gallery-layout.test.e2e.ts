@@ -433,3 +433,38 @@ it('marks the checked color format and moves a focus ring between formats', asyn
     'rgba(0, 0, 0, 0)',
   )
 })
+
+it('animates the accordion panel height on the first open as on later opens', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.goto('/docs/accordion')
+  await waitForShowcase(page)
+  await page
+    .locator('.rf-accordion-trigger[aria-expanded="false"]')
+    .first()
+    .evaluate((button) => button.setAttribute('data-test-trigger', ''))
+  const trigger = page.locator('[data-test-trigger]')
+  await trigger.scrollIntoViewIfNeeded()
+  const sample = () =>
+    trigger.evaluate(async (button) => {
+      const panel = button.closest('.rf-accordion-item')!.querySelector('.rf-accordion-panel')!
+      const heights: number[] = []
+      ;(button as HTMLElement).click()
+      for (let i = 0; i < 30; i++) {
+        await new Promise((resolve) => requestAnimationFrame(resolve))
+        heights.push(Math.round(panel.getBoundingClientRect().height))
+      }
+      return heights
+    })
+  const animates = (heights: number[]) => {
+    const final = heights.at(-1)!
+    return final > 0 && heights.some((height) => height > 0 && height < final - 1)
+  }
+
+  const first = await sample()
+  assert.ok(animates(first), `First open did not animate: ${first.join(' ')}`)
+  await trigger.click()
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+  await page.waitForTimeout(400)
+  const second = await sample()
+  assert.ok(animates(second), `Second open did not animate: ${second.join(' ')}`)
+})
