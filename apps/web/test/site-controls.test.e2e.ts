@@ -166,7 +166,10 @@ it('opens a full-height mobile drawer and keeps page interaction behind it', asy
   assert.ok(await drawer.evaluate((panel) => panel === document.activeElement))
   assert.equal(await drawer.getByRole('button', { name: 'Close navigation' }).count(), 0)
   assert.equal(await drawer.getByRole('button', { name: 'Reset settings to defaults' }).count(), 0)
-  assert.equal(await drawer.getByRole('button', { name: 'Copy link with these settings' }).count(), 0)
+  assert.equal(
+    await drawer.getByRole('button', { name: 'Copy link with these settings' }).count(),
+    0,
+  )
   assert.equal(await drawer.locator('.doc-playground-controls').count(), 0)
   const title = (await drawer.locator('.site-sheet-heading h2').boundingBox())!
   const github = (await drawer.getByRole('link', { name: 'Reflow on GitHub' }).boundingBox())!
@@ -229,7 +232,10 @@ it('opens a full-height mobile drawer and keeps page interaction behind it', asy
   await drawer.waitFor({ state: 'hidden' })
   await page.locator('.site-left').waitFor()
   await page.locator('dialog:modal').waitFor({ state: 'detached' })
-  await page.locator('.site-right').getByRole('button', { name: 'Reset settings to defaults' }).waitFor()
+  await page
+    .locator('.site-right')
+    .getByRole('button', { name: 'Reset settings to defaults' })
+    .waitFor()
 })
 
 it('server-renders native settings disclosures before client enhancement', async (t) => {
