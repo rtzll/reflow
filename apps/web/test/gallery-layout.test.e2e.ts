@@ -1002,7 +1002,7 @@ it('fills the InputMessage playground and demo with the conversation, composer a
       .first()
       .evaluate((node) => {
         const box = node.getBoundingClientRect()
-        const transcript = node.querySelector('.doc-composer-transcript')!.getBoundingClientRect()
+        const transcript = node.querySelector('.rf-chat-layout-body')!.getBoundingClientRect()
         const composer = node.querySelector('.rf-composer')!.getBoundingClientRect()
         return {
           top: Math.round(transcript.top - box.top),

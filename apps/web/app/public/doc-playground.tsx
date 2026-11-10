@@ -11,6 +11,7 @@ import { DrawerDemo } from './drawer-example.tsx'
 import { CodeBlockDemo, codeLanguages, type CodeSamples } from './code-block-example.tsx'
 import { CitationDemo } from './citation-example.tsx'
 import { AvatarDemo } from './avatar-example.tsx'
+import { ChatLayoutDemo } from './chat-layout-example.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
 import { paletteCommands, paletteGroups, paletteSuggestions } from './component-demos.tsx'
 import { SoundCombobox } from './sound-combobox.tsx'
@@ -29,6 +30,7 @@ import {
 } from './component-example-data.ts'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import {
+  ChatLayout,
   Accordion,
   AskUserQuestions,
   Badge,
@@ -282,6 +284,7 @@ export const playgroundControls: Record<string, readonly Control[]> = {
     toggle('title', 'Title'),
     size,
   ],
+  'chat-layout': [toggle('header', 'Header'), toggle('empty', 'Start empty'), size],
   avatar: [
     choice('size', 'Size', ['32', '20', '24', '40', '56']),
     choice('shape', 'Shape', ['circle', 'square']),
@@ -843,6 +846,15 @@ export function PlaygroundExample(
             openDelay={Number(v.openDelay)}
           />
         )
+      case 'chat-layout':
+        return (
+          <ChatLayoutDemo
+            variant="playground"
+            size={density}
+            header={Boolean(v.header)}
+            empty={Boolean(v.empty)}
+          />
+        )
       case 'avatar':
         return (
           <AvatarDemo
@@ -1000,39 +1012,32 @@ export function PlaygroundExample(
         )
       case 'input-message':
         return (
-          <div class="doc-composer-preview">
-            <div
-              class="doc-composer-transcript"
-              id={`${handle.id}-conversation`}
-              role="log"
-              aria-label="Conversation"
-            >
-              {composerMessages.map(({ text, attachments }, index) => (
-                <ChatMessage key={index} role="user" attachments={attachments} animate={index > 0}>
-                  {text}
-                </ChatMessage>
-              ))}
-            </div>
-            <InputMessage
-              attachments={Boolean(v.attachments)}
-              suggestions={v.suggestedPrompts ? inputMessagePrompts : undefined}
-              placeholderSuggestion={
-                v.suggestion ? 'Why is every other input box so stiff?' : undefined
-              }
-              history={composerMessages.map(({ text }) => text).filter(Boolean)}
-              minRows={2}
-              disabled={disabled}
-              size={density}
-              onSend={({ text, files }) => {
-                composerMessages.push({ text, attachments: files.map(({ name }) => ({ name })) })
-                handle.queueTask(() => {
-                  const transcript = document.getElementById(`${handle.id}-conversation`)
-                  if (transcript) transcript.scrollTop = transcript.scrollHeight
-                })
-                handle.update()
-              }}
-            />
-          </div>
+          <ChatLayout
+            class="doc-composer-preview"
+            composer={
+              <InputMessage
+                attachments={Boolean(v.attachments)}
+                suggestions={v.suggestedPrompts ? inputMessagePrompts : undefined}
+                placeholderSuggestion={
+                  v.suggestion ? 'Why is every other input box so stiff?' : undefined
+                }
+                history={composerMessages.map(({ text }) => text).filter(Boolean)}
+                minRows={2}
+                disabled={disabled}
+                size={density}
+                onSend={({ text, files }) => {
+                  composerMessages.push({ text, attachments: files.map(({ name }) => ({ name })) })
+                  handle.update()
+                }}
+              />
+            }
+          >
+            {composerMessages.map(({ text, attachments }, index) => (
+              <ChatMessage key={index} role="user" attachments={attachments} animate={index > 0}>
+                {text}
+              </ChatMessage>
+            ))}
+          </ChatLayout>
         )
       case 'sidebar':
         return <SidebarPlaygroundExample values={v} avatar={handle.props.avatar} />

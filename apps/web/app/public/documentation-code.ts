@@ -132,6 +132,7 @@ export function playgroundFragment(slug: string, values: PlaygroundValues): stri
   const names: Record<string, string> = {
     'ask-user-questions': 'AskUserQuestions',
     'carousel-dots': 'CarouselDots',
+    'chat-layout': 'ChatLayout',
     'chat-message': 'ChatMessage',
     'code-block': 'CodeBlock',
     'checkbox-group': 'CheckboxGroup',
@@ -260,6 +261,11 @@ ${opening} label="Options" options={options} defaultValue="0" />`
         values.openDelay && values.openDelay !== '500' ? ` openDelay={${values.openDelay}}` : ''
       const compact = values.size === 'compact' ? ' size="compact"' : ''
       return `<HoverCard${placement}${delay}${compact} renderTrigger={(trigger) => (\n  <a href="/u/reflow" {...trigger}>@reflow</a>\n)}>\n  <Profile user={user} />\n</HoverCard>`
+    }
+    case 'chat-layout': {
+      const header = values.header ? '\n  header={<ChatHeader title="Design chat" />}' : ''
+      const compact = values.size === 'compact' ? ' size="compact"' : ''
+      return `<ChatLayout${header}\n  empty={<p>Start a conversation</p>}\n  composer={<InputMessage${compact} onSend={send} />}\n>\n  {messages.map((message) => (\n    <ChatMessage role={message.role}${compact}>{message.text}</ChatMessage>\n  ))}\n</ChatLayout>`
     }
     case 'avatar': {
       const props = [

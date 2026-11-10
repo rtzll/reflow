@@ -46,6 +46,7 @@ import { DrawerDemo } from './drawer-example.tsx'
 import { CodeBlockDemo } from './code-block-example.tsx'
 import { CitationDemo } from './citation-example.tsx'
 import { AvatarDemo } from './avatar-example.tsx'
+import { ChatLayoutDemo } from './chat-layout-example.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
 import { SoundCombobox } from './sound-combobox.tsx'
 import { playCopySuccess } from './showcase-sound.ts'
@@ -371,6 +372,30 @@ export const componentExamples: Record<string, readonly DocumentationExample[]> 
       'autoplay',
       carouselExampleCode(4, true),
       'Hover the slide to pause its progress.',
+    ),
+  ],
+  'chat-layout': [
+    demo(
+      'A live conversation',
+      'basic',
+      `<ChatLayout composer={<InputMessage onSend={send} />}>\n  {messages.map((message) => (\n    <ChatMessage role={message.role}>{message.text}</ChatMessage>\n  ))}\n</ChatLayout>`,
+      'Send a message and watch the reply stream in: the transcript stays on the newest message while you are there.',
+    ),
+    demo(
+      'Long history',
+      'history',
+      `<ChatLayout composer={composer}>{history}</ChatLayout>`,
+      'The transcript opens at the newest message. Scroll back and it leaves you there, with a button back to the latest; it reads New messages once something arrives.',
+    ),
+    demo(
+      'Empty state',
+      'empty',
+      `<ChatLayout\n  empty={<p>Start a conversation</p>}\n  composer={composer}\n>\n  {messages}\n</ChatLayout>`,
+    ),
+    demo(
+      'With a header',
+      'header',
+      `<ChatLayout\n  header={<ChatHeader title="Design chat" people={people} />}\n  composer={composer}\n>\n  {messages}\n</ChatLayout>`,
     ),
   ],
   'chat-message': [
@@ -2356,6 +2381,8 @@ export function ComponentDemo(
         return <CodeBlockDemo variant={variant} samples={images.code} />
       case 'citation':
         return <CitationDemo variant={variant} />
+      case 'chat-layout':
+        return <ChatLayoutDemo variant={variant} />
       case 'avatar':
         return <AvatarDemo variant={variant} image={images.sidebarAvatar} />
       case 'segmented-control':

@@ -63,6 +63,11 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       'A set of slide controls with a moving hover surface and optional progress animation.',
     code: carouselExampleCode(),
   },
+  'chat-layout': {
+    description:
+      'The conversation screen: a transcript that stays on the newest message, with the composer docked below.',
+    code: `<ChatLayout composer={<InputMessage onSend={send} />}>\n  {messages.map((message) => <ChatMessage role={message.role}>{message.text}</ChatMessage>)}\n</ChatLayout>`,
+  },
   'chat-message': {
     description: 'A chat message with user or assistant alignment and optional attachments.',
     code: conversationCode,
@@ -250,6 +255,7 @@ const components = [
   ['calendar', 'Calendar'],
   ['card', 'Card'],
   ['carousel-dots', 'CarouselDots'],
+  ['chat-layout', 'ChatLayout'],
   ['chat-message', 'ChatMessage'],
   ['checkbox', 'Checkbox'],
   ['checkbox-group', 'CheckboxGroup'],

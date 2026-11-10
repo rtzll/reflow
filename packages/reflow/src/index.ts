@@ -18,6 +18,7 @@ export * from './drawer.tsx'
 export * from './code-block.tsx'
 export * from './citation.tsx'
 export * from './avatar.tsx'
+export * from './chat-layout.tsx'
 export * from './systems.ts'
 export * from './queued-stack.tsx'
 

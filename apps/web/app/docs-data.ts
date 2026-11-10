@@ -2728,6 +2728,50 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  'chat-layout': [
+    {
+      name: 'ChatLayout',
+      props: [
+        {
+          name: 'children',
+          type: 'RemixNode',
+          description: 'The messages, usually ChatMessage elements, oldest first.',
+          required: false,
+        },
+        {
+          name: 'composer',
+          type: 'RemixNode',
+          description: 'Docked below the transcript, usually an InputMessage.',
+          required: false,
+        },
+        {
+          name: 'header',
+          type: 'RemixNode',
+          description: 'Above the transcript, such as a title or the people in the chat.',
+          required: false,
+        },
+        {
+          name: 'empty',
+          type: 'RemixNode',
+          description: 'Shown in place of the transcript until the first message.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Names the transcript, a log. Default "Conversation".',
+          required: false,
+        },
+        {
+          name: 'class',
+          type: 'string',
+          description:
+            'Extra classes on the layout. Set --rf-chat-width for the column width; default 720px.',
+          required: false,
+        },
+      ],
+    },
+  ],
   avatar: [
     {
       name: 'Avatar',
@@ -4653,6 +4697,7 @@ export const componentDefaults: Record<string, Record<string, string>> = {
     openOnHover: 'false',
   },
   Button: { variant: 'primary' },
+  ChatLayout: { label: 'Conversation' },
   Avatar: { size: '32', shape: 'circle' },
   AvatarGroup: { max: '4', size: '32', shape: 'circle' },
   Citation: { index: '1', variant: 'number', placement: 'top', openDelay: '300' },

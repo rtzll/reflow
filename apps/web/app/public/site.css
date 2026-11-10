@@ -2483,12 +2483,16 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
   padding: 16px;
 }
 .doc-composer-preview {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: 12px;
+  --rf-chat-gutter: 0px;
   width: min(100%, 600px);
   height: 320px;
+}
+/* The stage frames the conversation, so the layout adds no edges of its own. */
+.doc-composer-preview .rf-chat-transcript {
+  padding-block: 0 12px;
+}
+.doc-composer-preview .rf-chat-layout-composer {
+  padding-block: 0;
 }
 .site-demo-stage .doc-composer-preview {
   width: min(100%, 420px);
@@ -2558,14 +2562,6 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
 }
 .site-demo-card:has(.site-demo-example[data-fit] .example-sidebar-playground) {
   min-height: 684px;
-}
-.doc-composer-transcript {
-  flex: 1;
-  min-height: 0;
-  overflow: auto;
-  display: grid;
-  align-content: start;
-  gap: 8px;
 }
 
 .doc-command-palette {
@@ -3179,4 +3175,26 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
   gap: 12px;
   color: var(--rf-muted);
   font-size: var(--rf-text-caption);
+}
+
+/* ChatLayout demos: a conversation screen inside the stage. */
+.doc-chat-layout {
+  inline-size: min(100%, 560px);
+  block-size: 440px;
+  overflow: hidden;
+  border-radius: var(--rf-panel-radius);
+  box-shadow: inset 0 0 0 1px var(--rf-border);
+}
+.doc-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.doc-chat-empty {
+  display: grid;
+  gap: 4px;
+}
+.doc-chat-empty strong {
+  color: var(--rf-fg);
 }

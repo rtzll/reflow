@@ -6,6 +6,7 @@ import { DrawerDemo } from './drawer-example.tsx'
 import { CodeBlockDemo } from './code-block-example.tsx'
 import { CitationDemo, citationSources } from './citation-example.tsx'
 import { AvatarDemo } from './avatar-example.tsx'
+import { ChatLayoutDemo } from './chat-layout-example.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
 import { paletteCommands, paletteSuggestions } from './palette-example-data.tsx'
 import { accents } from './site-settings.ts'
@@ -303,6 +304,8 @@ export const Example = clientEntry(
           )
         case 'hover-card':
           return <HoverCardDemo variant="basic" />
+        case 'chat-layout':
+          return <ChatLayoutDemo variant="playground" />
         case 'avatar':
           return <AvatarDemo variant="playground" image={handle.props.avatar} />
         case 'citation':
