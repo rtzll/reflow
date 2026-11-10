@@ -292,6 +292,28 @@ it('plays the error cue when a CodeBlock copy fails, as InputCopy does', async (
   await expect.poll(audioStarts).toBeGreaterThan(before)
 })
 
+it('keeps the sound button working after moving between demo slides', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/demo?c=carousel')
+  await waitForShowcase(page)
+  const documentStart = await page.evaluate(() => performance.timeOrigin)
+  await page.getByRole('link', { name: 'Next slide', exact: true }).click()
+  await expect(page).toHaveURL(/c=breadcrumb/)
+  await page.getByRole('link', { name: 'Previous slide', exact: true }).click()
+  await expect(page).toHaveURL(/c=carousel/)
+  // The deck moved within the same document.
+  expect(await page.evaluate(() => performance.timeOrigin)).toBe(documentStart)
+
+  const sound = page.getByRole('button', { name: 'Showcase sound' })
+  await expect(sound).toBeEnabled()
+  const pressed = await sound.getAttribute('aria-pressed')
+  await sound.click()
+  await expect(sound).toHaveAttribute('aria-pressed', pressed === 'true' ? 'false' : 'true')
+  await sound.click()
+  await expect(sound).toHaveAttribute('aria-pressed', pressed!)
+})
+
 it('plays the navigate cue for Carousel buttons and dots, not for autoplay', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   const audioStarts = await trackAudio(page)

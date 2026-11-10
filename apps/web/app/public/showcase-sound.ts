@@ -189,48 +189,62 @@ function bindSliderSounds() {
   })
 }
 
+let enabled = true
+let soundStarted = false
+const boundSoundControls = new WeakSet<Element>()
+
+function changePreference(next: boolean) {
+  enabled = next
+  syncSoundControls()
+  const value = enabled ? 'on' : 'off'
+  saveSoundCookie(value)
+  try {
+    localStorage.setItem(soundPreferenceKey, value)
+  } catch {
+    // Keep the current setting in memory.
+  }
+  if (enabled) {
+    void unlock()
+    play('toggle')
+  }
+}
+
+/**
+ * Wires any sound control not yet wired and shows the current preference on
+ * all of them. In-page navigations re-apply the server's markup, which
+ * disables the button again, so this runs after each one too.
+ */
+export function syncSoundControls() {
+  if (!soundStarted) return
+  setEnabled(enabled)
+  for (const shortcut of document.querySelectorAll<HTMLButtonElement>('[data-site-sound]')) {
+    if (!boundSoundControls.has(shortcut)) {
+      boundSoundControls.add(shortcut)
+      shortcut.addEventListener('click', () => changePreference(!enabled))
+    }
+    shortcut.disabled = false
+    shortcut.setAttribute('aria-pressed', String(enabled))
+    shortcut.title = enabled ? 'Mute showcase sound' : 'Enable showcase sound'
+  }
+  for (const control of document.querySelectorAll<HTMLInputElement>('[data-site-sound-switch]')) {
+    if (!boundSoundControls.has(control)) {
+      boundSoundControls.add(control)
+      control.addEventListener('change', () => changePreference(control.checked))
+    }
+    control.disabled = false
+    control.checked = enabled
+  }
+}
+
 export function enhanceShowcaseSound() {
+  if (soundStarted) return syncSoundControls()
   const shortcut = document.querySelector<HTMLButtonElement>('[data-site-sound]')
   const switches = document.querySelectorAll<HTMLInputElement>('[data-site-sound-switch]')
   if (!shortcut && !switches.length) return
-
-  let enabled = readSoundEnabled()
-
-  const applyPreference = () => {
-    setEnabled(enabled)
-    for (const control of switches) control.checked = enabled
-    if (shortcut) {
-      shortcut.setAttribute('aria-pressed', String(enabled))
-      shortcut.title = enabled ? 'Mute showcase sound' : 'Enable showcase sound'
-    }
-  }
-
-  function changePreference(next: boolean) {
-    enabled = next
-    applyPreference()
-    const value = enabled ? 'on' : 'off'
-    saveSoundCookie(value)
-    try {
-      localStorage.setItem(soundPreferenceKey, value)
-    } catch {
-      // Keep the current setting in memory.
-    }
-    if (enabled) {
-      void unlock()
-      play('toggle')
-    }
-  }
-
+  soundStarted = true
+  enabled = readSoundEnabled()
   setVolume(0.35)
-  applyPreference()
-  if (shortcut) {
-    shortcut.addEventListener('click', () => changePreference(!enabled))
-    shortcut.disabled = false
-  }
-  for (const control of switches) {
-    control.addEventListener('change', () => changePreference(control.checked))
-    control.disabled = false
-  }
+  syncSoundControls()
 
   // Some cues follow async work. Unlock audio while the first gesture is active.
   const activation = new AbortController()

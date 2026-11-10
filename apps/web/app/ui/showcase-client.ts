@@ -1,6 +1,6 @@
 import { play } from 'cuelume'
 import { applySetting, settingRows, type SettingKey } from '../public/site-settings.ts'
-import { enhanceShowcaseSound, playCopyError } from '../public/showcase-sound.ts'
+import { enhanceShowcaseSound, playCopyError, syncSoundControls } from '../public/showcase-sound.ts'
 
 const keyboardWidgets = [
   'textarea',
@@ -19,6 +19,17 @@ const keyboardWidgets = [
 
 // The settings rail has no scroll of its own: when it is taller than the
 // window it sticks with its end in view instead of its top.
+// Elements already wired. In-page navigations keep elements but re-apply
+// the server's markup, so wiring happens once and attributes are re-applied
+// after every navigation.
+const wired = new WeakSet<Element>()
+
+function wireOnce(element: Element) {
+  if (wired.has(element)) return false
+  wired.add(element)
+  return true
+}
+
 function pinSettingsRail() {
   const rail = document.querySelector<HTMLElement>('.site-right')
   if (!rail) return
@@ -27,8 +38,10 @@ function pinSettingsRail() {
       '--site-right-top',
       `${Math.min(0, window.innerHeight - rail.offsetHeight)}px`,
     )
-  new ResizeObserver(update).observe(rail)
-  window.addEventListener('resize', update)
+  if (wireOnce(rail)) {
+    new ResizeObserver(update).observe(rail)
+    window.addEventListener('resize', () => rail.isConnected && update())
+  }
   update()
 }
 
@@ -54,11 +67,14 @@ function enhanceMobileNavigation() {
   }
 
   // Without enhancement the same markup is a native details disclosure.
-  drawer.removeAttribute('open')
+  // An in-page navigation can re-apply the server's open attribute; a drawer
+  // the reader has open as a modal keeps it.
+  if (!drawer.matches(':modal')) drawer.removeAttribute('open')
   disclosure.dataset.enhanced = ''
   trigger.setAttribute('aria-haspopup', 'dialog')
   trigger.setAttribute('aria-keyshortcuts', '[')
   trigger.title = 'Open navigation ['
+  if (!wireOnce(disclosure)) return
   if (disclosure.open && mobile.matches) openDrawer()
   trigger.addEventListener('click', (event) => {
     event.preventDefault()
@@ -77,18 +93,22 @@ function enhanceMobileNavigation() {
   })
 }
 
-export function enhanceShowcase() {
-  enhanceShowcaseSound()
-  enhanceMobileNavigation()
-  pinSettingsRail()
-  const menus = Array.from(document.querySelectorAll<HTMLDetailsElement>('[data-setting-menu]'))
-  function setMenuOpen(menu: HTMLDetailsElement, open: boolean) {
-    menu.open = open
-    menu.querySelector('summary')?.setAttribute('aria-expanded', String(open))
-  }
+const settingMenus = () =>
+  Array.from(document.querySelectorAll<HTMLDetailsElement>('[data-setting-menu]'))
+
+function setMenuOpen(menu: HTMLDetailsElement, open: boolean) {
+  menu.open = open
+  menu.querySelector('summary')?.setAttribute('aria-expanded', String(open))
+}
+
+function enhanceSettingMenus() {
+  const menus = settingMenus()
   for (const menu of menus) {
     const trigger = menu.querySelector('summary')!
     const accent = menu.querySelector<HTMLElement>('.site-accent-panel')
+    trigger.setAttribute('aria-expanded', String(menu.open))
+    if (accent) accent.dataset.anchored = ''
+    if (!wireOnce(menu)) continue
     function placeAccent() {
       if (!accent || !menu.open) return
       const bounds = trigger.getBoundingClientRect()
@@ -106,7 +126,6 @@ export function enhanceShowcase() {
       accent.style.bottom = placeAbove ? window.innerHeight - bounds.top + 4 + 'px' : 'auto'
     }
     if (accent) {
-      accent.dataset.anchored = ''
       window.addEventListener('resize', placeAccent)
       document.addEventListener('scroll', placeAccent, { capture: true })
     }
@@ -115,7 +134,8 @@ export function enhanceShowcase() {
         menu.querySelectorAll<HTMLButtonElement>('[role="menuitemradio"], [role="menuitem"]'),
       ).filter((option) => !option.hidden && !option.disabled)
     function openMenu(last = false) {
-      for (const other of menus) if (other !== menu && other.open) setMenuOpen(other, false)
+      for (const other of settingMenus())
+        if (other !== menu && other.open) setMenuOpen(other, false)
       setMenuOpen(menu, true)
       if (accent) {
         placeAccent()
@@ -130,7 +150,6 @@ export function enhanceShowcase() {
       setMenuOpen(menu, false)
       trigger.focus({ preventScroll: true })
     }
-    trigger.setAttribute('aria-expanded', String(menu.open))
     menu.addEventListener('toggle', () => {
       trigger.setAttribute('aria-expanded', String(menu.open))
       placeAccent()
@@ -190,18 +209,13 @@ export function enhanceShowcase() {
         options[(index + (key === 'ArrowDown' ? 1 : -1) + options.length) % options.length]?.focus()
     })
   }
-  document.addEventListener(
-    'click',
-    (event) => {
-      if (!(event.target instanceof Node)) return
-      for (const menu of menus)
-        if (menu.open && !menu.contains(event.target)) setMenuOpen(menu, false)
-    },
-    { capture: true },
-  )
+}
+
+function enhanceCopyButtons() {
   for (let button of document.querySelectorAll<HTMLButtonElement>('[data-site-copy]')) {
     if (!navigator.clipboard) continue
     button.hidden = false
+    if (!wireOnce(button)) continue
     button.addEventListener('click', async () => {
       let box = button.closest('.site-code, .site-copy-action')
       let code = button.dataset.siteCopyText ?? box?.querySelector('code')?.textContent
@@ -222,6 +236,39 @@ export function enhanceShowcase() {
   for (let shortcut of document.querySelectorAll<HTMLElement>('[data-site-shortcut]')) {
     shortcut.hidden = false
   }
+}
+
+/**
+ * Wires what is new on the page and re-applies what enhancement changed.
+ * Runs at start and after every in-page navigation, which re-applies the
+ * server's markup to the elements it keeps.
+ */
+export function refreshShowcase() {
+  syncSoundControls()
+  enhanceMobileNavigation()
+  pinSettingsRail()
+  enhanceSettingMenus()
+  enhanceCopyButtons()
+}
+
+let started = false
+
+export function enhanceShowcase() {
+  if (started) return refreshShowcase()
+  started = true
+  enhanceShowcaseSound()
+  refreshShowcase()
+  document.addEventListener(
+    'click',
+    (event) => {
+      if (!(event.target instanceof Node)) return
+      for (const menu of settingMenus())
+        if (menu.open && !menu.contains(event.target)) setMenuOpen(menu, false)
+    },
+    { capture: true },
+  )
+  const navigation = (window as Window & { navigation?: EventTarget }).navigation
+  navigation?.addEventListener('navigatesuccess', () => refreshShowcase())
 
   window.addEventListener('keydown', (event) => {
     if (
