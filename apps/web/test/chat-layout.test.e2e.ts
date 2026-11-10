@@ -45,15 +45,28 @@ it('stays on a streaming reply while the reader does, and leaves a reader who sc
   await expect(example.getByText('How should motion feel?')).toBeVisible()
   await expect.poll(() => fromEnd(viewport)).toBe(0)
 
-  // As the reply streams in, the transcript follows it.
-  const reply = example.locator('.rf-chat-message[data-role="assistant"]').last()
-  const samples: number[] = []
-  const lengths: number[] = []
-  for (let i = 0; i < 12; i++) {
-    await page.waitForTimeout(90)
-    samples.push(await fromEnd(viewport))
-    lengths.push(((await reply.textContent()) ?? '').length)
-  }
+  // As the reply streams in, the transcript follows it. Sampled in the page
+  // once per frame, after it paints, so only what the reader saw counts.
+  const { samples, lengths } = await viewport.evaluate(
+    (node) =>
+      new Promise<{ samples: number[]; lengths: number[] }>((resolve) => {
+        const samples: number[] = []
+        const lengths: number[] = []
+        const content = node.firstElementChild as HTMLElement
+        const start = performance.now()
+        const frame = () =>
+          requestAnimationFrame(() =>
+            setTimeout(() => {
+              samples.push(Math.round(content.offsetHeight - node.clientHeight - node.scrollTop))
+              const replies = node.querySelectorAll('.rf-chat-message[data-role="assistant"]')
+              lengths.push((replies[replies.length - 1]?.textContent ?? '').length)
+              if (performance.now() - start < 1100) frame()
+              else resolve({ samples, lengths })
+            }),
+          )
+        frame()
+      }),
+  )
   assert.ok(lengths.at(-1)! > lengths[0]!, `the reply streamed: ${lengths.join(',')}`)
   assert.ok(Math.max(...samples) <= 2, `kept at the end: ${samples.join(',')}`)
 
