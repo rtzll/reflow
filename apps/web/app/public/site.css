@@ -3132,13 +3132,28 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
   inline-size: 100%;
 }
 
-/* The QueuedStack card gives the queue room for its messages beside the
-   row actions. */
+/* QueuedStack demos: a small conversation with the queue docked below, so a
+   sent message travels up into the transcript, as it would in an app. The
+   gallery card gives the queue room for its messages beside the actions. */
+.example-queue-chat {
+  inline-size: min(100%, 320px);
+  block-size: 260px;
+}
+.example-queue-chat .rf-chat-layout {
+  --rf-chat-gutter: 0px;
+}
+.example-queue-chat .rf-chat-transcript {
+  padding-block: 0 12px;
+}
+.example-queue-chat .rf-chat-layout-composer {
+  padding-block: 0;
+}
 .site-gallery [data-component='queued-stack'] .site-preview-stage {
   padding-inline: 8px;
 }
-.site-gallery [data-component='queued-stack'] .example-wide {
+.site-gallery [data-component='queued-stack'] .example-queue-chat {
   inline-size: min(100%, 300px);
+  block-size: 210px;
 }
 
 /* Citation demos: a paragraph of generated text. */

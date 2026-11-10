@@ -1232,3 +1232,50 @@ it('fills the proposed range end like a selected day, with a faint inner ring', 
     label: '26',
   })
 })
+
+it('sends a queued message up into the card’s conversation and restores the queue after', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/?theme=dark')
+  await waitForShowcase(page)
+  const card = page.locator('.site-gallery [data-component="queued-stack"]')
+  await card.scrollIntoViewIfNeeded()
+  const rows = card.locator('.rf-queue > li')
+  await expect(rows).toHaveCount(3)
+  // The queue's bottom edge, measured from the card's.
+  const queueBottom = () =>
+    card
+      .locator('.rf-queue-wrap')
+      .evaluate((node) =>
+        Math.round(
+          node.closest('article')!.getBoundingClientRect().bottom -
+            node.getBoundingClientRect().bottom,
+        ),
+      )
+  const docked = await queueBottom()
+  // Hovering brings the button into view first, so the click itself scrolls nothing.
+  const send = rows.first().getByRole('button', { name: 'Send' })
+  await send.hover()
+  const pageTop = await page.evaluate(() => scrollY)
+
+  await send.click()
+  const sent = card.getByRole('log', { name: 'Sent messages' }).getByText('Draft an intro')
+  await expect(sent).toBeVisible()
+  await expect(rows).toHaveCount(2)
+  // The message lands above the queue, which stays docked at the bottom.
+  const above = await sent.evaluate(
+    (node, queueTop) => node.getBoundingClientRect().bottom <= queueTop,
+    await card.locator('.rf-queue-wrap').evaluate((node) => node.getBoundingClientRect().top),
+  )
+  assert.ok(above, 'the sent message sits above the queue')
+  assert.equal(await queueBottom(), docked)
+  assert.equal(await page.evaluate(() => scrollY), pageTop, 'sending leaves the page where it was')
+
+  // While the pointer stays, nothing resets; once it leaves, the card returns to how it began.
+  await page.waitForTimeout(2800)
+  await expect(rows).toHaveCount(2)
+  await page.mouse.move(5, 5)
+  await expect(rows).toHaveCount(3, { timeout: 4000 })
+  await expect(card.locator('.rf-chat-message')).toHaveCount(0)
+})

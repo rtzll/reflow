@@ -43,6 +43,7 @@ import {
   CardMedia,
   CardTitle,
   CarouselDots,
+  ChatLayout,
   ChatMessage,
   Citation,
   Checkbox,
@@ -213,24 +214,28 @@ export const Example = clientEntry(
     let slide = 1
     let opacity = 35
     let message = ''
-    let sentQueueId: string | undefined
     const initialQueue = [
       { id: 'draft', content: 'Draft an intro' },
       { id: 'demo', content: 'Review demo' },
       { id: 'notes', content: 'List changes' },
     ]
     let queued = initialQueue
-    let refill: ReturnType<typeof setTimeout> | undefined
-    handle.signal.addEventListener('abort', () => clearTimeout(refill), { once: true })
-    // In the gallery, an emptied queue fills up again, as a dismissed banner returns.
-    const refillQueue = () => {
-      if (queued.length || !handle.props.showcase) return
-      clearTimeout(refill)
-      refill = setTimeout(() => {
+    let sentQueue: { id: string; content: string }[] = []
+    let queueHovered = false
+    let restore: ReturnType<typeof setTimeout> | undefined
+    handle.signal.addEventListener('abort', () => clearTimeout(restore), { once: true })
+    // In the gallery and the deck, the queue returns to how it began a while
+    // after it was last used, as a dismissed banner returns, so the card
+    // always shows what it is for. It waits while the pointer is on it.
+    const scheduleRestore = () => {
+      if (!handle.props.showcase) return
+      clearTimeout(restore)
+      restore = setTimeout(() => {
+        if (queueHovered) return
         queued = initialQueue
-        message = ''
+        sentQueue = []
         void handle.update()
-      }, 1600)
+      }, 2500)
     }
 
     return () => {
@@ -1037,33 +1042,51 @@ export const Example = clientEntry(
           )
         case 'queued-stack':
           return (
-            <div className="example-wide">
-              <QueuedStack
-                transitionMessages
-                messages={queued}
-                onOrderChange={(ids) => {
-                  const byId = new Map(queued.map((entry) => [entry.id, entry]))
-                  queued = ids.flatMap((id) => byId.get(id) ?? [])
-                  handle.update()
-                }}
-                onRemove={(id) => {
-                  queued = queued.filter((entry) => entry.id !== id)
-                  handle.update()
-                  refillQueue()
-                }}
-                onSend={async (id) => {
-                  sentQueueId = id
-                  message = queued.find((entry) => entry.id === id)?.content ?? ''
-                  queued = queued.filter((entry) => entry.id !== id)
-                  await handle.update()
-                  refillQueue()
-                }}
-              />
-              {message && (
-                <ChatMessage role="user" transitionId={sentQueueId} animate={false}>
-                  {message}
-                </ChatMessage>
-              )}
+            <div
+              className="example-queue-chat"
+              mix={[
+                on('pointerenter', () => {
+                  queueHovered = true
+                }),
+                on('pointerleave', () => {
+                  queueHovered = false
+                  if (queued !== initialQueue || sentQueue.length) scheduleRestore()
+                }),
+              ]}
+            >
+              <ChatLayout
+                label="Sent messages"
+                composer={
+                  <QueuedStack
+                    transitionMessages
+                    messages={queued}
+                    onOrderChange={(ids) => {
+                      const byId = new Map(queued.map((entry) => [entry.id, entry]))
+                      queued = ids.flatMap((id) => byId.get(id) ?? [])
+                      handle.update()
+                      scheduleRestore()
+                    }}
+                    onRemove={(id) => {
+                      queued = queued.filter((entry) => entry.id !== id)
+                      handle.update()
+                      scheduleRestore()
+                    }}
+                    onSend={async (id) => {
+                      const entry = queued.find((item) => item.id === id)
+                      if (entry) sentQueue = [...sentQueue, entry]
+                      queued = queued.filter((item) => item.id !== id)
+                      await handle.update()
+                      scheduleRestore()
+                    }}
+                  />
+                }
+              >
+                {sentQueue.map((entry) => (
+                  <ChatMessage key={entry.id} role="user" transitionId={entry.id} animate={false}>
+                    {entry.content}
+                  </ChatMessage>
+                ))}
+              </ChatLayout>
             </div>
           )
         case 'fluid-hover':
