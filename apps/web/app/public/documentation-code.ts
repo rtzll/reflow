@@ -261,6 +261,17 @@ ${opening} label="Options" options={options} defaultValue="0" />`
       const compact = values.size === 'compact' ? ' size="compact"' : ''
       return `<HoverCard${placement}${delay}${compact} renderTrigger={(trigger) => (\n  <a href="/u/reflow" {...trigger}>@reflow</a>\n)}>\n  <Profile user={user} />\n</HoverCard>`
     }
+    case 'citation': {
+      const count = Number(values.count ?? 1)
+      const sources =
+        count === 1 ? 'rams' : `[${['rams', 'norman', 'laws'].slice(0, count).join(', ')}]`
+      const props = [
+        values.style === 'site' ? ' variant="site"' : ' index={1}',
+        values.placement === 'bottom' ? ' placement="bottom"' : '',
+        values.size === 'compact' ? ' size="compact"' : '',
+      ].join('')
+      return `<p>\n  Good design is unobtrusive: it lets you do what you came to do.\n  <Citation${props} sources={${sources}} />\n</p>`
+    }
     case 'code-block': {
       const language = String(values.language ?? 'tsx')
       const extension =

@@ -1,0 +1,119 @@
+/* Citation: a small chip inline with the text it supports, on the gray
+   Badge's fill, sized to sit within the line without moving it. Its preview
+   is a HoverCard listing each source. */
+.rf-citation {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-inline-size: 18px;
+  block-size: 18px;
+  margin-inline: 2px;
+  padding-inline: 5px;
+  border-radius: 6px;
+  outline: none;
+  background: var(--rf-neutral-fill);
+  color: var(--rf-muted);
+  font: 500 11px / 1 var(--rf-font);
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+  vertical-align: 0.1em;
+  white-space: nowrap;
+  transition:
+    color var(--rf-fast),
+    background-color var(--rf-fast);
+}
+.rf-citation[data-variant='site'] {
+  padding-inline: 7px;
+}
+.rf-citation[data-size='compact'] {
+  min-inline-size: 16px;
+  block-size: 16px;
+  padding-inline: 4px;
+  font-size: 10px;
+}
+@media (hover: hover) {
+  .rf-citation:hover {
+    background: color-mix(in oklab, var(--rf-neutral-fill), var(--rf-fg) 10%);
+    color: var(--rf-fg);
+  }
+}
+.rf-citation:focus-visible {
+  box-shadow: 0 0 0 2px var(--rf-accent);
+  color: var(--rf-fg);
+}
+
+.rf-citation-sources {
+  display: grid;
+  gap: 12px;
+  inline-size: min(300px, calc(100vw - 32px));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rf-citation-sources[data-density='compact'] {
+  gap: 10px;
+}
+.rf-citation-source {
+  display: grid;
+  gap: 2px;
+  min-inline-size: 0;
+}
+.rf-citation-source + .rf-citation-source {
+  padding-block-start: 12px;
+  border-block-start: 1px solid var(--rf-border);
+}
+.rf-citation-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--rf-muted);
+  font: var(--rf-text-caption) / var(--rf-leading-caption) var(--rf-font);
+}
+.rf-citation-icon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: 14px;
+  block-size: 14px;
+  overflow: hidden;
+  border-radius: 3px;
+}
+.rf-citation-icon > :is(img, svg) {
+  inline-size: 100%;
+  block-size: 100%;
+}
+.rf-citation-site {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rf-citation-number {
+  margin-inline-start: auto;
+  font-variant-numeric: tabular-nums;
+}
+.rf-citation-title {
+  color: var(--rf-fg);
+  font-variation-settings: var(--rf-weight-strong);
+  text-decoration: none;
+}
+.rf-citation-title:hover,
+.rf-citation-title:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.rf-citation-description {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: var(--rf-muted);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+@media (forced-colors: active) {
+  .rf-citation {
+    border: 1px solid LinkText;
+  }
+}

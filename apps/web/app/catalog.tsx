@@ -96,6 +96,11 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       'A label, form control, help text, and error with associated accessible descriptions.',
     code: requestFormCode(),
   },
+  citation: {
+    description:
+      'An inline source chip in generated text that links to the source and previews it.',
+    code: `<p>\n  Good design is unobtrusive.\n  <Citation index={1} sources={{ title: 'Ten principles for good design', href }} />\n</p>`,
+  },
   'code-block': {
     description:
       'Code with its filename, a copy button, line numbers and line marks, highlighted for any language by Shiki.',
@@ -242,6 +247,7 @@ const components = [
   ['chat-message', 'ChatMessage'],
   ['checkbox', 'Checkbox'],
   ['checkbox-group', 'CheckboxGroup'],
+  ['citation', 'Citation'],
   ['code-block', 'CodeBlock'],
   ['color-picker', 'ColorPicker'],
   ['combobox', 'Combobox'],

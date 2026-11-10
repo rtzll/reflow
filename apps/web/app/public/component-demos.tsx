@@ -44,6 +44,7 @@ import { PopoverDemo } from './popover-example.tsx'
 import { ToasterDemo } from './toaster-example.tsx'
 import { DrawerDemo } from './drawer-example.tsx'
 import { CodeBlockDemo } from './code-block-example.tsx'
+import { CitationDemo } from './citation-example.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
 import { SoundCombobox } from './sound-combobox.tsx'
 import { playCopySuccess } from './showcase-sound.ts'
@@ -991,6 +992,37 @@ export const componentExamples: Record<string, readonly DocumentationExample[]> 
       'Compact',
       'compact',
       `<Popover label="Dimensions" trigger="Dimensions" size="compact">…</Popover>`,
+    ),
+  ],
+  citation: [
+    demo(
+      'Basic',
+      'basic',
+      `<p>\n  Good design is unobtrusive and honest.\n  <Citation index={1} sources={rams} /> It makes clear what you can do\n  and what just happened.\n  <Citation index={2} sources={norman} />\n</p>`,
+      'The chip links to its source and previews it while the pointer rests on it or focus is on it. Its accessible name says what it cites, not only its number.',
+    ),
+    demo(
+      'Several sources',
+      'multiple',
+      `<Citation index={1} sources={[rams, norman, laws]} />`,
+      'One chip can cite several sources; they take the numbers that follow, and the preview lists each.',
+    ),
+    demo(
+      'Site names',
+      'site',
+      `<Citation variant="site" sources={rams} />\n<Citation variant="site" sources={[laws, norman]} />`,
+      'Show the site instead of a number, with a count of the rest.',
+    ),
+    demo(
+      'Icons',
+      'icons',
+      `const sources = [{ ...rams, icon: <img src={favicon} alt="" /> }]`,
+      'Sources show a globe unless they bring their own icon.',
+    ),
+    demo(
+      'In a reply',
+      'chat',
+      `<ChatMessage role="assistant">\n  Mostly that you stop noticing it.\n  <Citation index={1} sources={rams} /> It lets you do what you came to do…\n  <Citation index={2} sources={[norman, laws]} />\n</ChatMessage>`,
     ),
   ],
   'code-block': [
@@ -2285,6 +2317,8 @@ export function ComponentDemo(
         return <DrawerDemo variant={variant} />
       case 'code-block':
         return <CodeBlockDemo variant={variant} samples={images.code} />
+      case 'citation':
+        return <CitationDemo variant={variant} />
       case 'segmented-control':
         return <SegmentedControlDemo variant={variant} />
       case 'breadcrumb':

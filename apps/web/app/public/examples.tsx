@@ -4,6 +4,7 @@ import { PopoverDemo } from './popover-example.tsx'
 import { ToasterDemo } from './toaster-example.tsx'
 import { DrawerDemo } from './drawer-example.tsx'
 import { CodeBlockDemo } from './code-block-example.tsx'
+import { CitationDemo, citationSources } from './citation-example.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
 import { paletteCommands, paletteSuggestions } from './palette-example-data.tsx'
 import { accents } from './site-settings.ts'
@@ -39,6 +40,7 @@ import {
   CardTitle,
   CarouselDots,
   ChatMessage,
+  Citation,
   Checkbox,
   CheckboxGroup,
   ColorPicker,
@@ -299,6 +301,8 @@ export const Example = clientEntry(
           )
         case 'hover-card':
           return <HoverCardDemo variant="basic" />
+        case 'citation':
+          return <CitationDemo variant="playground" />
         case 'code-block':
           return (
             <CodeBlockDemo
@@ -562,8 +566,9 @@ export const Example = clientEntry(
                   What does “good design” actually mean?
                 </ChatMessage>
                 <ChatMessage role="assistant" animate={false}>
-                  Mostly that you stop noticing it. It lets you do what you came to do, and it feels
-                  right while you do it.
+                  Mostly that you stop noticing it.
+                  <Citation index={1} sources={citationSources[0]!} /> It lets you do what you came
+                  to do, and it feels right while you do it.
                 </ChatMessage>
                 <ChatMessage role="user" animate={false}>
                   So function over form?

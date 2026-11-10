@@ -2728,6 +2728,94 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  citation: [
+    {
+      name: 'Citation',
+      props: [
+        {
+          name: 'sources',
+          type: 'CitationSource | CitationSource[]',
+          description: 'The source, or several sources cited together.',
+          required: true,
+        },
+        {
+          name: 'index',
+          type: 'number',
+          description:
+            'The first source’s number; several sources take the numbers that follow. Default 1.',
+          required: false,
+        },
+        {
+          name: 'variant',
+          type: '"number" | "site"',
+          description:
+            'number shows the source numbers; site shows the first site’s name and how many more. Default number.',
+          required: false,
+        },
+        {
+          name: 'target',
+          type: 'string',
+          description: 'Where links open, such as _blank, which also sets a safe rel.',
+          required: false,
+        },
+        {
+          name: 'placement',
+          type: 'PopoverPlacement',
+          description:
+            'Which side of the chip the preview opens on, flipping when there is no room. Default top.',
+          required: false,
+        },
+        {
+          name: 'openDelay',
+          type: 'number',
+          description:
+            'Milliseconds the pointer rests on the chip before the preview opens. Default 300.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: '"default" | "compact"',
+          description: 'Tightens the chip and the preview.',
+          required: false,
+        },
+      ],
+    },
+    {
+      name: 'CitationSource',
+      props: [
+        {
+          name: 'title',
+          type: 'string',
+          description: 'The source’s title, linked in the preview.',
+          required: true,
+        },
+        {
+          name: 'href',
+          type: 'string',
+          description: 'The source’s address; the chip links to the first source.',
+          required: true,
+        },
+        {
+          name: 'site',
+          type: 'string',
+          description: 'The site’s name. Defaults to the link’s host, without www.',
+          required: false,
+        },
+        {
+          name: 'description',
+          type: 'RemixNode',
+          description: 'A short excerpt shown in the preview, cut to three lines.',
+          required: false,
+        },
+        {
+          name: 'icon',
+          type: 'RemixNode',
+          description: 'The site’s icon, such as a favicon. Defaults to a globe.',
+          required: false,
+        },
+      ],
+    },
+  ],
   'code-block': [
     {
       name: 'CodeBlock',
@@ -4479,6 +4567,7 @@ export const componentDefaults: Record<string, Record<string, string>> = {
     openOnHover: 'false',
   },
   Button: { variant: 'primary' },
+  Citation: { index: '1', variant: 'number', placement: 'top', openDelay: '300' },
   CodeBlock: { startLine: '1', copyable: 'true' },
   'highlight()': { lang: 'text', notation: 'true' },
   Drawer: {

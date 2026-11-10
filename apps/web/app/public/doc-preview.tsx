@@ -21,6 +21,7 @@ const sharedPlaygroundDefaults = new Set([
   'toaster',
   'drawer',
   'code-block',
+  'citation',
 ])
 
 interface DocPreviewProps {

@@ -9,6 +9,7 @@ import { PopoverDemo } from './popover-example.tsx'
 import { ToasterDemo, toasterPositions } from './toaster-example.tsx'
 import { DrawerDemo } from './drawer-example.tsx'
 import { CodeBlockDemo, codeLanguages, type CodeSamples } from './code-block-example.tsx'
+import { CitationDemo } from './citation-example.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
 import { paletteCommands, paletteGroups, paletteSuggestions } from './component-demos.tsx'
 import { SoundCombobox } from './sound-combobox.tsx'
@@ -278,6 +279,12 @@ export const playgroundControls: Record<string, readonly Control[]> = {
   popover: [
     choice('placement', 'Placement', ['bottom', 'top', 'right', 'left']),
     toggle('title', 'Title'),
+    size,
+  ],
+  citation: [
+    choice('style', 'Variant', ['number', 'site']),
+    choice('count', 'Sources', ['1', '2', '3']),
+    choice('placement', 'Placement', ['top', 'bottom']),
     size,
   ],
   'code-block': [
@@ -827,6 +834,16 @@ export function PlaygroundExample(
             size={density}
             placement={String(v.placement) as 'bottom' | 'top' | 'right' | 'left'}
             openDelay={Number(v.openDelay)}
+          />
+        )
+      case 'citation':
+        return (
+          <CitationDemo
+            variant="playground"
+            size={density}
+            style={v.style === 'site' ? 'site' : 'number'}
+            count={Number(v.count)}
+            placement={v.placement === 'bottom' ? 'bottom' : 'top'}
           />
         )
       case 'code-block':
