@@ -1,0 +1,292 @@
+/* CodeBlock: code in a quiet frame, with a header for its file or language
+   and a copy button. Highlighted code from Reflow's own theme takes every
+   colour from the --rf-code-token-* variables below, so it follows the light
+   and dark themes and the accent; other Shiki themes bring their colours
+   inline. Lines carry Shiki's marks: highlighted, diff add and remove,
+   focused, error and warning, and highlighted words. */
+.rf-code-block {
+  --rf-code-font: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --rf-code-size: 13px;
+  --rf-code-leading: 20px;
+  --rf-code-pad: 16px;
+  --rf-code-foreground: var(--rf-fg);
+  --rf-code-background: transparent;
+  --rf-code-token-keyword: color-mix(in oklab, var(--rf-accent) 78%, var(--rf-fg));
+  --rf-code-token-string: var(--rf-success);
+  --rf-code-token-string-expression: var(--rf-success);
+  --rf-code-token-function: var(--rf-info);
+  --rf-code-token-constant: var(--rf-warning);
+  --rf-code-token-parameter: light-dark(#c2410c, #fdba74);
+  --rf-code-token-comment: var(--rf-muted);
+  --rf-code-token-punctuation: color-mix(in oklab, var(--rf-fg) 62%, transparent);
+  --rf-code-token-link: var(--rf-info);
+  --rf-code-token-inserted: var(--rf-success);
+  --rf-code-token-deleted: var(--rf-danger);
+  --rf-code-token-changed: var(--rf-warning);
+  --rf-code-added: light-dark(#22c55e, var(--rf-success));
+  --rf-code-removed: light-dark(#ef4444, var(--rf-danger));
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-inline-size: 0;
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--rf-panel-radius);
+  background: var(--rf-surface-2);
+  box-shadow: inset 0 0 0 1px var(--rf-border);
+  color: var(--rf-fg);
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+}
+.rf-code-block[data-density='compact'],
+[data-density='compact'] .rf-code-block:not([data-density]) {
+  --rf-code-size: 12px;
+  --rf-code-leading: 18px;
+  --rf-code-pad: 12px;
+}
+
+.rf-code-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: 40px;
+  box-sizing: border-box;
+  padding: 4px 6px 4px var(--rf-code-pad);
+  border-block-end: 1px solid var(--rf-border);
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption);
+  line-height: var(--rf-leading-caption, 16px);
+}
+/* With only the copy button, the header floats over the code's corner. */
+.rf-code-header:not(:has(.rf-code-filename, .rf-code-language)) {
+  position: absolute;
+  z-index: 1;
+  inset: 6px 6px auto auto;
+  min-block-size: 0;
+  padding: 0;
+  border: 0;
+}
+.rf-code-filename {
+  min-inline-size: 0;
+  overflow: hidden;
+  color: var(--rf-fg);
+  font-family: var(--rf-code-font);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rf-code-language {
+  font-family: var(--rf-code-font);
+  letter-spacing: 0.02em;
+}
+.rf-code-copy {
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: 28px;
+  block-size: 28px;
+  margin-inline-start: auto;
+  padding: 0;
+  border: 0;
+  border-radius: var(--rf-radius);
+  outline: none;
+  background: transparent;
+  color: var(--rf-muted);
+  cursor: pointer;
+  transition:
+    color var(--rf-fast),
+    background-color var(--rf-fast);
+}
+.rf-code-copy .rf-copy-action {
+  padding: 0;
+  color: inherit;
+}
+.rf-code-copy:focus-visible {
+  box-shadow: 0 0 0 1px var(--rf-accent);
+}
+@media (hover: hover) {
+  .rf-code-copy:hover {
+    background: var(--rf-hover);
+    color: var(--rf-fg);
+  }
+  .rf-code-copy:hover .rf-copy-action svg {
+    stroke-width: 2;
+  }
+}
+.rf-code-block[data-state='copied'] .rf-code-copy {
+  color: var(--rf-fg);
+}
+
+.rf-code-scroll {
+  min-inline-size: 0;
+}
+.rf-code-viewport:focus-visible {
+  outline: 2px solid var(--rf-accent);
+  outline-offset: -2px;
+}
+.rf-code {
+  margin: 0;
+  padding: 12px 0;
+  background: var(--rf-code-background);
+  color: var(--rf-code-foreground);
+  font: var(--rf-code-size) / var(--rf-code-leading) var(--rf-code-font);
+  font-variant-ligatures: none;
+  tab-size: 2;
+}
+.rf-code > code {
+  display: block;
+  inline-size: max-content;
+  min-inline-size: 100%;
+  counter-reset: rf-code-line var(--rf-code-start, 0);
+  font: inherit;
+}
+.rf-code-line {
+  display: inline-flex;
+  box-sizing: border-box;
+  min-inline-size: 100%;
+  padding-inline: var(--rf-code-pad);
+  transition:
+    opacity var(--rf-spring-moderate),
+    filter var(--rf-spring-moderate);
+}
+.rf-code-text {
+  flex: 1;
+  white-space: pre;
+}
+/* Wrapped, everything takes the available width instead of the longest
+   line's, so long lines break inside it. */
+.rf-code-block[data-wrap] .rf-scroll-root .rf-scroll-content {
+  width: 100%;
+}
+.rf-code-block[data-wrap] .rf-code {
+  flex: 1;
+  min-inline-size: 0;
+}
+.rf-code-block[data-wrap] .rf-code > code {
+  inline-size: auto;
+}
+.rf-code-block[data-wrap] .rf-code-line {
+  inline-size: 100%;
+}
+.rf-code-block[data-wrap] .rf-code-text {
+  min-inline-size: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Line numbers and diff marks sit in a gutter that selection skips. */
+.rf-code-block[data-line-numbers] .rf-code-line::before {
+  content: counter(rf-code-line);
+  counter-increment: rf-code-line;
+  flex: none;
+  min-inline-size: calc(var(--rf-code-digits, 2) * 1ch);
+  margin-inline-end: 16px;
+  color: var(--rf-muted);
+  opacity: 0.7;
+  text-align: end;
+  user-select: none;
+}
+.rf-code-mark {
+  flex: none;
+  inline-size: 2ch;
+  color: var(--rf-muted);
+  user-select: none;
+}
+
+.rf-code-line.highlighted {
+  background: color-mix(in oklab, var(--rf-accent) 12%, transparent);
+  box-shadow: inset 2px 0 var(--rf-accent);
+}
+.rf-code-line.highlighted.error {
+  background: color-mix(in oklab, var(--rf-code-removed) 14%, transparent);
+  box-shadow: inset 2px 0 var(--rf-code-removed);
+}
+.rf-code-line.highlighted.warning {
+  background: color-mix(in oklab, light-dark(#f59e0b, var(--rf-warning)) 16%, transparent);
+  box-shadow: inset 2px 0 light-dark(#f59e0b, var(--rf-warning));
+}
+.rf-code-line.diff.add {
+  background: color-mix(in oklab, var(--rf-code-added) 13%, transparent);
+}
+.rf-code-line.diff.add .rf-code-mark {
+  color: var(--rf-code-added);
+}
+.rf-code-line.diff.remove {
+  background: color-mix(in oklab, var(--rf-code-removed) 12%, transparent);
+}
+.rf-code-line.diff.remove .rf-code-mark {
+  color: var(--rf-code-removed);
+}
+.rf-code-line.diff.remove .rf-code-text {
+  opacity: 0.75;
+}
+.rf-code .highlighted-word {
+  border-radius: 4px;
+  background: color-mix(in oklab, var(--rf-accent) 16%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--rf-accent) 30%, transparent);
+}
+/* Focused lines keep the eye; the rest blur until the reader points at or
+   focuses the block. */
+.rf-code-block[data-has-focused] .rf-code-line:not(.focused) {
+  opacity: 0.5;
+  filter: blur(0.06em);
+}
+.rf-code-block[data-has-focused]:is(:hover, :focus-within) .rf-code-line:not(.focused) {
+  opacity: 1;
+  filter: none;
+}
+
+/* A theme with a light and a dark side follows the page between them. */
+.rf-code-block[data-themed] .rf-code[style*='--shiki-light'] {
+  background: light-dark(var(--shiki-light-bg), var(--shiki-dark-bg));
+  color: light-dark(var(--shiki-light), var(--shiki-dark));
+}
+.rf-code-block[data-themed] .rf-code[style*='--shiki-light'] span[style] {
+  color: light-dark(var(--shiki-light), var(--shiki-dark));
+}
+
+/* Folded, the code shows its first lines and fades into the Show all button. */
+.rf-code-block[data-collapsed='true'] .rf-code-viewport {
+  max-block-size: calc(var(--rf-code-max-lines) * var(--rf-code-leading) + 12px);
+  overflow-y: hidden;
+  mask-image: linear-gradient(to bottom, black 55%, transparent);
+}
+.rf-code-toggle {
+  display: block;
+  inline-size: 100%;
+  padding: 8px;
+  border: 0;
+  border-block-start: 1px solid var(--rf-border);
+  outline: none;
+  background: transparent;
+  color: var(--rf-muted);
+  font: inherit;
+  font-size: var(--rf-text-caption);
+  cursor: pointer;
+  transition:
+    color var(--rf-fast),
+    background-color var(--rf-fast);
+}
+.rf-code-toggle:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--rf-accent);
+}
+@media (hover: hover) {
+  .rf-code-toggle:hover {
+    background: var(--rf-hover);
+    color: var(--rf-fg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-code-line {
+    transition: none;
+  }
+}
+@media (forced-colors: active) {
+  .rf-code-block {
+    border: 1px solid CanvasText;
+  }
+  .rf-code-line:is(.highlighted, .diff) {
+    outline: 1px solid Highlight;
+    outline-offset: -1px;
+  }
+}
