@@ -2,6 +2,7 @@ import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
+import { heldDurations, holdMotion, releaseMotion, seekMotion } from './motion.ts'
 import { open, router } from './showcase-router.ts'
 
 it('slides a bottom drawer up to rest on the edge and closes it with a drag', async (t) => {
@@ -78,48 +79,65 @@ for (const [side, button, title] of [
     await page.setViewportSize({ width: 1280, height: 800 })
     await open(page, '/docs/drawer')
     const trigger = page.locator('#sides').getByRole('button', { name: button, exact: true })
-    const panel = page.getByRole('dialog', { name: title })
-    // Every frame: how much of the panel is on screen, and how dark the backdrop is.
-    const sample = () =>
-      panel.evaluate(async (node, side) => {
-        const frames: { shown: number; shade: number; time: number }[] = []
-        const start = performance.now()
+    const dialog = page.getByRole('dialog', { name: title })
+    // A closing dialog leaves the accessibility tree, so the panel is marked once open.
+    const panel = page.locator('[data-test-panel]')
+    // How much of the panel is on screen, and how dark the backdrop is.
+    const measure = () =>
+      panel.evaluate((node, side) => {
+        const box = node.getBoundingClientRect()
         const { clientWidth, clientHeight } = document.documentElement
-        while (performance.now() - start < 800) {
-          const box = node.getBoundingClientRect()
-          const shown =
-            side === 'bottom'
-              ? (clientHeight - box.top) / box.height
-              : side === 'top'
-                ? box.bottom / box.height
-                : side === 'right'
-                  ? (clientWidth - box.left) / box.width
-                  : box.right / box.width
-          frames.push({
-            shown: Math.max(0, Math.min(1, shown)),
-            shade: Number(getComputedStyle(node, '::backdrop').opacity),
-            time: Math.round(performance.now() - start),
-          })
-          await new Promise((resolve) => requestAnimationFrame(resolve))
+        const shown =
+          side === 'bottom'
+            ? (clientHeight - box.top) / box.height
+            : side === 'top'
+              ? box.bottom / box.height
+              : side === 'right'
+                ? (clientWidth - box.left) / box.width
+                : box.right / box.width
+        return {
+          shown: Math.max(0, Math.min(1, shown)),
+          shade: Number(getComputedStyle(node, '::backdrop').opacity),
         }
-        return frames
       }, side)
-    const check = (frames: Awaited<ReturnType<typeof sample>>) => {
-      const moving = frames.filter((frame) => frame.shown > 0.1 && frame.shown < 0.9)
-      assert.ok(moving.length >= 3, `slides over several frames: ${JSON.stringify(frames)}`)
-      for (const frame of moving)
-        assert.ok(Math.abs(frame.shown - frame.shade) < 0.15, `in step: ${JSON.stringify(frame)}`)
+    // The panel and its backdrop run 500ms together; seek both through it.
+    const frames = async (points: number[]) => {
+      await seekMotion(panel, 0)
+      // The panel's slide, its backdrop's fade, and their stay in the top layer.
+      const durations = await heldDurations(panel)
+      assert.deepEqual(new Set(durations), new Set([500]), `durations: ${durations}`)
+      const frames = []
+      for (const progress of points) {
+        await seekMotion(panel, progress)
+        frames.push(await measure())
+      }
+      for (const frame of frames)
+        assert.ok(Math.abs(frame.shown - frame.shade) < 0.15, `in step: ${JSON.stringify(frames)}`)
+      return frames
     }
 
+    await holdMotion(page)
     await trigger.click()
-    const opening = await sample()
-    check(opening)
-    // Still arriving at 120ms, settled well before 800ms.
-    assert.ok(opening.find((frame) => frame.time >= 120)!.shown < 0.97)
-    assert.ok(opening.at(-1)!.shown > 0.99 && opening.at(-1)!.shade > 0.99)
+    await dialog.evaluate((node) => node.setAttribute('data-test-panel', ''))
+    const opening = await frames([0, 0.25, 0.5, 0.75, 1])
+    assert.ok(opening[0]!.shown < 0.01 && opening[4]!.shown > 0.99, JSON.stringify(opening))
+    // A steep ease out: most of the way in after a quarter, then settling.
+    assert.ok(opening[1]!.shown > 0.6 && opening[1]!.shown < 0.9, JSON.stringify(opening))
+    assert.ok(
+      opening[2]!.shown > opening[1]!.shown && opening[3]!.shown < 1,
+      JSON.stringify(opening),
+    )
+    await releaseMotion(page)
+    await expect.poll(measure).toEqual({ shown: 1, shade: 1 })
 
+    await holdMotion(page)
     await page.keyboard.press('Escape')
-    check(await sample())
+    // At its end the closed panel leaves the page, so the last point is that.
+    const closing = await frames([0, 0.25, 0.5, 0.75])
+    assert.ok(closing[0]!.shown > 0.99 && closing[3]!.shown < 0.05, JSON.stringify(closing))
+    assert.ok(closing[1]!.shown > 0.1 && closing[1]!.shown < 0.4, JSON.stringify(closing))
+    await seekMotion(panel, 1)
     await expect(panel).toBeHidden()
+    await releaseMotion(page)
   })
 }
