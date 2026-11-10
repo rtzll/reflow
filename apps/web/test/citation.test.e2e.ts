@@ -79,3 +79,17 @@ it('follows the shape setting, sharp to pill', async (t) => {
   assert.ok(round.radius >= 4 && round.radius <= 8, `round: ${round.radius}`)
   assert.ok(pill.radius >= pill.height / 2, `pill: ${pill.radius}`)
 })
+
+it('closes its preview when the page scrolls instead of trailing behind it', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await page.goto('/docs/citation')
+  await waitForShowcase(page)
+  const chip = page.locator('#several-sources a.rf-citation')
+  await chip.scrollIntoViewIfNeeded()
+  await chip.hover()
+  const card = page.locator('#several-sources .rf-hover-card')
+  await expect(card).toBeVisible()
+  await page.mouse.wheel(0, 120)
+  await expect(card).toBeHidden()
+})

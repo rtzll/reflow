@@ -31,7 +31,8 @@ export interface HoverCardProps {
  * supplementary: the trigger still works on its own, a tap on a touch screen
  * follows it, and the card never takes focus or locks scrolling. The pointer
  * can cross into the card and use its links; it closes once the pointer has
- * left both, or on Escape. It shares Popover's surface and motion.
+ * left both, on Escape, or when the page scrolls. It shares Popover's
+ * surface and motion.
  *
  * The card is a span, so a trigger can sit inside a paragraph. Keep its
  * content to phrasing elements there, such as span and a, since a div or a
@@ -122,6 +123,18 @@ export function HoverCard(handle: Handle<HoverCardProps>) {
         setOpen(false)
       },
       options,
+    )
+    // The card is placed by script, so while the page scrolls it trails a frame
+    // behind its trigger. A preview belongs to where the pointer rests, so a
+    // scroll outside the card closes it at once.
+    element.ownerDocument.addEventListener(
+      'scroll',
+      (event) => {
+        if (!isOpen()) return
+        if (event.target instanceof Node && card?.contains(event.target)) return
+        setOpen(false)
+      },
+      { capture: true, passive: true, signal },
     )
     signal.addEventListener(
       'abort',

@@ -81,6 +81,20 @@ describe('HoverCard', () => {
     equal(document.activeElement, trigger)
   })
 
+  it('closes when the page scrolls, but not when its own content does', async (t) => {
+    const { $, cleanup } = render(profile({ openDelay: 0, closeDelay: 0 }))
+    t.after(cleanup)
+    const trigger = $('a[href="#profile"]') as HTMLAnchorElement
+    const card = $('.rf-hover-card') as HTMLElement
+    trigger.focus()
+    await waitFor(() => card.matches(':popover-open'))
+    card.dispatchEvent(new Event('scroll'))
+    await pause(40)
+    ok(card.matches(':popover-open'), 'scrolling inside the card keeps it')
+    document.dispatchEvent(new Event('scroll'))
+    await waitFor(() => !card.matches(':popover-open'))
+  })
+
   it('follows a controlled open state', async (t) => {
     let open = true
     let view: Handle | undefined
