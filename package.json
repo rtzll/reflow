@@ -20,7 +20,7 @@
     "lint:fix": "oxlint . --fix --max-warnings=0",
     "test": "pnpm build && pnpm test:run",
     "test:package": "pnpm build && node tools/check-package.mjs",
-    "test:run": "node --test tools/release.test.mjs && ./apps/web/node_modules/.bin/remix test"
+    "test:run": "node --test tools/release.test.mjs tools/check-tests.test.mjs && ./apps/web/node_modules/.bin/remix test"
   },
   "devDependencies": {
     "@types/node": "24.19.2",
