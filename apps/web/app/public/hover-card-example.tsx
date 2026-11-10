@@ -50,13 +50,13 @@ export function HoverCardDemo(handle: Handle<HoverCardDemoProps>) {
                 </a>
               )}
             >
-              <div class="doc-hover-link">
+              <span class="doc-hover-link">
                 <strong>Remix 3</strong>
-                <p>
+                <span>
                   A full stack web framework built on web standards, with its own component model.
-                </p>
+                </span>
                 <span class="doc-hover-muted">remix.run</span>
-              </div>
+              </span>
             </HoverCard>{' '}
             and the platform’s own popover and dialog elements.
           </p>

@@ -32,6 +32,10 @@ export interface HoverCardProps {
  * follows it, and the card never takes focus or locks scrolling. The pointer
  * can cross into the card and use its links; it closes once the pointer has
  * left both, or on Escape. It shares Popover's surface and motion.
+ *
+ * The card is a span, so a trigger can sit inside a paragraph. Keep its
+ * content to phrasing elements there, such as span and a, since a div or a
+ * list would end the paragraph when the browser parses server-rendered HTML.
  */
 export function HoverCard(handle: Handle<HoverCardProps>) {
   let trigger: HTMLElement | null = null
@@ -165,14 +169,16 @@ export function HoverCard(handle: Handle<HoverCardProps>) {
     return (
       <>
         {handle.props.renderTrigger({ mix: triggerMix })}
-        <div
+        {/* A span, so a card whose trigger sits in a paragraph keeps the
+            paragraph whole when the browser parses the server's HTML. */}
+        <span
           class="rf-menu-surface rf-popover-surface rf-hover-card"
           popover="manual"
           data-density={handle.props.size}
           mix={cardMix}
         >
           {handle.props.children}
-        </div>
+        </span>
       </>
     )
   }

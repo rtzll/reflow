@@ -37,3 +37,14 @@ it('opens on a resting pointer, stays open over the card, and closes after leavi
   await page.mouse.move(5, 5)
   await expect(card).toBeHidden()
 })
+
+it('keeps a card whose trigger sits in a paragraph inside that paragraph', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  // As parsed from the server's HTML, before any script runs.
+  await page.route('**/*.{js,mjs}', (route) => route.abort())
+  await page.goto('/docs/hover-card')
+  const sentence = page.locator('#link-preview .doc-hover-sentence')
+  await expect(sentence).toHaveCount(1)
+  await expect(sentence.locator('.rf-hover-card')).toHaveCount(1)
+  await expect(page.locator('#link-preview .rf-hover-card')).toHaveCount(1)
+})

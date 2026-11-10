@@ -2967,7 +2967,7 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
   min-inline-size: 0;
 }
 .doc-hover-profile-text p,
-.doc-hover-link p {
+.doc-hover-link > span:not(.doc-hover-muted) {
   margin: 4px 0;
 }
 .doc-hover-link {
