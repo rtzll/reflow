@@ -24,6 +24,7 @@ const sharedPlaygroundDefaults = new Set([
   'citation',
   'avatar',
   'chat-layout',
+  'carousel',
 ])
 
 interface DocPreviewProps {

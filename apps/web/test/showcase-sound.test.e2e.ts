@@ -292,6 +292,31 @@ it('plays the error cue when a CodeBlock copy fails, as InputCopy does', async (
   await expect.poll(audioStarts).toBeGreaterThan(before)
 })
 
+it('plays the navigate cue for Carousel buttons and dots, not for autoplay', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  const audioStarts = await trackAudio(page)
+  await page.goto('/docs/carousel')
+  await waitForShowcase(page)
+  const example = page.locator('#basic')
+  await example.getByRole('button', { name: 'Next slide' }).click()
+  await expect.poll(audioStarts).toBeGreaterThan(0)
+  const moved = await audioStarts()
+  await example.getByRole('button', { name: 'Show Keyboard care' }).click()
+  await expect.poll(audioStarts).toBeGreaterThan(moved)
+
+  // Autoplay moves on silently.
+  const autoplay = page.locator('#autoplay')
+  await autoplay.scrollIntoViewIfNeeded()
+  await page.mouse.move(5, 5)
+  const before = await audioStarts()
+  await expect(autoplay.getByRole('button', { name: 'Show Shared hover' })).toHaveAttribute(
+    'aria-current',
+    'true',
+    { timeout: 5000 },
+  )
+  expect(await audioStarts()).toBe(before)
+})
+
 it('plays open and close cues for a Drawer', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   const audioStarts = await trackAudio(page)

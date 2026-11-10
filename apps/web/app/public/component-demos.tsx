@@ -47,6 +47,7 @@ import { CodeBlockDemo } from './code-block-example.tsx'
 import { CitationDemo } from './citation-example.tsx'
 import { AvatarDemo } from './avatar-example.tsx'
 import { ChatLayoutDemo } from './chat-layout-example.tsx'
+import { CarouselDemo } from './carousel-demo.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
 import { SoundCombobox } from './sound-combobox.tsx'
 import { playCopySuccess } from './showcase-sound.ts'
@@ -372,6 +373,38 @@ export const componentExamples: Record<string, readonly DocumentationExample[]> 
       'autoplay',
       carouselExampleCode(4, true),
       'Hover the slide to pause its progress.',
+    ),
+  ],
+  carousel: [
+    demo(
+      'Basic',
+      'basic',
+      `<Carousel label="Highlights" slideLabels={titles}>\n  {slides.map((slide) => <Slide {...slide} />)}\n</Carousel>`,
+      'Swipe, scroll with a trackpad or the arrow keys, or drag with a mouse; the slide snaps into place and the dots follow. Each slide reads as its name and place, such as “Shared hover, 2 of 4”.',
+    ),
+    demo(
+      'Several in view',
+      'several',
+      `<Carousel label="Highlights" style={{ '--rf-carousel-slide': 'calc((100% - 24px) / 3)' }}>\n  {slides}\n</Carousel>`,
+      'Set --rf-carousel-slide for the slides’ width and --rf-carousel-gap for the space between them.',
+    ),
+    demo(
+      'Centered',
+      'center',
+      `<Carousel label="Highlights" align="center" defaultIndex={1}>{slides}</Carousel>`,
+      'Slides rest in the middle with their neighbours peeking in.',
+    ),
+    demo(
+      'Autoplay',
+      'autoplay',
+      `<Carousel label="Highlights" autoplay={{ duration: 3000 }}>{slides}</Carousel>`,
+      'The dots time it and show its progress. It pauses while pointed at or focused, and its button stops it, as the carousel pattern asks.',
+    ),
+    demo(
+      'Linked slides',
+      'links',
+      `<Carousel label="Articles">\n  {articles.map((article) => <a href={article.href}>…</a>)}\n</Carousel>`,
+      'A drag that ends over a link does not follow it; a click does.',
     ),
   ],
   'chat-layout': [
@@ -2383,6 +2416,8 @@ export function ComponentDemo(
         return <CitationDemo variant={variant} />
       case 'chat-layout':
         return <ChatLayoutDemo variant={variant} />
+      case 'carousel':
+        return <CarouselDemo variant={variant} />
       case 'avatar':
         return <AvatarDemo variant={variant} image={images.sidebarAvatar} />
       case 'segmented-control':

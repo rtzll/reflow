@@ -245,6 +245,28 @@ export function enhanceShowcaseSound() {
   document.addEventListener('click', unlockFromGesture, options)
   document.addEventListener('keydown', unlockFromGesture, options)
 
+  // Carousel: the buttons and dots navigate; autoplay stays silent.
+  document.addEventListener(
+    'click',
+    (event) => {
+      const button =
+        event.target instanceof Element
+          ? event.target.closest('.site-preview-stage .rf-carousel-controls button')
+          : null
+      if (!button || button.matches('.rf-carousel-play, :disabled')) return
+      const dots = [
+        ...(button.closest('.rf-carousel-controls')?.querySelectorAll('.rf-carousel-dots button') ??
+          []),
+      ]
+      const current = dots.findIndex((dot) => dot.getAttribute('aria-current') === 'true')
+      const target = dots.indexOf(button)
+      if (target === current) return
+      const back =
+        button.getAttribute('aria-label') === 'Previous slide' || (target >= 0 && target < current)
+      play('navigate', { emphasis: 'subtle', direction: back ? 'back' : 'forward' })
+    },
+    { capture: true },
+  )
   document.addEventListener('change', (event) => {
     const input = event.target
     if (!(input instanceof Element) || !input.closest('.site-preview-stage')) return

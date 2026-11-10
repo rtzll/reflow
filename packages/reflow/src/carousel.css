@@ -1,0 +1,67 @@
+/* Carousel: slides in a row on a native scroll container that snaps each
+   one into place. Set --rf-carousel-slide for the slides' width (100% shows
+   one at a time) and --rf-carousel-gap for the space between them. While a
+   mouse drags it, snapping waits until the slide it lands on is chosen. */
+.rf-carousel {
+  --rf-carousel-slide: 100%;
+  --rf-carousel-gap: 12px;
+  display: grid;
+  gap: 12px;
+  min-inline-size: 0;
+}
+.rf-carousel-viewport {
+  position: relative;
+  display: grid;
+  grid-auto-columns: var(--rf-carousel-slide);
+  grid-auto-flow: column;
+  gap: var(--rf-carousel-gap);
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  border-radius: var(--rf-panel-radius);
+  outline: none;
+}
+.rf-carousel-viewport::-webkit-scrollbar {
+  display: none;
+}
+.rf-carousel-viewport:focus-visible {
+  outline: 2px solid var(--rf-accent);
+  outline-offset: 2px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .rf-carousel-viewport {
+    cursor: grab;
+  }
+}
+.rf-carousel-viewport[data-dragging] {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  user-select: none;
+}
+.rf-carousel-slide {
+  min-inline-size: 0;
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
+}
+.rf-carousel[data-align='center'] .rf-carousel-slide {
+  scroll-snap-align: center;
+}
+/* Dragging moves the slides, not their images. */
+.rf-carousel-slide img {
+  -webkit-user-drag: none;
+}
+
+.rf-carousel-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.rf-carousel-controls .rf-carousel-dots {
+  margin-inline: 4px;
+}
+.rf-carousel-play {
+  margin-inline-start: 4px;
+}

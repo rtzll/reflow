@@ -492,7 +492,7 @@ const galleryOrder = [
   'input-copy',
   'accordion',
   'input-group',
-  'carousel-dots',
+  'carousel',
   'button',
   'breadcrumb',
   'table',
@@ -518,7 +518,7 @@ const wideCards = new Set([
   'ask-user-questions',
   'banner',
   'accordion',
-  'carousel-dots',
+  'carousel',
   'table',
   'calendar',
   'chat-message',
@@ -531,7 +531,7 @@ const tallCards = new Set([
   'sidebar',
   'thinking-steps',
   'ask-user-questions',
-  'carousel-dots',
+  'carousel',
   'chat-message',
 ])
 const rightCards = new Set([
@@ -541,7 +541,7 @@ const rightCards = new Set([
   'command-menu',
   'thinking-steps',
   'banner',
-  'carousel-dots',
+  'carousel',
   'calendar',
 ])
 
@@ -946,7 +946,7 @@ const demoOrder = [
   'thinking-steps',
   'banner',
   'input-copy',
-  'carousel-dots',
+  'carousel',
   'breadcrumb',
   'segmented-control',
   'popover',

@@ -58,6 +58,11 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       selected: false,
     }),
   },
+  carousel: {
+    description:
+      'Slides on a native scroll container that snaps, drags with momentum, and autoplays through its dots.',
+    code: `<Carousel label="Highlights" slideLabels={titles}>\n  {slides.map((slide) => <Slide {...slide} />)}\n</Carousel>`,
+  },
   'carousel-dots': {
     description:
       'A set of slide controls with a moving hover surface and optional progress animation.',
@@ -254,6 +259,7 @@ const components = [
   ['button', 'Button'],
   ['calendar', 'Calendar'],
   ['card', 'Card'],
+  ['carousel', 'Carousel'],
   ['carousel-dots', 'CarouselDots'],
   ['chat-layout', 'ChatLayout'],
   ['chat-message', 'ChatMessage'],

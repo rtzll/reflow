@@ -262,6 +262,20 @@ ${opening} label="Options" options={options} defaultValue="0" />`
       const compact = values.size === 'compact' ? ' size="compact"' : ''
       return `<HoverCard${placement}${delay}${compact} renderTrigger={(trigger) => (\n  <a href="/u/reflow" {...trigger}>@reflow</a>\n)}>\n  <Profile user={user} />\n</HoverCard>`
     }
+    case 'carousel': {
+      const perView = Number(values.perView ?? 1)
+      const props = [
+        perView > 1
+          ? `\n  style={{ '--rf-carousel-slide': 'calc((100% - ${(perView - 1) * 12}px) / ${perView})' }}`
+          : '',
+        values.align === 'center' ? '\n  align="center"' : '',
+        values.autoplay ? '\n  autoplay={{ duration: 3000 }}' : '',
+        values.dots === false ? '\n  dots={false}' : '',
+        values.controls === false ? '\n  controls={false}' : '',
+        values.size === 'compact' ? '\n  size="compact"' : '',
+      ].join('')
+      return `<Carousel\n  label="Highlights"\n  slideLabels={titles}${props}\n>\n  {slides.map((slide) => <Slide {...slide} />)}\n</Carousel>`
+    }
     case 'chat-layout': {
       const header = values.header ? '\n  header={<ChatHeader title="Design chat" />}' : ''
       const compact = values.size === 'compact' ? ' size="compact"' : ''

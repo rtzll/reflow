@@ -348,38 +348,44 @@ it('configures keyboard prompts and a native attachment picker for the InputMess
   assert.equal(await tile.getByRole('button', { name: 'Attach files', exact: true }).count(), 0)
 })
 
-it('fills and advances the gallery carousel, pausing over the slide', async (t) => {
+it('advances the gallery carousel through its dots, pausing over the slides', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1475, height: 900 })
   await page.emulateMedia({ reducedMotion: 'no-preference' })
   await page.goto('/?theme=dark')
-  const tile = page.locator('.site-gallery [data-component="carousel-dots"]')
-  const slide = tile.locator('.example-carousel-card')
-  const activeDot = tile.locator('button[aria-current="true"]')
+  await waitForShowcase(page)
+  const tile = page.locator('.site-gallery [data-component="carousel"]')
+  const viewport = tile.locator('.rf-carousel-viewport')
+  const activeDot = tile.locator('.rf-carousel-dots button[aria-current="true"]')
   const fill = activeDot.locator('.rf-carousel-dot > span')
-  await slide.hover()
+  await viewport.hover()
   await tile.locator('.rf-carousel-dots[data-rf-paused]').waitFor()
-  assert.equal(await activeDot.getAttribute('aria-label'), 'Show Inbox')
+  assert.equal(await activeDot.getAttribute('aria-label'), 'Show Fluid motion')
   assert.equal(
     await fill.evaluate((element) => getComputedStyle(element).animationPlayState),
     'paused',
   )
 
-  await tile.getByRole('link', { name: 'View CarouselDots documentation' }).hover()
-  await page.waitForFunction(() => {
-    const fill = document.querySelector(
-      '.site-gallery [data-component="carousel-dots"] [aria-current="true"] .rf-carousel-dot > span',
+  await tile.getByRole('link', { name: 'View Carousel documentation' }).hover()
+  await expect(tile.locator('.rf-carousel-dots[data-rf-paused]')).toHaveCount(0)
+  await expect(activeDot).toHaveAttribute('aria-label', 'Show Shared hover', { timeout: 6000 })
+  // The slide in view follows the dots.
+  await expect
+    .poll(() =>
+      viewport.evaluate((node) => {
+        const slide = node.querySelectorAll<HTMLElement>('.rf-carousel-slide')[1]!
+        return Math.abs(node.scrollLeft - slide.offsetLeft) < 2
+      }),
     )
-    const animation = fill?.getAnimations()[0]
-    const progress = animation?.effect?.getComputedTiming().progress
-    return typeof progress === 'number' && progress > 0 && progress < 1
-  })
-  await slide.getByText('Drafts', { exact: true }).waitFor({ timeout: 5000 })
+    .toBe(true)
 
   await page.emulateMedia({ reducedMotion: 'reduce' })
   assert.equal(await fill.evaluate((element) => getComputedStyle(element).animationName), 'none')
-  await tile.getByRole('button', { name: 'Show Archive' }).press('Enter')
-  await slide.getByText('Archive', { exact: true }).waitFor()
+  await tile.getByRole('button', { name: 'Show Yours to theme' }).press('Enter')
+  await expect(tile.getByRole('group', { name: 'Yours to theme, 4 of 4' })).toHaveAttribute(
+    'data-current',
+    'true',
+  )
 })
 
 it('keeps the gallery Combobox aligned and scrollable after a third choice wraps', async (t) => {

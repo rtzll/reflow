@@ -12,6 +12,7 @@ import { CodeBlockDemo, codeLanguages, type CodeSamples } from './code-block-exa
 import { CitationDemo } from './citation-example.tsx'
 import { AvatarDemo } from './avatar-example.tsx'
 import { ChatLayoutDemo } from './chat-layout-example.tsx'
+import { CarouselDemo } from './carousel-demo.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
 import { paletteCommands, paletteGroups, paletteSuggestions } from './component-demos.tsx'
 import { SoundCombobox } from './sound-combobox.tsx'
@@ -282,6 +283,14 @@ export const playgroundControls: Record<string, readonly Control[]> = {
   popover: [
     choice('placement', 'Placement', ['bottom', 'top', 'right', 'left']),
     toggle('title', 'Title'),
+    size,
+  ],
+  carousel: [
+    choice('perView', 'In view', ['1', '2', '3']),
+    choice('align', 'Align', ['start', 'center']),
+    toggle('autoplay', 'Autoplay'),
+    toggle('dots', 'Dots', true),
+    toggle('controls', 'Buttons', true),
     size,
   ],
   'chat-layout': [toggle('header', 'Header'), toggle('empty', 'Start empty'), size],
@@ -844,6 +853,18 @@ export function PlaygroundExample(
             size={density}
             placement={String(v.placement) as 'bottom' | 'top' | 'right' | 'left'}
             openDelay={Number(v.openDelay)}
+          />
+        )
+      case 'carousel':
+        return (
+          <CarouselDemo
+            variant="playground"
+            size={density}
+            perView={Number(v.perView)}
+            align={v.align === 'center' ? 'center' : 'start'}
+            autoplay={Boolean(v.autoplay)}
+            dots={Boolean(v.dots)}
+            controls={Boolean(v.controls)}
           />
         )
       case 'chat-layout':

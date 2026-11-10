@@ -2728,6 +2728,82 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  carousel: [
+    {
+      name: 'Carousel',
+      props: [
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Names the carousel, such as "Featured projects".',
+          required: true,
+        },
+        {
+          name: 'children',
+          type: 'RemixNode',
+          description: 'The slides, one per child.',
+          required: false,
+        },
+        {
+          name: 'slideLabels',
+          type: 'string[]',
+          description:
+            'Names each slide, for its announcement, such as “Shared hover, 2 of 4”, and its dot.',
+          required: false,
+        },
+        {
+          name: 'index',
+          type: 'number',
+          description: 'The current slide, when controlled by the parent.',
+          required: false,
+        },
+        {
+          name: 'defaultIndex',
+          type: 'number',
+          description: 'The slide shown first when uncontrolled. Default 0.',
+          required: false,
+        },
+        {
+          name: 'onIndexChange',
+          type: '((index: number) => void)',
+          description:
+            'Called when a button, a dot, a drag, a scroll or autoplay changes the slide.',
+          required: false,
+        },
+        {
+          name: 'dots',
+          type: 'boolean',
+          description: 'Shows CarouselDots under the slides. Default true.',
+          required: false,
+        },
+        {
+          name: 'controls',
+          type: 'boolean',
+          description: 'Shows previous and next buttons. Default true.',
+          required: false,
+        },
+        {
+          name: 'autoplay',
+          type: '{ duration: number }',
+          description:
+            'Moves on after this many milliseconds, timed and shown by the dots, with a button to pause.',
+          required: false,
+        },
+        {
+          name: 'align',
+          type: '"start" | "center"',
+          description: 'Where a slide comes to rest. Default start.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: '"default" | "compact"',
+          description: 'Tightens the controls.',
+          required: false,
+        },
+      ],
+    },
+  ],
   'chat-layout': [
     {
       name: 'ChatLayout',
@@ -4697,6 +4773,7 @@ export const componentDefaults: Record<string, Record<string, string>> = {
     openOnHover: 'false',
   },
   Button: { variant: 'primary' },
+  Carousel: { defaultIndex: '0', dots: 'true', controls: 'true', align: 'start' },
   ChatLayout: { label: 'Conversation' },
   Avatar: { size: '32', shape: 'circle' },
   AvatarGroup: { max: '4', size: '32', shape: 'circle' },

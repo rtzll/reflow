@@ -3199,3 +3199,50 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
   justify-items: center;
   gap: 24px;
 }
+
+/* Carousel demos: feature cards tinted by their hue. */
+.doc-carousel {
+  inline-size: min(100%, 520px);
+}
+.doc-carousel-per-2 {
+  --rf-carousel-slide: calc((100% - var(--rf-carousel-gap)) / 2);
+}
+.doc-carousel-per-3 {
+  --rf-carousel-slide: calc((100% - 2 * var(--rf-carousel-gap)) / 3);
+}
+.doc-carousel-peek {
+  --rf-carousel-slide: 72%;
+}
+.doc-carousel-slide {
+  display: grid;
+  align-content: end;
+  gap: 4px;
+  box-sizing: border-box;
+  block-size: 180px;
+  padding: 16px;
+  border-radius: var(--rf-panel-radius);
+  background: linear-gradient(
+    150deg,
+    color-mix(in oklab, var(--slide-hue) 38%, var(--rf-bg)),
+    color-mix(in oklab, var(--slide-hue) 10%, var(--rf-bg))
+  );
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--slide-hue) 25%, transparent);
+  color: var(--rf-fg);
+  text-decoration: none;
+}
+.doc-carousel-slide strong {
+  font-size: var(--rf-text-subtitle);
+  font-variation-settings: var(--rf-weight-strong);
+}
+.doc-carousel-slide span {
+  color: color-mix(in oklab, var(--rf-fg) 70%, transparent);
+}
+.doc-carousel-per-3 .doc-carousel-slide {
+  block-size: 140px;
+}
+.site-gallery [data-component='carousel'] .doc-carousel {
+  inline-size: min(100%, 440px);
+}
+.site-gallery [data-component='carousel'] .doc-carousel-slide {
+  block-size: 220px;
+}

@@ -33,7 +33,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'input-copy',
     'accordion',
     'input-group',
-    'carousel-dots',
+    'carousel',
     'button',
     'breadcrumb',
     'table',

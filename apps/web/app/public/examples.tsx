@@ -7,6 +7,7 @@ import { CodeBlockDemo } from './code-block-example.tsx'
 import { CitationDemo, citationSources } from './citation-example.tsx'
 import { AvatarDemo } from './avatar-example.tsx'
 import { ChatLayoutDemo } from './chat-layout-example.tsx'
+import { CarouselDemo } from './carousel-demo.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
 import { paletteCommands, paletteSuggestions } from './palette-example-data.tsx'
 import { accents } from './site-settings.ts'
@@ -304,6 +305,8 @@ export const Example = clientEntry(
           )
         case 'hover-card':
           return <HoverCardDemo variant="basic" />
+        case 'carousel':
+          return <CarouselDemo variant={handle.props.showcase ? 'gallery' : 'playground'} />
         case 'chat-layout':
           return <ChatLayoutDemo variant="playground" />
         case 'avatar':
