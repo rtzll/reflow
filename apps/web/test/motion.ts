@@ -95,3 +95,21 @@ export async function releaseMotion(page: Page) {
     }
   })
 }
+
+/**
+ * Skip an element's running animations, and its descendants', to their end,
+ * as if their time had passed: for motion that drives behaviour, such as an
+ * autoplay fill that moves on when it ends. Waits for one to be running.
+ */
+export async function finishMotion(element: Locator) {
+  await element.evaluate(async (node) => {
+    const running = () =>
+      node.getAnimations({ subtree: true }).filter((animation) => animation.playState === 'running')
+    const deadline = performance.now() + 10_000
+    while (running().length === 0) {
+      if (performance.now() > deadline) throw new Error('No animation is running on the element')
+      await new Promise((resolve) => setTimeout(resolve, 10))
+    }
+    for (const animation of running()) animation.finish()
+  })
+}

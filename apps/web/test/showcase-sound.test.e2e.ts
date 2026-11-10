@@ -1,6 +1,7 @@
 import { expect, type Page } from 'playwright/test'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
+import { finishMotion } from './motion.ts'
 import { router, waitForShowcase, open } from './showcase-router.ts'
 
 async function trackAudio(page: Page) {
@@ -206,10 +207,10 @@ it('plays a cue on manual carousel changes and leaves autoplay silent', async (t
   await open(page, '/docs/carousel-dots', { motion: true })
   const carousel = page.locator('#autoplay .example-carousel')
   await page.locator('#autoplay h2').click()
+  await finishMotion(carousel.locator('.rf-carousel-dots [aria-current="true"]'))
   await expect(carousel.getByRole('button', { name: 'Show Drafts' })).toHaveAttribute(
     'aria-current',
     'true',
-    { timeout: 6000 },
   )
   expect(await audioStarts()).toBe(0)
   const archive = carousel.getByRole('button', { name: 'Show Archive' })
@@ -319,10 +320,10 @@ it('plays the navigate cue for Carousel buttons and dots, not for autoplay', asy
   await autoplay.scrollIntoViewIfNeeded()
   await page.mouse.move(5, 5)
   const before = await audioStarts()
+  await finishMotion(autoplay.locator('.rf-carousel-dots [aria-current="true"]'))
   await expect(autoplay.getByRole('button', { name: 'Show Shared hover' })).toHaveAttribute(
     'aria-current',
     'true',
-    { timeout: 5000 },
   )
   expect(await audioStarts()).toBe(before)
 })

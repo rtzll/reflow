@@ -2,6 +2,7 @@ import { expect, type Locator } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
+import { finishMotion } from './motion.ts'
 import { open, router } from './showcase-router.ts'
 
 // Which slide rests at the start of the viewport, or -1 between slides.
@@ -108,12 +109,13 @@ it('autoplays through its dots, pauses while pointed at, and stops with its butt
   await viewport.scrollIntoViewIfNeeded()
   await page.mouse.move(5, 5)
   await expect(viewport).toHaveAttribute('aria-live', 'off')
+  // The current dot's fill runs out, and the next slide comes in.
+  await finishMotion(example.locator('.rf-carousel-dots [aria-current="true"]'))
   await expect(example.getByRole('button', { name: 'Show Shared hover' })).toHaveAttribute(
     'aria-current',
     'true',
-    { timeout: 5000 },
   )
-  await expect.poll(() => resting(viewport), { timeout: 3000 }).toBe(1)
+  await expect.poll(() => resting(viewport)).toBe(1)
 
   await viewport.hover()
   await expect(example.locator('.rf-carousel-dots[data-rf-paused]')).toHaveCount(1)

@@ -2,6 +2,7 @@ import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
+import { finishMotion } from './motion.ts'
 import { open, router } from './showcase-router.ts'
 
 it('hydrates previews across docs and deep-linked demo pages', async (t) => {
@@ -362,7 +363,8 @@ it('advances the gallery carousel through its dots, pausing over the slides', as
 
   await tile.getByRole('link', { name: 'View Carousel documentation' }).hover()
   await expect(tile.locator('.rf-carousel-dots[data-rf-paused]')).toHaveCount(0)
-  await expect(activeDot).toHaveAttribute('aria-label', 'Show Shared hover', { timeout: 6000 })
+  await finishMotion(activeDot)
+  await expect(activeDot).toHaveAttribute('aria-label', 'Show Shared hover')
   // The slide in view follows the dots.
   await expect
     .poll(() =>
