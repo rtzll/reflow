@@ -47,7 +47,8 @@
 .rf-citation-sources {
   display: grid;
   gap: 12px;
-  inline-size: min(300px, calc(100vw - 32px));
+  /* The preview's widest content box: 320px less its 12px padding. */
+  inline-size: min(296px, calc(100vw - 40px));
   margin: 0;
   padding: 0;
   list-style: none;

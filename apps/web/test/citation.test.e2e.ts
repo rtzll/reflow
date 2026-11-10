@@ -46,6 +46,9 @@ it('sits within the line and previews its sources above it', async (t) => {
   const card = page.locator('#several-sources .rf-hover-card')
   await expect(card).toBeVisible()
   await expect(card.getByRole('listitem')).toHaveCount(3)
+  // Its content fits: nothing scrolls sideways.
+  const overflow = await card.evaluate((node) => node.scrollWidth - node.clientWidth)
+  assert.equal(overflow, 0, `the preview overflows by ${overflow}px`)
   await expect(card.getByRole('link', { name: 'Laws of UX' })).toHaveCount(0)
   await expect(card.getByRole('link', { name: 'Aesthetic–Usability Effect' })).toBeVisible()
   const placement = await card.evaluate((node) => ({
