@@ -1,8 +1,9 @@
 import { readFileSync } from 'node:fs'
+import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { router } from './showcase-router.ts'
+import { router, waitForShowcase } from './showcase-router.ts'
 
 const { version } = JSON.parse(
   readFileSync(new URL('../../../packages/reflow/package.json', import.meta.url), 'utf8'),
@@ -14,34 +15,20 @@ it('lets the visitor take over skill examples and replay their initial state', a
   page.on('pageerror', (error) => errors.push(error.message))
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/docs/skill')
+  // Clicks before hydration land on inert markup.
+  await waitForShowcase(page)
   const tabs = page.getByRole('tablist', { name: 'Reflow tabs' })
-  await tabs.getByRole('tab', { name: 'Settings', exact: true }).click()
-  assert.equal(
-    await tabs.getByRole('tab', { name: 'Settings', exact: true }).getAttribute('aria-selected'),
-    'true',
-  )
-  await tabs.getByRole('tab', { name: 'Settings', exact: true }).press('ArrowLeft')
-  assert.equal(
-    await tabs.getByRole('tab', { name: 'Settings', exact: true }).getAttribute('aria-selected'),
-    'true',
-  )
-  await tabs.getByRole('tab', { name: 'Activity', exact: true }).press('Enter')
-  assert.equal(
-    await tabs.getByRole('tab', { name: 'Activity', exact: true }).getAttribute('aria-selected'),
-    'true',
-  )
+  const tab = (name: string) => tabs.getByRole('tab', { name, exact: true })
+  await tab('Settings').click()
+  await expect(tab('Settings')).toHaveAttribute('aria-selected', 'true')
+  // Arrow keys move focus without selecting; Enter selects.
+  await tab('Settings').press('ArrowLeft')
+  await expect(tab('Settings')).toHaveAttribute('aria-selected', 'true')
+  await tab('Activity').press('Enter')
+  await expect(tab('Activity')).toHaveAttribute('aria-selected', 'true')
   await page.getByRole('button', { name: 'Replay demonstration' }).first().click()
-  assert.equal(
-    await tabs.getByRole('tab', { name: 'Overview', exact: true }).getAttribute('aria-selected'),
-    'true',
-  )
-  assert.equal(
-    await page
-      .locator('.skill-cursor')
-      .first()
-      .evaluate((cursor) => getComputedStyle(cursor).display),
-    'none',
-  )
+  await expect(tab('Overview')).toHaveAttribute('aria-selected', 'true')
+  await expect(page.locator('.skill-cursor').first()).toHaveCSS('display', 'none')
   assert.deepEqual(errors, [])
 })
 

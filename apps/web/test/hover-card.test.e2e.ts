@@ -14,6 +14,8 @@ it('opens on a resting pointer, stays open over the card, and closes after leavi
   await trigger.scrollIntoViewIfNeeded()
   await trigger.hover()
   await expect(card).toBeVisible()
+  // Measure the rest pose, once the entry's drop and squash have settled.
+  await expect.poll(() => card.evaluate((node) => getComputedStyle(node).transform)).toBe('none')
   const geometry = await page.evaluate(
     ([a, b]) => {
       const t = a!.getBoundingClientRect()
