@@ -261,6 +261,15 @@ ${opening} label="Options" options={options} defaultValue="0" />`
       const compact = values.size === 'compact' ? ' size="compact"' : ''
       return `<HoverCard${placement}${delay}${compact} renderTrigger={(trigger) => (\n  <a href="/u/reflow" {...trigger}>@reflow</a>\n)}>\n  <Profile user={user} />\n</HoverCard>`
     }
+    case 'avatar': {
+      const props = [
+        values.image ? ' src={photo}' : '',
+        values.size && values.size !== '32' ? ` size={${values.size}}` : '',
+        values.shape === 'square' ? ' shape="square"' : '',
+        values.status && values.status !== 'none' ? ` status="${values.status}"` : '',
+      ].join('')
+      return `<Avatar name="Ada Lovelace"${props} />`
+    }
     case 'citation': {
       const count = Number(values.count ?? 1)
       const sources =

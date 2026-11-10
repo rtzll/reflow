@@ -10,6 +10,7 @@ import { ToasterDemo, toasterPositions } from './toaster-example.tsx'
 import { DrawerDemo } from './drawer-example.tsx'
 import { CodeBlockDemo, codeLanguages, type CodeSamples } from './code-block-example.tsx'
 import { CitationDemo } from './citation-example.tsx'
+import { AvatarDemo } from './avatar-example.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
 import { paletteCommands, paletteGroups, paletteSuggestions } from './component-demos.tsx'
 import { SoundCombobox } from './sound-combobox.tsx'
@@ -280,6 +281,12 @@ export const playgroundControls: Record<string, readonly Control[]> = {
     choice('placement', 'Placement', ['bottom', 'top', 'right', 'left']),
     toggle('title', 'Title'),
     size,
+  ],
+  avatar: [
+    choice('size', 'Size', ['32', '20', '24', '40', '56']),
+    choice('shape', 'Shape', ['circle', 'square']),
+    choice('status', 'Status', ['none', 'online', 'away', 'busy', 'offline']),
+    toggle('image', 'Image'),
   ],
   citation: [
     choice('style', 'Variant', ['number', 'site']),
@@ -834,6 +841,17 @@ export function PlaygroundExample(
             size={density}
             placement={String(v.placement) as 'bottom' | 'top' | 'right' | 'left'}
             openDelay={Number(v.openDelay)}
+          />
+        )
+      case 'avatar':
+        return (
+          <AvatarDemo
+            variant="playground"
+            image={handle.props.avatar}
+            size={Number(v.size)}
+            shape={v.shape === 'square' ? 'square' : 'circle'}
+            status={String(v.status) as 'none'}
+            withImage={Boolean(v.image)}
           />
         )
       case 'citation':

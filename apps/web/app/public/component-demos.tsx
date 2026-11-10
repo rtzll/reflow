@@ -45,6 +45,7 @@ import { ToasterDemo } from './toaster-example.tsx'
 import { DrawerDemo } from './drawer-example.tsx'
 import { CodeBlockDemo } from './code-block-example.tsx'
 import { CitationDemo } from './citation-example.tsx'
+import { AvatarDemo } from './avatar-example.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
 import { SoundCombobox } from './sound-combobox.tsx'
 import { playCopySuccess } from './showcase-sound.ts'
@@ -992,6 +993,42 @@ export const componentExamples: Record<string, readonly DocumentationExample[]> 
       'Compact',
       'compact',
       `<Popover label="Dimensions" trigger="Dimensions" size="compact">…</Popover>`,
+    ),
+  ],
+  avatar: [
+    demo(
+      'Images and initials',
+      'basic',
+      `<Avatar name="Alex Morgan" src={photo} size={40} />\n<Avatar name="Ada Lovelace" size={40} />\n<Avatar name="Broken Image" src={missing} size={40} />`,
+      'Without an image, or while it loads, or if it fails, the initials show on a colour picked from the name, the same every time.',
+    ),
+    demo(
+      'Sizes',
+      'sizes',
+      `<Avatar name="Ada Lovelace" size={20} />\n<Avatar name="Ada Lovelace" size={32} />\n<Avatar name="Ada Lovelace" size={56} />`,
+    ),
+    demo(
+      'Shapes and colours',
+      'shapes',
+      `<Avatar name="Ada Lovelace" src={photo} />\n<Avatar name="Reflow" shape="square" color="accent" />\n<Avatar name="Build Agent" shape="square" color="indigo" />`,
+      'Square suits teams, organisations and agents.',
+    ),
+    demo(
+      'Status',
+      'status',
+      `<Avatar name="Grace Hopper" status="online" />\n<Avatar name="Grace Hopper" status="away" />`,
+      'The status is part of the avatar’s name: “Grace Hopper (away)”.',
+    ),
+    demo(
+      'Group',
+      'group',
+      `<AvatarGroup avatars={editors} label="Editors" />`,
+      'Each avatar names itself in a tooltip; past max, a count names the rest. Pointing at the row spreads it apart.',
+    ),
+    demo(
+      'Group sizes',
+      'group-sizes',
+      `<AvatarGroup avatars={editors} max={3} size={24} />\n<AvatarGroup avatars={editors} size={40} shape="square" />`,
     ),
   ],
   citation: [
@@ -2319,6 +2356,8 @@ export function ComponentDemo(
         return <CodeBlockDemo variant={variant} samples={images.code} />
       case 'citation':
         return <CitationDemo variant={variant} />
+      case 'avatar':
+        return <AvatarDemo variant={variant} image={images.sidebarAvatar} />
       case 'segmented-control':
         return <SegmentedControlDemo variant={variant} />
       case 'breadcrumb':

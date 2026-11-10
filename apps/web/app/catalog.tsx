@@ -20,6 +20,11 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
     description: 'A guided flow with choices, custom answers, skipping, and back navigation.',
     code: questionCode(questionPlayground()),
   },
+  avatar: {
+    description:
+      'A picture or initials for a person, team or agent, alone or in an overlapping group.',
+    code: `<Avatar name="Ada Lovelace" src={photo} status="online" />\n<AvatarGroup avatars={editors} max={4} />`,
+  },
   badge: {
     description: 'A compact label with solid and dot treatments.',
     code: `<Badge color="violet">Fiction</Badge>\n<Badge color="amber">Science</Badge>\n<Badge color="green">Philosophy</Badge>\n<Badge color="blue">History</Badge>\n<Badge color="rose">Poetry</Badge>`,
@@ -237,6 +242,7 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
 const components = [
   ['accordion', 'Accordion'],
   ['ask-user-questions', 'AskUserQuestions'],
+  ['avatar', 'Avatar'],
   ['badge', 'Badge'],
   ['banner', 'Banner'],
   ['breadcrumb', 'Breadcrumb'],

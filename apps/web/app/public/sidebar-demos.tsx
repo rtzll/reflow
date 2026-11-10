@@ -2,6 +2,7 @@ import { cardBanner } from './component-example-data.ts'
 import { SidebarComparison } from './sidebar-comparison.tsx'
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
 import {
+  Avatar,
   Button,
   Dropdown,
   Icon,
@@ -226,12 +227,12 @@ export function UserFooter(
       triggerContent={
         <>
           {signedIn() ? (
-            <img
+            <Avatar
               class="rf-sidebar-avatar"
+              name="Alex Morgan"
               src={handle.props.avatar}
-              width="20"
-              height="20"
-              alt=""
+              size={20}
+              decorative
             />
           ) : (
             <span class="rf-sidebar-avatar">

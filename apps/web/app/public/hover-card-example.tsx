@@ -1,12 +1,15 @@
-import { HoverCard, type HoverCardTriggerProps, type PopoverPlacement } from '@rtzll/reflow'
+import { Avatar, HoverCard, type HoverCardTriggerProps, type PopoverPlacement } from '@rtzll/reflow'
 import type { Handle } from 'remix/component'
 
 function Profile(handle: Handle<{ size?: 'default' | 'compact' }>) {
   return () => (
     <div class="doc-hover-profile" data-density={handle.props.size}>
-      <span class="doc-hover-avatar" aria-hidden="true">
-        R
-      </span>
+      <Avatar
+        name="Reflow"
+        size={handle.props.size === 'compact' ? 32 : 40}
+        color="accent"
+        decorative
+      />
       <div class="doc-hover-profile-text">
         <strong>Reflow</strong>
         <span class="doc-hover-muted">@reflow</span>

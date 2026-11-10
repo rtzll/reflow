@@ -1,0 +1,115 @@
+/* Avatar: initials on a soft tint of their colour, covered by an image
+   once it loads. Sizes follow --rf-avatar-size; the initials scale with it.
+   A ring in the surface colour separates overlapping avatars in a group. */
+.rf-avatar {
+  --rf-avatar-size: 32px;
+  --rf-avatar-ring: var(--rf-bg);
+  position: relative;
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  box-sizing: border-box;
+  inline-size: var(--rf-avatar-size);
+  block-size: var(--rf-avatar-size);
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--rf-avatar-color, var(--rf-fg)) 20%, var(--rf-bg));
+  color: color-mix(in oklab, var(--rf-avatar-color, var(--rf-fg)) 60%, var(--rf-fg));
+  font: 550 calc(var(--rf-avatar-size) * 0.4) / 1 var(--rf-font);
+  letter-spacing: 0.01em;
+  user-select: none;
+  vertical-align: middle;
+}
+.rf-avatar[data-shape='square'] {
+  border-radius: max(4px, calc(var(--rf-avatar-size) * 0.25));
+}
+.rf-avatar > * {
+  grid-area: 1 / 1;
+}
+.rf-avatar-image {
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+.rf-avatar[data-image='error'] .rf-avatar-image {
+  display: none;
+}
+
+/* The status dot sits on the corner, ringed in the surface colour. */
+.rf-avatar-status {
+  place-self: end;
+  inline-size: max(6px, calc(var(--rf-avatar-size) * 0.28));
+  block-size: max(6px, calc(var(--rf-avatar-size) * 0.28));
+  margin: -1px;
+  border-radius: 9999px;
+  box-shadow: 0 0 0 2px var(--rf-avatar-ring);
+  background: var(--rf-muted);
+}
+.rf-avatar-status[data-status='online'] {
+  background: light-dark(#22c55e, var(--rf-success));
+}
+.rf-avatar-status[data-status='away'] {
+  background: light-dark(#f59e0b, var(--rf-warning));
+}
+.rf-avatar-status[data-status='busy'] {
+  background: light-dark(#ef4444, var(--rf-danger));
+}
+
+/* AvatarGroup: avatars overlap by a quarter of their size and spread apart
+   on the moderate spring while pointed at. */
+.rf-avatar-group {
+  --rf-avatar-overlap: calc(var(--rf-avatar-size) * -0.25);
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rf-avatar-group > li {
+  display: flex;
+  transition: margin-inline-start var(--rf-spring-moderate);
+}
+.rf-avatar-group > li + li {
+  margin-inline-start: var(--rf-avatar-overlap);
+}
+@media (hover: hover) {
+  .rf-avatar-group:hover > li + li {
+    margin-inline-start: 2px;
+  }
+}
+.rf-avatar-slot {
+  display: inline-flex;
+  border-radius: 9999px;
+}
+.rf-avatar-group .rf-avatar {
+  box-shadow: 0 0 0 2px var(--rf-avatar-ring);
+}
+.rf-avatar-more {
+  --rf-avatar-color: var(--rf-muted);
+  background: var(--rf-neutral-fill);
+  color: var(--rf-fg);
+  font-size: calc(var(--rf-avatar-size) * 0.34);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-avatar-group > li {
+    transition: none;
+  }
+}
+@media (forced-colors: active) {
+  .rf-avatar {
+    border: 1px solid CanvasText;
+  }
+}
+
+/* The ring takes the colour of the surface the avatars sit on. */
+.rf-popover-surface .rf-avatar {
+  --rf-avatar-ring: var(--rf-surface-3, white);
+}
+.rf-dialog .rf-avatar {
+  --rf-avatar-ring: var(--rf-surface-5);
+}
+.rf-drawer .rf-avatar {
+  --rf-avatar-ring: var(--rf-drawer-bg);
+}

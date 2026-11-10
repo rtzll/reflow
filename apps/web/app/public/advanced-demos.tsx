@@ -2,6 +2,7 @@ import { advancedSource } from './advanced-code.ts'
 import { play } from 'cuelume'
 import { on, ref, type Handle } from 'remix/component'
 import {
+  Avatar,
   AskUserQuestions,
   Badge,
   Banner,
@@ -579,13 +580,13 @@ export function WorkspaceSidebar(handle: Handle) {
               side="top"
               triggerContent={
                 <>
-                  <span class="rf-sidebar-avatar" aria-hidden="true">
-                    {workspaceName
-                      .split(' ')
-                      .map((part) => part[0])
-                      .join('')
-                      .slice(0, 2)}
-                  </span>
+                  <Avatar
+                    class="rf-sidebar-avatar"
+                    name={workspaceName}
+                    size={20}
+                    shape="square"
+                    decorative
+                  />
                   <span class="rf-sidebar-row-name rf-sidebar-row-plain">{workspaceName}</span>
                   <span class="rf-sidebar-row-trailing" aria-hidden="true">
                     <Icon name="chevrons-up-down" />

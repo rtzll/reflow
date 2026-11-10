@@ -2728,6 +2728,92 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  avatar: [
+    {
+      name: 'Avatar',
+      props: [
+        {
+          name: 'name',
+          type: 'string',
+          description: 'Who or what it shows: the accessible name, and the source of the initials.',
+          required: true,
+        },
+        {
+          name: 'src',
+          type: 'string',
+          description: 'An image. Until it loads, or if it fails, the initials show.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: 'number',
+          description: 'Width and height in pixels. Default 32.',
+          required: false,
+        },
+        {
+          name: 'shape',
+          type: '"circle" | "square"',
+          description: 'Square suits teams, organisations and agents. Default circle.',
+          required: false,
+        },
+        {
+          name: 'color',
+          type: 'BadgeColor',
+          description:
+            'The initials’ colour. Defaults to one picked from the name, the same every time.',
+          required: false,
+        },
+        {
+          name: 'status',
+          type: '"online" | "away" | "busy" | "offline"',
+          description: 'A dot in the corner, named with the avatar.',
+          required: false,
+        },
+        {
+          name: 'decorative',
+          type: 'boolean',
+          description:
+            'Hides the avatar from assistive technology, for when the name is written beside it.',
+          required: false,
+        },
+      ],
+    },
+    {
+      name: 'AvatarGroup',
+      props: [
+        {
+          name: 'avatars',
+          type: 'AvatarProps[]',
+          description: 'The people or things in the group, without size or shape.',
+          required: true,
+        },
+        {
+          name: 'max',
+          type: 'number',
+          description: 'How many avatars show, the count of the rest included. Default 4.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: 'number',
+          description: 'Each avatar’s size in pixels. Default 32.',
+          required: false,
+        },
+        {
+          name: 'shape',
+          type: '"circle" | "square"',
+          description: 'Each avatar’s shape. Default circle.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Names the group. Defaults to the number of people.',
+          required: false,
+        },
+      ],
+    },
+  ],
   citation: [
     {
       name: 'Citation',
@@ -4567,6 +4653,8 @@ export const componentDefaults: Record<string, Record<string, string>> = {
     openOnHover: 'false',
   },
   Button: { variant: 'primary' },
+  Avatar: { size: '32', shape: 'circle' },
+  AvatarGroup: { max: '4', size: '32', shape: 'circle' },
   Citation: { index: '1', variant: 'number', placement: 'top', openDelay: '300' },
   CodeBlock: { startLine: '1', copyable: 'true' },
   'highlight()': { lang: 'text', notation: 'true' },

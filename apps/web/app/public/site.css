@@ -2945,21 +2945,6 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
   inline-size: 280px;
   max-inline-size: 100%;
 }
-.doc-hover-avatar {
-  display: grid;
-  flex: none;
-  place-items: center;
-  inline-size: 40px;
-  block-size: 40px;
-  border-radius: 999px;
-  background: var(--rf-accent);
-  color: white;
-  font-variation-settings: var(--rf-weight-strong);
-}
-.doc-hover-profile[data-density='compact'] .doc-hover-avatar {
-  inline-size: 32px;
-  block-size: 32px;
-}
 .doc-hover-profile-text,
 .doc-hover-link {
   display: grid;
@@ -3175,4 +3160,23 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
 }
 .doc-citation-text[data-density='compact'] {
   font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+}
+
+/* Avatar demos. */
+.doc-avatar-row {
+  align-items: center;
+  gap: 12px;
+}
+.doc-avatar-stack {
+  display: grid;
+  justify-items: center;
+  gap: 20px;
+}
+.doc-popover-access {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption);
 }

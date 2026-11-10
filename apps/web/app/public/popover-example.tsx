@@ -1,4 +1,12 @@
-import { Button, Icon, Input, InputCopy, Popover, type PopoverPlacement } from '@rtzll/reflow'
+import {
+  AvatarGroup,
+  Button,
+  Icon,
+  Input,
+  InputCopy,
+  Popover,
+  type PopoverPlacement,
+} from '@rtzll/reflow'
 import { on, type Handle } from 'remix/component'
 
 function DimensionFields(handle: Handle<{ size?: 'default' | 'compact' }>) {
@@ -39,6 +47,20 @@ export function PopoverDemo(handle: Handle<PopoverDemoProps>) {
             size={size}
           >
             <InputCopy label="Link" value="https://reflow.example/docs/popover" size={size} />
+            <div class="doc-popover-access">
+              <span>People with access</span>
+              <AvatarGroup
+                avatars={[
+                  { name: 'Ada Lovelace' },
+                  { name: 'Grace Hopper' },
+                  { name: 'Alan Turing' },
+                  { name: 'Katherine Johnson' },
+                  { name: 'Edsger Dijkstra' },
+                ]}
+                size={size === 'compact' ? 20 : 24}
+                label="People with access"
+              />
+            </div>
           </Popover>
         )
       case 'placement':

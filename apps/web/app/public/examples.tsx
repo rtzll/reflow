@@ -5,6 +5,7 @@ import { ToasterDemo } from './toaster-example.tsx'
 import { DrawerDemo } from './drawer-example.tsx'
 import { CodeBlockDemo } from './code-block-example.tsx'
 import { CitationDemo, citationSources } from './citation-example.tsx'
+import { AvatarDemo } from './avatar-example.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
 import { paletteCommands, paletteSuggestions } from './palette-example-data.tsx'
 import { accents } from './site-settings.ts'
@@ -27,6 +28,7 @@ import { SoundCombobox } from './sound-combobox.tsx'
 import { playCopySuccess } from './showcase-sound.ts'
 import { play } from 'cuelume'
 import {
+  Avatar,
   Accordion,
   AskUserQuestions,
   Badge,
@@ -140,12 +142,12 @@ function GallerySidebar(handle: Handle<{ avatar: string }>) {
         }
         footer={
           <div class="rf-sidebar-row">
-            <img
+            <Avatar
               class="rf-sidebar-avatar"
+              name="Alex Morgan"
               src={handle.props.avatar}
-              width="20"
-              height="20"
-              alt=""
+              size={20}
+              decorative
             />
             <span class="rf-sidebar-row-name rf-sidebar-row-plain">Alex Morgan</span>
           </div>
@@ -301,6 +303,8 @@ export const Example = clientEntry(
           )
         case 'hover-card':
           return <HoverCardDemo variant="basic" />
+        case 'avatar':
+          return <AvatarDemo variant="playground" image={handle.props.avatar} />
         case 'citation':
           return <CitationDemo variant="playground" />
         case 'code-block':
