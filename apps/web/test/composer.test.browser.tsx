@@ -1,4 +1,4 @@
-import { ChatMessage, InputMessage } from '@rtzll/reflow'
+import { ChatMessage, InputMessage, type ComposerQueuedMessage } from '@rtzll/reflow'
 import { equal, ok } from 'remix/assert'
 import { type Handle } from 'remix/component'
 import { render } from 'remix/component/test'
@@ -183,7 +183,7 @@ it('morphs a queued message into its sent bubble and cleans up the transition', 
 
 it('hands focus back to the message box when the last queued message leaves', async (t) => {
   function Composer(handle: Handle) {
-    let queue = [{ id: 'queued', text: 'Queued message', files: [] as File[] }]
+    let queue: ComposerQueuedMessage[] = [{ id: 'queued', text: 'Queued message', files: [] }]
     return () => (
       <InputMessage
         queue={queue}
