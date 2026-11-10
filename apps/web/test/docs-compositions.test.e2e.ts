@@ -1,3 +1,4 @@
+import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
@@ -107,43 +108,35 @@ it('keeps workspace switching, project creation and profile controls functional 
 
 it('streams thinking steps on the reference schedule and ends the connector with the text', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
+  // The stream runs on timers, so the test holds the clock and steps it on.
+  await page.clock.install()
   await open(page, '/docs/thinking-steps', { motion: true })
-  // When each step appears and when every step completes, from the page clock.
-  await page.evaluate(() => {
-    const marks: number[] = []
-    ;(window as unknown as { marks: number[] }).marks = marks
-    let seen = 0
-    let done = false
-    const tick = () => {
-      const steps = document.querySelectorAll('#streaming .rf-thinking-timeline > li')
-      if (steps.length > seen) {
-        seen = steps.length
-        marks.push(performance.now())
-      }
-      const complete = Array.from(steps).every(
-        (step) => step.getAttribute('data-status') === 'complete',
-      )
-      if (!done && seen === 4 && complete) {
-        done = true
-        marks.push(performance.now())
-      }
-      if (!done) requestAnimationFrame(tick)
+  await page.clock.pauseAt((await page.evaluate(() => Date.now())) + 1000)
+  const preview = page.locator('#streaming .doc-preview')
+  await preview.scrollIntoViewIfNeeded()
+  await expect(preview.getByRole('button', { name: 'Pause example' })).toBeVisible()
+  // When each step appears, and when every step is complete, in 100ms steps.
+  const progress = () =>
+    preview.locator('.rf-thinking-timeline > li').evaluateAll((steps) => ({
+      shown: steps.length,
+      complete: steps.every((step) => step.getAttribute('data-status') === 'complete'),
+    }))
+  const marks: number[] = []
+  let seen = 0
+  for (let elapsed = 100; elapsed <= 6000; elapsed += 100) {
+    await page.clock.runFor(100)
+    const { shown, complete } = await progress()
+    if (shown > seen) {
+      seen = shown
+      marks.push(elapsed)
     }
-    requestAnimationFrame(tick)
-  })
-  await page.locator('#streaming .doc-preview').scrollIntoViewIfNeeded()
-  await page.waitForFunction(
-    () => (window as unknown as { marks: number[] }).marks.length === 5,
-    undefined,
-    { timeout: 10_000 },
-  )
-  const marks = await page.evaluate(() => (window as unknown as { marks: number[] }).marks)
-  const gaps = marks.slice(1).map((mark, index) => mark - marks[index]!)
+    if (seen === 4 && complete) {
+      marks.push(elapsed)
+      break
+    }
+  }
   // The reference: steps at 400, 1800, 3200 and 4200ms, all complete at 5200ms.
-  const expected = [1400, 1400, 1000, 1000]
-  gaps.forEach((gap, index) =>
-    assert.ok(Math.abs(gap - expected[index]!) < 250, `gap ${index}: ${Math.round(gap)}ms`),
-  )
+  assert.deepEqual(marks, [400, 1800, 3200, 4200, 5200])
 
   // The connector stops where a step's text ends, so a one-line step draws none.
   const lines = await page.locator('#basic .rf-thinking-timeline > li').evaluateAll((steps) =>
@@ -170,6 +163,7 @@ it('streams thinking steps on the reference schedule and ends the connector with
 
 it('plays, pauses and replays a streaming example from the preview header', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
+  await page.clock.install()
   await open(page, '/docs/thinking-steps', { motion: true })
   const preview = page.locator('#full-example .doc-preview')
   const steps = preview.locator('.rf-thinking-timeline > li')
@@ -187,11 +181,12 @@ it('plays, pauses and replays a streaming example from the preview header', asyn
   await button('Pause example').click()
   await button('Play example').waitFor()
   const held = await steps.count()
-  await page.waitForTimeout(1500)
+  await page.clock.runFor(1500)
   assert.equal(await steps.count(), held)
 
   await button('Play example').click()
-  await button('Replay example').waitFor({ timeout: 12_000 })
+  await page.clock.runFor(12_000)
+  await button('Replay example').waitFor()
   assert.equal(await steps.count(), 6)
 
   await button('Replay example').click()

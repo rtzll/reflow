@@ -189,15 +189,15 @@ it('plays an error cue after a failed clipboard action', async (t) => {
 it('plays the ready cue when the ThinkingSteps stream finishes', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   const audioStarts = await trackAudio(page)
+  await page.clock.install()
   await open(page, '/docs/thinking-steps', { motion: true })
   const preview = page.locator('#streaming .doc-preview')
   await page.locator('#streaming h2').click()
   await preview.scrollIntoViewIfNeeded()
   await expect(preview.getByRole('button', { name: 'Pause example' })).toBeVisible()
   expect(await audioStarts()).toBe(0)
-  await expect(preview.getByRole('button', { name: 'Replay example' })).toBeVisible({
-    timeout: 8000,
-  })
+  await page.clock.runFor(8000)
+  await expect(preview.getByRole('button', { name: 'Replay example' })).toBeVisible()
   await expect.poll(audioStarts).toBeGreaterThan(0)
 })
 
