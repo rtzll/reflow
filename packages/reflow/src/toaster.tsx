@@ -126,8 +126,9 @@ export const toast = Object.assign(
     info: (title: RemixNode, options?: ToastOptions) => upsert(title, 'info', options),
     warning: (title: RemixNode, options?: ToastOptions) => upsert(title, 'warning', options),
     error: (title: RemixNode, options?: ToastOptions) => upsert(title, 'error', options),
-    loading: (title: RemixNode, options?: ToastOptions) =>
-      upsert(title, 'loading', { duration: Infinity, ...options }),
+    // A loading toast stays without a duration of its own: the close timer
+    // skips loading toasts, so it starts once the toast settles.
+    loading: (title: RemixNode, options?: ToastOptions) => upsert(title, 'loading', options),
     promise<T>(
       promise: Promise<T> | (() => Promise<T>),
       messages: ToastPromiseMessages<T>,
@@ -136,7 +137,6 @@ export const toast = Object.assign(
       const id = upsert(messages.loading, 'loading', {
         description: messages.description,
         ...options,
-        duration: Infinity,
       })
       const settle = (status: ToastStatus, title: RemixNode) => {
         // A toast closed while it waited stays closed.

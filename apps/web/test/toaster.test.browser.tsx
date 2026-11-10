@@ -120,6 +120,31 @@ describe('Toaster', () => {
     toast.dismiss(sticky)
   })
 
+  it('closes a settled promise or loading toast on its own, like any other', async (t) => {
+    const { live, cleanup } = await mount({ duration: 120 })
+    t.after(cleanup)
+    let resolve!: (value: string) => void
+    toast.promise(new Promise<string>((done) => (resolve = done)), {
+      loading: 'Saving…',
+      success: 'Saved',
+      error: 'Failed',
+    })
+    await waitFor(() => live()[0]?.dataset.status === 'loading')
+    await pause(220)
+    equal(live().length, 1, 'it waits while loading')
+    resolve('done')
+    await waitFor(() => live()[0]?.dataset.status === 'success')
+    await waitFor(() => live().length === 0)
+
+    toast.loading('Syncing', { id: 'sync' })
+    await waitFor(() => live().length === 1)
+    await pause(220)
+    equal(live().length, 1, 'a loading toast stays')
+    toast.success('Synced', { id: 'sync' })
+    await waitFor(() => live()[0]?.dataset.status === 'success')
+    await waitFor(() => live().length === 0)
+  })
+
   it('runs an action and dismisses the toast unless the action prevents it', async (t) => {
     const { live, cleanup } = await mount()
     t.after(cleanup)
