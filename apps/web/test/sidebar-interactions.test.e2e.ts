@@ -2,7 +2,7 @@ import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { router } from './showcase-router.ts'
+import { router, waitForShowcase } from './showcase-router.ts'
 
 it('keeps the focused Sidebar frame in place as the inset fills it', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
@@ -182,4 +182,32 @@ it('uses the Settings dialog in Sidebar docs and provides a mobile section selec
   await page.getByRole('option', { name: 'Appearance', exact: true }).click()
   await dialog.getByRole('heading', { name: 'Appearance', exact: true }).waitFor()
   assert.deepEqual(errors, [])
+})
+
+it('moves the rail into a 288px left Drawer on a phone and closes it with a drag', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/docs/sidebar?theme=dark')
+  await waitForShowcase(page)
+  const trigger = page
+    .locator('.site-preview-stage')
+    .first()
+    .getByRole('button', { name: 'Open navigation', exact: true })
+  await trigger.click()
+  const panel = page.locator('dialog.rf-sidebar-drawer[open]')
+  await expect(panel).toBeVisible()
+  await expect.poll(() => panel.evaluate((node) => getComputedStyle(node).translate)).toBe('0px')
+  assert.deepEqual(await panel.boundingBox(), { x: 0, y: 0, width: 288, height: 844 })
+  assert.ok(await panel.evaluate((node) => node.matches(':modal')))
+
+  // A drag toward the left edge, past a quarter of the width, closes it.
+  const box = (await panel.locator('.rf-sidebar-inner').boundingBox())!
+  const y = box.y + box.height - 160
+  await page.mouse.move(200, y)
+  await page.mouse.down()
+  await page.mouse.move(150, y, { steps: 4 })
+  await page.mouse.move(60, y, { steps: 4 })
+  await page.mouse.up()
+  await expect(page.locator('dialog.rf-sidebar-drawer[open]')).toHaveCount(0)
+  await expect(trigger).toBeFocused()
 })

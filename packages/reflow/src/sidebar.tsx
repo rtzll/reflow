@@ -12,6 +12,7 @@ import {
 } from './basic.tsx'
 import { fluidHover } from './interactive.tsx'
 import { ScrollArea } from './scroll-area.tsx'
+import { Drawer } from './drawer.tsx'
 
 export interface SidebarItem {
   label: string
@@ -395,12 +396,13 @@ export function Sidebar(handle: Handle<SidebarProps>) {
   let drag:
     | { id: number; start: number; width: number; moved: boolean; collapsed: boolean }
     | undefined
-  let drawer: HTMLDialogElement | undefined
+  let drawerOpen = false
   const panelId = `${handle.id}-sidebar`
-  const drawerId = `${panelId}-drawer`
-  const captureDrawer = ref((node) => {
-    if (node instanceof HTMLDialogElement) drawer = node
-  })
+  const setDrawer = (open: boolean) => {
+    if (drawerOpen === open) return
+    drawerOpen = open
+    void handle.update()
+  }
 
   function limits() {
     const minimum = handle.props.minWidth ?? 160
@@ -755,16 +757,37 @@ export function Sidebar(handle: Handle<SidebarProps>) {
                   >
                     <Icon name="panel-left" />
                   </Button>
-                  <Button
-                    class="rf-sidebar-drawer-trigger"
-                    variant="ghost"
-                    size="compact"
-                    aria-controls={drawerId}
-                    aria-haspopup="dialog"
-                    mix={on('click', () => drawer?.showModal())}
+                  <Drawer
+                    side="left"
+                    title={label}
+                    flush
+                    class="rf-sidebar-drawer"
+                    open={drawerOpen}
+                    onOpenChange={setDrawer}
+                    renderTrigger={(trigger) => (
+                      <Button
+                        class="rf-sidebar-drawer-trigger"
+                        variant="ghost"
+                        size="compact"
+                        {...trigger}
+                      >
+                        Open navigation
+                      </Button>
+                    )}
                   >
-                    Open navigation
-                  </Button>
+                    <button
+                      type="button"
+                      class="rf-basic-sr-only"
+                      mix={on('click', () => setDrawer(false))}
+                    >
+                      Close navigation
+                    </button>
+                    <SidebarNavigation
+                      {...navigation}
+                      variant="default"
+                      onNavigate={() => setDrawer(false)}
+                    />
+                  </Drawer>
                 </>
               )}
               {toolbar != null && <div class="rf-sidebar-toolbar-content">{toolbar}</div>}
@@ -772,28 +795,6 @@ export function Sidebar(handle: Handle<SidebarProps>) {
           )}
           {children}
         </div>
-        <dialog
-          id={drawerId}
-          class="rf-sidebar-drawer"
-          aria-label={label}
-          mix={[
-            captureDrawer,
-            on('click', (event) => {
-              if (event.target === drawer) drawer?.close()
-            }),
-          ]}
-        >
-          <div class="rf-sidebar-drawer-content">
-            <button type="button" class="rf-basic-sr-only" mix={on('click', () => drawer?.close())}>
-              Close navigation
-            </button>
-            <SidebarNavigation
-              {...navigation}
-              variant="default"
-              onNavigate={() => drawer?.close()}
-            />
-          </div>
-        </dialog>
       </section>
     )
   }

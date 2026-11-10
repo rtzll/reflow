@@ -1,14 +1,23 @@
-import { on, ref, type Handle, type RemixNode } from 'remix/component'
+import { on, ref, type Handle, type MixInput, type RemixNode } from 'remix/component'
 import { Button, type ButtonProps } from './basic.tsx'
 import { Icon } from './icon.tsx'
 
 export type DrawerSide = 'bottom' | 'top' | 'left' | 'right'
+
+export interface DrawerTriggerProps {
+  'aria-haspopup': 'dialog'
+  'aria-expanded': boolean
+  'aria-controls': string
+  mix: MixInput<HTMLElement>
+}
 
 export interface DrawerProps {
   /** Contents of the button that opens the drawer. */
   trigger?: RemixNode
   triggerVariant?: ButtonProps['variant']
   triggerSize?: ButtonProps['size']
+  /** Renders your own trigger instead of the built-in button. Spread the provided props onto it. */
+  renderTrigger?: (props: DrawerTriggerProps) => RemixNode
   title: string
   description?: string
   children?: RemixNode
@@ -22,6 +31,9 @@ export interface DrawerProps {
   showCloseButton?: boolean
   /** Whether Escape, a click on the backdrop or a drag can close it. Default true. */
   dismissible?: boolean
+  /** Let the content fill the panel edge to edge, and visually hide the title. */
+  flush?: boolean
+  class?: string
   open?: boolean
   defaultOpen?: boolean
   onOpenChange?: (open: boolean) => void
@@ -272,28 +284,34 @@ export function Drawer(handle: Handle<DrawerProps>) {
     const footer = typeof props.footer === 'function' ? props.footer(close) : props.footer
     const vertical = side() === 'bottom' || side() === 'top'
     const showHandle = props.handle ?? (vertical && dismissible())
-    const showClose = props.showCloseButton ?? !vertical
+    const showClose = props.showCloseButton ?? (!vertical && !props.flush)
+    const triggerProps: DrawerTriggerProps = {
+      'aria-haspopup': 'dialog',
+      'aria-expanded': open(),
+      'aria-controls': id,
+      mix: on('click', (event) => {
+        if (event.currentTarget instanceof HTMLElement) invoker = event.currentTarget
+        requestOpen(true)
+      }),
+    }
     return (
       <>
-        {props.trigger != null && (
-          <Button
-            variant={props.triggerVariant ?? 'tertiary'}
-            size={props.triggerSize}
-            aria-haspopup="dialog"
-            aria-controls={id}
-            aria-expanded={open()}
-            mix={on('click', (event) => {
-              if (event.currentTarget instanceof HTMLElement) invoker = event.currentTarget
-              requestOpen(true)
-            })}
-          >
-            {props.trigger}
-          </Button>
-        )}
+        {props.renderTrigger
+          ? props.renderTrigger(triggerProps)
+          : props.trigger != null && (
+              <Button
+                variant={props.triggerVariant ?? 'tertiary'}
+                size={props.triggerSize}
+                {...triggerProps}
+              >
+                {props.trigger}
+              </Button>
+            )}
         <dialog
           id={id}
-          class="rf-drawer"
+          class={props.class ? `rf-drawer ${props.class}` : 'rf-drawer'}
           data-side={side()}
+          data-flush={props.flush || undefined}
           aria-modal="true"
           aria-labelledby={titleId}
           aria-describedby={props.description ? descriptionId : undefined}

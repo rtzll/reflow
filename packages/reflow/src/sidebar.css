@@ -926,68 +926,27 @@
   margin-inline-start: 8px;
 }
 
-/* Mobile drawer: below 768px the rail becomes a sheet that slides in from the left. */
+/* Mobile drawer: below 768px the rail moves into a left Drawer, which brings
+   the slide, the drag to close and the backdrop; it keeps the rail's width,
+   surface and shadow. */
 .rf-sidebar-drawer-trigger {
   display: none;
 }
-.rf-sidebar-drawer {
-  position: fixed;
-  inset-block: 0;
-  inset-inline-start: 0;
-  box-sizing: border-box;
-  width: min(288px, 100vw);
-  max-width: none;
-  height: 100dvh;
-  max-height: none;
-  margin: 0;
-  padding: 0;
+.rf-drawer.rf-sidebar-drawer[data-side] {
+  --rf-drawer-bg: var(--rf-surface-2);
+  inline-size: min(288px, 100vw);
   overflow: hidden;
-  border: 0;
-  background: var(--rf-surface-2);
-  box-shadow: var(--rf-sb-surface-shadow);
-  color: var(--rf-fg);
-  translate: -100% 0;
-  transition:
-    translate var(--rf-exit-moderate),
-    display var(--rf-exit-moderate) allow-discrete,
-    overlay var(--rf-exit-moderate) allow-discrete;
+  box-shadow: var(--rf-drawer-tail), var(--rf-sb-surface-shadow);
 }
-.rf-sidebar-drawer[open] {
-  translate: 0 0;
-  transition:
-    translate var(--rf-spring-moderate),
-    display var(--rf-spring-moderate) allow-discrete,
-    overlay var(--rf-spring-moderate) allow-discrete;
+.rf-sidebar-drawer .rf-drawer-body {
+  display: flex;
+  flex-direction: column;
 }
-@starting-style {
-  .rf-sidebar-drawer[open] {
-    translate: -100% 0;
-  }
+.rf-sidebar-drawer .rf-sidebar-inner {
+  flex: 1;
+  min-block-size: 0;
 }
-.rf-sidebar-drawer::backdrop {
-  background: light-dark(rgb(0 0 0 / 40%), rgb(0 0 0 / 80%));
-  opacity: 0;
-  transition:
-    opacity var(--rf-exit-moderate),
-    display var(--rf-exit-moderate) allow-discrete,
-    overlay var(--rf-exit-moderate) allow-discrete;
-}
-.rf-sidebar-drawer[open]::backdrop {
-  opacity: 1;
-  transition:
-    opacity 160ms ease,
-    display 160ms allow-discrete,
-    overlay 160ms allow-discrete;
-}
-@starting-style {
-  .rf-sidebar-drawer[open]::backdrop {
-    opacity: 0;
-  }
-}
-.rf-sidebar-drawer-content {
-  height: 100%;
-}
-.rf-sidebar-drawer-content > .rf-basic-sr-only:focus-visible {
+.rf-sidebar-drawer .rf-drawer-body > .rf-basic-sr-only:focus-visible {
   clip-path: none;
   width: auto;
   height: auto;
@@ -996,8 +955,6 @@
   position: static;
 }
 @media (prefers-reduced-motion: reduce) {
-  .rf-sidebar-drawer,
-  .rf-sidebar-drawer::backdrop,
   .rf-sidebar-layout,
   .rf-sidebar-card {
     transition-duration: 0s !important;

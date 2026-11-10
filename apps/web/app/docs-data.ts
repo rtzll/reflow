@@ -2768,6 +2768,26 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           required: false,
         },
         {
+          name: 'renderTrigger',
+          type: '(props: DrawerTriggerProps) => RemixNode',
+          description:
+            'Renders your own trigger instead of the built-in button; spread the props onto it.',
+          required: false,
+        },
+        {
+          name: 'flush',
+          type: 'boolean',
+          description:
+            'Lets the content fill the panel edge to edge and visually hides the title, which still names the drawer.',
+          required: false,
+        },
+        {
+          name: 'class',
+          type: 'string',
+          description: 'Extra classes on the panel.',
+          required: false,
+        },
+        {
           name: 'side',
           type: '"bottom" | "top" | "left" | "right"',
           description: 'The edge the drawer slides in from. Default bottom.',
