@@ -256,6 +256,9 @@ export function Carousel(handle: Handle<CarouselProps>) {
       },
       options,
     )
+    // Links and images are draggable by default; a native drag would cancel
+    // the pointer and take over the slides' drag, so the carousel keeps it.
+    node.addEventListener('dragstart', (event) => event.preventDefault(), options)
     node.addEventListener('pointerup', endDrag, options)
     node.addEventListener('pointercancel', endDrag, options)
     // A drag that ends over a link does not follow it.

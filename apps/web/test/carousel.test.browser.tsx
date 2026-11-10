@@ -81,6 +81,21 @@ describe('Carousel', () => {
     ok($('.rf-carousel-slide[data-current]')?.textContent?.includes('Two'))
   })
 
+  it('keeps the browser from dragging links and images out of its slides', async (t) => {
+    const { $, cleanup } = render(
+      <Carousel label="Articles">
+        <a href="#one">One</a>
+        <a href="#two">Two</a>
+      </Carousel>,
+    )
+    t.after(cleanup)
+    // Native drag and drop of a link would take over a mouse drag of the slides.
+    const link = $('a[href="#one"]') as HTMLAnchorElement
+    const start = new Event('dragstart', { bubbles: true, cancelable: true })
+    link.dispatchEvent(start)
+    ok(start.defaultPrevented)
+  })
+
   it('autoplays through its dots, with a button that stops it', async (t) => {
     const { $, cleanup } = render(
       <Carousel label="Highlights" autoplay={{ duration: 4000 }}>

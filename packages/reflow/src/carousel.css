@@ -48,8 +48,8 @@
 .rf-carousel[data-align='center'] .rf-carousel-slide {
   scroll-snap-align: center;
 }
-/* Dragging moves the slides, not their images. */
-.rf-carousel-slide img {
+/* Dragging moves the slides, not their links or images. */
+.rf-carousel-slide :is(a, img) {
   -webkit-user-drag: none;
 }
 
