@@ -2,12 +2,11 @@ import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
 import { expect } from 'playwright/test'
-import { router, waitForShowcase } from './showcase-router.ts'
+import { router, waitForShowcase, open } from './showcase-router.ts'
 
 it('applies preferences immediately, keeps links clean, and persists through reload', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await page.goto('/?theme=light')
-  await waitForShowcase(page)
+  await open(page, '/?theme=light')
   const panel = page.locator('.site-right')
   await panel.locator('[data-setting-trigger="theme"]').click()
   await panel.getByRole('menuitemradio', { name: 'Dark', exact: true }).click()
@@ -37,19 +36,18 @@ it('applies preferences immediately, keeps links clean, and persists through rel
     .getByRole('link', { name: 'Introduction', exact: true })
   assert.equal(await introduction.getAttribute('href'), '/docs')
   assert.equal(new URL(page.url()).search, '')
-  await page.goto('/docs')
+  await open(page, '/docs')
   assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark')
   assert.equal(await page.locator('html').getAttribute('data-accent'), 'violet')
   assert.equal(await page.locator('html').getAttribute('data-font'), 'geist-serif')
-  await page.goto('/docs?theme=light')
+  await open(page, '/docs?theme=light')
   assert.equal(await page.locator('html').getAttribute('data-theme'), 'light')
 })
 
 it('keeps settings menus exclusive and dismisses them with pointer and keyboard input', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/docs')
-  await waitForShowcase(page)
+  await open(page, '/docs')
   const panel = page.locator('.site-right')
   const theme = panel.locator('[data-setting-trigger="theme"]')
   const accent = panel.locator('[data-setting-trigger="accent"]')
@@ -125,8 +123,7 @@ it('keeps settings menus exclusive and dismisses them with pointer and keyboard 
 
 it('keeps the accent picker open while committing hex and RGB edits', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await page.goto('/docs')
-  await waitForShowcase(page)
+  await open(page, '/docs')
   const panel = page.locator('.site-right')
   const accent = panel.locator('[data-setting-trigger="accent"]')
   const picker = panel.getByRole('dialog', { name: 'Accent', exact: true })
@@ -156,7 +153,7 @@ it('keeps the accent picker open while committing hex and RGB edits', async (t) 
 it('opens a full-height mobile drawer and keeps page interaction behind it', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.goto('/docs?theme=dark')
+  await open(page, '/docs?theme=dark')
   const mobile = page.locator('.site-mobile[data-enhanced]')
   const trigger = mobile.locator(':scope > summary')
   const drawer = page.getByRole('dialog', { name: 'Navigation and settings' })
@@ -245,12 +242,12 @@ it('opens a full-height mobile drawer and keeps page interaction behind it', asy
 
 it('server-renders native settings disclosures before client enhancement', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await page.goto('/docs?theme=dark')
+  await open(page, '/docs?theme=dark')
   const context = await page.context().browser()!.newContext({ javaScriptEnabled: false })
   try {
     const unenhanced = await context.newPage()
     // A shared link applies its settings without JavaScript too.
-    await unenhanced.goto(new URL('/docs?theme=dark', page.url()).href)
+    await open(unenhanced, new URL('/docs?theme=dark', page.url()).href, { hydrate: false })
     assert.equal(new URL(unenhanced.url()).search, '')
     const panel = unenhanced.locator('.site-right')
     const accent = panel.locator('[data-setting-trigger="accent"]')
@@ -285,8 +282,7 @@ it('opens global search with Mod+K, applies commands, and shows individual short
   const page = await t.serve(await createTestServer(router.fetch))
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
-  await page.goto('/?theme=dark')
-  await waitForShowcase(page)
+  await open(page, '/?theme=dark')
   assert.equal(await page.locator('.site-left .site-search kbd').count(), 2)
   await page.locator('body').press('ControlOrMeta+k')
   const dialog = page.getByRole('dialog', { name: 'Search Reflow' })
@@ -319,8 +315,7 @@ it('browses a custom heading family and restores its weight and stylesheet', asy
     requestedFonts.push(route.request().url())
     await route.fulfill({ status: 200, contentType: 'text/css', body: '' })
   })
-  await page.goto('/docs/typography?font=inter')
-  await waitForShowcase(page)
+  await open(page, '/docs/typography?font=inter')
   assert.equal(requestedFonts.length, 0)
   const panel = page.locator('.site-right')
   await panel.locator('[data-setting-trigger="font"]').click()
@@ -342,7 +337,7 @@ it('browses a custom heading family and restores its weight and stylesheet', asy
   await panel.locator('[data-setting-trigger="fontWeight"]').click()
   await panel.getByRole('menuitemradio', { name: '700', exact: true }).click()
   assert.equal(await page.locator('html').getAttribute('data-font-weight'), '700')
-  await page.goto('/docs/typography')
+  await open(page, '/docs/typography')
   assert.equal(await page.locator('html').getAttribute('data-font'), 'google:Playfair Display')
   assert.equal(await page.locator('html').getAttribute('data-font-weight'), '700')
   await waitForShowcase(page)
@@ -364,14 +359,14 @@ it('browses a custom heading family and restores its weight and stylesheet', asy
 
 it('saves the settings of a shared link over older cookies and shows the clean URL', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await page.goto('/')
+  await open(page, '/')
   await page.context().addCookies([
     { name: 'reflow_theme', value: 'dark', url: page.url() },
     { name: 'reflow_accent', value: 'violet', url: page.url() },
     { name: 'reflow_density', value: 'compact', url: page.url() },
   ])
   const shared = { theme: 'system', accent: 'blue', density: 'default' }
-  await page.goto('/docs/button?theme=system&accent=blue&density=default&view=code#examples')
+  await open(page, '/docs/button?theme=system&accent=blue&density=default&view=code#examples')
   const url = new URL(page.url())
   assert.equal(url.pathname + url.search + url.hash, '/docs/button?view=code#examples')
   await waitForShowcase(page)
@@ -427,15 +422,13 @@ it('saves the settings of a shared link over older cookies and shows the clean U
   await search.press('Enter')
   assert.equal(await page.locator('html').getAttribute('data-theme'), 'system')
   await expect(reset).toBeDisabled()
-  await page.goto('/docs/button?theme=dark&accent=red')
-  await waitForShowcase(page)
+  await open(page, '/docs/button?theme=dark&accent=red')
   const trigger = page.locator('.site-right [data-setting-trigger="accent"]')
   const currentColor = page.locator('.site-right .site-accent-panel input[aria-label="Hex value"]')
   await trigger.click()
   assert.equal((await currentColor.inputValue()).toUpperCase(), 'FF6467')
   await page.emulateMedia({ colorScheme: 'dark' })
-  await page.goto('/docs/button?theme=system&accent=red')
-  await waitForShowcase(page)
+  await open(page, '/docs/button?theme=system&accent=red')
   await trigger.click()
   await page.waitForFunction(
     () =>
@@ -459,8 +452,7 @@ it('saves the settings of a shared link over older cookies and shows the clean U
 it('scrolls the page from over the right rail and keeps the left rail self-contained', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1440, height: 900 })
-  await page.goto('/docs/button')
-  await waitForShowcase(page)
+  await open(page, '/docs/button')
   const right = page.locator('.site-right')
   const left = page.locator('.site-left')
   const scrollY = () => page.evaluate(() => Math.round(window.scrollY))

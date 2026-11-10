@@ -2,14 +2,14 @@ import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { router, waitForShowcase } from './showcase-router.ts'
+import { open, router } from './showcase-router.ts'
 
 it('keeps citations and their previews inside the paragraph the server sends', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   // As parsed from the server's HTML, before any script runs.
   await page.route('**/*.{js,mjs}', (route) => route.abort())
   for (const path of ['/docs/citation']) {
-    await page.goto(path)
+    await open(page, path, { hydrate: false })
     const chips = await page.locator('.doc-citation-text').count()
     assert.ok(chips > 0, `${path} has paragraphs to check`)
     const broken = await page.evaluate(
@@ -26,8 +26,7 @@ it('sits within the line and previews its sources above it', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/docs/citation')
-  await waitForShowcase(page)
+  await open(page, '/docs/citation')
   const paragraph = page.locator('#several-sources .doc-citation-text')
   const chip = paragraph.getByRole('link', { name: /^Sources 1 to 3: / })
   await chip.scrollIntoViewIfNeeded()
@@ -63,7 +62,7 @@ it('sits within the line and previews its sources above it', async (t) => {
 it('follows the shape setting, sharp to pill', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   const radius = async (shape: string) => {
-    await page.goto(`/docs/citation?shape=${shape}`)
+    await open(page, `/docs/citation?shape=${shape}`)
     return page
       .locator('#basic .rf-citation')
       .first()
@@ -83,8 +82,7 @@ it('follows the shape setting, sharp to pill', async (t) => {
 it('closes its preview when the page scrolls instead of trailing behind it', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
-  await page.goto('/docs/citation')
-  await waitForShowcase(page)
+  await open(page, '/docs/citation')
   const chip = page.locator('#several-sources a.rf-citation')
   await chip.scrollIntoViewIfNeeded()
   await chip.hover()

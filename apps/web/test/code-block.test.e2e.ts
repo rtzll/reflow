@@ -3,7 +3,7 @@ import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { router, waitForShowcase } from './showcase-router.ts'
+import { open, router } from './showcase-router.ts'
 
 // The card's own source, as the file has it, less the notation comment.
 function cardSource() {
@@ -22,7 +22,7 @@ it('shows the gallery card its own source, highlighted on the server', async (t)
   await page.setViewportSize({ width: 1440, height: 900 })
   // No script: the colours arrive with the page.
   await page.route('**/*.{js,mjs}', (route) => route.abort())
-  await page.goto('/?theme=dark')
+  await open(page, '/?theme=dark', { hydrate: false })
   const card = page.locator('.site-gallery [data-component="code-block"]')
   const code = card.locator('code')
   assert.equal(await code.textContent(), cardSource())
@@ -46,8 +46,7 @@ it('shows the gallery card its own source, highlighted on the server', async (t)
 it('copies the code without its line numbers and confirms it', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
-  await page.goto('/docs/code-block')
-  await waitForShowcase(page)
+  await open(page, '/docs/code-block')
   const block = page.locator('#line-numbers [data-slot="code-block"]')
   await block.scrollIntoViewIfNeeded()
   const gutter = await block
@@ -72,8 +71,7 @@ it('folds long code, blurs unfocused lines, and follows a light and dark theme p
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/docs/code-block?theme=light')
-  await waitForShowcase(page)
+  await open(page, '/docs/code-block?theme=light')
 
   const folded = page.locator('#long-code [data-slot="code-block"]')
   await folded.scrollIntoViewIfNeeded()
@@ -99,8 +97,7 @@ it('folds long code, blurs unfocused lines, and follows a light and dark theme p
   await themed.scrollIntoViewIfNeeded()
   const keyword = themed.locator('.rf-code-text span').first()
   const light = await keyword.evaluate((node) => getComputedStyle(node).color)
-  await page.goto('/docs/code-block?theme=dark')
-  await waitForShowcase(page)
+  await open(page, '/docs/code-block?theme=dark')
   const dark = await page
     .locator('#other-themes [data-slot="code-block"] .rf-code-text span')
     .first()
@@ -111,8 +108,7 @@ it('folds long code, blurs unfocused lines, and follows a light and dark theme p
 it('wraps long lines to the block instead of scrolling them', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.goto('/docs/code-block')
-  await waitForShowcase(page)
+  await open(page, '/docs/code-block')
   const viewport = page.locator('#wrapping [data-slot="code-block"] .rf-code-viewport')
   await viewport.scrollIntoViewIfNeeded()
   const size = await viewport.evaluate((node) => ({

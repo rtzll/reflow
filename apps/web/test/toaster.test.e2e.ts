@@ -2,14 +2,13 @@ import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { router, waitForShowcase } from './showcase-router.ts'
+import { open, router } from './showcase-router.ts'
 
 it('piles toasts on QueuedStack’s values and spreads them a gap apart when pointed at', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/docs/toaster')
-  await waitForShowcase(page)
+  await open(page, '/docs/toaster')
   const status = page.locator('#status')
   for (const name of ['Success', 'Info', 'Warning'])
     await status.getByRole('button', { name, exact: true }).click()
@@ -59,8 +58,7 @@ it('piles toasts on QueuedStack’s values and spreads them a gap apart when poi
 it('moves to each of the six positions and slides a swiped toast away', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1440, height: 900 })
-  await page.goto('/docs/toaster')
-  await waitForShowcase(page)
+  await open(page, '/docs/toaster')
   await page.locator('#position').getByRole('button', { name: 'top-center', exact: true }).click()
   const list = page.locator('.rf-toaster')
   await expect(list).toHaveAttribute('data-position', 'top-center')
@@ -89,8 +87,7 @@ it('moves to each of the six positions and slides a swiped toast away', async (t
 
 it('reaches the newest toast with Alt+T and dismisses it with Escape', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await page.goto('/docs/toaster')
-  await waitForShowcase(page)
+  await open(page, '/docs/toaster')
   const archive = page.locator('#action').getByRole('button', { name: 'Archive', exact: true })
   await archive.click()
   const toast = page.locator('.rf-toast:not([data-removed])', { hasText: 'Conversation archived' })

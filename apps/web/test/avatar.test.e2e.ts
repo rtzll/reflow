@@ -2,14 +2,13 @@ import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { router, waitForShowcase } from './showcase-router.ts'
+import { open, router } from './showcase-router.ts'
 
 it('gives neighbours in a group different colours, overlaps them, and spreads them on hover', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/docs/avatar')
-  await waitForShowcase(page)
+  await open(page, '/docs/avatar')
   const group = page.getByRole('list', { name: 'Editors' })
   await group.scrollIntoViewIfNeeded()
   const avatars = group.getByRole('img')
@@ -44,8 +43,7 @@ it('gives neighbours in a group different colours, overlaps them, and spreads th
 
 it('falls back to initials for a failed image and shows the image that loads', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await page.goto('/docs/avatar')
-  await waitForShowcase(page)
+  await open(page, '/docs/avatar')
   const row = page.locator('#images-and-initials .doc-avatar-row')
   const broken = row.getByRole('img', { name: 'Broken Image' })
   await expect(broken).toHaveAttribute('data-image', 'error')

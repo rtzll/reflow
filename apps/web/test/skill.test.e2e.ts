@@ -3,7 +3,7 @@ import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { router, waitForShowcase } from './showcase-router.ts'
+import { open, router } from './showcase-router.ts'
 
 const { version } = JSON.parse(
   readFileSync(new URL('../../../packages/reflow/package.json', import.meta.url), 'utf8'),
@@ -14,9 +14,8 @@ it('lets the visitor take over skill examples and replay their initial state', a
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/docs/skill')
+  await open(page, '/docs/skill')
   // Clicks before hydration land on inert markup.
-  await waitForShowcase(page)
   const tabs = page.getByRole('tablist', { name: 'Reflow tabs' })
   const tab = (name: string) => tabs.getByRole('tab', { name, exact: true })
   await tab('Settings').click()
@@ -35,7 +34,8 @@ it('lets the visitor take over skill examples and replay their initial state', a
 it('copies an installation prompt that includes the active preferences', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
-  await page.goto(
+  await open(
+    page,
     '/?theme=light&accent=violet&shape=pill&density=compact&font=geist-serif&fontWeight=600&icons=tabler',
   )
   await page.getByRole('button', { name: 'Copy install prompt', exact: true }).first().click()
@@ -59,7 +59,7 @@ it('copies an installation prompt that includes the active preferences', async (
 it('copies a prompt that installs the skill with npx and audits the project', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
-  await page.goto('/docs/skill')
+  await open(page, '/docs/skill')
   await page.getByRole('button', { name: 'Copy prompt', exact: true }).first().click()
   await page.getByRole('button', { name: 'Copied', exact: true }).waitFor()
   assert.equal(

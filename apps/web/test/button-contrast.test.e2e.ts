@@ -1,12 +1,12 @@
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { router } from './showcase-router.ts'
+import { router, open } from './showcase-router.ts'
 
 it('keeps the install button label legible while hovered in both themes', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   for (const theme of ['light', 'dark']) {
-    await page.goto(`/docs?theme=${theme}`)
+    await open(page, `/docs?theme=${theme}`)
     const button = page.getByRole('button', { name: 'Copy install prompt', exact: true }).first()
     const color = await button.evaluate((element) => getComputedStyle(element).color)
     await button.hover()
@@ -23,7 +23,7 @@ it('keeps the install button label legible while hovered in both themes', async 
 it('keeps the primary banner action label distinct from its fill in both themes', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   for (const theme of ['light', 'dark']) {
-    await page.goto(`/docs/banner?theme=${theme}`)
+    await open(page, `/docs/banner?theme=${theme}`)
     const link = page.getByRole('button', { name: 'Open the docs', exact: true }).first()
     const { color, fill } = await link.evaluate((element) => ({
       color: getComputedStyle(element).color,

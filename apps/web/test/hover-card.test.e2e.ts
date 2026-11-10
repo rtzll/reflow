@@ -2,13 +2,12 @@ import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { router, waitForShowcase } from './showcase-router.ts'
+import { open, router } from './showcase-router.ts'
 
 it('opens on a resting pointer, stays open over the card, and closes after leaving', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
-  await page.goto('/docs/hover-card')
-  await waitForShowcase(page)
+  await open(page, '/docs/hover-card')
   const trigger = page.locator('#basic .doc-hover-trigger')
   const card = page.locator('#basic .rf-hover-card')
   await trigger.scrollIntoViewIfNeeded()
@@ -42,7 +41,7 @@ it('keeps a card whose trigger sits in a paragraph inside that paragraph', async
   const page = await t.serve(await createTestServer(router.fetch))
   // As parsed from the server's HTML, before any script runs.
   await page.route('**/*.{js,mjs}', (route) => route.abort())
-  await page.goto('/docs/hover-card')
+  await open(page, '/docs/hover-card', { hydrate: false })
   const sentence = page.locator('#link-preview .doc-hover-sentence')
   await expect(sentence).toHaveCount(1)
   await expect(sentence.locator('.rf-hover-card')).toHaveCount(1)

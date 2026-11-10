@@ -1,7 +1,7 @@
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { router } from './showcase-router.ts'
+import { router, open } from './showcase-router.ts'
 
 it('lets external question controls load, navigate, and clear answer state', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
@@ -13,7 +13,7 @@ it('lets external question controls load, navigate, and clear answer state', asy
   const example = page.locator('#controlled .doc-preview')
   const loadSample = example.getByRole('button', { name: 'Load sample answer' })
   try {
-    await page.goto('/docs/ask-user-questions', { waitUntil: 'commit' })
+    await open(page, '/docs/ask-user-questions', { hydrate: false, waitUntil: 'commit' })
     await loadSample.waitFor()
     assert.ok(await loadSample.isDisabled())
   } finally {
@@ -38,7 +38,7 @@ it('lets external question controls load, navigate, and clear answer state', asy
 
 it('streams reasoning text, replays it, and displays local images and expandable sources', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await page.goto('/docs/thinking-steps')
+  await open(page, '/docs/thinking-steps')
   const basic = page.locator('#basic .rf-thinking-steps-disclosure')
   const trigger = basic.locator(':scope > summary')
   const nested = basic.getByText('Explored 6 files', { exact: true })
@@ -85,7 +85,7 @@ it('streams reasoning text, replays it, and displays local images and expandable
 
 it('keeps workspace switching, project creation and profile controls functional inside the sidebar composition', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await page.goto('/docs/sidebar')
+  await open(page, '/docs/sidebar')
   const example = page.locator('#workspace-composition .doc-preview')
   await example.getByRole('button', { name: 'Acme Inc', exact: true }).click()
   await page.getByRole('menuitem', { name: 'Design Studio', exact: true }).click()
@@ -107,7 +107,7 @@ it('keeps workspace switching, project creation and profile controls functional 
 
 it('streams thinking steps on the reference schedule and ends the connector with the text', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await page.goto('/docs/thinking-steps')
+  await open(page, '/docs/thinking-steps')
   // When each step appears and when every step completes, from the page clock.
   await page.evaluate(() => {
     const marks: number[] = []
@@ -170,7 +170,7 @@ it('streams thinking steps on the reference schedule and ends the connector with
 
 it('plays, pauses and replays a streaming example from the preview header', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await page.goto('/docs/thinking-steps')
+  await open(page, '/docs/thinking-steps')
   const preview = page.locator('#full-example .doc-preview')
   const steps = preview.locator('.rf-thinking-timeline > li')
   const button = (name: string) => preview.getByRole('button', { name, exact: true })

@@ -1,7 +1,7 @@
 import { expect, type Page } from 'playwright/test'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { router, waitForShowcase } from './showcase-router.ts'
+import { router, waitForShowcase, open } from './showcase-router.ts'
 
 async function trackAudio(page: Page) {
   await page.addInitScript(() => {
@@ -26,7 +26,7 @@ it('renders the saved sound state before the browser initializes audio', async (
   await page.route('**/*', (route) =>
     route.request().resourceType() === 'script' ? route.abort() : route.continue(),
   )
-  await page.goto('/docs/accordion')
+  await open(page, '/docs/accordion', { hydrate: false })
   const sound = page.locator('.site-right').getByRole('switch', { name: 'Sound effects' })
   await expect(sound).toBeVisible()
   await expect(sound).toBeChecked()
@@ -49,8 +49,7 @@ it('renders the saved sound state before the browser initializes audio', async (
 it('defaults sound on, migrates the saved preference, and keeps it out of shared URLs', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
-  await page.goto('/docs/accordion')
-  await waitForShowcase(page)
+  await open(page, '/docs/accordion')
   const settings = page.locator('.site-right')
   const sound = settings.getByRole('switch', { name: 'Sound effects' })
   const cookie = async () =>
@@ -80,8 +79,7 @@ it('plays quiet cues on committed changes and stays silent when muted', async (t
   const page = await t.serve(await createTestServer(router.fetch))
   const audioStarts = await trackAudio(page)
   const visit = async (path: string) => {
-    await page.goto(path)
-    await waitForShowcase(page)
+    await open(page, path)
   }
   const cue = async (action: () => Promise<void>) => {
     const before = await audioStarts()
@@ -157,8 +155,7 @@ it('confirms each successful InputCopy action, including a quick repeat', async 
   const page = await t.serve(await createTestServer(router.fetch))
   const audioStarts = await trackAudio(page)
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
-  await page.goto('/docs/input-copy')
-  await waitForShowcase(page)
+  await open(page, '/docs/input-copy')
   const example = page.locator('.doc-preview-stage[data-playground] [data-slot="input-copy"]')
   const button = example.getByRole('button')
   await button.click()
@@ -177,8 +174,7 @@ it('plays an error cue after a failed clipboard action', async (t) => {
       throw new DOMException('Clipboard denied', 'NotAllowedError')
     }
   })
-  await page.goto('/docs/input-copy')
-  await waitForShowcase(page)
+  await open(page, '/docs/input-copy')
   await page.getByRole('button', { name: 'Copy import', exact: true }).click()
   await expect.poll(audioStarts).toBeGreaterThan(0)
 
@@ -192,8 +188,7 @@ it('plays an error cue after a failed clipboard action', async (t) => {
 it('plays the ready cue when the ThinkingSteps stream finishes', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   const audioStarts = await trackAudio(page)
-  await page.goto('/docs/thinking-steps')
-  await waitForShowcase(page)
+  await open(page, '/docs/thinking-steps')
   const preview = page.locator('#streaming .doc-preview')
   await page.locator('#streaming h2').click()
   await preview.scrollIntoViewIfNeeded()
@@ -208,8 +203,7 @@ it('plays the ready cue when the ThinkingSteps stream finishes', async (t) => {
 it('plays a cue on manual carousel changes and leaves autoplay silent', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   const audioStarts = await trackAudio(page)
-  await page.goto('/docs/carousel-dots')
-  await waitForShowcase(page)
+  await open(page, '/docs/carousel-dots')
   const carousel = page.locator('#autoplay .example-carousel')
   await page.locator('#autoplay h2').click()
   await expect(carousel.getByRole('button', { name: 'Show Drafts' })).toHaveAttribute(
@@ -230,8 +224,7 @@ it('plays a cue on manual carousel changes and leaves autoplay silent', async (t
 it('plays a cue as each toast arrives and as a promise toast settles', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   const audioStarts = await trackAudio(page)
-  await page.goto('/docs/toaster')
-  await waitForShowcase(page)
+  await open(page, '/docs/toaster')
   await page.locator('#status').getByRole('button', { name: 'Success', exact: true }).click()
   await page.locator('.rf-toast[data-status="success"]').waitFor()
   await expect.poll(audioStarts).toBeGreaterThan(0)
@@ -250,8 +243,7 @@ it('confirms a CodeBlock copy with the copy cue', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
   const audioStarts = await trackAudio(page)
-  await page.goto('/docs/code-block')
-  await waitForShowcase(page)
+  await open(page, '/docs/code-block')
   const block = page.locator('#basic [data-slot="code-block"]')
   await block.getByRole('button', { name: 'Copy code' }).click()
   await expect(block.getByRole('button', { name: 'Copied' })).toBeVisible()
@@ -263,8 +255,7 @@ it('plays the copy cue from the CodeBlock gallery card too', async (t) => {
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
   const audioStarts = await trackAudio(page)
   await page.setViewportSize({ width: 1440, height: 900 })
-  await page.goto('/?theme=dark')
-  await waitForShowcase(page)
+  await open(page, '/?theme=dark')
   const card = page.locator('.site-gallery [data-component="code-block"]')
   await card.getByRole('button', { name: 'Copy code' }).click()
   await expect(card.getByRole('button', { name: 'Copied' })).toBeVisible()
@@ -279,8 +270,7 @@ it('plays the error cue when a CodeBlock copy fails, as InputCopy does', async (
       throw new DOMException('Clipboard denied', 'NotAllowedError')
     }
   })
-  await page.goto('/docs/code-block')
-  await waitForShowcase(page)
+  await open(page, '/docs/code-block')
   // Unlock audio with a first gesture, as the InputCopy test does.
   await page.getByRole('button', { name: 'Copy import', exact: true }).click()
   await expect.poll(audioStarts).toBeGreaterThan(0)
@@ -295,8 +285,7 @@ it('plays the error cue when a CodeBlock copy fails, as InputCopy does', async (
 it('keeps the sound button working after moving between demo slides', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1440, height: 900 })
-  await page.goto('/demo?c=carousel')
-  await waitForShowcase(page)
+  await open(page, '/demo?c=carousel')
   const documentStart = await page.evaluate(() => performance.timeOrigin)
   await page.getByRole('link', { name: 'Next slide', exact: true }).click()
   await expect(page).toHaveURL(/c=breadcrumb/)
@@ -317,8 +306,7 @@ it('keeps the sound button working after moving between demo slides', async (t) 
 it('plays the navigate cue for Carousel buttons and dots, not for autoplay', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   const audioStarts = await trackAudio(page)
-  await page.goto('/docs/carousel')
-  await waitForShowcase(page)
+  await open(page, '/docs/carousel')
   const example = page.locator('#basic')
   await example.getByRole('button', { name: 'Next slide' }).click()
   await expect.poll(audioStarts).toBeGreaterThan(0)
@@ -342,8 +330,7 @@ it('plays the navigate cue for Carousel buttons and dots, not for autoplay', asy
 it('plays open and close cues for a Drawer', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   const audioStarts = await trackAudio(page)
-  await page.goto('/docs/drawer')
-  await waitForShowcase(page)
+  await open(page, '/docs/drawer')
   await page.locator('#basic').getByRole('button', { name: 'Filters', exact: true }).click()
   await expect(page.getByRole('dialog', { name: 'Filters' })).toBeVisible()
   await expect.poll(audioStarts).toBeGreaterThan(0)
@@ -356,8 +343,7 @@ it('plays open and close cues for a Drawer', async (t) => {
 it('plays open and close cues for a Popover', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   const audioStarts = await trackAudio(page)
-  await page.goto('/docs/popover')
-  await waitForShowcase(page)
+  await open(page, '/docs/popover')
   const trigger = page.locator('#basic').getByRole('button', { name: 'Dimensions', exact: true })
   await trigger.click()
   await expect(trigger).toHaveAttribute('aria-expanded', 'true')
@@ -371,8 +357,7 @@ it('plays open and close cues for a Popover', async (t) => {
 it('keeps HoverCard previews silent', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   const audioStarts = await trackAudio(page)
-  await page.goto('/docs/hover-card')
-  await waitForShowcase(page)
+  await open(page, '/docs/hover-card')
   await page.locator('#basic .doc-hover-trigger').hover()
   await expect(page.locator('#basic .rf-hover-card')).toBeVisible()
   await page.waitForTimeout(200)

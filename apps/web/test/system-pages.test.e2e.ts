@@ -2,13 +2,12 @@ import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
 import { expect } from 'playwright/test'
-import { router, waitForShowcase } from './showcase-router.ts'
+import { open, router } from './showcase-router.ts'
 
 it('fits the size toolbar controls and height guides without overlap', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1440, height: 900 })
-  await page.goto('/docs/sizes')
-  await waitForShowcase(page)
+  await open(page, '/docs/sizes')
 
   for (const [density, height, gap] of [
     ['default', 36, 8],
@@ -49,8 +48,7 @@ it('fits the size toolbar controls and height guides without overlap', async (t)
 it('applies region density to both the Sizes toolbar and its inline sort menu', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1440, height: 900 })
-  await page.goto('/docs/sizes')
-  await waitForShowcase(page)
+  await open(page, '/docs/sizes')
   const demo = page.locator('.system-density-demo')
   const header = demo.getByRole('tablist', { name: 'Region density' })
   const menu = demo.locator('.rf-dropdown-surface[data-inline]')
@@ -74,8 +72,7 @@ it('applies region density to both the Sizes toolbar and its inline sort menu', 
 it('aligns the three hover axes and keeps the card grid interactive', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1440, height: 900 })
-  await page.goto('/docs/fluid-hover')
-  await waitForShowcase(page)
+  await open(page, '/docs/fluid-hover')
 
   const axes = page.locator('.system-axes')
   await expect(axes.getByRole('tab', { name: 'Settings' })).toBeVisible()
@@ -128,8 +125,7 @@ it('staggers the landing hero on both presets and on replay', async (t) => {
       return animation
     }
   })
-  await page.goto('/docs/reveal')
-  await waitForShowcase(page)
+  await open(page, '/docs/reveal')
 
   const frame = page.locator('[data-reveal-kind="landing"]')
   const heroItems = frame.locator('.system-reveal-hero > *')
@@ -154,7 +150,7 @@ it('staggers the landing hero on both presets and on replay', async (t) => {
 
 it('uses the native viewport through the custom scrollbar and follows scroll reveal progress', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await page.goto('/docs/scrollbars')
+  await open(page, '/docs/scrollbars')
   const viewport = page.getByRole('region', { name: 'Scrollable example', exact: true }).first()
   await viewport.hover()
   const scrollbar = page
@@ -164,7 +160,7 @@ it('uses the native viewport through the custom scrollbar and follows scroll rev
   assert.ok(await viewport.evaluate((element) => element.scrollTop > 0))
   await scrollbar.press('Home')
   assert.equal(await viewport.evaluate((element) => element.scrollTop), 0)
-  await page.goto('/docs/reveal')
+  await open(page, '/docs/reveal')
   const revealViewport = page.getByRole('region', { name: 'Scroll reveal preview', exact: true })
   await revealViewport.waitFor()
   await revealViewport.evaluate((element) => {
@@ -198,7 +194,7 @@ it('uses the native viewport through the custom scrollbar and follows scroll rev
 
 it('renders editable Markdown tables and nested tasks while treating raw HTML as text', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await page.goto('/docs/typography')
+  await open(page, '/docs/typography')
   const specimen = page.locator('.system-markdown-specimen')
   await specimen.getByRole('table').waitFor()
   assert.ok((await specimen.getByRole('checkbox').count()) >= 4)

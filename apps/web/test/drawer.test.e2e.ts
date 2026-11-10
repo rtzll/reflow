@@ -2,13 +2,12 @@ import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { router, waitForShowcase } from './showcase-router.ts'
+import { open, router } from './showcase-router.ts'
 
 it('slides a bottom drawer up to rest on the edge and closes it with a drag', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 800 })
-  await page.goto('/docs/drawer')
-  await waitForShowcase(page)
+  await open(page, '/docs/drawer')
   const trigger = page.locator('#basic').getByRole('button', { name: 'Filters', exact: true })
   await trigger.click()
   const panel = page.getByRole('dialog', { name: 'Filters' })
@@ -45,8 +44,7 @@ it('rests side drawers against their edge at 400px wide', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 800 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/docs/drawer')
-  await waitForShowcase(page)
+  await open(page, '/docs/drawer')
   for (const [name, title] of [
     ['Right', 'Details'],
     ['Left', 'Mailboxes'],
@@ -78,8 +76,7 @@ for (const [side, button, title] of [
   it(`slides a ${side} drawer in and out over 500ms, the backdrop darkening in step`, async (t) => {
     const page = await t.serve(await createTestServer(router.fetch))
     await page.setViewportSize({ width: 1280, height: 800 })
-    await page.goto('/docs/drawer')
-    await waitForShowcase(page)
+    await open(page, '/docs/drawer')
     const trigger = page.locator('#sides').getByRole('button', { name: button, exact: true })
     const panel = page.getByRole('dialog', { name: title })
     // Every frame: how much of the panel is on screen, and how dark the backdrop is.

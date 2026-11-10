@@ -1,12 +1,11 @@
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { router, waitForShowcase } from './showcase-router.ts'
+import { open, router } from './showcase-router.ts'
 
 it('switches real icon geometry in place and remembers the selection across routes', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await page.goto('/')
-  await waitForShowcase(page)
+  await open(page, '/')
   const icon = page.locator('.site-main [data-rf-icon="home"]').first()
   const trigger = page.locator('.site-right [data-setting-trigger="icons"]')
   const geometry = () =>
@@ -54,7 +53,7 @@ it('switches real icon geometry in place and remembers the selection across rout
   await page.locator('body').press('i')
   assert.equal(await page.locator('html').getAttribute('data-icons'), 'tabler')
   assert.equal(new URL(page.url()).search, '')
-  await page.goto('/docs/select')
+  await open(page, '/docs/select')
   const selectIcon = page.locator('.doc-preview [data-rf-icon="chevron-down"]').first()
   const visibleFamily = (node: Element) =>
     Array.from(node.children)
@@ -66,7 +65,9 @@ it('switches real icon geometry in place and remembers the selection across rout
   const serverOnly = await browser.newContext({ javaScriptEnabled: false })
   try {
     const unenhanced = await serverOnly.newPage()
-    await unenhanced.goto(new URL('/docs/select?icons=phosphor', page.url()).href)
+    await open(unenhanced, new URL('/docs/select?icons=phosphor', page.url()).href, {
+      hydrate: false,
+    })
     assert.equal(
       await unenhanced
         .locator('.doc-preview [data-rf-icon="chevron-down"]')
@@ -81,7 +82,7 @@ it('switches real icon geometry in place and remembers the selection across rout
 
 it('applies Button icon, active and icon-only settings to the preview and generated code', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await page.goto('/docs/button')
+  await open(page, '/docs/button')
   const preview = page.locator('.doc-preview').first()
   const button = preview.getByRole('button', { name: 'Get started', exact: true })
   const controls = page.getByRole('region', { name: 'Button playground settings' })

@@ -2,13 +2,12 @@ import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { router, waitForShowcase } from './showcase-router.ts'
+import { open, router } from './showcase-router.ts'
 
 it('centres a system event between hairlines, muted, with its actions in view', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
-  await page.goto('/docs/chat-message')
-  await waitForShowcase(page)
+  await open(page, '/docs/chat-message')
   const thread = page.locator('#system-messages .example-chat-thread')
   const event = thread.getByRole('article', { name: 'System' }).nth(1)
   await event.scrollIntoViewIfNeeded()

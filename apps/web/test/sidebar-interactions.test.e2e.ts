@@ -2,12 +2,12 @@ import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { router, waitForShowcase } from './showcase-router.ts'
+import { open, router } from './showcase-router.ts'
 
 it('keeps the focused Sidebar frame in place as the inset fills it', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 1000 })
-  await page.goto('/demo?c=sidebar')
+  await open(page, '/demo?c=sidebar')
   const shell = page.locator('.site-demo-stage .example-sidebar-playground > .rf-sidebar-layout')
   const main = shell.locator('.rf-sidebar-main')
   const frame = await shell.boundingBox()
@@ -29,7 +29,7 @@ it('keeps the focused Sidebar frame in place as the inset fills it', async (t) =
 it('uses the focused Sidebar workspace, shortcuts, section actions and user menu', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 1000 })
-  await page.goto('/demo?c=sidebar')
+  await open(page, '/demo?c=sidebar')
   const shell = page.locator('.site-demo-stage .example-sidebar-playground > .rf-sidebar-layout')
   const workspace = shell.getByRole('button', { name: 'Switch workspace' })
   const search = shell.getByRole('searchbox', { name: 'Filter navigation' })
@@ -102,7 +102,7 @@ it('keeps the profile and workspace menus inside a resized rail with visible key
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 1000 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/demo?c=sidebar&theme=dark')
+  await open(page, '/demo?c=sidebar&theme=dark')
   const shell = page.locator('.site-demo-stage .example-sidebar-playground > .rf-sidebar-layout')
   await shell.getByRole('separator', { name: 'Resize sidebar' }).press('ArrowLeft')
   const rail = shell.locator('.rf-sidebar-panel .rf-sidebar-inner')
@@ -131,7 +131,7 @@ it('keeps the profile and workspace menus inside a resized rail with visible key
 it('peeks without expanding the content grid, dismisses on Escape and outside press, and pins open', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
-  await page.goto('/docs/sidebar')
+  await open(page, '/docs/sidebar')
   const click = page.locator('#resize-collapse-peek .rf-sidebar-layout').nth(1)
   const edge = click.getByRole('button', { name: 'Peek sidebar' })
   await edge.click()
@@ -169,7 +169,7 @@ it('uses the Settings dialog in Sidebar docs and provides a mobile section selec
   const page = await t.serve(await createTestServer(router.fetch))
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
-  await page.goto('/docs/sidebar')
+  await open(page, '/docs/sidebar')
   await page.locator('#inside-a-dialog').getByRole('button', { name: 'Open settings' }).click()
   const dialog = page.getByRole('dialog', { name: 'Settings', exact: true })
   await dialog.getByRole('link', { name: 'Notifications', exact: true }).click()
@@ -187,8 +187,7 @@ it('uses the Settings dialog in Sidebar docs and provides a mobile section selec
 it('moves the rail into a 288px left Drawer on a phone and closes it with a drag', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.goto('/docs/sidebar?theme=dark')
-  await waitForShowcase(page)
+  await open(page, '/docs/sidebar?theme=dark')
   const trigger = page
     .locator('.site-preview-stage')
     .first()

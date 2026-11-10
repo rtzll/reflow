@@ -2,7 +2,7 @@ import { expect, type Locator } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { router, waitForShowcase } from './showcase-router.ts'
+import { open, router } from './showcase-router.ts'
 
 const fromEnd = (viewport: Locator) =>
   viewport.evaluate((node) => Math.round(node.scrollHeight - node.scrollTop - node.clientHeight))
@@ -11,8 +11,7 @@ it('opens at the newest message and jumps back to it from the history', async (t
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/docs/chat-layout')
-  await waitForShowcase(page)
+  await open(page, '/docs/chat-layout')
   const example = page.locator('#long-history')
   await example.scrollIntoViewIfNeeded()
   const viewport = example.locator('.rf-chat-layout-viewport')
@@ -31,8 +30,7 @@ it('stays on a streaming reply while the reader does, and leaves a reader who sc
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/docs/chat-layout')
-  await waitForShowcase(page)
+  await open(page, '/docs/chat-layout')
   const example = page.locator('#long-history')
   await example.scrollIntoViewIfNeeded()
   const viewport = example.locator('.rf-chat-layout-viewport')

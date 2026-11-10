@@ -2,7 +2,7 @@ import { expect, type Locator } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { router, waitForShowcase } from './showcase-router.ts'
+import { open, router } from './showcase-router.ts'
 
 // Which slide rests at the start of the viewport, or -1 between slides.
 const resting = (viewport: Locator) =>
@@ -16,8 +16,7 @@ it('snaps to the next slide after a mouse drag, and keeps a short drag in place'
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/docs/carousel')
-  await waitForShowcase(page)
+  await open(page, '/docs/carousel')
   const example = page.locator('#basic')
   const viewport = example.locator('.rf-carousel-viewport')
   await viewport.scrollIntoViewIfNeeded()
@@ -60,8 +59,7 @@ it('scrolls with the keyboard and its buttons without moving the page', async (t
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/docs/carousel')
-  await waitForShowcase(page)
+  await open(page, '/docs/carousel')
   const example = page.locator('#basic')
   const viewport = example.locator('.rf-carousel-viewport')
   await viewport.scrollIntoViewIfNeeded()
@@ -87,8 +85,7 @@ it('does not follow a link a drag ends on, but follows a click', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/docs/carousel')
-  await waitForShowcase(page)
+  await open(page, '/docs/carousel')
   const example = page.locator('#linked-slides')
   const viewport = example.locator('.rf-carousel-viewport')
   await viewport.scrollIntoViewIfNeeded()
@@ -108,8 +105,7 @@ it('does not follow a link a drag ends on, but follows a click', async (t) => {
 it('autoplays through its dots, pauses while pointed at, and stops with its button', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
-  await page.goto('/docs/carousel')
-  await waitForShowcase(page)
+  await open(page, '/docs/carousel')
   const example = page.locator('#autoplay')
   const viewport = example.locator('.rf-carousel-viewport')
   await viewport.scrollIntoViewIfNeeded()
@@ -138,8 +134,7 @@ it('counts only the stops it can reach when several slides are in view', async (
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/docs/carousel')
-  await waitForShowcase(page)
+  await open(page, '/docs/carousel')
   const example = page.locator('#several-in-view')
   await example.scrollIntoViewIfNeeded()
   // Six slides, three in view: four places to rest.
@@ -159,8 +154,7 @@ it('works the same in a right-to-left page', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/docs/carousel')
-  await waitForShowcase(page)
+  await open(page, '/docs/carousel')
   const example = page.locator('#basic')
   const viewport = example.locator('.rf-carousel-viewport')
   await viewport.scrollIntoViewIfNeeded()
