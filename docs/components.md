@@ -58,6 +58,7 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 2 | `Drawer` (shipped) | [vaul](https://github.com/emilkowalski/vaul) | Dialog's native `<dialog>` and focus return; the Sidebar's mobile drawer uses it |
 | 3 | `CodeBlock`, a `system` role for ChatMessage, `Citation` and `ChatLayout` (shipped) | Astryx's chat set | The InputMessage docs layout, ChatMessage's glide, ThinkingStepSource chips, the docs' code panel |
 | 4 | `Avatar` and `AvatarGroup` (shipped), `Skeleton`, `Spinner`, `Progress`, `NumberField` | — | ThinkingIndicator's shimmer, Button's loading state, CarouselDots' progress fill, ColorPicker's scrub fields |
+| 5 | `Carousel` | [Blossom Carousel](https://github.com/jespervos/blossom-carousel) | CarouselDots, native scroll snap, the `--rf-spring-*` tiers |
 
 ### Decisions so far
 
@@ -65,4 +66,5 @@ Built in this order, one component at a time, with a short design note (API, beh
 - **Drawer** slides in from any of the four sides, closes on drag past a threshold or a fast flick, and has an optional handle. Snap points, background scaling and nested drawers come later.
 - **ChatLayout** owns the conversation screen: a transcript that fills the space and stays pinned to the newest message, with the composer docked at the bottom.
 - **CodeBlock** builds on Shiki rather than a highlighter of its own: accurate grammars for every language, line marks written as `// [!code …]` comments, and any Shiki theme. The component lives in the main package with no dependencies and renders plain code by itself; `highlight()` lives at `@rtzll/reflow/highlight`, with Shiki as an optional peer, and returns plain data, so code is highlighted on the server and the browser loads no highlighter. Reflow owns the frame: the header, copy, line numbers, wrapping, folding, scrolling and the look of every line mark. Reflow's own theme colours tokens with CSS variables, so code follows the theme and the accent.
+- **Carousel** keeps a real scroll container, as Blossom does: touch, keyboard and screen readers scroll it natively, and CSS scroll snap configures it. Reflow adds a small drag with momentum for mice only, on its springs; previous and next buttons and CarouselDots that follow the scroll position; the carousel pattern's semantics, a labelled region whose slides read as "3 of 7"; and reduced motion. Unlike Blossom, it patches nothing outside its own element, adds no global listeners, and leaves text in slides selectable.
 - **Upstream** stays a source: new Fluid Functionalism components are adopted as they appear, as Breadcrumb was.
