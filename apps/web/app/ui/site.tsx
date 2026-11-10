@@ -464,6 +464,8 @@ function CopyAction(handle: Handle<{ text: string; label: string }>) {
 const galleryOrder = [
   'input-message',
   'thinking-indicator',
+  'toaster',
+  'hover-card',
   'color-picker',
   'switch',
   'combobox',
@@ -494,8 +496,6 @@ const galleryOrder = [
   'date-picker',
   'chat-message',
   'popover',
-  'hover-card',
-  'toaster',
   'drawer',
 ]
 

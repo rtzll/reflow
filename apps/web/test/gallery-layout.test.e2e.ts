@@ -11,6 +11,8 @@ it('preserves the gallery order and keeps previews above their footers', async (
   const expected = [
     'input-message',
     'thinking-indicator',
+    'toaster',
+    'hover-card',
     'color-picker',
     'switch',
     'combobox',
@@ -41,8 +43,6 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'date-picker',
     'chat-message',
     'popover',
-    'hover-card',
-    'toaster',
     'drawer',
   ]
   const gallery = page.locator('.site-gallery')
@@ -124,20 +124,23 @@ it('preserves the gallery order and keeps previews above their footers', async (
       assert.equal(tabs!.y, thinking!.y)
       assert.ok(tabs!.x < thinking!.x)
       // The last band: a large conversation on the left, two smalls stacked beside it.
-      const [chat, popover, hoverCard] = await Promise.all(
-        ['chat-message', 'popover', 'hover-card'].map(tile),
+      const [chat, popover, drawer] = await Promise.all(
+        ['chat-message', 'popover', 'drawer'].map(tile),
       )
       assert.ok(chat!.width > popover!.width * 1.9, 'the conversation spans two columns')
       assert.equal(chat!.y, popover!.y)
       assert.ok(popover!.x > chat!.x)
-      assert.equal(popover!.x, hoverCard!.x)
-      assert.ok(hoverCard!.y > popover!.y)
-      assert.equal(Math.round(chat!.y + chat!.height), Math.round(hoverCard!.y + hoverCard!.height))
-      // Then a band of its own: the wide Toaster card with Drawer beside it.
-      const [toaster, drawer] = await Promise.all(['toaster', 'drawer'].map(tile))
-      assert.equal(toaster!.y, drawer!.y)
-      assert.ok(toaster!.width > drawer!.width * 1.9)
-      assert.ok(drawer!.x > toaster!.x)
+      assert.equal(popover!.x, drawer!.x)
+      assert.ok(drawer!.y > popover!.y)
+      assert.equal(Math.round(chat!.y + chat!.height), Math.round(drawer!.y + drawer!.height))
+      // The second row shows off the newer overlays: a wide Toaster with HoverCard beside it.
+      const [input, toaster, hover] = await Promise.all(
+        ['input-message', 'toaster', 'hover-card'].map(tile),
+      )
+      assert.equal(toaster!.y, hover!.y)
+      assert.ok(toaster!.y > input!.y)
+      assert.ok(toaster!.width > hover!.width * 1.9)
+      assert.ok(hover!.x > toaster!.x)
       const accordion = gallery.locator('[data-component="accordion"]')
       await accordion.getByRole('button', { name: 'Accessibility', exact: true }).click()
       await checkContainment()
