@@ -25,6 +25,8 @@ Use official Remix packages and standard platform APIs. The expected runtime fou
 
 No React runtime, Radix, Base UI, Motion, third-party calendar/editor package, or third-party runtime utility is part of the baseline.
 
+Optional adapters are the one exception, for work a small local implementation cannot do well, such as highlighting every language. An adapter lives at its own import path, takes its library as an optional peer dependency, and is imported by nothing else in Reflow, so an app that does not import it never installs or loads the library. The component it serves keeps working without it. `@rtzll/reflow/highlight` wraps Shiki for CodeBlock this way, and the package check fails if any other module imports Shiki or if installing Reflow pulls it in.
+
 ## Architecture direction
 
 The pnpm workspace has two packages. `packages/reflow` exports ESM components, TypeScript declarations, and a stylesheet as [`@rtzll/reflow` on npm](https://www.npmjs.com/package/@rtzll/reflow). `apps/web` uses those public exports for the gallery, documentation, and focused demo.

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { execFileSync, spawn } from 'node:child_process'
 import { once } from 'node:events'
-import { mkdtempSync, readFileSync, realpathSync, rmSync } from 'node:fs'
+import { existsSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
@@ -31,6 +31,8 @@ try {
     'README.md',
     'dist/index.js',
     'dist/index.d.ts',
+    'dist/highlight.js',
+    'dist/highlight.d.ts',
     'dist/styles.css',
   ]) {
     assert.ok(files.includes(`package/${name}`), `Package is missing ${name}`)
@@ -45,11 +47,24 @@ try {
     execFileSync('tar', ['-xOzf', tarball, 'package/LICENSE'], { encoding: 'utf8' }),
     readFileSync(join(root, 'LICENSE'), 'utf8'),
   )
+  // Shiki is opt-in: only the highlight entry may import it.
+  for (const file of files.filter((name) => /^package\/dist\/.+\.js$/.test(name))) {
+    if (file === 'package/dist/highlight.js') continue
+    const source = execFileSync('tar', ['-xOzf', tarball, file], { encoding: 'utf8' })
+    assert.doesNotMatch(source, /from ['"](?:shiki|@shikijs\/)/, `${file} must not import Shiki`)
+  }
   run(process.execPath, ['tools/create-starter.mjs', destination, '--tarball', tarball])
   run('pnpm', ['install', '--frozen-lockfile'], destination)
   run('pnpm', ['check'], destination)
   const installed = realpathSync(join(destination, 'node_modules/@rtzll/reflow'))
   assert.ok(installed.startsWith(`${temporary}/`), 'The starter must not link to the workspace')
+  // The optional peers stay out of an app that does not ask for them.
+  const store = join(destination, 'node_modules/.pnpm')
+  assert.ok(
+    !existsSync(join(destination, 'node_modules/shiki')) &&
+      !(existsSync(store) && readdirSync(store).some((name) => name.startsWith('shiki@'))),
+    'Installing Reflow must not install Shiki',
+  )
 
   server = spawn(process.execPath, ['--import', 'remix/node-tsx', 'server.ts'], {
     cwd: destination,

@@ -13,6 +13,10 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./highlight": {
+      "types": "./dist/highlight.d.ts",
+      "default": "./dist/highlight.js"
+    },
     "./styles.css": "./dist/styles.css"
   },
   "scripts": {
@@ -20,10 +24,22 @@
     "check": "tsc -p tsconfig.json --noEmit"
   },
   "peerDependencies": {
-    "remix": "3.2.0"
+    "@shikijs/transformers": "^4.5.0",
+    "remix": "3.2.0",
+    "shiki": "^4.5.0"
+  },
+  "peerDependenciesMeta": {
+    "@shikijs/transformers": {
+      "optional": true
+    },
+    "shiki": {
+      "optional": true
+    }
   },
   "devDependencies": {
-    "remix": "3.2.0"
+    "@shikijs/transformers": "4.5.0",
+    "remix": "3.2.0",
+    "shiki": "4.5.0"
   },
   "dependencies": {
     "@remix-run/ui": "0.13.1"

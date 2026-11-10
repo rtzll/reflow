@@ -71,6 +71,24 @@ Your document also needs a browser entry that calls `run()` from `remix/componen
 
 Server-rendered markup alone does not enable interactive controls. Keep server and initial browser props consistent; apply persisted appearance preferences before the first render to avoid a theme flash.
 
+## Highlight code
+
+`CodeBlock` renders plain code with nothing but Reflow. To highlight it, install the optional peers and call `highlight()` from `@rtzll/reflow/highlight` where the code is known, ideally in a route handler, and pass the result to `CodeBlock`:
+
+```sh
+pnpm add shiki @shikijs/transformers
+```
+
+```tsx
+import { CodeBlock } from '@rtzll/reflow'
+import { highlight } from '@rtzll/reflow/highlight'
+
+const code = await highlight(source, { lang: 'tsx' })
+// <CodeBlock code={code} filename="Button.tsx" />
+```
+
+The result is plain data, so it can cross into a client entry as props, and the browser loads no highlighter. Highlight in the browser only for code that arrives later, such as a streamed reply. On platforms with a bundle size limit, such as Cloudflare Workers, highlight known code at build time; the showcase's [build](../apps/web/tools/build.mjs) does this for its samples.
+
 ## Check the integration
 
 Run your app's typecheck and open a page using the installed package. Confirm that styles load, the Dialog opens with pointer and keyboard, Escape closes it, and focus returns to its trigger. Check the console and network panel for hydration errors and missing assets. For forms, verify submitted values and reset behavior in your own composition.

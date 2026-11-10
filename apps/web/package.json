@@ -14,8 +14,10 @@
   },
   "dependencies": {
     "@rtzll/reflow": "workspace:*",
+    "@shikijs/transformers": "4.5.0",
     "cuelume": "0.2.8",
-    "remix": "3.2.0"
+    "remix": "3.2.0",
+    "shiki": "4.5.0"
   },
   "devDependencies": {
     "esbuild": "0.28.2",
