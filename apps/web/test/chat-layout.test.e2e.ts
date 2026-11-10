@@ -45,26 +45,26 @@ it('stays on a streaming reply while the reader does, and leaves a reader who sc
   await expect(example.getByText('How should motion feel?')).toBeVisible()
   await expect.poll(() => fromEnd(viewport)).toBe(0)
 
-  // As the reply streams in, the transcript follows it. Sampled in the page
-  // once per frame, after it paints, so only what the reader saw counts.
+  // As the reply streams in, the transcript follows it. Each time it grows,
+  // the test's own ResizeObserver, called after ChatLayout's in the same
+  // rendering step, reads where the frame about to be painted will be.
   const { samples, lengths } = await viewport.evaluate(
     (node) =>
       new Promise<{ samples: number[]; lengths: number[] }>((resolve) => {
         const samples: number[] = []
         const lengths: number[] = []
         const content = node.firstElementChild as HTMLElement
-        const start = performance.now()
-        const frame = () =>
-          requestAnimationFrame(() =>
-            setTimeout(() => {
-              samples.push(Math.round(content.offsetHeight - node.clientHeight - node.scrollTop))
-              const replies = node.querySelectorAll('.rf-chat-message[data-role="assistant"]')
-              lengths.push((replies[replies.length - 1]?.textContent ?? '').length)
-              if (performance.now() - start < 1100) frame()
-              else resolve({ samples, lengths })
-            }),
-          )
-        frame()
+        const log = node.querySelector('[role="log"]')!
+        const observer = new ResizeObserver(() => {
+          samples.push(Math.round(content.offsetHeight - node.clientHeight - node.scrollTop))
+          const replies = node.querySelectorAll('.rf-chat-message[data-role="assistant"]')
+          lengths.push((replies[replies.length - 1]?.textContent ?? '').length)
+        })
+        observer.observe(log)
+        setTimeout(() => {
+          observer.disconnect()
+          resolve({ samples, lengths })
+        }, 1400)
       }),
   )
   assert.ok(lengths.at(-1)! > lengths[0]!, `the reply streamed: ${lengths.join(',')}`)
