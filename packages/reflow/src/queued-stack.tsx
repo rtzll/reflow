@@ -19,6 +19,8 @@ export interface QueuedStackProps {
   transitionMessages?: boolean
 }
 
+type QueueAction = 'up' | 'down' | 'remove' | 'send'
+
 export function QueuedStack(handle: Handle<QueuedStackProps>) {
   let expanded = false
   let list: HTMLOListElement | undefined
@@ -29,6 +31,39 @@ export function QueuedStack(handle: Handle<QueuedStackProps>) {
     if (node instanceof HTMLOListElement) list = node
   })
   const sending = new Set<string>()
+  // The action that had focus when its message moved or left, to hand focus
+  // on to once the queue has re-rendered.
+  let refocus: { action: QueueAction; id: string; index: number } | undefined
+
+  function remember(action: QueueAction, id: string, index: number) {
+    if (list?.contains(document.activeElement)) refocus = { action, id, index }
+  }
+
+  function restoreFocus() {
+    const target = refocus
+    if (!target || !list) return
+    const rows = Array.from(list.children) as HTMLElement[]
+    const row = rows.find((item) => item.dataset.queueId === target.id)
+    let button: HTMLButtonElement | null | undefined
+    if (target.action === 'up' || target.action === 'down') {
+      // The moved message keeps focus, on the other arrow if this one ran out.
+      if (!row) return
+      if (rows.indexOf(row) === target.index) return
+      button = row.querySelector<HTMLButtonElement>(`[data-queue-action="${target.action}"]`)
+      if (button?.disabled)
+        button = row.querySelector<HTMLButtonElement>(
+          `[data-queue-action="${target.action === 'up' ? 'down' : 'up'}"]`,
+        )
+    } else {
+      // The message that takes the sent or removed one's place, or the one before it.
+      if (row) return
+      const next = rows[Math.min(target.index, rows.length - 1)]
+      button = next?.querySelector<HTMLButtonElement>(`[data-queue-action="${target.action}"]`)
+    }
+    refocus = undefined
+    // It takes the place of the button that had focus, so nothing needs scrolling.
+    button?.focus({ preventScroll: true })
+  }
 
   async function send(id: string) {
     if (sending.has(id)) return
@@ -64,6 +99,7 @@ export function QueuedStack(handle: Handle<QueuedStackProps>) {
   return () => {
     const { messages, onRemove, onEdit, label = 'Queued messages' } = handle.props
     if (!messages.length) expanded = false
+    if (refocus) handle.queueTask(restoreFocus)
     return (
       <div class="rf-queue-wrap" hidden={!messages.length} data-expanded={expanded || undefined}>
         {messages.length > 1 && (
@@ -180,7 +216,11 @@ export function QueuedStack(handle: Handle<QueuedStackProps>) {
                   variant="ghost"
                   disabled={index === 0}
                   aria-label={`Move message ${index + 1} up`}
-                  mix={on('click', () => move(message.id, index - 1))}
+                  data-queue-action="up"
+                  mix={on('click', () => {
+                    remember('up', message.id, index)
+                    move(message.id, index - 1)
+                  })}
                 >
                   ↑
                 </Button>
@@ -189,7 +229,11 @@ export function QueuedStack(handle: Handle<QueuedStackProps>) {
                   variant="ghost"
                   disabled={index === messages.length - 1}
                   aria-label={`Move message ${index + 1} down`}
-                  mix={on('click', () => move(message.id, index + 1))}
+                  data-queue-action="down"
+                  mix={on('click', () => {
+                    remember('down', message.id, index)
+                    move(message.id, index + 1)
+                  })}
                 >
                   ↓
                 </Button>
@@ -198,7 +242,11 @@ export function QueuedStack(handle: Handle<QueuedStackProps>) {
                     size="icon-compact"
                     variant="ghost"
                     aria-label={`Remove message ${index + 1}`}
-                    mix={on('click', () => onRemove(message.id))}
+                    data-queue-action="remove"
+                    mix={on('click', () => {
+                      remember('remove', message.id, index)
+                      onRemove(message.id)
+                    })}
                   >
                     ×
                   </Button>
@@ -206,7 +254,11 @@ export function QueuedStack(handle: Handle<QueuedStackProps>) {
                 <Button
                   size="compact"
                   variant="secondary"
-                  mix={on('click', () => send(message.id))}
+                  data-queue-action="send"
+                  mix={on('click', () => {
+                    remember('send', message.id, index)
+                    void send(message.id)
+                  })}
                 >
                   Send
                 </Button>

@@ -180,3 +180,27 @@ it('morphs a queued message into its sent bubble and cleans up the transition', 
   equal($('.rf-queue:not([hidden])'), null)
   equal(document.documentElement.hasAttribute('data-rf-message-transition'), false)
 })
+
+it('hands focus back to the message box when the last queued message leaves', async (t) => {
+  function Composer(handle: Handle) {
+    let queue = [{ id: 'queued', text: 'Queued message', files: [] as File[] }]
+    return () => (
+      <InputMessage
+        queue={queue}
+        onQueueChange={(next) => {
+          queue = [...next]
+          void handle.update()
+        }}
+        onSend={async () => {}}
+      />
+    )
+  }
+  const { $, act, cleanup } = render(<Composer />)
+  t.after(cleanup)
+  const remove = $('button[aria-label="Remove message 1"]') as HTMLButtonElement
+  remove.focus()
+  await act(() => remove.click())
+  for (let frame = 0; frame < 30 && document.activeElement?.tagName !== 'TEXTAREA'; frame++)
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+  equal(document.activeElement, $('textarea'))
+})

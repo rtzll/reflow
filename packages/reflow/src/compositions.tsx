@@ -397,9 +397,17 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
   }
 
   function changeQueue(next: ComposerQueuedMessage[]) {
+    // When the last queued message leaves with focus inside the queue, the
+    // message box takes focus, so the keyboard does not fall back to the page.
+    const active = document.activeElement
+    const composer = next.length === 0 ? active?.closest('.rf-queue-wrap')?.closest('form') : null
     if (handle.props.queue === undefined) queued = next
     handle.props.onQueueChange?.(next)
     handle.update()
+    if (composer)
+      handle.queueTask(() =>
+        composer.querySelector<HTMLTextAreaElement>('textarea')?.focus({ preventScroll: true }),
+      )
   }
 
   async function sendQueued(id: string) {
