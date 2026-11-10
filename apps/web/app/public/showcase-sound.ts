@@ -36,6 +36,47 @@ export function playCopySuccess() {
   play('success', { emphasis: 'subtle' })
 }
 
+const toastCues = {
+  success: 'success',
+  error: 'error',
+  warning: 'warning',
+  info: 'attention',
+  default: 'attention',
+} as const
+
+function playToast(toast: Element) {
+  const status = toast.getAttribute('data-status')
+  if (status && status in toastCues)
+    play(toastCues[status as keyof typeof toastCues], { emphasis: 'subtle' })
+}
+
+// A cue for each toast as it arrives, and for a loading toast as it settles.
+function bindToastSounds() {
+  const region = document.querySelector('.rf-toaster-region')
+  if (!region) return
+  const observer = new MutationObserver((records) => {
+    for (const record of records) {
+      if (record.type === 'childList') {
+        for (const node of record.addedNodes)
+          if (node instanceof Element && node.matches('.rf-toast')) playToast(node)
+      } else if (
+        record.target instanceof Element &&
+        record.target.matches('.rf-toast:not([data-removed])') &&
+        record.oldValue !== record.target.getAttribute('data-status')
+      ) {
+        playToast(record.target)
+      }
+    }
+  })
+  observer.observe(region, {
+    subtree: true,
+    childList: true,
+    attributes: true,
+    attributeFilter: ['data-status'],
+    attributeOldValue: true,
+  })
+}
+
 function bindInputCopyErrors() {
   const main = document.querySelector('#main')
   if (!main) return
@@ -246,4 +287,5 @@ export function enhanceShowcaseSound() {
   )
   bindSliderSounds()
   bindInputCopyErrors()
+  bindToastSounds()
 }

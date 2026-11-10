@@ -3035,3 +3035,71 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
   border: 1px dashed color-mix(in oklab, var(--rf-border) 80%, transparent);
   border-radius: var(--rf-radius);
 }
+
+/* Toaster card: a small screen to place the stack on, beside buttons that raise toasts. */
+.example-toaster-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+}
+.example-toaster-screen {
+  position: relative;
+  box-sizing: border-box;
+  inline-size: 176px;
+  block-size: 112px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-panel-radius);
+  background: var(--rf-surface-2);
+}
+.example-toaster-screen label {
+  position: absolute;
+  inline-size: 40px;
+  block-size: 12px;
+  border-radius: 4px;
+  background: var(--rf-hover);
+  cursor: pointer;
+  transition: background-color var(--rf-fast);
+}
+.example-toaster-screen label[data-position^='top'] {
+  top: 10px;
+}
+.example-toaster-screen label[data-position^='bottom'] {
+  bottom: 10px;
+}
+.example-toaster-screen label[data-position$='left'] {
+  left: 10px;
+}
+.example-toaster-screen label[data-position$='right'] {
+  right: 10px;
+}
+.example-toaster-screen label[data-position$='center'] {
+  left: calc(50% - 20px);
+}
+@media (hover: hover) {
+  .example-toaster-screen label:hover {
+    background: var(--rf-active);
+  }
+}
+.example-toaster-screen label:has(:checked) {
+  background: var(--rf-accent);
+}
+.example-toaster-screen label:has(:focus-visible) {
+  outline: 2px solid var(--rf-accent);
+  outline-offset: 2px;
+}
+.example-toaster-screen input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.example-toaster-actions {
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+  gap: 8px;
+}

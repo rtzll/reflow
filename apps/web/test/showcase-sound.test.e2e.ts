@@ -227,6 +227,25 @@ it('plays a cue on manual carousel changes and leaves autoplay silent', async (t
   expect(await audioStarts()).toBe(before)
 })
 
+it('plays a cue as each toast arrives and as a promise toast settles', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  const audioStarts = await trackAudio(page)
+  await page.goto('/docs/toaster')
+  await waitForShowcase(page)
+  await page.locator('#status').getByRole('button', { name: 'Success', exact: true }).click()
+  await page.locator('.rf-toast[data-status="success"]').waitFor()
+  await expect.poll(audioStarts).toBeGreaterThan(0)
+  const arrived = await audioStarts()
+  await page.locator('#promise').getByRole('button', { name: 'Upload', exact: true }).click()
+  const upload = page.locator('.rf-toast[data-status="loading"]')
+  await upload.waitFor()
+  await page.waitForTimeout(200)
+  // The spinner arrives silently; the outcome plays.
+  expect(await audioStarts()).toBe(arrived)
+  await page.locator('.rf-toast', { hasText: 'Uploaded roadmap.pdf' }).waitFor()
+  await expect.poll(audioStarts).toBeGreaterThan(arrived)
+})
+
 it('plays open and close cues for a Popover', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   const audioStarts = await trackAudio(page)

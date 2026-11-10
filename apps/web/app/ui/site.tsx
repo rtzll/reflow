@@ -495,6 +495,7 @@ const galleryOrder = [
   'chat-message',
   'popover',
   'hover-card',
+  'toaster',
 ]
 
 const wideCards = new Set([
@@ -511,6 +512,7 @@ const wideCards = new Set([
   'table',
   'calendar',
   'chat-message',
+  'toaster',
 ])
 
 const tallCards = new Set([
@@ -937,6 +939,7 @@ const demoOrder = [
   'segmented-control',
   'popover',
   'hover-card',
+  'toaster',
   'settings',
 ]
 

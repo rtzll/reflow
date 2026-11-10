@@ -5,6 +5,7 @@ import { accentCss, type readSettings } from './public/site-settings.ts'
 import { fontStylesheet, fontWeights } from './public/google-fonts.ts'
 import { fontCatalog } from './public/google-font-catalog.ts'
 import { ShowcaseIconSprite } from './public/icon-sprite.tsx'
+import { SiteToaster } from './public/toaster-example.tsx'
 
 interface DocumentProps {
   children: RemixNode
@@ -60,6 +61,7 @@ export function Document(handle: Handle<DocumentProps>) {
         <body>
           <ShowcaseIconSprite />
           {children}
+          <SiteToaster />
         </body>
       </html>
     )

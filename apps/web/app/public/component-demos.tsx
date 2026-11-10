@@ -41,6 +41,7 @@ import { DropdownDemo } from './dropdown-example.tsx'
 import { BreadcrumbDemo } from './breadcrumb-example.tsx'
 import { SegmentedControlDemo } from './segmented-control-example.tsx'
 import { PopoverDemo } from './popover-example.tsx'
+import { ToasterDemo } from './toaster-example.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
 import { SoundCombobox } from './sound-combobox.tsx'
 import { playCopySuccess } from './showcase-sound.ts'
@@ -972,6 +973,55 @@ export const componentExamples: Record<string, readonly DocumentationExample[]> 
       'Compact',
       'compact',
       `<Popover label="Dimensions" trigger="Dimensions" size="compact">…</Popover>`,
+    ),
+  ],
+  toaster: [
+    demo(
+      'Basic',
+      'basic',
+      `// Once, near the root of the app:\n<Toaster />\n\n// Anywhere:\ntoast('Event created')`,
+      'Place one Toaster in the app and raise toasts with toast() from anywhere: no provider, and nothing renders on the server.',
+    ),
+    demo(
+      'Status',
+      'status',
+      `toast.success('Changes saved')\ntoast.info('A new version is available')\ntoast.warning('Storage is almost full')\ntoast.error('Could not send the message')`,
+      'Status toasts share Banner’s icons and colors.',
+    ),
+    demo(
+      'Description',
+      'description',
+      `toast('Event created', { description: 'Monday, November 9 at 9:41' })`,
+    ),
+    demo(
+      'Action',
+      'action',
+      `toast('Conversation archived', {\n  action: { label: 'Undo', onClick: restore },\n})`,
+      'The toast closes after its action runs, unless the handler calls event.preventDefault().',
+    ),
+    demo(
+      'Promise',
+      'promise',
+      `toast.promise(upload(file), {\n  loading: 'Uploading roadmap.pdf…',\n  success: (name) => \`Uploaded \${name}\`,\n  error: 'Upload failed',\n})`,
+      'One toast follows the promise from loading to its outcome.',
+    ),
+    demo(
+      'Position',
+      'position',
+      `<Toaster position="top-center" />`,
+      'Six positions: the three top and the three bottom ones. Swipes dismiss toward the nearest edge.',
+    ),
+    demo(
+      'Expanded',
+      'expand',
+      `<Toaster expand />`,
+      'Spread out from the start, instead of piling until pointed at or focused.',
+    ),
+    demo(
+      'Close button',
+      'close-button',
+      `<Toaster closeButton />`,
+      'Swipes, Escape and Alt+T work without it; the button helps where those are hard to discover.',
     ),
   ],
   'radio-group': [
@@ -2123,6 +2173,8 @@ export function ComponentDemo(
         return <HoverCardDemo variant={variant} />
       case 'popover':
         return <PopoverDemo variant={variant} />
+      case 'toaster':
+        return <ToasterDemo variant={variant} />
       case 'segmented-control':
         return <SegmentedControlDemo variant={variant} />
       case 'breadcrumb':

@@ -154,6 +154,10 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
     description: 'A working status with an animated icon and rotating visual label.',
     code: `<ThinkingIndicator labels={['Thinking…', 'Refining…']} />`,
   },
+  toaster: {
+    description: 'Brief notifications raised from anywhere with toast(), stacked in a corner.',
+    code: `<Toaster />\n\ntoast.success('Changes saved', { description: 'Monday at 9:41' })`,
+  },
   popover: {
     description: 'A panel anchored to a trigger for filters, inline settings, or sharing.',
     code: `<Popover label="Dimensions" trigger="Dimensions">\n  <Input name="width" defaultValue="100%" />\n</Popover>`,
@@ -253,6 +257,7 @@ const components = [
   ['textarea', 'Textarea'],
   ['thinking-indicator', 'ThinkingIndicator'],
   ['thinking-steps', 'ThinkingSteps'],
+  ['toaster', 'Toaster'],
   ['tooltip', 'Tooltip'],
 ] as const
 

@@ -258,6 +258,28 @@ ${opening} label="Options" options={options} defaultValue="0" />`
       const compact = values.size === 'compact' ? ' size="compact"' : ''
       return `<HoverCard${placement}${delay}${compact} renderTrigger={(trigger) => (\n  <a href="/u/reflow" {...trigger}>@reflow</a>\n)}>\n  <Profile user={user} />\n</HoverCard>`
     }
+    case 'toaster': {
+      const props = [
+        values.position && values.position !== 'bottom-right'
+          ? ` position="${values.position}"`
+          : '',
+        values.expand ? ' expand' : '',
+        values.closeButton ? ' closeButton' : '',
+        values.size === 'compact' ? ' size="compact"' : '',
+      ].join('')
+      const status = String(values.status ?? 'default')
+      const call =
+        status === 'loading'
+          ? "toast.promise(upload(file), {\n  loading: 'Uploading roadmap.pdf…',\n  success: (name) => `Uploaded ${name}`,\n  error: 'Upload failed',\n})"
+          : `${status === 'default' ? 'toast' : `toast.${status}`}('Event created'${
+              values.description || values.action
+                ? `, {${values.description ? "\n  description: 'Monday, November 9 at 9:41'," : ''}${
+                    values.action ? "\n  action: { label: 'Undo', onClick: restore }," : ''
+                  }\n}`
+                : ''
+            })`
+      return `<Toaster${props} />\n\n${call}`
+    }
     case 'popover': {
       const title = values.title
         ? ' title="Dimensions" description="Set the size of the selected frame."'

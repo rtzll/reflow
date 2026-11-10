@@ -6,6 +6,7 @@ import { DropdownPlayground } from './dropdown-example.tsx'
 import { BreadcrumbDemo } from './breadcrumb-example.tsx'
 import { SegmentedControlDemo } from './segmented-control-example.tsx'
 import { PopoverDemo } from './popover-example.tsx'
+import { ToasterDemo, toasterPositions } from './toaster-example.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
 import { paletteCommands, paletteGroups, paletteSuggestions } from './component-demos.tsx'
 import { SoundCombobox } from './sound-combobox.tsx'
@@ -275,6 +276,15 @@ export const playgroundControls: Record<string, readonly Control[]> = {
   popover: [
     choice('placement', 'Placement', ['bottom', 'top', 'right', 'left']),
     toggle('title', 'Title'),
+    size,
+  ],
+  toaster: [
+    choice('position', 'Position', [...toasterPositions]),
+    choice('status', 'Status', ['default', 'success', 'info', 'warning', 'error', 'loading']),
+    toggle('description', 'Description', true),
+    toggle('action', 'Action'),
+    toggle('closeButton', 'Close button'),
+    toggle('expand', 'Expand'),
     size,
   ],
   'segmented-control': [
@@ -797,6 +807,19 @@ export function PlaygroundExample(
             size={density}
             placement={String(v.placement) as 'bottom' | 'top' | 'right' | 'left'}
             openDelay={Number(v.openDelay)}
+          />
+        )
+      case 'toaster':
+        return (
+          <ToasterDemo
+            variant="playground"
+            size={density}
+            position={String(v.position) as (typeof toasterPositions)[number]}
+            status={String(v.status)}
+            description={Boolean(v.description)}
+            action={Boolean(v.action)}
+            closeButton={Boolean(v.closeButton)}
+            expand={Boolean(v.expand)}
           />
         )
       case 'popover':

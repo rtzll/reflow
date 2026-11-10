@@ -42,6 +42,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'chat-message',
     'popover',
     'hover-card',
+    'toaster',
   ]
   const gallery = page.locator('.site-gallery')
   for (const width of [1440, 1280, 768, 390]) {

@@ -470,7 +470,7 @@
 }
 .rf-queue {
   --rf-queue-row: 44px;
-  --rf-queue-gap: 5px;
+  --rf-queue-gap: var(--rf-stack-gap);
   position: relative;
   list-style: none;
   padding: 0;
@@ -502,7 +502,7 @@
   padding: 0 8px;
   cursor: grab;
   z-index: calc(3 - var(--rf-queue-depth));
-  scale: calc(1 - var(--rf-queue-depth) * 0.035) 1;
+  scale: calc(1 - var(--rf-queue-depth) * var(--rf-stack-scale-step)) 1;
   transition:
     margin-block-start var(--rf-spring-moderate),
     scale var(--rf-spring-moderate),
@@ -511,7 +511,7 @@
 .rf-queue > li + li {
   margin-block-start: var(
     --rf-queue-spacing,
-    calc(var(--rf-queue-peek, 6px) - var(--rf-queue-row))
+    calc(var(--rf-queue-peek, var(--rf-stack-peek)) - var(--rf-queue-row))
   );
 }
 .rf-queue > li:nth-child(n + 4) {

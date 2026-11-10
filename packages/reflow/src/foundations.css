@@ -198,6 +198,12 @@
   --rf-exit-fast: 60ms ease-out;
   --rf-exit-moderate: 120ms ease-out;
   --rf-exit-slow: 160ms ease-out;
+  /* Piles: QueuedStack and the Toaster share these. Each card behind the
+     front one peeks out by the peek and narrows by the scale step; spread
+     out, cards sit a gap apart. */
+  --rf-stack-peek: 6px;
+  --rf-stack-gap: 5px;
+  --rf-stack-scale-step: 0.035;
 }
 
 @media (prefers-reduced-motion: reduce) {

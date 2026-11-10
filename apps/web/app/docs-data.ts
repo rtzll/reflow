@@ -2721,6 +2721,162 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  toaster: [
+    {
+      name: 'Toaster',
+      props: [
+        {
+          name: 'position',
+          type: 'ToasterPosition',
+          description:
+            'Where the stack sits: top-left, top-center, top-right, bottom-left, bottom-center or bottom-right. Default bottom-right.',
+          required: false,
+        },
+        {
+          name: 'expand',
+          type: 'boolean',
+          description: 'Show the stack spread out instead of piled. Default false.',
+          required: false,
+        },
+        {
+          name: 'visibleToasts',
+          type: 'number',
+          description: 'How many toasts stay in view; older ones wait behind them. Default 3.',
+          required: false,
+        },
+        {
+          name: 'duration',
+          type: 'number',
+          description: 'Milliseconds each toast stays before closing on its own. Default 4000.',
+          required: false,
+        },
+        {
+          name: 'closeButton',
+          type: 'boolean',
+          description: 'Gives every dismissible toast a close button. Default false.',
+          required: false,
+        },
+        {
+          name: 'hotkey',
+          type: 'string',
+          description: 'Moves focus to the newest toast. Default alt+t.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Names the notifications region. Default "Notifications".',
+          required: false,
+        },
+        {
+          name: 'offset',
+          type: 'number',
+          description:
+            'Distance from the viewport edges in pixels. Default 24, or 16 on narrow screens.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: '"default" | "compact"',
+          description: 'Tightens the toast padding and icons.',
+          required: false,
+        },
+      ],
+    },
+    {
+      name: 'toast()',
+      props: [
+        {
+          name: 'toast',
+          type: '(title: RemixNode, options?: ToastOptions) => string',
+          description: 'Raises a toast and returns its id.',
+          required: false,
+        },
+        {
+          name: 'toast.success',
+          type: '(title, options?) => string',
+          description:
+            'A success toast. toast.info, toast.warning and toast.error work the same way.',
+          required: false,
+        },
+        {
+          name: 'toast.loading',
+          type: '(title, options?) => string',
+          description: 'A toast with a spinner that stays until updated or dismissed.',
+          required: false,
+        },
+        {
+          name: 'toast.promise',
+          type: '(promise, { loading, success, error, description? }, options?) => string',
+          description:
+            'One toast that follows a promise, or a function returning one, from loading to success or error. success and error take a value or a function of the result.',
+          required: false,
+        },
+        {
+          name: 'toast.dismiss',
+          type: '(id?: string) => void',
+          description: 'Closes one toast, or all of them without an id.',
+          required: false,
+        },
+      ],
+    },
+    {
+      name: 'ToastOptions',
+      props: [
+        {
+          name: 'id',
+          type: 'string',
+          description: 'Reuse an id to update a toast in place instead of adding another.',
+          required: false,
+        },
+        {
+          name: 'description',
+          type: 'RemixNode',
+          description: 'Supporting text under the title.',
+          required: false,
+        },
+        {
+          name: 'duration',
+          type: 'number',
+          description:
+            'Milliseconds before it closes on its own; Infinity keeps it until dismissed. Defaults to the Toaster duration.',
+          required: false,
+        },
+        {
+          name: 'action',
+          type: '{ label: string; onClick: (event: MouseEvent) => void }',
+          description:
+            'A button beside the text. The toast closes after it runs, unless the handler calls event.preventDefault().',
+          required: false,
+        },
+        {
+          name: 'dismissible',
+          type: 'boolean',
+          description: 'Whether a swipe, Escape or the close button can close it. Default true.',
+          required: false,
+        },
+        {
+          name: 'icon',
+          type: 'RemixNode',
+          description: 'Replaces the status icon.',
+          required: false,
+        },
+        {
+          name: 'onDismiss',
+          type: '(toast: Toast) => void',
+          description:
+            'Called when the toast is closed by a swipe, Escape, the close button, an action or toast.dismiss.',
+          required: false,
+        },
+        {
+          name: 'onAutoClose',
+          type: '(toast: Toast) => void',
+          description: 'Called when the toast closes on its own after its duration.',
+          required: false,
+        },
+      ],
+    },
+  ],
   'hover-card': [
     {
       name: 'HoverCard',
@@ -4084,6 +4240,14 @@ export const componentDefaults: Record<string, Record<string, string>> = {
     openOnHover: 'false',
   },
   Button: { variant: 'primary' },
+  Toaster: {
+    position: 'bottom-right',
+    visibleToasts: '3',
+    duration: '4000',
+    hotkey: 'alt+t',
+    label: 'Notifications',
+    offset: '24',
+  },
   Calendar: {
     label: 'Calendar',
     mode: 'single',
