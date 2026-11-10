@@ -124,15 +124,18 @@ export function HoverCard(handle: Handle<HoverCardProps>) {
       },
       options,
     )
-    // The card is placed by script, so while the page scrolls it trails a frame
-    // behind its trigger. A preview belongs to where the pointer rests, so a
-    // scroll outside the card closes it at once.
+    // The card is placed by script, so while the trigger scrolls it trails a
+    // frame behind. A preview belongs to where the pointer rests, so when the
+    // page, or anything holding the trigger, scrolls, it closes at once. Other
+    // scrollers, such as a carousel elsewhere, leave it be.
     element.ownerDocument.addEventListener(
       'scroll',
       (event) => {
         if (!isOpen()) return
-        if (event.target instanceof Node && card?.contains(event.target)) return
-        setOpen(false)
+        const source = event.target
+        const movesTrigger =
+          source === element.ownerDocument || (source instanceof Node && source.contains(element))
+        if (movesTrigger) setOpen(false)
       },
       { capture: true, passive: true, signal },
     )

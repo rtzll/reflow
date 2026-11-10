@@ -91,6 +91,13 @@ describe('HoverCard', () => {
     card.dispatchEvent(new Event('scroll'))
     await pause(40)
     ok(card.matches(':popover-open'), 'scrolling inside the card keeps it')
+    // A scroller elsewhere on the page, such as an autoplaying carousel, leaves it be.
+    const elsewhere = document.createElement('div')
+    document.body.append(elsewhere)
+    t.after(() => elsewhere.remove())
+    elsewhere.dispatchEvent(new Event('scroll'))
+    await pause(40)
+    ok(card.matches(':popover-open'), 'an unrelated scroller keeps it')
     document.dispatchEvent(new Event('scroll'))
     await waitFor(() => !card.matches(':popover-open'))
   })
