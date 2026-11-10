@@ -7,7 +7,7 @@ Reflow started as a native Remix port of the [Fluid Functionalism](https://githu
 - **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `Field`, `Input`, `InputCopy`, `InputGroup`, `RadioGroup`, `SegmentedControl`, `Select`, `Slider`, `Switch`, `Textarea`
 - **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`
 - **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `CarouselDots`, `Sidebar`, `Tabs`
-- **Menus and overlays** · `CommandMenu`, `Dialog`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
+- **Menus and overlays** · `CommandMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
 - **Display and feedback** · `Badge`, `Banner`, `Card`, `Table`, `Toaster`
 - **Conversation** · `AskUserQuestions`, `ChatMessage`, `InputMessage`, `QueuedStack`, `ThinkingIndicator`, `ThinkingSteps`
 
@@ -55,7 +55,7 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 1 | `SegmentedControl` (shipped) | Apple's segmented control | Tabs and RadioGroup's moving fill; native radios for forms |
 | 1 | `Popover` and `HoverCard` (shipped) | Radix and Astryx concepts | Tooltip's anchoring; Dropdown's hover intent and safe pointer travel |
 | 2 | `Toaster` and `toast()` (shipped) | [sonner](https://github.com/emilkowalski/sonner) | QueuedStack's pile; Banner's status icons |
-| 2 | `Drawer` | [vaul](https://github.com/emilkowalski/vaul) | Dialog's native `<dialog>` and focus return; the Sidebar's mobile drawer can move onto it |
+| 2 | `Drawer` (shipped) | [vaul](https://github.com/emilkowalski/vaul) | Dialog's native `<dialog>` and focus return; the Sidebar's mobile drawer can move onto it |
 | 3 | `ChatLayout`, `Citation`, `CodeBlock`, and a `system` role for ChatMessage | Astryx's chat set | The InputMessage docs layout, ChatMessage's glide, ThinkingStepSource chips, the docs' code panel |
 | 4 | `Avatar` and `AvatarGroup`, `Skeleton`, `Spinner`, `Progress`, `NumberField` | — | ThinkingIndicator's shimmer, Button's loading state, CarouselDots' progress fill, ColorPicker's scrub fields |
 

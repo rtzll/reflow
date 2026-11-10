@@ -2721,6 +2721,99 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  drawer: [
+    {
+      name: 'Drawer',
+      props: [
+        {
+          name: 'title',
+          type: 'string',
+          description: 'Names the drawer, shown as its heading.',
+          required: true,
+        },
+        {
+          name: 'description',
+          type: 'string',
+          description: 'Supporting text under the title, announced with the drawer.',
+          required: false,
+        },
+        {
+          name: 'children',
+          type: 'RemixNode',
+          description: 'The drawer content.',
+          required: false,
+        },
+        {
+          name: 'footer',
+          type: 'RemixNode | ((close: () => void) => RemixNode)',
+          description: 'Footer actions; a callback receives a function that closes the drawer.',
+          required: false,
+        },
+        {
+          name: 'trigger',
+          type: 'RemixNode',
+          description: 'Contents of the button that opens the drawer.',
+          required: false,
+        },
+        {
+          name: 'triggerVariant',
+          type: 'ButtonProps["variant"]',
+          description: 'The trigger button variant. Default tertiary.',
+          required: false,
+        },
+        {
+          name: 'triggerSize',
+          type: 'ButtonProps["size"]',
+          description: 'The trigger button size.',
+          required: false,
+        },
+        {
+          name: 'side',
+          type: '"bottom" | "top" | "left" | "right"',
+          description: 'The edge the drawer slides in from. Default bottom.',
+          required: false,
+        },
+        {
+          name: 'handle',
+          type: 'boolean',
+          description: 'Shows a grab handle. Default true for dismissible top and bottom drawers.',
+          required: false,
+        },
+        {
+          name: 'showCloseButton',
+          type: 'boolean',
+          description: 'Shows a close button. Default true for left and right drawers.',
+          required: false,
+        },
+        {
+          name: 'dismissible',
+          type: 'boolean',
+          description:
+            'Whether Escape, a click on the backdrop or a drag can close it. Default true.',
+          required: false,
+        },
+        {
+          name: 'open',
+          type: 'boolean',
+          description: 'Whether the drawer is open, when controlled by the parent.',
+          required: false,
+        },
+        {
+          name: 'defaultOpen',
+          type: 'boolean',
+          description: 'Whether the drawer starts open when uncontrolled.',
+          required: false,
+        },
+        {
+          name: 'onOpenChange',
+          type: '((open: boolean) => void)',
+          description:
+            'Called when the trigger, Escape, the backdrop, a drag or close() opens or closes the drawer.',
+          required: false,
+        },
+      ],
+    },
+  ],
   toaster: [
     {
       name: 'Toaster',
@@ -4240,6 +4333,11 @@ export const componentDefaults: Record<string, Record<string, string>> = {
     openOnHover: 'false',
   },
   Button: { variant: 'primary' },
+  Drawer: {
+    side: 'bottom',
+    triggerVariant: 'tertiary',
+    dismissible: 'true',
+  },
   Toaster: {
     position: 'bottom-right',
     visibleToasts: '3',

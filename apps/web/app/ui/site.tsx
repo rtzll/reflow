@@ -496,6 +496,7 @@ const galleryOrder = [
   'popover',
   'hover-card',
   'toaster',
+  'drawer',
 ]
 
 const wideCards = new Set([
@@ -940,6 +941,7 @@ const demoOrder = [
   'popover',
   'hover-card',
   'toaster',
+  'drawer',
   'settings',
 ]
 
@@ -954,6 +956,7 @@ const customizableSlides = new Set([
   'combobox',
   'command-menu',
   'date-picker',
+  'drawer',
   'dropdown',
   'hover-card',
   'input-message',

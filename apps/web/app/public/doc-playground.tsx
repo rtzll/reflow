@@ -7,6 +7,7 @@ import { BreadcrumbDemo } from './breadcrumb-example.tsx'
 import { SegmentedControlDemo } from './segmented-control-example.tsx'
 import { PopoverDemo } from './popover-example.tsx'
 import { ToasterDemo, toasterPositions } from './toaster-example.tsx'
+import { DrawerDemo } from './drawer-example.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
 import { paletteCommands, paletteGroups, paletteSuggestions } from './component-demos.tsx'
 import { SoundCombobox } from './sound-combobox.tsx'
@@ -276,6 +277,13 @@ export const playgroundControls: Record<string, readonly Control[]> = {
   popover: [
     choice('placement', 'Placement', ['bottom', 'top', 'right', 'left']),
     toggle('title', 'Title'),
+    size,
+  ],
+  drawer: [
+    choice('side', 'Side', ['bottom', 'right', 'top', 'left']),
+    toggle('handle', 'Handle', true),
+    toggle('closeButton', 'Close button'),
+    toggle('dismissible', 'Dismissible', true),
     size,
   ],
   toaster: [
@@ -807,6 +815,17 @@ export function PlaygroundExample(
             size={density}
             placement={String(v.placement) as 'bottom' | 'top' | 'right' | 'left'}
             openDelay={Number(v.openDelay)}
+          />
+        )
+      case 'drawer':
+        return (
+          <DrawerDemo
+            variant="playground"
+            size={density}
+            side={String(v.side) as 'bottom' | 'right' | 'top' | 'left'}
+            handle={Boolean(v.handle)}
+            closeButton={Boolean(v.closeButton)}
+            dismissible={Boolean(v.dismissible)}
           />
         )
       case 'toaster':

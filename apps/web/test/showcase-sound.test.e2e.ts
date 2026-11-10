@@ -246,6 +246,20 @@ it('plays a cue as each toast arrives and as a promise toast settles', async (t)
   await expect.poll(audioStarts).toBeGreaterThan(arrived)
 })
 
+it('plays open and close cues for a Drawer', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  const audioStarts = await trackAudio(page)
+  await page.goto('/docs/drawer')
+  await waitForShowcase(page)
+  await page.locator('#basic').getByRole('button', { name: 'Filters', exact: true }).click()
+  await expect(page.getByRole('dialog', { name: 'Filters' })).toBeVisible()
+  await expect.poll(audioStarts).toBeGreaterThan(0)
+  const opened = await audioStarts()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('dialog', { name: 'Filters' })).toBeHidden()
+  await expect.poll(audioStarts).toBeGreaterThan(opened)
+})
+
 it('plays open and close cues for a Popover', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   const audioStarts = await trackAudio(page)

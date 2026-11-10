@@ -95,6 +95,10 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       'A label, form control, help text, and error with associated accessible descriptions.',
     code: requestFormCode(),
   },
+  drawer: {
+    description: 'A panel that slides in from an edge and closes with a drag or a flick.',
+    code: `<Drawer trigger="Filters" title="Filters" footer={(close) => <Button mix={on('click', close)}>Apply</Button>}>\n  <Switch label="In stock only" />\n</Drawer>`,
+  },
   'hover-card': {
     description: 'A preview card for a link or a name, shown while the pointer rests on it.',
     code: `<HoverCard renderTrigger={(trigger) => <a href="/u/reflow" {...trigger}>@reflow</a>}>\n  <p>Fluid components for Remix.</p>\n</HoverCard>`,
@@ -237,6 +241,7 @@ const components = [
   ['command-menu', 'CommandMenu'],
   ['date-picker', 'DatePicker'],
   ['dialog', 'Dialog'],
+  ['drawer', 'Drawer'],
   ['dropdown', 'Dropdown'],
   ['field', 'Field'],
   ['hover-card', 'HoverCard'],

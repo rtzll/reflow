@@ -19,6 +19,7 @@ const sharedPlaygroundDefaults = new Set([
   'slider',
   'thinking-steps',
   'toaster',
+  'drawer',
 ])
 
 interface DocPreviewProps {

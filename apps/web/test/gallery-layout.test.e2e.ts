@@ -43,6 +43,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'popover',
     'hover-card',
     'toaster',
+    'drawer',
   ]
   const gallery = page.locator('.site-gallery')
   for (const width of [1440, 1280, 768, 390]) {
@@ -100,6 +101,14 @@ it('preserves the gallery order and keeps previews above their footers', async (
       assert.deepEqual(spills, [], `Preview overflow at ${width}px`)
     }
     await checkContainment()
+    if (width === 768) {
+      // With two columns the smalls are odd, so the last one closes the row.
+      const [last, gallery] = await Promise.all([
+        page.locator('.site-gallery article[data-component="drawer"]').boundingBox(),
+        page.locator('.site-gallery').boundingBox(),
+      ])
+      assert.ok(last!.width > gallery!.width * 0.8, 'Drawer spans the row at two columns')
+    }
     if (width === 1440) {
       await expect(
         gallery.locator('[data-component="ask-user-questions"]').getByText('Question 1 of 8'),
@@ -124,6 +133,11 @@ it('preserves the gallery order and keeps previews above their footers', async (
       assert.equal(popover!.x, hoverCard!.x)
       assert.ok(hoverCard!.y > popover!.y)
       assert.equal(Math.round(chat!.y + chat!.height), Math.round(hoverCard!.y + hoverCard!.height))
+      // Then a band of its own: the wide Toaster card with Drawer beside it.
+      const [toaster, drawer] = await Promise.all(['toaster', 'drawer'].map(tile))
+      assert.equal(toaster!.y, drawer!.y)
+      assert.ok(toaster!.width > drawer!.width * 1.9)
+      assert.ok(drawer!.x > toaster!.x)
       const accordion = gallery.locator('[data-component="accordion"]')
       await accordion.getByRole('button', { name: 'Accessibility', exact: true }).click()
       await checkContainment()

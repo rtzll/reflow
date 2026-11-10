@@ -1,0 +1,218 @@
+/* Drawer: a modal panel attached to one edge of the viewport. It slides in
+   on the moderate spring, which has no bounce, so the panel never lifts off
+   its edge, and leaves on Dialog's exit tween. While dragged it follows
+   --rf-drawer-drag, the distance toward its edge, and the backdrop fades
+   with --rf-drawer-progress. A strip of panel color past the edge covers
+   the gap when a drag pulls it the other way. */
+.rf-drawer {
+  --rf-drawer-bg: var(--rf-surface-5);
+  --rf-drawer-drag: 0px;
+  --rf-drawer-closed: 0 100%;
+  --rf-drawer-tail: 0 32px 0 0 var(--rf-drawer-bg);
+  position: fixed;
+  box-sizing: border-box;
+  inset: auto 0 0;
+  inline-size: 100%;
+  max-inline-size: none;
+  block-size: auto;
+  max-block-size: calc(100dvh - 48px);
+  margin: 0;
+  padding: 24px;
+  border: 0;
+  border-radius: var(--rf-panel-radius) var(--rf-panel-radius) 0 0;
+  outline: none;
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: var(--rf-drawer-bg);
+  color: var(--rf-fg);
+  box-shadow:
+    var(--rf-drawer-tail),
+    0 0 0 1px light-dark(rgb(0 0 0 / 6%), rgb(255 255 255 / 6%)),
+    0 0 24px light-dark(rgb(0 0 0 / 10%), rgb(0 0 0 / 30%));
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+  translate: var(--rf-drawer-closed);
+  transition:
+    translate var(--rf-exit-slow),
+    overlay 160ms allow-discrete,
+    display 160ms allow-discrete;
+}
+.rf-drawer[open] {
+  translate: 0 var(--rf-drawer-drag);
+  transition:
+    translate var(--rf-spring-moderate),
+    overlay 160ms allow-discrete,
+    display 160ms allow-discrete;
+}
+@starting-style {
+  .rf-drawer[open] {
+    translate: var(--rf-drawer-closed);
+  }
+  .rf-drawer[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+/* Top and bottom drawers keep their content in a readable column. */
+.rf-drawer[data-side='bottom'],
+.rf-drawer[data-side='top'] {
+  padding-inline: max(24px, calc((100% - 560px) / 2));
+}
+.rf-drawer[data-side='top'] {
+  --rf-drawer-closed: 0 -100%;
+  --rf-drawer-tail: 0 -32px 0 0 var(--rf-drawer-bg);
+  inset: 0 0 auto;
+  border-radius: 0 0 var(--rf-panel-radius) var(--rf-panel-radius);
+}
+.rf-drawer[data-side='top'][open] {
+  translate: 0 calc(-1 * var(--rf-drawer-drag));
+}
+.rf-drawer[data-side='right'],
+.rf-drawer[data-side='left'] {
+  inline-size: min(calc(100% - 48px), 400px);
+  block-size: 100dvh;
+  max-block-size: none;
+}
+.rf-drawer[data-side='right'] {
+  --rf-drawer-closed: 100% 0;
+  --rf-drawer-tail: 32px 0 0 0 var(--rf-drawer-bg);
+  inset: 0 0 0 auto;
+  border-radius: var(--rf-panel-radius) 0 0 var(--rf-panel-radius);
+}
+.rf-drawer[data-side='right'][open] {
+  translate: var(--rf-drawer-drag) 0;
+}
+.rf-drawer[data-side='left'] {
+  --rf-drawer-closed: -100% 0;
+  --rf-drawer-tail: -32px 0 0 0 var(--rf-drawer-bg);
+  inset: 0 auto 0 0;
+  border-radius: 0 var(--rf-panel-radius) var(--rf-panel-radius) 0;
+}
+.rf-drawer[data-side='left'][open] {
+  translate: calc(-1 * var(--rf-drawer-drag)) 0;
+}
+.rf-drawer[data-dragging] {
+  cursor: grabbing;
+  user-select: none;
+  transition: none;
+}
+
+.rf-drawer::backdrop {
+  background: rgb(0 0 0 / 40%);
+  opacity: 0;
+  transition:
+    opacity var(--rf-exit-slow),
+    overlay 160ms allow-discrete,
+    display 160ms allow-discrete;
+}
+[data-theme='dark'] .rf-drawer::backdrop {
+  background: rgb(0 0 0 / 70%);
+}
+.rf-drawer[open]::backdrop {
+  opacity: calc(1 - var(--rf-drawer-progress, 0));
+  transition:
+    opacity var(--rf-spring-moderate),
+    overlay 160ms allow-discrete,
+    display 160ms allow-discrete;
+}
+.rf-drawer[data-dragging]::backdrop {
+  transition: none;
+}
+
+.rf-drawer-handle {
+  inline-size: 40px;
+  block-size: 4px;
+  margin: -12px auto 16px;
+  border-radius: 9999px;
+  background: var(--rf-border);
+  cursor: grab;
+}
+.rf-drawer[open] {
+  display: flex;
+  flex-direction: column;
+}
+/* At the top, the handle sits on the edge that pulls away. */
+.rf-drawer[data-side='top'] .rf-drawer-handle {
+  order: 1;
+  margin: 16px auto -12px;
+}
+/* On the sides, the footer stays at the bottom of the panel. */
+.rf-drawer:is([data-side='left'], [data-side='right']) .rf-drawer-body {
+  flex: 1;
+}
+.rf-drawer-handle,
+.rf-drawer-header {
+  touch-action: none;
+}
+.rf-drawer-header {
+  display: grid;
+  gap: 6px;
+  padding-inline-end: 32px;
+}
+.rf-drawer-header h2 {
+  margin: 0;
+  font: 400 var(--rf-text-title) / var(--rf-leading-title) var(--rf-heading-font);
+  font-variation-settings: var(--rf-weight-strong);
+}
+.rf-drawer-header p {
+  margin: 0;
+  color: var(--rf-muted);
+}
+.rf-drawer:not(:has(.rf-drawer-close)) .rf-drawer-header {
+  padding-inline-end: 0;
+}
+.rf-drawer-body {
+  margin-block-start: 16px;
+}
+.rf-drawer-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-block-start: 24px;
+}
+.rf-drawer-close {
+  gap: normal;
+  position: absolute;
+  inset-block-start: 12px;
+  inset-inline-end: 12px;
+}
+
+[data-density='compact'] .rf-drawer {
+  padding: 16px;
+}
+[data-density='compact'] .rf-drawer:is([data-side='bottom'], [data-side='top']) {
+  padding-inline: max(16px, calc((100% - 520px) / 2));
+}
+[data-density='compact'] .rf-drawer-handle {
+  margin-block: -6px 12px;
+}
+
+/* Reduced motion: the drawer fades in place; a drag still moves it. */
+@media (prefers-reduced-motion: reduce) {
+  .rf-drawer {
+    translate: none;
+    opacity: 0;
+    transition:
+      opacity var(--rf-exit-slow),
+      overlay 160ms allow-discrete,
+      display 160ms allow-discrete;
+  }
+  .rf-drawer[open] {
+    opacity: 1;
+    transition:
+      opacity var(--rf-spring-moderate),
+      overlay 160ms allow-discrete,
+      display 160ms allow-discrete;
+  }
+  @starting-style {
+    .rf-drawer[open] {
+      translate: none;
+      opacity: 0;
+    }
+  }
+}
+@media (forced-colors: active) {
+  .rf-drawer {
+    border: 1px solid CanvasText;
+  }
+}

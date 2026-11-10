@@ -271,7 +271,7 @@ export function enhanceShowcaseSound() {
     'toggle',
     (event) => {
       const dialog = event.target
-      if (dialog instanceof HTMLDialogElement && dialog.matches('.rf-dialog')) {
+      if (dialog instanceof HTMLDialogElement && dialog.matches('.rf-dialog, .rf-drawer')) {
         play(dialog.open ? 'open' : 'close')
       } else if (
         event instanceof ToggleEvent &&

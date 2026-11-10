@@ -3103,3 +3103,57 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
   grid-template-columns: repeat(2, max-content);
   gap: 8px;
 }
+
+/* Drawer demos. */
+.doc-drawer-filters {
+  display: grid;
+  gap: 16px;
+}
+.doc-drawer-nav {
+  display: grid;
+  gap: 2px;
+  margin-inline: -8px;
+}
+.doc-drawer-nav a {
+  padding: 6px 8px;
+  border-radius: var(--rf-item-radius);
+  color: var(--rf-muted);
+  text-decoration: none;
+}
+.doc-drawer-nav a[aria-current='page'] {
+  background: var(--rf-hover);
+  color: var(--rf-fg);
+}
+@media (hover: hover) {
+  .doc-drawer-nav a:hover {
+    color: var(--rf-fg);
+  }
+}
+.doc-drawer-details {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 24px;
+  margin: 0;
+}
+.doc-drawer-details dt {
+  color: var(--rf-muted);
+}
+.doc-drawer-details dd {
+  margin: 0;
+}
+.doc-drawer-text {
+  margin: 0;
+}
+.doc-drawer-notes {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-inline-start: 20px;
+  color: var(--rf-muted);
+}
+/* Two columns: the last small card, Drawer, closes the gallery's final row. */
+@media (768px <= width < 1280px) {
+  .site-gallery:not([data-search-results]) [data-component='drawer'] {
+    grid-column: span 2;
+  }
+}

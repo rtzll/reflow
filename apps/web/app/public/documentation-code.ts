@@ -258,6 +258,20 @@ ${opening} label="Options" options={options} defaultValue="0" />`
       const compact = values.size === 'compact' ? ' size="compact"' : ''
       return `<HoverCard${placement}${delay}${compact} renderTrigger={(trigger) => (\n  <a href="/u/reflow" {...trigger}>@reflow</a>\n)}>\n  <Profile user={user} />\n</HoverCard>`
     }
+    case 'drawer': {
+      const side = values.side && values.side !== 'bottom' ? ` side="${values.side}"` : ''
+      const vertical = !values.side || values.side === 'bottom' || values.side === 'top'
+      const dismissible = values.dismissible === false ? ' dismissible={false}' : ''
+      const handle =
+        values.handle === (vertical && values.dismissible !== false)
+          ? ''
+          : ` handle={${Boolean(values.handle)}}`
+      const close =
+        Boolean(values.closeButton) === !vertical
+          ? ''
+          : ` showCloseButton={${Boolean(values.closeButton)}}`
+      return `<Drawer trigger="Open drawer" title="Filters"${side}${handle}${close}${dismissible}>\n  <Switch label="In stock only" defaultChecked />\n</Drawer>`
+    }
     case 'toaster': {
       const props = [
         values.position && values.position !== 'bottom-right'

@@ -42,6 +42,7 @@ import { BreadcrumbDemo } from './breadcrumb-example.tsx'
 import { SegmentedControlDemo } from './segmented-control-example.tsx'
 import { PopoverDemo } from './popover-example.tsx'
 import { ToasterDemo } from './toaster-example.tsx'
+import { DrawerDemo } from './drawer-example.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
 import { SoundCombobox } from './sound-combobox.tsx'
 import { playCopySuccess } from './showcase-sound.ts'
@@ -973,6 +974,37 @@ export const componentExamples: Record<string, readonly DocumentationExample[]> 
       'Compact',
       'compact',
       `<Popover label="Dimensions" trigger="Dimensions" size="compact">…</Popover>`,
+    ),
+  ],
+  drawer: [
+    demo(
+      'Basic',
+      'basic',
+      `<Drawer\n  trigger="Filters"\n  title="Filters"\n  description="Narrow the results."\n  footer={(close) => <Button mix={on('click', close)}>Apply</Button>}\n>\n  <SegmentedControl label="Sort by" options={sorts} fill />\n  <Switch label="In stock only" defaultChecked />\n</Drawer>`,
+      'Drag the panel down, flick it, press Escape or click the backdrop to close it; focus returns to the trigger.',
+    ),
+    demo(
+      'Sides',
+      'sides',
+      `<Drawer side="top" trigger="Top" title="Announcement">…</Drawer>\n<Drawer side="right" trigger="Right" title="Details">…</Drawer>\n<Drawer side="bottom" trigger="Bottom" title="Filters">…</Drawer>\n<Drawer side="left" trigger="Left" title="Mailboxes">…</Drawer>`,
+      'Top and bottom drawers show a handle; side drawers show a close button. Each closes with a drag toward its edge.',
+    ),
+    demo(
+      'Navigation',
+      'navigation',
+      `<Drawer side="left" trigger="Mailboxes" title="Mailboxes">\n  <nav aria-label="Mail">…</nav>\n</Drawer>`,
+    ),
+    demo(
+      'Scrolling content',
+      'scrolling',
+      `<Drawer trigger="Release notes" title="Release notes">\n  <ol>…</ol>\n</Drawer>`,
+      'Long content scrolls inside the panel; a drag only takes over once the content is back at its start.',
+    ),
+    demo(
+      'Not dismissible',
+      'required',
+      `<Drawer\n  trigger="Accept terms"\n  title="Terms of service"\n  dismissible={false}\n  footer={(close) => <Button mix={on('click', close)}>Accept</Button>}\n>…</Drawer>`,
+      'Escape, the backdrop and drags leave it open; close it from your own action.',
     ),
   ],
   toaster: [
@@ -2175,6 +2207,8 @@ export function ComponentDemo(
         return <PopoverDemo variant={variant} />
       case 'toaster':
         return <ToasterDemo variant={variant} />
+      case 'drawer':
+        return <DrawerDemo variant={variant} />
       case 'segmented-control':
         return <SegmentedControlDemo variant={variant} />
       case 'breadcrumb':
