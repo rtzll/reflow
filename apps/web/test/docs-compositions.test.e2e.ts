@@ -2,6 +2,7 @@ import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
+import { pauseClock } from './clock.ts'
 import { router, open } from './showcase-router.ts'
 
 it('lets external question controls load, navigate, and clear answer state', async (t) => {
@@ -111,7 +112,7 @@ it('streams thinking steps on the reference schedule and ends the connector with
   // The stream runs on timers, so the test holds the clock and steps it on.
   await page.clock.install()
   await open(page, '/docs/thinking-steps', { motion: true })
-  await page.clock.pauseAt((await page.evaluate(() => Date.now())) + 1000)
+  await pauseClock(page)
   const preview = page.locator('#streaming .doc-preview')
   await preview.scrollIntoViewIfNeeded()
   await expect(preview.getByRole('button', { name: 'Pause example' })).toBeVisible()

@@ -3,6 +3,7 @@ import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
+import { pauseClock } from './clock.ts'
 import { holdMotion, releaseMotion, seekMotion } from './motion.ts'
 import { open, router } from './showcase-router.ts'
 
@@ -207,12 +208,16 @@ it('uses one hover fill for grouped inputs and places the Volume preview above t
 
 it('restores dismissed banners and allows clearing the selected feature', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
+  // The banner returns on a timer, which the test moves on itself.
+  await page.clock.install()
   await open(page, '/?theme=dark', { motion: true })
   const banner = page.locator('.site-gallery [data-component="banner"]')
   const dismiss = banner.getByRole('button', { name: 'Dismiss' })
+  await pauseClock(page)
   await dismiss.click()
-  await dismiss.waitFor({ state: 'hidden', timeout: 1000 })
-  await dismiss.waitFor({ state: 'visible', timeout: 2500 })
+  await dismiss.waitFor({ state: 'hidden' })
+  await page.clock.runFor(1500)
+  await dismiss.waitFor({ state: 'visible' })
 
   const dropdown = page.getByRole('menu', { name: 'Component features' })
   const initial = dropdown.getByRole('menuitemcheckbox', {
