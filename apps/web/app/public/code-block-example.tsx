@@ -29,6 +29,7 @@ export function CodeBlockCard(handle: Handle<CardProps>) {
       lineNumbers
       wrap
       size="compact"
+      onCopy={playCopySuccess}
     />
   )
 }

@@ -77,16 +77,18 @@ function bindToastSounds() {
   })
 }
 
-function bindInputCopyErrors() {
+function bindCopyErrors() {
   const main = document.querySelector('#main')
   if (!main) return
-  // InputCopy exposes the outcome on its root after the clipboard request settles.
+  // InputCopy and CodeBlock expose the outcome on their root after the clipboard request settles.
   const observer = new MutationObserver((records) => {
     for (const { target, oldValue } of records) {
       if (
         oldValue !== 'error' &&
         target instanceof Element &&
-        target.matches('[data-slot="input-copy"][data-state="error"]')
+        target.matches(
+          ':is([data-slot="input-copy"], [data-slot="code-block"])[data-state="error"]',
+        )
       ) {
         playCopyError()
       }
@@ -286,6 +288,6 @@ export function enhanceShowcaseSound() {
     { capture: true },
   )
   bindSliderSounds()
-  bindInputCopyErrors()
+  bindCopyErrors()
   bindToastSounds()
 }

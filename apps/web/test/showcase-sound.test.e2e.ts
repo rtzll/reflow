@@ -258,6 +258,40 @@ it('confirms a CodeBlock copy with the copy cue', async (t) => {
   await expect.poll(audioStarts).toBeGreaterThan(0)
 })
 
+it('plays the copy cue from the CodeBlock gallery card too', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+  const audioStarts = await trackAudio(page)
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/?theme=dark')
+  await waitForShowcase(page)
+  const card = page.locator('.site-gallery [data-component="code-block"]')
+  await card.getByRole('button', { name: 'Copy code' }).click()
+  await expect(card.getByRole('button', { name: 'Copied' })).toBeVisible()
+  await expect.poll(audioStarts).toBeGreaterThan(0)
+})
+
+it('plays the error cue when a CodeBlock copy fails, as InputCopy does', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  const audioStarts = await trackAudio(page)
+  await page.addInitScript(() => {
+    Clipboard.prototype.writeText = async () => {
+      throw new DOMException('Clipboard denied', 'NotAllowedError')
+    }
+  })
+  await page.goto('/docs/code-block')
+  await waitForShowcase(page)
+  // Unlock audio with a first gesture, as the InputCopy test does.
+  await page.getByRole('button', { name: 'Copy import', exact: true }).click()
+  await expect.poll(audioStarts).toBeGreaterThan(0)
+  const block = page.locator('#basic [data-slot="code-block"]')
+  const before = await audioStarts()
+  await block.getByRole('button', { name: 'Copy code' }).click()
+  await expect(block).toHaveAttribute('data-state', 'error')
+  await expect(block.getByRole('button', { name: 'Copy failed' })).toBeVisible()
+  await expect.poll(audioStarts).toBeGreaterThan(before)
+})
+
 it('plays open and close cues for a Drawer', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   const audioStarts = await trackAudio(page)
