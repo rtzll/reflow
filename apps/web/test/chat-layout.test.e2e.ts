@@ -25,7 +25,7 @@ it('opens at the newest message and jumps back to it from the history', async (t
   await expect(jump).toBeHidden()
 })
 
-it('stays on a streaming reply while the reader does, and leaves a reader who scrolled back', async (t) => {
+it('stays on a streaming reply while the reader does', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
   await open(page, '/docs/chat-layout')
@@ -65,14 +65,32 @@ it('stays on a streaming reply while the reader does, and leaves a reader who sc
   )
   assert.ok(lengths.at(-1)! > lengths[0]!, `the reply streamed: ${lengths.join(',')}`)
   assert.ok(Math.max(...samples) <= 2, `kept at the end: ${samples.join(',')}`)
+})
 
-  // Send again, then scroll back: the reader stays put while the reply grows.
+it('leaves a reader who scrolled back where they are while a reply streams', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.setViewportSize({ width: 1280, height: 900 })
+  // The reply streams on timers, which the test moves on itself.
+  await page.clock.install()
+  await open(page, '/docs/chat-layout')
+  const example = page.locator('#long-history')
+  await example.scrollIntoViewIfNeeded()
+  const viewport = example.locator('.rf-chat-layout-viewport')
+  const composer = example.getByRole('textbox')
+  const reply = () =>
+    viewport.evaluate((node) => {
+      const replies = node.querySelectorAll('.rf-chat-message[data-role="assistant"]')
+      return (replies[replies.length - 1]?.textContent ?? '').length
+    })
+
   await composer.fill('And what about speed?')
   await composer.press('Enter')
-  await page.waitForTimeout(500)
+  await page.clock.runFor(500)
   await viewport.evaluate((node) => node.scrollBy(0, -200))
   const held = await viewport.evaluate((node) => node.scrollTop)
   await expect(example.getByRole('button', { name: 'New messages' })).toBeVisible()
-  await page.waitForTimeout(400)
+  const before = await reply()
+  await page.clock.runFor(400)
+  assert.ok((await reply()) > before, 'the reply kept streaming')
   assert.equal(await viewport.evaluate((node) => node.scrollTop), held)
 })
