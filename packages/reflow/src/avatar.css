@@ -66,6 +66,7 @@
   list-style: none;
 }
 .rf-avatar-group > li {
+  position: relative;
   display: flex;
   transition: margin-inline-start var(--rf-spring-moderate);
 }

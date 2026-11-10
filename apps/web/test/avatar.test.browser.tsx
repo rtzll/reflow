@@ -89,6 +89,9 @@ describe('AvatarGroup', () => {
     const items = Array.from($$('ul.rf-avatar-group > li'))
     equal(items.length, 3)
     equal(items[0]!.querySelector('.rf-avatar')?.getAttribute('aria-label'), 'Ada Lovelace')
+    // Earlier avatars stack above later ones, keeping status dots in view.
+    const layers = items.map((item) => Number((item as HTMLElement).style.zIndex || 0))
+    ok(layers[0]! > layers[1]! && layers[1]! > layers[2]!, `stacking: ${layers.join(',')}`)
     const more = items[2]!.querySelector('.rf-avatar-more') as HTMLElement
     equal(more.textContent, '+3')
     equal(

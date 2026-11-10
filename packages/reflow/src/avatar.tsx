@@ -123,7 +123,8 @@ export function AvatarGroup(handle: Handle<AvatarGroupProps>) {
     return (
       <ul class="rf-avatar-group" aria-label={label} style={{ '--rf-avatar-size': `${size}px` }}>
         {shown.map((avatar, index) => (
-          <li key={`${avatar.name}-${index}`}>
+          // Earlier avatars sit on top, so each status dot stays in view.
+          <li key={`${avatar.name}-${index}`} style={{ zIndex: shown.length - index + 1 }}>
             <Tooltip
               content={avatar.name}
               renderTrigger={(trigger) => (
