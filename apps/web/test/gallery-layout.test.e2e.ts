@@ -3,6 +3,7 @@ import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
+import { holdMotion, releaseMotion, seekMotion } from './motion.ts'
 import { open, router } from './showcase-router.ts'
 
 it('preserves the gallery order and keeps previews above their footers', async (t) => {
@@ -166,7 +167,10 @@ it('preserves the gallery order and keeps previews above their footers', async (
   }
   const datePicker = gallery.locator('[data-component="date-picker"]')
   await datePicker.getByRole('button', { name: 'Clear date', exact: true }).click()
-  const trigger = datePicker.getByRole('button', { name: 'Start date: Pick a date', exact: true })
+  const trigger = datePicker.getByRole('button', {
+    name: 'Start date: Pick a date',
+    exact: true,
+  })
   assert.ok(await trigger.evaluate((button) => document.activeElement === button))
   await trigger.press('Enter')
   await datePicker.getByRole('dialog', { name: 'Start date' }).waitFor()
@@ -212,8 +216,12 @@ it('restores dismissed banners and allows clearing the selected feature', async 
   await dismiss.waitFor({ state: 'visible', timeout: 2500 })
 
   const dropdown = page.getByRole('menu', { name: 'Component features' })
-  const initial = dropdown.getByRole('menuitemcheckbox', { name: 'Spring animations' })
-  const feature = dropdown.getByRole('menuitemcheckbox', { name: 'Font weight shifts' })
+  const initial = dropdown.getByRole('menuitemcheckbox', {
+    name: 'Spring animations',
+  })
+  const feature = dropdown.getByRole('menuitemcheckbox', {
+    name: 'Font weight shifts',
+  })
   const check = feature.locator('.rf-menu-check path')
   await check.evaluate((path) => {
     path.addEventListener('transitionend', (event) => {
@@ -240,11 +248,16 @@ it('moves the hovered switch thumb without jumping and settles a drag from the t
   await page.emulateMedia({ reducedMotion: 'no-preference' })
   await open(page, '/?theme=dark')
   const tile = page.locator('.site-gallery [data-component="switch"]')
-  const input = tile.getByRole('switch', { name: 'Sound effects', exact: true })
+  const input = tile.getByRole('switch', {
+    name: 'Sound effects',
+    exact: true,
+  })
   await input.hover()
   const track = tile
     .locator('.rf-switch')
-    .filter({ has: page.getByRole('switch', { name: 'Sound effects', exact: true }) })
+    .filter({
+      has: page.getByRole('switch', { name: 'Sound effects', exact: true }),
+    })
     .locator('.rf-switch-track')
   const thumb = track.locator('.rf-switch-thumb')
   await thumb.evaluate(async (element) => {
@@ -313,7 +326,9 @@ it('fans out the queue and reorders during a drag before release', async (t) => 
   const last = (await rows.last().boundingBox())!
   await page.mouse.move(first.x + 30, first.y + first.height / 2)
   await page.mouse.down()
-  await page.mouse.move(last.x + 30, last.y + last.height / 2 + 4, { steps: 8 })
+  await page.mouse.move(last.x + 30, last.y + last.height / 2 + 4, {
+    steps: 8,
+  })
   assert.match((await rows.last().textContent()) ?? '', /Draft an intro/)
   await page.mouse.up()
   await rows
@@ -786,7 +801,10 @@ it('grows, merges and splits the checked fill in a CheckboxGroup', async (t) => 
       const base = node.getBoundingClientRect()
       const box = (element: Element) => {
         const rect = element.getBoundingClientRect()
-        return { top: Math.round(rect.top - base.top), bottom: Math.round(rect.bottom - base.top) }
+        return {
+          top: Math.round(rect.top - base.top),
+          bottom: Math.round(rect.bottom - base.top),
+        }
       }
       return {
         blocks: Array.from(node.querySelectorAll('.rf-choice-run:not([data-leaving])'), box),
@@ -891,7 +909,10 @@ async function pressAlpha(page: Page) {
   const y = box.y + box.height / 2
   await page.mouse.move(x, y)
   await page.mouse.down()
-  return { alpha, moveTo: (dx: number) => page.mouse.move(x + dx, y, { steps: 5 }) }
+  return {
+    alpha,
+    moveTo: (dx: number) => page.mouse.move(x + dx, y, { steps: 5 }),
+  }
 }
 
 it('scrubs a color channel with a locked pointer and a virtual cursor', async (t) => {
@@ -943,10 +964,6 @@ it('keeps scrubbing on the OS cursor when the pointer lock is refused', async (t
 
 it('glides earlier chat messages up when a new one is sent', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  // A DevTools session shifts frame timing the way CI runners do, where a
-  // transcript once scrolled past its end mid-glide and snapped back.
-  const cdp = await page.context().newCDPSession(page)
-  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 })
   await open(page, '/docs/input-message')
   const box = page.locator('.doc-composer-preview textarea').first()
   await box.scrollIntoViewIfNeeded()
@@ -954,30 +971,38 @@ it('glides earlier chat messages up when a new one is sent', async (t) => {
     await box.fill(`Message ${i}`)
     await box.press('Enter')
   }
-  const earlier = page.getByText('Message 6', { exact: true })
-  await earlier.waitFor()
-  await page.waitForTimeout(400)
-  // Sample the earlier message's place on screen every frame across the next send.
-  await earlier.evaluate((node) => {
-    const samples: number[] = []
-    ;(window as unknown as { samples: number[] }).samples = samples
-    const start = performance.now()
-    const tick = () => {
-      samples.push(node.getBoundingClientRect().top)
-      if (performance.now() - start < 600) requestAnimationFrame(tick)
-    }
-    requestAnimationFrame(tick)
-  })
+  // A message glides once its own entrance has finished.
+  const earlier = page.locator('.rf-chat-message', { hasText: /^Message 6$/ })
+  await expect
+    .poll(() =>
+      earlier.evaluate((node) => node.getAnimations().map((animation) => animation.playState)),
+    )
+    .not.toContain('running')
+  const top = () => earlier.evaluate((node) => node.getBoundingClientRect().top)
+  const before = await top()
+
+  await holdMotion(page)
   await box.fill('Message 8')
   await box.press('Enter')
-  await page.waitForTimeout(800)
-  const samples = await page.evaluate(() => (window as unknown as { samples: number[] }).samples)
-  const first = samples[0]!
-  const last = samples[samples.length - 1]!
-  assert.ok(last < first - 20, `The message should move up (${first} → ${last})`)
-  // It passes through the space between, rather than jumping in one frame.
-  const between = samples.filter((top) => top < first - 4 && top > last + 4)
-  assert.ok(between.length >= 2, `Expected a glide, got ${samples.map(Math.round).join(', ')}`)
+  await page.locator('.rf-chat-message', { hasText: /^Message 8$/ }).waitFor()
+  // A glide restarts on the next frame if the transcript scrolled under it.
+  await page.evaluate(
+    () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
+  )
+  const frames = []
+  for (const progress of [0, 0.2, 1]) {
+    await seekMotion(earlier, progress)
+    frames.push(await top())
+  }
+  const [start, middle, end] = frames as [number, number, number]
+  // From where it showed, through the space between, rather than in one jump.
+  // A spring, it is most of the way there a fifth of the way through.
+  assert.ok(Math.abs(start - before) < 1, `starts where it was: ${before} → ${frames}`)
+  assert.ok(end < before - 20, `moves up: ${frames}`)
+  assert.ok(middle < start - 4 && middle > end + 4, `passes between: ${frames}`)
+  // It lands where the glide ended, without the transcript snapping back.
+  await releaseMotion(page)
+  await expect.poll(top).toBeCloseTo(end, 0)
 })
 
 it('fills the InputMessage playground and demo with the conversation, composer at the bottom', async (t) => {
@@ -1013,7 +1038,10 @@ it('fills the InputMessage playground and demo with the conversation, composer a
     const fits = await page.locator('.site-demo-card').evaluate((card) => {
       const column = card.querySelector('.doc-composer-preview')!.getBoundingClientRect()
       const footer = card.querySelector('.site-preview-footer')!.getBoundingClientRect()
-      return { height: Math.round(column.height), inside: column.bottom <= footer.top }
+      return {
+        height: Math.round(column.height),
+        inside: column.bottom <= footer.top,
+      }
     })
     assert.deepEqual(fits, { height: 480, inside: true }, `at ${width}px`)
   }
@@ -1027,7 +1055,10 @@ it('anchors docs previews 48px below the header, as the reference does', async (
     page.locator(frame).evaluate((stage, target) => {
       const box = stage.getBoundingClientRect()
       const node = stage.querySelector(target)!.getBoundingClientRect()
-      return { x: Math.round(node.left - box.left), y: Math.round(node.top - box.top) }
+      return {
+        x: Math.round(node.left - box.left),
+        y: Math.round(node.top - box.top),
+      }
     }, target)
 
   // A collapsing example stays in place: the stage hugs it instead of centering it.
@@ -1063,11 +1094,17 @@ it('anchors docs previews 48px below the header, as the reference does', async (
   // The accordion playground supplies its own inset in the reference.
   await open(page, '/docs/accordion')
   const accordion = '.doc-preview-stage[data-playground][data-component="accordion"]'
-  assert.deepEqual(await offset(accordion, '.doc-example-content'), { x: 24, y: 40 })
+  assert.deepEqual(await offset(accordion, '.doc-example-content'), {
+    x: 24,
+    y: 40,
+  })
   await page.locator(accordion).getByRole('button', { name: 'Styling', exact: true }).click()
   assert.equal((await offset(accordion, '.rf-accordion')).y, 40)
   await page.setViewportSize({ width: 390, height: 844 })
-  assert.deepEqual(await offset(accordion, '.doc-example-content'), { x: 16, y: 40 })
+  assert.deepEqual(await offset(accordion, '.doc-example-content'), {
+    x: 16,
+    y: 40,
+  })
   await page.setViewportSize({ width: 1280, height: 900 })
 
   // Pickers start at the top so their popups expanded downward.
