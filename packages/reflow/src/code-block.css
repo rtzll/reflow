@@ -220,7 +220,7 @@
   opacity: 0.75;
 }
 .rf-code .highlighted-word {
-  border-radius: 4px;
+  border-radius: calc(var(--rf-radius) / 2);
   background: color-mix(in oklab, var(--rf-accent) 16%, transparent);
   box-shadow: 0 0 0 1px color-mix(in oklab, var(--rf-accent) 30%, transparent);
 }

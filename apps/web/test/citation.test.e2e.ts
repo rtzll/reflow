@@ -56,3 +56,23 @@ it('sits within the line and previews its sources above it', async (t) => {
   }))
   assert.deepEqual(placement, { side: 'top', above: true })
 })
+
+it('follows the shape setting, sharp to pill', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  const radius = async (shape: string) => {
+    await page.goto(`/docs/citation?shape=${shape}`)
+    return page
+      .locator('#basic .rf-citation')
+      .first()
+      .evaluate((node) => ({
+        radius: parseFloat(getComputedStyle(node).borderTopLeftRadius),
+        height: node.getBoundingClientRect().height,
+      }))
+  }
+  const sharp = await radius('sharp')
+  const round = await radius('rounded')
+  const pill = await radius('pill')
+  assert.ok(sharp.radius <= 1, `sharp: ${sharp.radius}`)
+  assert.ok(round.radius >= 4 && round.radius <= 8, `round: ${round.radius}`)
+  assert.ok(pill.radius >= pill.height / 2, `pill: ${pill.radius}`)
+})

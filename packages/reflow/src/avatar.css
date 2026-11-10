@@ -22,6 +22,9 @@
 .rf-avatar[data-shape='square'] {
   border-radius: max(4px, calc(var(--rf-avatar-size) * 0.25));
 }
+[data-shape='sharp'] .rf-avatar[data-shape='square'] {
+  border-radius: var(--rf-radius);
+}
 .rf-avatar > * {
   grid-area: 1 / 1;
 }

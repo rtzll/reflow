@@ -10,7 +10,8 @@
   block-size: 18px;
   margin-inline: 2px;
   padding-inline: 5px;
-  border-radius: 6px;
+  /* Three quarters of the item radius: 6px rounded, a pill at pill, square at sharp. */
+  border-radius: calc(var(--rf-item-radius) * 0.75);
   outline: none;
   background: var(--rf-neutral-fill);
   color: var(--rf-muted);

@@ -109,6 +109,9 @@
     background: color-mix(in oklab, var(--rf-surface-3, white), var(--rf-fg) 5%);
   }
 }
+[data-shape='sharp'] .rf-chat-jump {
+  border-radius: var(--rf-radius);
+}
 .rf-chat-jump > svg {
   flex: none;
 }
