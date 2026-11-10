@@ -1235,6 +1235,8 @@ it('fills the proposed range end like a selected day, with a faint inner ring', 
 it('sends a queued message up into the card’s conversation and restores the queue after', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1440, height: 900 })
+  // The card resets on a timer; the test moves the clock on rather than waiting.
+  await page.clock.install()
   await open(page, '/?theme=dark')
   const card = page.locator('.site-gallery [data-component="queued-stack"]')
   await card.scrollIntoViewIfNeeded()
@@ -1270,9 +1272,10 @@ it('sends a queued message up into the card’s conversation and restores the qu
   assert.equal(await page.evaluate(() => scrollY), pageTop, 'sending leaves the page where it was')
 
   // While the pointer stays, nothing resets; once it leaves, the card returns to how it began.
-  await page.waitForTimeout(2800)
+  await page.clock.runFor(3000)
   await expect(rows).toHaveCount(2)
   await page.mouse.move(5, 5)
-  await expect(rows).toHaveCount(3, { timeout: 4000 })
+  await page.clock.runFor(3000)
+  await expect(rows).toHaveCount(3)
   await expect(card.locator('.rf-chat-message')).toHaveCount(0)
 })
