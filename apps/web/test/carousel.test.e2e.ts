@@ -154,3 +154,38 @@ it('counts only the stops it can reach when several slides are in view', async (
     'true',
   )
 })
+
+it('works the same in a right-to-left page', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/docs/carousel')
+  await waitForShowcase(page)
+  const example = page.locator('#basic')
+  const viewport = example.locator('.rf-carousel-viewport')
+  await viewport.scrollIntoViewIfNeeded()
+  await example.evaluate((node) => node.setAttribute('dir', 'rtl'))
+  await viewport.evaluate((node) => node.scrollTo({ left: 0, behavior: 'instant' }))
+  assert.equal(await viewport.evaluate((node) => getComputedStyle(node).direction), 'rtl')
+  // In RTL a slide rests with its right edge on the viewport's.
+  const restingRtl = () =>
+    viewport.evaluate((node) => {
+      const right = node.getBoundingClientRect().right
+      return Array.from(node.querySelectorAll<HTMLElement>('.rf-carousel-slide')).findIndex(
+        (slide) => Math.abs(slide.getBoundingClientRect().right - right) < 2,
+      )
+    })
+  await expect.poll(restingRtl).toBe(0)
+  await example.getByRole('button', { name: 'Next slide' }).click()
+  await expect.poll(restingRtl).toBe(1)
+  await example.getByRole('button', { name: 'Show Yours to theme' }).click()
+  await expect.poll(restingRtl).toBe(3)
+  await expect(example.getByRole('button', { name: 'Next slide' })).toBeDisabled()
+
+  // Scrolling by hand moves the dots too.
+  await viewport.evaluate((node) => node.scrollTo({ left: 0, behavior: 'instant' }))
+  await expect(example.getByRole('button', { name: 'Show Fluid motion' })).toHaveAttribute(
+    'aria-current',
+    'true',
+  )
+})

@@ -92,14 +92,24 @@ export function Carousel(handle: Handle<CarouselProps>) {
   }
 
   // Where a slide comes to rest, within the range the viewport can scroll.
+  // Measured from the slide's box against the viewport's, so it holds in
+  // either direction: right to left, scrollLeft runs from 0 down to minus
+  // the scroll width.
   function restingLeft(slide: HTMLElement) {
     if (!viewport) return 0
     const style = getComputedStyle(viewport)
+    const rtl = style.direction === 'rtl'
+    const padding = parseFloat(style.scrollPaddingInlineStart) || 0
+    const frame = viewport.getBoundingClientRect()
+    const box = slide.getBoundingClientRect()
     const left =
       handle.props.align === 'center'
-        ? slide.offsetLeft + slide.offsetWidth / 2 - viewport.clientWidth / 2
-        : slide.offsetLeft - (parseFloat(style.scrollPaddingInlineStart) || 0)
-    return Math.min(Math.max(0, left), viewport.scrollWidth - viewport.clientWidth)
+        ? viewport.scrollLeft + (box.left + box.width / 2) - (frame.left + frame.width / 2)
+        : rtl
+          ? viewport.scrollLeft + (box.right - frame.right) + padding
+          : viewport.scrollLeft + (box.left - frame.left) - padding
+    const max = viewport.scrollWidth - viewport.clientWidth
+    return rtl ? Math.min(0, Math.max(-max, left)) : Math.min(max, Math.max(0, left))
   }
 
   function measure() {
@@ -114,7 +124,7 @@ export function Carousel(handle: Handle<CarouselProps>) {
       return
     }
     const end = viewport.scrollWidth - viewport.clientWidth
-    const last = slides.findIndex((slide) => restingLeft(slide) >= end - 1)
+    const last = slides.findIndex((slide) => Math.abs(restingLeft(slide)) >= end - 1)
     const next = last === -1 ? slides.length : last + 1
     if (next === reachable) return
     reachable = next
