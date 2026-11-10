@@ -68,3 +68,61 @@ it('rests side drawers against their edge at 400px wide', async (t) => {
     await expect(panel).toBeHidden()
   }
 })
+
+for (const [side, button, title] of [
+  ['bottom', 'Bottom', 'Filters'],
+  ['top', 'Top', 'Announcement'],
+  ['right', 'Right', 'Details'],
+  ['left', 'Left', 'Mailboxes'],
+] as const) {
+  it(`slides a ${side} drawer in and out over 500ms, the backdrop darkening in step`, async (t) => {
+    const page = await t.serve(await createTestServer(router.fetch))
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await page.goto('/docs/drawer')
+    await waitForShowcase(page)
+    const trigger = page.locator('#sides').getByRole('button', { name: button, exact: true })
+    const panel = page.getByRole('dialog', { name: title })
+    // Every frame: how much of the panel is on screen, and how dark the backdrop is.
+    const sample = () =>
+      panel.evaluate(async (node, side) => {
+        const frames: { shown: number; shade: number; time: number }[] = []
+        const start = performance.now()
+        const { clientWidth, clientHeight } = document.documentElement
+        while (performance.now() - start < 800) {
+          const box = node.getBoundingClientRect()
+          const shown =
+            side === 'bottom'
+              ? (clientHeight - box.top) / box.height
+              : side === 'top'
+                ? box.bottom / box.height
+                : side === 'right'
+                  ? (clientWidth - box.left) / box.width
+                  : box.right / box.width
+          frames.push({
+            shown: Math.max(0, Math.min(1, shown)),
+            shade: Number(getComputedStyle(node, '::backdrop').opacity),
+            time: Math.round(performance.now() - start),
+          })
+          await new Promise((resolve) => requestAnimationFrame(resolve))
+        }
+        return frames
+      }, side)
+    const check = (frames: Awaited<ReturnType<typeof sample>>) => {
+      const moving = frames.filter((frame) => frame.shown > 0.1 && frame.shown < 0.9)
+      assert.ok(moving.length >= 3, `slides over several frames: ${JSON.stringify(frames)}`)
+      for (const frame of moving)
+        assert.ok(Math.abs(frame.shown - frame.shade) < 0.15, `in step: ${JSON.stringify(frame)}`)
+    }
+
+    await trigger.click()
+    const opening = await sample()
+    check(opening)
+    // Still arriving at 120ms, settled well before 800ms.
+    assert.ok(opening.find((frame) => frame.time >= 120)!.shown < 0.97)
+    assert.ok(opening.at(-1)!.shown > 0.99 && opening.at(-1)!.shade > 0.99)
+
+    await page.keyboard.press('Escape')
+    check(await sample())
+    await expect(panel).toBeHidden()
+  })
+}

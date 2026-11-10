@@ -1,10 +1,13 @@
-/* Drawer: a modal panel attached to one edge of the viewport. It slides in
-   on the moderate spring, which has no bounce, so the panel never lifts off
-   its edge, and leaves on Dialog's exit tween. While dragged it follows
-   --rf-drawer-drag, the distance toward its edge, and the backdrop fades
-   with --rf-drawer-progress. A strip of panel color past the edge covers
-   the gap when a drag pulls it the other way. */
+/* Drawer: a modal panel attached to one edge of the viewport. The panel
+   and the backdrop share one motion, in and out and back from a drag: a
+   long ease that starts fast and settles gently, with no overshoot, so the
+   panel never lifts off its edge and the backdrop darkens as it arrives.
+   While dragged the panel follows --rf-drawer-drag, the distance toward its
+   edge, and the backdrop lightens with --rf-drawer-progress. A strip of
+   panel color past the edge covers the gap when a drag pulls it the other
+   way. */
 .rf-drawer {
+  --rf-drawer-motion: 500ms cubic-bezier(0.32, 0.72, 0, 1);
   --rf-drawer-bg: var(--rf-surface-5);
   --rf-drawer-drag: 0px;
   --rf-drawer-closed: 0 100%;
@@ -32,24 +35,12 @@
   font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
   translate: var(--rf-drawer-closed);
   transition:
-    translate var(--rf-exit-slow),
-    overlay 160ms allow-discrete,
-    display 160ms allow-discrete;
+    translate var(--rf-drawer-motion),
+    overlay var(--rf-drawer-motion) allow-discrete,
+    display var(--rf-drawer-motion) allow-discrete;
 }
 .rf-drawer[open] {
   translate: 0 var(--rf-drawer-drag);
-  transition:
-    translate var(--rf-spring-moderate),
-    overlay 160ms allow-discrete,
-    display 160ms allow-discrete;
-}
-@starting-style {
-  .rf-drawer[open] {
-    translate: var(--rf-drawer-closed);
-  }
-  .rf-drawer[open]::backdrop {
-    opacity: 0;
-  }
 }
 
 /* Top and bottom drawers keep their content in a readable column. */
@@ -100,22 +91,31 @@
   background: rgb(0 0 0 / 40%);
   opacity: 0;
   transition:
-    opacity var(--rf-exit-slow),
-    overlay 160ms allow-discrete,
-    display 160ms allow-discrete;
+    opacity 500ms cubic-bezier(0.32, 0.72, 0, 1),
+    overlay 500ms cubic-bezier(0.32, 0.72, 0, 1) allow-discrete,
+    display 500ms cubic-bezier(0.32, 0.72, 0, 1) allow-discrete;
 }
 [data-theme='dark'] .rf-drawer::backdrop {
   background: rgb(0 0 0 / 70%);
 }
 .rf-drawer[open]::backdrop {
-  opacity: calc(1 - var(--rf-drawer-progress, 0));
-  transition:
-    opacity var(--rf-spring-moderate),
-    overlay 160ms allow-discrete,
-    display 160ms allow-discrete;
+  opacity: 1;
 }
 .rf-drawer[data-dragging]::backdrop {
+  opacity: calc(1 - var(--rf-drawer-progress, 0));
   transition: none;
+}
+/* Where the panel and backdrop start from as the drawer opens. Starting
+   styles cascade with the rest, so these follow the open rules above and
+   match the per-side ones in specificity, or those would win and the
+   drawer would appear without its slide. */
+@starting-style {
+  .rf-drawer[data-side][open] {
+    translate: var(--rf-drawer-closed);
+  }
+  .rf-drawer[data-side][open]::backdrop {
+    opacity: 0;
+  }
 }
 
 .rf-drawer-handle {
@@ -193,19 +193,15 @@
     translate: none;
     opacity: 0;
     transition:
-      opacity var(--rf-exit-slow),
-      overlay 160ms allow-discrete,
-      display 160ms allow-discrete;
+      opacity var(--rf-drawer-motion),
+      overlay var(--rf-drawer-motion) allow-discrete,
+      display var(--rf-drawer-motion) allow-discrete;
   }
   .rf-drawer[open] {
     opacity: 1;
-    transition:
-      opacity var(--rf-spring-moderate),
-      overlay 160ms allow-discrete,
-      display 160ms allow-discrete;
   }
   @starting-style {
-    .rf-drawer[open] {
+    .rf-drawer[data-side][open] {
       translate: none;
       opacity: 0;
     }
