@@ -48,14 +48,23 @@ export function ChatLayout(handle: Handle<ChatLayoutProps>) {
     void handle.update()
   }
 
+  // The end, from layout alone. Messages gliding to new places are moved by
+  // transforms, which grow scrollHeight while they play; measured that way,
+  // the transcript would scroll past the end and snap back as glides finish.
+  function endTop() {
+    if (!viewport) return 0
+    const content = viewport.firstElementChild as HTMLElement | null
+    return Math.max(0, (content?.offsetHeight ?? viewport.scrollHeight) - viewport.clientHeight)
+  }
+
   function atEnd() {
     if (!viewport) return true
-    return viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight <= pinSlack
+    return endTop() - viewport.scrollTop <= pinSlack
   }
 
   function scrollToEnd(smooth = false) {
     viewport?.scrollTo({
-      top: viewport.scrollHeight,
+      top: endTop(),
       behavior: smooth && !prefersReducedMotion() ? 'smooth' : 'instant',
     })
   }
@@ -66,10 +75,10 @@ export function ChatLayout(handle: Handle<ChatLayoutProps>) {
     if (!viewport) return
     const scroller = viewport
     scrollToEnd()
-    let lastHeight = node.scrollHeight
+    let lastHeight = node.offsetHeight
     const observer = new ResizeObserver(() => {
-      const grew = node.scrollHeight > lastHeight
-      lastHeight = node.scrollHeight
+      const grew = node.offsetHeight > lastHeight
+      lastHeight = node.offsetHeight
       if (pinned) scrollToEnd()
       else if (grew) setState(false, true)
     })

@@ -956,6 +956,10 @@ it('keeps scrubbing on the OS cursor when the pointer lock is refused', async (t
 
 it('glides earlier chat messages up when a new one is sent', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
+  // A DevTools session shifts frame timing the way CI runners do, where a
+  // transcript once scrolled past its end mid-glide and snapped back.
+  const cdp = await page.context().newCDPSession(page)
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 })
   await page.goto('/docs/input-message')
   await waitForShowcase(page)
   const box = page.locator('.doc-composer-preview textarea').first()
