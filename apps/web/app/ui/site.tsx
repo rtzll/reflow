@@ -526,6 +526,7 @@ const tallCards = new Set([
   'chat-message',
 ])
 const rightCards = new Set([
+  'input-message',
   'color-picker',
   'command-menu',
   'thinking-steps',

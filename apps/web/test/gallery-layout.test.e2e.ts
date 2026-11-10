@@ -133,13 +133,24 @@ it('preserves the gallery order and keeps previews above their footers', async (
       assert.equal(popover!.x, drawer!.x)
       assert.ok(drawer!.y > popover!.y)
       assert.equal(Math.round(chat!.y + chat!.height), Math.round(drawer!.y + drawer!.height))
-      // The second row shows off the newer overlays: a wide Toaster with HoverCard beside it.
-      const [input, toaster, hover] = await Promise.all(
-        ['input-message', 'toaster', 'hover-card'].map(tile),
+      // Wide cards alternate sides down the gallery: InputMessage on the right
+      // of the first row, Toaster on the left of the second, ColorPicker on the
+      // right again, and so on.
+      const sides = await gallery.evaluate((node) => {
+        const left = node.getBoundingClientRect().left
+        return Array.from(
+          node.querySelectorAll<HTMLElement>(':scope > article[data-wide]'),
+          (card) => (card.getBoundingClientRect().left - left < 50 ? 'L' : 'R'),
+        ).join('')
+      })
+      assert.equal(sides, 'RLRLRLRLRLRLRL')
+      const [indicator, input, toaster, hover] = await Promise.all(
+        ['thinking-indicator', 'input-message', 'toaster', 'hover-card'].map(tile),
       )
+      assert.equal(indicator!.y, input!.y)
+      assert.ok(indicator!.x < input!.x)
       assert.equal(toaster!.y, hover!.y)
       assert.ok(toaster!.y > input!.y)
-      assert.ok(toaster!.width > hover!.width * 1.9)
       assert.ok(hover!.x > toaster!.x)
       const accordion = gallery.locator('[data-component="accordion"]')
       await accordion.getByRole('button', { name: 'Accessibility', exact: true }).click()
