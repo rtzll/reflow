@@ -84,13 +84,20 @@ export interface ChatAttachment {
 
 export interface ChatMessageProps {
   transitionId?: string
-  role: 'user' | 'assistant'
+  /** `system` shows an event in the conversation, such as a model switch, as a quiet centred line. */
+  role: 'user' | 'assistant' | 'system'
   children?: RemixNode
+  /** Files shown with a user or assistant message. */
   attachments?: readonly ChatAttachment[]
+  /** Names the message. Defaults to You, Assistant or System. */
   label?: string
   size?: ControlSize
+  /** Shown under a user message on hover, and inline after a system event. */
   time?: string
+  /** Shown on hover under a message, and always after a system event. */
   actions?: RemixNode
+  /** A small glyph before a system event. */
+  icon?: RemixNode
   animate?: boolean
 }
 
@@ -167,6 +174,28 @@ export function ChatMessage(handle: Handle<ChatMessageProps>) {
   return () => {
     const { role, label, attachments, children, size, time, actions, animate = true } = handle.props
     followMove()
+    if (role === 'system')
+      return (
+        <article
+          class="rf-chat-message"
+          data-role="system"
+          data-size={size}
+          data-animate={animate ? '' : undefined}
+          aria-label={label ?? 'System'}
+          mix={track}
+        >
+          <p class="rf-chat-system">
+            {handle.props.icon != null && (
+              <span class="rf-chat-system-icon" aria-hidden="true">
+                {handle.props.icon}
+              </span>
+            )}
+            <span class="rf-chat-system-text">{children}</span>
+            {time && <span class="rf-chat-time">{time}</span>}
+            {actions != null && <span class="rf-chat-actions">{actions}</span>}
+          </p>
+        </article>
+      )
     return (
       <article
         class="rf-chat-message"

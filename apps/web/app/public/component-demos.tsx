@@ -388,6 +388,22 @@ export const componentExamples: Record<string, readonly DocumentationExample[]> 
 </ChatMessage>
 <ChatMessage role="assistant" animate={false}>Looks great — it’ll crop cleanly into the circle.</ChatMessage>`,
     ),
+    demo(
+      'System messages',
+      'system',
+      `<ChatMessage role="system" icon={<Icon name="clock" />} time="Yesterday 6:08 PM">
+  Conversation resumed
+</ChatMessage>
+<ChatMessage role="user">Can you tighten the intro?</ChatMessage>
+<ChatMessage
+  role="system"
+  icon={<Icon name="cpu" />}
+  actions={<Button size="compact" variant="ghost">Undo</Button>}
+>
+  Switched to a faster model
+</ChatMessage>`,
+      'Events in the conversation, such as a model switch or a resumed session, sit between messages as a quiet centred line. Their time and actions stay in view.',
+    ),
   ],
   checkbox: [
     demo(
@@ -1879,7 +1895,13 @@ export function ComponentDemo(
       case 'carousel-dots':
         return <CarouselExample autoplay={variant === 'autoplay'} />
       case 'chat-message':
-        return <ChatExample variant={variant === 'attachments' ? 'attachments' : 'roles'} />
+        return (
+          <ChatExample
+            variant={
+              variant === 'attachments' ? 'attachments' : variant === 'system' ? 'system' : 'roles'
+            }
+          />
+        )
       case 'checkbox':
         return width(
           variant === 'description' ? (

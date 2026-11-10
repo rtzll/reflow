@@ -932,8 +932,9 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
         },
         {
           name: 'role',
-          type: '"user" | "assistant"',
-          description: 'Position and treatment of the chat message.',
+          type: '"user" | "assistant" | "system"',
+          description:
+            'Position and treatment of the chat message. A system message shows an event, such as a model switch, as a quiet centred line.',
           required: true,
         },
         {
@@ -945,13 +946,13 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
         {
           name: 'attachments',
           type: 'readonly ChatAttachment[]',
-          description: 'Files displayed before the message body.',
+          description: 'Files displayed before the body of a user or assistant message.',
           required: false,
         },
         {
           name: 'label',
           type: 'string',
-          description: 'Accessible name of the message.',
+          description: 'Accessible name of the message. Defaults to You, Assistant or System.',
           required: false,
         },
         {
@@ -963,13 +964,19 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
         {
           name: 'time',
           type: 'string',
-          description: 'Timestamp displayed below a user message.',
+          description: 'Timestamp shown below a user message, or after a system event.',
           required: false,
         },
         {
           name: 'actions',
           type: 'RemixNode',
-          description: 'Actions displayed beside the message or composer.',
+          description: 'Actions shown on hover below a message, and always after a system event.',
+          required: false,
+        },
+        {
+          name: 'icon',
+          type: 'RemixNode',
+          description: 'A small glyph before a system event.',
           required: false,
         },
         {

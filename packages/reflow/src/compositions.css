@@ -141,6 +141,57 @@
     pointer-events: auto;
   }
 }
+/* System: an event in the conversation, such as a model switch, as a quiet
+   centred caption between hairlines. It spans the transcript, fades in
+   where it lands, and keeps its time and actions in view. */
+.rf-chat-message[data-role='system'] {
+  align-items: stretch;
+  align-self: stretch;
+  justify-self: stretch;
+  max-width: none;
+  transform-origin: center;
+}
+.rf-chat-system {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding-block: 8px;
+  color: var(--rf-muted);
+  font: var(--rf-text-caption) / var(--rf-leading-caption) var(--rf-font);
+  text-align: center;
+}
+.rf-chat-system::before,
+.rf-chat-system::after {
+  content: '';
+  flex: 1;
+  min-inline-size: 16px;
+  border-block-start: 1px solid color-mix(in oklab, var(--rf-border) 70%, transparent);
+}
+.rf-chat-system-icon {
+  display: inline-flex;
+  flex: none;
+}
+.rf-chat-system-icon > svg {
+  inline-size: 14px;
+  block-size: 14px;
+}
+.rf-chat-system-text {
+  min-inline-size: 0;
+  text-wrap: balance;
+}
+.rf-chat-system .rf-chat-time::before {
+  content: '·';
+  margin-inline-end: 8px;
+}
+.rf-chat-message[data-role='system'][data-animate] {
+  animation-name: rf-message-fade;
+}
+@keyframes rf-message-fade {
+  from {
+    opacity: 0;
+  }
+}
 @keyframes rf-message-enter {
   from {
     opacity: 0;

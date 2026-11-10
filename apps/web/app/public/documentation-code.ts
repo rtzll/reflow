@@ -239,6 +239,8 @@ export function playgroundFragment(slug: string, values: PlaygroundValues): stri
     case 'carousel-dots':
       return carouselExampleCode(Number(values.count), Boolean(values.autoplay))
     case 'chat-message':
+      if (values.role === 'system')
+        return `${opening} icon={<Icon name="cpu" />}>Switched to a faster model</ChatMessage>`
       return `${opening}${values.attachments ? ' attachments={[{ name: "design-notes.md", detail: "Markdown · 2 KB" }]}' : ''}>Can we make the interaction feel more fluid?</ChatMessage>`
     case 'checkbox':
     case 'switch':

@@ -24,7 +24,7 @@ export const chatAvatar =
   'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160"%3E%3Crect width="160" height="160" fill="%236b97ff"/%3E%3Ccircle cx="80" cy="62" r="27" fill="%23e1eaff"/%3E%3Cpath fill="%23e1eaff" d="M24 160a56 56 0 0 1 112 0z"/%3E%3C/svg%3E'
 
 export function ChatExample(
-  handle: Handle<{ variant?: 'conversation' | 'roles' | 'attachments' }>,
+  handle: Handle<{ variant?: 'conversation' | 'roles' | 'attachments' | 'system' }>,
 ) {
   let copied = -1
   return () => {
@@ -38,6 +38,35 @@ export function ChatExample(
             </ChatMessage>
             <ChatMessage role="assistant" animate={false}>
               Left-aligned, no background.
+            </ChatMessage>
+          </>
+        ) : variant === 'system' ? (
+          <>
+            <ChatMessage
+              role="system"
+              animate={false}
+              icon={<Icon name="clock" />}
+              time="Yesterday 6:08 PM"
+            >
+              Conversation resumed
+            </ChatMessage>
+            <ChatMessage role="user" animate={false}>
+              Can you tighten the intro?
+            </ChatMessage>
+            <ChatMessage
+              role="system"
+              animate={false}
+              icon={<Icon name="cpu" />}
+              actions={
+                <Button size="compact" variant="ghost">
+                  Undo
+                </Button>
+              }
+            >
+              Switched to a faster model
+            </ChatMessage>
+            <ChatMessage role="assistant" animate={false}>
+              Done — it now opens with the problem it solves.
             </ChatMessage>
           </>
         ) : variant === 'attachments' ? (

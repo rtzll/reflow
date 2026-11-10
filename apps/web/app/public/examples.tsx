@@ -555,6 +555,9 @@ export const Example = clientEntry(
           if (handle.props.gallery)
             return (
               <div className="example-chat-gallery">
+                <ChatMessage role="system" animate={false} icon={<Icon name="clock" />}>
+                  Conversation resumed
+                </ChatMessage>
                 <ChatMessage role="user" animate={false}>
                   What does “good design” actually mean?
                 </ChatMessage>

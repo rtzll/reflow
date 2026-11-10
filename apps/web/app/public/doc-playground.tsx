@@ -166,7 +166,7 @@ export const playgroundControls: Record<string, readonly Control[]> = {
     toggle('autoplay', 'Autoplay'),
   ],
   'chat-message': [
-    choice('role', 'Role', ['user', 'assistant']),
+    choice('role', 'Role', ['user', 'assistant', 'system']),
     size,
     toggle('animate', 'Animate', true),
     toggle('attachments', 'Attachments'),
@@ -651,14 +651,17 @@ export function PlaygroundExample(
       case 'chat-message':
         return (
           <ChatMessage
-            role={v.role === 'assistant' ? 'assistant' : 'user'}
+            role={v.role === 'assistant' || v.role === 'system' ? v.role : 'user'}
             size={density}
             animate={Boolean(v.animate)}
+            icon={v.role === 'system' ? <Icon name="cpu" /> : undefined}
             attachments={
               v.attachments ? [{ name: 'design-notes.md', detail: 'Markdown · 2 KB' }] : undefined
             }
           >
-            Can we make the interaction feel more fluid?
+            {v.role === 'system'
+              ? 'Switched to a faster model'
+              : 'Can we make the interaction feel more fluid?'}
           </ChatMessage>
         )
       case 'checkbox':
