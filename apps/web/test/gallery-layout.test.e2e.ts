@@ -19,7 +19,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'select',
     'command-menu',
     'tooltip',
-    'badge',
+    'avatar',
     'sidebar',
     'radio-group',
     'segmented-control',

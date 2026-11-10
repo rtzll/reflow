@@ -59,6 +59,33 @@ export function AvatarDemo(handle: Handle<AvatarDemoProps>) {
             <AvatarGroup avatars={avatarPeople.slice(0, 4)} size={40} shape="square" />
           </div>
         )
+      case 'gallery':
+        return (
+          <div class="example-avatar-groups">
+            <AvatarGroup
+              label="Editors"
+              avatars={[
+                { name: 'Alex Morgan', src: image, status: 'online' },
+                { name: 'Ada Lovelace', status: 'online' },
+                { name: 'Grace Hopper', status: 'away' },
+                { name: 'Alan Turing' },
+                { name: 'Katherine Johnson' },
+                { name: 'Edsger Dijkstra' },
+              ]}
+              size={40}
+            />
+            <AvatarGroup
+              label="Agents"
+              shape="square"
+              avatars={[
+                { name: 'Research Agent', color: 'teal' },
+                { name: 'Design Agent', color: 'violet' },
+                { name: 'Build Agent', color: 'amber' },
+              ]}
+              size={32}
+            />
+          </div>
+        )
       case 'playground':
         return (
           <Avatar

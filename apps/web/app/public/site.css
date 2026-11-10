@@ -2724,14 +2724,8 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
   }
 }
 /* Match the overview compositions while allowing tablet tiles to stay short. */
-.site-gallery
-  :is([data-component='card'], [data-component='command-menu'], [data-component='badge'])
-  .site-preview-stage {
+.site-gallery :is([data-component='card'], [data-component='command-menu']) .site-preview-stage {
   padding-inline: 24px;
-}
-.site-gallery [data-component='badge'] .example-row {
-  width: 100%;
-  justify-content: flex-start;
 }
 .site-gallery [data-component='command-menu'] .rf-command {
   max-block-size: 440px;
@@ -3197,4 +3191,11 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
 }
 .doc-chat-empty strong {
   color: var(--rf-fg);
+}
+
+/* The Avatar card: people above, agents below. */
+.example-avatar-groups {
+  display: grid;
+  justify-items: center;
+  gap: 24px;
 }

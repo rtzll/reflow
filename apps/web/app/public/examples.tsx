@@ -307,7 +307,12 @@ export const Example = clientEntry(
         case 'chat-layout':
           return <ChatLayoutDemo variant="playground" />
         case 'avatar':
-          return <AvatarDemo variant="playground" image={handle.props.avatar} />
+          return (
+            <AvatarDemo
+              variant={handle.props.showcase ? 'gallery' : 'playground'}
+              image={handle.props.avatar}
+            />
+          )
         case 'citation':
           return <CitationDemo variant="playground" />
         case 'code-block':

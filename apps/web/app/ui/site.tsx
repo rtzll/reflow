@@ -478,7 +478,7 @@ const galleryOrder = [
   'select',
   'command-menu',
   'tooltip',
-  'badge',
+  'avatar',
   'sidebar',
   'radio-group',
   'segmented-control',
@@ -954,6 +954,7 @@ const demoOrder = [
   'toaster',
   'drawer',
   'code-block',
+  'chat-layout',
   'settings',
 ]
 
