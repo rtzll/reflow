@@ -43,6 +43,7 @@ import { SegmentedControlDemo } from './segmented-control-example.tsx'
 import { PopoverDemo } from './popover-example.tsx'
 import { ToasterDemo } from './toaster-example.tsx'
 import { DrawerDemo } from './drawer-example.tsx'
+import { CodeBlockDemo } from './code-block-example.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
 import { SoundCombobox } from './sound-combobox.tsx'
 import { playCopySuccess } from './showcase-sound.ts'
@@ -974,6 +975,57 @@ export const componentExamples: Record<string, readonly DocumentationExample[]> 
       'Compact',
       'compact',
       `<Popover label="Dimensions" trigger="Dimensions" size="compact">…</Popover>`,
+    ),
+  ],
+  'code-block': [
+    demo(
+      'Basic',
+      'basic',
+      `import { CodeBlock } from '@rtzll/reflow'\nimport { highlight } from '@rtzll/reflow/highlight'\n\n// In a route handler, so the page arrives highlighted.\nconst code = await highlight(source, { lang: 'tsx' })\n\n<CodeBlock code={code} filename="route.tsx" />`,
+      'Highlight where the code is known, ideally in a route handler: the page arrives highlighted and the browser loads no highlighter. Install shiki and @shikijs/transformers to use @rtzll/reflow/highlight; everything else in Reflow works without them.',
+    ),
+    demo(
+      'Line marks',
+      'notation',
+      `const code = await highlight(\n  \`let sum = 0 // [!code --]\nlet sum = items.length ? 0 : Number.NaN // [!code ++]\nfor (const item of items) sum += item.price // [!code highlight]\nreturn sum // [!code warning]\`,\n  { lang: 'ts' },\n)`,
+      'Comments in the code mark lines as added, removed, highlighted, or carrying an error or warning, and leave the code. [!code word:name] marks a word.',
+    ),
+    demo(
+      'Focus',
+      'focus',
+      `const source = \`const code = await highlight(source) // [!code focus]\``,
+      'Focused lines keep the eye; the rest blur until the reader points at or focuses the block.',
+    ),
+    demo(
+      'Line numbers',
+      'line-numbers',
+      `<CodeBlock code={code} filename="code-block.css" lineNumbers startLine={42} />`,
+      'Numbers sit in a gutter that selection and copying skip.',
+    ),
+    demo(
+      'Any language',
+      'languages',
+      `await highlight(source, { lang: 'python' })`,
+      'Every language Shiki bundles loads on first use; unknown ones render as plain text.',
+    ),
+    demo(
+      'Long code',
+      'folded',
+      `<CodeBlock code={code} filename="highlight.ts" lineNumbers maxLines={8} />`,
+      'Folds behind a Show all button past maxLines.',
+    ),
+    demo('Wrapping', 'wrap', `<CodeBlock code={code} language="md" wrap />`),
+    demo(
+      'Other themes',
+      'themes',
+      `await highlight(source, {\n  lang: 'ts',\n  themes: { light: 'github-light', dark: 'github-dark' },\n})`,
+      'Reflow’s own theme takes its colours from CSS variables and follows the accent; any Shiki theme, or a light and dark pair, works too.',
+    ),
+    demo(
+      'Without highlighting',
+      'plain',
+      `<CodeBlock code={'pnpm add shiki @shikijs/transformers'} language="bash" />`,
+      'Plain code needs nothing but Reflow.',
     ),
   ],
   drawer: [
@@ -2209,6 +2261,8 @@ export function ComponentDemo(
         return <ToasterDemo variant={variant} />
       case 'drawer':
         return <DrawerDemo variant={variant} />
+      case 'code-block':
+        return <CodeBlockDemo variant={variant} samples={images.code} />
       case 'segmented-control':
         return <SegmentedControlDemo variant={variant} />
       case 'breadcrumb':

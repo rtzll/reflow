@@ -8,6 +8,7 @@ import { carouselExampleCode } from './public/carousel-example.tsx'
 import { SystemPage } from './public/system-page.tsx'
 import { SkillPage } from './public/skill-page.tsx'
 import { Example } from './public/examples.tsx'
+import type { CodeSamples } from './public/code-block-example.tsx'
 import type { ShowcaseComponent } from './ui/site.tsx'
 
 const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 'props'>> = {
@@ -94,6 +95,11 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
     description:
       'A label, form control, help text, and error with associated accessible descriptions.',
     code: requestFormCode(),
+  },
+  'code-block': {
+    description:
+      'Code with its filename, a copy button, line numbers and line marks, highlighted for any language by Shiki.',
+    code: `import { highlight } from '@rtzll/reflow/highlight'\n\nconst code = await highlight(source, { lang: 'tsx' })\n\n<CodeBlock code={code} filename="Button.tsx" />`,
   },
   drawer: {
     description: 'A panel that slides in from an edge and closes with a drag or a flick.',
@@ -236,6 +242,7 @@ const components = [
   ['chat-message', 'ChatMessage'],
   ['checkbox', 'Checkbox'],
   ['checkbox-group', 'CheckboxGroup'],
+  ['code-block', 'CodeBlock'],
   ['color-picker', 'ColorPicker'],
   ['combobox', 'Combobox'],
   ['command-menu', 'CommandMenu'],
@@ -312,13 +319,21 @@ export const catalog: readonly ShowcaseComponent[] = [
   })),
 ]
 
-export function galleryCatalog(avatar: string, gallery = false) {
+export function galleryCatalog(avatar: string, gallery = false, samples?: CodeSamples) {
   return catalog.map((component) =>
     component.preview == null
       ? component
       : {
           ...component,
-          preview: <Example slug={component.slug} showcase gallery={gallery} avatar={avatar} />,
+          preview: (
+            <Example
+              slug={component.slug}
+              showcase
+              gallery={gallery}
+              avatar={avatar}
+              code={component.slug === 'code-block' ? samples?.card : undefined}
+            />
+          ),
         },
   )
 }

@@ -133,6 +133,7 @@ export function playgroundFragment(slug: string, values: PlaygroundValues): stri
     'ask-user-questions': 'AskUserQuestions',
     'carousel-dots': 'CarouselDots',
     'chat-message': 'ChatMessage',
+    'code-block': 'CodeBlock',
     'checkbox-group': 'CheckboxGroup',
     'color-picker': 'ColorPicker',
     'command-menu': 'CommandMenu',
@@ -257,6 +258,20 @@ ${opening} label="Options" options={options} defaultValue="0" />`
         values.openDelay && values.openDelay !== '500' ? ` openDelay={${values.openDelay}}` : ''
       const compact = values.size === 'compact' ? ' size="compact"' : ''
       return `<HoverCard${placement}${delay}${compact} renderTrigger={(trigger) => (\n  <a href="/u/reflow" {...trigger}>@reflow</a>\n)}>\n  <Profile user={user} />\n</HoverCard>`
+    }
+    case 'code-block': {
+      const language = String(values.language ?? 'tsx')
+      const extension =
+        { tsx: 'tsx', css: 'css', bash: 'sh', json: 'json', python: 'py', rust: 'rs' }[language] ??
+        language
+      const props = [
+        values.filename === false ? '' : ` filename="example.${extension}"`,
+        values.lineNumbers ? ' lineNumbers' : '',
+        values.wrap ? ' wrap' : '',
+        values.copyable === false ? ' copyable={false}' : '',
+        values.size === 'compact' ? ' size="compact"' : '',
+      ].join('')
+      return `const code = await highlight(source, { lang: '${language}' })\n\n<CodeBlock code={code}${props} />`
     }
     case 'drawer': {
       const side = values.side && values.side !== 'bottom' ? ` side="${values.side}"` : ''

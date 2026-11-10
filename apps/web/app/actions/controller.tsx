@@ -1,6 +1,7 @@
 import { createController } from 'remix/router'
 import { assets, getPageAssets } from '../assets.ts'
 import { catalog, galleryCatalog } from '../catalog.tsx'
+import { codeSamples } from '../code-samples.ts'
 import { Document } from '../document.tsx'
 import type { AppContext } from '../router.ts'
 import { routes } from '../routes.ts'
@@ -43,9 +44,13 @@ async function show(context: AppContext, page: ShowcaseProps['page'], slug?: str
       ? 'Reflow'
       : `${component?.name ?? (page === 'docs' ? 'Documentation' : 'Demo')} · Reflow`
   const pageAssets = await getPageAssets()
+  // CodeBlock's samples are highlighted on the server, for the pages that show them.
+  const samples =
+    page === 'gallery' || page === 'demo' || slug === 'code-block' ? await codeSamples() : undefined
+  const images = slug === 'code-block' ? { ...pageAssets.images, code: samples } : pageAssets.images
   const components =
     page === 'gallery' || page === 'demo'
-      ? galleryCatalog(pageAssets.images.sidebarAvatar, page === 'gallery')
+      ? galleryCatalog(pageAssets.images.sidebarAvatar, page === 'gallery', samples)
       : catalog
   return context.render(
     <Document assets={pageAssets} settings={settings} title={title}>
@@ -53,7 +58,7 @@ async function show(context: AppContext, page: ShowcaseProps['page'], slug?: str
         page={page}
         components={components}
         slug={slug}
-        images={pageAssets.images}
+        images={images}
         query={query}
         settings={settings}
       />

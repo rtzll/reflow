@@ -1,6 +1,7 @@
 import { Icon as ReflowIcon, Switch, type IconName } from '@rtzll/reflow'
 import type { Handle, RemixNode } from 'remix/component'
 import type { ExampleImages } from '../assets.ts'
+import { samplesFor } from '../public/code-block-example.tsx'
 import { routes } from '../routes.ts'
 import { PlaygroundControls } from '../public/doc-playground.tsx'
 import { DocPreview } from '../public/doc-preview.tsx'
@@ -461,14 +462,18 @@ function CopyAction(handle: Handle<{ text: string; label: string }>) {
   )
 }
 
+// A docs preview carries only the CodeBlock samples it shows.
+function previewImages(images: ExampleImages, variant: string | undefined): ExampleImages {
+  return images.code ? { ...images, code: samplesFor(images.code, variant) } : images
+}
+
 const galleryOrder = [
   'input-message',
   'thinking-indicator',
   'toaster',
   'hover-card',
-  'color-picker',
-  'switch',
-  'combobox',
+  'queued-stack',
+  'code-block',
   'card',
   'select',
   'command-menu',
@@ -497,10 +502,14 @@ const galleryOrder = [
   'chat-message',
   'popover',
   'drawer',
+  'color-picker',
+  'switch',
+  'combobox',
 ]
 
 const wideCards = new Set([
   'input-message',
+  'code-block',
   'color-picker',
   'card',
   'command-menu',
@@ -527,6 +536,7 @@ const tallCards = new Set([
 ])
 const rightCards = new Set([
   'input-message',
+  'code-block',
   'color-picker',
   'command-menu',
   'thinking-steps',
@@ -817,7 +827,7 @@ function ComponentDoc(
                   slug={component.slug}
                   code={component.code ?? `import { ${component.name} } from '@rtzll/reflow'`}
                   initialCode={showCode}
-                  images={images}
+                  images={previewImages(images, undefined)}
                 />
                 {component.controls}
               </section>
@@ -835,7 +845,7 @@ function ComponentDoc(
                   slug={component.slug}
                   variant={example.variant}
                   code={example.code}
-                  images={images}
+                  images={previewImages(images, example.variant)}
                 />
               </section>
             ))}
@@ -943,6 +953,7 @@ const demoOrder = [
   'hover-card',
   'toaster',
   'drawer',
+  'code-block',
   'settings',
 ]
 

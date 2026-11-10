@@ -2721,6 +2721,125 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  'code-block': [
+    {
+      name: 'CodeBlock',
+      props: [
+        {
+          name: 'code',
+          type: 'string | HighlightedCode',
+          description: 'Plain code, or code from highlight() in @rtzll/reflow/highlight.',
+          required: true,
+        },
+        {
+          name: 'filename',
+          type: 'string',
+          description: 'Shown in the header, and names the code region.',
+          required: false,
+        },
+        {
+          name: 'language',
+          type: 'string',
+          description:
+            'Shown in the header when there is no filename. Defaults to the highlighted language.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description:
+            'Names the code region. Defaults to the filename, or the language followed by "code".',
+          required: false,
+        },
+        {
+          name: 'lineNumbers',
+          type: 'boolean',
+          description: 'Numbers the lines, in a gutter that copying skips.',
+          required: false,
+        },
+        {
+          name: 'startLine',
+          type: 'number',
+          description: 'The first line’s number. Default 1.',
+          required: false,
+        },
+        {
+          name: 'wrap',
+          type: 'boolean',
+          description: 'Wraps long lines instead of scrolling them sideways.',
+          required: false,
+        },
+        {
+          name: 'maxLines',
+          type: 'number',
+          description: 'Folds longer code to this many lines behind a Show all button.',
+          required: false,
+        },
+        {
+          name: 'copyable',
+          type: 'boolean',
+          description: 'Shows the copy button. Default true.',
+          required: false,
+        },
+        {
+          name: 'onCopy',
+          type: '(() => void)',
+          description: 'Called after the code is copied.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: '"default" | "compact"',
+          description: 'Tightens the type, line height and padding.',
+          required: false,
+        },
+      ],
+    },
+    {
+      name: 'highlight()',
+      props: [
+        {
+          name: 'code',
+          type: 'string',
+          description: 'The code to highlight.',
+          required: true,
+        },
+        {
+          name: 'lang',
+          type: 'string',
+          description:
+            'Any language Shiki bundles, or an alias such as ts or py. Unknown languages render as plain text. Default text.',
+          required: false,
+        },
+        {
+          name: 'theme',
+          type: 'BundledTheme | ThemeRegistration',
+          description:
+            'A Shiki theme. Defaults to Reflow’s, which colours tokens with --rf-code-token-* CSS variables.',
+          required: false,
+        },
+        {
+          name: 'themes',
+          type: '{ light: Theme; dark: Theme }',
+          description: 'A light and a dark theme; the block follows the page between them.',
+          required: false,
+        },
+        {
+          name: 'notation',
+          type: 'boolean',
+          description:
+            'Reads // [!code highlight], ++, --, focus, error, warning and word:name comments into line and word marks, and removes them. Default true.',
+          required: false,
+        },
+        {
+          name: 'transformers',
+          type: 'ShikiTransformer[]',
+          description: 'More Shiki transformers, run after the notation ones.',
+          required: false,
+        },
+      ],
+    },
+  ],
   drawer: [
     {
       name: 'Drawer',
@@ -4353,6 +4472,8 @@ export const componentDefaults: Record<string, Record<string, string>> = {
     openOnHover: 'false',
   },
   Button: { variant: 'primary' },
+  CodeBlock: { startLine: '1', copyable: 'true' },
+  'highlight()': { lang: 'text', notation: 'true' },
   Drawer: {
     side: 'bottom',
     triggerVariant: 'tertiary',

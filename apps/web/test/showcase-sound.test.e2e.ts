@@ -246,6 +246,18 @@ it('plays a cue as each toast arrives and as a promise toast settles', async (t)
   await expect.poll(audioStarts).toBeGreaterThan(arrived)
 })
 
+it('confirms a CodeBlock copy with the copy cue', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+  const audioStarts = await trackAudio(page)
+  await page.goto('/docs/code-block')
+  await waitForShowcase(page)
+  const block = page.locator('#basic [data-slot="code-block"]')
+  await block.getByRole('button', { name: 'Copy code' }).click()
+  await expect(block.getByRole('button', { name: 'Copied' })).toBeVisible()
+  await expect.poll(audioStarts).toBeGreaterThan(0)
+})
+
 it('plays open and close cues for a Drawer', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   const audioStarts = await trackAudio(page)

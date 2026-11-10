@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'node:url'
 import { createAssetServer } from 'remix/assets'
 import { loadConfig } from 'remix/cli'
+import type { CodeSamples } from './public/code-block-example.tsx'
 
 const config = await loadConfig(fileURLToPath(new URL('../', import.meta.url)))
 const production = process.env.NODE_ENV === 'production'
@@ -17,6 +18,8 @@ export const assets = createAssetServer({
 export interface ExampleImages {
   sidebarAvatar: string
   thinkingPreview: string
+  /** CodeBlock samples highlighted on the server, only on pages that show them. */
+  code?: CodeSamples
 }
 
 export async function getPageAssets() {

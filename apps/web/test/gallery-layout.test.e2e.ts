@@ -13,9 +13,8 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'thinking-indicator',
     'toaster',
     'hover-card',
-    'color-picker',
-    'switch',
-    'combobox',
+    'queued-stack',
+    'code-block',
     'card',
     'select',
     'command-menu',
@@ -44,6 +43,9 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'chat-message',
     'popover',
     'drawer',
+    'color-picker',
+    'switch',
+    'combobox',
   ]
   const gallery = page.locator('.site-gallery')
   for (const width of [1440, 1280, 768, 390]) {
@@ -102,12 +104,17 @@ it('preserves the gallery order and keeps previews above their footers', async (
     }
     await checkContainment()
     if (width === 768) {
-      // With two columns the smalls are odd, so the last one closes the row.
-      const [last, gallery] = await Promise.all([
-        page.locator('.site-gallery article[data-component="drawer"]').boundingBox(),
-        page.locator('.site-gallery').boundingBox(),
-      ])
-      assert.ok(last!.width > gallery!.width * 0.8, 'Drawer spans the row at two columns')
+      // Two columns, and as many small cards as fill them: the last row is full.
+      const rows = await gallery.evaluate((node) => {
+        const tiles = Array.from(node.querySelectorAll<HTMLElement>(':scope > article'))
+        const bottom = Math.max(...tiles.map((tile) => tile.getBoundingClientRect().bottom))
+        const last = tiles.filter(
+          (tile) => Math.abs(tile.getBoundingClientRect().bottom - bottom) < 2,
+        )
+        const width = last.reduce((sum, tile) => sum + tile.getBoundingClientRect().width, 0)
+        return width / node.getBoundingClientRect().width
+      })
+      assert.ok(rows > 0.9, `the last row fills the gallery (${rows})`)
     }
     if (width === 1440) {
       await expect(
@@ -143,7 +150,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
           (card) => (card.getBoundingClientRect().left - left < 50 ? 'L' : 'R'),
         ).join('')
       })
-      assert.equal(sides, 'RLRLRLRLRLRLRL')
+      assert.equal(sides, 'RLRLRLRLRLRLRLR')
       const [indicator, input, toaster, hover] = await Promise.all(
         ['thinking-indicator', 'input-message', 'toaster', 'hover-card'].map(tile),
       )
@@ -307,13 +314,13 @@ it('fans out the queue and reorders during a drag before release', async (t) => 
   await page.mouse.move(first.x + 30, first.y + first.height / 2)
   await page.mouse.down()
   await page.mouse.move(last.x + 30, last.y + last.height / 2 + 4, { steps: 8 })
-  assert.match((await rows.last().textContent()) ?? '', /Draft a short intro/)
+  assert.match((await rows.last().textContent()) ?? '', /Draft an intro/)
   await page.mouse.up()
   await rows
     .last()
     .getByRole('button', { name: /move message .* up/i })
     .press('Enter')
-  assert.match((await rows.nth(1).textContent()) ?? '', /Draft a short intro/)
+  assert.match((await rows.nth(1).textContent()) ?? '', /Draft an intro/)
 })
 
 it('caps a long searchable dropdown while leaving its lower options reachable', async (t) => {
@@ -380,7 +387,7 @@ it('supports the queue, nested menus, and a compact picker on a touch viewport',
   await waitForShowcase(mobile)
   const pile = mobile.getByRole('list', { name: 'Queued messages' })
   const height = (await pile.boundingBox())!.height
-  await pile.getByText('Draft a short intro', { exact: true }).tap()
+  await pile.getByText('Draft an intro', { exact: true }).tap()
   await mobile.getByRole('button', { name: 'Collapse queue' }).waitFor()
   assert.ok((await pile.boundingBox())!.height > height * 2)
   await mobile.getByRole('button', { name: 'Collapse queue' }).tap()

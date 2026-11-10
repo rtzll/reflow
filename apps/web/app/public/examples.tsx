@@ -3,6 +3,7 @@ import { SegmentedControlDemo } from './segmented-control-example.tsx'
 import { PopoverDemo } from './popover-example.tsx'
 import { ToasterDemo } from './toaster-example.tsx'
 import { DrawerDemo } from './drawer-example.tsx'
+import { CodeBlockDemo } from './code-block-example.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
 import { paletteCommands, paletteSuggestions } from './palette-example-data.tsx'
 import { accents } from './site-settings.ts'
@@ -73,6 +74,7 @@ import {
   ThinkingStepSource,
   ThinkingStepSources,
   Tooltip,
+  type HighlightedCode,
 } from '@rtzll/reflow'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import { BannerExample, BannerPreview } from './banner-example.tsx'
@@ -191,7 +193,13 @@ function GallerySidebar(handle: Handle<{ avatar: string }>) {
 export const Example = clientEntry(
   import.meta.url,
   function Example(
-    handle: Handle<{ slug: string; showcase?: boolean; gallery?: boolean; avatar?: string }>,
+    handle: Handle<{
+      slug: string
+      showcase?: boolean
+      gallery?: boolean
+      avatar?: string
+      code?: HighlightedCode
+    }>,
   ) {
     let saved = false
     let lastAction = ''
@@ -200,11 +208,24 @@ export const Example = clientEntry(
     let opacity = 35
     let message = ''
     let sentQueueId: string | undefined
-    let queued = [
-      { id: 'draft', content: 'Draft a short intro' },
-      { id: 'demo', content: 'Review the demo states' },
-      { id: 'notes', content: 'Summarize the changes' },
+    const initialQueue = [
+      { id: 'draft', content: 'Draft an intro' },
+      { id: 'demo', content: 'Review demo' },
+      { id: 'notes', content: 'List changes' },
     ]
+    let queued = initialQueue
+    let refill: ReturnType<typeof setTimeout> | undefined
+    handle.signal.addEventListener('abort', () => clearTimeout(refill), { once: true })
+    // In the gallery, an emptied queue fills up again, as a dismissed banner returns.
+    const refillQueue = () => {
+      if (queued.length || !handle.props.showcase) return
+      clearTimeout(refill)
+      refill = setTimeout(() => {
+        queued = initialQueue
+        message = ''
+        void handle.update()
+      }, 1600)
+    }
 
     return () => {
       switch (handle.props.slug) {
@@ -278,6 +299,13 @@ export const Example = clientEntry(
           )
         case 'hover-card':
           return <HoverCardDemo variant="basic" />
+        case 'code-block':
+          return (
+            <CodeBlockDemo
+              variant={handle.props.code ? 'gallery' : 'plain'}
+              samples={handle.props.code ? { card: handle.props.code } : undefined}
+            />
+          )
         case 'drawer':
           return <DrawerDemo variant={handle.props.showcase ? 'gallery' : 'playground'} />
         case 'toaster':
@@ -998,12 +1026,14 @@ export const Example = clientEntry(
                 onRemove={(id) => {
                   queued = queued.filter((entry) => entry.id !== id)
                   handle.update()
+                  refillQueue()
                 }}
                 onSend={async (id) => {
                   sentQueueId = id
                   message = queued.find((entry) => entry.id === id)?.content ?? ''
                   queued = queued.filter((entry) => entry.id !== id)
                   await handle.update()
+                  refillQueue()
                 }}
               />
               {message && (

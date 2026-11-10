@@ -104,6 +104,9 @@ const manifest = {
   },
   entries: Object.fromEntries([...clientEntries].map(([path, id]) => [id, scriptEntry(path)])),
 }
+// Highlight the CodeBlock samples here, so the worker bundle never includes Shiki.
+const { codeSamples } = await import('../app/code-samples.ts')
+const samples = await codeSamples()
 const worker = await build({
   ...common,
   entryPoints: ['worker/index.ts'],
@@ -111,7 +114,11 @@ const worker = await build({
   platform: 'browser',
   conditions: ['workerd', 'worker', 'browser'],
   external: ['node:async_hooks'],
-  define: { ...common.define, REFLOW_ASSETS: JSON.stringify(manifest) },
+  define: {
+    ...common.define,
+    REFLOW_ASSETS: JSON.stringify(manifest),
+    REFLOW_CODE_SAMPLES: JSON.stringify(samples),
+  },
   plugins: [
     clientEntryPlugin,
     {
@@ -120,6 +127,10 @@ const worker = await build({
         builder.onResolve({ filter: /assets\.ts$/ }, ({ path, resolveDir }) => {
           if (resolve(resolveDir, path) === resolve(root, 'app/assets.ts'))
             return { path: resolve(root, 'worker/assets.ts') }
+        })
+        builder.onResolve({ filter: /code-samples\.ts$/ }, ({ path, resolveDir }) => {
+          if (resolve(resolveDir, path) === resolve(root, 'app/code-samples.ts'))
+            return { path: resolve(root, 'worker/code-samples.ts') }
         })
       },
     },

@@ -3151,9 +3151,17 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
   padding-inline-start: 20px;
   color: var(--rf-muted);
 }
-/* Two columns: the last small card, Drawer, closes the gallery's final row. */
-@media (768px <= width < 1280px) {
-  .site-gallery:not([data-search-results]) [data-component='drawer'] {
-    grid-column: span 2;
-  }
+
+/* The CodeBlock card fills its wide card. */
+.site-gallery [data-component='code-block'] .rf-code-block {
+  inline-size: 100%;
+}
+
+/* The QueuedStack card gives the queue room for its messages beside the
+   row actions. */
+.site-gallery [data-component='queued-stack'] .site-preview-stage {
+  padding-inline: 8px;
+}
+.site-gallery [data-component='queued-stack'] .example-wide {
+  inline-size: min(100%, 300px);
 }

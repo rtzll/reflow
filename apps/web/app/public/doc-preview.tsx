@@ -20,6 +20,7 @@ const sharedPlaygroundDefaults = new Set([
   'thinking-steps',
   'toaster',
   'drawer',
+  'code-block',
 ])
 
 interface DocPreviewProps {
@@ -240,6 +241,7 @@ export const DocPreview = clientEntry(
                     slug={handle.props.slug}
                     values={playground}
                     avatar={handle.props.images.sidebarAvatar}
+                    samples={handle.props.images.code}
                   />
                 ) : handle.props.variant ? (
                   <ComponentDemo

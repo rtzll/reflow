@@ -8,7 +8,7 @@ Reflow started as a native Remix port of the [Fluid Functionalism](https://githu
 - **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`
 - **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `CarouselDots`, `Sidebar`, `Tabs`
 - **Menus and overlays** · `CommandMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
-- **Display and feedback** · `Badge`, `Banner`, `Card`, `Table`, `Toaster`
+- **Display and feedback** · `Badge`, `Banner`, `Card`, `CodeBlock`, `Table`, `Toaster`
 - **Conversation** · `AskUserQuestions`, `ChatMessage`, `InputMessage`, `QueuedStack`, `ThinkingIndicator`, `ThinkingSteps`
 
 Every component has a docs page with a live preview, highlighted code and an API table; most also have a playground. Run the showcase and open `/docs`, or read the [usage examples](../apps/web/app/public/examples.tsx).
@@ -56,7 +56,7 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 1 | `Popover` and `HoverCard` (shipped) | Radix and Astryx concepts | Tooltip's anchoring; Dropdown's hover intent and safe pointer travel |
 | 2 | `Toaster` and `toast()` (shipped) | [sonner](https://github.com/emilkowalski/sonner) | QueuedStack's pile; Banner's status icons |
 | 2 | `Drawer` (shipped) | [vaul](https://github.com/emilkowalski/vaul) | Dialog's native `<dialog>` and focus return; the Sidebar's mobile drawer uses it |
-| 3 | `ChatLayout`, `Citation`, `CodeBlock`, and a `system` role for ChatMessage | Astryx's chat set | The InputMessage docs layout, ChatMessage's glide, ThinkingStepSource chips, the docs' code panel |
+| 3 | `CodeBlock` (shipped), `ChatLayout`, `Citation`, and a `system` role for ChatMessage | Astryx's chat set | The InputMessage docs layout, ChatMessage's glide, ThinkingStepSource chips, the docs' code panel |
 | 4 | `Avatar` and `AvatarGroup`, `Skeleton`, `Spinner`, `Progress`, `NumberField` | — | ThinkingIndicator's shimmer, Button's loading state, CarouselDots' progress fill, ColorPicker's scrub fields |
 
 ### Decisions so far
@@ -64,5 +64,5 @@ Built in this order, one component at a time, with a short design note (API, beh
 - **Toasts** are raised with a `toast()` function and shown by one `<Toaster>` placed in the app, as in sonner: no provider, and nothing renders on the server. They support all six positions. The stack peeks and spreads like QueuedStack, which keeps its own behavior; the two only share stacking values.
 - **Drawer** slides in from any of the four sides, closes on drag past a threshold or a fast flick, and has an optional handle. Snap points, background scaling and nested drawers come later.
 - **ChatLayout** owns the conversation screen: a transcript that fills the space and stays pinned to the newest message, with the composer docked at the bottom.
-- **CodeBlock** (proposed, to confirm) comes from the docs' own code panel: a language or filename label, a copy button with feedback, scrolling through ScrollArea, and the small dependency-free highlighter for JavaScript and TypeScript. Other languages render plain, and a slot takes markup highlighted elsewhere. The docs then use it for their Code tab.
+- **CodeBlock** builds on Shiki rather than a highlighter of its own: accurate grammars for every language, line marks written as `// [!code …]` comments, and any Shiki theme. The component lives in the main package with no dependencies and renders plain code by itself; `highlight()` lives at `@rtzll/reflow/highlight`, with Shiki as an optional peer, and returns plain data, so code is highlighted on the server and the browser loads no highlighter. Reflow owns the frame: the header, copy, line numbers, wrapping, folding, scrolling and the look of every line mark. Reflow's own theme colours tokens with CSS variables, so code follows the theme and the accent.
 - **Upstream** stays a source: new Fluid Functionalism components are adopted as they appear, as Breadcrumb was.

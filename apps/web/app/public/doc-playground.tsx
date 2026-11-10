@@ -8,6 +8,7 @@ import { SegmentedControlDemo } from './segmented-control-example.tsx'
 import { PopoverDemo } from './popover-example.tsx'
 import { ToasterDemo, toasterPositions } from './toaster-example.tsx'
 import { DrawerDemo } from './drawer-example.tsx'
+import { CodeBlockDemo, codeLanguages, type CodeSamples } from './code-block-example.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
 import { paletteCommands, paletteGroups, paletteSuggestions } from './component-demos.tsx'
 import { SoundCombobox } from './sound-combobox.tsx'
@@ -279,6 +280,14 @@ export const playgroundControls: Record<string, readonly Control[]> = {
     toggle('title', 'Title'),
     size,
   ],
+  'code-block': [
+    choice('language', 'Language', [...codeLanguages]),
+    toggle('filename', 'Filename', true),
+    toggle('lineNumbers', 'Line numbers'),
+    toggle('wrap', 'Wrap'),
+    toggle('copyable', 'Copy button', true),
+    size,
+  ],
   drawer: [
     choice('side', 'Side', ['bottom', 'right', 'top', 'left']),
     toggle('handle', 'Handle', true),
@@ -509,7 +518,7 @@ export const PlaygroundControls = clientEntry(
 )
 
 export function PlaygroundExample(
-  handle: Handle<{ slug: string; values: PlaygroundValues; avatar: string }>,
+  handle: Handle<{ slug: string; values: PlaygroundValues; avatar: string; samples?: CodeSamples }>,
 ) {
   let selection = cardItems[0].title as string
   let slide = 0
@@ -815,6 +824,19 @@ export function PlaygroundExample(
             size={density}
             placement={String(v.placement) as 'bottom' | 'top' | 'right' | 'left'}
             openDelay={Number(v.openDelay)}
+          />
+        )
+      case 'code-block':
+        return (
+          <CodeBlockDemo
+            variant="playground"
+            samples={handle.props.samples}
+            size={density}
+            language={String(v.language)}
+            filename={Boolean(v.filename)}
+            lineNumbers={Boolean(v.lineNumbers)}
+            wrap={Boolean(v.wrap)}
+            copyable={Boolean(v.copyable)}
           />
         )
       case 'drawer':
