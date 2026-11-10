@@ -219,6 +219,7 @@ it('loads each demo with its own defaults during carousel navigation', async (t)
 it('routes demo arrows to the focused widget or to slide navigation', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.goto('/demo?c=checkbox-group&theme=dark&fit=1')
+  await waitForShowcase(page)
   const stage = page.locator('.site-demo-stage')
   const bananas = stage.getByRole('checkbox', { name: 'Bananas', exact: true })
   await bananas.click()
@@ -239,6 +240,7 @@ it('routes demo arrows to the focused widget or to slide navigation', async (t) 
   assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark')
 
   await page.goto('/demo?c=slider')
+  await waitForShowcase(page)
   const slider = stage.getByRole('slider', { name: 'Opacity', exact: true })
   const before = Number(await slider.inputValue())
   await slider.press('ArrowRight')
@@ -253,6 +255,7 @@ it('routes demo arrows to the focused widget or to slide navigation', async (t) 
   )
 
   await page.goto('/demo?c=tabs')
+  await waitForShowcase(page)
   await stage.getByRole('tab', { name: 'Home', exact: true }).press('ArrowRight')
   assert.ok(
     await stage
