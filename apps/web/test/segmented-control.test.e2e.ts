@@ -31,7 +31,6 @@ function measure(control: Element) {
 
 it('sits on the size ladder with a concentric thumb on the checked segment', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/docs/segmented-control')
   for (const [example, height, segment, padding] of [
     ['basic', 36, 28, 4],

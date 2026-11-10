@@ -7,7 +7,6 @@ import { open, router } from './showcase-router.ts'
 it('anchors the panel 8px from its trigger on the chosen side', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/docs/popover')
   const gap = async (example: string, name: string) => {
     const trigger = page.locator(`#${example}`).getByRole('button', { name, exact: true })

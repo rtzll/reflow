@@ -18,14 +18,21 @@ export interface OpenOptions {
   /** Wait for the page to hydrate. Default true; pass false only to check the server's HTML. */
   hydrate?: boolean
   waitUntil?: 'load' | 'domcontentloaded' | 'networkidle' | 'commit'
+  /**
+   * Keep the page's motion. By default a page opens with reduced motion, so a
+   * test of what a component does is not timed against its animations; tests
+   * of the motion itself opt in and seek it with ./motion.ts.
+   */
+  motion?: boolean
 }
 
 /**
- * Opens a showcase page and, unless told not to, waits until it has
- * hydrated. End-to-end tests navigate only through this, so none can act on
+ * Opens a showcase page with reduced motion and, unless told not to, waits
+ * until it has hydrated. End-to-end tests navigate only through this, so none can act on
  * markup before its scripts are wired; tools/check-tests.test.mjs enforces it.
  */
 export async function open(page: Page, url: string, options: OpenOptions = {}) {
+  await page.emulateMedia({ reducedMotion: options.motion ? 'no-preference' : 'reduce' })
   const response = await page.goto(url, options.waitUntil ? { waitUntil: options.waitUntil } : {})
   if (options.hydrate !== false) await waitForShowcase(page)
   return response

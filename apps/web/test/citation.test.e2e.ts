@@ -25,7 +25,6 @@ it('keeps citations and their previews inside the paragraph the server sends', a
 it('sits within the line and previews its sources above it', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/docs/citation')
   const paragraph = page.locator('#several-sources .doc-citation-text')
   const chip = paragraph.getByRole('link', { name: /^Sources 1 to 3: / })

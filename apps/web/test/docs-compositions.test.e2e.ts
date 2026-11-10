@@ -38,7 +38,7 @@ it('lets external question controls load, navigate, and clear answer state', asy
 
 it('streams reasoning text, replays it, and displays local images and expandable sources', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await open(page, '/docs/thinking-steps')
+  await open(page, '/docs/thinking-steps', { motion: true })
   const basic = page.locator('#basic .rf-thinking-steps-disclosure')
   const trigger = basic.locator(':scope > summary')
   const nested = basic.getByText('Explored 6 files', { exact: true })
@@ -107,7 +107,7 @@ it('keeps workspace switching, project creation and profile controls functional 
 
 it('streams thinking steps on the reference schedule and ends the connector with the text', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await open(page, '/docs/thinking-steps')
+  await open(page, '/docs/thinking-steps', { motion: true })
   // When each step appears and when every step completes, from the page clock.
   await page.evaluate(() => {
     const marks: number[] = []
@@ -170,7 +170,7 @@ it('streams thinking steps on the reference schedule and ends the connector with
 
 it('plays, pauses and replays a streaming example from the preview header', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await open(page, '/docs/thinking-steps')
+  await open(page, '/docs/thinking-steps', { motion: true })
   const preview = page.locator('#full-example .doc-preview')
   const steps = preview.locator('.rf-thinking-timeline > li')
   const button = (name: string) => preview.getByRole('button', { name, exact: true })

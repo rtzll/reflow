@@ -188,7 +188,7 @@ it('plays an error cue after a failed clipboard action', async (t) => {
 it('plays the ready cue when the ThinkingSteps stream finishes', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   const audioStarts = await trackAudio(page)
-  await open(page, '/docs/thinking-steps')
+  await open(page, '/docs/thinking-steps', { motion: true })
   const preview = page.locator('#streaming .doc-preview')
   await page.locator('#streaming h2').click()
   await preview.scrollIntoViewIfNeeded()
@@ -203,7 +203,7 @@ it('plays the ready cue when the ThinkingSteps stream finishes', async (t) => {
 it('plays a cue on manual carousel changes and leaves autoplay silent', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   const audioStarts = await trackAudio(page)
-  await open(page, '/docs/carousel-dots')
+  await open(page, '/docs/carousel-dots', { motion: true })
   const carousel = page.locator('#autoplay .example-carousel')
   await page.locator('#autoplay h2').click()
   await expect(carousel.getByRole('button', { name: 'Show Drafts' })).toHaveAttribute(
@@ -306,7 +306,7 @@ it('keeps the sound button working after moving between demo slides', async (t) 
 it('plays the navigate cue for Carousel buttons and dots, not for autoplay', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   const audioStarts = await trackAudio(page)
-  await open(page, '/docs/carousel')
+  await open(page, '/docs/carousel', { motion: true })
   const example = page.locator('#basic')
   await example.getByRole('button', { name: 'Next slide' }).click()
   await expect.poll(audioStarts).toBeGreaterThan(0)

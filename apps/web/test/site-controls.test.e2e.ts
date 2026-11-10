@@ -46,7 +46,6 @@ it('applies preferences immediately, keeps links clean, and persists through rel
 
 it('keeps settings menus exclusive and dismisses them with pointer and keyboard input', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/docs')
   const panel = page.locator('.site-right')
   const theme = panel.locator('[data-setting-trigger="theme"]')

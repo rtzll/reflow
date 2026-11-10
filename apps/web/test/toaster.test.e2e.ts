@@ -7,7 +7,6 @@ import { open, router } from './showcase-router.ts'
 it('piles toasts on QueuedStack’s values and spreads them a gap apart when pointed at', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1440, height: 900 })
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/docs/toaster')
   const status = page.locator('#status')
   for (const name of ['Success', 'Info', 'Warning'])

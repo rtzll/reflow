@@ -125,7 +125,7 @@ it('staggers the landing hero on both presets and on replay', async (t) => {
       return animation
     }
   })
-  await open(page, '/docs/reveal')
+  await open(page, '/docs/reveal', { motion: true })
 
   const frame = page.locator('[data-reveal-kind="landing"]')
   const heroItems = frame.locator('.system-reveal-hero > *')
@@ -148,7 +148,7 @@ it('staggers the landing hero on both presets and on replay', async (t) => {
   await expect.poll(delays).toEqual(['0', '60', '120', '180', '180'])
 })
 
-it('uses the native viewport through the custom scrollbar and follows scroll reveal progress', async (t) => {
+it('uses the native viewport through the custom scrollbar', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await open(page, '/docs/scrollbars')
   const viewport = page.getByRole('region', { name: 'Scrollable example', exact: true }).first()
@@ -160,7 +160,11 @@ it('uses the native viewport through the custom scrollbar and follows scroll rev
   assert.ok(await viewport.evaluate((element) => element.scrollTop > 0))
   await scrollbar.press('Home')
   assert.equal(await viewport.evaluate((element) => element.scrollTop), 0)
-  await open(page, '/docs/reveal')
+})
+
+it('follows scroll reveal progress, and holds still with reduced motion', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await open(page, '/docs/reveal', { motion: true })
   const revealViewport = page.getByRole('region', { name: 'Scroll reveal preview', exact: true })
   await revealViewport.waitFor()
   await revealViewport.evaluate((element) => {

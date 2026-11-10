@@ -7,7 +7,6 @@ import { open, router } from './showcase-router.ts'
 it('gives neighbours in a group different colours, overlaps them, and spreads them on hover', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/docs/avatar')
   const group = page.getByRole('list', { name: 'Editors' })
   await group.scrollIntoViewIfNeeded()

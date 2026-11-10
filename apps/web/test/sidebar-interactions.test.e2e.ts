@@ -101,7 +101,6 @@ it('uses the focused Sidebar workspace, shortcuts, section actions and user menu
 it('keeps the profile and workspace menus inside a resized rail with visible keyboard focus', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 1000 })
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/demo?c=sidebar&theme=dark')
   const shell = page.locator('.site-demo-stage .example-sidebar-playground > .rf-sidebar-layout')
   await shell.getByRole('separator', { name: 'Resize sidebar' }).press('ArrowLeft')

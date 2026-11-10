@@ -70,7 +70,6 @@ it('copies the code without its line numbers and confirms it', async (t) => {
 it('folds long code, blurs unfocused lines, and follows a light and dark theme pair', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/docs/code-block?theme=light')
 
   const folded = page.locator('#long-code [data-slot="code-block"]')

@@ -13,7 +13,6 @@ it('lets the visitor take over skill examples and replay their initial state', a
   const page = await t.serve(await createTestServer(router.fetch))
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/docs/skill')
   // Clicks before hydration land on inert markup.
   const tabs = page.getByRole('tablist', { name: 'Reflow tabs' })

@@ -207,8 +207,7 @@ it('uses one hover fill for grouped inputs and places the Volume preview above t
 
 it('restores dismissed banners and allows clearing the selected feature', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await page.emulateMedia({ reducedMotion: 'no-preference' })
-  await open(page, '/?theme=dark')
+  await open(page, '/?theme=dark', { motion: true })
   const banner = page.locator('.site-gallery [data-component="banner"]')
   const dismiss = banner.getByRole('button', { name: 'Dismiss' })
   await dismiss.click()
@@ -245,8 +244,7 @@ it('restores dismissed banners and allows clearing the selected feature', async 
 
 it('moves the hovered switch thumb without jumping and settles a drag from the thumb position', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await page.emulateMedia({ reducedMotion: 'no-preference' })
-  await open(page, '/?theme=dark')
+  await open(page, '/?theme=dark', { motion: true })
   const tile = page.locator('.site-gallery [data-component="switch"]')
   const input = tile.getByRole('switch', {
     name: 'Sound effects',
@@ -314,7 +312,6 @@ it('moves the hovered switch thumb without jumping and settles a drag from the t
 
 it('fans out the queue and reorders during a drag before release', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/docs/queued-stack')
   const pile = page.getByRole('list', { name: 'Queued messages' })
   const height = (await pile.boundingBox())!.height
@@ -341,7 +338,6 @@ it('fans out the queue and reorders during a drag before release', async (t) => 
 it('caps a long searchable dropdown while leaving its lower options reachable', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1200, height: 1000 })
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/docs/dropdown#searchable-menu')
   const trigger = page.locator('#searchable-menu').getByRole('button', { name: 'Auto detect' })
   await trigger.evaluate((button) =>
@@ -441,7 +437,6 @@ it('supports the queue, nested menus, and a compact picker on a touch viewport',
 
 it('moves the inline menu focus ring and preserves its forced-colors fallback', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/docs/dropdown#basic')
   const menu = page.getByRole('menu', { name: 'Library' })
   const first = menu.getByRole('menuitemradio', { name: 'Teamspaces' })
@@ -471,7 +466,6 @@ it('moves the inline menu focus ring and preserves its forced-colors fallback', 
 
 it('moves one focus ring between the rows of a triggered menu', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/docs/dropdown#triggered-menu')
   const trigger = page.locator('#triggered-menu .rf-dropdown-trigger')
   await trigger.focus()
@@ -511,7 +505,6 @@ it('moves one focus ring between the rows of a triggered menu', async (t) => {
 
 it('marks the checked color format and moves a focus ring between formats', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/docs/color-picker')
   const trigger = page.locator('.rf-color-format-trigger').locator('visible=true').first()
   await trigger.focus()
@@ -552,7 +545,7 @@ it('marks the checked color format and moves a focus ring between formats', asyn
 
 it('animates the accordion panel height on the first open as on later opens', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await open(page, '/docs/accordion')
+  await open(page, '/docs/accordion', { motion: true })
   await page
     .locator('.rf-accordion-trigger[aria-expanded="false"]')
     .first()
@@ -705,7 +698,6 @@ it('can reopen either gallery breadcrumb menu after switching and selecting', as
 
 it('glides one hover along the breadcrumb, names cut steps, and collapses on overflow', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/docs/breadcrumb')
 
   const basic = page.locator('#basic .rf-breadcrumb').first()
@@ -959,7 +951,7 @@ it('keeps scrubbing on the OS cursor when the pointer lock is refused', async (t
 
 it('glides earlier chat messages up when a new one is sent', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await open(page, '/docs/input-message')
+  await open(page, '/docs/input-message', { motion: true })
   const box = page.locator('.doc-composer-preview textarea').first()
   await box.scrollIntoViewIfNeeded()
   for (let i = 1; i <= 7; i++) {
@@ -1243,7 +1235,6 @@ it('fills the proposed range end like a selected day, with a faint inner ring', 
 it('sends a queued message up into the card’s conversation and restores the queue after', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1440, height: 900 })
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/?theme=dark')
   const card = page.locator('.site-gallery [data-component="queued-stack"]')
   await card.scrollIntoViewIfNeeded()

@@ -118,7 +118,7 @@ it('updates the live playground and copied code while preserving replay and insp
 
 it('keeps the loading Button label and size while showing the two-dot spinner', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  await open(page, '/docs/button')
+  await open(page, '/docs/button', { motion: true })
   const button = page.getByRole('button', { name: 'Click me', exact: true })
   const width = () => button.evaluate((element) => element.getBoundingClientRect().width)
   const idleWidth = await width()
@@ -347,8 +347,7 @@ it('configures keyboard prompts and a native attachment picker for the InputMess
 it('advances the gallery carousel through its dots, pausing over the slides', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1475, height: 900 })
-  await page.emulateMedia({ reducedMotion: 'no-preference' })
-  await open(page, '/?theme=dark')
+  await open(page, '/?theme=dark', { motion: true })
   const tile = page.locator('.site-gallery [data-component="carousel"]')
   const viewport = tile.locator('.rf-carousel-viewport')
   const activeDot = tile.locator('.rf-carousel-dots button[aria-current="true"]')
@@ -386,7 +385,6 @@ it('advances the gallery carousel through its dots, pausing over the slides', as
 it('keeps the gallery Combobox aligned and scrollable after a third choice wraps', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1475, height: 1000 })
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/?theme=dark&icons=lucide')
   const tile = page.locator('.site-gallery [data-component="combobox"]')
   await tile.getByRole('button', { name: 'Open options' }).click()

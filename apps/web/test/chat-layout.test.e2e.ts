@@ -10,7 +10,6 @@ const fromEnd = (viewport: Locator) =>
 it('opens at the newest message and jumps back to it from the history', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/docs/chat-layout')
   const example = page.locator('#long-history')
   await example.scrollIntoViewIfNeeded()
@@ -29,7 +28,6 @@ it('opens at the newest message and jumps back to it from the history', async (t
 it('stays on a streaming reply while the reader does, and leaves a reader who scrolled back', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/docs/chat-layout')
   const example = page.locator('#long-history')
   await example.scrollIntoViewIfNeeded()

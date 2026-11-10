@@ -44,7 +44,6 @@ it('slides a bottom drawer up to rest on the edge and closes it with a drag', as
 it('rests side drawers against their edge at 400px wide', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 800 })
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/docs/drawer')
   for (const [name, title] of [
     ['Right', 'Details'],
@@ -77,7 +76,7 @@ for (const [side, button, title] of [
   it(`slides a ${side} drawer in and out over 500ms, the backdrop darkening in step`, async (t) => {
     const page = await t.serve(await createTestServer(router.fetch))
     await page.setViewportSize({ width: 1280, height: 800 })
-    await open(page, '/docs/drawer')
+    await open(page, '/docs/drawer', { motion: true })
     const trigger = page.locator('#sides').getByRole('button', { name: button, exact: true })
     const dialog = page.getByRole('dialog', { name: title })
     // A closing dialog leaves the accessibility tree, so the panel is marked once open.

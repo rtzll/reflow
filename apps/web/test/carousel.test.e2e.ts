@@ -15,7 +15,6 @@ const resting = (viewport: Locator) =>
 it('snaps to the next slide after a mouse drag, and keeps a short drag in place', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/docs/carousel')
   const example = page.locator('#basic')
   const viewport = example.locator('.rf-carousel-viewport')
@@ -58,7 +57,6 @@ it('snaps to the next slide after a mouse drag, and keeps a short drag in place'
 it('scrolls with the keyboard and its buttons without moving the page', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/docs/carousel')
   const example = page.locator('#basic')
   const viewport = example.locator('.rf-carousel-viewport')
@@ -84,7 +82,6 @@ it('scrolls with the keyboard and its buttons without moving the page', async (t
 it('does not follow a link a drag ends on, but follows a click', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/docs/carousel')
   const example = page.locator('#linked-slides')
   const viewport = example.locator('.rf-carousel-viewport')
@@ -105,7 +102,7 @@ it('does not follow a link a drag ends on, but follows a click', async (t) => {
 it('autoplays through its dots, pauses while pointed at, and stops with its button', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
-  await open(page, '/docs/carousel')
+  await open(page, '/docs/carousel', { motion: true })
   const example = page.locator('#autoplay')
   const viewport = example.locator('.rf-carousel-viewport')
   await viewport.scrollIntoViewIfNeeded()
@@ -133,7 +130,6 @@ it('autoplays through its dots, pauses while pointed at, and stops with its butt
 it('counts only the stops it can reach when several slides are in view', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/docs/carousel')
   const example = page.locator('#several-in-view')
   await example.scrollIntoViewIfNeeded()
@@ -153,7 +149,6 @@ it('counts only the stops it can reach when several slides are in view', async (
 it('works the same in a right-to-left page', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 900 })
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, '/docs/carousel')
   const example = page.locator('#basic')
   const viewport = example.locator('.rf-carousel-viewport')
