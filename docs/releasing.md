@@ -52,4 +52,6 @@ pnpm --filter @reflow/web exec remix doctor
 node tools/check-package.mjs
 ```
 
+Before a release, also run `pnpm test:linux` to run the suite on Linux, as CI does. [Testing](testing.md)
+
 `pnpm check` builds once; `pnpm test:run` and `node tools/check-package.mjs` reuse that build. `pnpm test` and `pnpm test:package` build first for standalone local use. No local validation command publishes. The smoke test cleans up its temporary app, browser, and server even on failure.

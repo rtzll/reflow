@@ -30,6 +30,8 @@ CI runs the Reflow checks and browser tests with no reference server. For a visu
 
 The test suite covers keyboard and focus behavior, form values and resets, popup interactions, composer attachments and queued sends, settings, and showcase layout. The docs sweep checks hydration and horizontal overflow in desktop dark and mobile light, and documentation examples are typechecked against the public API.
 
+How to write and run tests, including motion and timers, and what to do when one flakes: [Testing](testing.md).
+
 When changing an interaction, verify the component where the showcase uses it. Check pointer, keyboard, touch, reduced motion and form behavior where they apply, and use the built-in browser for visual checks. For a component that follows upstream, compare the same state with Fluid Functionalism when changing its motion or presentation.
 
 Checks run on pull requests and pushes to `main`; superseded check runs are cancelled. CI reuses the build from `pnpm check` by running `pnpm test:run`. The install smoke test then checks the packed artifact. The catalog's HTTP rendering is covered by a server test, and `pnpm test:deployment` checks hydration and overflow on every docs page at desktop and mobile widths. Showcase tests import the router from `apps/web/test/showcase-router.ts`, which closes asset watchers after each suite so workers exit promptly. [Release preparation and enablement](releasing.md) are separate and require a manual trigger after migration.
