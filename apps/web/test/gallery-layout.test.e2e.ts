@@ -559,33 +559,28 @@ it('animates the accordion panel height on the first open as on later opens', as
     .evaluate((button) => button.setAttribute('data-test-trigger', ''))
   const trigger = page.locator('[data-test-trigger]')
   await trigger.scrollIntoViewIfNeeded()
-  const sample = () =>
-    trigger.evaluate(async (button) => {
-      const panel = button.closest('.rf-accordion-item')!.querySelector('.rf-accordion-panel')!
-      const heights: number[] = []
-      ;(button as HTMLElement).click()
-      for (let i = 0; i < 30; i++) {
-        await new Promise((resolve) => requestAnimationFrame(resolve))
-        heights.push(Math.round(panel.getBoundingClientRect().height))
-      }
-      return heights
-    })
-  const animates = (heights: number[]) => {
-    const final = heights.at(-1)!
-    return final > 0 && heights.some((height) => height > 0 && height < final - 1)
-  }
-
-  const first = await sample()
-  assert.ok(animates(first), `First open did not animate: ${first.join(' ')}`)
-  await trigger.click()
-  await expect(trigger).toHaveAttribute('aria-expanded', 'false')
   const panel = page
     .locator('.rf-accordion-item')
     .filter({ has: trigger })
     .locator('.rf-accordion-panel')
+  const height = () => panel.evaluate((node) => node.getBoundingClientRect().height)
+  // A fifth of the way into its spring, the panel is part of the way to its full height.
+  const opensGradually = async (label: string) => {
+    await holdMotion(page)
+    await trigger.click()
+    await seekMotion(panel, 0.2)
+    const partway = await height()
+    await seekMotion(panel, 1)
+    const full = await height()
+    await releaseMotion(page)
+    assert.ok(full > 0 && partway > 1 && partway < full - 1, `${label}: ${partway} of ${full}`)
+  }
+
+  await opensGradually('First open')
+  await trigger.click()
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false')
   await expect(panel).toHaveCSS('grid-template-rows', '0px')
-  const second = await sample()
-  assert.ok(animates(second), `Second open did not animate: ${second.join(' ')}`)
+  await opensGradually('Second open')
 })
 
 it('strengthens the command list header line and drops the end line at the bottom', async (t) => {
