@@ -18,6 +18,12 @@
   background: transparent;
   cursor: pointer;
 }
+/* On touch, each dot's button reaches the 24px minimum target; the dots stay small. */
+@media (pointer: coarse) {
+  .rf-carousel-dots button {
+    padding: 9px;
+  }
+}
 .rf-carousel-dots button:focus-visible {
   box-shadow: 0 0 0 1px var(--rf-accent);
 }
