@@ -129,6 +129,8 @@
 .rf-calendar-months {
   display: flex;
   flex-wrap: wrap;
+  /* Months that wrap onto their own rows, as on a phone, stay centred. */
+  justify-content: center;
   align-items: flex-start;
   gap: 24px;
 }
