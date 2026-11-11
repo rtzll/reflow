@@ -750,21 +750,24 @@ html[data-density='compact'] .site-nav a {
   border-radius: var(--rf-panel-radius, 12px);
 }
 
+/* The copy button sits beside the code, so a long line scrolls under neither. */
 .site-code {
-  position: relative;
+  display: flex;
+  align-items: flex-start;
   border: 1px solid var(--rf-border);
   border-radius: var(--rf-panel-radius, 12px);
   background: var(--rf-surface-2, var(--rf-bg));
 }
 .site-code pre {
+  flex: 1;
+  min-width: 0;
   overflow-x: auto;
-  padding: 12px 42px 12px 12px;
+  padding: 12px;
   font-size: 12px;
 }
 .site-code .site-icon-button {
-  position: absolute;
-  top: 4px;
-  right: 4px;
+  flex: none;
+  margin: 4px 4px 4px 0;
 }
 .site-props-scroll {
   overflow: auto;
@@ -2583,6 +2586,8 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
 
 .site-intro-install > div {
   display: grid;
+  /* One column no wider than the section, so a long command scrolls in its box. */
+  grid-template-columns: minmax(0, 1fr);
   justify-items: start;
   gap: 8px;
   min-width: 0;
