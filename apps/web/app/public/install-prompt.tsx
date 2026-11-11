@@ -9,7 +9,7 @@ import {
   type Settings,
 } from './site-settings.ts'
 
-export const reflowInstallCommand = 'pnpm add --save-exact @rtzll/reflow@0.7.0 remix@3.2.0'
+export const reflowInstallCommand = 'pnpm add --save-exact @rtzll/reflow@0.7.1 remix@3.2.0'
 
 /** Installs the Reflow skill from the repository with the skills CLI. Global
  *  (-g) keeps it out of the user's project; -y skips the CLI's questions,
