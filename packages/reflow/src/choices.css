@@ -414,6 +414,17 @@
   color: var(--rf-muted);
   cursor: pointer;
 }
+/* On touch, the remove button answers a little beyond its drawn square. */
+@media (pointer: coarse) {
+  .rf-picker-chip > button {
+    position: relative;
+  }
+  .rf-picker-chip > button::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+  }
+}
 .rf-picker-chip > button:hover {
   background: var(--rf-active);
   color: var(--rf-fg);
