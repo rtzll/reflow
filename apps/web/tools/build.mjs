@@ -64,15 +64,37 @@ const client = await build({
   loader: { '.woff2': 'file' },
 })
 
-function href(source) {
+function outputOf(source) {
   const entry = Object.entries(client.metafile.outputs).find(
     ([, value]) => value.entryPoint && resolve(root, value.entryPoint) === resolve(root, source),
   )
   if (!entry) throw new Error(`Missing browser output for ${source}`)
-  return '/' + relative(resolve(output, 'client'), resolve(root, entry[0])).replaceAll('\\', '/')
+  return entry[0]
+}
+function publicHref(file) {
+  return '/' + relative(resolve(output, 'client'), resolve(root, file)).replaceAll('\\', '/')
+}
+function href(source) {
+  return publicHref(outputOf(source))
+}
+// Every chunk a module imports statically, however deep. Preloading them lets
+// the browser fetch a page's scripts at once instead of one import level per
+// round trip, which on a slow connection costs seconds before hydration.
+function staticImports(file, found = new Set()) {
+  for (const { path, kind, external } of client.metafile.outputs[file]?.imports ?? []) {
+    if (kind !== 'import-statement' || external || found.has(path)) continue
+    found.add(path)
+    staticImports(path, found)
+  }
+  return found
 }
 function scriptEntry(source) {
-  return { href: href(source), importMap: { imports: {} }, preloads: [] }
+  const file = outputOf(source)
+  return {
+    href: publicHref(file),
+    importMap: { imports: {} },
+    preloads: [file, ...staticImports(file)].map(publicHref),
+  }
 }
 
 // Copy only explicitly public images and license notices, never the source tree.
