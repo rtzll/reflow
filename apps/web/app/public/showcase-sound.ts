@@ -268,9 +268,64 @@ function bindNumberSounds() {
   })
 }
 
+function bindColorSquareSounds() {
+  let pointer: { id: number; square: Element; value: string | null } | undefined
+  let key: { square: Element; value: string | null } | undefined
+  function finish(square: Element, value: string | null) {
+    requestAnimationFrame(() => {
+      if (square.isConnected && square.getAttribute('aria-valuetext') !== value)
+        play('select', { emphasis: 'subtle', volume: 0.35 })
+    })
+  }
+  document.addEventListener(
+    'pointerdown',
+    (event) => {
+      if (!event.isPrimary || event.button !== 0 || !(event.target instanceof Element)) return
+      const square = event.target.closest('.site-preview-stage .rf-color-square')
+      if (square && square.getAttribute('tabindex') !== '-1')
+        pointer = { id: event.pointerId, square, value: square.getAttribute('aria-valuetext') }
+    },
+    { capture: true },
+  )
+  document.addEventListener('pointerup', (event) => {
+    if (pointer?.id !== event.pointerId) return
+    finish(pointer.square, pointer.value)
+    pointer = undefined
+  })
+  document.addEventListener('pointercancel', () => {
+    pointer = undefined
+  })
+  document.addEventListener(
+    'keydown',
+    (event) => {
+      if (
+        event.repeat ||
+        !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key) ||
+        !(event.target instanceof Element)
+      )
+        return
+      const square = event.target.closest('.site-preview-stage .rf-color-square')
+      if (square && square.getAttribute('tabindex') !== '-1')
+        key = { square, value: square.getAttribute('aria-valuetext') }
+    },
+    { capture: true },
+  )
+  document.addEventListener('keyup', (event) => {
+    if (
+      !key ||
+      event.target !== key.square ||
+      !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)
+    )
+      return
+    finish(key.square, key.value)
+    key = undefined
+  })
+}
+
 let enabled = true
 let soundStarted = false
 const boundSoundControls = new WeakSet<Element>()
+const silentDialogClose = new WeakSet<HTMLDialogElement>()
 
 function changePreference(next: boolean) {
   enabled = next
@@ -375,8 +430,10 @@ export function enhanceShowcaseSound() {
       play('select', { emphasis: 'subtle' })
   })
   document.addEventListener('reflow:command-select', (event) => {
-    if (event.target instanceof Element && event.target.closest('.site-preview-stage'))
-      play('select', { emphasis: 'subtle' })
+    if (!(event.target instanceof Element) || !event.target.closest('.site-preview-stage')) return
+    const dialog = event.target.closest('dialog')
+    if (dialog) silentDialogClose.add(dialog)
+    play('select', { emphasis: 'subtle' })
   })
   document.addEventListener('reflow:carousel-navigation', (event) => {
     if (!(event.target instanceof Element) || !event.target.closest('.site-preview-stage')) return
@@ -522,6 +579,8 @@ export function enhanceShowcaseSound() {
     (event) => {
       const dialog = event.target
       if (dialog instanceof HTMLDialogElement && dialog.matches('.rf-dialog, .rf-drawer')) {
+        if (!dialog.open && silentDialogClose.delete(dialog)) return
+        if (dialog.open) silentDialogClose.delete(dialog)
         play(dialog.open ? 'open' : 'close')
       } else if (
         event instanceof ToggleEvent &&
@@ -537,6 +596,7 @@ export function enhanceShowcaseSound() {
   )
   bindSliderSounds()
   bindNumberSounds()
+  bindColorSquareSounds()
   bindCopyErrors()
   bindToastSounds()
 }
