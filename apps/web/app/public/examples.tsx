@@ -32,7 +32,6 @@ import {
 import { RequestFormExample } from './request-form-example.tsx'
 import { SoundCombobox } from './sound-combobox.tsx'
 import { playCopySuccess } from './showcase-sound.ts'
-import { play } from 'cuelume'
 import {
   Avatar,
   Accordion,
@@ -841,7 +840,6 @@ export const Example = clientEntry(
                   message =
                     text || `Attached ${files.length} ${files.length === 1 ? 'file' : 'files'}`
                   handle.update()
-                  play('success')
                 }}
               />
               {message && <ChatMessage role="user">{message}</ChatMessage>}

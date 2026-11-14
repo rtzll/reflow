@@ -1,5 +1,6 @@
 import { AvatarGroup, ChatLayout, ChatMessage, InputMessage } from '@rtzll/reflow'
 import type { Handle } from 'remix/component'
+import { play } from 'cuelume'
 
 interface Message {
   role: 'user' | 'assistant' | 'system'
@@ -55,7 +56,10 @@ export function ChatLayoutDemo(handle: Handle<ChatLayoutDemoProps>) {
       shown = Math.min(words.length, shown + 2)
       message.text = words.slice(0, shown).join(' ')
       void handle.update()
-      if (shown === words.length) clearInterval(timer)
+      if (shown === words.length) {
+        clearInterval(timer)
+        play('ready', { emphasis: 'subtle' })
+      }
     }, 60)
   }
 

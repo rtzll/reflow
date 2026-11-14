@@ -189,6 +189,7 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
   async function submit(event: SubmitEvent) {
     event.preventDefault()
     if (handle.props.disabled || sending || (!draft.trim() && files.length === 0)) return
+    event.currentTarget.dispatchEvent(new Event('reflow:message-send', { bubbles: true }))
     if (handle.props.status === 'streaming') {
       changeQueue([
         ...(handle.props.queue ?? queued),
