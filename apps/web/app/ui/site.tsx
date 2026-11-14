@@ -477,10 +477,10 @@ const galleryOrder = [
   'queued-stack',
   'command-menu',
   'select',
-  'tooltip',
-  'sidebar',
   'avatar',
+  'sidebar',
   'radio-group',
+  'breadcrumb',
   'thinking-steps',
   'tabs',
   'segmented-control',
@@ -504,7 +504,6 @@ const galleryOrder = [
   'color-picker',
   'switch',
   'combobox',
-  'breadcrumb',
 ]
 
 const wideCards = new Set([

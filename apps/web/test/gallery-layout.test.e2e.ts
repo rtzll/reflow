@@ -20,10 +20,10 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'queued-stack',
     'command-menu',
     'select',
-    'tooltip',
-    'sidebar',
     'avatar',
+    'sidebar',
     'radio-group',
+    'breadcrumb',
     'thinking-steps',
     'tabs',
     'segmented-control',
@@ -47,7 +47,6 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'color-picker',
     'switch',
     'combobox',
-    'breadcrumb',
   ]
   const gallery = page.locator('.site-gallery')
   for (const width of [1440, 1280, 768, 390]) {
@@ -68,7 +67,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
     await trail.getByRole('button', { name: 'Drafts' }).waitFor()
     assert.equal(await trail.locator('[aria-current="page"]').textContent(), 'Roadmap.md')
     assert.equal(await trail.locator('a').first().textContent(), 'Home')
-    await trail.locator('li[data-ellipsis]').waitFor()
+    if (width !== 768) await trail.locator('li[data-ellipsis]').waitFor()
     assert.equal(
       await gallery.locator('[data-component="color-picker"] .rf-color-swatch').count(),
       17,

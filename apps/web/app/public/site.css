@@ -1042,7 +1042,7 @@ body:has(.site-demo) {
   .site-gallery {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .site-gallery [data-right] {
+  .site-gallery :is([data-right], [data-component='breadcrumb']) {
     grid-column: span 2;
   }
 }
@@ -1052,7 +1052,7 @@ body:has(.site-demo) {
     grid-template-columns: minmax(0, 1fr);
     grid-auto-rows: minmax(200px, auto);
   }
-  .site-gallery :is([data-wide], [data-right]) {
+  .site-gallery :is([data-wide], [data-right], [data-component='breadcrumb']) {
     grid-column: auto;
   }
   .site-gallery [data-tall] {
