@@ -33,7 +33,9 @@
 @import './dialog.css';
 @import './tooltip.css';
 @import './sidebar.css';
-@import './dates.css';
+@import './calendar.css';
+@import './time-field.css';
+@import './date-picker.css';
 @import './command-menu.css';
 @import './ask-user-questions.css';
 @import './range-color.css';

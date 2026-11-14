@@ -1,0 +1,102 @@
+.rf-date-sizer,
+.rf-date-sizer * {
+  text-box: trim-both cap alphabetic;
+}
+
+.rf-date-sizer {
+  display: inline-flex;
+  visibility: hidden;
+  white-space: pre;
+  pointer-events: none;
+}
+
+.rf-date-sizer > span {
+  grid-area: auto;
+}
+
+.rf-date-sizer > span:not(:first-child) {
+  position: absolute;
+}
+
+[data-hover='standard'] .rf-date-time:hover {
+  background: var(--rf-hover);
+}
+
+.rf-date-time:has(input:focus-visible) {
+  outline: none;
+  box-shadow: 0 0 0 1px var(--rf-accent, #6b97ff);
+}
+
+.rf-date-time {
+  display: inline-flex;
+  align-items: center;
+  block-size: var(--rf-control-height, 36px);
+  gap: calc(var(--rf-icon-size, 16px) - 10px);
+  padding: 0 calc(var(--rf-control-padding, 12px) - 4px);
+  border-radius: var(--rf-radius, 8px);
+  cursor: text;
+}
+
+.rf-date-duration {
+  color: var(--rf-muted);
+  white-space: nowrap;
+}
+
+.rf-date-time svg {
+  flex: none;
+  inline-size: var(--rf-icon-size, 16px);
+  block-size: var(--rf-icon-size, 16px);
+  color: var(--rf-muted);
+}
+
+.rf-date-time-field {
+  display: inline-grid;
+}
+
+.rf-date-time-field > * {
+  grid-area: 1 / 1;
+}
+
+.rf-date-time-field > .rf-date-sizer {
+  display: block;
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-date-time-field {
+  inline-size: 8ch;
+}
+.rf-time-surface {
+  width: 112px;
+  min-inline-size: 112px;
+  max-block-size: min(240px, var(--popover-available-height, 240px));
+  overflow-y: auto;
+  padding: 4px;
+}
+.rf-time-surface[data-duration] {
+  width: 180px;
+  min-inline-size: 180px;
+}
+.rf-time-list {
+  position: relative;
+  outline: none;
+}
+.rf-time-option {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: var(--rf-control-height, 36px);
+  padding-inline: 8px;
+  border-radius: var(--rf-radius, 8px);
+  color: var(--rf-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.rf-time-option[aria-selected='true'],
+.rf-time-option[data-highlighted] {
+  color: var(--rf-fg);
+}
+.rf-time-option[aria-selected='true'] {
+  font-variation-settings: var(--rf-weight-strong);
+}
