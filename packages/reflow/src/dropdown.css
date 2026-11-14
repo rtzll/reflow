@@ -231,6 +231,11 @@
 .rf-menu-search input::placeholder {
   color: var(--rf-muted, #737373);
 }
+@media (pointer: coarse) {
+  .rf-menu-search input {
+    font-size: max(16px, var(--rf-text-body, 13px));
+  }
+}
 
 .rf-menu-search + .rf-menu-list {
   padding-block-start: 2px;

@@ -312,6 +312,7 @@
   .rf-question-free > textarea {
     margin-block: -1px;
     padding-block: 1px;
+    font-size: max(16px, var(--rf-text-body));
   }
 }
 

@@ -104,6 +104,11 @@
   color: var(--rf-muted);
   opacity: 1;
 }
+@media (pointer: coarse) {
+  .rf-command-search input {
+    font-size: max(16px, var(--rf-text-subtitle, 14px));
+  }
+}
 .rf-command-search > svg {
   flex: none;
   color: var(--rf-muted);

@@ -39,6 +39,12 @@
   opacity: 0.5;
 }
 
+@media (pointer: coarse) {
+  .rf-input:not([type='file']) {
+    font-size: max(16px, var(--rf-text-body));
+  }
+}
+
 .rf-input-with-icon {
   --rf-step-size: calc(var(--rf-control-height) - 8px);
   --rf-step-inset: 4px;

@@ -65,6 +65,11 @@
 .rf-date-time-field {
   inline-size: 8ch;
 }
+@media (pointer: coarse) {
+  .rf-date-time-field {
+    font-size: max(16px, var(--rf-text-body, 13px));
+  }
+}
 .rf-time-surface {
   width: 112px;
   min-inline-size: 112px;

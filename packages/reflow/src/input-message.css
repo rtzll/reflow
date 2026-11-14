@@ -54,6 +54,11 @@
 .rf-composer .rf-textarea:hover:not(:disabled) {
   background: transparent;
 }
+@media (pointer: coarse) {
+  .rf-composer .rf-textarea {
+    font-size: max(16px, var(--rf-text-subtitle));
+  }
+}
 .rf-composer-send {
   gap: normal;
 }

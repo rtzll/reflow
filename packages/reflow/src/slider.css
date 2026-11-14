@@ -219,6 +219,12 @@
   align-items: center;
 }
 
+@media (pointer: coarse) {
+  .rf-slider-value {
+    font-size: 16px;
+  }
+}
+
 .rf-slider-value > span,
 .rf-slider-value > input {
   grid-area: 1 / 1;
