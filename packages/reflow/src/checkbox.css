@@ -1,0 +1,89 @@
+.rf-checkbox-mark {
+  --rf-checkbox-radius: 5px;
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  box-sizing: border-box;
+  width: var(--rf-icon-size);
+  height: var(--rf-icon-size);
+  border: 1.5px solid var(--rf-border);
+  border-radius: min(var(--rf-checkbox-radius), var(--rf-radius));
+  transition: border-color var(--rf-fast);
+}
+
+.rf-checkbox[data-size='compact'] > .rf-checkbox-mark,
+[data-density='compact'] .rf-checkbox:not([data-size]) > .rf-checkbox-mark {
+  --rf-checkbox-radius: 4px;
+}
+
+[data-shape='sharp'] .rf-checkbox-mark {
+  border-radius: 0;
+}
+
+.rf-checkbox:has(> input:focus-visible) > .rf-checkbox-mark {
+  outline: none;
+  box-shadow: 0 0 0 1px var(--rf-accent);
+}
+
+@media (hover: hover) {
+  .rf-checkbox:hover:not(:has(> input:disabled)) > .rf-checkbox-mark {
+    border-color: var(--rf-border-emphasis);
+  }
+}
+
+.rf-checkbox > input[aria-invalid='true'] + .rf-checkbox-mark {
+  border-color: color-mix(in oklab, light-dark(#ef4444, var(--rf-danger)) 50%, transparent);
+}
+
+.rf-checkbox-mark > svg {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: calc(var(--rf-icon-size) + 2px);
+  height: calc(var(--rf-icon-size) + 2px);
+  translate: -50% -50%;
+  overflow: visible;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.rf-checkbox-check {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset calc(var(--rf-fast) / 2) ease-in;
+}
+
+.rf-checkbox-dash {
+  opacity: 0;
+  transition: opacity var(--rf-fast);
+}
+
+.rf-checkbox > input:is(:checked, :indeterminate, [aria-checked='mixed']) + .rf-checkbox-mark {
+  border-color: transparent;
+}
+
+.rf-checkbox
+  > input:checked:not(:indeterminate, [aria-checked='mixed'])
+  + .rf-checkbox-mark
+  .rf-checkbox-check {
+  stroke-dashoffset: 0;
+  transition-timing-function: ease-out;
+  transition-duration: var(--rf-fast);
+}
+
+.rf-checkbox
+  > input:is(:indeterminate, [aria-checked='mixed'])
+  + .rf-checkbox-mark
+  .rf-checkbox-dash {
+  opacity: 1;
+}
+
+@media (hover: hover) {
+  .rf-checkbox:hover
+    > input:is(:checked, :indeterminate, [aria-checked='mixed']):not(:disabled)
+    + .rf-checkbox-mark {
+    border-color: var(--rf-border-emphasis);
+  }
+}

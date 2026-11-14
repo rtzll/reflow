@@ -1,0 +1,101 @@
+.rf-table-highlight {
+  background: var(--rf-hover);
+}
+
+div > .rf-highlight.rf-table-highlight {
+  border-radius: 0;
+}
+
+.rf-table-container {
+  overflow-x: auto;
+}
+
+.rf-table {
+  --rf-table-cell-py: 8px;
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--rf-fg);
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+}
+
+.rf-table-container[data-size='compact'] .rf-table {
+  --rf-table-cell-py: 5px;
+}
+
+.rf-table :is(th, td) {
+  box-sizing: border-box;
+  padding: var(--rf-table-cell-py) var(--rf-control-padding);
+  text-align: start;
+}
+
+.rf-table td {
+  color: var(--rf-muted);
+  transition: color var(--rf-fast);
+}
+
+.rf-table th {
+  color: var(--rf-fg);
+}
+
+.rf-table .rf-table-row {
+  position: relative;
+  z-index: 10;
+  border: 0 solid color-mix(in oklab, var(--rf-neutral-fill) 40%, transparent);
+  border-block-end-width: 1px;
+  transition: border-color var(--rf-fast);
+  font-variation-settings: var(--rf-weight-normal);
+}
+
+.rf-table thead .rf-table-row {
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.rf-table-row[data-selected] {
+  background: var(--rf-active);
+}
+
+.rf-table-container[data-row-hover] .rf-table-row[data-rf-hover-item]:not([data-rf-hovered]):hover,
+[data-hover='standard']
+  .rf-table-container[data-row-hover]
+  .rf-table-row[data-rf-hover-item]:hover {
+  background: var(--rf-hover);
+}
+
+.rf-table-row[data-rf-hovered] > td {
+  color: var(--rf-fg);
+}
+
+.rf-table .rf-table-row[data-rf-hovered],
+.rf-table .rf-table-row:has(+ .rf-table-row[data-rf-hovered]),
+.rf-table thead:has(+ tbody > .rf-table-row:first-child[data-rf-hovered]) > .rf-table-row {
+  border-color: transparent;
+}
+
+.rf-table td.rf-table-empty-cell {
+  padding: 0;
+  color: var(--rf-fg);
+}
+
+.rf-table-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: calc(3 * (1lh + 2 * var(--rf-table-cell-py)));
+  padding: 16px 12px;
+  text-align: center;
+}
+
+.rf-table-empty-title {
+  color: var(--rf-fg);
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.rf-table-empty-description {
+  color: var(--rf-muted);
+}
+
+.rf-table-empty-action {
+  margin-top: 8px;
+}

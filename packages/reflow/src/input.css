@@ -1,0 +1,140 @@
+.rf-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: var(--rf-control-height);
+  padding: 0 var(--rf-control-padding);
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-radius);
+  background: transparent;
+  color: var(--rf-fg);
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+  font-variation-settings: var(--rf-weight-normal);
+  transition:
+    background-color var(--rf-fast),
+    border-color var(--rf-fast);
+}
+
+.rf-input::placeholder {
+  color: var(--rf-muted);
+  opacity: 1;
+}
+
+@media (hover: hover) {
+  .rf-input:not(:disabled, :focus):hover:where(:not(.rf-input-field-control > *)) {
+    background: var(--rf-hover);
+  }
+}
+
+.rf-input[aria-invalid='true'] {
+  border-color: color-mix(in oklab, light-dark(#ef4444, var(--rf-danger)) 50%, transparent);
+}
+
+.rf-input:focus {
+  border-color: var(--rf-border-emphasis);
+  outline: none;
+}
+
+.rf-input:disabled {
+  opacity: 0.5;
+}
+
+.rf-input-with-icon {
+  --rf-step-size: calc(var(--rf-control-height) - 8px);
+  --rf-step-inset: 4px;
+  --rf-step-gap: 8px;
+  position: relative;
+  display: block;
+  min-inline-size: 0;
+  inline-size: 100%;
+}
+
+.rf-input-with-icon[data-size='compact'],
+[data-density='compact'] .rf-input-with-icon:not([data-size]) {
+  --rf-step-size: calc(var(--rf-control-height) - 4px);
+  --rf-step-inset: 2px;
+  --rf-step-gap: 4px;
+}
+
+.rf-input-with-icon > .rf-input[type='file'] {
+  padding-block: calc((var(--rf-control-height) - var(--rf-leading-body) - 2px) / 2);
+  padding-inline-start: calc(var(--rf-control-padding) + var(--rf-icon-size) + var(--rf-gap));
+}
+
+.rf-input[type='file']:not([data-has-file]) {
+  color: var(--rf-muted);
+}
+
+.rf-input-file-icon {
+  position: absolute;
+  inset-inline-start: var(--rf-control-padding);
+  inset-block-start: 50%;
+  width: var(--rf-icon-size);
+  height: var(--rf-icon-size);
+  color: var(--rf-muted);
+  translate: 0 -50%;
+  pointer-events: none;
+}
+
+.rf-input[data-has-file] + .rf-input-file-icon {
+  color: var(--rf-fg);
+}
+
+.rf-input::file-selector-button {
+  margin-inline-end: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--rf-fg);
+  font: inherit;
+  cursor: pointer;
+}
+
+.rf-input-with-icon > .rf-input[type='number'] {
+  appearance: textfield;
+  padding-inline-end: calc(var(--rf-step-inset) + 2 * var(--rf-step-size) + var(--rf-step-gap));
+}
+
+.rf-input-with-icon > .rf-input[type='number']::-webkit-inner-spin-button,
+.rf-input-with-icon > .rf-input[type='number']::-webkit-outer-spin-button {
+  appearance: none;
+}
+
+.rf-input-steppers {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: var(--rf-step-inset);
+  display: flex;
+  align-items: center;
+}
+
+.rf-input-steppers > button {
+  display: grid;
+  place-items: center;
+  width: var(--rf-step-size);
+  height: var(--rf-step-size);
+  padding: 0;
+  border: 0;
+  border-radius: max(1px, calc(var(--rf-radius) - var(--rf-step-inset)));
+  background: transparent;
+  color: var(--rf-muted);
+  cursor: pointer;
+  transition:
+    color var(--rf-fast),
+    background-color var(--rf-fast);
+}
+
+.rf-input-steppers > button:not(:disabled):hover {
+  color: var(--rf-fg);
+  background: var(--rf-hover);
+}
+
+.rf-input-steppers > button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.rf-input-steppers svg {
+  width: var(--rf-icon-size);
+  height: var(--rf-icon-size);
+}

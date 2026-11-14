@@ -1,0 +1,183 @@
+.rf-input-copy {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  /* The row's height comes from the padded children: 36px = 8px + 20px line + 8px. */
+  --rf-copy-py: calc((var(--rf-control-height) - 20px) / 2);
+  gap: 2px;
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+}
+
+.rf-input-copy[data-disabled] {
+  opacity: 0.5;
+}
+
+.rf-copy-label {
+  color: var(--rf-muted);
+  font-variation-settings: var(--rf-weight-normal);
+}
+
+.rf-copy-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0;
+  border: 0;
+  border-radius: var(--rf-radius);
+  background: transparent;
+  color: var(--rf-fg);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.rf-copy-row:focus-visible {
+  outline: 1px solid var(--rf-accent);
+}
+
+.rf-copy-row:disabled {
+  cursor: default;
+}
+
+.rf-copy-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  padding-block: var(--rf-copy-py);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variation-settings: var(--rf-weight-normal);
+  text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.rf-input-copy[data-align='left'] :is(.rf-copy-label, .rf-copy-value) {
+  padding-inline-start: 4px;
+}
+
+.rf-input-copy[data-state='error'] .rf-copy-value {
+  user-select: text;
+}
+
+.rf-copy-value > mark {
+  background: transparent;
+  color: inherit;
+  transition: background-color var(--rf-fast);
+}
+
+.rf-copy-row:is(:hover, :focus-visible):not(:disabled) mark {
+  background: color-mix(in oklab, var(--rf-accent) 20%, transparent);
+}
+
+.rf-copy-action {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  padding: var(--rf-copy-py) 6px;
+  color: var(--rf-muted);
+  transition: color var(--rf-fast);
+}
+
+.rf-copy-action:has(.rf-copy-feedback) {
+  gap: 6px;
+}
+
+.rf-copy-glyph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.rf-copy-glyph[data-phase='exit'] {
+  opacity: 0;
+  scale: 0.8;
+  transition:
+    opacity var(--rf-spring-fast),
+    scale var(--rf-spring-fast);
+}
+
+.rf-copy-glyph[data-phase='enter'] {
+  animation: rf-copy-in var(--rf-spring-fast) both;
+}
+
+.rf-copy-glyph[data-phase='enter']:not([data-glyph='idle']) {
+  --rf-copy-from: 0.6;
+}
+
+@keyframes rf-copy-in {
+  from {
+    opacity: 0;
+    scale: var(--rf-copy-from, 0.8);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-copy-glyph[data-phase] {
+    animation: none;
+    transition: none;
+  }
+}
+
+.rf-copy-glyph[data-glyph='error'] {
+  color: var(--rf-danger);
+}
+
+.rf-copy-feedback {
+  display: inline-grid;
+  font-variation-settings: var(--rf-weight-normal);
+  text-align: start;
+  user-select: none;
+}
+
+.rf-copy-feedback > span {
+  grid-area: 1 / 1;
+}
+
+.rf-copy-feedback > [aria-hidden='true'] {
+  visibility: hidden;
+}
+
+.rf-copy-action svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+  transition: stroke-width var(--rf-fast);
+}
+
+.rf-copy-action svg g[data-rf-icon-default] {
+  stroke-width: inherit;
+}
+
+.rf-copy-row:is(:hover, :focus-visible):not(:disabled) .rf-copy-action {
+  color: var(--rf-fg);
+}
+
+.rf-copy-row:is(:hover, :focus-visible):not(:disabled) .rf-copy-action svg {
+  stroke-width: 2;
+}
+
+/* The button variant draws its check and cross at a fixed 2. */
+.rf-copy-row .rf-copy-action:has(.rf-copy-feedback) svg[data-result] {
+  stroke-width: 2;
+}
+
+.rf-copy-action path[pathLength] {
+  stroke-dasharray: 1;
+  animation: rf-copy-draw var(--rf-fast) ease-out;
+}
+
+@keyframes rf-copy-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}

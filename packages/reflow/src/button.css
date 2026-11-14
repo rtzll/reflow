@@ -1,0 +1,238 @@
+.rf-button {
+  --rf-button-fill: var(--rf-fg);
+  --rf-button-hover: color-mix(in oklab, var(--rf-fg) 90%, var(--rf-bg));
+  --rf-button-active: color-mix(in oklab, var(--rf-fg) 80%, var(--rf-bg));
+  --rf-button-ring: var(--rf-button-fill);
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: var(--rf-control-height);
+  max-inline-size: 100%;
+  gap: 6px;
+  padding: 0 16px;
+  margin: 0;
+  border: 0;
+  border-radius: var(--rf-radius);
+  background: transparent;
+  color: var(--rf-bg);
+  font-family: var(--rf-font);
+  font-size: var(--rf-text-body);
+  /* The reference's button never changes weight, so its label keeps the
+     font's own optical sizing instead of the weight tokens' fixed opsz. */
+  font-variation-settings: normal;
+  line-height: var(--rf-leading-body);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: color var(--rf-fast);
+}
+
+.rf-button::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 1px;
+  border-radius: inherit;
+  background: var(--rf-button-fill);
+  box-shadow: 0 0 0 1px var(--rf-button-ring);
+  transition:
+    background-color var(--rf-fast),
+    box-shadow var(--rf-medium) var(--rf-ease-out);
+  pointer-events: none;
+}
+
+.rf-button[data-variant='secondary'] {
+  --rf-button-fill: var(--rf-tint);
+  --rf-button-hover: var(--rf-tint-hover);
+  --rf-button-active: var(--rf-tint);
+  color: var(--rf-fg);
+}
+
+.rf-button[data-variant='tertiary'] {
+  --rf-button-fill: transparent;
+  --rf-button-hover: var(--rf-hover);
+  --rf-button-active: var(--rf-active);
+  --rf-button-ring: var(--rf-border);
+  color: var(--rf-fg);
+}
+
+.rf-button[data-variant='tertiary']::before {
+  box-shadow:
+    0 0 0 1px var(--rf-border),
+    inset 0 0 0 0 var(--rf-border);
+}
+
+.rf-button[data-variant='ghost'] {
+  --rf-button-fill: transparent;
+  --rf-button-hover: var(--rf-hover);
+  --rf-button-active: var(--rf-active);
+  color: var(--rf-muted);
+}
+
+.rf-button[data-variant='destructive'] {
+  --rf-button-red: oklch(63.7% 0.237 25.331);
+  --rf-button-fill: light-dark(
+    color-mix(in oklab, var(--rf-button-red) 15%, transparent),
+    color-mix(in oklab, var(--rf-button-red) 20%, transparent)
+  );
+  --rf-button-hover: light-dark(
+    color-mix(in oklab, var(--rf-button-red) 25%, transparent),
+    color-mix(in oklab, var(--rf-button-red) 30%, transparent)
+  );
+  --rf-button-active: var(--rf-button-fill);
+  color: light-dark(oklch(50.5% 0.213 27.518), oklch(70.4% 0.191 22.216));
+}
+
+.rf-button[data-active]::before {
+  background: var(--rf-button-active);
+  box-shadow: 0 0 0 1px var(--rf-button-active);
+}
+
+.rf-button[data-variant='tertiary'][data-active]::before {
+  box-shadow:
+    0 0 0 1px var(--rf-border),
+    inset 0 0 0 0 var(--rf-border);
+}
+
+.rf-button[data-variant='destructive'][data-active]:not(:active)::before {
+  background: var(--rf-button-hover);
+  box-shadow: 0 0 0 1px var(--rf-button-hover);
+}
+
+@media (hover: hover) {
+  .rf-button[data-variant='ghost']:not(:disabled, [aria-disabled='true']):hover {
+    color: var(--rf-fg);
+  }
+
+  .rf-button:not(:disabled, [aria-disabled='true'], [data-active]):hover::before {
+    background: var(--rf-button-hover);
+    box-shadow: 0 0 0 1px var(--rf-button-hover);
+  }
+
+  .rf-button[data-variant='tertiary']:not(:disabled, [aria-disabled='true']):hover::before {
+    box-shadow:
+      0 0 0 1px var(--rf-border),
+      inset 0 0 0 0 var(--rf-border);
+  }
+
+  .rf-button:not(:disabled, [aria-disabled='true']):hover
+    :is(.rf-button-icon > svg, .rf-button-label > svg) {
+    stroke-width: 2;
+  }
+}
+
+.rf-button:not(:disabled, [aria-disabled='true']):active::before {
+  background: var(--rf-button-active);
+  box-shadow: 0 0 0 0 var(--rf-button-active);
+  transition-duration: var(--rf-fast);
+}
+
+.rf-button[data-variant='tertiary']:not(:disabled, [aria-disabled='true']):active::before {
+  box-shadow:
+    0 0 0 0 var(--rf-border),
+    inset 0 0 0 1px var(--rf-border);
+}
+
+.rf-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 1px var(--rf-accent);
+}
+
+.rf-button:is(:disabled, [aria-disabled='true']):not([aria-busy='true']) {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.rf-button[aria-busy='true'] {
+  cursor: progress;
+}
+
+.rf-button[data-leading] {
+  padding-inline-start: 12px;
+}
+
+.rf-button[data-trailing] {
+  padding-inline-end: 12px;
+}
+
+.rf-button[data-size='compact'],
+[data-density='compact'] .rf-button:not([data-size]) {
+  gap: 4px;
+  padding-inline: 12px;
+}
+
+.rf-button[data-size='compact'][data-leading],
+[data-density='compact'] .rf-button:not([data-size])[data-leading] {
+  padding-inline-start: 8px;
+}
+
+.rf-button[data-size='compact'][data-trailing],
+[data-density='compact'] .rf-button:not([data-size])[data-trailing] {
+  padding-inline-end: 8px;
+}
+
+.rf-button:is([data-size='icon'], [data-size='icon-compact']) {
+  width: var(--rf-control-height);
+  padding: 0;
+}
+
+.rf-button-content {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: inherit;
+}
+
+.rf-button[aria-busy='true'] > .rf-button-content {
+  opacity: 0;
+}
+
+.rf-button-label {
+  text-box: trim-both cap alphabetic;
+}
+
+/* An SVG has no text baseline to trim. Center its box directly. */
+.rf-button:is([data-size='icon'], [data-size='icon-compact']) .rf-button-label:has(> svg) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-box-trim: none;
+}
+
+.rf-button-icon,
+.rf-button-label > svg {
+  flex: none;
+  width: var(--rf-icon-size);
+  height: var(--rf-icon-size);
+}
+
+.rf-button-icon {
+  display: grid;
+  place-items: center;
+}
+
+.rf-button-icon > svg {
+  width: 100%;
+  height: 100%;
+}
+
+.rf-button :is(.rf-button-icon > svg, .rf-button-label > svg) {
+  stroke-width: 1.5;
+  transition: stroke-width var(--rf-fast);
+}
+
+.rf-button-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--rf-icon-size);
+  height: var(--rf-icon-size);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}

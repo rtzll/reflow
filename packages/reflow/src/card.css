@@ -1,0 +1,443 @@
+.rf-card-group {
+  --rf-card-line: color-mix(in oklab, var(--rf-border) 60%, transparent);
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: repeat(var(--rf-card-columns), minmax(0, 1fr));
+  gap: 0;
+}
+
+.rf-card-group[data-separated] {
+  gap: 8px;
+}
+
+.rf-card-group[data-border='outlined']:not([data-separated]) {
+  overflow: hidden;
+  border: 1px solid var(--rf-card-line);
+  border-radius: var(--rf-panel-radius);
+}
+
+.rf-card {
+  --rf-card-line: color-mix(in oklab, var(--rf-border) 60%, transparent);
+  --rf-card-divider: var(--rf-card-line);
+  --rf-card-x: 16px;
+  --rf-card-pb: 16px;
+  --rf-card-pt: 16px;
+  --rf-card-pt-part: 12px;
+  --rf-card-py: 14px;
+  --rf-card-gap: 12px;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 60px;
+  flex-direction: column;
+  padding-block-end: var(--rf-card-pb);
+  border-radius: var(--rf-panel-radius);
+  overflow: hidden;
+  color: var(--rf-fg);
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+}
+
+.rf-card[data-size='compact'],
+[data-density='compact'] .rf-card:not([data-size]) {
+  --rf-card-x: 12px;
+  --rf-card-pb: 12px;
+  --rf-card-pt: 12px;
+  --rf-card-pt-part: 10px;
+  --rf-card-py: 10px;
+  --rf-card-gap: 10px;
+}
+
+.rf-card[data-border='outlined'] {
+  border: 1px solid var(--rf-card-line);
+}
+
+/* Inside a group the card is a plain cell: only a framed, separated tile clips itself. */
+.rf-card-group > .rf-card {
+  overflow: visible;
+  border-radius: 0;
+}
+
+.rf-card-group[data-separated][data-border='outlined'] > .rf-card {
+  overflow: hidden;
+  border: 1px solid var(--rf-card-line);
+  border-radius: var(--rf-panel-radius);
+}
+
+.rf-card-group[data-orientation='inline'] > .rf-card {
+  align-items: center;
+  flex-direction: row;
+  gap: var(--rf-card-gap);
+  padding-block-end: 0;
+  padding-inline-start: var(--rf-card-x);
+}
+
+/* Short inline rows use the catalog's 52px rhythm; content-rich cards keep their own padding. */
+.rf-card-group[data-orientation='inline']
+  > .rf-card:not(:has(> .rf-card-header, > .rf-card-body, > .rf-card-image)) {
+  min-height: 52px;
+  padding: 6px 12px;
+  gap: 10px;
+}
+
+.rf-card-group[data-orientation='inline'] > .rf-card:has(> .rf-card-image) {
+  padding-inline-start: 0;
+}
+
+/* Hairlines toward the neighbours below and to the right. */
+.rf-card-group > .rf-card:is([data-divider-below], [data-divider-right])::before,
+.rf-card-group > .rf-card[data-divider-right]::after {
+  position: absolute;
+  z-index: -1;
+  background: var(--rf-card-divider);
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+}
+
+.rf-card-group > .rf-card[data-divider-below]::before {
+  inset: auto 0 0;
+  height: 1px;
+  opacity: 1;
+}
+
+.rf-card-group > .rf-card[data-divider-right]::after {
+  inset: 0 0 0 auto;
+  width: 1px;
+  opacity: 1;
+}
+
+.rf-card-group > .rf-card[data-divider-right][data-divider-below]::after {
+  inset-block-end: 1px;
+}
+
+/* The highlight and the selection fill hide the hairlines they touch. */
+.rf-card-group > .rf-card:is([data-rf-hovered], [data-selected])::before,
+.rf-card-group > .rf-card:is([data-rf-hovered], [data-selected])::after,
+.rf-card-group > .rf-card:has(+ .rf-card[data-rf-hovered])::after,
+.rf-card-group > .rf-card:has(+ .rf-card[data-rf-hovered])::before,
+.rf-card-group > .rf-card:has(+ .rf-card[data-selected])::after,
+.rf-card-group > .rf-card:has(+ .rf-card[data-selected])::before {
+  opacity: 0;
+}
+
+.rf-card-highlight {
+  background: var(--rf-hover);
+}
+
+.rf-highlight.rf-card-highlight {
+  border-radius: var(--rf-panel-radius);
+}
+
+.rf-card-fill {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: var(--rf-panel-radius);
+  background: var(--rf-active);
+  pointer-events: none;
+}
+
+.rf-card[data-rf-hover-item]:not([aria-disabled='true'], [data-rf-hovered]):hover,
+[data-hover='standard'] .rf-card[data-rf-hover-item]:not([aria-disabled='true']):hover {
+  background: var(--rf-hover);
+}
+
+.rf-card[aria-disabled='true'] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.rf-card-target {
+  position: absolute;
+  z-index: 20;
+  inset: 0;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.rf-card-target:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 1px var(--rf-accent);
+}
+
+.rf-card-target:disabled {
+  cursor: default;
+}
+
+.rf-card
+  :is(a, button, input, select, textarea, [tabindex]):not(.rf-card-target, .rf-card-dismiss) {
+  position: relative;
+  z-index: 30;
+}
+
+.rf-card-dismiss {
+  position: absolute;
+  z-index: 30;
+  inset: 8px 8px auto auto;
+}
+
+.rf-card-dismiss {
+  gap: normal;
+}
+
+.rf-card:has(> .rf-card-image) > .rf-card-dismiss {
+  --rf-button-hover: transparent;
+  background: color-mix(in oklab, var(--rf-surface-3) 70%, transparent);
+  backdrop-filter: blur(8px);
+  transition:
+    background-color var(--rf-fast),
+    opacity var(--rf-fast);
+}
+
+.rf-card:has(> .rf-card-image) > .rf-card-dismiss:hover {
+  background: var(--rf-surface-3);
+}
+
+.rf-card-dismiss[data-on-hover] {
+  transition: opacity var(--rf-fast);
+}
+
+@media (hover: hover) {
+  .rf-card:not(:hover, :focus-within) > .rf-card-dismiss[data-on-hover] {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.rf-card-group[data-orientation='inline']
+  .rf-card[data-dismissible]:is(:hover, :focus-within)
+  .rf-card-header {
+  padding-inline-end: 40px;
+}
+
+.rf-card-header {
+  display: grid;
+  min-width: 0;
+  align-items: start;
+  grid-auto-rows: min-content;
+  gap: 4px;
+  padding: var(--rf-card-pt) var(--rf-card-x) 0;
+}
+
+.rf-card-header:has(> .rf-card-action) {
+  grid-template-columns: 1fr auto;
+}
+
+.rf-card-group[data-orientation='inline'] .rf-card-header {
+  flex: 1;
+  padding: var(--rf-card-py) 0;
+}
+
+.rf-card-content {
+  padding: var(--rf-card-pt-part) var(--rf-card-x) 0;
+}
+
+.rf-card-group[data-orientation='inline'] .rf-card-content {
+  padding: 0;
+}
+
+.rf-card-body {
+  display: contents;
+}
+
+.rf-card-group[data-orientation='inline'] .rf-card-body {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  padding: var(--rf-card-py) var(--rf-card-x) var(--rf-card-py) 0;
+}
+
+.rf-card-group[data-orientation='inline'] .rf-card-body > .rf-card-header {
+  flex: none;
+  padding: 0;
+}
+
+.rf-card-title,
+.rf-card-description {
+  margin: 0;
+}
+
+.rf-card-title {
+  min-width: 0;
+  overflow-x: clip;
+  text-overflow: ellipsis;
+  font: var(--rf-text-subtitle) / var(--rf-leading-subtitle) var(--rf-heading-font);
+  font-variation-settings: var(--rf-weight-normal);
+  transition: font-variation-settings var(--rf-fast);
+}
+
+.rf-card-group[data-orientation='inline'] .rf-card-title {
+  text-box: trim-both cap alphabetic;
+}
+
+.rf-card[data-selected] .rf-card-title {
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.rf-card-description {
+  color: var(--rf-muted);
+  font: var(--rf-text-subtitle) / var(--rf-leading-subtitle) var(--rf-font);
+}
+
+.rf-card-eyebrow {
+  color: var(--rf-muted);
+  font: var(--rf-text-caption) / var(--rf-leading-caption) var(--rf-font);
+}
+
+.rf-card-action {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  justify-self: end;
+  align-self: start;
+  position: relative;
+  z-index: 30;
+}
+
+.rf-card-footer {
+  position: relative;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: var(--rf-card-pt-part) var(--rf-card-x) 0;
+}
+
+.rf-card-group[data-orientation='inline'] .rf-card-footer {
+  margin-inline-start: auto;
+  padding: 0 var(--rf-card-x) 0 0;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+}
+
+.rf-card-group[data-orientation='inline'] .rf-card-body > .rf-card-footer {
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+}
+
+.rf-button.rf-card-button:not([data-size]) {
+  height: 28px;
+  gap: 6px;
+  padding-inline: 10px;
+  font-size: var(--rf-text-caption);
+  font-variation-settings: var(--rf-weight-normal);
+  line-height: var(--rf-leading-caption);
+}
+
+.rf-card-button[data-variant='primary'] {
+  --rf-button-fill: var(--rf-fg);
+  --rf-button-hover: color-mix(in oklab, var(--rf-fg) 90%, transparent);
+  --rf-button-active: color-mix(in oklab, var(--rf-fg) 80%, transparent);
+}
+
+.rf-card-button[data-link] {
+  padding-inline: 0;
+  height: auto;
+  color: var(--rf-fg);
+}
+
+.rf-card-media {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  margin-block-end: 8px;
+}
+
+.rf-card-group[data-orientation='inline'] .rf-card-media {
+  margin-block-end: 0;
+}
+
+.rf-card-media[data-treatment='icon'] {
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--rf-radius);
+  background: var(--rf-hover);
+}
+
+.rf-card-media[data-treatment='icon'] > svg {
+  color: var(--rf-muted);
+}
+
+.rf-card-media[data-treatment='logo'] {
+  gap: 6px;
+}
+
+.rf-card-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rf-card-logo > img {
+  border-radius: var(--rf-radius);
+  object-fit: contain;
+  outline: 1px solid light-dark(rgb(0 0 0 / 0.1), rgb(255 255 255 / 0.1));
+  outline-offset: -1px;
+}
+
+.rf-card-logo > i {
+  width: 8px;
+  height: 1px;
+  background: var(--rf-border);
+}
+
+.rf-card-image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 2px;
+  object-fit: cover;
+  outline: 1px solid light-dark(rgb(0 0 0 / 0.1), rgb(255 255 255 / 0.1));
+  outline-offset: -1px;
+}
+
+.rf-card-group[data-orientation='inline'] .rf-card-image {
+  flex: none;
+  width: 160px;
+  height: 160px;
+  aspect-ratio: auto;
+}
+
+.rf-card-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--rf-gap);
+}
+
+.rf-card-feature > svg {
+  flex: none;
+  margin-block-start: 2px;
+  color: var(--rf-muted);
+}
+
+.rf-card-feature > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rf-card-feature-title {
+  color: var(--rf-fg);
+  font-variation-settings: var(--rf-weight-strong);
+  text-box: trim-both cap alphabetic;
+}
+
+.rf-card-feature-description {
+  color: var(--rf-muted);
+  font: var(--rf-text-caption) / var(--rf-leading-caption) var(--rf-font);
+}

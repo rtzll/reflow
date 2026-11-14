@@ -1,0 +1,276 @@
+/* Banner appear and dismiss. The row (grid track) and the banner ride one
+   curve. Appearing: the row opens over twice the moderate spring (the curve of
+   --rf-spring-moderate, stretched to 400ms); inline, the banner grows on the
+   slow spring one fast tier later; fixed, it slides down with the row.
+   Dismissing: the row closes over twice the moderate exit, easeInOut. Inline,
+   the banner is gone and at 0.6 scale by the time the row is 0.6 open (106ms,
+   fitted to follow the row), so it never outgrows it; fixed, it fades and
+   slides up over the whole close. A parent's flow gap is given back through
+   --rf-banner-flow-gap. */
+.rf-banner-collapse {
+  --rf-banner-row-open: linear(
+    0,
+    0.0504 3.1%,
+    0.1607 6.3%,
+    0.4178 12.5%,
+    0.5327 15.6%,
+    0.6311 18.8%,
+    0.7125 21.9%,
+    0.7783 25%,
+    0.8305 28.1%,
+    0.8713 31.3%,
+    0.9029 34.4%,
+    0.9271 37.5%,
+    0.9456 40.6%,
+    0.9595 43.8%,
+    0.9778 50%,
+    0.988 56.3%,
+    0.9935 62.5%,
+    0.9982 75%,
+    1
+  );
+  --rf-banner-row-close: cubic-bezier(0.42, 0, 0.58, 1);
+  display: grid;
+  align-self: start;
+  grid-template-rows: 1fr;
+  margin-bottom: 0;
+  transition:
+    grid-template-rows 400ms var(--rf-banner-row-open),
+    margin-bottom 400ms var(--rf-banner-row-open);
+}
+
+.rf-banner-collapse[data-open='false'] {
+  grid-template-rows: 0fr;
+  margin-bottom: calc(var(--rf-banner-flow-gap, 0px) * -1);
+  overflow: clip;
+  transition:
+    grid-template-rows 240ms var(--rf-banner-row-close),
+    margin-bottom 240ms var(--rf-banner-row-close);
+}
+
+.rf-banner-overflow {
+  min-height: 0;
+}
+
+.rf-banner-collapse[data-variant='fixed'] {
+  overflow: clip;
+  position: sticky;
+  z-index: var(--rf-z-sticky);
+  inset-block-start: 0;
+}
+
+.rf-banner {
+  transform-origin: top;
+  transition:
+    opacity var(--rf-spring-slow) var(--rf-fast),
+    scale var(--rf-spring-slow) var(--rf-fast);
+}
+
+.rf-banner-collapse[data-open='false'] .rf-banner {
+  opacity: 0;
+  scale: 0.6;
+  transition:
+    opacity 106ms cubic-bezier(0.45, 0, 0.75, 0.55),
+    scale 106ms cubic-bezier(0.45, 0, 0.75, 0.55);
+}
+
+.rf-banner-collapse[data-variant='fixed'] .rf-banner {
+  transition:
+    opacity 400ms var(--rf-banner-row-open),
+    translate 400ms var(--rf-banner-row-open);
+}
+
+.rf-banner-collapse[data-variant='fixed'][data-open='false'] .rf-banner {
+  opacity: 0;
+  scale: 1;
+  translate: 0 -100%;
+  transition:
+    opacity 240ms var(--rf-banner-row-close),
+    translate 240ms var(--rf-banner-row-close);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-banner-collapse,
+  .rf-banner-collapse[data-open='false'] {
+    transition:
+      grid-template-rows 0s var(--rf-fast),
+      margin-bottom 0s var(--rf-fast);
+  }
+
+  .rf-banner-collapse .rf-banner,
+  .rf-banner-collapse[data-open='false'] .rf-banner,
+  .rf-banner-collapse[data-variant='fixed'][data-open='false'] .rf-banner {
+    scale: 1;
+    translate: 0 0;
+    transition: opacity var(--rf-spring-fast);
+  }
+}
+
+.rf-banner {
+  --rf-status-color: var(--rf-fg);
+  --rf-banner-fill: var(--rf-hover);
+  --rf-banner-tint: 8%;
+  --rf-banner-inset: 16px;
+  --rf-banner-gap: 12px;
+  --rf-banner-glyph-size: 20px;
+  --rf-banner-close-size: 15px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  box-sizing: border-box;
+  container: reflow-banner / inline-size;
+  width: 100%;
+  padding: var(--rf-banner-inset);
+  border-radius: var(--rf-panel-radius);
+  background-image: linear-gradient(var(--rf-banner-fill), var(--rf-banner-fill));
+  color: var(--rf-fg);
+  font: var(--rf-text-subtitle) / var(--rf-leading-subtitle) var(--rf-font);
+}
+
+.rf-banner[data-size='compact'],
+[data-density='compact'] .rf-banner:not([data-size]) {
+  --rf-banner-inset: 12px;
+  --rf-banner-gap: 10px;
+  --rf-banner-glyph-size: 16px;
+  --rf-banner-close-size: 13px;
+}
+
+.rf-banner:has(.rf-banner-description) {
+  align-items: start;
+}
+
+.rf-banner-collapse[data-variant='fixed'] .rf-banner {
+  border-radius: 0;
+  background-color: var(--rf-bg);
+}
+
+.rf-banner:not([data-status='default']) {
+  --rf-banner-tint: 12%;
+}
+
+.rf-banner[data-status='info'] {
+  --rf-status-color: light-dark(#3b82f6, var(--rf-info));
+}
+
+.rf-banner[data-status='success'] {
+  --rf-status-color: light-dark(#22c55e, var(--rf-success));
+}
+
+.rf-banner[data-status='warning'] {
+  --rf-status-color: light-dark(#f59e0b, var(--rf-warning));
+}
+
+.rf-banner[data-status='error'] {
+  --rf-status-color: light-dark(#ef4444, var(--rf-danger));
+}
+
+.rf-banner[data-contrast='high'] {
+  --rf-banner-fill: color-mix(in oklab, var(--rf-status-color) var(--rf-banner-tint), transparent);
+}
+
+.rf-banner-icon {
+  display: grid;
+  place-items: center;
+  grid-area: 1 / 1;
+  width: var(--rf-banner-glyph-size);
+  height: var(--rf-leading-subtitle);
+  margin-inline-end: var(--rf-banner-gap);
+  color: var(--rf-status-color);
+}
+
+.rf-banner-icon > svg {
+  width: var(--rf-banner-glyph-size);
+  height: var(--rf-banner-glyph-size);
+}
+
+.rf-banner-content {
+  display: flex;
+  flex-direction: column;
+  grid-area: 1 / 2;
+  min-width: 0;
+  gap: 2px;
+}
+
+.rf-banner-content:has(> .rf-banner-title):not(
+    :has(> :not(.rf-banner-title, .rf-banner-description, .rf-banner-actions))
+  ) {
+  display: contents;
+}
+
+.rf-banner .rf-banner-title,
+.rf-banner .rf-banner-description {
+  margin: 0;
+}
+
+.rf-banner-title {
+  grid-area: 1 / 2;
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.rf-banner .rf-banner-description {
+  grid-area: 2 / 2;
+  margin-top: 2px;
+}
+
+.rf-banner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  grid-area: 1 / 3;
+  gap: 8px;
+  margin: calc((var(--rf-leading-subtitle) - 28px) / 2) 0;
+  margin-inline-start: var(--rf-banner-gap);
+}
+
+.rf-banner:has(.rf-banner-description) .rf-banner-actions {
+  grid-area: 3 / 2;
+  margin: calc(var(--rf-banner-gap) - 4px) 0 0;
+}
+
+@container reflow-banner (width <= 24rem) {
+  .rf-banner-actions {
+    grid-area: 3 / 2;
+    margin: calc(var(--rf-banner-gap) - 4px) 0 0;
+  }
+}
+
+.rf-banner > .rf-banner-dismiss {
+  display: flex;
+  grid-area: 1 / 4;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 28px;
+  height: 28px;
+  margin: calc((var(--rf-leading-subtitle) - 28px) / 2) 0;
+  margin-inline: 8px -6px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--rf-radius);
+  background: transparent;
+  color: var(--rf-muted);
+  cursor: pointer;
+  outline: none;
+  transition:
+    color var(--rf-fast),
+    background-color var(--rf-fast);
+}
+
+.rf-banner > .rf-banner-dismiss:focus-visible {
+  box-shadow: 0 0 0 1px var(--rf-accent);
+}
+
+@media (hover: hover) {
+  .rf-banner > .rf-banner-dismiss:hover {
+    background: var(--rf-hover);
+    color: var(--rf-fg);
+  }
+}
+
+.rf-banner-dismiss > svg {
+  width: var(--rf-banner-close-size);
+  height: var(--rf-banner-close-size);
+}
+
+.rf-banner-actions .rf-button[data-variant='ghost'] {
+  color: var(--rf-fg);
+}

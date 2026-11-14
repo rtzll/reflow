@@ -1,0 +1,53 @@
+.rf-badge {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  block-size: 24px;
+  gap: 6px;
+  padding-inline: 10px;
+  border-radius: var(--rf-item-radius);
+  background: color-mix(in srgb, var(--rf-badge-color) 15%, var(--rf-bg));
+  color: var(--rf-fg);
+  font: var(--rf-text-caption) / var(--rf-leading-caption) var(--rf-font);
+  white-space: nowrap;
+}
+
+.rf-badge[data-color='gray'] {
+  background: var(--rf-neutral-fill);
+}
+
+.rf-badge[data-variant='dot'] {
+  border: 1px solid var(--rf-border);
+  background: transparent;
+}
+
+.rf-badge[data-size='compact'],
+[data-density='compact'] .rf-badge:not([data-size]) {
+  block-size: 20px;
+  gap: 4px;
+  padding-inline: 8px;
+  font-size: 11px;
+  line-height: 14px;
+}
+
+.rf-badge-label {
+  text-box: trim-both cap alphabetic;
+}
+
+.rf-badge-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: calc(infinity * 1px);
+  background: var(--rf-badge-color);
+}
+
+.rf-badge[data-color='gray'] > .rf-badge-dot {
+  background: var(--rf-muted);
+}
+
+.rf-badge[data-size='compact'] > .rf-badge-dot,
+[data-density='compact'] .rf-badge:not([data-size]) > .rf-badge-dot {
+  width: 6px;
+  height: 6px;
+}

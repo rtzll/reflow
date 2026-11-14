@@ -1,0 +1,16 @@
+.rf-textarea {
+  display: block;
+  height: auto;
+  padding-block: calc((var(--rf-control-height) - var(--rf-leading-body) - 2px) / 2);
+  border-radius: min(var(--rf-radius), 16px);
+  resize: vertical;
+}
+
+.rf-textarea[data-autoresize] {
+  min-height: calc(
+    var(--rf-control-height) + (min(var(--rf-textarea-rows), 10) - 1) * var(--rf-leading-body)
+  );
+  max-height: calc(var(--rf-control-height) + 9 * var(--rf-leading-body));
+  field-sizing: content;
+  resize: none;
+}

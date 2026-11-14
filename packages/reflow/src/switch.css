@@ -1,0 +1,119 @@
+.rf-switch > input {
+  touch-action: pan-y;
+}
+
+.rf-switch {
+  --rf-switch-press-size: 4px;
+  box-sizing: border-box;
+  min-block-size: var(--rf-control-height);
+  padding-inline: var(--rf-control-padding);
+  user-select: none;
+}
+
+.rf-switch[data-size='compact'],
+[data-density='compact'] .rf-switch:not([data-size]) {
+  --rf-switch-press-size: 3px;
+}
+
+.rf-switch > .rf-choice-label,
+.rf-switch:has(> input:checked) > .rf-choice-label {
+  font-variation-settings: normal;
+}
+
+.rf-switch > .rf-choice-label {
+  color: var(--rf-muted);
+  text-box: trim-both cap alphabetic;
+  transition: color var(--rf-fast);
+}
+
+.rf-switch:has(> input:checked) > .rf-choice-label {
+  color: var(--rf-fg);
+}
+
+.rf-switch-track {
+  --rf-switch-width: calc(var(--rf-icon-size) * 3 - 14px);
+  --rf-switch-thumb: calc(var(--rf-icon-size) * 2 - 16px);
+  position: relative;
+  flex: none;
+  display: block;
+  width: var(--rf-switch-width);
+  height: calc(var(--rf-switch-thumb) + 4px);
+  border-radius: min(99px, calc(var(--rf-radius) * 4));
+  background: var(--rf-neutral-fill);
+  transition: background-color var(--rf-fast);
+}
+
+.rf-choice:has(> input:focus-visible) > .rf-switch-track {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--rf-bg),
+    0 0 0 3px var(--rf-accent);
+}
+
+[data-shape='sharp'] .rf-switch-track,
+[data-shape='sharp'] .rf-switch-thumb {
+  border-radius: 0;
+}
+
+.rf-switch-thumb {
+  --rf-switch-stretch: 0px;
+  --rf-switch-squash: 0px;
+  --rf-switch-x: 0px;
+  position: absolute;
+  display: block;
+  inset: 50% auto auto 2px;
+  width: calc(var(--rf-switch-thumb) + var(--rf-switch-stretch));
+  height: calc(var(--rf-switch-thumb) - var(--rf-switch-squash));
+  border-radius: 999px;
+  background: white;
+  box-shadow:
+    0 1px 3px 0 rgb(0 0 0 / 10%),
+    0 1px 2px -1px rgb(0 0 0 / 10%);
+  translate: var(--rf-switch-x) -50%;
+  transition:
+    translate var(--rf-spring-moderate),
+    width var(--rf-spring-moderate),
+    height var(--rf-spring-moderate);
+}
+
+.rf-switch > input:checked + .rf-switch-track {
+  background: var(--rf-accent);
+}
+
+.rf-switch > input:checked + .rf-switch-track .rf-switch-thumb {
+  /* Keep the outside edge aligned when the thumb widens. */
+  --rf-switch-x: calc(
+    var(--rf-switch-width) - var(--rf-switch-thumb) - 4px - var(--rf-switch-stretch)
+  );
+}
+
+@media (hover: hover) {
+  .rf-switch:hover > input:not(:checked, :disabled) + .rf-switch-track {
+    background: color-mix(in oklab, var(--rf-neutral-fill), light-dark(black, white) 10%);
+  }
+
+  .rf-switch:hover > input:checked:not(:disabled) + .rf-switch-track {
+    background: color-mix(in oklab, var(--rf-accent), black 8%);
+  }
+
+  .rf-switch:hover:not(:has(> input:disabled)) .rf-switch-thumb {
+    --rf-switch-stretch: 2px;
+  }
+}
+
+.rf-switch > input:active:not(:disabled) + .rf-switch-track .rf-switch-thumb,
+.rf-switch-track[data-dragging] .rf-switch-thumb {
+  --rf-switch-stretch: var(--rf-switch-press-size);
+  --rf-switch-squash: var(--rf-switch-press-size);
+}
+
+.rf-switch > input + .rf-switch-track[data-dragging] .rf-switch-thumb {
+  --rf-switch-x: var(--rf-switch-position, 0px);
+  transition-property: width, height;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-switch .rf-switch-track .rf-switch-thumb {
+    transition: none;
+  }
+}

@@ -1,0 +1,42 @@
+.rf-choice {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: var(--rf-leading-body);
+  gap: var(--rf-gap);
+  color: var(--rf-fg);
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.rf-choice > input {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.rf-choice:has(> input:disabled) {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.rf-choice:has(> input:focus-visible) > :is(.rf-checkbox-mark, .rf-switch-track) {
+  outline: 1px solid var(--rf-accent);
+  outline-offset: 2px;
+}
+
+.rf-choice-label {
+  font-variation-settings: var(--rf-weight-normal);
+  transition: font-variation-settings var(--rf-fast);
+}
+
+.rf-choice:has(> input:checked) > .rf-choice-label {
+  font-variation-settings: var(--rf-weight-strong);
+}
