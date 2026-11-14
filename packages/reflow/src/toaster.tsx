@@ -3,7 +3,7 @@ import { on, ref, type Handle, type RemixNode } from 'remix/component'
 import { Button } from './basic.tsx'
 import { Icon } from './icon.tsx'
 import { matchesShortcut, parseShortcut } from './behaviors/shortcut.ts'
-import { statusIcon } from './status-icon.tsx'
+import { statusIcon } from './systems/status-icon.tsx'
 
 export type ToastStatus = 'default' | 'info' | 'success' | 'warning' | 'error' | 'loading'
 

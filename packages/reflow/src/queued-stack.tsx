@@ -1,4 +1,4 @@
-import { messageTransitionName, transitionMessage } from './message-transition.ts'
+import { messageTransitionName, transitionMessage } from './systems/message-transition.ts'
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
 import { Button } from './basic.tsx'
 

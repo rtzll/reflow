@@ -1,6 +1,6 @@
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
 import { Button, Field, Input, type ControlSize } from './basic.tsx'
-import { partitionFiles } from './file-selection.ts'
+import { partitionFiles } from './behaviors/file-selection.ts'
 import { Icon } from './icon.tsx'
 
 export interface FileInputProps {

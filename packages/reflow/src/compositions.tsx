@@ -1,6 +1,6 @@
-import { partitionFiles } from './file-selection.ts'
+import { partitionFiles } from './behaviors/file-selection.ts'
 import { Icon } from './icon.tsx'
-import { messageTransitionName, transitionMessage } from './message-transition.ts'
+import { messageTransitionName, transitionMessage } from './systems/message-transition.ts'
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
 import { prefersReducedMotion } from '@remix-run/ui/animation'
 import { Badge, Button, Textarea, type BadgeColor, type ControlSize } from './basic.tsx'

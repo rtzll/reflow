@@ -1,3 +1,6 @@
+// Parse, format and match keyboard shortcuts written as `⌘K` or `Alt+T`.
+// Remix UI has no shortcut handling; Dropdown, CommandMenu and Toaster share this.
+
 /** Split modifier symbols and named keys while retaining a trailing plus key. */
 export function shortcutKeys(shortcut: string) {
   return shortcut.match(/[⌘⌥⇧⌃]|[^⌘⌥⇧⌃+\s]+|\+(?=$)/g) ?? []

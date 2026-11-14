@@ -5,7 +5,7 @@ import type { Handle, MixInput, Props, RemixNode } from 'remix/component'
 import { jsx } from 'remix/component/jsx-runtime'
 import { fluidHover } from './systems/fluid-hover.ts'
 import { Tooltip } from './overlays.tsx'
-import { statusIcon } from './status-icon.tsx'
+import { statusIcon } from './systems/status-icon.tsx'
 import { badgeColors } from './systems/colors.ts'
 
 export type ControlSize = 'default' | 'compact'

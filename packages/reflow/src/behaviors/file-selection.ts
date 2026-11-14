@@ -1,3 +1,9 @@
+/**
+ * Split files into those an `accept` list allows and those it rejects, by
+ * extension, exact MIME type or `type/*`, as the native file input matches
+ * them. FileInput and InputMessage use it for dropped and pasted files, which
+ * the browser does not filter. The platform exposes no matcher for this.
+ */
 export function partitionFiles(files: Iterable<File>, accept?: string) {
   const types = (accept ?? '')
     .split(',')
