@@ -189,6 +189,52 @@ function bindSliderSounds() {
   })
 }
 
+function bindNumberSounds() {
+  let pointer: { id: number; input: HTMLInputElement; value: number } | undefined
+  let key: { input: HTMLInputElement; value: number } | undefined
+  const initial = new WeakMap<HTMLInputElement, number>()
+  function finish(input: HTMLInputElement, value: number) {
+    requestAnimationFrame(() => {
+      const next = input.valueAsNumber
+      if (Number.isFinite(next) && Number.isFinite(value) && next !== value)
+        play('select', { emphasis: 'subtle', volume: 0.35, direction: next > value ? 'forward' : 'back' })
+      initial.set(input, next)
+    })
+  }
+  document.addEventListener('focusin', (event) => {
+    const input = event.target
+    if (input instanceof HTMLInputElement && input.type === 'number' && input.closest('.site-preview-stage') && !input.closest('.rf-slider')) initial.set(input, input.valueAsNumber)
+  })
+  document.addEventListener('pointerdown', (event) => {
+    if (!event.isPrimary || event.button !== 0 || !(event.target instanceof Element)) return
+    const target = event.target.closest('.site-preview-stage .rf-number-scrub, .site-preview-stage [data-slot="input-number"] button')
+    const input = target?.closest('.rf-field')?.querySelector<HTMLInputElement>('input[type="number"]')
+    if (input && !input.disabled && !input.readOnly) pointer = { id: event.pointerId, input, value: input.valueAsNumber }
+  }, { capture: true })
+  document.addEventListener('pointerup', (event) => {
+    if (pointer?.id !== event.pointerId) return
+    finish(pointer.input, pointer.value)
+    pointer = undefined
+  })
+  document.addEventListener('pointercancel', () => { pointer = undefined })
+  document.addEventListener('keydown', (event) => {
+    const input = event.target
+    if (!(input instanceof HTMLInputElement) || input.type !== 'number' || !input.closest('.site-preview-stage') || input.closest('.rf-slider') || !['ArrowUp', 'ArrowDown'].includes(event.key) || event.repeat) return
+    key = { input, value: input.valueAsNumber }
+  }, { capture: true })
+  document.addEventListener('keyup', (event) => {
+    if (!key || event.target !== key.input || !['ArrowUp', 'ArrowDown'].includes(event.key)) return
+    finish(key.input, key.value)
+    key = undefined
+  })
+  document.addEventListener('focusout', (event) => {
+    const input = event.target
+    if (!(input instanceof HTMLInputElement) || !initial.has(input)) return
+    if (pointer?.input !== input && key?.input !== input) finish(input, initial.get(input)!)
+    initial.delete(input)
+  })
+}
+
 let enabled = true
 let soundStarted = false
 const boundSoundControls = new WeakSet<Element>()
@@ -363,6 +409,7 @@ export function enhanceShowcaseSound() {
     { capture: true },
   )
   bindSliderSounds()
+  bindNumberSounds()
   bindCopyErrors()
   bindToastSounds()
 }
