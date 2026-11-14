@@ -155,6 +155,7 @@ export function CommandMenu(handle: Handle<CommandMenuProps>) {
 
   function select(item: CommandItem) {
     if (item.disabled) return
+    list?.dispatchEvent(new Event('reflow:command-select', { bubbles: true }))
     handle.props.onSelect?.(item.value)
     if (openState) setOpen(false)
   }

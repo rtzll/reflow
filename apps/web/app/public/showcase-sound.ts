@@ -374,6 +374,10 @@ export function enhanceShowcaseSound() {
     if (event.target instanceof Element && event.target.closest('.site-preview-stage'))
       play('select', { emphasis: 'subtle' })
   })
+  document.addEventListener('reflow:command-select', (event) => {
+    if (event.target instanceof Element && event.target.closest('.site-preview-stage'))
+      play('select', { emphasis: 'subtle' })
+  })
   document.addEventListener('reflow:message-send', (event) => {
     if (event.target instanceof Element && event.target.closest('.site-preview-stage'))
       play('tap', { emphasis: 'subtle' })
