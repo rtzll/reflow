@@ -84,6 +84,7 @@ import {
   ThinkingStepDetails,
   ThinkingStepSource,
   ThinkingStepSources,
+  Toolbar,
   Tooltip,
   type HighlightedCode,
 } from '@rtzll/reflow'
@@ -255,11 +256,12 @@ export const Example = clientEntry(
               <Spinner label="Loading results" size="24px" />
             </div>
           )
+        case 'toolbar':
         case 'button':
           return (
             <div className="example-stack">
-              {handle.props.showcase ? (
-                <div className="example-row">
+              {handle.props.showcase || handle.props.slug === 'toolbar' ? (
+                <Toolbar class="example-row" label="Button variants">
                   <Button
                     size="compact"
                     loading={starting}
@@ -285,7 +287,7 @@ export const Example = clientEntry(
                   <Button size="compact" variant="ghost">
                     Ghost
                   </Button>
-                </div>
+                </Toolbar>
               ) : (
                 <Button
                   mix={on('click', () => {

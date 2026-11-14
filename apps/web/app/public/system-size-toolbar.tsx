@@ -1,4 +1,13 @@
-import { Button, Dropdown, Icon, InputField, InputGroup, Select, Tabs } from '@rtzll/reflow'
+import {
+  Button,
+  Dropdown,
+  Icon,
+  InputField,
+  InputGroup,
+  Select,
+  Tabs,
+  Toolbar,
+} from '@rtzll/reflow'
 import { on, ref, type Handle } from 'remix/component'
 
 const sortOptions = [
@@ -86,7 +95,11 @@ function SizeToolbarRow(handle: Handle<{ density: 'default' | 'compact' }>) {
               { label: 'Board', value: 'board', icon: viewIcon('M8 7v6m4-6v10m4-10v4') },
             ]}
           />
-          <div class="system-size-actions" data-show-filters={showFilters || undefined}>
+          <Toolbar
+            class="system-size-actions"
+            label={`${density} project actions`}
+            data-show-filters={showFilters || undefined}
+          >
             <div class="system-size-filters" id={`size-${density}-filters`}>
               <InputGroup class="system-size-search">
                 <InputField
@@ -130,7 +143,7 @@ function SizeToolbarRow(handle: Handle<{ density: 'default' | 'compact' }>) {
             >
               New
             </Button>
-          </div>
+          </Toolbar>
           <span class="system-size-guide" aria-hidden="true">
             <svg
               width="8"

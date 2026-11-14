@@ -31,6 +31,8 @@ Use Spinner for indeterminate loading. Give a standalone spinner a label and omi
 
 Use Pagination with a one-based page number and a function that returns real page URLs. Keep current-page state in the route for bookmarks and browser history.
 
+Use Toolbar for grouped actions that share a tab stop. Name the group and use the arrows to move between its buttons or links. Text fields keep their own tab stops.
+
 Apply theme settings on a common ancestor with `data-theme`, `data-accent`, `data-shape`, `data-density`, and `data-hover`. Use the `--rf-*` CSS properties from the installed stylesheet for surfaces, spacing, text and focus colors. Consumers can provide icons as slots without adding an icon runtime.
 
 ## Interaction craft

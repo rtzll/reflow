@@ -1,0 +1,11 @@
+.rf-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rf-gap);
+}
+
+.rf-toolbar[aria-orientation='vertical'] {
+  flex-direction: column;
+  align-items: start;
+}

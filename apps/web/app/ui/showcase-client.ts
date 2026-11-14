@@ -14,6 +14,7 @@ const keyboardWidgets = [
   '[role="listbox"]',
   '[role="menu"]',
   '[role="menubar"]',
+  '[role="toolbar"]',
   '.site-accent-panel',
 ].join(', ')
 

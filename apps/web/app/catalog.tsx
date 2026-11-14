@@ -30,6 +30,16 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
     description: 'Previous, next, and numbered links for navigating page-based results.',
     code: `<Pagination page={2} pageCount={3} href={(page) => \`/?teamPage=\${page}#team-table\`} />`,
   },
+  toolbar: {
+    description:
+      'A labeled row or column of action controls with one tab stop and arrow-key navigation.',
+    code: `<Toolbar label="Button variants">
+  <Button>Primary</Button>
+  <Button variant="secondary">Secondary</Button>
+  <Button variant="tertiary">Tertiary</Button>
+  <Button variant="ghost">Ghost</Button>
+</Toolbar>`,
+  },
   spinner: {
     description: 'An indeterminate loading indicator shared by Button and Toaster.',
     code: `<Spinner label="Loading results" size="24px" />`,
@@ -359,6 +369,7 @@ const components = [
   ['thinking-indicator', 'ThinkingIndicator'],
   ['thinking-steps', 'ThinkingSteps'],
   ['toaster', 'Toaster'],
+  ['toolbar', 'Toolbar'],
   ['tooltip', 'Tooltip'],
   ['trigger-menu', 'TriggerMenu'],
 ] as const

@@ -48,6 +48,32 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  toolbar: [
+    {
+      name: 'Toolbar',
+      props: [
+        {
+          name: 'label',
+          type: 'string',
+          required: true,
+          description: 'Accessible name of the toolbar.',
+        },
+        {
+          name: 'orientation',
+          type: "'horizontal' | 'vertical'",
+          required: false,
+          description: 'Selects the arrow keys and layout. Defaults to horizontal.',
+        },
+        {
+          name: 'children',
+          type: 'RemixNode',
+          required: true,
+          description:
+            'Action buttons or links. Text fields and nested keyboard widgets keep their existing navigation.',
+        },
+      ],
+    },
+  ],
   spinner: [
     {
       name: 'Spinner',
