@@ -9,8 +9,9 @@ it('inserts a mention at the caret before Enter can send the message', async (t)
   const tile = page.locator('[data-component="input-message"]')
   const composer = tile.getByRole('textbox', { name: 'Message' })
   await composer.fill('Ask @gr tomorrow')
-  await composer.press('Home')
-  for (let i = 0; i < 7; i++) await composer.press('ArrowRight')
+  // Back from the end to just after "@gr". Home would scroll the page on macOS
+  // rather than move the caret.
+  for (let i = 0; i < ' tomorrow'.length; i++) await composer.press('ArrowLeft')
   await expect(tile.getByRole('option', { name: 'Grace Hopper' })).toBeVisible()
   await composer.press('Enter')
   await expect(composer).toHaveValue('Ask @Grace Hopper tomorrow')

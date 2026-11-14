@@ -11,16 +11,16 @@ it('preserves the gallery order and keeps previews above their footers', async (
   const page = await t.serve(await createTestServer(router.fetch))
   await page.emulateMedia({ reducedMotion: 'reduce' })
   const expected = [
-    'input-message',
-    'thinking-indicator',
+    'carousel',
+    'queued-stack',
     'toaster',
     'hover-card',
     'code-block',
     'card',
-    'queued-stack',
+    'avatar',
     'command-menu',
     'select',
-    'avatar',
+    'thinking-indicator',
     'sidebar',
     'radio-group',
     'breadcrumb',
@@ -34,7 +34,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'dropdown',
     'accordion',
     'input-copy',
-    'carousel',
+    'input-message',
     'input-group',
     'button',
     'table',
@@ -123,14 +123,21 @@ it('preserves the gallery order and keeps previews above their footers', async (
       ).toBeVisible()
       const tile = (slug: string) =>
         gallery.locator(`article[data-component="${slug}"]`).boundingBox()
-      const [table, dialog, datePicker, wideCalendar, tabs, thinking] = await Promise.all(
-        ['table', 'alert-dialog', 'date-picker', 'calendar', 'tabs', 'thinking-steps'].map(tile),
+      const [table, dialog, datePicker, wideCalendar, segmented, thinking] = await Promise.all(
+        [
+          'table',
+          'alert-dialog',
+          'date-picker',
+          'calendar',
+          'segmented-control',
+          'thinking-steps',
+        ].map(tile),
       )
       assert.equal(table!.y, dialog!.y)
       assert.equal(datePicker!.y, wideCalendar!.y)
       assert.ok(datePicker!.x < wideCalendar!.x)
-      assert.equal(tabs!.y, thinking!.y)
-      assert.ok(tabs!.x < thinking!.x)
+      assert.equal(segmented!.y, thinking!.y)
+      assert.ok(segmented!.x < thinking!.x)
       // The last band: a large conversation on the left, two smalls stacked beside it.
       const [chat, popover, drawer] = await Promise.all(
         ['chat-message', 'popover', 'drawer'].map(tile),
@@ -141,9 +148,9 @@ it('preserves the gallery order and keeps previews above their footers', async (
       assert.equal(popover!.x, drawer!.x)
       assert.ok(drawer!.y > popover!.y)
       assert.equal(Math.round(chat!.y + chat!.height), Math.round(drawer!.y + drawer!.height))
-      // Wide cards alternate sides down the gallery: InputMessage on the right
-      // of the first row and Toaster on the left of the second. The file browser
-      // gets the next row, then the card grid starts with Card on the left.
+      // Wide cards alternate sides down the gallery: the tall Carousel on the
+      // right of the first band and Toaster on the left of the next row. The file
+      // browser gets the row after, then the card grid starts with Card on the left.
       const sides = await gallery.evaluate((node) => {
         const left = node.getBoundingClientRect().left
         return Array.from(
@@ -152,14 +159,18 @@ it('preserves the gallery order and keeps previews above their footers', async (
         ).join('')
       })
       assert.equal(sides, 'RLLRLRLRLRLRLR')
-      const [indicator, input, toaster, hover] = await Promise.all(
-        ['thinking-indicator', 'input-message', 'toaster', 'hover-card'].map(tile),
+      // The first band: QueuedStack and HoverCard stacked beside the Carousel.
+      const [carousel, queue, hover, toaster, avatar] = await Promise.all(
+        ['carousel', 'queued-stack', 'hover-card', 'toaster', 'avatar'].map(tile),
       )
-      assert.equal(indicator!.y, input!.y)
-      assert.ok(indicator!.x < input!.x)
-      assert.equal(toaster!.y, hover!.y)
-      assert.ok(toaster!.y > input!.y)
-      assert.ok(hover!.x > toaster!.x)
+      assert.equal(queue!.y, carousel!.y)
+      assert.ok(queue!.x < carousel!.x)
+      assert.equal(hover!.x, queue!.x)
+      assert.ok(hover!.y > queue!.y)
+      assert.equal(Math.round(carousel!.y + carousel!.height), Math.round(hover!.y + hover!.height))
+      assert.equal(toaster!.y, avatar!.y)
+      assert.ok(toaster!.y > carousel!.y)
+      assert.ok(avatar!.x > toaster!.x)
       const accordion = gallery.locator('[data-component="accordion"]')
       await accordion.getByRole('button', { name: 'Accessibility', exact: true }).click()
       await checkContainment()
