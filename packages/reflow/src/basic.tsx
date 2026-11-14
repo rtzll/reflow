@@ -1,3 +1,4 @@
+import { Spinner } from './spinner.tsx'
 import { Icon, type IconName } from './icon.tsx'
 import { on, ref } from 'remix/component'
 import type { Handle, MixInput, Props, RemixNode } from 'remix/component'
@@ -53,22 +54,7 @@ export function Button(handle: Handle<ButtonProps>) {
             </span>
           )}
         </span>
-        {props.loading && (
-          <svg class="rf-button-spinner" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <g>
-              <circle
-                cx="8"
-                cy="8"
-                r="6.25"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                pathLength="100"
-                transform="rotate(-90 8 8)"
-              />
-            </g>
-          </svg>
-        )}
+        {props.loading && <Spinner class="rf-button-spinner" />}
       </>
     )
 

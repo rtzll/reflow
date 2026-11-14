@@ -1,3 +1,4 @@
+import { Spinner } from './spinner.tsx'
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
 import { Button } from './basic.tsx'
 import { Icon } from './icon.tsx'
@@ -446,20 +447,7 @@ export function Toaster(handle: Handle<ToasterProps>) {
     const icon =
       entry.icon ??
       (entry.status === 'loading' ? (
-        <svg class="rf-toast-spinner" viewBox="0 0 16 16" fill="none">
-          <g>
-            <circle
-              cx="8"
-              cy="8"
-              r="6.25"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              pathLength="100"
-              transform="rotate(-90 8 8)"
-            />
-          </g>
-        </svg>
+        <Spinner class="rf-toast-spinner" />
       ) : entry.status === 'default' ? undefined : (
         statusIcon(entry.status)
       ))

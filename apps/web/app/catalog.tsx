@@ -26,6 +26,10 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       'A picture or initials for a person, team or agent, alone or in an overlapping group.',
     code: `<Avatar name="Ada Lovelace" src={photo} status="online" />\n<AvatarGroup avatars={editors} max={4} />`,
   },
+  spinner: {
+    description: 'An indeterminate loading indicator shared by Button and Toaster.',
+    code: `<Spinner label="Loading results" size="24px" />`,
+  },
   skeleton: {
     description: 'Decorative placeholders that reserve space for content while it loads.',
     code: `<Table aria-label="Team members" aria-busy="true">
@@ -342,6 +346,7 @@ const components = [
   ['sidebar', 'Sidebar'],
   ['skeleton', 'Skeleton'],
   ['slider', 'Slider'],
+  ['spinner', 'Spinner'],
   ['switch', 'Switch'],
   ['table', 'Table'],
   ['tabs', 'Tabs'],

@@ -170,16 +170,6 @@
   inline-size: 20px;
   block-size: 20px;
 }
-.rf-toast-spinner g {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: rf-button-spinner-turn 1s cubic-bezier(0.65, 0, 0.35, 1) infinite;
-}
-.rf-toast-spinner circle {
-  stroke-dasharray: 0.01 49.99;
-  stroke-dashoffset: -25;
-  animation: rf-button-spinner-breathe 1s cubic-bezier(0.65, 0, 0.35, 1) infinite;
-}
 .rf-toast-content {
   display: flex;
   flex: 1;
@@ -256,9 +246,6 @@
   .rf-toast,
   .rf-toast[data-removed] {
     transition: opacity var(--rf-spring-moderate);
-  }
-  .rf-toast-spinner :is(g, circle) {
-    animation: none;
   }
 }
 @media (forced-colors: active) {

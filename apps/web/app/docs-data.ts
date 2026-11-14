@@ -11,6 +11,32 @@ export interface ApiSection {
 }
 
 export const componentApi: Record<string, readonly ApiSection[]> = {
+  spinner: [
+    {
+      name: 'Spinner',
+      props: [
+        {
+          name: 'label',
+          type: 'string',
+          required: false,
+          description:
+            'Names a standalone status. Omit for a decorative indicator beside a status message.',
+        },
+        {
+          name: 'size',
+          type: 'string',
+          required: false,
+          description: 'Width and height in CSS units. Defaults to the shared icon size.',
+        },
+        {
+          name: 'class',
+          type: 'string',
+          required: false,
+          description: 'Additional class on the SVG.',
+        },
+      ],
+    },
+  ],
   skeleton: [
     {
       name: 'Skeleton',

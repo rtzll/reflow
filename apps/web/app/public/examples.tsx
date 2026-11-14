@@ -74,6 +74,7 @@ import {
   Select,
   Sidebar,
   Slider,
+  Spinner,
   Switch,
   Tabs,
   Textarea,
@@ -211,6 +212,9 @@ export const Example = clientEntry(
     }>,
   ) {
     let saved = false
+    let starting = false
+    let startTimer: ReturnType<typeof setTimeout> | undefined
+    handle.signal.addEventListener('abort', () => clearTimeout(startTimer), { once: true })
     let lastAction = ''
     let selectedFeature: string | undefined = 'Spring animations'
     let slide = 1
@@ -242,6 +246,12 @@ export const Example = clientEntry(
 
     return () => {
       switch (handle.props.slug) {
+        case 'spinner':
+          return (
+            <div class="example-row">
+              <Spinner label="Loading results" size="24px" />
+            </div>
+          )
         case 'button':
           return (
             <div className="example-stack">
@@ -249,9 +259,16 @@ export const Example = clientEntry(
                 <div className="example-row">
                   <Button
                     size="compact"
+                    loading={starting}
                     mix={on('click', () => {
-                      saved = true
-                      handle.update()
+                      starting = true
+                      saved = false
+                      void handle.update()
+                      startTimer = setTimeout(() => {
+                        starting = false
+                        saved = true
+                        void handle.update()
+                      }, 900)
                     })}
                   >
                     Primary
