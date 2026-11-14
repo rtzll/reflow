@@ -26,6 +26,10 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       'A picture or initials for a person, team or agent, alone or in an overlapping group.',
     code: `<Avatar name="Ada Lovelace" src={photo} status="online" />\n<AvatarGroup avatars={editors} max={4} />`,
   },
+  pagination: {
+    description: 'Previous, next, and numbered links for navigating page-based results.',
+    code: `<Pagination page={2} pageCount={3} href={(page) => \`/?teamPage=\${page}#team-table\`} />`,
+  },
   spinner: {
     description: 'An indeterminate loading indicator shared by Button and Toaster.',
     code: `<Spinner label="Loading results" size="24px" />`,
@@ -336,6 +340,7 @@ const components = [
   ['input-group', 'InputGroup'],
   ['input-message', 'InputMessage'],
   ['number-field', 'NumberField'],
+  ['pagination', 'Pagination'],
   ['popover', 'Popover'],
   ['progress', 'Progress'],
   ['queued-stack', 'QueuedStack'],
@@ -404,7 +409,12 @@ export const catalog: readonly ShowcaseComponent[] = [
   })),
 ]
 
-export function galleryCatalog(avatar: string, gallery = false, samples?: CodeSamples) {
+export function galleryCatalog(
+  avatar: string,
+  gallery = false,
+  samples?: CodeSamples,
+  query?: URLSearchParams,
+) {
   return catalog.map((component) =>
     component.preview == null
       ? component
@@ -416,6 +426,10 @@ export function galleryCatalog(avatar: string, gallery = false, samples?: CodeSa
               showcase
               gallery={gallery}
               avatar={avatar}
+              teamPage={
+                component.slug === 'table' ? (query?.get('teamPage') ?? undefined) : undefined
+              }
+              search={component.slug === 'table' ? (query?.get('q') ?? undefined) : undefined}
               code={component.slug === 'code-block' ? samples?.card : undefined}
             />
           ),

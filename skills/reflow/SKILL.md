@@ -29,6 +29,8 @@ Use Skeleton for decorative placeholders sized to match incoming content. Set ar
 
 Use Spinner for indeterminate loading. Give a standalone spinner a label and omit it when nearby content names the status.
 
+Use Pagination with a one-based page number and a function that returns real page URLs. Keep current-page state in the route for bookmarks and browser history.
+
 Apply theme settings on a common ancestor with `data-theme`, `data-accent`, `data-shape`, `data-density`, and `data-hover`. Use the `--rf-*` CSS properties from the installed stylesheet for surfaces, spacing, text and focus colors. Consumers can provide icons as slots without adding an icon runtime.
 
 ## Interaction craft

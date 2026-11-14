@@ -50,7 +50,12 @@ async function show(context: AppContext, page: ShowcaseProps['page'], slug?: str
   const images = slug === 'code-block' ? { ...pageAssets.images, code: samples } : pageAssets.images
   const components =
     page === 'gallery' || page === 'demo'
-      ? galleryCatalog(pageAssets.images.sidebarAvatar, page === 'gallery', samples)
+      ? galleryCatalog(
+          pageAssets.images.sidebarAvatar,
+          page === 'gallery',
+          samples,
+          url.searchParams,
+        )
       : catalog
   return context.render(
     <Document assets={pageAssets} settings={settings} title={title}>

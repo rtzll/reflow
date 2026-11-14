@@ -64,6 +64,7 @@ import {
   InputField,
   Icon,
   InputGroup,
+  Pagination,
   Progress,
   TriggerMenu,
   NumberField,
@@ -208,6 +209,8 @@ export const Example = clientEntry(
       showcase?: boolean
       gallery?: boolean
       avatar?: string
+      teamPage?: string
+      search?: string
       code?: HighlightedCode
     }>,
   ) {
@@ -984,11 +987,24 @@ export const Example = clientEntry(
               <Switch label="Sound effects" />
             </div>
           )
+        case 'pagination':
+          return (
+            <Pagination
+              page={5}
+              pageCount={12}
+              href={(page) => `/?teamPage=${Math.min(page, 3)}#team-table`}
+            />
+          )
         case 'skeleton':
           return <TeamTableExample loading />
         case 'table':
           return (
-            <TeamTableExample gallery={handle.props.gallery} showcase={handle.props.showcase} />
+            <TeamTableExample
+              gallery={handle.props.gallery}
+              showcase={handle.props.showcase}
+              teamPage={handle.props.teamPage}
+              search={handle.props.search}
+            />
           )
         case 'textarea':
           return (

@@ -11,6 +11,43 @@ export interface ApiSection {
 }
 
 export const componentApi: Record<string, readonly ApiSection[]> = {
+  pagination: [
+    {
+      name: 'Pagination',
+      props: [
+        {
+          name: 'page',
+          type: 'number',
+          required: true,
+          description: 'Current page, starting at one.',
+        },
+        {
+          name: 'pageCount',
+          type: 'number',
+          required: true,
+          description: 'Total pages. Navigation is hidden for zero or one page.',
+        },
+        {
+          name: 'href',
+          type: '(page: number) => string',
+          required: true,
+          description: 'Builds the URL for every available page link.',
+        },
+        {
+          name: 'label',
+          type: 'string',
+          required: false,
+          description: 'Navigation name. Defaults to Pagination.',
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          required: false,
+          description: 'Control density.',
+        },
+      ],
+    },
+  ],
   spinner: [
     {
       name: 'Spinner',
