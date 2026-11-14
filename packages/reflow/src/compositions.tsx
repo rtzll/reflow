@@ -6,8 +6,8 @@ import { prefersReducedMotion } from '@remix-run/ui/animation'
 import { Badge, Button, Textarea, type BadgeColor, type ControlSize } from './basic.tsx'
 import { Accordion } from './groups.tsx'
 import { QueuedStack } from './queued-stack.tsx'
-import { fluidHover } from './interactive.tsx'
-import { motion } from './systems.ts'
+import { fluidHover } from './systems/fluid-hover.ts'
+import { motion } from './systems/motion.ts'
 import { Tooltip } from './overlays.tsx'
 import {
   TriggerMenu,

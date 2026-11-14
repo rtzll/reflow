@@ -9,7 +9,7 @@ import {
 } from '@remix-run/ui/animation'
 import * as popover from '@remix-run/ui/popover'
 import * as select from '@remix-run/ui/select'
-import { fluidHover } from './interactive.tsx'
+import { fluidHover } from './systems/fluid-hover.ts'
 import { ScrollArea } from './scroll-area.tsx'
 
 export interface ChoiceOption {

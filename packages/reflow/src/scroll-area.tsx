@@ -1,5 +1,5 @@
 import { ref, type Handle, type RemixNode } from 'remix/component'
-import { scrollFade } from './systems.ts'
+import { scrollFade } from './systems/motion.ts'
 
 export interface ScrollAreaProps {
   children: RemixNode

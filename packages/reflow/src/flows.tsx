@@ -4,12 +4,13 @@ import {
   matchesShortcut,
   parseShortcut,
   shortcutKeys,
-} from './shortcut.ts'
+} from './behaviors/shortcut.ts'
 import { on, ref } from 'remix/component'
 import type { Handle, RemixNode } from 'remix/component'
 import { Button } from './basic.tsx'
 import { Icon } from './icon.tsx'
-import { fluidHover, Tabs } from './interactive.tsx'
+import { Tabs } from './interactive.tsx'
+import { fluidHover } from './systems/fluid-hover.ts'
 import { ScrollArea } from './scroll-area.tsx'
 import { Dialog } from './overlays.tsx'
 

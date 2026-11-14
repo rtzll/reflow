@@ -1,7 +1,7 @@
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
 import type { ControlSize } from './basic.tsx'
 import { Icon } from './icon.tsx'
-import { fluidHover } from './interactive.tsx'
+import { fluidHover } from './systems/fluid-hover.ts'
 
 export interface TreeItem {
   /** Unique across the tree. */

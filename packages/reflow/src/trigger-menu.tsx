@@ -1,6 +1,6 @@
 import { anchor, type AnchorPoint } from '@remix-run/ui/anchor'
 import { on, ref, type Handle, type MixInput, type RemixNode } from 'remix/component'
-import { fluidHover } from './interactive.tsx'
+import { fluidHover } from './systems/fluid-hover.ts'
 
 export interface TriggerMenuItem {
   label: string

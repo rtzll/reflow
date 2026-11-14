@@ -2,7 +2,7 @@ import { Icon } from './icon.tsx'
 import * as accordion from '@remix-run/ui/accordion'
 import { on, type Handle, type RemixNode } from 'remix/component'
 import { Checkbox } from './basic.tsx'
-import { fluidHover } from './interactive.tsx'
+import { fluidHover } from './systems/fluid-hover.ts'
 import { selectionRuns } from './selection-runs.ts'
 
 export interface AccordionItem {

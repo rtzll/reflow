@@ -10,7 +10,7 @@ import {
   CardMedia,
   CardImage,
 } from './basic.tsx'
-import { fluidHover } from './interactive.tsx'
+import { fluidHover } from './systems/fluid-hover.ts'
 import { ScrollArea } from './scroll-area.tsx'
 import { Drawer } from './drawer.tsx'
 

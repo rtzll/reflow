@@ -1,6 +1,6 @@
 import { ref, type Handle } from 'remix/component'
 import type { BadgeColor } from './basic.tsx'
-import { badgeColors } from './colors.ts'
+import { badgeColors } from './systems/colors.ts'
 import { Tooltip } from './overlays.tsx'
 
 export type AvatarStatus = 'online' | 'away' | 'busy' | 'offline'

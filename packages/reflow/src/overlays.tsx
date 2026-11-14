@@ -3,6 +3,7 @@ import { on, ref } from 'remix/component'
 import type { Handle, MixInput, RemixNode } from 'remix/component'
 import { anchor } from '@remix-run/ui/anchor'
 import { Button, type ButtonProps } from './basic.tsx'
+import { hoverIntent } from './behaviors/hover-intent.ts'
 
 export interface DialogProps {
   /** Contents of the button that opens the dialog. */
@@ -259,8 +260,7 @@ export function Tooltip(handle: Handle<TooltipProps>) {
   let popup: HTMLElement | null = null
   let stopAnchor: (() => void) | undefined
   let openEvents: AbortController | undefined
-  let showTimer: ReturnType<typeof setTimeout> | undefined
-  let hideTimer: ReturnType<typeof setTimeout> | undefined
+  const intent = hoverIntent(handle.signal, { open: show, close: hide })
   let triggerHovered = false
   let popupHovered = false
   let focused = false
@@ -314,14 +314,13 @@ export function Tooltip(handle: Handle<TooltipProps>) {
   }
 
   function hide() {
-    clearTimeout(showTimer)
-    clearTimeout(hideTimer)
+    intent.cancel()
     setInternal(false)
     sync()
   }
 
   function show() {
-    clearTimeout(hideTimer)
+    intent.stay()
     if (!trigger?.isConnected || !popup?.isConnected || dismissed || menuIsOpen()) return
     setInternal(true)
     sync()
@@ -361,11 +360,12 @@ export function Tooltip(handle: Handle<TooltipProps>) {
   }
 
   function leave() {
-    clearTimeout(showTimer)
-    clearTimeout(hideTimer)
-    if (triggerHovered || popupHovered || focused) return
+    if (triggerHovered || popupHovered || focused) {
+      intent.cancel()
+      return
+    }
     // Let the pointer cross the gap between the trigger and the tooltip.
-    hideTimer = setTimeout(hide, 130)
+    intent.leave(130)
   }
 
   const triggerMix = ref((element, signal) => {
@@ -385,9 +385,7 @@ export function Tooltip(handle: Handle<TooltipProps>) {
         cursor = { x: event.clientX, y: event.clientY }
         triggerHovered = true
         dismissed = false
-        clearTimeout(hideTimer)
-        clearTimeout(showTimer)
-        showTimer = setTimeout(show, Math.max(0, handle.props.delayDuration ?? 200))
+        intent.enter(handle.props.delayDuration ?? 200)
       },
       { signal },
     )
@@ -463,7 +461,7 @@ export function Tooltip(handle: Handle<TooltipProps>) {
       'pointerenter',
       () => {
         popupHovered = true
-        clearTimeout(hideTimer)
+        intent.stay()
       },
       { signal },
     )

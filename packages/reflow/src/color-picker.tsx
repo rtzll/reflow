@@ -4,7 +4,7 @@ import * as menu from '@remix-run/ui/menu'
 import * as popover from '@remix-run/ui/popover'
 import type { ControlSize } from './basic.tsx'
 import { Icon } from './icon.tsx'
-import { fluidHover } from './interactive.tsx'
+import { fluidHover } from './systems/fluid-hover.ts'
 import { Tooltip } from './overlays.tsx'
 import { Slider } from './range-color.tsx'
 

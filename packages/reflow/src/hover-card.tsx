@@ -1,6 +1,7 @@
 import { ref, type Handle, type MixInput, type RemixNode } from 'remix/component'
 import { anchor } from '@remix-run/ui/anchor'
 import type { PopoverPlacement } from './popover.tsx'
+import { hoverIntent } from './behaviors/hover-intent.ts'
 
 export interface HoverCardTriggerProps {
   mix: MixInput<HTMLElement>
@@ -43,13 +44,14 @@ export function HoverCard(handle: Handle<HoverCardProps>) {
   let card: HTMLElement | null = null
   let localOpen = handle.props.defaultOpen ?? false
   let stopAnchor: (() => void) | undefined
-  let openTimer: ReturnType<typeof setTimeout> | undefined
-  let closeTimer: ReturnType<typeof setTimeout> | undefined
   const isOpen = () => handle.props.open ?? localOpen
+  const intent = hoverIntent(handle.signal, {
+    open: () => setOpen(true),
+    close: () => setOpen(false),
+  })
 
   function setOpen(next: boolean) {
-    clearTimeout(openTimer)
-    clearTimeout(closeTimer)
+    intent.cancel()
     if (isOpen() === next) return
     localOpen = next
     handle.props.onOpenChange?.(next)
@@ -57,17 +59,13 @@ export function HoverCard(handle: Handle<HoverCardProps>) {
   }
 
   function scheduleOpen() {
-    clearTimeout(closeTimer)
-    if (isOpen()) return
-    clearTimeout(openTimer)
-    openTimer = setTimeout(() => setOpen(true), Math.max(0, handle.props.openDelay ?? 500))
+    if (isOpen()) intent.stay()
+    else intent.enter(handle.props.openDelay ?? 500)
   }
 
   function scheduleClose() {
-    clearTimeout(openTimer)
-    clearTimeout(closeTimer)
-    if (!isOpen()) return
-    closeTimer = setTimeout(() => setOpen(false), Math.max(0, handle.props.closeDelay ?? 200))
+    if (isOpen()) intent.leave(handle.props.closeDelay ?? 200)
+    else intent.cancel()
   }
 
   // Shows or hides the card to match the open state, after each render.
@@ -142,8 +140,7 @@ export function HoverCard(handle: Handle<HoverCardProps>) {
     signal.addEventListener(
       'abort',
       () => {
-        clearTimeout(openTimer)
-        clearTimeout(closeTimer)
+        intent.cancel()
         stopAnchor?.()
         if (trigger === element) trigger = null
       },
@@ -155,7 +152,7 @@ export function HoverCard(handle: Handle<HoverCardProps>) {
     if (!(element instanceof HTMLElement)) return
     card = element
     const options = { signal }
-    element.addEventListener('pointerenter', () => clearTimeout(closeTimer), options)
+    element.addEventListener('pointerenter', () => intent.stay(), options)
     element.addEventListener(
       'pointerleave',
       (event) => {

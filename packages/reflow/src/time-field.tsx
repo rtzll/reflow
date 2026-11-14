@@ -2,7 +2,7 @@ import { on, ref, type Handle } from 'remix/component'
 import * as popover from '@remix-run/ui/popover'
 import * as listbox from '@remix-run/ui/listbox'
 import { Icon } from './icon.tsx'
-import { fluidHover } from './interactive.tsx'
+import { fluidHover } from './systems/fluid-hover.ts'
 
 // Time parsing and same-day slot behavior follow Fluid Functionalism's
 // date-picker-core (MIT, attribution and license in ../NOTICE).

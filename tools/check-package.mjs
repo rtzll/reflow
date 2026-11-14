@@ -40,7 +40,7 @@ try {
   for (const file of files) {
     assert.match(
       file,
-      /^package\/(?:package\.json|LICENSE|NOTICE|README\.md|dist\/[^/]+\.(?:js|ts|css))$/,
+      /^package\/(?:package\.json|LICENSE|NOTICE|README\.md|dist\/(?:(?:behaviors|systems)\/)?[^/]+\.(?:js|ts|css))$/,
     )
   }
   assert.equal(
