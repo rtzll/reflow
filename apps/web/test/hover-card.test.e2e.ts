@@ -2,6 +2,7 @@ import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
+import { catalog } from '../app/catalog.tsx'
 import { open, router } from './showcase-router.ts'
 
 it('opens on a resting pointer, stays open over the card, and closes after leaving', async (t) => {
@@ -46,4 +47,23 @@ it('keeps a card whose trigger sits in a paragraph inside that paragraph', async
   await expect(sentence).toHaveCount(1)
   await expect(sentence.locator('.rf-hover-card')).toHaveCount(1)
   await expect(page.locator('#link-preview .rf-hover-card')).toHaveCount(1)
+})
+
+it('shows the catalog totals in the Reflow profile on the gallery and docs', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  const systemCount = catalog.filter((entry) => entry.category === 'system').length
+  const componentCount = catalog.length - systemCount
+  for (const [url, preview] of [
+    ['/', '.site-gallery [data-component="hover-card"]'],
+    ['/docs/hover-card', '#basic'],
+  ]) {
+    await open(page, url)
+    await page.locator(preview).getByRole('link', { name: '@reflow', exact: true }).hover()
+    await expect(
+      page
+        .locator(preview)
+        .locator('.rf-hover-card')
+        .getByText(`${componentCount} components · ${systemCount} systems`),
+    ).toBeVisible()
+  }
 })

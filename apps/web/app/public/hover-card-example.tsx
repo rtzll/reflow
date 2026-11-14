@@ -1,5 +1,6 @@
 import { Avatar, HoverCard, type HoverCardTriggerProps, type PopoverPlacement } from '@rtzll/reflow'
 import type { Handle } from 'remix/component'
+import { components, systems } from './catalog-entries.ts'
 
 function Profile(handle: Handle<{ size?: 'default' | 'compact' }>) {
   return () => (
@@ -15,7 +16,8 @@ function Profile(handle: Handle<{ size?: 'default' | 'compact' }>) {
         <span class="doc-hover-muted">@reflow</span>
         <p>Fluid components for Remix, with springs, shared hover, and keyboard care.</p>
         <span class="doc-hover-muted">
-          <strong>35</strong> components · <strong>8</strong> systems
+          <strong>{components.length}</strong> components · <strong>{systems.length}</strong>{' '}
+          systems
         </span>
       </div>
     </div>
