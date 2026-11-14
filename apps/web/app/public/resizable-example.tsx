@@ -1,5 +1,6 @@
 import { ChatMessage, Citation, Icon, Resizable } from '@rtzll/reflow'
 import type { Handle } from 'remix/component'
+import { play } from 'cuelume'
 import { citationSources } from './citation-example.tsx'
 
 const references = [
@@ -44,6 +45,7 @@ export function ResizableDemo(handle: Handle<{ orientation?: 'horizontal' | 'ver
       defaultValue={65}
       min={40}
       max={75}
+      onValueCommit={() => play('select', { emphasis: 'subtle', volume: 0.35 })}
       first={<DesignConversation />}
       second={
         <section class="example-split-sources" aria-label="Sources">

@@ -1,5 +1,6 @@
 import { CodeBlock, Resizable, Tree, type HighlightedCode } from '@rtzll/reflow'
 import type { Handle } from 'remix/component'
+import { play } from 'cuelume'
 import { CodeBlockCard } from './code-block-example.tsx'
 
 const projectFiles = [
@@ -9,6 +10,7 @@ const projectFiles = [
 
 export function ProjectTreeExample(handle: Handle<{ source?: HighlightedCode }>) {
   let file = handle.props.source ? 'source' : 'readme'
+  let expanded = ['app']
   return () => (
     <Resizable
       class="example-project-tree"
@@ -16,14 +18,20 @@ export function ProjectTreeExample(handle: Handle<{ source?: HighlightedCode }>)
       defaultValue={34}
       min={25}
       max={55}
+      onValueCommit={() => play('select', { emphasis: 'subtle', volume: 0.35 })}
       first={
         <Tree
           label="Project files"
           items={projectFiles}
           defaultExpanded={['app']}
+          onExpandedChange={(next) => {
+            play(next.length > expanded.length ? 'open' : 'close', { emphasis: 'subtle' })
+            expanded = next
+          }}
           value={file}
           size="compact"
           onValueChange={(value) => {
+            play('select', { emphasis: 'subtle' })
             file = value
             void handle.update()
           }}
