@@ -31,7 +31,7 @@ export function QueuedStack(handle: Handle<QueuedStackProps>) {
         origin: number
         grabOffset: number
         started: boolean
-        moved: boolean
+        from: number
       }
     | undefined
   const listRef = ref((node) => {
@@ -93,13 +93,15 @@ export function QueuedStack(handle: Handle<QueuedStackProps>) {
     if (from < 0 || target < 0 || target >= ids.length || from === target) return
     ids.splice(from, 1)
     ids.splice(target, 0, id)
-    if (drag?.id === id) drag.moved = true
     handle.props.onOrderChange(ids)
   }
 
   function endDrag(event: PointerEvent) {
     if (!drag || drag.pointer !== event.pointerId) return
-    if (drag.moved && event.type === 'pointerup')
+    if (
+      event.type === 'pointerup' &&
+      handle.props.messages.findIndex((message) => message.id === drag?.id) !== drag.from
+    )
       list?.dispatchEvent(new Event('reflow:queue-reorder', { bubbles: true }))
     list?.removeAttribute('data-dragging')
     list?.querySelector('[data-dragged]')?.removeAttribute('data-dragged')
@@ -201,7 +203,7 @@ export function QueuedStack(handle: Handle<QueuedStackProps>) {
                     origin: event.clientY,
                     grabOffset: event.clientY - event.currentTarget.getBoundingClientRect().top,
                     started: false,
-                    moved: false,
+                    from: index,
                   }
                   list.setPointerCapture(event.pointerId)
                 }),
