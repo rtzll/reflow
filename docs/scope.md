@@ -57,6 +57,8 @@ Primitives Reflow checked and does not use, and why:
 - **`toggle` for Switch.** Switch is a native checkbox that can be dragged. The primitive reads the checked state during the click, before a drag that settles on the current value cancels it, and drops `defaultChecked` from the input, so a form reset no longer restores it.
 - **`listbox` for CommandMenu.** The primitive marks the committed value as selected and clears the highlight when the pointer leaves. CommandMenu runs commands, so it has no committed value, and it keeps the highlighted command marked selected for the input's `aria-activedescendant`.
 
+Tabs uses the `tabs` primitive but handles its arrow keys first: the primitive selects the tab an arrow moves to, and Reflow's Tabs moves focus only, selecting on Enter, Space or a click.
+
 Check again when Remix UI updates.
 
 ## Showcase requirements

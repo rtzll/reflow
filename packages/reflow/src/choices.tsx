@@ -11,6 +11,7 @@ import * as popover from '@remix-run/ui/popover'
 import * as select from '@remix-run/ui/select'
 import { fluidHover } from './systems/fluid-hover.ts'
 import { ScrollArea } from './scroll-area.tsx'
+import { navigationIndex } from './behaviors/list-navigation.ts'
 
 export interface ChoiceOption {
   value: string
@@ -466,20 +467,14 @@ export function Combobox(handle: Handle<ComboboxProps>) {
         }
         return
       }
-      if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key) || !enabled.length) return
-      if (!open && (event.key === 'Home' || event.key === 'End')) return
+      const next = navigationIndex(
+        event.key,
+        enabled.findIndex((option) => option.value === active),
+        enabled.length,
+        { orientation: 'vertical', homeEnd: open },
+      )
+      if (next === undefined) return
       event.preventDefault()
-      const index = enabled.findIndex((option) => option.value === active)
-      const next =
-        event.key === 'Home'
-          ? 0
-          : event.key === 'End'
-            ? enabled.length - 1
-            : event.key === 'ArrowDown'
-              ? (index + 1) % enabled.length
-              : index < 0
-                ? enabled.length - 1
-                : (index - 1 + enabled.length) % enabled.length
       active = enabled[next].value
       open = true
       void handle.update().then((signal) => {

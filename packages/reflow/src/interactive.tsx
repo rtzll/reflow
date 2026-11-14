@@ -7,6 +7,7 @@ import { spring } from '@remix-run/ui/animation'
 import * as menu from '@remix-run/ui/menu'
 import * as tabs from '@remix-run/ui/tabs'
 import { Button } from './basic.tsx'
+import { navigationIndex } from './behaviors/list-navigation.ts'
 
 export interface TabItem {
   value: string
@@ -58,12 +59,6 @@ export function Tabs(handle: Handle<TabsProps>) {
               on(
                 'keydown',
                 (event) => {
-                  if (
-                    !['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(
-                      event.key,
-                    )
-                  )
-                    return
                   const enabled = Array.from(
                     event.currentTarget.querySelectorAll<HTMLButtonElement>(
                       '[role="tab"]:not(:disabled)',
@@ -71,17 +66,10 @@ export function Tabs(handle: Handle<TabsProps>) {
                   )
                   const index = enabled.indexOf(event.target as HTMLButtonElement)
                   if (index < 0) return
+                  const next = navigationIndex(event.key, index, enabled.length)
+                  if (next === undefined) return
                   event.preventDefault()
                   event.stopPropagation()
-                  const next =
-                    event.key === 'Home'
-                      ? 0
-                      : event.key === 'End'
-                        ? enabled.length - 1
-                        : (index +
-                            (['ArrowRight', 'ArrowDown'].includes(event.key) ? 1 : -1) +
-                            enabled.length) %
-                          enabled.length
                   enabled[next]?.focus()
                 },
                 true,

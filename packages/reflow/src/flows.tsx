@@ -13,6 +13,7 @@ import { Tabs } from './interactive.tsx'
 import { fluidHover } from './systems/fluid-hover.ts'
 import { ScrollArea } from './scroll-area.tsx'
 import { Dialog } from './overlays.tsx'
+import { navigationIndex } from './behaviors/list-navigation.ts'
 
 export interface CommandItem {
   value: string
@@ -215,25 +216,11 @@ export function CommandMenu(handle: Handle<CommandMenuProps>) {
       select(enabled[index])
       return
     }
-    let next: number
-    switch (event.key) {
-      case 'ArrowDown':
-        next = (index + 1) % enabled.length
-        break
-      case 'ArrowUp':
-        next = (index - 1 + enabled.length) % enabled.length
-        break
-      case 'Home':
-        if (query || event.shiftKey) return
-        next = 0
-        break
-      case 'End':
-        if (query || event.shiftKey) return
-        next = enabled.length - 1
-        break
-      default:
-        return
-    }
+    const next = navigationIndex(event.key, index, enabled.length, {
+      orientation: 'vertical',
+      homeEnd: !query && !event.shiftKey,
+    })
+    if (next === undefined) return
     event.preventDefault()
     highlighted = enabled[next].value
     scrollToSelection = true

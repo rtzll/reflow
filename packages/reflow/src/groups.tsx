@@ -4,6 +4,7 @@ import { on, type Handle, type RemixNode } from 'remix/component'
 import { Checkbox } from './basic.tsx'
 import { fluidHover } from './systems/fluid-hover.ts'
 import { selectionRuns } from './selection-runs.ts'
+import { navigationIndex } from './behaviors/list-navigation.ts'
 
 export interface AccordionItem {
   value: string
@@ -130,12 +131,7 @@ export function CheckboxGroup(handle: Handle<CheckboxGroupProps>) {
               focusSelector: ':has(input:focus-visible)',
             }),
             on<HTMLDivElement, 'keydown'>('keydown', (event) => {
-              // Up/Down move focus between rows (wrapping), Home/End jump to the ends.
-              const keys =
-                orientation === 'horizontal'
-                  ? ['ArrowRight', 'ArrowLeft']
-                  : ['ArrowDown', 'ArrowUp']
-              if (![...keys, 'Home', 'End'].includes(event.key)) return
+              // Arrows move focus between rows (wrapping), Home/End jump to the ends.
               const inputs = Array.from(
                 event.currentTarget.querySelectorAll<HTMLInputElement>(
                   'input[type="checkbox"]:not(:disabled)',
@@ -143,13 +139,11 @@ export function CheckboxGroup(handle: Handle<CheckboxGroupProps>) {
               )
               const index = inputs.indexOf(event.target as HTMLInputElement)
               if (index === -1) return
+              const next = navigationIndex(event.key, index, inputs.length, {
+                orientation: orientation === 'horizontal' ? 'horizontal' : 'vertical',
+              })
+              if (next === undefined) return
               event.preventDefault()
-              const next =
-                event.key === 'Home'
-                  ? 0
-                  : event.key === 'End'
-                    ? inputs.length - 1
-                    : (index + (event.key === keys[0] ? 1 : -1) + inputs.length) % inputs.length
               inputs[next]?.focus()
             }),
             onValueChange &&

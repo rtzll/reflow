@@ -13,6 +13,7 @@ import {
 import { fluidHover } from './systems/fluid-hover.ts'
 import { ScrollArea } from './scroll-area.tsx'
 import { Drawer } from './drawer.tsx'
+import { navigationIndex } from './behaviors/list-navigation.ts'
 
 export interface SidebarItem {
   label: string
@@ -233,21 +234,16 @@ function tabStop(items: readonly SidebarItem[], activeHref?: string): string | u
 
 /** Arrow keys, Home and End move focus between the rows a menu shows, wrapping at the ends. */
 function moveFocus(event: KeyboardEvent & { currentTarget: HTMLUListElement }) {
-  if (!['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key))
-    return
   const rows = Array.from(
     event.currentTarget.querySelectorAll<HTMLElement>('.rf-sidebar-link'),
   ).filter((row) => !row.closest('[inert]'))
   const index = rows.indexOf(event.target as HTMLElement)
   if (index === -1) return
+  const next = navigationIndex(event.key, index, rows.length)
+  if (next === undefined) return
   event.preventDefault()
   event.stopPropagation()
-  if (event.key === 'Home') rows[0]?.focus()
-  else if (event.key === 'End') rows[rows.length - 1]?.focus()
-  else {
-    const step = event.key === 'ArrowDown' || event.key === 'ArrowRight' ? 1 : -1
-    rows[(index + step + rows.length) % rows.length]?.focus()
-  }
+  rows[next]?.focus()
 }
 
 function matchesSidebarItem(item: SidebarItem, term: string): boolean {

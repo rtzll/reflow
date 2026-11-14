@@ -3,6 +3,7 @@ import * as popover from '@remix-run/ui/popover'
 import * as listbox from '@remix-run/ui/listbox'
 import { Icon } from './icon.tsx'
 import { fluidHover } from './systems/fluid-hover.ts'
+import { navigationIndex } from './behaviors/list-navigation.ts'
 
 // Time parsing and same-day slot behavior follow Fluid Functionalism's
 // date-picker-core (MIT, attribution and license in ../NOTICE).
@@ -181,13 +182,15 @@ export function TimeField(handle: Handle<TimeFieldProps>) {
                       return
                     }
                     const index = slots.findIndex((minute) => timeValue(minute) === active)
-                    const next =
-                      slots[
-                        Math.max(
-                          0,
-                          Math.min(slots.length - 1, index + (event.key === 'ArrowDown' ? 1 : -1)),
-                        )
-                      ]
+                    const target =
+                      index < 0
+                        ? 0
+                        : navigationIndex(event.key, index, slots.length, {
+                            orientation: 'vertical',
+                            wrap: false,
+                            homeEnd: false,
+                          })
+                    const next = target === undefined ? undefined : slots[target]
                     if (next !== undefined) {
                       active = timeValue(next)
                       draft = format(next)

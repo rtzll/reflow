@@ -1,4 +1,5 @@
 import { on, ref, type Handle, type Props, type RemixNode } from 'remix/component'
+import { navigationIndex } from './behaviors/list-navigation.ts'
 
 export interface ToolbarProps extends Omit<Props<'div'>, 'children' | 'role' | 'aria-label'> {
   label: string
@@ -112,15 +113,11 @@ export function Toolbar(handle: Handle<ToolbarProps>) {
             const index = items.indexOf(event.target)
             if (index < 0) return
             const vertical = orientation === 'vertical'
-            const rtl = !vertical && getComputedStyle(event.currentTarget).direction === 'rtl'
-            const forward = vertical ? 'ArrowDown' : rtl ? 'ArrowLeft' : 'ArrowRight'
-            const backward = vertical ? 'ArrowUp' : rtl ? 'ArrowRight' : 'ArrowLeft'
-            let target: HTMLElement | undefined
-            if (event.key === forward) target = items[(index + 1) % items.length]
-            else if (event.key === backward)
-              target = items[(index + items.length - 1) % items.length]
-            else if (event.key === 'Home') target = items[0]
-            else if (event.key === 'End') target = items.at(-1)
+            const next = navigationIndex(event.key, index, items.length, {
+              orientation,
+              rtl: !vertical && getComputedStyle(event.currentTarget).direction === 'rtl',
+            })
+            const target = next === undefined ? undefined : items[next]
             if (!target) return
             event.preventDefault()
             sync(event.currentTarget, target)

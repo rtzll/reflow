@@ -1,6 +1,7 @@
 import { anchor, type AnchorPoint } from '@remix-run/ui/anchor'
 import { on, ref, type Handle, type MixInput, type RemixNode } from 'remix/component'
 import { fluidHover } from './systems/fluid-hover.ts'
+import { navigationIndex } from './behaviors/list-navigation.ts'
 
 export interface TriggerMenuItem {
   label: string
@@ -241,8 +242,11 @@ export function TriggerMenu(handle: Handle<TriggerMenuProps>) {
               !event.metaKey
             ) {
               event.preventDefault()
-              const delta = event.key === 'ArrowDown' ? 1 : -1
-              active = (active + delta + options.length) % options.length
+              active =
+                navigationIndex(event.key, active, options.length, {
+                  orientation: 'vertical',
+                  homeEnd: false,
+                }) ?? active
               void handle.update()
               handle.queueTask(() =>
                 field?.ownerDocument
