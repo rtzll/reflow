@@ -459,6 +459,10 @@ export function enhanceShowcaseSound() {
     if (event.target instanceof Element && event.target.closest('.site-preview-stage'))
       play('tap', { emphasis: 'subtle' })
   })
+  document.addEventListener('reflow:message-error', (event) => {
+    if (event.target instanceof Element && event.target.closest('.site-preview-stage'))
+      play('error', { emphasis: 'subtle' })
+  })
   document.addEventListener('reflow:queue-reorder', (event) => {
     if (event.target instanceof Element && event.target.closest('.site-preview-stage'))
       play('select', { emphasis: 'subtle' })
