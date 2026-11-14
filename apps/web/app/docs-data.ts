@@ -2600,6 +2600,12 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           required: false,
         },
         {
+          name: 'triggers',
+          type: 'readonly TriggerMenuTrigger[]',
+          description: 'Optional caret suggestions for triggers such as @ or /. See TriggerMenu.',
+          required: false,
+        },
+        {
           name: 'suggestions',
           type: 'readonly string[]',
           description: 'Suggested messages presented while the composer is empty.',
@@ -2724,6 +2730,27 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           type: 'readonly File[]',
           description: 'Files attached to the queued message.',
           required: true,
+        },
+      ],
+    },
+  ],
+  'trigger-menu': [
+    {
+      name: 'TriggerMenu',
+      props: [
+        {
+          name: 'triggers',
+          type: 'readonly TriggerMenuTrigger[]',
+          required: true,
+          description:
+            'Each trigger has a character, accessible list label and an array of items with labels and replacement values.',
+        },
+        {
+          name: 'renderField',
+          type: '(props: TriggerMenuFieldProps) => RemixNode',
+          required: true,
+          description:
+            'Spread the supplied attributes and mix onto a textarea. Run the mix before custom key handling.',
         },
       ],
     },

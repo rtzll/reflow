@@ -19,6 +19,7 @@ import {
   badgeGenres,
   badgeColorNames,
   componentOptions,
+  composerTriggers,
   inputMessagePrompts,
 } from './component-example-data.ts'
 import {
@@ -375,6 +376,16 @@ export const componentExamples: Record<string, readonly DocumentationExample[]> 
       'autoplay',
       carouselExampleCode(4, true),
       'Hover the slide to pause its progress.',
+    ),
+  ],
+  'trigger-menu': [
+    demo(
+      'In a composer',
+      'composer',
+      `const triggers = ${JSON.stringify(composerTriggers, null, 2)}
+
+<InputMessage triggers={triggers} attachments={false} onSend={({ text }) => console.log(text)} />`,
+      'Type @ to mention a person or / to insert a command. Enter chooses the highlighted suggestion while the menu is open.',
     ),
   ],
   progress: [
@@ -2434,6 +2445,18 @@ export function ComponentDemo(
         return <CitationDemo variant={variant} />
       case 'chat-layout':
         return <ChatLayoutDemo variant={variant} />
+      case 'trigger-menu':
+        return (
+          <div class="example-composer">
+            <InputMessage
+              triggers={composerTriggers}
+              attachments={false}
+              placeholder="Type @ or /"
+              onSend={({ text }) => say(text)}
+            />
+            {output && <ChatMessage role="user">{output}</ChatMessage>}
+          </div>
+        )
       case 'progress':
         return (
           <div style={{ width: 'min(100%, 280px)' }}>

@@ -24,6 +24,7 @@ import {
   componentOptions,
   datePickerToday,
   datePickerOffset,
+  composerTriggers,
 } from './component-example-data.ts'
 import { RequestFormExample } from './request-form-example.tsx'
 import { SoundCombobox } from './sound-combobox.tsx'
@@ -60,6 +61,7 @@ import {
   Icon,
   InputGroup,
   Progress,
+  TriggerMenu,
   NumberField,
   InputMessage,
   QueuedStack,
@@ -729,6 +731,17 @@ export const Example = clientEntry(
               />
             </div>
           )
+        case 'trigger-menu':
+          return (
+            <div style={{ width: 'min(100%, 320px)' }}>
+              <TriggerMenu
+                triggers={composerTriggers}
+                renderField={(props) => (
+                  <Textarea {...props} aria-label="Message" placeholder="Type @ or /" />
+                )}
+              />
+            </div>
+          )
         case 'progress':
           return (
             <div style={{ width: 'min(100%, 280px)' }}>
@@ -784,6 +797,7 @@ export const Example = clientEntry(
             <div className="example-composer example-chat">
               <InputMessage
                 attachments={!handle.props.showcase}
+                triggers={composerTriggers}
                 placeholderSuggestion="Why is every other input box so stiff?"
                 onSend={async ({ text, files }) => {
                   message =

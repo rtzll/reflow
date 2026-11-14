@@ -17,6 +17,8 @@ Use NumberField for typed quantities with native form validation and step button
 
 Use Progress for work in flight. Supply a value and total when known and omit the value while the total is unknown.
 
+Use TriggerMenu for caret suggestions in a textarea, or pass triggers to InputMessage. An item supplies the text to insert, including the trigger when it belongs in the draft.
+
 Apply theme settings on a common ancestor with `data-theme`, `data-accent`, `data-shape`, `data-density`, and `data-hover`. Use the `--rf-*` CSS properties from the installed stylesheet for surfaces, spacing, text and focus colors. Consumers can provide icons as slots without adding an icon runtime.
 
 ## Interaction craft

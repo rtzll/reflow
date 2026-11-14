@@ -5,6 +5,7 @@ import { cardPlaygroundCode } from './public/card-example-code.ts'
 import { questionCode, questionPlayground } from './public/question-example-data.ts'
 import { requestFormCode } from './public/request-form-example.tsx'
 import { carouselExampleCode } from './public/carousel-example.tsx'
+import { triggerMenuCode } from './public/component-example-data.ts'
 import { SystemPage } from './public/system-page.tsx'
 import { SkillPage } from './public/skill-page.tsx'
 import { Example } from './public/examples.tsx'
@@ -57,6 +58,10 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       description: true,
       selected: false,
     }),
+  },
+  'trigger-menu': {
+    description: 'Suggestions at the caret for mentions, commands, and other text triggers.',
+    code: triggerMenuCode,
   },
   progress: {
     description: 'A labeled progress bar for work with a known total or an unknown duration.',
@@ -306,6 +311,7 @@ const components = [
   ['thinking-steps', 'ThinkingSteps'],
   ['toaster', 'Toaster'],
   ['tooltip', 'Tooltip'],
+  ['trigger-menu', 'TriggerMenu'],
 ] as const
 
 const systems = [

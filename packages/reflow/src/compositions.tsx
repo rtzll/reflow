@@ -8,6 +8,11 @@ import { QueuedStack } from './queued-stack.tsx'
 import { fluidHover } from './interactive.tsx'
 import { motion } from './systems.ts'
 import { Tooltip } from './overlays.tsx'
+import {
+  TriggerMenu,
+  type TriggerMenuFieldProps,
+  type TriggerMenuTrigger,
+} from './trigger-menu.tsx'
 
 export interface CarouselDotsProps {
   count: number
@@ -287,6 +292,7 @@ export interface InputMessageProps {
   size?: ControlSize
   history?: readonly string[]
   suggestions?: readonly string[]
+  triggers?: readonly TriggerMenuTrigger[]
   status?: 'idle' | 'streaming'
   onStop?: () => void
   onSend: (message: ComposerMessage) => void | Promise<void>
@@ -502,6 +508,93 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
       !sending &&
       !(dragOver && attachments)
     const suggestionId = `${handle.id}-suggestion`
+    const renderField = (triggerField?: TriggerMenuFieldProps) => (
+      <Textarea
+        rows={minRows}
+        aria-label={label}
+        aria-describedby={showSuggestion ? suggestionId : undefined}
+        autoResize
+        aria-controls={
+          triggerField?.['aria-controls'] ??
+          (!draft && suggestions.length ? `${handle.id}-suggestions` : undefined)
+        }
+        aria-autocomplete={triggerField?.['aria-autocomplete']}
+        aria-activedescendant={
+          triggerField?.['aria-activedescendant'] ??
+          (!draft && activeSuggestion >= 0
+            ? `${handle.id}-suggestion-${activeSuggestion}`
+            : undefined)
+        }
+        placeholder={
+          dragOver && attachments
+            ? 'Drop files here to add to chat'
+            : showSuggestion
+              ? undefined
+              : placeholder
+        }
+        value={draft}
+        disabled={disabled || sending}
+        mix={[
+          triggerField?.mix,
+          on<HTMLTextAreaElement, 'input'>('input', (event) => {
+            historyIndex = undefined
+            changeDraft(event.currentTarget.value)
+          }),
+          on<HTMLTextAreaElement, 'keydown'>('keydown', (event) => {
+            if (event.isComposing || event.defaultPrevented) return
+            if (
+              !draft &&
+              suggestions.length &&
+              (event.key === 'ArrowDown' || (event.key === 'ArrowUp' && activeSuggestion >= 0))
+            ) {
+              event.preventDefault()
+              hoveredSuggestion = -1
+              activeSuggestion =
+                event.key === 'ArrowDown'
+                  ? Math.min(suggestions.length - 1, activeSuggestion + 1)
+                  : Math.max(-1, activeSuggestion - 1)
+              handle.update()
+              return
+            }
+            if (!draft && activeSuggestion >= 0 && event.key === 'Enter') {
+              event.preventDefault()
+              changeDraft(suggestions[activeSuggestion])
+              return
+            }
+            if (event.key === 'Tab' && !event.shiftKey && !draft && placeholderSuggestion) {
+              event.preventDefault()
+              changeDraft(placeholderSuggestion)
+            } else if (
+              (event.key === 'ArrowUp' || event.key === 'ArrowDown') &&
+              !event.shiftKey &&
+              history.length
+            ) {
+              const field = event.currentTarget
+              const atStart = !field.value.slice(0, field.selectionStart).includes('\n')
+              const atEnd = !field.value.slice(field.selectionEnd).includes('\n')
+              if (event.key === 'ArrowUp' && atStart) {
+                event.preventDefault()
+                if (historyIndex === undefined) {
+                  historyDraft = draft
+                  historyIndex = history.length
+                }
+                historyIndex = Math.max(0, historyIndex - 1)
+                changeDraft(history[historyIndex])
+              } else if (event.key === 'ArrowDown' && atEnd && historyIndex !== undefined) {
+                event.preventDefault()
+                historyIndex++
+                const next = historyIndex >= history.length ? historyDraft : history[historyIndex]
+                if (historyIndex >= history.length) historyIndex = undefined
+                changeDraft(next)
+              }
+            } else if (event.key === 'Enter' && !event.shiftKey) {
+              event.preventDefault()
+              event.currentTarget.form?.requestSubmit()
+            }
+          }),
+        ]}
+      />
+    )
     return (
       <form
         class="rf-composer"
@@ -632,86 +725,11 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
           </div>
         </div>
         <div class="rf-composer-field">
-          <Textarea
-            rows={minRows}
-            aria-label={label}
-            aria-describedby={showSuggestion ? suggestionId : undefined}
-            autoResize
-            aria-controls={!draft && suggestions.length ? `${handle.id}-suggestions` : undefined}
-            aria-activedescendant={
-              !draft && activeSuggestion >= 0
-                ? `${handle.id}-suggestion-${activeSuggestion}`
-                : undefined
-            }
-            placeholder={
-              dragOver && attachments
-                ? 'Drop files here to add to chat'
-                : showSuggestion
-                  ? undefined
-                  : placeholder
-            }
-            value={draft}
-            disabled={disabled || sending}
-            mix={[
-              on<HTMLTextAreaElement, 'input'>('input', (event) => {
-                historyIndex = undefined
-                changeDraft(event.currentTarget.value)
-              }),
-              on<HTMLTextAreaElement, 'keydown'>('keydown', (event) => {
-                if (event.isComposing) return
-                if (
-                  !draft &&
-                  suggestions.length &&
-                  (event.key === 'ArrowDown' || (event.key === 'ArrowUp' && activeSuggestion >= 0))
-                ) {
-                  event.preventDefault()
-                  hoveredSuggestion = -1
-                  activeSuggestion =
-                    event.key === 'ArrowDown'
-                      ? Math.min(suggestions.length - 1, activeSuggestion + 1)
-                      : Math.max(-1, activeSuggestion - 1)
-                  handle.update()
-                  return
-                }
-                if (!draft && activeSuggestion >= 0 && event.key === 'Enter') {
-                  event.preventDefault()
-                  changeDraft(suggestions[activeSuggestion])
-                  return
-                }
-                if (event.key === 'Tab' && !event.shiftKey && !draft && placeholderSuggestion) {
-                  event.preventDefault()
-                  changeDraft(placeholderSuggestion)
-                } else if (
-                  (event.key === 'ArrowUp' || event.key === 'ArrowDown') &&
-                  !event.shiftKey &&
-                  history.length
-                ) {
-                  const field = event.currentTarget
-                  const atStart = !field.value.slice(0, field.selectionStart).includes('\n')
-                  const atEnd = !field.value.slice(field.selectionEnd).includes('\n')
-                  if (event.key === 'ArrowUp' && atStart) {
-                    event.preventDefault()
-                    if (historyIndex === undefined) {
-                      historyDraft = draft
-                      historyIndex = history.length
-                    }
-                    historyIndex = Math.max(0, historyIndex - 1)
-                    changeDraft(history[historyIndex])
-                  } else if (event.key === 'ArrowDown' && atEnd && historyIndex !== undefined) {
-                    event.preventDefault()
-                    historyIndex++
-                    const next =
-                      historyIndex >= history.length ? historyDraft : history[historyIndex]
-                    if (historyIndex >= history.length) historyIndex = undefined
-                    changeDraft(next)
-                  }
-                } else if (event.key === 'Enter' && !event.shiftKey) {
-                  event.preventDefault()
-                  event.currentTarget.form?.requestSubmit()
-                }
-              }),
-            ]}
-          />
+          {handle.props.triggers?.length ? (
+            <TriggerMenu triggers={handle.props.triggers} renderField={renderField} />
+          ) : (
+            renderField()
+          )}
           {showSuggestion && (
             <>
               <span class="rf-composer-suggestion" aria-hidden="true">
