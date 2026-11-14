@@ -1,3 +1,4 @@
+import { partitionFiles } from './file-selection.ts'
 import { Icon } from './icon.tsx'
 import { messageTransitionName, transitionMessage } from './message-transition.ts'
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
@@ -377,24 +378,13 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
   function addFiles(incoming: FileList | null) {
     if (!incoming || handle.props.disabled || sending) return
     const limit = Math.max(1, handle.props.maxFiles ?? 5)
-    const allowed = (handle.props.accept ?? 'image/png,image/jpeg,application/pdf')
-      .split(',')
-      .map((value) => value.trim().toLowerCase())
-      .filter(Boolean)
-    const additions = Array.from(incoming).filter(
-      (file) =>
-        !allowed.length ||
-        allowed.some((type) =>
-          type.startsWith('.')
-            ? file.name.toLowerCase().endsWith(type)
-            : type.endsWith('/*')
-              ? file.type.startsWith(type.slice(0, -1))
-              : file.type === type,
-        ),
+    const { accepted: additions, rejected } = partitionFiles(
+      incoming,
+      handle.props.accept ?? 'image/png,image/jpeg,application/pdf',
     )
     const remaining = limit - files.length
     error =
-      additions.length !== incoming.length
+      rejected.length > 0
         ? 'Some files have an unsupported type.'
         : additions.length > remaining
           ? `You can attach up to ${limit} files.`

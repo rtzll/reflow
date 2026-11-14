@@ -4,7 +4,7 @@ Reflow started as a native Remix port of the [Fluid Functionalism](https://githu
 
 ## Catalog
 
-- **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `Field`, `Input`, `InputCopy`, `InputGroup`, `NumberField`, `RadioGroup`, `SegmentedControl`, `Select`, `Slider`, `Switch`, `Textarea`
+- **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `Field`, `FileInput`, `Input`, `InputCopy`, `InputGroup`, `NumberField`, `RadioGroup`, `SegmentedControl`, `Select`, `Slider`, `Switch`, `Textarea`
 - **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`
 - **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `Sidebar`, `Tabs`
 - **Menus and overlays** · `CommandMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
@@ -60,6 +60,7 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 4 | `Avatar` and `AvatarGroup` (shipped), `Skeleton`, `Spinner`, `Progress` (shipped), `NumberField` (shipped) | — | ThinkingIndicator's shimmer, Button's loading state, CarouselDots' progress fill, ColorPicker's scrub fields |
 | 5 | `Carousel` (shipped) | [Blossom Carousel](https://github.com/jespervos/blossom-carousel) | CarouselDots, native scroll snap, the `--rf-spring-*` tiers |
 | 6 | `TriggerMenu` (shipped) | [UI SDK](https://ui-sdk.dev/docs/react/components/trigger-menu) | InputMessage, anchored positioning, fluid hover |
+| 6 | `FileInput` (shipped) | [UI SDK](https://ui-sdk.dev/docs/react/components/file-input) | Native file input, Field, InputMessage file filtering |
 
 ### Decisions so far
 

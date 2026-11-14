@@ -83,6 +83,7 @@ import {
   DatePicker,
   Dialog,
   Dropdown,
+  FileInput,
   Field,
   FieldDescription,
   FieldGroup,
@@ -376,6 +377,14 @@ export const componentExamples: Record<string, readonly DocumentationExample[]> 
       'autoplay',
       carouselExampleCode(4, true),
       'Hover the slide to pause its progress.',
+    ),
+  ],
+  'file-input': [
+    demo(
+      'Image attachment',
+      'image',
+      `<FileInput label="Cover image" name="cover" accept="image/*" maxSize={2_000_000} required />`,
+      'Pick, drop, or paste an image up to 2 MB. The chosen file is available through FormData.',
     ),
   ],
   'trigger-menu': [
@@ -2445,6 +2454,16 @@ export function ComponentDemo(
         return <CitationDemo variant={variant} />
       case 'chat-layout':
         return <ChatLayoutDemo variant={variant} />
+      case 'file-input':
+        return width(
+          <FileInput
+            label="Cover image"
+            name="cover"
+            accept="image/*"
+            maxSize={2_000_000}
+            required
+          />,
+        )
       case 'trigger-menu':
         return (
           <div class="example-composer">

@@ -1,4 +1,12 @@
-import { Button, Drawer, Progress, SegmentedControl, Switch, type DrawerSide } from '@rtzll/reflow'
+import {
+  Button,
+  Drawer,
+  FileInput,
+  Progress,
+  SegmentedControl,
+  Switch,
+  type DrawerSide,
+} from '@rtzll/reflow'
 import { on, type Handle } from 'remix/component'
 
 function Filters(handle: Handle<{ size?: 'default' | 'compact' }>) {
@@ -60,6 +68,7 @@ function sideContent(side: DrawerSide, size?: 'default' | 'compact') {
             <dt>Status</dt>
             <dd>In review</dd>
           </dl>
+          <FileInput label="Review files" name="review" accept=".pdf,.txt" multiple />
           <Progress label="Review progress" value={3} max={5} showValue />
         </div>
       )

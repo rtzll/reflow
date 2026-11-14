@@ -2734,6 +2734,73 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  'file-input': [
+    {
+      name: 'FileInput',
+      props: [
+        {
+          name: 'label',
+          type: 'string',
+          required: true,
+          description: 'Visible label associated with the file input.',
+        },
+        {
+          name: 'name',
+          type: 'string',
+          required: false,
+          description: 'Name used when submitting the form.',
+        },
+        {
+          name: 'accept',
+          type: 'string',
+          required: false,
+          description: 'Comma-separated file extensions and MIME types, including wildcards.',
+        },
+        {
+          name: 'multiple',
+          type: 'boolean',
+          required: false,
+          description: 'Accumulate more than one selected file.',
+        },
+        {
+          name: 'maxFiles',
+          type: 'number',
+          required: false,
+          description: 'Maximum count when multiple is enabled.',
+        },
+        {
+          name: 'maxSize',
+          type: 'number',
+          required: false,
+          description: 'Maximum bytes per file.',
+        },
+        {
+          name: 'required / disabled',
+          type: 'boolean',
+          required: false,
+          description: 'Native form states.',
+        },
+        {
+          name: 'description',
+          type: 'RemixNode',
+          required: false,
+          description: 'Help text associated with the input.',
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          required: false,
+          description: 'Control density.',
+        },
+        {
+          name: 'onFilesChange',
+          type: '(files: readonly File[]) => void',
+          required: false,
+          description: 'Reports the current selection after a change or reset.',
+        },
+      ],
+    },
+  ],
   'trigger-menu': [
     {
       name: 'TriggerMenu',

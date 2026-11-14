@@ -59,6 +59,11 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       selected: false,
     }),
   },
+  'file-input': {
+    description:
+      'Pick, drop, or paste files, with type and size limits and native form submission.',
+    code: `<FileInput label="Documents" name="documents" accept=".pdf,.txt" maxFiles={3} multiple />`,
+  },
   'trigger-menu': {
     description: 'Suggestions at the caret for mentions, commands, and other text triggers.',
     code: triggerMenuCode,
@@ -289,6 +294,7 @@ const components = [
   ['drawer', 'Drawer'],
   ['dropdown', 'Dropdown'],
   ['field', 'Field'],
+  ['file-input', 'FileInput'],
   ['hover-card', 'HoverCard'],
   ['input', 'Input'],
   ['input-copy', 'InputCopy'],

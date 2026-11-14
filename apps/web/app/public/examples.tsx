@@ -54,6 +54,7 @@ import {
   DatePicker,
   Dialog,
   Dropdown,
+  FileInput,
   Field,
   Input,
   InputCopy,
@@ -728,6 +729,18 @@ export const Example = clientEntry(
               <InputCopy
                 value="pnpm add remix @remix-run/ui @remix-run/component"
                 onCopy={playCopySuccess}
+              />
+            </div>
+          )
+        case 'file-input':
+          return (
+            <div style={{ width: 'min(100%, 320px)' }}>
+              <FileInput
+                label="Documents"
+                name="documents"
+                accept=".pdf,.txt"
+                maxFiles={3}
+                multiple
               />
             </div>
           )
