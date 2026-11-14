@@ -301,6 +301,18 @@ export function enhanceShowcaseSound() {
     if (cue === 'select' || cue === 'close' || cue === 'warning' || cue === 'error')
       play(cue, { emphasis: 'subtle' })
   })
+  document.addEventListener('rmx:select-change', (event) => {
+    if (event.target instanceof Element && event.target.closest('.site-preview-stage .rf-select'))
+      play('select', { emphasis: 'subtle' })
+  })
+  document.addEventListener('rmx:menu-select', (event) => {
+    if (!(event.target instanceof Element) || !event.target.closest('.site-preview-stage')) return
+    const { item } = event as HTMLElementEventMap['rmx:menu-select']
+    play(item.type === 'checkbox' ? 'toggle' : 'select', {
+      emphasis: 'subtle',
+      direction: item.checked === false ? 'back' : 'forward',
+    })
+  })
   document.addEventListener('rmx:tabs-change', (event) => {
     if (event.target instanceof Element && event.target.closest('.site-preview-stage .rf-tabs'))
       play('select', { emphasis: 'subtle' })
