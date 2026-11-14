@@ -121,20 +121,6 @@
   margin: 2px 8px;
 }
 
-.rf-attachment-image,
-.rf-attachment-file {
-  width: var(--rf-file-preview-size, 80px);
-  height: var(--rf-file-preview-size, 80px);
-  object-fit: cover;
-  border-radius: max(0px, calc(var(--rf-radius) - 2px));
-}
-.rf-attachment-file {
-  display: grid;
-  place-items: center;
-  background: var(--rf-muted-bg);
-  color: var(--rf-muted);
-  font-size: 12px;
-}
 .rf-composer .rf-textarea {
   max-height: calc(var(--rf-composer-max-rows, 8) * 20px + 12px);
 }

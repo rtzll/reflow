@@ -147,8 +147,7 @@
   padding: 4px;
 }
 
-.rf-date-presets button,
-.rf-date-done {
+.rf-date-presets button {
   position: relative;
   display: flex;
   align-items: center;
@@ -192,38 +191,6 @@
 
 .rf-date-presets button[aria-pressed='true'] .rf-date-preset-label {
   font-variation-settings: var(--rf-weight-strong, 'wght' 550, 'opsz' 18);
-}
-
-.rf-date-done:hover {
-  background: var(--rf-hover);
-  color: var(--rf-fg);
-}
-.rf-date-times {
-  display: flex;
-  gap: 12px;
-  align-items: end;
-  padding: 12px;
-  border-top: 1px solid var(--rf-border);
-}
-.rf-date-times label {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  color: var(--rf-muted);
-  font-size: 12px;
-}
-.rf-date-times input {
-  min-width: 0;
-  border: 1px solid var(--rf-border);
-  border-radius: var(--rf-radius);
-  padding: 6px;
-  color: var(--rf-fg);
-  background: transparent;
-  font: inherit;
-}
-.rf-date-done {
-  margin-left: auto;
-  background: var(--rf-muted-bg);
 }
 
 .rf-date-inline-times {
