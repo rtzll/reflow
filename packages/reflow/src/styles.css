@@ -22,7 +22,8 @@
 @import './checkbox-group.css';
 @import './radio-group.css';
 @import './compositions.css';
-@import './choices.css';
+@import './select.css';
+@import './combobox.css';
 @import './overlays.css';
 @import './sidebar.css';
 @import './dates.css';

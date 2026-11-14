@@ -1,0 +1,204 @@
+.rf-picker {
+  display: inline-block;
+  max-inline-size: 100%;
+  vertical-align: middle;
+  font-size: var(--rf-text-body, 13px);
+  line-height: var(--rf-leading-body, 20px);
+  color: var(--rf-fg, #161616);
+}
+
+.rf-picker-trigger {
+  box-sizing: border-box;
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  inline-size: 100%;
+  min-inline-size: 140px;
+  min-block-size: var(--rf-control-height, 36px);
+  padding: 0 10px;
+  border: 1px solid var(--rf-border, #dedede);
+  border-radius: var(--rf-radius, 8px);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+}
+
+.rf-picker-trigger {
+  cursor: pointer;
+}
+
+.rf-select .rf-picker-trigger {
+  min-inline-size: calc(var(--rf-control-height, 36px) * 4 + 16px);
+  padding-inline: var(--rf-control-padding, 12px);
+  gap: var(--rf-gap, 8px);
+}
+
+.rf-select .rf-picker-value {
+  flex: 1;
+}
+
+/* As in the reference: the label is flex-1 and trimmed to the cap height, with
+   padding and a negative margin so truncation does not clip ascenders. */
+.rf-select .rf-picker-label {
+  flex: 1;
+  min-inline-size: 0;
+  padding-block: 4px;
+  margin-block: -4px;
+  text-box: trim-both cap alphabetic;
+}
+
+.rf-picker-chevron {
+  inline-size: var(--rf-icon-size, 16px);
+  block-size: var(--rf-icon-size, 16px);
+}
+
+.rf-picker-value,
+.rf-picker-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-inline-size: 0;
+}
+
+.rf-picker-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rf-picker-icon,
+.rf-picker-chevron,
+.rf-picker-check {
+  flex: none;
+}
+
+.rf-picker-icon svg {
+  inline-size: 16px;
+  block-size: 16px;
+}
+
+.rf-picker-chevron,
+.rf-picker-value[data-placeholder],
+.rf-picker-input::placeholder {
+  color: var(--rf-muted, #737373);
+}
+
+.rf-picker[data-variant='ghost'] .rf-picker-trigger {
+  border-color: transparent;
+}
+
+.rf-picker-trigger {
+  transition:
+    color var(--rf-fast, 80ms),
+    background-color var(--rf-fast, 80ms),
+    border-radius var(--rf-fast, 80ms),
+    box-shadow var(--rf-fast, 80ms),
+    opacity var(--rf-fast, 80ms);
+}
+
+@media (hover: hover) {
+  .rf-picker-trigger:hover:not(:disabled) {
+    background: var(--rf-hover, #ededed);
+  }
+}
+
+.rf-picker-trigger:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 1px var(--rf-accent, #6b97ff);
+}
+
+.rf-picker-trigger[aria-invalid='true'],
+.rf-picker-trigger[aria-invalid='true']:hover {
+  border-color: color-mix(in oklab, light-dark(#ef4444, var(--rf-danger)) 50%, transparent);
+}
+
+.rf-picker-trigger:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.rf-picker-surface {
+  inline-size: max-content;
+  min-inline-size: 140px;
+}
+
+.rf-select-surface,
+.rf-combobox-surface {
+  border: 0;
+  border-radius: var(--rf-popup-radius, 12px);
+  background: var(--rf-surface-3);
+  /* shadowLevel 3 of the reference */
+  box-shadow:
+    inset 0 1px light-dark(transparent, rgb(255 255 255 / 2%)),
+    inset 0 0 0 1px light-dark(transparent, rgb(255 255 255 / 2%)),
+    0 0 0 1px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 12%)),
+    0 1px 1px -0.5px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 18%)),
+    0 3px 3px -1.5px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 18%));
+  max-block-size: 300px;
+}
+
+:is(.rf-select-surface, .rf-combobox-surface) :is(.rf-picker-option, .rf-picker-hover) {
+  border-radius: var(--rf-item-radius, 8px);
+}
+
+:is(.rf-select-surface, .rf-combobox-surface) .rf-picker-option {
+  padding-inline: 8px;
+}
+
+.rf-picker-option {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: var(--rf-control-height, 36px);
+  padding-inline: 9px;
+  border-radius: calc(var(--rf-panel-radius, 12px) - 5px);
+  color: var(--rf-muted, #737373);
+  outline: none;
+  cursor: pointer;
+  user-select: none;
+}
+
+.rf-picker-option[hidden] {
+  display: none;
+}
+
+.rf-picker-option:is([data-highlighted='true'], [aria-selected='true']) {
+  color: var(--rf-fg);
+  font-variation-settings:
+    'wght' 550,
+    'opsz' 18;
+}
+
+.rf-picker-option[aria-selected='true'] {
+  background: var(--rf-active);
+}
+
+.rf-picker-option[aria-disabled='true'] {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.rf-picker-option .rf-picker-label {
+  flex: 1;
+}
+
+.rf-picker-option:not([aria-selected='true']) .rf-picker-check {
+  visibility: hidden;
+}
+
+.rf-picker-hover {
+  border-radius: calc(var(--rf-panel-radius, 12px) - 5px);
+  background: var(--rf-hover);
+}
+
+[data-hover='standard'] .rf-picker-option[data-highlighted='true'] {
+  background: var(--rf-hover);
+}
+
+.rf-picker-option:is([data-select-flash], [data-combobox-flash]) {
+  background: color-mix(in srgb, var(--rf-accent) 16%, var(--rf-active));
+}
