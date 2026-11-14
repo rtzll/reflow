@@ -51,6 +51,14 @@ Where code goes:
 - A helper used by one component stays next to that component. Only helpers shared by two or more components move into a layer.
 - Imports point down: components import systems, behaviors and primitives; systems and behaviors never import components.
 
+Primitives Reflow checked and does not use, and why:
+
+- **`combobox` for Combobox.** The primitive holds one value and clears unmatched text on blur. Combobox also selects several values as chips and creates new options from the typed text.
+- **`toggle` for Switch.** Switch is a native checkbox that can be dragged. The primitive reads the checked state during the click, before a drag that settles on the current value cancels it, and drops `defaultChecked` from the input, so a form reset no longer restores it.
+- **`listbox` for CommandMenu.** The primitive marks the committed value as selected and clears the highlight when the pointer leaves. CommandMenu runs commands, so it has no committed value, and it keeps the highlighted command marked selected for the input's `aria-activedescendant`.
+
+Check again when Remix UI updates.
+
 ## Showcase requirements
 
 - Overview: left navigation grouped into systems and components, central interactive preview cards, and a customization rail.
