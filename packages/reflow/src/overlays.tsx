@@ -4,6 +4,7 @@ import type { Handle, MixInput, RemixNode } from 'remix/component'
 import { anchor } from '@remix-run/ui/anchor'
 import { Button, type ButtonProps } from './basic.tsx'
 import { hoverIntent } from './behaviors/hover-intent.ts'
+import { modal } from './behaviors/modal.ts'
 
 export interface DialogProps {
   /** Contents of the button that opens the dialog. */
@@ -36,10 +37,7 @@ interface DialogSurfaceProps extends DialogProps {
 }
 
 function DialogSurface(handle: Handle<DialogSurfaceProps>) {
-  let dialog: HTMLDialogElement | null = null
-  let invoker: HTMLElement | null = null
   let internalOpen = handle.props.defaultOpen ?? false
-  let pressedBackdrop = false
   const id = handle.id
   const titleId = `${id}-title`
   const descriptionId = `${id}-description`
@@ -56,85 +54,16 @@ function DialogSurface(handle: Handle<DialogSurfaceProps>) {
     requestOpen(false)
   }
 
-  function syncDialog() {
-    if (!dialog?.isConnected || dialog.open === open()) return
-    if (open()) {
-      if (handle.props.modal === false) dialog.show()
-      else dialog.showModal()
-    } else dialog.close()
-  }
-
-  function outsidePanel(event: MouseEvent, element: HTMLDialogElement) {
-    if (event.target !== element) return false
-    const rect = element.getBoundingClientRect()
-    return (
-      event.clientX < rect.left ||
-      event.clientX > rect.right ||
-      event.clientY < rect.top ||
-      event.clientY > rect.bottom
-    )
-  }
-
-  const dialogMix = ref((element, signal) => {
-    if (!(element instanceof HTMLDialogElement)) return
-    dialog = element
-    element.addEventListener(
-      'cancel',
-      (event) => {
-        event.preventDefault()
-        close()
-      },
-      { signal },
-    )
-    element.addEventListener(
-      'close',
-      () => {
-        if (element.open) return
-        // Form method="dialog" closes the element directly.
-        close()
-        const target = invoker
-        invoker = null
-        if (
-          target?.isConnected &&
-          element.ownerDocument.activeElement === element.ownerDocument.body
-        ) {
-          target.focus({ preventScroll: true })
-        }
-      },
-      { signal },
-    )
-    element.addEventListener(
-      'pointerdown',
-      (event) => {
-        pressedBackdrop = outsidePanel(event, element)
-      },
-      { signal },
-    )
-    element.addEventListener(
-      'click',
-      (event) => {
-        if (
-          pressedBackdrop &&
-          outsidePanel(event, element) &&
-          (handle.props.dismissOnBackdrop ?? true)
-        )
-          close()
-        pressedBackdrop = false
-      },
-      { signal },
-    )
-    signal.addEventListener(
-      'abort',
-      () => {
-        if (dialog === element) dialog = null
-      },
-      { once: true },
-    )
+  const dialog = modal({
+    open,
+    onClose: close,
+    closeOnBackdrop: () => handle.props.dismissOnBackdrop ?? true,
+    nonModal: () => handle.props.modal === false,
   })
 
   return () => {
     const props = handle.props
-    handle.queueTask(syncDialog)
+    handle.queueTask(dialog.sync)
     const footer = typeof props.footer === 'function' ? props.footer(close) : props.footer
     return (
       <>
@@ -145,10 +74,7 @@ function DialogSurface(handle: Handle<DialogSurfaceProps>) {
             aria-haspopup="dialog"
             aria-controls={id}
             aria-expanded={open()}
-            mix={on('click', (event) => {
-              if (event.currentTarget instanceof HTMLElement) invoker = event.currentTarget
-              requestOpen(true)
-            })}
+            mix={[dialog.trigger, on('click', () => requestOpen(true))]}
           >
             {props.trigger}
           </Button>
@@ -163,7 +89,7 @@ function DialogSurface(handle: Handle<DialogSurfaceProps>) {
           aria-modal={props.modal === false ? undefined : true}
           aria-labelledby={titleId}
           aria-describedby={props.description ? descriptionId : undefined}
-          mix={dialogMix}
+          mix={dialog.dialog}
         >
           <header class="rf-dialog-header">
             <h2 id={titleId}>{props.title}</h2>

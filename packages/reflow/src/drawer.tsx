@@ -1,6 +1,7 @@
 import { on, ref, type Handle, type MixInput, type RemixNode } from 'remix/component'
 import { Button, type ButtonProps } from './basic.tsx'
 import { Icon } from './icon.tsx'
+import { modal, onBackdrop } from './behaviors/modal.ts'
 
 export type DrawerSide = 'bottom' | 'top' | 'left' | 'right'
 
@@ -67,10 +68,7 @@ interface Drag {
  * a drag the other way resists.
  */
 export function Drawer(handle: Handle<DrawerProps>) {
-  let dialog: HTMLDialogElement | null = null
-  let invoker: HTMLElement | null = null
   let internalOpen = handle.props.defaultOpen ?? false
-  let pressedBackdrop = false
   let drag: Drag | undefined
   const id = handle.id
   const titleId = `${id}-title`
@@ -90,30 +88,19 @@ export function Drawer(handle: Handle<DrawerProps>) {
     requestOpen(false)
   }
 
-  function sync() {
-    if (!dialog?.isConnected || dialog.open === open()) return
-    if (open()) {
-      setDrag(dialog, 0)
-      dialog.showModal()
-    } else dialog.close()
-  }
+  const panel = modal({
+    open,
+    onClose: close,
+    closeOnEscape: dismissible,
+    closeOnBackdrop: dismissible,
+    beforeOpen: (dialog) => setDrag(dialog, 0),
+  })
 
   function setDrag(element: HTMLElement, offset: number, size = 1) {
     element.style.setProperty('--rf-drawer-drag', `${Math.round(offset)}px`)
     element.style.setProperty(
       '--rf-drawer-progress',
       String(Math.min(1, Math.max(0, offset / size))),
-    )
-  }
-
-  function outsidePanel(event: MouseEvent, element: HTMLDialogElement) {
-    if (event.target !== element) return false
-    const rect = element.getBoundingClientRect()
-    return (
-      event.clientX < rect.left ||
-      event.clientX > rect.right ||
-      event.clientY < rect.top ||
-      event.clientY > rect.bottom
     )
   }
 
@@ -178,38 +165,14 @@ export function Drawer(handle: Handle<DrawerProps>) {
     setDrag(element, 0)
   }
 
-  const dialogMix = ref((element, signal) => {
+  // Follows a drag toward the drawer's edge. The modal behavior handles the rest.
+  const dragMix = ref((element, signal) => {
     if (!(element instanceof HTMLDialogElement)) return
-    dialog = element
     const options = { signal }
-    element.addEventListener(
-      'cancel',
-      (event) => {
-        event.preventDefault()
-        if (dismissible()) close()
-      },
-      options,
-    )
-    element.addEventListener(
-      'close',
-      () => {
-        if (element.open) return
-        close()
-        const target = invoker
-        invoker = null
-        if (
-          target?.isConnected &&
-          element.ownerDocument.activeElement === element.ownerDocument.body
-        )
-          target.focus({ preventScroll: true })
-      },
-      options,
-    )
     element.addEventListener(
       'pointerdown',
       (event) => {
-        pressedBackdrop = outsidePanel(event, element)
-        if (pressedBackdrop || !dismissible() || event.button !== 0) return
+        if (onBackdrop(event, element) || !dismissible() || event.button !== 0) return
         const target = event.target
         if (!(target instanceof Element) || target.closest(interactive)) return
         if (scrollsFirst(target, element)) return
@@ -261,26 +224,11 @@ export function Drawer(handle: Handle<DrawerProps>) {
     )
     element.addEventListener('pointerup', (event) => endDrag(event, element), options)
     element.addEventListener('pointercancel', (event) => endDrag(event, element), options)
-    element.addEventListener(
-      'click',
-      (event) => {
-        if (pressedBackdrop && outsidePanel(event, element) && dismissible()) close()
-        pressedBackdrop = false
-      },
-      options,
-    )
-    signal.addEventListener(
-      'abort',
-      () => {
-        if (dialog === element) dialog = null
-      },
-      { once: true },
-    )
   })
 
   return () => {
     const props = handle.props
-    handle.queueTask(sync)
+    handle.queueTask(panel.sync)
     const footer = typeof props.footer === 'function' ? props.footer(close) : props.footer
     const vertical = side() === 'bottom' || side() === 'top'
     const showHandle = props.handle ?? (vertical && dismissible())
@@ -289,10 +237,7 @@ export function Drawer(handle: Handle<DrawerProps>) {
       'aria-haspopup': 'dialog',
       'aria-expanded': open(),
       'aria-controls': id,
-      mix: on('click', (event) => {
-        if (event.currentTarget instanceof HTMLElement) invoker = event.currentTarget
-        requestOpen(true)
-      }),
+      mix: [panel.trigger, on('click', () => requestOpen(true))],
     }
     return (
       <>
@@ -315,7 +260,7 @@ export function Drawer(handle: Handle<DrawerProps>) {
           aria-modal="true"
           aria-labelledby={titleId}
           aria-describedby={props.description ? descriptionId : undefined}
-          mix={dialogMix}
+          mix={[panel.dialog, dragMix]}
         >
           {showHandle && <div class="rf-drawer-handle" aria-hidden="true" />}
           <header class="rf-drawer-header">
