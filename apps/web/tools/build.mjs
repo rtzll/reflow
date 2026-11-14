@@ -51,18 +51,22 @@ const styles = [
   'app/public/site.css',
   'app/public/examples.css',
 ]
-const client = await build({
-  ...common,
-  entryPoints: ['app/public/entry.ts', ...clientEntries.keys(), ...styles],
-  outdir: resolve(output, 'client'),
-  entryNames: 'assets/[name]-[hash]',
-  chunkNames: 'assets/chunk-[hash]',
-  assetNames: 'assets/[name]-[hash]',
-  publicPath: '/',
-  platform: 'browser',
-  splitting: true,
-  loader: { '.woff2': 'file' },
-})
+const [client, samples] = await Promise.all([
+  build({
+    ...common,
+    entryPoints: ['app/public/entry.ts', ...clientEntries.keys(), ...styles],
+    outdir: resolve(output, 'client'),
+    entryNames: 'assets/[name]-[hash]',
+    chunkNames: 'assets/chunk-[hash]',
+    assetNames: 'assets/[name]-[hash]',
+    publicPath: '/',
+    platform: 'browser',
+    splitting: true,
+    loader: { '.woff2': 'file' },
+  }),
+  // Highlight the CodeBlock samples while bundling, so the worker never includes Shiki.
+  import('../app/code-samples.ts').then(({ codeSamples }) => codeSamples()),
+])
 
 function outputOf(source) {
   const entry = Object.entries(client.metafile.outputs).find(
@@ -128,9 +132,6 @@ const manifest = {
   },
   entries: Object.fromEntries([...clientEntries].map(([path, id]) => [id, scriptEntry(path)])),
 }
-// Highlight the CodeBlock samples here, so the worker bundle never includes Shiki.
-const { codeSamples } = await import('../app/code-samples.ts')
-const samples = await codeSamples()
 const worker = await build({
   ...common,
   entryPoints: ['worker/index.ts'],
