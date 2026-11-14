@@ -438,6 +438,27 @@ export function enhanceShowcaseSound() {
     if (event.target instanceof Element && event.target.closest('.site-preview-stage .rf-select'))
       play('select', { emphasis: 'subtle' })
   })
+  document.addEventListener(
+    'click',
+    (event) => {
+      if (!(event.target instanceof Element)) return
+      const button = event.target.closest<HTMLButtonElement>(
+        '.site-preview-stage .rf-calendar button, .site-preview-stage .rf-color-swatch',
+      )
+      if (!button || button.disabled || button.getAttribute('aria-disabled') === 'true') return
+      if (button.matches('.rf-calendar-nav'))
+        play('navigate', {
+          emphasis: 'subtle',
+          direction: button.dataset.direction === 'previous' ? 'back' : 'forward',
+        })
+      else if (
+        button.matches('.rf-calendar-day') ||
+        (button.matches('.rf-color-swatch') && button.getAttribute('aria-pressed') !== 'true')
+      )
+        play('select', { emphasis: 'subtle' })
+    },
+    { capture: true },
+  )
   document.addEventListener('rmx:menu-select', (event) => {
     if (!(event.target instanceof Element) || !event.target.closest('.site-preview-stage')) return
     const { item } = event as Event & { item: { type: string; checked?: boolean } }

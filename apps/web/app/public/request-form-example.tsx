@@ -1,4 +1,5 @@
 import { on, type Handle } from 'remix/component'
+import { play } from 'cuelume'
 import {
   Button,
   Checkbox,
@@ -40,6 +41,7 @@ export function RequestFormExample(handle: Handle<RequestFormProps>) {
           else if (!emailPattern.test(email)) errors.email = 'Enter a valid email address'
           if (!data.has('conduct')) errors.conduct = 'Required to join the event'
           sent = Object.keys(errors).length === 0
+          play(sent ? 'success' : 'error', { emphasis: 'subtle' })
           handle.update()
         })}
       >
