@@ -1,0 +1,95 @@
+.rf-radio {
+  align-items: center;
+  color: var(--rf-muted);
+  cursor: pointer;
+  display: flex;
+  gap: var(--rf-gap);
+  min-height: calc(var(--rf-control-height) + 4px);
+  padding: 12px var(--rf-control-padding);
+}
+.rf-radio-body {
+  display: grid;
+  justify-items: start;
+  min-width: 0;
+}
+.rf-radio-text {
+  display: inline-grid;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.rf-radio-sizer,
+.rf-radio-label {
+  grid-area: 1 / 1;
+  text-box: trim-both cap alphabetic;
+}
+.rf-radio-sizer {
+  visibility: hidden;
+  font-variation-settings: var(--rf-weight-strong);
+}
+.rf-radio-label {
+  font-variation-settings: var(--rf-weight-normal);
+  transition:
+    color var(--rf-fast),
+    font-variation-settings var(--rf-fast);
+}
+.rf-radio:is([data-rf-hovered], :focus-within, :has(:checked)) {
+  color: var(--rf-fg);
+}
+.rf-radio:has(:checked) .rf-radio-label {
+  font-variation-settings: var(--rf-weight-strong);
+}
+.rf-radio:has(:disabled) {
+  cursor: default;
+}
+.rf-radio > input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  opacity: 0;
+  margin: 0;
+}
+.rf-radio-mark {
+  border: 1.5px solid var(--rf-border);
+  border-radius: 50%;
+  transition: border-color var(--rf-fast);
+  display: grid;
+  height: var(--rf-icon-size);
+  place-items: center;
+  width: var(--rf-icon-size);
+  flex: none;
+}
+.rf-radio-mark::after {
+  content: '';
+  border-radius: inherit;
+  height: calc(var(--rf-icon-size) / 2);
+  width: calc(var(--rf-icon-size) / 2);
+  background: currentColor;
+  scale: 0;
+  transition: scale var(--rf-fast) var(--rf-ease-out);
+}
+.rf-radio input:checked + .rf-radio-mark {
+  border-color: transparent;
+}
+.rf-radio input:checked + .rf-radio-mark::after {
+  scale: 1;
+}
+.rf-radio:has(input:focus-visible) {
+  outline: 1px solid var(--rf-accent);
+  outline-offset: 1px;
+}
+.rf-radio:not(:has(:checked)):is([data-rf-hovered], :focus-within) .rf-radio-mark {
+  border-color: light-dark(oklch(70.8% 0 0), oklch(55.6% 0 0));
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-radio-mark::after {
+    animation: none;
+    transition: none;
+  }
+}
+
+.rf-choice-selection {
+  background: var(--rf-active);
+}
+.rf-choice-group-list[data-rf-has-selection] > .rf-radio:has(input:checked) {
+  background: transparent;
+}

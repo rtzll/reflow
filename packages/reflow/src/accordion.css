@@ -1,0 +1,196 @@
+.rf-accordion {
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  position: relative;
+  width: 288px;
+}
+.rf-accordion-item {
+  min-width: 0;
+  position: relative;
+}
+/* The open tint is an overlay, so the item itself stays transparent. */
+.rf-accordion-tint {
+  background-color: light-dark(
+    color-mix(in oklab, #e5e5e5 20%, transparent),
+    color-mix(in oklab, #525252 12%, transparent)
+  );
+  border-radius: var(--rf-radius);
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  transition: opacity var(--rf-exit-moderate);
+  z-index: -2;
+}
+.rf-accordion-item[data-state='open'] > .rf-accordion-tint {
+  opacity: 1;
+  transition: opacity 120ms linear;
+}
+/* Hovering another row dims the open tint. */
+.rf-accordion:has(.rf-accordion-trigger[data-rf-hovered][aria-expanded='false'])
+  > .rf-accordion-item[data-state='open']
+  > .rf-accordion-tint {
+  opacity: 0.7;
+}
+/* highlight="trigger": the tint covers the open row only, and only on hover. */
+.rf-accordion[data-highlight='trigger'] > .rf-accordion-item > .rf-accordion-tint {
+  block-size: 36px;
+  bottom: auto;
+}
+.rf-accordion[data-highlight='trigger']
+  > .rf-accordion-item[data-state='open']:not(
+    :has(.rf-accordion-trigger[data-rf-hovered], .rf-accordion-trigger:hover)
+  )
+  > .rf-accordion-tint {
+  opacity: 0;
+  transition: opacity var(--rf-exit-moderate);
+}
+.rf-accordion-item > :is(h2, h3, h4, h5, h6) {
+  margin: 0;
+  font: inherit;
+}
+.rf-accordion-trigger {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--rf-radius);
+  color: var(--rf-fg);
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  gap: 8px;
+  min-height: var(--rf-control-height);
+  outline: none;
+  padding: 8px var(--rf-control-padding);
+  position: relative;
+  text-align: left;
+  user-select: none;
+  width: 100%;
+  z-index: 10;
+}
+.rf-accordion-label {
+  display: inline-grid;
+  flex: 1;
+  font-size: var(--rf-text-body);
+  line-height: var(--rf-leading-body);
+  text-align: left;
+}
+.rf-accordion-label > span {
+  grid-area: 1 / 1;
+}
+.rf-accordion-label > span:first-child {
+  font-variation-settings: var(--rf-weight-strong);
+  visibility: hidden;
+}
+.rf-accordion-label > span:last-child {
+  color: var(--rf-muted);
+  font-variation-settings: var(--rf-weight-normal);
+  transition:
+    color 80ms,
+    font-variation-settings 80ms;
+}
+.rf-accordion[data-variant='separated'] .rf-accordion-item + .rf-accordion-item {
+  border-block-start: 1px solid var(--rf-border);
+}
+.rf-accordion-trigger:focus-visible {
+  outline: 1px solid var(--rf-accent);
+  outline-offset: 1px;
+}
+.rf-accordion-trigger:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.rf-accordion-trigger:is([aria-expanded='true'], [data-rf-hovered], :focus-visible)
+  .rf-accordion-label
+  > span:last-child {
+  color: var(--rf-fg);
+}
+.rf-accordion-trigger[aria-expanded='true'] .rf-accordion-label > span:last-child {
+  font-variation-settings: var(--rf-weight-strong);
+}
+.rf-accordion-chevron {
+  align-items: center;
+  display: inline-flex;
+  flex-shrink: 0;
+  justify-content: center;
+  transition: transform var(--rf-spring-fast);
+}
+.rf-accordion-chevron > svg {
+  color: var(--rf-muted);
+  transition: color 80ms;
+}
+.rf-accordion-chevron [data-rf-icon-default] {
+  stroke-width: 1.5;
+  transition: stroke-width 80ms;
+}
+.rf-accordion-trigger[aria-expanded='true'] > .rf-accordion-chevron {
+  transform: rotate(90deg);
+}
+.rf-accordion-trigger:is([aria-expanded='true'], [data-rf-hovered], :focus-visible)
+  > .rf-accordion-chevron
+  > svg {
+  color: var(--rf-fg);
+}
+.rf-accordion-trigger:is([aria-expanded='true'], [data-rf-hovered], :focus-visible)
+  > .rf-accordion-chevron
+  [data-rf-icon-default] {
+  stroke-width: 2;
+}
+.rf-accordion-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows var(--rf-exit-fast),
+    opacity 40ms linear,
+    visibility 0s linear 60ms;
+  visibility: hidden;
+}
+.rf-accordion-panel > div {
+  min-height: 0;
+  overflow: hidden;
+}
+.rf-accordion-content {
+  color: var(--rf-muted);
+  font-size: var(--rf-text-body);
+  line-height: var(--rf-leading-body);
+  padding: 4px var(--rf-control-padding) 12px;
+}
+.rf-accordion-panel[data-state='open'] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition:
+    grid-template-rows var(--rf-spring-fast),
+    opacity 60ms linear,
+    visibility 0s;
+  visibility: visible;
+}
+
+[data-hover='standard'] .rf-accordion-trigger:not(:disabled):hover,
+.rf-accordion[data-variant='separated'] .rf-accordion-trigger:not(:disabled):hover {
+  background: var(--rf-hover);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-accordion-item,
+  .rf-accordion-tint,
+  .rf-accordion-panel,
+  .rf-accordion-chevron {
+    animation: none;
+    transition: none;
+  }
+}
+
+.rf-accordion > [data-rf-hover-layer] {
+  background: var(--rf-hover);
+}
+
+@media (forced-colors: none) {
+  .rf-accordion:has(> .rf-focus-ring[data-visible])
+    > .rf-accordion-item
+    > :is(h2, h3, h4, h5, h6)
+    > .rf-accordion-trigger:focus-visible {
+    outline-color: transparent;
+  }
+}

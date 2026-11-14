@@ -1,0 +1,97 @@
+.rf-choice-group {
+  border: 0;
+  margin: 0;
+  min-inline-size: 0;
+  padding: 0;
+}
+.rf-choice-group > legend {
+  font-weight: 550;
+  margin-block-end: 6px;
+  padding: 0 8px;
+}
+.rf-choice-group-list {
+  display: flex;
+  flex-direction: column;
+  isolation: isolate;
+  position: relative;
+}
+.rf-choice-group-list[data-orientation='horizontal'] {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.rf-choice-group-row {
+  border-radius: var(--rf-radius);
+  min-width: 0;
+  position: relative;
+}
+.rf-choice-group-row > .rf-choice {
+  width: 100%;
+  min-height: calc(var(--rf-control-height) + 4px);
+  padding: 5px var(--rf-control-padding);
+  color: var(--rf-muted);
+}
+.rf-choice-group-row[data-rf-hovered] > .rf-choice,
+.rf-choice-group-row > .rf-choice:has(input:is(:checked, :focus-visible)) {
+  color: var(--rf-fg);
+}
+.rf-choice-group-row:has(input:checked) {
+  background: var(--rf-active);
+}
+/* Checkbox rows: the check is always foreground; the box border darkens to
+   neutral-400 (neutral-500 dark) while the row is hovered or focused, and stays
+   transparent once checked. */
+.rf-choice-group-row > .rf-checkbox > .rf-checkbox-mark {
+  color: var(--rf-fg);
+}
+/* Keep a row outline available before the shared ring is mounted. */
+.rf-choice-group-row:has(> .rf-checkbox > input:focus-visible) {
+  outline: 1px solid var(--rf-accent);
+  outline-offset: 1px;
+}
+.rf-choice-group-row > .rf-checkbox:has(> input:focus-visible) > .rf-checkbox-mark {
+  box-shadow: none;
+}
+.rf-choice-group-row[data-rf-hovered]
+  > .rf-checkbox
+  > input:not(:checked, :indeterminate)
+  + .rf-checkbox-mark,
+.rf-choice-group-row
+  > .rf-checkbox:has(> input:focus-visible:not(:checked, :indeterminate))
+  > .rf-checkbox-mark {
+  border-color: light-dark(oklch(70.8% 0 0), oklch(55.6% 0 0));
+}
+.rf-choice-group-row > .rf-checkbox:hover > input:is(:checked, :indeterminate) + .rf-checkbox-mark {
+  border-color: transparent;
+}
+.rf-choice-group-row:has(input:checked):has(+ .rf-choice-group-row input:checked) {
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+}
+.rf-choice-group-row:has(input:checked) + .rf-choice-group-row:has(input:checked) {
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+}
+.rf-choice-group-list[data-orientation='horizontal'] .rf-choice-group-row {
+  border-radius: var(--rf-radius);
+}
+.rf-choice-group-row[aria-disabled='true'] {
+  opacity: 0.45;
+}
+.rf-choice-group-row small {
+  display: block;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption);
+}
+[data-hover='standard'] .rf-choice-group-row:not([aria-disabled='true']):hover {
+  background: var(--rf-hover);
+}
+.rf-choice-group-list > [data-rf-hover-layer] {
+  background: var(--rf-hover);
+}
+
+@media (forced-colors: none) {
+  .rf-choice-group-list:has(> .rf-focus-ring[data-visible])
+    > .rf-choice-group-row:has(input:focus-visible) {
+    outline-color: transparent;
+  }
+}
