@@ -675,7 +675,7 @@ export const Example = clientEntry(
           return <DatePicker label="Start date" defaultMonth="2026-11-01" />
         case 'alert-dialog':
           return (
-            <div class="example-block">
+            <div class="example-stack">
               <AlertDialog
                 trigger="Delete draft"
                 triggerVariant="secondary"
@@ -687,11 +687,9 @@ export const Example = clientEntry(
                   void handle.update()
                 }}
               />
-              {lastAction && (
-                <span class="example-status" role="status">
-                  {lastAction}
-                </span>
-              )}
+              <span class="example-status" role="status">
+                {lastAction}
+              </span>
             </div>
           )
         case 'dialog':

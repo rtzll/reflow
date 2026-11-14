@@ -2477,7 +2477,7 @@ export function ComponentDemo(
         return <ChatLayoutDemo variant={variant} />
       case 'alert-dialog':
         return (
-          <div class="example-block">
+          <div class="example-stack">
             <AlertDialog
               trigger="Leave editor"
               title="Leave without saving?"
@@ -2486,11 +2486,9 @@ export function ComponentDemo(
               confirmLabel="Leave"
               onConfirm={() => say('Left editor')}
             />
-            {output && (
-              <span class="example-status" role="status">
-                {output}
-              </span>
-            )}
+            <span class="example-status" role="status">
+              {output}
+            </span>
           </div>
         )
       case 'resizable':
