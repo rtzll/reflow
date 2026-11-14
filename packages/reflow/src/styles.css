@@ -21,7 +21,13 @@
 @import './choice-group.css';
 @import './checkbox-group.css';
 @import './radio-group.css';
-@import './compositions.css';
+@import './carousel-dots.css';
+@import './chat-message.css';
+@import './input-message.css';
+@import './thinking-indicator.css';
+@import './thinking-steps.css';
+@import './queued-stack.css';
+@import './message-transition.css';
 @import './select.css';
 @import './combobox.css';
 @import './dialog.css';

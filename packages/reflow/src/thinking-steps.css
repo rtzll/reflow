@@ -1,0 +1,327 @@
+.rf-thinking-steps {
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-panel-radius);
+  padding: 4px;
+}
+.rf-thinking-steps-disclosure {
+  border: 0;
+  padding: 0;
+}
+.rf-thinking-steps-disclosure > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: var(--rf-control-height);
+  padding-inline: var(--rf-control-padding);
+  list-style: none;
+  cursor: pointer;
+  font-variation-settings: var(--rf-weight-strong);
+}
+.rf-thinking-steps-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+.rf-thinking-steps-disclosure > summary:focus-visible {
+  outline: 1px solid var(--rf-accent);
+  border-radius: var(--rf-radius);
+}
+.rf-thinking-steps-disclosure[open] > summary > svg {
+  rotate: 90deg;
+}
+
+.rf-thinking-steps-disclosure > .rf-accordion {
+  width: auto;
+  margin-inline-start: var(--rf-control-padding);
+  border-inline-start: 1px solid var(--rf-border);
+  padding-inline-start: 8px;
+}
+.rf-step-title {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+.rf-step-title > span:first-child {
+  width: 14px;
+  color: var(--rf-muted);
+}
+.rf-step-title[data-status='active'] > span:first-child {
+  color: var(--rf-accent);
+}
+
+.rf-thinking-steps[data-variant='timeline'] {
+  box-sizing: border-box;
+  width: min(100%, 320px);
+  border: 0;
+  padding: 0;
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.rf-thinking-steps[data-variant='timeline'] > summary {
+  min-height: var(--rf-control-height);
+  gap: 10px;
+  border-radius: var(--rf-item-radius);
+  color: var(--rf-muted);
+  font-variation-settings: var(--rf-weight-normal);
+  transition:
+    background var(--rf-fast),
+    color var(--rf-fast);
+}
+.rf-thinking-disclosure-label {
+  display: inline-grid;
+}
+.rf-thinking-disclosure-label > span {
+  grid-area: 1 / 1;
+}
+.rf-thinking-disclosure-label > [aria-hidden='true'] {
+  visibility: hidden;
+  font-variation-settings: var(--rf-weight-strong);
+}
+.rf-thinking-steps[data-variant='timeline'][open] > summary .rf-thinking-disclosure-label {
+  color: var(--rf-fg);
+  font-variation-settings: var(--rf-weight-strong);
+}
+.rf-thinking-steps[data-variant='timeline'] > summary:hover,
+.rf-thinking-timeline-content details > summary:hover {
+  background: var(--rf-hover);
+  color: var(--rf-fg);
+}
+.rf-thinking-steps[data-variant='timeline'] > summary > svg {
+  width: var(--rf-icon-size);
+  height: var(--rf-icon-size);
+  transition: rotate var(--rf-fast) var(--rf-ease-out);
+}
+.rf-thinking-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 4px 12px 12px;
+}
+.rf-thinking-timeline > li {
+  display: grid;
+  grid-template-rows: 1fr;
+  animation: rf-thinking-step-grow var(--rf-spring-slow) backwards;
+}
+.rf-thinking-step-body {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  column-gap: 10px;
+  min-height: 0;
+  overflow: clip;
+  /* As in the reference: the step opens its height on the slow spring, and
+     its icon and text fade in once that space starts opening. */
+  animation: rf-thinking-step-enter 240ms ease-out 80ms both;
+}
+.rf-thinking-timeline-row {
+  padding: 6px 8px 6px 0;
+}
+.rf-thinking-timeline > li {
+  padding-inline-start: 8px;
+}
+@keyframes rf-thinking-step-grow {
+  from {
+    grid-template-rows: 0fr;
+  }
+}
+
+.rf-thinking-timeline-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* The connector stops where the step's text ends, as in the reference. */
+  padding-block: 8px 6px;
+  color: var(--rf-muted);
+}
+.rf-thinking-timeline-icon > svg {
+  flex: none;
+  width: calc(var(--rf-icon-size) - 2px);
+  height: calc(var(--rf-icon-size) - 2px);
+}
+.rf-thinking-timeline-dot {
+  width: 6px;
+  height: 6px;
+  margin: 4px 0;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--rf-muted) 60%, transparent);
+}
+.rf-thinking-timeline > li:not(:last-child) .rf-thinking-timeline-icon::after {
+  content: '';
+  flex: 1;
+  width: 1px;
+  margin-top: 4px;
+  background: color-mix(in oklab, var(--rf-border) 60%, transparent);
+}
+.rf-thinking-timeline-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.rf-thinking-timeline-title {
+  color: var(--rf-fg);
+  font-variation-settings: var(--rf-weight-strong);
+}
+.rf-thinking-timeline-description,
+.rf-thinking-timeline-content {
+  color: var(--rf-muted);
+}
+.rf-thinking-timeline > li[data-status='active'] .rf-thinking-timeline-title {
+  width: fit-content;
+  color: transparent;
+  --rf-thinking-shimmer-base: light-dark(#a3a3a3, #525252);
+  --rf-thinking-shimmer-light: light-dark(#525252, #a3a3a3);
+  background: linear-gradient(
+      90deg,
+      var(--rf-thinking-shimmer-base) 35%,
+      var(--rf-thinking-shimmer-light) 50%,
+      var(--rf-thinking-shimmer-base) 65%
+    )
+    100% 0 / 300% 100%;
+  background-clip: text;
+  animation: rf-thinking-shimmer 1.5s ease-in-out infinite;
+}
+.rf-thinking-timeline-content details {
+  margin: 4px 0 0 -12px;
+}
+.rf-thinking-timeline-content details > summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 4px 12px;
+  border-radius: var(--rf-item-radius);
+  list-style: none;
+  cursor: pointer;
+}
+.rf-thinking-timeline-content details > summary::-webkit-details-marker {
+  display: none;
+}
+.rf-thinking-timeline-content details > summary::after {
+  content: '';
+  width: 5px;
+  height: 5px;
+  margin-inline: 5px;
+  border: solid currentColor;
+  border-width: 1px 1px 0 0;
+  rotate: 45deg;
+  transition: rotate var(--rf-fast) var(--rf-ease-out);
+}
+.rf-thinking-timeline-content details[open] > summary::after {
+  rotate: 135deg;
+}
+.rf-thinking-timeline-content details > summary:focus-visible {
+  outline: 1px solid var(--rf-accent);
+}
+.rf-thinking-timeline-content details > ul {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 2px 12px 0;
+  list-style: none;
+  font-size: var(--rf-text-caption);
+  line-height: var(--rf-leading-caption);
+}
+@keyframes rf-thinking-step-enter {
+  from {
+    opacity: 0;
+  }
+}
+
+@supports (interpolate-size: allow-keywords) and selector(details::details-content) {
+  .rf-thinking-steps[data-variant='timeline'],
+  .rf-thinking-timeline-content details {
+    interpolate-size: allow-keywords;
+  }
+  .rf-thinking-steps[data-variant='timeline']::details-content,
+  .rf-thinking-timeline-content details::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size var(--rf-medium) var(--rf-ease-out),
+      content-visibility var(--rf-medium) allow-discrete;
+  }
+  .rf-thinking-steps[data-variant='timeline'][open]::details-content,
+  .rf-thinking-timeline-content details[open]::details-content {
+    block-size: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-thinking-timeline > li,
+  .rf-thinking-timeline > li[data-status='active'] .rf-thinking-timeline-title {
+    animation: none;
+  }
+  .rf-thinking-timeline > li[data-status='active'] .rf-thinking-timeline-title {
+    color: var(--rf-muted);
+    background: none;
+  }
+}
+
+.rf-thinking-step-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-block-start: 4px;
+}
+.rf-thinking-step-source {
+  display: inline-flex;
+  text-decoration: none;
+  border-radius: var(--rf-radius);
+}
+.rf-thinking-step-source:focus-visible {
+  outline: 1px solid var(--rf-accent);
+  outline-offset: 2px;
+}
+.rf-thinking-step-image {
+  margin: 6px 0 0;
+}
+.rf-thinking-step-image img {
+  display: block;
+  width: min(100%, 200px);
+  height: auto;
+  border-radius: var(--rf-panel-radius);
+  outline: 1px solid var(--rf-border);
+  outline-offset: -1px;
+}
+.rf-thinking-step-image figcaption {
+  margin-block-start: 4px;
+  color: var(--rf-muted);
+  font: var(--rf-text-caption) / var(--rf-leading-caption) var(--rf-font);
+}
+/* As in the reference: a source chip scales up on the moderate spring as it
+   unblurs; an image fades in as it unblurs. */
+.rf-thinking-step-source {
+  animation:
+    rf-thinking-source-enter var(--rf-spring-moderate) var(--rf-thinking-part-delay, 0ms) both,
+    rf-thinking-part-unblur 120ms ease-out var(--rf-thinking-part-delay, 0ms) both;
+}
+.rf-thinking-step-image {
+  animation:
+    rf-thinking-part-fade 200ms ease-out var(--rf-thinking-part-delay, 0ms) both,
+    rf-thinking-part-unblur 150ms ease-out var(--rf-thinking-part-delay, 0ms) both;
+}
+@keyframes rf-thinking-source-enter {
+  from {
+    opacity: 0;
+    scale: 0.85;
+  }
+}
+@keyframes rf-thinking-part-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes rf-thinking-part-unblur {
+  from {
+    filter: blur(4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-thinking-step-body,
+  .rf-thinking-step-source,
+  .rf-thinking-step-image {
+    animation: none;
+  }
+  .rf-thinking-steps::details-content,
+  .rf-thinking-timeline-content details::details-content {
+    transition: none !important;
+  }
+}

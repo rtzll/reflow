@@ -1,0 +1,11 @@
+html[data-rf-message-transition]::view-transition-group(*) {
+  animation-duration: 160ms;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+html[data-rf-message-transition]::view-transition-group(root),
+html[data-rf-message-transition]::view-transition-new(root) {
+  animation: none;
+}
+html[data-rf-message-transition]::view-transition-old(root) {
+  display: none;
+}

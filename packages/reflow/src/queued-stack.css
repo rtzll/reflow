@@ -1,0 +1,107 @@
+.rf-queue-wrap {
+  min-inline-size: 0;
+}
+.rf-queue-toggle {
+  display: block;
+  margin-inline-start: auto;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: var(--rf-item-radius);
+  background: transparent;
+  color: var(--rf-muted);
+  font: inherit;
+  font-size: var(--rf-text-caption);
+  cursor: pointer;
+}
+.rf-queue-toggle:hover {
+  background: var(--rf-hover);
+}
+.rf-queue {
+  --rf-queue-row: 44px;
+  --rf-queue-gap: var(--rf-stack-gap);
+  position: relative;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  isolation: isolate;
+}
+.rf-queue-wrap[data-expanded] .rf-queue,
+.rf-queue:focus-within,
+.rf-queue[data-dragging] {
+  --rf-queue-spacing: var(--rf-queue-gap);
+}
+@media (hover: hover) {
+  .rf-queue:hover {
+    --rf-queue-spacing: var(--rf-queue-gap);
+  }
+}
+.rf-queue > li {
+  display: flex;
+  box-sizing: border-box;
+  min-inline-size: 0;
+  block-size: var(--rf-queue-row);
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-panel-radius);
+  background: var(--rf-surface-2);
+  padding: 0 8px;
+  cursor: grab;
+  z-index: calc(3 - var(--rf-queue-depth));
+  scale: calc(1 - var(--rf-queue-depth) * var(--rf-stack-scale-step)) 1;
+  transition:
+    margin-block-start var(--rf-spring-moderate),
+    scale var(--rf-spring-moderate),
+    translate var(--rf-spring-fast);
+}
+.rf-queue > li + li {
+  margin-block-start: var(
+    --rf-queue-spacing,
+    calc(var(--rf-queue-peek, var(--rf-stack-peek)) - var(--rf-queue-row))
+  );
+}
+.rf-queue > li:nth-child(n + 4) {
+  --rf-queue-peek: 0px;
+  z-index: 0;
+}
+.rf-queue-wrap[data-expanded] .rf-queue > li,
+.rf-queue:focus-within > li,
+.rf-queue[data-dragging] > li {
+  scale: 1;
+  touch-action: none;
+}
+@media (hover: hover) {
+  .rf-queue:hover > li {
+    scale: 1;
+    touch-action: none;
+  }
+}
+.rf-queue > li[data-dragged] {
+  translate: 0 var(--rf-drag-offset);
+  z-index: 4;
+  cursor: grabbing;
+  transition: none;
+}
+.rf-queue-content {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rf-queue-actions {
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-queue > li {
+    transition: none;
+  }
+}
+
+.rf-queue[hidden] {
+  display: none;
+}

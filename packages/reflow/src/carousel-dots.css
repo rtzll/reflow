@@ -1,0 +1,85 @@
+.rf-carousel-dots {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  isolation: isolate;
+  position: relative;
+}
+.rf-carousel-dots button {
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 10;
+  padding: 6px;
+  border: 0;
+  border-radius: 9999px;
+  outline: none;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+/* On touch, each dot's button reaches the 24px minimum target; the dots stay small. */
+@media (pointer: coarse) {
+  .rf-carousel-dots button {
+    padding: 9px;
+  }
+}
+.rf-carousel-dots button:focus-visible {
+  box-shadow: 0 0 0 1px var(--rf-accent);
+}
+.rf-carousel-dot {
+  display: block;
+  position: relative;
+  width: 6px;
+  height: 6px;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--rf-fg), transparent 85%);
+  border-radius: 9999px;
+  transition: width var(--rf-spring-moderate);
+}
+.rf-carousel-dots [aria-current='true'] .rf-carousel-dot {
+  width: 24px;
+}
+.rf-carousel-dot > span {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--rf-fg), transparent 60%);
+  animation: rf-carousel-progress linear both;
+}
+/* Like the reference, hovering does not pause autoplay. Keyboard focus does:
+   moving content must stay stoppable for keyboard users (owner's decision). */
+.rf-carousel-dots:is(
+    [data-rf-autoplay]:not([data-rf-onscreen]),
+    [data-rf-paused],
+    :has(:focus-visible)
+  )
+  .rf-carousel-dot
+  > span {
+  animation-play-state: paused;
+}
+@keyframes rf-carousel-progress {
+  from {
+    transform: translateX(calc(6px - 100%));
+  }
+}
+[data-shape='sharp'] .rf-carousel-dots button,
+[data-shape='sharp'] .rf-carousel-dot,
+[data-shape='sharp'] .rf-carousel-dot > span,
+[data-shape='sharp'] .rf-carousel-dots > .rf-highlight {
+  border-radius: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-carousel-dot,
+  .rf-carousel-dot > span {
+    animation: none;
+    transition: none;
+  }
+  .rf-carousel-dots[data-rf-autoplay] .rf-carousel-dot > span {
+    transform: translateX(calc(6px - 100%));
+  }
+}
+.rf-carousel-dots > .rf-highlight {
+  background: var(--rf-hover);
+  border-radius: 9999px;
+}

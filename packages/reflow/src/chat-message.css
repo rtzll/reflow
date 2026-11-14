@@ -1,0 +1,188 @@
+.rf-chat-message {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: flex-start;
+  justify-self: start;
+  gap: 6px;
+  max-width: 80%;
+  color: var(--rf-fg);
+}
+.rf-chat-message[data-role='user'] {
+  align-items: flex-end;
+  align-self: flex-end;
+  justify-self: end;
+}
+.rf-chat-message[data-animate] {
+  animation: rf-message-enter var(--rf-spring-moderate) both;
+  transform-origin: bottom left;
+}
+.rf-chat-message[data-animate][data-role='user'] {
+  transform-origin: bottom right;
+}
+.rf-chat-body {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  padding-block: 8px;
+  font: var(--rf-text-subtitle) / var(--rf-leading-subtitle) var(--rf-font);
+}
+.rf-chat-message[data-role='user'] .rf-chat-body {
+  background: color-mix(in oklab, var(--rf-neutral-fill), var(--rf-bg) 45%);
+  border-radius: var(--rf-radius);
+  padding-inline: 14px;
+  text-wrap: pretty;
+}
+.rf-chat-message[data-size='compact'] .rf-chat-body {
+  padding-block: 6px;
+}
+.rf-chat-message[data-role='user'][data-size='compact'] .rf-chat-body {
+  padding-inline: 12px;
+}
+.rf-chat-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--rf-muted);
+  padding-inline: 4px;
+  user-select: none;
+  font: var(--rf-text-caption) / var(--rf-leading-caption) var(--rf-font);
+}
+.rf-chat-time {
+  font-variant-numeric: tabular-nums;
+}
+.rf-chat-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.rf-chat-actions .rf-button {
+  --rf-control-height: 24px;
+  --rf-icon-size: 13px;
+}
+.rf-chat-actions
+  .rf-button:not(:disabled, [aria-disabled='true']):hover
+  :is(.rf-button-icon > svg, .rf-button-label > svg) {
+  stroke-width: 1.5;
+}
+@media (hover: hover) {
+  .rf-chat-meta {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 150ms;
+  }
+  .rf-chat-message:is(:hover, :focus-within) .rf-chat-meta {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+/* System: an event in the conversation, such as a model switch, as a quiet
+   centred caption between hairlines. It spans the transcript, fades in
+   where it lands, and keeps its time and actions in view. */
+.rf-chat-message[data-role='system'] {
+  align-items: stretch;
+  align-self: stretch;
+  justify-self: stretch;
+  max-width: none;
+  transform-origin: center;
+}
+.rf-chat-system {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding-block: 8px;
+  color: var(--rf-muted);
+  font: var(--rf-text-caption) / var(--rf-leading-caption) var(--rf-font);
+  text-align: center;
+}
+.rf-chat-system::before,
+.rf-chat-system::after {
+  content: '';
+  flex: 1;
+  min-inline-size: 16px;
+  border-block-start: 1px solid color-mix(in oklab, var(--rf-border) 70%, transparent);
+}
+.rf-chat-system-icon {
+  display: inline-flex;
+  flex: none;
+}
+.rf-chat-system-icon > svg {
+  inline-size: 14px;
+  block-size: 14px;
+}
+.rf-chat-system-text {
+  min-inline-size: 0;
+  text-wrap: balance;
+}
+.rf-chat-system .rf-chat-time::before {
+  content: '·';
+  margin-inline-end: 8px;
+}
+.rf-chat-message[data-role='system'][data-animate] {
+  animation-name: rf-message-fade;
+}
+@keyframes rf-message-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes rf-message-enter {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+    scale: 0.96;
+  }
+}
+.rf-chat-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-start;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.rf-chat-message[data-role='user'] .rf-chat-attachments {
+  justify-content: flex-end;
+}
+.rf-chat-thumb {
+  position: relative;
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  overflow: hidden;
+  background: var(--rf-neutral-fill);
+  outline: 1px solid rgba(0, 0, 0, 0.1);
+  outline-offset: -1px;
+  border-radius: var(--rf-radius);
+}
+[data-theme='dark'] .rf-chat-thumb {
+  outline-color: rgba(255, 255, 255, 0.1);
+}
+.rf-chat-thumb img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.rf-chat-thumb-glyph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--rf-muted);
+}
+.rf-chat-thumb a {
+  position: absolute;
+  inset: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-chat-message[data-animate],
+  .rf-chat-meta {
+    animation: none;
+    transition: none;
+  }
+}

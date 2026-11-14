@@ -1,0 +1,366 @@
+.rf-composer {
+  --rf-composer-edge: light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 18%));
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border: 0;
+  border-radius: var(--rf-panel-radius);
+  background: var(--rf-surface-2);
+  cursor: text;
+  box-shadow:
+    inset 0 1px 0 0 light-dark(transparent, rgb(255 255 255 / 1%)),
+    inset 0 0 0 1px light-dark(transparent, rgb(255 255 255 / 2%)),
+    0 0 0 1px light-dark(rgb(0 0 0 / 6%), transparent),
+    0 1px 1px -0.5px var(--rf-composer-edge);
+  transition:
+    box-shadow var(--rf-fast),
+    color var(--rf-fast);
+}
+/* The edge is one 1px ring that recolors in place, so hover and focus raise contrast without thickening the stroke. */
+@media (hover: hover) {
+  .rf-composer:hover:not(:has(textarea:disabled, textarea:focus-visible)) {
+    box-shadow:
+      0 0 0 1px var(--rf-border),
+      0 1px 1px -0.5px var(--rf-composer-edge);
+  }
+}
+.rf-composer:has(textarea:focus-visible) {
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--rf-fg) 20%, transparent),
+    0 1px 1px -0.5px var(--rf-composer-edge);
+}
+.rf-composer-field {
+  position: relative;
+  min-width: 0;
+  font: 16px / 24px var(--rf-font);
+}
+.rf-composer .rf-textarea {
+  display: inline-block;
+  vertical-align: baseline;
+  width: 100%;
+  box-shadow: none;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  max-height: 12em;
+  padding: 8px;
+  resize: none;
+  font-size: var(--rf-text-subtitle);
+  line-height: var(--rf-leading-subtitle);
+  cursor: text;
+}
+.rf-composer .rf-textarea:hover:not(:disabled) {
+  background: transparent;
+}
+.rf-composer-send {
+  gap: normal;
+}
+.rf-composer-send svg {
+  width: 19px;
+  height: 19px;
+}
+.rf-composer[data-size='compact'] .rf-composer-send svg {
+  width: 15px;
+  height: 15px;
+}
+.rf-composer-suggestion {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  padding: 8px;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-subtitle);
+  line-height: var(--rf-leading-subtitle);
+  font-variation-settings: var(--rf-weight-normal);
+  pointer-events: none;
+}
+.rf-composer-suggestion > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+}
+.rf-composer-suggestion > span > span {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.rf-composer-suggestion kbd {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  height: 18px;
+  padding-inline: 4px;
+  transform: translateY(-1px);
+  border: 1px solid var(--rf-border);
+  border-radius: 5px;
+  background: var(--rf-bg);
+  color: var(--rf-muted);
+  font: var(--rf-text-micro) / var(--rf-leading-micro) var(--rf-font);
+}
+.rf-composer[data-size='compact'] .rf-composer-suggestion kbd {
+  height: 16px;
+}
+.rf-composer-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.rf-composer-send,
+.rf-composer-right-actions {
+  margin-inline-start: auto;
+}
+.rf-composer-right-actions + .rf-composer-send {
+  margin-inline-start: 0;
+}
+.rf-composer-error {
+  color: var(--rf-danger);
+  margin: 2px 8px;
+}
+
+.rf-attachment-image,
+.rf-attachment-file {
+  width: var(--rf-file-preview-size, 80px);
+  height: var(--rf-file-preview-size, 80px);
+  object-fit: cover;
+  border-radius: max(0px, calc(var(--rf-radius) - 2px));
+}
+.rf-attachment-file {
+  display: grid;
+  place-items: center;
+  background: var(--rf-muted-bg);
+  color: var(--rf-muted);
+  font-size: 12px;
+}
+.rf-composer .rf-textarea {
+  max-height: calc(var(--rf-composer-max-rows, 8) * 20px + 12px);
+}
+/* The prompts collapse like the reference: the region opens and closes its height with the moderate spring while the divider holds. */
+.rf-composer-suggestions-region {
+  display: grid;
+  flex: none;
+  grid-template-rows: 0fr;
+  margin: -4px -8px 0;
+  opacity: 0;
+  transition:
+    grid-template-rows var(--rf-spring-moderate),
+    opacity var(--rf-spring-moderate);
+}
+.rf-composer-suggestions-region[data-open] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.rf-composer-suggestions-region > div {
+  min-height: 0;
+  overflow: hidden;
+}
+.rf-composer-suggestions {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  margin-top: 8px;
+  padding: 6px 6px 0;
+  border-top: 1px solid color-mix(in oklab, var(--rf-border) 60%, transparent);
+  isolation: isolate;
+}
+.rf-composer-suggestions > [data-rf-hover-layer] {
+  border-radius: var(--rf-item-radius);
+  background: var(--rf-hover);
+}
+.rf-composer-suggestions [role='option'] {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding-inline: 10px;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-subtitle);
+  line-height: var(--rf-leading-subtitle);
+  font-variation-settings: var(--rf-weight-normal);
+  cursor: pointer;
+  transition: color var(--rf-fast);
+}
+.rf-composer[data-size='compact'] .rf-composer-suggestions [role='option'] {
+  height: 28px;
+  padding-inline: 8px;
+}
+.rf-composer-suggestions [role='option'][data-highlighted] {
+  color: var(--rf-fg);
+}
+.rf-composer-suggestions [role='option'][aria-disabled='true'] {
+  pointer-events: none;
+}
+.rf-composer-suggestions [role='option'] > span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding-block: 4px;
+  margin-block: -4px;
+  text-box: trim-both cap alphabetic;
+}
+.rf-composer-suggestions [role='option'] > svg {
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: opacity var(--rf-fast);
+}
+.rf-composer-suggestions [role='option'] > svg[data-idle] {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-composer-suggestions-region {
+    transition: none;
+  }
+}
+
+/* Attached files: square thumbnails above the field, with a remove badge revealed on tile hover. */
+.rf-composer-files-region {
+  display: grid;
+  flex: none;
+  grid-template-rows: 0fr;
+  margin: 0;
+  opacity: 0;
+  transition:
+    grid-template-rows var(--rf-spring-moderate),
+    opacity var(--rf-spring-moderate);
+}
+.rf-composer-files-region[data-open] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.rf-composer-files-region > div {
+  min-height: 0;
+  overflow: hidden;
+}
+.rf-composer-files-region:not([data-open]) {
+  margin-block-end: -4px;
+}
+.rf-composer-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0 0 4px;
+}
+.rf-composer-files li {
+  position: relative;
+  flex: none;
+  cursor: default;
+  transition:
+    opacity var(--rf-spring-fast),
+    scale var(--rf-spring-fast);
+}
+@starting-style {
+  .rf-composer-files li {
+    opacity: 0;
+    scale: 0.9;
+  }
+}
+.rf-composer-files li[data-exiting] {
+  opacity: 0;
+  scale: 0.9;
+  transition-duration: var(--rf-exit-fast);
+  transition-timing-function: linear;
+  pointer-events: none;
+}
+.rf-file-thumb {
+  position: relative;
+  flex: none;
+  overflow: hidden;
+  width: var(--rf-file-preview-size, 80px);
+  height: var(--rf-file-preview-size, 80px);
+  border-radius: max(0px, calc(var(--rf-panel-radius) - 8px));
+  background: light-dark(#e5e5e5, #525252);
+  outline: 1px solid light-dark(rgb(0 0 0 / 10%), rgb(255 255 255 / 10%));
+  outline-offset: -1px;
+}
+.rf-file-thumb img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.rf-file-thumb > div {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--rf-muted);
+}
+.rf-file-thumb svg {
+  width: max(16px, calc(var(--rf-file-preview-size, 80px) * 0.35));
+  height: max(16px, calc(var(--rf-file-preview-size, 80px) * 0.35));
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.rf-composer-file-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 9999px;
+  background: #171717;
+  color: #fff;
+  cursor: pointer;
+  outline: none;
+  transition: opacity var(--rf-fast);
+}
+.rf-composer-file-remove::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+}
+.rf-composer-file-remove svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.rf-composer-file-remove:focus-visible {
+  box-shadow: 0 0 0 1px var(--rf-accent);
+}
+@media (hover: hover) {
+  .rf-composer-file-remove {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .rf-composer-files li:hover .rf-composer-file-remove,
+  .rf-composer-file-remove:focus-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+/* Dropping files: the edge ring takes the accent. */
+.rf-composer[data-dragover] {
+  box-shadow:
+    0 0 0 1px var(--rf-accent),
+    0 1px 1px -0.5px var(--rf-composer-edge);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-composer-files-region,
+  .rf-composer-files li {
+    transition: none;
+  }
+}

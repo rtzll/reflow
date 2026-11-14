@@ -1,0 +1,73 @@
+.rf-thinking {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px var(--rf-control-padding);
+  color: var(--rf-muted);
+}
+.rf-thinking > svg {
+  flex: none;
+}
+.rf-thinking > svg path {
+  animation: rf-thinking-morph 6s ease-in-out infinite;
+}
+.rf-thinking-words {
+  display: inline-grid;
+  overflow: hidden;
+}
+.rf-thinking-words > span {
+  grid-area: 1 / 1;
+}
+.rf-thinking-sizer {
+  visibility: hidden;
+}
+.rf-thinking-word {
+  background: linear-gradient(100deg, var(--rf-muted) 24%, var(--rf-fg) 50%, var(--rf-muted) 76%)
+    100% 0 / 260% 100%;
+  background-clip: text;
+  color: transparent;
+  animation:
+    rf-thinking-enter 240ms ease-out,
+    rf-thinking-shimmer 1.5s linear infinite;
+}
+@keyframes rf-thinking-morph {
+  0%,
+  100% {
+    d: path(
+      'M 12 8 C 14.21 8 16 9.79 16 12 C 16 14.21 14.21 16 12 16 C 9.79 16 8 14.21 8 12 C 8 9.79 9.79 8 12 8 Z'
+    );
+  }
+  25%,
+  75% {
+    d: path(
+      'M 12 12 C 14 8.5 19 8.5 19 12 C 19 15.5 14 15.5 12 12 C 10 8.5 5 8.5 5 12 C 5 15.5 10 15.5 12 12 Z'
+    );
+  }
+  50% {
+    d: path(
+      'M 12 16 C 14.21 16 16 14.21 16 12 C 16 9.79 14.21 8 12 8 C 9.79 8 8 9.79 8 12 C 8 14.21 9.79 16 12 16 Z'
+    );
+  }
+}
+@keyframes rf-thinking-enter {
+  from {
+    opacity: 0;
+    translate: 0 65%;
+  }
+}
+@keyframes rf-thinking-shimmer {
+  to {
+    background-position: 0% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-thinking > svg path,
+  .rf-thinking-word {
+    animation: none;
+    transition: none;
+  }
+  .rf-thinking-word {
+    background: none;
+    color: var(--rf-muted);
+  }
+}
