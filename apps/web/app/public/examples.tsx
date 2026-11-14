@@ -184,6 +184,7 @@ function GallerySidebar(handle: Handle<{ avatar: string }>) {
               ...Array.from({ length: drafts }, (_, i) => ({
                 label: i === 0 ? 'Untitled thread' : `Untitled thread ${i + 1}`,
                 href: `#draft-${i + 1}`,
+                icon: <span class="rf-sidebar-dot example-draft-dot" />,
               })).reverse(),
               ...galleryThreads,
             ].map((item) => ({

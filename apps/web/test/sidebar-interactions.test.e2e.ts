@@ -4,6 +4,29 @@ import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
 import { open, router } from './showcase-router.ts'
 
+it('aligns newly created gallery threads with the existing threads', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await open(page, '/?theme=dark')
+  const sidebar = page.locator('.site-gallery [data-component="sidebar"]')
+  const create = sidebar.getByRole('link', { name: 'New thread', exact: true })
+  await create.click()
+  await create.click()
+  const existing = sidebar.getByRole('link', { name: 'Sidebar component height in demo' })
+  const title = existing.locator('.rf-sidebar-label')
+  const left = (await title.boundingBox())!.x
+  for (const name of ['Untitled thread', 'Untitled thread 2']) {
+    const draft = sidebar.getByRole('link', { name, exact: true })
+    await expect(draft.locator('.rf-sidebar-icon .rf-sidebar-dot')).toHaveCSS(
+      'border-top-style',
+      'dashed',
+    )
+    expect((await draft.locator('.rf-sidebar-label').boundingBox())!.x).toBe(left)
+  }
+  await expect(
+    sidebar.getByRole('link', { name: 'Untitled thread 2', exact: true }),
+  ).toHaveAttribute('aria-current', 'page')
+})
+
 it('keeps the focused Sidebar frame in place as the inset fills it', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1280, height: 1000 })

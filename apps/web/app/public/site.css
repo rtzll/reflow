@@ -549,6 +549,9 @@ html[data-density='compact'] .site-nav a {
   --rf-sb-row: 28px;
   --rf-sb-sub: 24px;
 }
+.example-gallery-sidebar .example-draft-dot {
+  border-style: dashed;
+}
 .example-gallery-sidebar .rf-sidebar-row > img {
   object-fit: cover;
 }
