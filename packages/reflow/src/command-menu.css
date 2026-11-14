@@ -1,0 +1,430 @@
+.rf-command {
+  box-sizing: border-box;
+  width: min(100%, 384px);
+  min-width: 0;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-panel-radius);
+  color: var(--rf-fg);
+  background: var(--rf-surface-3);
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+}
+
+.rf-command-dialog {
+  display: contents;
+}
+.rf-command-dialog > .rf-button:has(.rf-command-shortcut) {
+  padding-inline-end: 12px;
+}
+.rf-command-dialog > .rf-dialog[data-position='top'] {
+  width: min(540px, calc(100% - 32px));
+  max-height: min(440px, 76dvh);
+  margin-block-start: max(12dvh, calc(50dvh - 220px));
+  padding: 0;
+  overflow: hidden;
+  background: light-dark(white, #303030);
+}
+.rf-command-dialog > .rf-dialog > .rf-dialog-header {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.rf-command-dialog > .rf-dialog > .rf-dialog-body {
+  margin: 0;
+}
+
+.rf-command[data-in-dialog] {
+  width: 100%;
+  max-block-size: min(440px, 76dvh);
+  background: light-dark(white, #303030);
+  box-shadow: none;
+}
+
+.rf-command {
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 520px);
+  max-block-size: 360px;
+  overflow: hidden;
+  border: 0;
+  box-shadow:
+    inset 0 1px light-dark(transparent, rgb(255 255 255 / 2%)),
+    inset 0 0 0 1px light-dark(transparent, rgb(255 255 255 / 2%)),
+    0 0 0 1px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 12%)),
+    0 1px 1px -0.5px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 18%)),
+    0 3px 3px -1.5px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 18%));
+}
+
+.rf-command-frame {
+  max-block-size: inherit;
+  overflow: hidden;
+}
+.rf-command-frame[data-rf-ready] {
+  transition: height var(--rf-spring-moderate);
+}
+.rf-command-column {
+  display: flex;
+  flex-direction: column;
+  max-block-size: inherit;
+  min-block-size: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-command-frame[data-rf-ready] {
+    transition: none;
+  }
+}
+
+.rf-command-search {
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: 10px;
+  block-size: 48px;
+  padding-inline: 16px;
+  color: var(--rf-fg);
+}
+
+.rf-command-search input {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  background: transparent;
+  color: var(--rf-fg);
+  font: inherit;
+  font-size: var(--rf-text-subtitle, 14px);
+  line-height: 24px;
+}
+
+.rf-command-search input::placeholder {
+  color: var(--rf-muted);
+  opacity: 1;
+}
+.rf-command-search > svg {
+  flex: none;
+  color: var(--rf-muted);
+  stroke-width: 1.5;
+  transition:
+    color var(--rf-spring-fast),
+    stroke-width var(--rf-spring-fast);
+}
+.rf-command-search:focus-within > svg {
+  color: var(--rf-fg);
+  stroke-width: 2;
+}
+
+[data-density='compact'] .rf-command-search {
+  gap: 8px;
+  block-size: 40px;
+  padding-inline: 12px;
+}
+[data-density='compact'] .rf-command-search input {
+  line-height: 20px;
+}
+
+.rf-command-scroll {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-block-size: 0;
+  /* Room for the header hairline, drawn by ::before so it can strengthen.
+     The scroll root clips its overflow, so the line cannot sit on a border. */
+  padding-block-start: 1px;
+  --rf-scroll-divider-size: 48px;
+}
+/* Scroll dividers, as in the reference: the top hairline closes the header
+   and strengthens once rows pass under it; the bottom hairline stands while
+   rows continue below and goes at the end, which is why the footer draws no
+   line of its own. Without a footer the list is the panel's last child and
+   that line would double the panel edge, so it is dropped. The lines ride the
+   scroll root because the viewport's fade mask would erase them.
+   This follows the reference's intent, not its pixels: there the stronger
+   line sits on the root's border, which the root's overflow clip hides, so
+   its header line never strengthens. Keep the strengthening. */
+.rf-command-scroll::before,
+.rf-command-scroll::after {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  inset-inline: 0;
+  block-size: 1px;
+  pointer-events: none;
+}
+.rf-command-scroll::before {
+  inset-block-start: 0;
+  background: color-mix(in oklab, var(--rf-border) 60%, transparent);
+}
+.rf-command-scroll::after {
+  inset-block-end: 0;
+  background: var(--rf-border);
+  opacity: 0;
+}
+@keyframes rf-scroll-divider-start {
+  to {
+    background: var(--rf-border);
+  }
+}
+@keyframes rf-scroll-divider-end {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@supports (timeline-scope: --rf-command-scroller) {
+  .rf-command-scroll {
+    timeline-scope: --rf-command-scroller;
+  }
+  .rf-command-scroll > .rf-scroll-viewport {
+    scroll-timeline-name: --rf-command-scroller;
+  }
+  /* Keep the timeline separate, as in systems.css: CSS transformers can emit
+     a shorthand timeline syntax that browsers do not yet support. */
+  .rf-command-scroll::before {
+    --rf-scroll-divider-animation: rf-scroll-divider-start 1ms linear both;
+    animation: var(--rf-scroll-divider-animation);
+    animation-timeline: --rf-command-scroller;
+    animation-range: 0 var(--rf-scroll-divider-size);
+  }
+  .rf-command-scroll::after {
+    --rf-scroll-divider-animation: rf-scroll-divider-end 1ms linear both;
+    animation: var(--rf-scroll-divider-animation);
+    animation-timeline: --rf-command-scroller;
+    animation-range: calc(100% - var(--rf-scroll-divider-size)) 100%;
+  }
+  .rf-command-scroll:last-child::after {
+    content: none;
+  }
+}
+.rf-command-scroll > .rf-scroll-viewport {
+  flex: 1 1 auto;
+  block-size: auto;
+  min-block-size: 0;
+}
+.rf-command-scroll > .rf-scroll-viewport > .rf-scroll-content {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100%;
+}
+
+.rf-command-results {
+  position: relative;
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  box-sizing: border-box;
+  gap: 4px;
+  padding: 4px;
+  outline: none;
+}
+.rf-command-results[data-empty] {
+  justify-content: center;
+  padding: 0;
+}
+.rf-command-results > [role='group'] {
+  display: flex;
+  flex-direction: column;
+}
+
+.rf-command-filters {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px 8px;
+}
+.rf-command-tabs {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  min-width: 0;
+}
+[data-density='compact'] .rf-command-filters {
+  gap: 4px;
+  padding: 0 8px 6px;
+}
+
+.rf-command-controls {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  margin-inline-start: auto;
+}
+.rf-command-controls[data-standalone] {
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0 10px 8px;
+}
+[data-density='compact'] .rf-command-controls[data-standalone] {
+  padding: 0 8px 6px;
+}
+.rf-command-controls [role='combobox'] {
+  width: auto;
+  min-width: 0;
+}
+/* Controls hug their content: a select drops the field width it keeps in forms. */
+.rf-command-controls .rf-select {
+  flex: none;
+}
+.rf-command-controls .rf-select .rf-picker-trigger {
+  inline-size: auto;
+  min-inline-size: 0;
+}
+
+.rf-command-results [data-rf-hover-layer] {
+  border-radius: var(--rf-item-radius);
+  background: var(--rf-hover);
+}
+
+.rf-command-group-label {
+  display: flex;
+  flex: none;
+  align-items: center;
+  block-size: 28px;
+  padding-inline: 8px;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption);
+  line-height: var(--rf-leading-caption);
+}
+[data-density='compact'] .rf-command-group-label {
+  block-size: 24px;
+  padding-inline: 6px;
+}
+
+.rf-command-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  min-height: var(--rf-control-height);
+  padding: 4px 8px;
+  border-radius: var(--rf-item-radius);
+  cursor: pointer;
+}
+
+.rf-command-option {
+  z-index: 1;
+  flex: none;
+  block-size: var(--rf-control-height);
+  padding-block: 0;
+  color: var(--rf-muted);
+  user-select: none;
+  transition: color var(--rf-spring-fast);
+}
+.rf-command-option[aria-disabled='true'] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.rf-command-option[aria-selected='true'] {
+  color: var(--rf-fg);
+}
+.rf-command-option[aria-selected='true']:not([data-rf-hovered]) {
+  background: var(--rf-hover);
+}
+.rf-command-option-text {
+  display: flex;
+  flex: 1;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+.rf-command-option-icon {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  width: var(--rf-icon-size);
+}
+.rf-command-option-icon > svg {
+  width: 100%;
+  height: auto;
+  transition:
+    color var(--rf-spring-fast),
+    stroke-width var(--rf-spring-fast);
+}
+.rf-command-option[aria-selected='true'] .rf-command-option-icon > svg {
+  stroke-width: 2;
+}
+/* As in the reference: labels truncate, trimmed to the cap height, with padding and a negative margin so the clip keeps ascenders. */
+.rf-command-option-text > * {
+  min-width: 0;
+  padding-block: 4px;
+  margin-block: -4px;
+  overflow: hidden;
+  text-box: trim-both cap alphabetic;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rf-command-option-text > * + * {
+  color: var(--rf-muted);
+}
+.rf-command-shortcut {
+  display: inline-flex;
+  flex: none;
+  gap: 2px;
+  align-items: center;
+}
+.rf-command-shortcut kbd {
+  display: grid;
+  box-sizing: border-box;
+  place-items: center;
+  min-inline-size: 20px;
+  block-size: 20px;
+  padding-inline: 4px;
+  border-radius: 5px;
+  background: var(--rf-hover);
+  color: var(--rf-muted);
+  font: var(--rf-text-micro) / var(--rf-leading-micro) var(--rf-font);
+  white-space: nowrap;
+}
+[data-density='compact'] .rf-command-shortcut kbd {
+  min-inline-size: 16px;
+  block-size: 16px;
+}
+
+.rf-command-empty {
+  margin: 0;
+  padding: 24px 12px;
+  color: var(--rf-muted);
+  text-align: center;
+}
+.rf-command-footer {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 16px;
+  block-size: 40px;
+  padding-inline: 16px;
+  overflow: hidden;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption);
+  line-height: var(--rf-leading-caption);
+}
+.rf-command-footer > span {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+}
+.rf-command-footer > .rf-command-footer-action {
+  flex: 0 1 auto;
+  min-inline-size: 0;
+  margin-inline-start: auto;
+  color: var(--rf-fg);
+}
+.rf-command-footer-action > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+[data-density='compact'] .rf-command-footer {
+  gap: 12px;
+  block-size: 32px;
+  padding-inline: 12px;
+}
