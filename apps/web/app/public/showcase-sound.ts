@@ -345,6 +345,19 @@ export function enhanceShowcaseSound() {
     if (event.target instanceof Element && event.target.closest('.site-preview-stage'))
       play('tap', { emphasis: 'subtle' })
   })
+  document.addEventListener('reflow:queue-reorder', (event) => {
+    if (event.target instanceof Element && event.target.closest('.site-preview-stage')) play('select', { emphasis: 'subtle' })
+  })
+  document.addEventListener('click', (event) => {
+    if (!(event.target instanceof Element)) return
+    const button = event.target.closest<HTMLButtonElement>('.site-preview-stage .rf-queue-wrap button')
+    if (!button || button.disabled) return
+    const action = button.dataset.queueAction
+    if (button.matches('.rf-queue-toggle')) play(button.getAttribute('aria-expanded') === 'true' ? 'close' : 'open', { emphasis: 'subtle' })
+    else if (action === 'up' || action === 'down') play('select', { emphasis: 'subtle', direction: action === 'up' ? 'back' : 'forward' })
+    else if (action === 'remove') play('close', { emphasis: 'subtle' })
+    else if (action === 'send') play('tap', { emphasis: 'subtle' })
+  }, { capture: true })
   document.addEventListener('click', (event) => {
     if (event.target instanceof Element && event.target.closest('.site-preview-stage .rf-composer-send[aria-label="Stop response"]:not(:disabled)'))
       play('close', { emphasis: 'subtle' })
