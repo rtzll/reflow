@@ -45,34 +45,40 @@ html[data-density='compact'] :is(.site-layout, .site-demo) {
   --site-title-size: 24px;
 }
 
-.site-layout *,
-.site-demo * {
-  box-sizing: border-box;
-}
-.site-layout [hidden],
-.site-demo [hidden] {
-  display: none !important;
-}
-.site-layout :where(h1, h2, p, ul, pre),
-.site-demo :where(h1, p) {
-  margin: 0;
+/* The page's resets sit in the base layer, which document.tsx orders before
+   Reflow's layer, so component styles keep winning over them. */
+@layer base {
+  .site-layout *,
+  .site-demo * {
+    box-sizing: border-box;
+  }
+  .site-layout [hidden],
+  .site-demo [hidden] {
+    display: none !important;
+  }
+  .site-layout :where(h1, h2, p, ul, pre),
+  .site-demo :where(h1, p) {
+    margin: 0;
+  }
+
+  .site-layout :where(a:not(.rf-button)),
+  .site-demo :where(a:not(.rf-button)) {
+    color: inherit;
+    text-decoration: none;
+  }
+  .site-layout :where(:focus-visible),
+  .site-demo :where(:focus-visible) {
+    outline: 1px solid var(--rf-accent);
+    outline-offset: 2px;
+  }
 }
 
-.site-layout :where(a:not(.rf-button)),
-.site-demo :where(a:not(.rf-button)) {
-  color: inherit;
-  text-decoration: none;
-}
+/* Unlayered on purpose: controls take the page font over Reflow's. */
 .site-layout button,
 .site-demo button,
 .site-layout select,
 .site-layout input {
   font-family: inherit;
-}
-.site-layout :where(:focus-visible),
-.site-demo :where(:focus-visible) {
-  outline: 1px solid var(--rf-accent);
-  outline-offset: 2px;
 }
 
 .site-layout {
@@ -2497,7 +2503,7 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
   height: 320px;
 }
 /* The stage frames the conversation, so the layout adds no edges of its own. */
-.doc-composer-preview .rf-chat-transcript {
+.doc-composer-preview:not([data-empty]) .rf-chat-transcript {
   padding-block: 0 12px;
 }
 .doc-composer-preview .rf-chat-layout-composer {
@@ -3163,7 +3169,7 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
 .example-queue-chat .rf-chat-layout {
   --rf-chat-gutter: 0px;
 }
-.example-queue-chat .rf-chat-transcript {
+.example-queue-chat .rf-chat-layout:not([data-empty]) .rf-chat-transcript {
   padding-block: 0 12px;
 }
 .example-queue-chat .rf-chat-layout-composer {

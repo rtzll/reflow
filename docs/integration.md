@@ -61,7 +61,7 @@ Resolve the CSS package export through that asset server in your document action
 const libraryStyles = await assets.getHref(import.meta.resolve('@rtzll/reflow/styles.css'))
 ```
 
-Render `<link rel="stylesheet" href={libraryStyles} />` in the document head, before your application stylesheet. Serve the exported stylesheet through the asset server so its relative CSS imports resolve too.
+Render `<link rel="stylesheet" href={libraryStyles} />` in the document head, before your application stylesheet. Serve the exported stylesheet through the asset server so its relative CSS imports resolve too. Reflow's rules sit in the `reflow` cascade layer, so your CSS and `css()` styles override them; keep resets in a layer before it, as [customization](customization.md#cascade-layers) shows.
 
 ## Render and hydrate
 

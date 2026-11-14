@@ -42,6 +42,9 @@ export function Document(handle: Handle<DocumentProps>) {
         <head>
           <meta charSet="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
+          {/* Names the layers before any stylesheet does: the page's resets
+              (base) sit under Reflow, and Remix's css() styles (rmx) above it. */}
+          <style>{'@layer base, reflow, rmx;'}</style>
           <meta name="color-scheme" content="light dark" />
           <meta name="description" content="Fluid components for Remix." />
           <link rel="icon" href={assets.favicon} type="image/svg+xml" />

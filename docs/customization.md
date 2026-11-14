@@ -2,6 +2,36 @@
 
 Load `@rtzll/reflow/styles.css` first, then your application CSS. Reflow uses inherited CSS variables and data attributes; no theme provider or Tailwind setup is required.
 
+## Cascade layers
+
+Every Reflow rule sits in the `reflow` [cascade layer](https://developer.mozilla.org/en-US/docs/Web/CSS/@layer). Your CSS overrides it without needing a more specific selector:
+
+- Styles from Remix's `css()`, such as `<Button mix={css({ paddingInline: '20px' })}>`, sit in Remix's `rmx` layer, which comes after `reflow` when Reflow's stylesheet is linked in the head.
+- CSS outside any layer always beats layered CSS, so your ordinary stylesheets win too.
+
+That second point also applies to broad resets. An unlayered `button { padding: 0 }` or `a { color: inherit }` now beats Reflow's component styles. Put resets and base styles in a layer before `reflow`, and name the order once, before any stylesheet link:
+
+```tsx
+<head>
+  <style>{'@layer base, reflow, rmx, app;'}</style>
+  <link rel="stylesheet" href={libraryStyles} />
+  <link rel="stylesheet" href={appStyles} />
+</head>
+```
+
+```css
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  :where(a) {
+    color: inherit;
+  }
+}
+```
+
+Layers keep the order in which a page first names them, which is why the statement comes first. The showcase does the same in its [document](../apps/web/app/document.tsx) and [stylesheet](../apps/web/app/public/site.css).
+
 ## Appearance
 
 Set attributes on the document's `<html>` element for app-wide defaults, or on a container for a local example:
