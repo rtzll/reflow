@@ -23,3 +23,25 @@ it('resizes the gallery conversation and sources with the keyboard and pointer',
   await separator.press('End')
   await expect(separator).toHaveAttribute('aria-valuenow', '75')
 })
+
+it('lists each cited source in the same order as the conversation', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  for (const [url, selector] of [
+    ['/', '[data-component="chat-message"]'],
+    ['/docs/resizable', '#playground'],
+  ]) {
+    await open(page, url)
+    const example = page.locator(selector)
+    const citations = example.getByRole('link', { name: /^Source \d+:/ })
+    const sources = example.getByRole('region', { name: 'Sources' }).getByRole('link')
+    await expect(citations).toHaveCount(2)
+    await expect(sources).toHaveCount(2)
+    for (const index of [0, 1]) {
+      await expect(citations.nth(index)).toHaveText(String(index + 1))
+      await expect(sources.nth(index)).toHaveAttribute(
+        'href',
+        (await citations.nth(index).getAttribute('href'))!,
+      )
+    }
+  }
+})

@@ -1,6 +1,17 @@
-import { ChatMessage, Citation, Icon, Resizable } from '@rtzll/reflow'
+import { ChatMessage, Citation, Resizable } from '@rtzll/reflow'
 import type { Handle } from 'remix/component'
 import { citationSources } from './citation-example.tsx'
+
+const references = [
+  {
+    claim: 'Dieter Rams argued for making a product as simple as possible.',
+    source: citationSources[0]!,
+  },
+  {
+    claim: 'Don Norman emphasized making possible actions easy to discover.',
+    source: citationSources[1]!,
+  },
+]
 
 export function ResizableDemo(handle: Handle<{ orientation?: 'horizontal' | 'vertical' }>) {
   return () => (
@@ -13,22 +24,15 @@ export function ResizableDemo(handle: Handle<{ orientation?: 'horizontal' | 'ver
       max={75}
       first={
         <div class="example-chat-gallery">
-          <ChatMessage role="system" animate={false} icon={<Icon name="clock" />}>
-            Conversation resumed
-          </ChatMessage>
           <ChatMessage role="user" animate={false}>
-            What does “good design” actually mean?
+            What makes a product easy to use?
           </ChatMessage>
           <ChatMessage role="assistant" animate={false}>
-            Mostly that you stop noticing it.
-            <Citation index={1} sources={citationSources[0]!} /> It lets you do what you came to do,
-            and it feels right while you do it.
-          </ChatMessage>
-          <ChatMessage role="user" animate={false}>
-            So function over form?
-          </ChatMessage>
-          <ChatMessage role="assistant" animate={false}>
-            Something that feels good to use is, in a real sense, working better.
+            {references.map(({ claim, source }, index) => (
+              <p key={source.href}>
+                {claim} <Citation index={index + 1} sources={source} />
+              </p>
+            ))}
           </ChatMessage>
         </div>
       }
@@ -36,7 +40,7 @@ export function ResizableDemo(handle: Handle<{ orientation?: 'horizontal' | 'ver
         <section class="example-split-sources" aria-label="Sources">
           <h3>Sources</h3>
           <ol>
-            {citationSources.map((source) => (
+            {references.map(({ source }) => (
               <li key={source.href}>
                 <a href={source.href}>{source.title}</a>
               </li>

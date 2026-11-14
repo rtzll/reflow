@@ -45,6 +45,9 @@
   display: grid;
   gap: 8px;
 }
+.example-chat-gallery .rf-chat-body p + p {
+  margin-block-start: 8px;
+}
 .example-chat-thread {
   width: min(100%, 568px);
   display: grid;
