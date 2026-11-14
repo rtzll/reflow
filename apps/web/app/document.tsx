@@ -12,11 +12,17 @@ interface DocumentProps {
   assets: Awaited<ReturnType<typeof getPageAssets>>
   settings: ReturnType<typeof readSettings>
   title: string
+  /** The requested page; link previews need absolute URLs. */
+  url: URL
 }
+
+const description = 'Fluid components for Remix.'
 
 export function Document(handle: Handle<DocumentProps>) {
   return () => {
-    const { assets, children, settings, title } = handle.props
+    const { assets, children, settings, title, url } = handle.props
+    // Preference parameters only change the look, so the shared link drops them.
+    const pageUrl = new URL(url.pathname, url.origin).href
     const customFont = settings.font.startsWith('google:')
       ? fontCatalog.find((font) => font.n === settings.font.slice(7))
       : undefined
@@ -46,7 +52,20 @@ export function Document(handle: Handle<DocumentProps>) {
               (base) sit under Reflow, and Remix's css() styles (rmx) above it. */}
           <style>{'@layer base, reflow, rmx;'}</style>
           <meta name="color-scheme" content="light dark" />
-          <meta name="description" content="Fluid components for Remix." />
+          <meta name="description" content={description} />
+          <meta property="og:type" content="website" />
+          <meta property="og:site_name" content="Reflow" />
+          <meta property="og:title" content={title} />
+          <meta property="og:description" content={description} />
+          <meta property="og:url" content={pageUrl} />
+          <meta property="og:image" content={new URL(assets.ogImage, url.origin).href} />
+          <meta property="og:image:width" content="2000" />
+          <meta property="og:image:height" content="1050" />
+          <meta
+            property="og:image:alt"
+            content="Reflow components: a queued message stack, an open hover card and a carousel."
+          />
+          <meta name="twitter:card" content="summary_large_image" />
           <link rel="icon" href={assets.favicon} type="image/svg+xml" />
           <title>{title}</title>
           {customFont && (

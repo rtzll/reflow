@@ -58,7 +58,7 @@ async function show(context: AppContext, page: ShowcaseProps['page'], slug?: str
         )
       : catalog
   return context.render(
-    <Document assets={pageAssets} settings={settings} title={title}>
+    <Document assets={pageAssets} settings={settings} title={title} url={url}>
       <Showcase
         page={page}
         components={components}

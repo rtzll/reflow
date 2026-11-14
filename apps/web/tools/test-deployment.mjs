@@ -52,6 +52,14 @@ try {
     assert.equal(response.headers.get('cache-control'), 'private, no-store')
     assert.ok(!(await response.text()).includes(homedir()), path)
   }
+  // Link previews need an absolute image URL that the built site serves.
+  const home = await (await fetch(origin + '/docs/button')).text()
+  const ogImage = home.match(/<meta property="og:image" content="([^"]+)"/)?.[1]
+  assert.equal(ogImage, `${origin}/og.png`)
+  const image = await fetch(ogImage)
+  assert.equal(image.status, 200)
+  assert.equal(image.headers.get('content-type'), 'image/png')
+  assert.match(home, /<meta name="twitter:card" content="summary_large_image"/)
   for (const path of [
     '/missing',
     '/docs/not-a-component',

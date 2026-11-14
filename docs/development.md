@@ -11,6 +11,8 @@ Open the address printed in the terminal: `/` for the gallery, `/docs` for docum
 
 `pnpm dev` builds the library before starting the server. Run `pnpm build` after editing library source or styles. The website loads the library through the workspace package's public exports.
 
+Every page shares one link preview image, `apps/web/app/public/og.png`: the gallery's first band with the HoverCard open. After changing those components or the gallery's first band, start `pnpm dev` and run `pnpm --filter @reflow/web og:image` to capture it again.
+
 ```sh
 pnpm lint
 pnpm format:check
