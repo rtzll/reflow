@@ -9,16 +9,18 @@ async function trackAudio(page: Page) {
     const start = AudioScheduledSourceNode.prototype.start
     const startBuffer = AudioBufferSourceNode.prototype.start
     let starts = 0
+    const state = window as Window & { soundTestStarts: number }
+    state.soundTestStarts = 0
     AudioScheduledSourceNode.prototype.start = function (...args) {
-      document.documentElement.dataset.audioStarts = String(++starts)
+      state.soundTestStarts = ++starts
       return start.apply(this, args)
     }
     AudioBufferSourceNode.prototype.start = function (...args) {
-      document.documentElement.dataset.audioStarts = String(++starts)
+      state.soundTestStarts = ++starts
       return startBuffer.apply(this, args)
     }
   })
-  return () => page.locator('html').evaluate((root) => Number(root.dataset.audioStarts ?? 0))
+  return () => page.evaluate(() => (window as Window & { soundTestStarts: number }).soundTestStarts)
 }
 
 it('renders the saved sound state before the browser initializes audio', async (t) => {
@@ -363,4 +365,78 @@ it('keeps HoverCard previews silent', async (t) => {
   await expect(page.locator('#basic .rf-hover-card')).toBeVisible()
   await page.waitForTimeout(200)
   expect(await audioStarts()).toBe(0)
+})
+
+it('sounds committed tree, number, queue and mention interactions', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  const audioStarts = await trackAudio(page)
+  await open(page, '/')
+  const cue = async (action: () => Promise<unknown>) => {
+    const before = await audioStarts()
+    await action()
+    await expect.poll(audioStarts).toBeGreaterThan(before)
+  }
+  const browser = page.locator('[data-component="code-block"]')
+  const folder = browser.getByRole('treeitem', { name: 'app', exact: true })
+  await cue(() => folder.press('ArrowLeft'))
+  await cue(() => folder.press('ArrowRight'))
+  await cue(() => browser.getByRole('treeitem', { name: 'README.md' }).press('Enter'))
+  await cue(() => browser.getByRole('separator').press('ArrowLeft'))
+  const number = page.locator('[data-component="input-group"]')
+  await cue(() => number.getByRole('button', { name: 'Increase' }).click())
+  const queue = page.locator('[data-component="queued-stack"]')
+  await cue(() => queue.getByRole('button', { name: '3 queued messages' }).click())
+  await cue(() => queue.getByRole('button', { name: 'Move message 1 down' }).click())
+  const composer = page
+    .locator('[data-component="input-message"]')
+    .getByRole('textbox', { name: 'Message' })
+  await composer.fill('@gr')
+  await cue(() => composer.press('Enter'))
+  await expect(composer).toHaveValue('@Grace Hopper ')
+})
+
+it('sounds accepted and rejected files but stays silent after muting', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  const audioStarts = await trackAudio(page)
+  await open(page, '/docs/file-input')
+  const input = page.getByLabel('Cover image').last()
+  await input.setInputFiles({
+    name: 'cover.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from('image'),
+  })
+  await expect.poll(audioStarts).toBeGreaterThan(0)
+  const accepted = await audioStarts()
+  await input.setInputFiles({
+    name: 'note.txt',
+    mimeType: 'text/plain',
+    buffer: Buffer.from('text'),
+  })
+  await expect.poll(audioStarts).toBeGreaterThan(accepted)
+  await page.locator('.site-right').getByRole('switch', { name: 'Sound effects' }).press('Space')
+  const muted = await audioStarts()
+  await input.setInputFiles({
+    name: 'other.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from('image'),
+  })
+  await page.waitForTimeout(200)
+  expect(await audioStarts()).toBe(muted)
+})
+
+it('sounds custom selection and gallery pagination', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  const audioStarts = await trackAudio(page)
+  await open(page, '/')
+  const select = page.locator('[data-component="select"]')
+  await select.getByRole('button', { name: 'Role' }).click()
+  await select.getByRole('option').nth(1).click()
+  await expect.poll(audioStarts).toBeGreaterThan(0)
+  const before = await audioStarts()
+  await page
+    .getByRole('navigation', { name: 'Team pages' })
+    .getByRole('link', { name: 'Next page' })
+    .click()
+  await expect(page).toHaveURL(/teamPage=2/)
+  await expect.poll(audioStarts).toBeGreaterThan(before)
 })
