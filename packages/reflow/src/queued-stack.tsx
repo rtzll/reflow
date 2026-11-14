@@ -1,6 +1,6 @@
 import { messageTransitionName, transitionMessage } from './systems/message-transition.ts'
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
-import { Button } from './basic.tsx'
+import { Button } from './button.tsx'
 
 const interactiveContent = 'button, a, input, select, textarea, [contenteditable]'
 

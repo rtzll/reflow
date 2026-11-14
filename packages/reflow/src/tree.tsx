@@ -1,5 +1,5 @@
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
-import type { ControlSize } from './basic.tsx'
+import type { ControlSize } from './systems/styling.ts'
 import { Icon } from './icon.tsx'
 import { fluidHover } from './systems/fluid-hover.ts'
 

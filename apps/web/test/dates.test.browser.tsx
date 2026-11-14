@@ -1,4 +1,4 @@
-import { Calendar, DatePicker } from '../../../packages/reflow/dist/dates.js'
+import { Calendar, DatePicker } from '@rtzll/reflow'
 import { equal, ok } from 'remix/assert'
 import { render } from 'remix/component/test'
 import { describe, it } from 'remix/test'

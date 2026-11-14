@@ -1,9 +1,9 @@
 import { attrs, on, ref } from 'remix/component'
 import type { Handle, RemixNode } from 'remix/component'
 import { Icon } from './icon.tsx'
-import { Dropdown, type DropdownItem } from './interactive.tsx'
+import { Dropdown, type DropdownItem } from './dropdown.tsx'
 import { fluidHover } from './systems/fluid-hover.ts'
-import { Tooltip, type TooltipTriggerProps } from './overlays.tsx'
+import { Tooltip, type TooltipTriggerProps } from './tooltip.tsx'
 
 export interface BreadcrumbItem {
   label: string

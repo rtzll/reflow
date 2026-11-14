@@ -1,6 +1,6 @@
 import { Spinner } from './spinner.tsx'
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
-import { Button } from './basic.tsx'
+import { Button } from './button.tsx'
 import { Icon } from './icon.tsx'
 import { matchesShortcut, parseShortcut } from './behaviors/shortcut.ts'
 import { statusIcon } from './systems/status-icon.tsx'

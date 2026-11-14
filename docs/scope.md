@@ -46,7 +46,9 @@ To anyone using the package, everything it exports is a component, however many 
 
 Where code goes:
 
-- A component lives in its own file, named after it, with its stylesheet beside it. Parts of one component, such as `CardTitle` or `FieldLabel`, stay in their component's file.
+- A component lives in its own file, named after it. Parts of one component, such as `CardTitle` or `FieldLabel`, stay in their component's file.
+- When a component builds on another's internals, as AlertDialog does on Dialog's surface or DatePicker on Calendar's date inputs, the internals stay in the first component's file and are exported from it. `index.ts` then lists that file's public names instead of re-exporting all of it, so the internals stay private to the package.
+- Stylesheets are not split per component yet: many still cover several components, and `foundations.css` holds the styles of the basic controls along with the tokens.
 - A component does not write keyboard, focus or hover-timing logic inline when a primitive or behavior covers it. If two components need the same logic and neither covers it, it becomes a behavior.
 - A helper used by one component stays next to that component. Only helpers shared by two or more components move into a layer.
 - Imports point down: components import systems, behaviors and primitives; systems and behaviors never import components.

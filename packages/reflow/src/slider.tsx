@@ -1,6 +1,6 @@
 import { on, ref } from 'remix/component'
 import type { Handle } from 'remix/component'
-import type { ControlSize } from './basic.tsx'
+import type { ControlSize } from './systems/styling.ts'
 
 export type SliderValue = number | [number, number]
 export type ValuePosition = 'left' | 'right' | 'top' | 'bottom' | 'tooltip'

@@ -1,7 +1,7 @@
 import { Icon } from './icon.tsx'
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
+import { Button } from './button.tsx'
 import {
-  Button,
   Card,
   CardGroup,
   CardHeader,
@@ -9,7 +9,7 @@ import {
   CardDescription,
   CardMedia,
   CardImage,
-} from './basic.tsx'
+} from './card.tsx'
 import { fluidHover } from './systems/fluid-hover.ts'
 import { ScrollArea } from './scroll-area.tsx'
 import { Drawer } from './drawer.tsx'

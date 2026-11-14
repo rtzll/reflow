@@ -1,6 +1,6 @@
 import { on, type Handle, type MixInput, type RemixNode } from 'remix/component'
 import * as popover from '@remix-run/ui/popover'
-import { Button, type ButtonProps } from './basic.tsx'
+import { Button, type ButtonProps } from './button.tsx'
 
 export type PopoverPlacement =
   | 'top'

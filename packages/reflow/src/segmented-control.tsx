@@ -1,6 +1,6 @@
 import { on, type Handle, type MixInput, type RemixNode } from 'remix/component'
 import { fluidHover } from './systems/fluid-hover.ts'
-import { Tooltip } from './overlays.tsx'
+import { Tooltip } from './tooltip.tsx'
 
 export interface SegmentedControlOption {
   value: string

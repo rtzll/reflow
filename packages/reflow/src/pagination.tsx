@@ -1,5 +1,5 @@
 import type { Handle } from 'remix/component'
-import type { ControlSize } from './basic.tsx'
+import type { ControlSize } from './systems/styling.ts'
 import { Icon } from './icon.tsx'
 
 export interface PaginationProps {

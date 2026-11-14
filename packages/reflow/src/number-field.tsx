@@ -1,5 +1,7 @@
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
-import { Field, Input, type ControlSize } from './basic.tsx'
+import { Field } from './field.tsx'
+import { Input } from './input.tsx'
+import type { ControlSize } from './systems/styling.ts'
 
 export interface NumberFieldProps {
   label: string

@@ -1,7 +1,7 @@
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
 import { prefersReducedMotion } from '@remix-run/ui/animation'
-import { Button } from './basic.tsx'
-import { CarouselDots } from './compositions.tsx'
+import { Button } from './button.tsx'
+import { CarouselDots } from './carousel-dots.tsx'
 import { Icon } from './icon.tsx'
 
 export interface CarouselProps {

@@ -1,5 +1,5 @@
 import { on, ref, type Handle, type MixInput, type RemixNode } from 'remix/component'
-import { Button, type ButtonProps } from './basic.tsx'
+import { Button, type ButtonProps } from './button.tsx'
 import { Icon } from './icon.tsx'
 import { modal, onBackdrop } from './behaviors/modal.ts'
 

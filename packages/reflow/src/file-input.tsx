@@ -1,5 +1,8 @@
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
-import { Button, Field, Input, type ControlSize } from './basic.tsx'
+import { Button } from './button.tsx'
+import { Field } from './field.tsx'
+import { Input } from './input.tsx'
+import type { ControlSize } from './systems/styling.ts'
 import { partitionFiles } from './behaviors/file-selection.ts'
 import { Icon } from './icon.tsx'
 
