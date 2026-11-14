@@ -59,6 +59,11 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       selected: false,
     }),
   },
+  resizable: {
+    description: 'Split two panes and adjust their space with the pointer or keyboard.',
+    code: `<Resizable label="Resize conversation" defaultValue={65} min={40} max={75}
+  first={<div>Conversation</div>} second={<aside>Sources</aside>} />`,
+  },
   'file-input': {
     description:
       'Pick, drop, or paste files, with type and size limits and native form submission.',
@@ -305,6 +310,7 @@ const components = [
   ['progress', 'Progress'],
   ['queued-stack', 'QueuedStack'],
   ['radio-group', 'RadioGroup'],
+  ['resizable', 'Resizable'],
   ['segmented-control', 'SegmentedControl'],
   ['select', 'Select'],
   ['sidebar', 'Sidebar'],

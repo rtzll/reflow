@@ -48,6 +48,7 @@ import { CodeBlockDemo } from './code-block-example.tsx'
 import { CitationDemo } from './citation-example.tsx'
 import { AvatarDemo } from './avatar-example.tsx'
 import { ChatLayoutDemo } from './chat-layout-example.tsx'
+import { ResizableDemo } from './resizable-example.tsx'
 import { CarouselDemo } from './carousel-demo.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
 import { SoundCombobox } from './sound-combobox.tsx'
@@ -377,6 +378,15 @@ export const componentExamples: Record<string, readonly DocumentationExample[]> 
       'autoplay',
       carouselExampleCode(4, true),
       'Hover the slide to pause its progress.',
+    ),
+  ],
+  resizable: [
+    demo(
+      'Stacked panes',
+      'vertical',
+      `<Resizable orientation="vertical" label="Resize conversation" defaultValue={65}
+  first={<div>Conversation</div>} second={<aside>Sources</aside>} />`,
+      'Use the up and down arrows to resize a vertical stack. Home and End move to the bounds.',
     ),
   ],
   'file-input': [
@@ -2454,6 +2464,8 @@ export function ComponentDemo(
         return <CitationDemo variant={variant} />
       case 'chat-layout':
         return <ChatLayoutDemo variant={variant} />
+      case 'resizable':
+        return <ResizableDemo orientation="vertical" />
       case 'file-input':
         return width(
           <FileInput

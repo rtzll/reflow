@@ -2734,6 +2734,61 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  resizable: [
+    {
+      name: 'Resizable',
+      props: [
+        {
+          name: 'label',
+          type: 'string',
+          required: true,
+          description: 'Accessible name for the separator.',
+        },
+        {
+          name: 'first / second',
+          type: 'RemixNode',
+          required: true,
+          description: 'The two pane contents, in reading order.',
+        },
+        {
+          name: 'orientation',
+          type: "'horizontal' | 'vertical'",
+          required: false,
+          description: 'Side by side by default. Use vertical to stack the panes.',
+        },
+        {
+          name: 'value / defaultValue',
+          type: 'number',
+          required: false,
+          description: 'Controlled or initial percentage of available space for the first pane.',
+        },
+        {
+          name: 'min / max',
+          type: 'number',
+          required: false,
+          description: 'First pane bounds as percentages. Defaults to 15 and 85.',
+        },
+        {
+          name: 'step',
+          type: 'number',
+          required: false,
+          description: 'Percentage points per arrow key press. Defaults to 5.',
+        },
+        {
+          name: 'onValueChange / onValueCommit',
+          type: '(value: number) => void',
+          required: false,
+          description: 'Reports the percentage as it changes or when a resize finishes.',
+        },
+        {
+          name: 'class',
+          type: 'string',
+          required: false,
+          description: 'Class on the split layout. Give vertical stacks a block size.',
+        },
+      ],
+    },
+  ],
   'file-input': [
     {
       name: 'FileInput',

@@ -4,9 +4,10 @@ import { PopoverDemo } from './popover-example.tsx'
 import { ToasterDemo } from './toaster-example.tsx'
 import { DrawerDemo } from './drawer-example.tsx'
 import { CodeBlockDemo } from './code-block-example.tsx'
-import { CitationDemo, citationSources } from './citation-example.tsx'
+import { CitationDemo } from './citation-example.tsx'
 import { AvatarDemo } from './avatar-example.tsx'
 import { ChatLayoutDemo } from './chat-layout-example.tsx'
+import { ResizableDemo } from './resizable-example.tsx'
 import { CarouselDemo } from './carousel-demo.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
 import { paletteCommands, paletteSuggestions } from './palette-example-data.tsx'
@@ -580,29 +581,10 @@ export const Example = clientEntry(
           )
         case 'carousel-dots':
           return <CarouselExample autoplay={handle.props.showcase} duration={2400} />
+        case 'resizable':
+          return <ResizableDemo />
         case 'chat-message':
-          if (handle.props.gallery)
-            return (
-              <div className="example-chat-gallery">
-                <ChatMessage role="system" animate={false} icon={<Icon name="clock" />}>
-                  Conversation resumed
-                </ChatMessage>
-                <ChatMessage role="user" animate={false}>
-                  What does “good design” actually mean?
-                </ChatMessage>
-                <ChatMessage role="assistant" animate={false}>
-                  Mostly that you stop noticing it.
-                  <Citation index={1} sources={citationSources[0]!} /> It lets you do what you came
-                  to do, and it feels right while you do it.
-                </ChatMessage>
-                <ChatMessage role="user" animate={false}>
-                  So function over form?
-                </ChatMessage>
-                <ChatMessage role="assistant" animate={false}>
-                  Not quite. Something that feels good to use is, in a real sense, working better.
-                </ChatMessage>
-              </div>
-            )
+          if (handle.props.gallery) return <ResizableDemo />
           return handle.props.showcase ? (
             <div className="example-chat-tile">
               <ChatMessage role="user" size="compact" animate={false}>

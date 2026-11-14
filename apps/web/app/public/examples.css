@@ -2003,3 +2003,39 @@
     order: 1;
   }
 }
+
+.example-split {
+  inline-size: min(100%, 580px);
+  block-size: 320px;
+  color: var(--rf-fg);
+}
+
+.example-split > .rf-resizable-pane {
+  padding: 10px;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-panel-radius);
+  background: var(--rf-surface-2);
+}
+
+.example-split-sources {
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+  overflow-wrap: anywhere;
+}
+
+.example-split-sources h3 {
+  margin: 0;
+  font: inherit;
+  font-variation-settings: var(--rf-weight-semibold);
+}
+
+.example-split-sources ol {
+  display: grid;
+  gap: 8px;
+  margin-block: 8px 0;
+  padding-inline-start: 1.25em;
+}
+
+.example-split-sources a {
+  color: var(--rf-fg);
+  text-underline-offset: 2px;
+}

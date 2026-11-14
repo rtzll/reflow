@@ -1,0 +1,82 @@
+.rf-resizable {
+  --rf-resizable-grip-size: 12px;
+  display: grid;
+  grid-template-columns:
+    minmax(0, var(--rf-resizable-first))
+    var(--rf-resizable-grip-size)
+    minmax(0, var(--rf-resizable-second));
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+.rf-resizable[data-orientation='vertical'] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows:
+    minmax(0, var(--rf-resizable-first))
+    var(--rf-resizable-grip-size)
+    minmax(0, var(--rf-resizable-second));
+}
+
+.rf-resizable-pane {
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: auto;
+}
+
+.rf-resizable-grip {
+  position: relative;
+  display: grid;
+  place-items: center;
+  cursor: col-resize;
+  touch-action: none;
+  outline: none;
+}
+
+.rf-resizable-grip::before {
+  content: '';
+  inline-size: 2px;
+  block-size: 24px;
+  border-radius: 999px;
+  background: var(--rf-border-emphasis);
+  transition: background-color var(--rf-fast);
+}
+
+.rf-resizable[data-orientation='vertical'] .rf-resizable-grip {
+  cursor: row-resize;
+}
+
+.rf-resizable[data-orientation='vertical'] .rf-resizable-grip::before {
+  inline-size: 24px;
+  block-size: 2px;
+}
+
+.rf-resizable-grip:is(:hover, :focus-visible)::before,
+.rf-resizable[data-resizing] .rf-resizable-grip::before {
+  background: var(--rf-accent);
+}
+
+.rf-resizable-grip:focus-visible {
+  outline: 1px solid var(--rf-accent);
+  outline-offset: -1px;
+}
+
+.rf-resizable[data-resizing] {
+  user-select: none;
+}
+
+@media (pointer: coarse) {
+  .rf-resizable {
+    --rf-resizable-grip-size: 24px;
+  }
+}
+
+@media (forced-colors: active) {
+  .rf-resizable-grip::before {
+    forced-color-adjust: none;
+    background: ButtonText;
+  }
+
+  .rf-resizable-grip:focus-visible {
+    outline-color: Highlight;
+  }
+}
