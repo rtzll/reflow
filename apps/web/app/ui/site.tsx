@@ -472,29 +472,28 @@ const galleryOrder = [
   'thinking-indicator',
   'toaster',
   'hover-card',
-  'queued-stack',
   'code-block',
   'card',
-  'select',
+  'queued-stack',
   'command-menu',
+  'select',
   'tooltip',
-  'avatar',
   'sidebar',
+  'avatar',
   'radio-group',
-  'segmented-control',
   'thinking-steps',
   'tabs',
-  'checkbox-group',
+  'segmented-control',
   'ask-user-questions',
+  'checkbox-group',
   'slider',
-  'dropdown',
   'banner',
-  'input-copy',
+  'dropdown',
   'accordion',
-  'input-group',
+  'input-copy',
   'carousel',
+  'input-group',
   'button',
-  'breadcrumb',
   'table',
   'alert-dialog',
   'calendar',
@@ -505,11 +504,11 @@ const galleryOrder = [
   'color-picker',
   'switch',
   'combobox',
+  'breadcrumb',
 ]
 
 const wideCards = new Set([
   'input-message',
-  'code-block',
   'color-picker',
   'card',
   'command-menu',
@@ -536,7 +535,6 @@ const tallCards = new Set([
 ])
 const rightCards = new Set([
   'input-message',
-  'code-block',
   'color-picker',
   'command-menu',
   'thinking-steps',
@@ -605,6 +603,7 @@ function Gallery(
                 key={entry.slug}
                 class="site-preview-card"
                 data-component={entry.slug}
+                data-full-width={entry.slug === 'code-block' ? '' : undefined}
                 data-wide={wideCards.has(entry.slug) ? '' : undefined}
                 data-tall={tallCards.has(entry.slug) ? '' : undefined}
                 data-right={rightCards.has(entry.slug) ? '' : undefined}

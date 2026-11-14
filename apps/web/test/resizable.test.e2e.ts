@@ -3,13 +3,13 @@ import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
 import { open, router } from './showcase-router.ts'
 
-it('resizes the gallery conversation and sources with the keyboard and pointer', async (t) => {
+it('resizes the gallery file browser with the keyboard and pointer', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await open(page, '/')
-  const tile = page.locator('[data-component="chat-message"]')
-  const separator = tile.getByRole('separator', { name: 'Resize conversation' })
+  const tile = page.locator('[data-component="code-block"]')
+  const separator = tile.getByRole('separator', { name: 'Resize project files' })
   await separator.press('ArrowLeft')
-  await expect(separator).toHaveAttribute('aria-valuenow', '60')
+  await expect(separator).toHaveAttribute('aria-valuenow', '29')
   const bounds = (await separator.boundingBox())!
   const x = bounds.x + bounds.width / 2
   const y = bounds.y + bounds.height / 2
@@ -19,30 +19,25 @@ it('resizes the gallery conversation and sources with the keyboard and pointer',
   await page.mouse.up()
   await expect
     .poll(async () => Number(await separator.getAttribute('aria-valuenow')))
-    .toBeLessThan(60)
+    .toBeLessThan(29)
   await separator.press('End')
-  await expect(separator).toHaveAttribute('aria-valuenow', '75')
+  await expect(separator).toHaveAttribute('aria-valuenow', '55')
 })
 
 it('lists each cited source in the same order as the conversation', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
-  for (const [url, selector] of [
-    ['/', '[data-component="chat-message"]'],
-    ['/docs/resizable', '#playground'],
-  ]) {
-    await open(page, url)
-    const example = page.locator(selector)
-    const citations = example.getByRole('link', { name: /^Source \d+:/ })
-    const sources = example.getByRole('region', { name: 'Sources' }).getByRole('link')
-    await expect(citations).toHaveCount(2)
-    await expect(sources).toHaveCount(2)
-    for (const index of [0, 1]) {
-      await expect(citations.nth(index)).toHaveText(String(index + 1))
-      await expect(sources.nth(index)).toHaveAttribute(
-        'href',
-        (await citations.nth(index).getAttribute('href'))!,
-      )
-    }
+  await open(page, '/docs/resizable')
+  const example = page.locator('#playground')
+  const citations = example.getByRole('link', { name: /^Source \d+:/ })
+  const sources = example.getByRole('region', { name: 'Sources' }).getByRole('link')
+  await expect(citations).toHaveCount(2)
+  await expect(sources).toHaveCount(2)
+  for (const index of [0, 1]) {
+    await expect(citations.nth(index)).toHaveText(String(index + 1))
+    await expect(sources.nth(index)).toHaveAttribute(
+      'href',
+      (await citations.nth(index).getAttribute('href'))!,
+    )
   }
 })
 

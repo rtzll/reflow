@@ -9,7 +9,7 @@ import { CodeBlockDemo } from './code-block-example.tsx'
 import { CitationDemo } from './citation-example.tsx'
 import { AvatarDemo } from './avatar-example.tsx'
 import { ChatLayoutDemo } from './chat-layout-example.tsx'
-import { ResizableDemo } from './resizable-example.tsx'
+import { DesignConversation, ResizableDemo } from './resizable-example.tsx'
 import { CarouselDemo } from './carousel-demo.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
 import { paletteCommands, paletteSuggestions } from './palette-example-data.tsx'
@@ -607,7 +607,7 @@ export const Example = clientEntry(
         case 'resizable':
           return <ResizableDemo />
         case 'chat-message':
-          if (handle.props.gallery) return <ResizableDemo />
+          if (handle.props.gallery) return <DesignConversation showResume />
           return handle.props.showcase ? (
             <div className="example-chat-tile">
               <ChatMessage role="user" size="compact" animate={false}>

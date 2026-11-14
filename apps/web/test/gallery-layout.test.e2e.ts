@@ -15,29 +15,28 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'thinking-indicator',
     'toaster',
     'hover-card',
-    'queued-stack',
     'code-block',
     'card',
-    'select',
+    'queued-stack',
     'command-menu',
+    'select',
     'tooltip',
-    'avatar',
     'sidebar',
+    'avatar',
     'radio-group',
-    'segmented-control',
     'thinking-steps',
     'tabs',
-    'checkbox-group',
+    'segmented-control',
     'ask-user-questions',
+    'checkbox-group',
     'slider',
-    'dropdown',
     'banner',
-    'input-copy',
+    'dropdown',
     'accordion',
-    'input-group',
+    'input-copy',
     'carousel',
+    'input-group',
     'button',
-    'breadcrumb',
     'table',
     'alert-dialog',
     'calendar',
@@ -48,6 +47,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'color-picker',
     'switch',
     'combobox',
+    'breadcrumb',
   ]
   const gallery = page.locator('.site-gallery')
   for (const width of [1440, 1280, 768, 390]) {
@@ -143,8 +143,8 @@ it('preserves the gallery order and keeps previews above their footers', async (
       assert.ok(drawer!.y > popover!.y)
       assert.equal(Math.round(chat!.y + chat!.height), Math.round(drawer!.y + drawer!.height))
       // Wide cards alternate sides down the gallery: InputMessage on the right
-      // of the first row, Toaster on the left of the second, ColorPicker on the
-      // right again, and so on.
+      // of the first row and Toaster on the left of the second. The file browser
+      // gets the next row, then the card grid starts with Card on the left.
       const sides = await gallery.evaluate((node) => {
         const left = node.getBoundingClientRect().left
         return Array.from(
@@ -152,7 +152,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
           (card) => (card.getBoundingClientRect().left - left < 50 ? 'L' : 'R'),
         ).join('')
       })
-      assert.equal(sides, 'RLRLRLRLRLRLRLR')
+      assert.equal(sides, 'RLLRLRLRLRLRLR')
       const [indicator, input, toaster, hover] = await Promise.all(
         ['thinking-indicator', 'input-message', 'toaster', 'hover-card'].map(tile),
       )

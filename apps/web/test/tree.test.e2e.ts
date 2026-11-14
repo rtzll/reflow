@@ -28,3 +28,24 @@ it('opens a file from the gallery tree without moving focus into its preview', a
   await expect(tile.locator('code')).toContainText('# Reflow')
   await expect(readme).toBeFocused()
 })
+
+it('gives the gallery file browser its own row', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  for (const width of [1440, 768, 390]) {
+    await page.setViewportSize({ width, height: 900 })
+    await open(page, '/')
+    const tile = page.locator('.site-gallery [data-component="code-block"]')
+    const [browser, gallery] = await Promise.all([
+      tile.boundingBox(),
+      page.locator('.site-gallery').boundingBox(),
+    ])
+    const padding = await page.locator('.site-gallery').evaluate((element) => {
+      const style = getComputedStyle(element)
+      return parseFloat(style.paddingLeft) + parseFloat(style.paddingRight)
+    })
+    expect(Math.abs(browser!.width - (gallery!.width - padding))).toBeLessThanOrEqual(1)
+    const chat = page.locator('.site-gallery [data-component="chat-message"]')
+    await expect(chat.getByRole('separator')).toHaveCount(0)
+    await expect(chat.getByText('What makes a product easy to use?')).toBeVisible()
+  }
+})
