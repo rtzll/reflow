@@ -58,49 +58,6 @@
   background: light-dark(#ef4444, var(--rf-danger));
 }
 
-/* AvatarGroup: avatars overlap by a quarter of their size and spread apart
-   on the moderate spring while pointed at. */
-.rf-avatar-group {
-  --rf-avatar-overlap: calc(var(--rf-avatar-size) * -0.25);
-  display: flex;
-  align-items: center;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.rf-avatar-group > li {
-  position: relative;
-  display: flex;
-  transition: margin-inline-start var(--rf-spring-moderate);
-}
-.rf-avatar-group > li + li {
-  margin-inline-start: var(--rf-avatar-overlap);
-}
-@media (hover: hover) {
-  .rf-avatar-group:hover > li + li {
-    margin-inline-start: 2px;
-  }
-}
-.rf-avatar-slot {
-  display: inline-flex;
-  border-radius: 9999px;
-}
-.rf-avatar-group .rf-avatar {
-  box-shadow: 0 0 0 2px var(--rf-avatar-ring);
-}
-.rf-avatar-more {
-  --rf-avatar-color: var(--rf-muted);
-  background: var(--rf-neutral-fill);
-  color: var(--rf-fg);
-  font-size: calc(var(--rf-avatar-size) * 0.34);
-  font-variant-numeric: tabular-nums;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .rf-avatar-group > li {
-    transition: none;
-  }
-}
 @media (forced-colors: active) {
   .rf-avatar {
     border: 1px solid CanvasText;
