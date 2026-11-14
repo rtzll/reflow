@@ -511,7 +511,7 @@ export function enhanceShowcaseSound() {
     (event) => {
       if (!(event.target instanceof Element)) return
       const button = event.target.closest<HTMLButtonElement>(
-        '.site-preview-stage .rf-calendar button, .site-preview-stage .rf-color-swatch',
+        '.site-preview-stage .rf-calendar button, .site-preview-stage .rf-color-swatch, .site-preview-stage .rf-date-presets button, .site-preview-stage .rf-date-clear',
       )
       if (!button || button.disabled || button.getAttribute('aria-disabled') === 'true') return
       if (button.matches('.rf-calendar-nav'))
@@ -519,8 +519,11 @@ export function enhanceShowcaseSound() {
           emphasis: 'subtle',
           direction: button.dataset.direction === 'previous' ? 'back' : 'forward',
         })
+      else if (button.matches('.rf-date-clear')) play('close', { emphasis: 'subtle' })
       else if (
         button.matches('.rf-calendar-day') ||
+        (button.matches('.rf-date-presets button') &&
+          button.getAttribute('aria-pressed') !== 'true') ||
         (button.matches('.rf-color-swatch') && button.getAttribute('aria-pressed') !== 'true')
       )
         play('select', { emphasis: 'subtle' })
