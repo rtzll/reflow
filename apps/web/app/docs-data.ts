@@ -2728,6 +2728,73 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  'number-field': [
+    {
+      name: 'NumberField',
+      props: [
+        {
+          name: 'label',
+          required: true,
+          type: 'string',
+          description: 'Visible label associated with the numeric input.',
+        },
+        {
+          name: 'name',
+          required: false,
+          type: 'string',
+          description: 'Name used when submitting the form.',
+        },
+        {
+          name: 'value',
+          required: false,
+          type: 'number | null',
+          description: 'Controlled value. Use null for an empty field.',
+        },
+        {
+          name: 'defaultValue',
+          required: false,
+          type: 'number',
+          description: 'Initial uncontrolled value, restored on form reset.',
+        },
+        {
+          name: 'min / max / step',
+          required: false,
+          type: 'number',
+          description: 'Native number bounds and increment. The default step is 1.',
+        },
+        {
+          name: 'scrub',
+          required: false,
+          type: 'boolean',
+          description: 'Drag the label horizontally to step through values.',
+        },
+        {
+          name: 'description / error',
+          required: false,
+          type: 'RemixNode',
+          description: 'Associated help or validation text.',
+        },
+        {
+          name: 'size',
+          required: false,
+          type: "'default' | 'compact'",
+          description: 'Control density.',
+        },
+        {
+          name: 'required / disabled / readOnly',
+          required: false,
+          type: 'boolean',
+          description: 'Native input states.',
+        },
+        {
+          name: 'onValueChange',
+          required: false,
+          type: '(value: number | null) => void',
+          description: 'Called when the number changes. Empty input reports null.',
+        },
+      ],
+    },
+  ],
   carousel: [
     {
       name: 'Carousel',

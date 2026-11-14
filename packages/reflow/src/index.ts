@@ -25,3 +25,4 @@ export * from './queued-stack.tsx'
 
 export * from './scroll-area.tsx'
 export * from './icon.tsx'
+export * from './number-field.tsx'

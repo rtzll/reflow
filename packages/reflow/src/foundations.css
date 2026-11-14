@@ -2235,3 +2235,14 @@ div > .rf-highlight.rf-table-highlight {
 .rf-input-field-control:is([data-rf-hovered], :focus-within) > .rf-input-field-icon > svg {
   stroke-width: 2;
 }
+
+.rf-number-scrub {
+  display: inline-block;
+  cursor: ew-resize;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.rf-field:has(input:disabled, input:read-only) .rf-number-scrub {
+  cursor: default;
+}

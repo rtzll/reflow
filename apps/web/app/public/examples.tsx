@@ -59,6 +59,7 @@ import {
   InputField,
   Icon,
   InputGroup,
+  NumberField,
   InputMessage,
   QueuedStack,
   RadioGroup,
@@ -727,6 +728,12 @@ export const Example = clientEntry(
               />
             </div>
           )
+        case 'number-field':
+          return (
+            <div style={{ width: 'min(100%, 240px)' }}>
+              <NumberField label="Guests" name="guests" min={1} max={12} defaultValue={2} scrub />
+            </div>
+          )
         case 'input-group':
           return (
             <div className="example-block" style={{ width: 'min(100%, 320px)' }}>
@@ -745,11 +752,13 @@ export const Example = clientEntry(
                       icon={handle.props.gallery ? <Icon name="mail" /> : undefined}
                     />
                     {handle.props.gallery && (
-                      <InputField
-                        type="url"
-                        label="Website"
-                        placeholder="https://reflow.christianrotzoll.com/"
-                        icon={<Icon name="globe" />}
+                      <NumberField
+                        label="Guests"
+                        name="guests"
+                        min={1}
+                        max={12}
+                        defaultValue={2}
+                        scrub
                       />
                     )}
                   </>

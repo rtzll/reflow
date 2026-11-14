@@ -97,6 +97,7 @@ import {
   InputCopy,
   InputField,
   InputGroup,
+  NumberField,
   InputMessage,
   RadioGroup,
   Select,
@@ -373,6 +374,14 @@ export const componentExamples: Record<string, readonly DocumentationExample[]> 
       'autoplay',
       carouselExampleCode(4, true),
       'Hover the slide to pause its progress.',
+    ),
+  ],
+  'number-field': [
+    demo(
+      'Decimal steps',
+      'decimal',
+      `<NumberField label="Hours" name="hours" min={0} max={24} step={0.25} defaultValue={1.5} description="Log time in quarter hours." />`,
+      'Use the arrow keys or step buttons to adjust the value.',
     ),
   ],
   carousel: [
@@ -2416,6 +2425,20 @@ export function ComponentDemo(
         return <CitationDemo variant={variant} />
       case 'chat-layout':
         return <ChatLayoutDemo variant={variant} />
+      case 'number-field':
+        return (
+          <div style={{ width: 'min(100%, 240px)' }}>
+            <NumberField
+              label="Hours"
+              name="hours"
+              min={0}
+              max={24}
+              step={0.25}
+              defaultValue={1.5}
+              description="Log time in quarter hours."
+            />
+          </div>
+        )
       case 'carousel':
         return <CarouselDemo variant={variant} />
       case 'avatar':

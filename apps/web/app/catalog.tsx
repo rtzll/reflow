@@ -58,6 +58,11 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       selected: false,
     }),
   },
+  'number-field': {
+    description:
+      'A labeled numeric field with native validation, step buttons, and optional drag-to-scrub.',
+    code: `<NumberField label="Guests" name="guests" min={1} max={12} defaultValue={2} scrub />`,
+  },
   carousel: {
     description:
       'Slides on a native scroll container that snaps, drags with momentum, and autoplays through its dots.',
@@ -280,6 +285,7 @@ const components = [
   ['input-copy', 'InputCopy'],
   ['input-group', 'InputGroup'],
   ['input-message', 'InputMessage'],
+  ['number-field', 'NumberField'],
   ['popover', 'Popover'],
   ['queued-stack', 'QueuedStack'],
   ['radio-group', 'RadioGroup'],

@@ -4,7 +4,7 @@ Reflow started as a native Remix port of the [Fluid Functionalism](https://githu
 
 ## Catalog
 
-- **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `Field`, `Input`, `InputCopy`, `InputGroup`, `RadioGroup`, `SegmentedControl`, `Select`, `Slider`, `Switch`, `Textarea`
+- **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `Field`, `Input`, `InputCopy`, `InputGroup`, `NumberField`, `RadioGroup`, `SegmentedControl`, `Select`, `Slider`, `Switch`, `Textarea`
 - **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`
 - **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `Sidebar`, `Tabs`
 - **Menus and overlays** · `CommandMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
@@ -57,7 +57,7 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 2 | `Toaster` and `toast()` (shipped) | [sonner](https://github.com/emilkowalski/sonner) | QueuedStack's pile; Banner's status icons |
 | 2 | `Drawer` (shipped) | [vaul](https://github.com/emilkowalski/vaul) | Dialog's native `<dialog>` and focus return; the Sidebar's mobile drawer uses it |
 | 3 | `CodeBlock`, a `system` role for ChatMessage, `Citation` and `ChatLayout` (shipped) | Astryx's chat set | The InputMessage docs layout, ChatMessage's glide, ThinkingStepSource chips, the docs' code panel |
-| 4 | `Avatar` and `AvatarGroup` (shipped), `Skeleton`, `Spinner`, `Progress`, `NumberField` | — | ThinkingIndicator's shimmer, Button's loading state, CarouselDots' progress fill, ColorPicker's scrub fields |
+| 4 | `Avatar` and `AvatarGroup` (shipped), `Skeleton`, `Spinner`, `Progress`, `NumberField` (shipped) | — | ThinkingIndicator's shimmer, Button's loading state, CarouselDots' progress fill, ColorPicker's scrub fields |
 | 5 | `Carousel` (shipped) | [Blossom Carousel](https://github.com/jespervos/blossom-carousel) | CarouselDots, native scroll snap, the `--rf-spring-*` tiers |
 
 ### Decisions so far
