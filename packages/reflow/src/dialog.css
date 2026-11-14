@@ -133,83 +133,11 @@
   inset-inline-end: 12px;
 }
 
-.rf-tooltip {
-  position: fixed;
-  z-index: var(--rf-z-tooltip);
-  inset: auto;
-  box-sizing: border-box;
-  width: max-content;
-  max-inline-size: min(250px, calc(100vw - 24px));
-  margin: 0;
-  padding: 4px 8px;
-  border: 0;
-  border-radius: var(--rf-radius);
-  background: var(--rf-fg);
-  color: var(--rf-bg);
-  font: var(--rf-text-caption) / var(--rf-leading-caption) var(--rf-font);
-  font-variation-settings: var(--rf-weight-normal);
-  overflow: visible;
-  overflow-wrap: anywhere;
-  opacity: 0;
-  /* Reference motion: 4px slide and fade on the fast spring in, the fast
-     exit tween out. The closed state carries the exit, the open state the
-     enter. */
-  transition:
-    opacity var(--rf-exit-fast),
-    transform var(--rf-exit-fast),
-    overlay var(--rf-exit-fast) allow-discrete,
-    display var(--rf-exit-fast) allow-discrete;
-}
-
-@supports (text-box: trim-both cap alphabetic) {
-  .rf-tooltip {
-    padding-block: 8px;
-    text-box: trim-both cap alphabetic;
-  }
-}
-
-.rf-tooltip:not([data-open]) {
-  display: none;
-}
-.rf-tooltip[data-open] {
-  display: block;
-  opacity: 1;
-  transform: translate(0);
-  transition:
-    opacity var(--rf-spring-fast),
-    transform var(--rf-spring-fast),
-    overlay var(--rf-spring-fast) allow-discrete,
-    display var(--rf-spring-fast) allow-discrete;
-}
-.rf-tooltip[data-side='top'] {
-  --rf-tooltip-offset-y: 4px;
-}
-.rf-tooltip[data-side='bottom'] {
-  --rf-tooltip-offset-y: -4px;
-}
-.rf-tooltip[data-side='left'] {
-  --rf-tooltip-offset-x: 4px;
-}
-.rf-tooltip[data-side='right'] {
-  --rf-tooltip-offset-x: -4px;
-}
-.rf-tooltip:not([data-open]) {
-  transform: translate(var(--rf-tooltip-offset-x, 0px), var(--rf-tooltip-offset-y, 0px));
-}
-
-@starting-style {
-  .rf-tooltip[data-open] {
-    opacity: 0;
-    transform: translate(var(--rf-tooltip-offset-x, 0px), var(--rf-tooltip-offset-y, 0px));
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .rf-dialog,
   .rf-dialog[open],
   .rf-dialog::backdrop,
-  .rf-dialog[open]::backdrop,
-  .rf-tooltip {
+  .rf-dialog[open]::backdrop {
     transition: none;
   }
 }

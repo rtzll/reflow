@@ -24,7 +24,8 @@
 @import './compositions.css';
 @import './select.css';
 @import './combobox.css';
-@import './overlays.css';
+@import './dialog.css';
+@import './tooltip.css';
 @import './sidebar.css';
 @import './dates.css';
 @import './flows.css';
