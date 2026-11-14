@@ -183,7 +183,7 @@
   .rf-command-scroll > .rf-scroll-viewport {
     scroll-timeline-name: --rf-command-scroller;
   }
-  /* Keep the timeline separate, as in systems.css: CSS transformers can emit
+  /* Keep the timeline separate, as in motion.css: CSS transformers can emit
      a shorthand timeline syntax that browsers do not yet support. */
   .rf-command-scroll::before {
     --rf-scroll-divider-animation: rf-scroll-divider-start 1ms linear both;

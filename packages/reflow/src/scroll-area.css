@@ -14,37 +14,6 @@
   }
 }
 
-[data-rf-scroll-fade] {
-  --rf-scroll-fade-top: 0px;
-  --rf-scroll-fade-bottom: 0px;
-  --rf-scroll-fade-left: 0px;
-  --rf-scroll-fade-right: 0px;
-  --rf-fade-y: linear-gradient(
-    to bottom,
-    transparent,
-    #000 var(--rf-scroll-fade-top),
-    #000 calc(100% - var(--rf-scroll-fade-bottom)),
-    transparent
-  );
-  --rf-fade-x: linear-gradient(
-    to right,
-    transparent,
-    #000 var(--rf-scroll-fade-left),
-    #000 calc(100% - var(--rf-scroll-fade-right)),
-    transparent
-  );
-}
-[data-rf-scroll-fade='vertical'] {
-  mask-image: var(--rf-fade-y);
-}
-[data-rf-scroll-fade='horizontal'] {
-  mask-image: var(--rf-fade-x);
-}
-[data-rf-scroll-fade='both'] {
-  mask-image: var(--rf-fade-y), var(--rf-fade-x);
-  mask-composite: intersect;
-}
-
 .rf-scroll-root {
   position: relative;
   min-width: 0;
@@ -155,37 +124,5 @@
   .rf-scroll-track,
   .rf-scroll-thumb {
     transition: none;
-  }
-}
-
-@keyframes rf-scroll-reveal-enter {
-  from {
-    opacity: 0;
-    transform: translateY(var(--rf-reveal-distance)) scale(var(--rf-reveal-scale));
-  }
-}
-@keyframes rf-scroll-reveal-leave {
-  to {
-    opacity: 0;
-    transform: translateY(calc(var(--rf-reveal-distance) * -1)) scale(var(--rf-reveal-scale));
-  }
-}
-@supports (animation-timeline: view()) {
-  [data-rf-reveal-scroll] {
-    /* Keep the timeline separate: CSS transformers can emit a shorthand
-       timeline syntax that browsers do not yet support. */
-    --rf-scroll-reveal-animation:
-      rf-scroll-reveal-enter 1ms linear both, rf-scroll-reveal-leave 1ms linear both;
-    animation: var(--rf-scroll-reveal-animation);
-    animation-timeline: view(), view();
-    animation-range:
-      entry var(--rf-reveal-scroll-start) entry var(--rf-reveal-scroll-range),
-      exit calc(100% - var(--rf-reveal-scroll-range)) exit
-        calc(100% - var(--rf-reveal-scroll-start));
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  [data-rf-reveal-scroll] {
-    animation: none;
   }
 }

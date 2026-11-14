@@ -50,7 +50,8 @@
 @import './avatar.css';
 @import './chat-layout.css';
 @import './carousel.css';
-@import './systems.css';
+@import './scroll-area.css';
+@import './motion.css';
 @import './progress.css';
 @import './trigger-menu.css';
 @import './file-input.css';
