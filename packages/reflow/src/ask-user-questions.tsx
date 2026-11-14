@@ -157,6 +157,7 @@ export function AskUserQuestions(handle: Handle<AskUserQuestionsProps>) {
     const { id, question } = view()
     if (!question) return
     if (question.multiSelect) {
+      root?.dispatchEvent(new CustomEvent('reflow:question', { bubbles: true, detail: 'toggle' }))
       put(id, (previous) => {
         const set = new Set(previous?.selectedIds ?? [])
         if (!set.delete(optionId)) set.add(optionId)
@@ -164,6 +165,12 @@ export function AskUserQuestions(handle: Handle<AskUserQuestionsProps>) {
       })
       return
     }
+    root?.dispatchEvent(
+      new CustomEvent('reflow:question', {
+        bubbles: true,
+        detail: view().index >= view().total - 1 ? 'success' : 'select',
+      }),
+    )
     const text = latest[id]?.otherText
     advance(put(id, () => ({ selectedIds: [optionId], otherText: text || undefined })))
   }
@@ -181,16 +188,29 @@ export function AskUserQuestions(handle: Handle<AskUserQuestionsProps>) {
     if (!text) return
     const message = question.freeText ? question.freeTextValidate?.(text) : undefined
     if (message) {
+      root?.dispatchEvent(new CustomEvent('reflow:question', { bubbles: true, detail: 'error' }))
       error = message
       void handle.update()
       return
     }
     error = null
+    root?.dispatchEvent(
+      new CustomEvent('reflow:question', {
+        bubbles: true,
+        detail: view().index >= view().total - 1 ? 'success' : 'navigate',
+      }),
+    )
     advance(put(id, () => ({ otherText: text })))
   }
 
   function skip() {
     const { id, index } = view()
+    root?.dispatchEvent(
+      new CustomEvent('reflow:question', {
+        bubbles: true,
+        detail: index >= view().total - 1 ? 'success' : 'navigate',
+      }),
+    )
     const snapshot = write((previous) => ({
       ...previous,
       [id]: {
@@ -206,10 +226,19 @@ export function AskUserQuestions(handle: Handle<AskUserQuestionsProps>) {
 
   function back() {
     const { index } = view()
-    if (index > 0) go(index - 1)
+    if (index > 0) {
+      root?.dispatchEvent(new CustomEvent('reflow:question', { bubbles: true, detail: 'back' }))
+      go(index - 1)
+    }
   }
 
   function submitMulti() {
+    root?.dispatchEvent(
+      new CustomEvent('reflow:question', {
+        bubbles: true,
+        detail: view().index >= view().total - 1 ? 'success' : 'navigate',
+      }),
+    )
     advance(latest)
   }
 

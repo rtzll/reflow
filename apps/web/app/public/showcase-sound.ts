@@ -378,6 +378,19 @@ export function enhanceShowcaseSound() {
     if (event.target instanceof Element && event.target.closest('.site-preview-stage'))
       play('select', { emphasis: 'subtle' })
   })
+  document.addEventListener('reflow:question', (event) => {
+    if (!(event.target instanceof Element) || !event.target.closest('.site-preview-stage')) return
+    const cue = (event as CustomEvent<string>).detail
+    if (cue === 'back') play('navigate', { emphasis: 'subtle', direction: 'back' })
+    else if (
+      cue === 'navigate' ||
+      cue === 'select' ||
+      cue === 'toggle' ||
+      cue === 'success' ||
+      cue === 'error'
+    )
+      play(cue, { emphasis: 'subtle' })
+  })
   document.addEventListener('reflow:message-send', (event) => {
     if (event.target instanceof Element && event.target.closest('.site-preview-stage'))
       play('tap', { emphasis: 'subtle' })
