@@ -20,7 +20,7 @@
     "./styles.css": "./dist/styles.css"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json && cp src/*.css dist/",
+    "build": "rm -rf dist && tsc -p tsconfig.json && cp src/*.css dist/",
     "check": "tsc -p tsconfig.json --noEmit"
   },
   "peerDependencies": {
