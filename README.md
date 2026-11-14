@@ -59,7 +59,7 @@ Theme, density, accent, shape, typography, and hover behavior are configurable t
 
 - **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `Field`, `FileInput`, `Input`, `InputCopy`, `InputGroup`, `NumberField`, `RadioGroup`, `SegmentedControl`, `Select`, `Slider`, `Switch`, `Textarea`
 - **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`
-- **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `Pagination`, `Resizable`, `Sidebar`, `Tabs`, `Toolbar`
+- **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `Pagination`, `Resizable`, `Sidebar`, `Tabs`, `Toolbar`, `Tree`
 - **Menus and overlays** · `AlertDialog`, `CommandMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
 - **Display and feedback** · `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `Card`, `CodeBlock`, `Progress`, `Skeleton`, `Spinner`, `Table`, `Toaster`
 - **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `Citation`, `InputMessage`, `QueuedStack`, `ThinkingIndicator`, `ThinkingSteps`, `TriggerMenu`

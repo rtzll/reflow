@@ -1,0 +1,86 @@
+.rf-tree,
+.rf-tree ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rf-tree {
+  position: relative;
+  isolation: isolate;
+  color: var(--rf-fg);
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+}
+
+.rf-tree[data-size='compact'] {
+  --rf-control-height: 28px;
+}
+
+.rf-tree [role='treeitem'] {
+  outline: none;
+}
+
+.rf-tree > .rf-tree-hover {
+  border-radius: var(--rf-item-radius);
+  background: var(--rf-hover);
+}
+
+.rf-tree-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-block-size: var(--rf-control-height);
+  padding-inline: calc(4px + var(--rf-tree-level) * 12px) 6px;
+  border-radius: var(--rf-item-radius);
+  cursor: pointer;
+}
+
+.rf-tree-row > svg,
+.rf-tree-disclosure {
+  flex: none;
+  inline-size: var(--rf-icon-size);
+  block-size: var(--rf-icon-size);
+  color: var(--rf-muted);
+}
+
+.rf-tree-disclosure svg {
+  inline-size: 100%;
+  block-size: 100%;
+  transition: rotate var(--rf-fast);
+}
+
+.rf-tree-row[data-expanded] .rf-tree-disclosure svg {
+  rotate: 90deg;
+}
+
+.rf-tree:dir(rtl) .rf-tree-disclosure svg {
+  scale: -1 1;
+}
+
+.rf-tree-label {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rf-tree [aria-selected='true'] > .rf-tree-row {
+  background: var(--rf-active);
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.rf-tree [role='treeitem']:focus-visible > .rf-tree-row {
+  outline: 1px solid var(--rf-accent);
+  outline-offset: -1px;
+}
+
+[data-hover='standard'] .rf-tree-row:hover {
+  background: var(--rf-hover);
+}
+
+@media (forced-colors: active) {
+  .rf-tree [aria-selected='true'] > .rf-tree-row {
+    border-inline-start: 2px solid Highlight;
+  }
+}

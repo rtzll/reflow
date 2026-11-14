@@ -48,6 +48,86 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  tree: [
+    {
+      name: 'Tree',
+      props: [
+        {
+          name: 'label',
+          type: 'string',
+          required: true,
+          description: 'Accessible name of the tree.',
+        },
+        {
+          name: 'items',
+          type: 'readonly TreeItem[]',
+          required: true,
+          description:
+            'Hierarchical data with unique values. Branches expand and leaves can be selected.',
+        },
+        {
+          name: 'value / defaultValue',
+          type: 'string | null',
+          required: false,
+          description:
+            'Controlled or initial selected leaf. Use null to clear a controlled selection.',
+        },
+        {
+          name: 'onValueChange',
+          type: '(value: string) => void',
+          required: false,
+          description: 'Reports the selected leaf.',
+        },
+        {
+          name: 'expanded / defaultExpanded',
+          type: 'readonly string[]',
+          required: false,
+          description: 'Controlled or initial list of expanded branch values.',
+        },
+        {
+          name: 'onExpandedChange',
+          type: '(expanded: string[]) => void',
+          required: false,
+          description: 'Reports expanded branch values when a branch opens or closes.',
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          required: false,
+          description: 'Row density.',
+        },
+      ],
+    },
+    {
+      name: 'TreeItem',
+      props: [
+        {
+          name: 'value',
+          type: 'string',
+          required: true,
+          description: 'Unique identifier across the tree.',
+        },
+        {
+          name: 'label',
+          type: 'string',
+          required: true,
+          description: 'Visible label, accessible name, and typeahead text.',
+        },
+        {
+          name: 'children',
+          type: 'readonly TreeItem[]',
+          required: false,
+          description: 'Nested items. An item with children is a branch.',
+        },
+        {
+          name: 'icon',
+          type: 'RemixNode',
+          required: false,
+          description: 'Optional decorative icon. Defaults to a folder or file.',
+        },
+      ],
+    },
+  ],
   toolbar: [
     {
       name: 'Toolbar',

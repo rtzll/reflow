@@ -2045,3 +2045,19 @@
   justify-content: space-between;
   gap: 8px 12px;
 }
+
+.example-project-tree {
+  inline-size: min(100%, 620px);
+  block-size: 238px;
+}
+
+.example-project-tree > .rf-resizable-pane:first-child {
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-panel-radius);
+  background: var(--rf-surface-2);
+  padding: 4px;
+}
+
+.example-project-tree .rf-code-block {
+  inline-size: 100%;
+}

@@ -1,3 +1,4 @@
+import { ProjectTreeExample } from './project-tree-example.tsx'
 import { TeamTableExample } from './team-table-example.tsx'
 import { BreadcrumbDemo } from './breadcrumb-example.tsx'
 import { SegmentedControlDemo } from './segmented-control-example.tsx'
@@ -347,7 +348,11 @@ export const Example = clientEntry(
           )
         case 'citation':
           return <CitationDemo variant="playground" />
+        case 'tree':
+          return <ProjectTreeExample />
         case 'code-block':
+          if (handle.props.gallery && handle.props.code)
+            return <ProjectTreeExample source={handle.props.code} />
           return (
             <CodeBlockDemo
               variant={handle.props.code ? 'gallery' : 'plain'}

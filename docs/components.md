@@ -6,7 +6,7 @@ Reflow started as a native Remix port of the [Fluid Functionalism](https://githu
 
 - **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `Field`, `FileInput`, `Input`, `InputCopy`, `InputGroup`, `NumberField`, `RadioGroup`, `SegmentedControl`, `Select`, `Slider`, `Switch`, `Textarea`
 - **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`
-- **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `Pagination`, `Resizable`, `Sidebar`, `Tabs`, `Toolbar`
+- **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `Pagination`, `Resizable`, `Sidebar`, `Tabs`, `Toolbar`, `Tree`
 - **Menus and overlays** · `AlertDialog`, `CommandMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
 - **Display and feedback** · `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `Card`, `CodeBlock`, `Progress`, `Skeleton`, `Spinner`, `Table`, `Toaster`
 - **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `Citation`, `InputMessage`, `QueuedStack`, `ThinkingIndicator`, `ThinkingSteps`, `TriggerMenu`
@@ -65,6 +65,7 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 6 | `AlertDialog` (shipped) | [UI SDK](https://ui-sdk.dev/docs/react/components/alert-dialog) | Dialog, destructive Button |
 | 7 | `Pagination` (shipped) | [UI SDK](https://ui-sdk.dev/docs/react/components/pagination) | Native links, Table |
 | 7 | `Toolbar` (shipped) | [UI SDK](https://ui-sdk.dev/docs/react/components/toolbar) | Button, keyboard focus navigation |
+| 7 | `Tree` (shipped) | [UI SDK](https://ui-sdk.dev/docs/react/components/tree) | Fluid hover, Resizable, CodeBlock |
 
 ### Decisions so far
 

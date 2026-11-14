@@ -30,6 +30,17 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
     description: 'Previous, next, and numbered links for navigating page-based results.',
     code: `<Pagination page={2} pageCount={3} href={(page) => \`/?teamPage=\${page}#team-table\`} />`,
   },
+  tree: {
+    description:
+      'Browse and select from a hierarchy with expandable branches and keyboard navigation.',
+    code: `const files = [
+  { value: 'app', label: 'app', children: [{ value: 'example', label: 'code-block-example.tsx' }] },
+  { value: 'readme', label: 'README.md' },
+]
+
+<Tree label="Project files" items={files} defaultExpanded={['app']}
+  defaultValue="readme" onValueChange={(file) => console.log(file)} />`,
+  },
   toolbar: {
     description:
       'A labeled row or column of action controls with one tab stop and arrow-key navigation.',
@@ -371,6 +382,7 @@ const components = [
   ['toaster', 'Toaster'],
   ['toolbar', 'Toolbar'],
   ['tooltip', 'Tooltip'],
+  ['tree', 'Tree'],
   ['trigger-menu', 'TriggerMenu'],
 ] as const
 
