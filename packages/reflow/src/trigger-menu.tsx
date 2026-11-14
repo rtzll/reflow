@@ -134,6 +134,7 @@ export function TriggerMenu(handle: Handle<TriggerMenuProps>) {
     dismissed = matchTrigger(field, handle.props.triggers)
     close()
     field.dispatchEvent(new Event('input', { bubbles: true }))
+    field.dispatchEvent(new Event('reflow:trigger-select', { bubbles: true }))
   }
 
   const fieldRef = ref<HTMLTextAreaElement>((element, signal) => {

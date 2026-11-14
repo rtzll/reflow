@@ -291,6 +291,10 @@ export function enhanceShowcaseSound() {
       play('select')
     }
   })
+  document.addEventListener('reflow:trigger-select', (event) => {
+    if (event.target instanceof Element && event.target.closest('.site-preview-stage'))
+      play('select', { emphasis: 'subtle' })
+  })
   document.addEventListener('rmx:tabs-change', (event) => {
     if (event.target instanceof Element && event.target.closest('.site-preview-stage .rf-tabs'))
       play('select', { emphasis: 'subtle' })
