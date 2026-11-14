@@ -3039,7 +3039,7 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
   position: absolute;
   inline-size: 40px;
   block-size: 12px;
-  border-radius: 4px;
+  border-radius: min(6px, calc(var(--rf-radius) / 2));
   background: var(--rf-hover);
   cursor: pointer;
   transition: background-color var(--rf-fast);

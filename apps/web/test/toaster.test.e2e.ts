@@ -4,6 +4,20 @@ import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
 import { open, router } from './showcase-router.ts'
 
+it('applies the sharp shape to every position marker in the gallery preview', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await open(page, '/?shape=sharp')
+  const markers = page.locator('[data-component="toaster"] .example-toaster-screen label')
+  await expect(markers).toHaveCount(6)
+  const radii = await markers.evaluateAll((labels) =>
+    labels.map((label) => parseFloat(getComputedStyle(label).borderTopLeftRadius)),
+  )
+  assert.ok(
+    radii.every((radius) => radius <= 1),
+    `Sharp preview radii: ${radii.join(', ')}`,
+  )
+})
+
 it('piles toasts on QueuedStack’s values and spreads them a gap apart when pointed at', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await page.setViewportSize({ width: 1440, height: 900 })
