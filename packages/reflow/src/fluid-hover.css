@@ -1,0 +1,64 @@
+/* One surface slides behind the current item, leaving its hit target intact. */
+[data-rf-hover-host] {
+  position: relative;
+  isolation: isolate;
+}
+
+.rf-highlight {
+  position: absolute;
+  z-index: -1;
+  inset: 0 auto auto 0;
+  pointer-events: none;
+  opacity: 0;
+  border-radius: var(--rf-radius, 8px);
+  transition: opacity 80ms ease;
+}
+
+.rf-highlight[data-visible] {
+  opacity: 1;
+}
+
+.rf-highlight[data-moving] {
+  transition:
+    var(--rf-highlight-travel),
+    opacity 80ms ease;
+}
+
+.rf-focus-ring {
+  z-index: 2;
+}
+
+.rf-focus-ring::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 1px solid var(--rf-accent, #6b97ff);
+  border-radius: calc(var(--rf-radius, 8px) + 2px);
+}
+
+.rf-focus-ring:not([data-visible]) {
+  transition: opacity var(--rf-exit-fast);
+}
+
+@media (forced-colors: none) {
+  .rf-tabs-list:has(> .rf-focus-ring[data-visible]) .rf-tab:focus-visible,
+  .rf-menu-list:has(> .rf-focus-ring[data-visible]) > .rf-menu-entry > .rf-menu-item:focus-visible {
+    outline-color: transparent;
+  }
+}
+
+@media (forced-colors: active) {
+  .rf-focus-ring {
+    display: none;
+  }
+}
+
+[data-hover='standard'] [data-rf-hover-layer] {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-highlight[data-moving] {
+    transition: opacity 80ms ease;
+  }
+}

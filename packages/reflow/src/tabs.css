@@ -1,0 +1,168 @@
+.rf-tabs {
+  max-inline-size: 100%;
+  color: var(--rf-fg);
+}
+
+.rf-tabs-list {
+  display: flex;
+  align-items: center;
+  max-inline-size: calc(100% + 8px);
+  padding: 4px;
+  margin: -4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.rf-tab {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  gap: var(--rf-gap, 8px);
+  min-block-size: var(--rf-control-height, 36px);
+  padding: 0 var(--rf-control-padding, 12px);
+  border: 0;
+  border-radius: var(--rf-radius, 8px);
+  outline: none;
+  background: transparent;
+  color: var(--rf-fg);
+  font: inherit;
+  font-size: var(--rf-text-body, 13px);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* The label and icon carry the colour and weight, as in the reference. */
+.rf-tab-label > span,
+.rf-tab-icon {
+  color: var(--rf-muted, #737373);
+  transition:
+    color 80ms ease,
+    font-variation-settings 80ms ease;
+}
+
+.rf-tab-label > span {
+  font-variation-settings: var(--rf-weight-normal);
+}
+
+:is(.rf-tab[aria-selected='true'], .rf-tab[data-rf-hovered], .rf-tab:focus-visible)
+  :is(.rf-tab-label > span, .rf-tab-icon) {
+  color: var(--rf-fg);
+}
+
+.rf-tab[aria-selected='true'] .rf-tab-label > span {
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.rf-tabs-list:not([data-rf-has-selection]) .rf-tab[aria-selected='true'] {
+  background: var(--rf-active);
+}
+
+.rf-tab:focus-visible {
+  outline: 1px solid var(--rf-accent, #6b97ff);
+  outline-offset: 1px;
+}
+
+.rf-tab:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.rf-tab-selection {
+  background: var(--rf-active);
+}
+
+.rf-tab-hover {
+  background: var(--rf-active);
+}
+
+.rf-tab-hover[data-visible] {
+  opacity: 0.4;
+}
+
+.rf-tabs-list:has(.rf-tab-hover[data-visible]) .rf-tab-selection {
+  opacity: 0.8;
+}
+
+.rf-tabs[data-variant='underline'] .rf-tab-selection,
+.rf-tabs[data-variant='underline']
+  .rf-tabs-list:not([data-rf-has-selection])
+  .rf-tab[aria-selected='true'] {
+  border-radius: 0;
+  background: linear-gradient(var(--rf-accent), var(--rf-accent)) bottom / 100% 2px no-repeat;
+}
+
+.rf-tab-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.rf-tab-icon svg {
+  inline-size: var(--rf-icon-size, 16px);
+  block-size: var(--rf-icon-size, 16px);
+}
+
+/* Size the label at its selected weight so the surrounding tabs stay put. */
+.rf-tab-label {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.rf-tab-label::before,
+.rf-tab-label > span {
+  grid-area: 1 / 1;
+  text-box: trim-both cap alphabetic;
+}
+
+.rf-tab-label::before {
+  content: attr(data-label);
+  visibility: hidden;
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.rf-tab[data-active-label] {
+  gap: 0;
+}
+
+.rf-tab[data-active-label] .rf-tab-label {
+  grid-template-columns: 0fr;
+  margin-inline-start: 0;
+  transition:
+    grid-template-columns 150ms ease,
+    margin 150ms ease;
+}
+
+.rf-tab[data-active-label][aria-selected='true'] .rf-tab-label {
+  grid-template-columns: 1fr;
+  margin-inline-start: max(6px, var(--rf-gap, 8px));
+}
+
+.rf-tab[data-active-label] .rf-tab-label::before,
+.rf-tab[data-active-label] .rf-tab-label > span {
+  min-inline-size: 0;
+  overflow: hidden;
+}
+
+.rf-tab-panel {
+  margin-block-start: 12px;
+}
+
+.rf-tab-panel:empty {
+  display: none;
+}
+
+@media (hover: hover) {
+  [data-hover='standard'] .rf-tab:not(:disabled):hover {
+    background-color: var(--rf-hover);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-tab[data-active-label] .rf-tab-label {
+    transition: opacity 80ms ease;
+  }
+}

@@ -1,0 +1,275 @@
+.rf-menu-icon,
+.rf-menu-check {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.rf-menu-icon svg {
+  inline-size: 16px;
+  block-size: 16px;
+}
+
+.rf-dropdown {
+  display: inline-block;
+  max-inline-size: 100%;
+}
+
+.rf-dropdown-surface {
+  border: 0;
+  background: var(--rf-surface-3, white);
+  box-shadow:
+    inset 0 1px light-dark(transparent, rgb(255 255 255 / 2%)),
+    inset 0 0 0 1px light-dark(transparent, rgb(255 255 255 / 2%)),
+    0 0 0 1px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 12%)),
+    0 1px 1px -0.5px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 18%)),
+    0 3px 3px -1.5px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 18%));
+}
+
+.rf-dropdown-surface:not([data-inline]) {
+  max-height: 480px;
+  overscroll-behavior: contain;
+}
+
+/* A submenu floats one elevation step above the menu that opened it. */
+.rf-dropdown-surface[data-menu-submenu] {
+  background: var(--rf-surface-5, white);
+}
+
+.rf-dropdown-surface .rf-menu-search {
+  background: inherit;
+}
+
+.rf-menu-list {
+  padding: 4px;
+  outline: none;
+}
+
+.rf-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: var(--rf-control-height, 36px);
+  padding: 0 8px;
+  border-radius: var(--rf-radius, 8px);
+  outline: none;
+  color: var(--rf-fg);
+  font-size: var(--rf-text-body, 13px);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Label, icon and chevron carry the muted/foreground colour, as in the reference. */
+.rf-menu-label > span,
+.rf-menu-icon,
+.rf-menu-chevron {
+  color: var(--rf-muted, #737373);
+}
+
+.rf-menu-chevron {
+  flex: none;
+  transition: color var(--rf-fast);
+}
+
+.rf-menu-item:is([data-highlighted], [aria-checked='true'])
+  :is(.rf-menu-label > span, .rf-menu-icon, .rf-menu-chevron),
+.rf-menu-item[aria-expanded='true'] .rf-menu-chevron {
+  color: var(--rf-fg);
+}
+
+.rf-menu-item[aria-checked='true'] {
+  background: var(--rf-active);
+}
+
+.rf-menu-item[aria-disabled='true'] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.rf-menu-item:focus-visible {
+  outline: 1px solid var(--rf-accent, #6b97ff);
+  outline-offset: -1px;
+}
+
+/* As in the reference: the label is stacked over an invisible copy at the
+   checked weight, both trimmed to the cap height with matching padding and
+   negative margin so truncation does not clip ascenders. */
+.rf-menu-label {
+  display: inline-grid;
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.rf-menu-label::before,
+.rf-menu-label > span {
+  grid-area: 1 / 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-block: 0.25em;
+  margin-block: -0.25em;
+  text-box: trim-both cap alphabetic;
+}
+
+.rf-menu-label::before {
+  content: attr(data-label);
+  visibility: hidden;
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.rf-menu-label > span {
+  font-variation-settings: var(--rf-weight-normal);
+  transition:
+    color var(--rf-fast),
+    font-variation-settings var(--rf-fast);
+}
+
+.rf-menu-item[aria-checked='true'] .rf-menu-label > span {
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.rf-menu-check {
+  visibility: hidden;
+  transition: visibility 0s linear 40ms;
+}
+
+.rf-menu-check path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 40ms ease-in;
+}
+
+.rf-menu-item[aria-checked='true'] .rf-menu-check {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.rf-menu-item[aria-checked='true'] .rf-menu-check path {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 80ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-menu-item .rf-menu-check,
+  .rf-menu-item .rf-menu-check path {
+    transition: none;
+  }
+}
+
+.rf-menu-hover {
+  border-radius: var(--rf-radius, 8px);
+  background: var(--rf-hover);
+}
+
+.rf-menu-separator {
+  height: 1px;
+  margin: 4px -4px;
+  background: color-mix(in oklab, var(--rf-border, #dedede) 60%, transparent);
+}
+
+.rf-menu-shortcut {
+  flex: none;
+  padding: 1px 4px;
+  border: 1px solid var(--rf-border, #dedede);
+  border-radius: 4px;
+  color: var(--rf-muted, #737373);
+  font: inherit;
+  font-size: 11px;
+}
+
+[data-hover='standard'] .rf-menu-item[data-highlighted] {
+  background: var(--rf-hover);
+}
+
+.rf-menu-search {
+  position: sticky;
+  z-index: 1;
+  inset-block-start: 0;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--rf-gap, 8px);
+  block-size: var(--rf-control-height, 36px);
+  padding-inline: 12px;
+  border: 0 solid color-mix(in oklab, var(--rf-border, #dedede) 60%, transparent);
+  border-block-end-width: 1px;
+  background: var(--rf-surface-2, var(--rf-bg, white));
+}
+
+.rf-menu-search > svg {
+  flex: none;
+  inline-size: var(--rf-icon-size, 16px);
+  block-size: var(--rf-icon-size, 16px);
+  color: var(--rf-muted, #737373);
+  stroke-width: 1.5;
+  transition:
+    color var(--rf-fast),
+    stroke-width var(--rf-fast);
+}
+
+.rf-menu-search:focus-within > svg {
+  color: var(--rf-fg);
+  stroke-width: 2;
+}
+
+.rf-menu-search input {
+  box-sizing: content-box;
+  flex: 1;
+  min-inline-size: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  background: transparent;
+  color: var(--rf-fg);
+  font: inherit;
+  font-size: var(--rf-text-body, 13px);
+  line-height: 24px;
+}
+
+.rf-menu-search input::placeholder {
+  color: var(--rf-muted, #737373);
+}
+
+.rf-menu-search + .rf-menu-list {
+  padding-block-start: 2px;
+}
+
+.rf-menu-empty {
+  margin-block: 2px;
+  padding: 24px 8px;
+  text-align: center;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-body, 13px);
+}
+
+.rf-dropdown-surface[data-inline] {
+  max-inline-size: 100%;
+  opacity: 1;
+  transform: none;
+}
+.rf-menu-group-label {
+  padding: 6px 8px;
+  font: var(--rf-text-caption) / var(--rf-leading-caption) var(--rf-font);
+  color: var(--rf-muted);
+}
+
+.rf-menu-shortcut {
+  display: inline-flex;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+}
+.rf-menu-shortcut kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 3px;
+  border: 1px solid var(--rf-border);
+  border-radius: 4px;
+  background: var(--rf-muted-bg);
+  color: var(--rf-muted);
+  font: 11px / 1 var(--rf-font);
+}

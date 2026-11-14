@@ -1,0 +1,87 @@
+.rf-menu-surface {
+  --rf-menu-rest-transform: translateY(-4px) scaleY(0.96);
+  box-sizing: border-box;
+  margin: 0;
+  inline-size: 288px;
+  max-inline-size: calc(100vw - 16px);
+  padding: 0;
+  border: 1px solid var(--rf-border, #dedede);
+  border-radius: var(--rf-panel-radius, 12px);
+  background: var(--rf-surface-2, var(--rf-bg, white));
+  color: var(--rf-fg);
+  box-shadow:
+    0 12px 28px rgb(0 0 0 / 14%),
+    0 2px 5px rgb(0 0 0 / 8%);
+  /* Reference popup motion: drop 4px and grow from 96% height on the fast
+     spring; leave on the fast exit tween. The closed state carries the exit
+     transition, the open state the enter transition. */
+  opacity: 0;
+  transform: var(--rf-menu-rest-transform);
+  transform-origin: top;
+  transition:
+    opacity var(--rf-exit-fast),
+    transform var(--rf-exit-fast),
+    display var(--rf-exit-fast) allow-discrete,
+    overlay var(--rf-exit-fast) allow-discrete;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+
+.rf-menu-surface[data-anchor-placement^='top'] {
+  --rf-menu-rest-transform: translateY(4px) scaleY(0.96);
+  transform-origin: bottom;
+}
+
+/* Submenus open sideways and can flip toward the opposite viewport edge. */
+.rf-menu-surface[data-menu-submenu] {
+  --rf-menu-rest-transform: scaleY(0.96);
+  inline-size: 224px;
+  transform-origin: left;
+}
+
+.rf-menu-surface[data-menu-submenu][data-anchor-placement^='left'] {
+  transform-origin: right;
+}
+
+.rf-menu-surface:popover-open {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--rf-spring-fast),
+    transform var(--rf-spring-fast),
+    display var(--rf-spring-fast) allow-discrete,
+    overlay var(--rf-spring-fast) allow-discrete;
+}
+
+@starting-style {
+  .rf-menu-surface:popover-open {
+    opacity: 0;
+    transform: var(--rf-menu-rest-transform);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-menu-surface {
+    transition:
+      opacity var(--rf-exit-fast),
+      display var(--rf-exit-fast) allow-discrete,
+      overlay var(--rf-exit-fast) allow-discrete;
+  }
+
+  .rf-menu-surface:popover-open {
+    transition:
+      opacity var(--rf-spring-fast),
+      display var(--rf-spring-fast) allow-discrete,
+      overlay var(--rf-spring-fast) allow-discrete;
+  }
+
+  .rf-menu-surface {
+    transform: none;
+  }
+
+  @starting-style {
+    .rf-menu-surface:popover-open {
+      transform: none;
+    }
+  }
+}
