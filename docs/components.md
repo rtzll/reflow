@@ -19,14 +19,14 @@ A new component, or a new upstream one, is done when it has all of the following
 
 **Behavior**
 
-- Built on native elements or Remix UI primitives, with Reflow code only for the gaps. No new runtime dependency (see the [dependency policy](scope.md#dependency-policy)).
+- Built on native elements, Remix UI primitives and Reflow's behaviors, placed as [code structure](scope.md#code-structure) describes. Logic for a gap that another component also needs becomes a behavior. No new runtime dependency (see the [dependency policy](scope.md#dependency-policy)).
 - Keyboard operation, visible focus, and correct roles and names. Form controls take part in forms: values, `name`, reset and validation.
 - Server rendering works without JavaScript where it makes sense, and hydration does not shift the layout.
 
 **Look and motion**
 
 - Reflow's own style: surfaces, radius, type and color come from the shared CSS variables. A reference library informs concepts and parameters, never styling.
-- Shared systems before new code: fluid hover and its selection and focus layers, the `--rf-spring-*` tiers and `motion` in `systems.ts`, ScrollArea, Tooltip, Dropdown.
+- Systems and existing components before new code: fluid hover and its selection and focus layers, the `--rf-spring-*` tiers and `motion` in `src/systems/`, and components such as ScrollArea, Tooltip and Dropdown.
 - Default and compact sizes, light and dark themes, every shape, forced colors, and reduced motion, which keeps fades and drops movement.
 - Pieces that look alike stay in line: a pile of toasts and QueuedStack share their stacking values.
 

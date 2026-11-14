@@ -33,6 +33,24 @@ The pnpm workspace has two packages. `packages/reflow` exports ESM components, T
 
 Separate reusable geometry, color, date, and state logic from DOM measurement and Remix component lifecycle integration. Share hover, motion, focus, density, and surface behavior instead of reimplementing it in every component.
 
+### Code structure
+
+To anyone using the package, everything it exports is a component, however many other components it is built from. Inside `packages/reflow/src`, code that is not a component sits in one of three layers, and components build on them:
+
+| Layer | What it is | Where |
+| --- | --- | --- |
+| Primitive | Headless, accessible behavior from `@remix-run/ui`. Only Remix UI's modules are called primitives. | `@remix-run/ui/*` |
+| Behavior | Reflow's headless code for a gap in Remix UI: keyboard, focus, pointer or timing logic with no markup and no styles. Each one says which gap it fills, so it can be replaced when Remix UI covers it. | `src/behaviors/` |
+| System | The look and motion shared across components: fluid hover, the motion tiers, reveal, colors. The showcase documents these under Systems. | `src/systems/` |
+| Component | What the package exports and the docs list: markup, styles and behavior, built from the layers above and from other components. | `src/<component>.tsx` |
+
+Where code goes:
+
+- A component lives in its own file, named after it, with its stylesheet beside it. Parts of one component, such as `CardTitle` or `FieldLabel`, stay in their component's file.
+- A component does not write keyboard, focus or hover-timing logic inline when a primitive or behavior covers it. If two components need the same logic and neither covers it, it becomes a behavior.
+- A helper used by one component stays next to that component. Only helpers shared by two or more components move into a layer.
+- Imports point down: components import systems, behaviors and primitives; systems and behaviors never import components.
+
 ## Showcase requirements
 
 - Overview: left navigation grouped into systems and components, central interactive preview cards, and a customization rail.
