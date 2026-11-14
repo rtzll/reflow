@@ -313,6 +313,15 @@ export function enhanceShowcaseSound() {
       direction: item.checked === false ? 'back' : 'forward',
     })
   })
+  document.addEventListener('click', (event) => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+    const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('.site-preview-stage .rf-pagination a') : null
+    if (!link || link.getAttribute('aria-current') === 'page') return
+    const current = Number(link.closest('.rf-pagination')?.querySelector('[aria-current="page"]')?.getAttribute('aria-label')?.match(/\d+/)?.[0])
+    const label = link.getAttribute('aria-label') ?? ''
+    const target = Number(label.match(/\d+/)?.[0])
+    play('navigate', { emphasis: 'subtle', direction: label === 'Previous page' || (target && target < current) ? 'back' : 'forward' })
+  })
   document.addEventListener('rmx:tabs-change', (event) => {
     if (event.target instanceof Element && event.target.closest('.site-preview-stage .rf-tabs'))
       play('select', { emphasis: 'subtle' })
