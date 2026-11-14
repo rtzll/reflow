@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "reflow",
+  "send_metrics": false,
   "main": "build/worker/index.js",
   "no_bundle": true,
   "compatibility_date": "2026-11-08",
