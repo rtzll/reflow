@@ -83,6 +83,7 @@ export function TeamTableExample(
               pageCount={pageCount}
               label="Team pages"
               size="compact"
+              resetScroll="manual"
               href={(next) => {
                 const query = new URLSearchParams()
                 if (search) query.set('q', search)

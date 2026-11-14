@@ -8,6 +8,8 @@ export interface PaginationProps {
   href: (page: number) => string
   label?: string
   size?: ControlSize
+  /** Keep the current scroll position during Remix navigation. */
+  resetScroll?: 'manual' | 'after-transition'
 }
 
 function pageNumbers(page: number, count: number) {
@@ -27,7 +29,7 @@ function pageNumbers(page: number, count: number) {
 
 export function Pagination(handle: Handle<PaginationProps>) {
   return () => {
-    const { page, pageCount, href, label = 'Pagination', size } = handle.props
+    const { page, pageCount, href, label = 'Pagination', size, resetScroll } = handle.props
     const count = Number.isFinite(pageCount) ? Math.max(0, Math.floor(pageCount)) : 0
     if (count < 2) return null
     const current = Number.isFinite(page) ? Math.min(count, Math.max(1, Math.floor(page))) : 1
@@ -37,7 +39,12 @@ export function Pagination(handle: Handle<PaginationProps>) {
         <ul>
           <li>
             {current > 1 ? (
-              <a class="rf-pagination-arrow" href={href(current - 1)} aria-label="Previous page">
+              <a
+                class="rf-pagination-arrow"
+                href={href(current - 1)}
+                data-rmx-reset-scroll={resetScroll}
+                aria-label="Previous page"
+              >
                 <Icon name="chevron-left" />
               </a>
             ) : (
@@ -53,6 +60,7 @@ export function Pagination(handle: Handle<PaginationProps>) {
               ) : (
                 <a
                   href={href(number)}
+                  data-rmx-reset-scroll={resetScroll}
                   aria-label={`Page ${number}`}
                   aria-current={current === number ? 'page' : undefined}
                 >
@@ -63,7 +71,12 @@ export function Pagination(handle: Handle<PaginationProps>) {
           ))}
           <li>
             {current < count ? (
-              <a class="rf-pagination-arrow" href={href(current + 1)} aria-label="Next page">
+              <a
+                class="rf-pagination-arrow"
+                href={href(current + 1)}
+                data-rmx-reset-scroll={resetScroll}
+                aria-label="Next page"
+              >
                 <Icon name="chevron-right" />
               </a>
             ) : (

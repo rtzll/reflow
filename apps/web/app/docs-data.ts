@@ -34,6 +34,12 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           description: 'Builds the URL for every available page link.',
         },
         {
+          name: 'resetScroll',
+          type: "'after-transition' | 'manual'",
+          required: false,
+          description: 'Set to manual to keep the current scroll position during Remix navigation.',
+        },
+        {
           name: 'label',
           type: 'string',
           required: false,
