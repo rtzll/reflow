@@ -55,6 +55,7 @@ import { SoundCombobox } from './sound-combobox.tsx'
 import { playCopySuccess } from './showcase-sound.ts'
 import {
   Accordion,
+  AlertDialog,
   AskUserQuestions,
   Badge,
   Banner,
@@ -378,6 +379,16 @@ export const componentExamples: Record<string, readonly DocumentationExample[]> 
       'autoplay',
       carouselExampleCode(4, true),
       'Hover the slide to pause its progress.',
+    ),
+  ],
+  'alert-dialog': [
+    demo(
+      'Leave without saving',
+      'leave',
+      `<AlertDialog trigger="Leave editor" title="Leave without saving?"
+  description="Your unsaved changes will be discarded." cancelLabel="Keep editing" confirmLabel="Leave"
+  onConfirm={() => console.log('Left')} />`,
+      'Escape and Keep editing dismiss the dialog. Backdrop clicks keep it open.',
     ),
   ],
   resizable: [
@@ -2464,6 +2475,24 @@ export function ComponentDemo(
         return <CitationDemo variant={variant} />
       case 'chat-layout':
         return <ChatLayoutDemo variant={variant} />
+      case 'alert-dialog':
+        return (
+          <div class="example-block">
+            <AlertDialog
+              trigger="Leave editor"
+              title="Leave without saving?"
+              description="Your unsaved changes will be discarded."
+              cancelLabel="Keep editing"
+              confirmLabel="Leave"
+              onConfirm={() => say('Left editor')}
+            />
+            {output && (
+              <span class="example-status" role="status">
+                {output}
+              </span>
+            )}
+          </div>
+        )
       case 'resizable':
         return <ResizableDemo orientation="vertical" />
       case 'file-input':

@@ -39,7 +39,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'button',
     'breadcrumb',
     'table',
-    'dialog',
+    'alert-dialog',
     'calendar',
     'date-picker',
     'chat-message',
@@ -125,7 +125,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
       const tile = (slug: string) =>
         gallery.locator(`article[data-component="${slug}"]`).boundingBox()
       const [table, dialog, datePicker, wideCalendar, tabs, thinking] = await Promise.all(
-        ['table', 'dialog', 'date-picker', 'calendar', 'tabs', 'thinking-steps'].map(tile),
+        ['table', 'alert-dialog', 'date-picker', 'calendar', 'tabs', 'thinking-steps'].map(tile),
       )
       assert.equal(table!.y, dialog!.y)
       assert.equal(datePicker!.y, wideCalendar!.y)

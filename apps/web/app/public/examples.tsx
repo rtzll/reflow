@@ -34,6 +34,7 @@ import { play } from 'cuelume'
 import {
   Avatar,
   Accordion,
+  AlertDialog,
   AskUserQuestions,
   Badge,
   Button,
@@ -672,6 +673,27 @@ export const Example = clientEntry(
           if (handle.props.gallery)
             return <DatePicker label="Start date" defaultValue={datePickerToday()} clearable />
           return <DatePicker label="Start date" defaultMonth="2026-11-01" />
+        case 'alert-dialog':
+          return (
+            <div class="example-block">
+              <AlertDialog
+                trigger="Delete draft"
+                triggerVariant="secondary"
+                title="Delete this draft?"
+                description="This permanently removes the draft."
+                confirmLabel="Delete draft"
+                onConfirm={() => {
+                  lastAction = 'Draft deleted'
+                  void handle.update()
+                }}
+              />
+              {lastAction && (
+                <span class="example-status" role="status">
+                  {lastAction}
+                </span>
+              )}
+            </div>
+          )
         case 'dialog':
           return (
             <Dialog

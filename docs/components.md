@@ -7,7 +7,7 @@ Reflow started as a native Remix port of the [Fluid Functionalism](https://githu
 - **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `Field`, `FileInput`, `Input`, `InputCopy`, `InputGroup`, `NumberField`, `RadioGroup`, `SegmentedControl`, `Select`, `Slider`, `Switch`, `Textarea`
 - **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`
 - **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `Resizable`, `Sidebar`, `Tabs`
-- **Menus and overlays** · `CommandMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
+- **Menus and overlays** · `AlertDialog`, `CommandMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
 - **Display and feedback** · `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `Card`, `CodeBlock`, `Progress`, `Table`, `Toaster`
 - **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `Citation`, `InputMessage`, `QueuedStack`, `ThinkingIndicator`, `ThinkingSteps`, `TriggerMenu`
 
@@ -62,6 +62,7 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 6 | `TriggerMenu` (shipped) | [UI SDK](https://ui-sdk.dev/docs/react/components/trigger-menu) | InputMessage, anchored positioning, fluid hover |
 | 6 | `FileInput` (shipped) | [UI SDK](https://ui-sdk.dev/docs/react/components/file-input) | Native file input, Field, InputMessage file filtering |
 | 6 | `Resizable` (shipped) | [UI SDK](https://ui-sdk.dev/docs/react/components/resizable) | Sidebar grip interaction |
+| 6 | `AlertDialog` (shipped) | [UI SDK](https://ui-sdk.dev/docs/react/components/alert-dialog) | Dialog, destructive Button |
 
 ### Decisions so far
 

@@ -23,6 +23,8 @@ Use FileInput for uploads in a form. Set accept and any count or size limits, an
 
 Use Resizable for two panes that share space. Name its separator and supply an initial percentage and bounds for the first pane. Use onValueCommit to save a layout after resizing.
 
+Use AlertDialog when the user needs to confirm a destructive action. Explain the consequence and name the action. Cancel receives initial focus.
+
 Apply theme settings on a common ancestor with `data-theme`, `data-accent`, `data-shape`, `data-density`, and `data-hover`. Use the `--rf-*` CSS properties from the installed stylesheet for surfaces, spacing, text and focus colors. Consumers can provide icons as slots without adding an icon runtime.
 
 ## Interaction craft

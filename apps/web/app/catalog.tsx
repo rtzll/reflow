@@ -59,6 +59,10 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       selected: false,
     }),
   },
+  'alert-dialog': {
+    description: 'A modal confirmation that gives the safer action initial focus.',
+    code: `<AlertDialog trigger="Delete draft" title="Delete this draft?" description="This permanently removes the draft." confirmLabel="Delete draft" onConfirm={() => console.log('Deleted')} />`,
+  },
   resizable: {
     description: 'Split two panes and adjust their space with the pointer or keyboard.',
     code: `<Resizable label="Resize conversation" defaultValue={65} min={40} max={75}
@@ -275,6 +279,7 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
 
 const components = [
   ['accordion', 'Accordion'],
+  ['alert-dialog', 'AlertDialog'],
   ['ask-user-questions', 'AskUserQuestions'],
   ['avatar', 'Avatar'],
   ['badge', 'Badge'],

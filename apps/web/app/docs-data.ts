@@ -2734,6 +2734,68 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  'alert-dialog': [
+    {
+      name: 'AlertDialog',
+      props: [
+        { name: 'title', type: 'string', required: true, description: 'Names the modal.' },
+        {
+          name: 'description',
+          type: 'string',
+          required: true,
+          description: 'Explains what the action will do.',
+        },
+        {
+          name: 'trigger',
+          type: 'RemixNode',
+          required: false,
+          description: 'Contents of the button that opens the modal.',
+        },
+        {
+          name: 'triggerVariant / triggerSize',
+          type: 'Button props',
+          required: false,
+          description: 'Appearance of the trigger.',
+        },
+        {
+          name: 'confirmLabel',
+          type: 'string',
+          required: true,
+          description: 'Label for the confirmation button.',
+        },
+        {
+          name: 'cancelLabel',
+          type: 'string',
+          required: false,
+          description: 'Label for the cancel button. Defaults to Cancel.',
+        },
+        {
+          name: 'confirmVariant',
+          type: 'ButtonVariant',
+          required: false,
+          description: 'Confirm button appearance. Defaults to destructive.',
+        },
+        {
+          name: 'onConfirm',
+          type: '() => void',
+          required: true,
+          description: 'Invoked when the confirm action is activated.',
+        },
+        {
+          name: 'open / defaultOpen',
+          type: 'boolean',
+          required: false,
+          description: 'Controlled or initial open state.',
+        },
+        {
+          name: 'onOpenChange',
+          type: '(open: boolean) => void',
+          required: false,
+          description: 'Reports requests to open or close.',
+        },
+      ],
+    },
+  ],
   resizable: [
     {
       name: 'Resizable',

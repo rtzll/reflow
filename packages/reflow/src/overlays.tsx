@@ -27,6 +27,14 @@ export interface DialogProps {
 }
 
 export function Dialog(handle: Handle<DialogProps>) {
+  return () => <DialogSurface {...handle.props} />
+}
+
+interface DialogSurfaceProps extends DialogProps {
+  role?: 'alertdialog'
+}
+
+function DialogSurface(handle: Handle<DialogSurfaceProps>) {
   let dialog: HTMLDialogElement | null = null
   let invoker: HTMLElement | null = null
   let internalOpen = handle.props.defaultOpen ?? false
@@ -146,6 +154,7 @@ export function Dialog(handle: Handle<DialogProps>) {
         )}
         <dialog
           id={id}
+          role={props.role}
           class="rf-dialog"
           data-size={props.size ?? 'sm'}
           data-flush={props.flush || undefined}
@@ -174,6 +183,54 @@ export function Dialog(handle: Handle<DialogProps>) {
           )}
         </dialog>
       </>
+    )
+  }
+}
+
+export interface AlertDialogProps extends Pick<
+  DialogProps,
+  'trigger' | 'triggerVariant' | 'triggerSize' | 'title' | 'open' | 'defaultOpen' | 'onOpenChange'
+> {
+  description: string
+  confirmLabel: string
+  cancelLabel?: string
+  confirmVariant?: ButtonProps['variant']
+  onConfirm: () => void
+}
+
+/** Confirm an action in a modal with the safer choice focused first. */
+export function AlertDialog(handle: Handle<AlertDialogProps>) {
+  return () => {
+    const {
+      confirmLabel,
+      cancelLabel = 'Cancel',
+      confirmVariant = 'destructive',
+      onConfirm,
+      ...props
+    } = handle.props
+    return (
+      <DialogSurface
+        {...props}
+        role="alertdialog"
+        dismissOnBackdrop={false}
+        showCloseButton={false}
+        footer={(close) => (
+          <>
+            <Button autofocus variant="secondary" mix={on('click', close)}>
+              {cancelLabel}
+            </Button>
+            <Button
+              variant={confirmVariant}
+              mix={on('click', () => {
+                onConfirm()
+                close()
+              })}
+            >
+              {confirmLabel}
+            </Button>
+          </>
+        )}
+      />
     )
   }
 }

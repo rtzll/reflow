@@ -496,7 +496,7 @@ const galleryOrder = [
   'button',
   'breadcrumb',
   'table',
-  'dialog',
+  'alert-dialog',
   'calendar',
   'date-picker',
   'chat-message',
