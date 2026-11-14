@@ -9,7 +9,7 @@ async function trackAudio(page: Page) {
     const start = AudioScheduledSourceNode.prototype.start
     const startBuffer = AudioBufferSourceNode.prototype.start
     let starts = 0
-    const state = window as Window & { soundTestStarts: number }
+    const state = window as Window & { soundTestStarts?: number }
     state.soundTestStarts = 0
     AudioScheduledSourceNode.prototype.start = function (...args) {
       state.soundTestStarts = ++starts
@@ -20,7 +20,8 @@ async function trackAudio(page: Page) {
       return startBuffer.apply(this, args)
     }
   })
-  return () => page.evaluate(() => (window as Window & { soundTestStarts: number }).soundTestStarts)
+  return () =>
+    page.evaluate(() => (window as Window & { soundTestStarts?: number }).soundTestStarts ?? 0)
 }
 
 it('renders the saved sound state before the browser initializes audio', async (t) => {
