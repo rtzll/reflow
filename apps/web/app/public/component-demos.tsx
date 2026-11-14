@@ -97,6 +97,7 @@ import {
   InputCopy,
   InputField,
   InputGroup,
+  Progress,
   NumberField,
   InputMessage,
   RadioGroup,
@@ -374,6 +375,14 @@ export const componentExamples: Record<string, readonly DocumentationExample[]> 
       'autoplay',
       carouselExampleCode(4, true),
       'Hover the slide to pause its progress.',
+    ),
+  ],
+  progress: [
+    demo(
+      'Indeterminate',
+      'indeterminate',
+      `<Progress label="Preparing files" />`,
+      'Omit the value while the amount of work is unknown.',
     ),
   ],
   'number-field': [
@@ -2425,6 +2434,12 @@ export function ComponentDemo(
         return <CitationDemo variant={variant} />
       case 'chat-layout':
         return <ChatLayoutDemo variant={variant} />
+      case 'progress':
+        return (
+          <div style={{ width: 'min(100%, 280px)' }}>
+            <Progress label="Preparing files" />
+          </div>
+        )
       case 'number-field':
         return (
           <div style={{ width: 'min(100%, 240px)' }}>

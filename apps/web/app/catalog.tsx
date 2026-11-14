@@ -58,6 +58,10 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       selected: false,
     }),
   },
+  progress: {
+    description: 'A labeled progress bar for work with a known total or an unknown duration.',
+    code: `<Progress label="Uploading files" value={7} max={12} showValue />`,
+  },
   'number-field': {
     description:
       'A labeled numeric field with native validation, step buttons, and optional drag-to-scrub.',
@@ -287,6 +291,7 @@ const components = [
   ['input-message', 'InputMessage'],
   ['number-field', 'NumberField'],
   ['popover', 'Popover'],
+  ['progress', 'Progress'],
   ['queued-stack', 'QueuedStack'],
   ['radio-group', 'RadioGroup'],
   ['segmented-control', 'SegmentedControl'],

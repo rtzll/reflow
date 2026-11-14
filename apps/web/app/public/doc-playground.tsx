@@ -57,6 +57,7 @@ import {
   InputCopy,
   InputField,
   InputGroup,
+  Progress,
   InputMessage,
   RadioGroup,
   Select,
@@ -107,6 +108,11 @@ const label = (initial: string): Control => ({
 })
 
 export const playgroundControls: Record<string, readonly Control[]> = {
+  progress: [
+    toggle('indeterminate', 'Indeterminate'),
+    toggle('showValue', 'Show percentage', true),
+    size,
+  ],
   accordion: [
     choice('expand', 'Expand', ['one or none', 'one at a time', 'any number']),
     toggle('highlightExpanded', 'Highlight expanded', true),
@@ -942,6 +948,18 @@ export function PlaygroundExample(
             placement={String(v.placement) as 'bottom' | 'top' | 'right' | 'left'}
             title={Boolean(v.title)}
           />
+        )
+      case 'progress':
+        return (
+          <div style={{ width: 'min(100%, 280px)' }}>
+            <Progress
+              label="Uploading files"
+              value={v.indeterminate ? undefined : 7}
+              max={12}
+              showValue={Boolean(v.showValue)}
+              size={density}
+            />
+          </div>
         )
       case 'segmented-control':
         return (

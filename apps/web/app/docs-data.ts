@@ -2728,6 +2728,43 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  progress: [
+    {
+      name: 'Progress',
+      props: [
+        {
+          name: 'label',
+          required: true,
+          type: 'string',
+          description: 'Visible and accessible name.',
+        },
+        {
+          name: 'value',
+          required: false,
+          type: 'number',
+          description: 'Completed work. Omit to show indeterminate progress.',
+        },
+        {
+          name: 'max',
+          required: false,
+          type: 'number',
+          description: 'Total work. Defaults to 100.',
+        },
+        {
+          name: 'size',
+          required: false,
+          type: "'default' | 'compact'",
+          description: 'Bar thickness.',
+        },
+        {
+          name: 'showValue',
+          required: false,
+          type: 'boolean',
+          description: 'Shows the percentage beside the label when the value is known.',
+        },
+      ],
+    },
+  ],
   'number-field': [
     {
       name: 'NumberField',

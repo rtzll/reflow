@@ -15,6 +15,8 @@ Use `@rtzll/reflow` components and import `@rtzll/reflow/styles.css` once. Prefe
 
 Use NumberField for typed quantities with native form validation and step buttons. Enable scrub for values users will adjust repeatedly.
 
+Use Progress for work in flight. Supply a value and total when known and omit the value while the total is unknown.
+
 Apply theme settings on a common ancestor with `data-theme`, `data-accent`, `data-shape`, `data-density`, and `data-hover`. Use the `--rf-*` CSS properties from the installed stylesheet for surfaces, spacing, text and focus colors. Consumers can provide icons as slots without adding an icon runtime.
 
 ## Interaction craft

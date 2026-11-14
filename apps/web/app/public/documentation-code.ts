@@ -237,6 +237,8 @@ export function playgroundFragment(slug: string, values: PlaygroundValues): stri
       return `${opening} defaultMonth="2026-11-01" />`
     case 'card':
       return cardPlaygroundCode(values)
+    case 'progress':
+      return `<Progress label="Uploading files"${values.indeterminate ? '' : ' value={7} max={12}'}${values.showValue ? ' showValue' : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
     case 'carousel-dots':
       return carouselExampleCode(Number(values.count), Boolean(values.autoplay))
     case 'chat-message':

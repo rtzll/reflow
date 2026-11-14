@@ -1,0 +1,77 @@
+.rf-progress {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  color: var(--rf-fg);
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+}
+
+.rf-progress-caption {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.rf-progress-caption > :nth-child(2) {
+  color: var(--rf-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-progress-track {
+  overflow: hidden;
+  block-size: 6px;
+  border-radius: var(--rf-radius);
+  background: var(--rf-border);
+}
+
+.rf-progress[data-size='compact'] .rf-progress-track,
+[data-density='compact'] .rf-progress:not([data-size]) .rf-progress-track {
+  block-size: 4px;
+}
+
+.rf-progress-fill {
+  block-size: 100%;
+  border-radius: inherit;
+  background: var(--rf-accent);
+  transition: inline-size var(--rf-medium) var(--rf-ease-out);
+}
+
+.rf-progress[data-indeterminate] .rf-progress-fill {
+  inline-size: 35%;
+  animation: rf-progress-travel 1.4s ease-in-out infinite alternate;
+}
+
+.rf-progress:dir(rtl) {
+  --rf-progress-direction: -1;
+}
+
+@keyframes rf-progress-travel {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(185.7% * var(--rf-progress-direction, 1)));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-progress-fill {
+    transition: none;
+  }
+
+  .rf-progress[data-indeterminate] .rf-progress-fill {
+    animation: none;
+    margin-inline: auto;
+  }
+}
+
+@media (forced-colors: active) {
+  .rf-progress-track {
+    outline: 1px solid CanvasText;
+  }
+
+  .rf-progress-fill {
+    forced-color-adjust: none;
+    background: Highlight;
+  }
+}

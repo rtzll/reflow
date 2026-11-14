@@ -1,4 +1,4 @@
-import { Button, Drawer, SegmentedControl, Switch, type DrawerSide } from '@rtzll/reflow'
+import { Button, Drawer, Progress, SegmentedControl, Switch, type DrawerSide } from '@rtzll/reflow'
 import { on, type Handle } from 'remix/component'
 
 function Filters(handle: Handle<{ size?: 'default' | 'compact' }>) {
@@ -51,14 +51,17 @@ function sideContent(side: DrawerSide, size?: 'default' | 'compact') {
       return <Navigation />
     case 'right':
       return (
-        <dl class="doc-drawer-details">
-          <dt>Owner</dt>
-          <dd>Reflow team</dd>
-          <dt>Updated</dt>
-          <dd>November 9, 2026</dd>
-          <dt>Status</dt>
-          <dd>In review</dd>
-        </dl>
+        <div class="doc-drawer-filters">
+          <dl class="doc-drawer-details">
+            <dt>Owner</dt>
+            <dd>Reflow team</dd>
+            <dt>Updated</dt>
+            <dd>November 9, 2026</dd>
+            <dt>Status</dt>
+            <dd>In review</dd>
+          </dl>
+          <Progress label="Review progress" value={3} max={5} showValue />
+        </div>
       )
     case 'top':
       return (

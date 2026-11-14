@@ -59,6 +59,7 @@ import {
   InputField,
   Icon,
   InputGroup,
+  Progress,
   NumberField,
   InputMessage,
   QueuedStack,
@@ -726,6 +727,12 @@ export const Example = clientEntry(
                 value="pnpm add remix @remix-run/ui @remix-run/component"
                 onCopy={playCopySuccess}
               />
+            </div>
+          )
+        case 'progress':
+          return (
+            <div style={{ width: 'min(100%, 280px)' }}>
+              <Progress label="Uploading files" value={7} max={12} showValue />
             </div>
           )
         case 'number-field':
