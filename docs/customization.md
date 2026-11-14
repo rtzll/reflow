@@ -37,6 +37,8 @@ body {
 
 The library declares an Inter-first font stack but does not bundle the showcase's font assets in the package. Supply your own fonts or use the system stack above. Accent affects accent treatments such as focus rings; it does not recolor every component. The [foundation stylesheet](../packages/reflow/src/foundations.css) defines surface, spacing, typography, radius, and motion tokens.
 
+For text links, add `class="rf-link"` to a native anchor. The class uses the theme's foreground color and keeps the underline visible at rest. The underline strengthens on hover and keyboard focus.
+
 ## Motion and application state
 
 Components respond to `prefers-reduced-motion`. Reduced motion limits movement; it does not promise that all color and opacity transitions disappear. Keep that preference intact when overriding motion tokens.

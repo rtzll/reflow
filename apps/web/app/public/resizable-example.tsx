@@ -42,7 +42,9 @@ export function ResizableDemo(handle: Handle<{ orientation?: 'horizontal' | 'ver
           <ol>
             {references.map(({ source }) => (
               <li key={source.href}>
-                <a href={source.href}>{source.title}</a>
+                <a class="rf-link" href={source.href}>
+                  {source.title}
+                </a>
               </li>
             ))}
           </ol>

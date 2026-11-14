@@ -103,7 +103,7 @@ export function Citation(handle: Handle<CitationProps>) {
                   <span class="rf-citation-number">{String(index + offset)}</span>
                 )}
               </span>
-              <a class="rf-citation-title" href={source.href} target={target} rel={rel}>
+              <a class="rf-citation-title rf-link" href={source.href} target={target} rel={rel}>
                 {source.title}
               </a>
               {source.description != null && (

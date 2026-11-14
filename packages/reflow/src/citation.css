@@ -96,14 +96,7 @@
   font-variant-numeric: tabular-nums;
 }
 .rf-citation-title {
-  color: var(--rf-fg);
   font-variation-settings: var(--rf-weight-strong);
-  text-decoration: none;
-}
-.rf-citation-title:hover,
-.rf-citation-title:focus-visible {
-  text-decoration: underline;
-  text-underline-offset: 2px;
 }
 .rf-citation-description {
   display: -webkit-box;

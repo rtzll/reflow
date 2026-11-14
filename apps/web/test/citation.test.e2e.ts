@@ -48,7 +48,9 @@ it('sits within the line and previews its sources above it', async (t) => {
   const overflow = await card.evaluate((node) => node.scrollWidth - node.clientWidth)
   assert.equal(overflow, 0, `the preview overflows by ${overflow}px`)
   await expect(card.getByRole('link', { name: 'Laws of UX' })).toHaveCount(0)
-  await expect(card.getByRole('link', { name: 'Aesthetic–Usability Effect' })).toBeVisible()
+  const sourceLink = card.getByRole('link', { name: 'Aesthetic–Usability Effect' })
+  await expect(sourceLink).toBeVisible()
+  await expect(sourceLink).toHaveCSS('text-decoration-line', 'underline')
   const placement = await card.evaluate((node) => ({
     side: node.getAttribute('data-anchor-placement'),
     above:

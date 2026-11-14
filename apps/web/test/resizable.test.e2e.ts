@@ -45,3 +45,14 @@ it('lists each cited source in the same order as the conversation', async (t) =>
     }
   }
 })
+
+it('marks the source links with an underline before hover in both themes', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  for (const theme of ['light', 'dark']) {
+    await open(page, `/docs/resizable?theme=${theme}`)
+    const source = page
+      .locator('#playground')
+      .getByRole('link', { name: 'Ten principles for good design', exact: true })
+    await expect(source).toHaveCSS('text-decoration-line', 'underline')
+  }
+})
