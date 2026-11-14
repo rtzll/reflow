@@ -70,6 +70,7 @@ export function Carousel(handle: Handle<CarouselProps>) {
   let steering: number | undefined
   let steerTimer: ReturnType<typeof setTimeout> | undefined
   let frame = 0
+  let userScrollFrom: number | undefined
   // How many slides can come to rest; with several in view, the last few
   // share the end. Zero until measured, which counts every slide.
   let reachable = 0
@@ -198,14 +199,30 @@ export function Carousel(handle: Handle<CarouselProps>) {
       ? Math.max(1, Math.round(viewport.clientWidth / Math.max(1, sample.offsetWidth)))
       : 1
     const landed = nearest(viewport.scrollLeft - velocity * throwTime)
-    select(Math.min(finished.from + perView, Math.max(finished.from - perView, landed)))
+    const next = Math.min(finished.from + perView, Math.max(finished.from - perView, landed))
+    if (next !== finished.from)
+      viewport.dispatchEvent(
+        new CustomEvent('reflow:carousel-navigation', {
+          bubbles: true,
+          detail: next < finished.from ? 'back' : 'forward',
+        }),
+      )
+    select(next)
   }
 
   const viewportMix = ref((node, signal) => {
     if (!(node instanceof HTMLElement)) return
     viewport = node
     const options = { signal }
-    node.addEventListener('scroll', onScroll, { signal, passive: true })
+    node.addEventListener(
+      'scroll',
+      () => {
+        if (steering === undefined && !drag?.started && userScrollFrom === undefined)
+          userScrollFrom = current()
+        onScroll()
+      },
+      { signal, passive: true },
+    )
     const resize = new ResizeObserver(() => measure())
     resize.observe(node)
     signal.addEventListener('abort', () => resize.disconnect(), { once: true })
@@ -213,6 +230,17 @@ export function Carousel(handle: Handle<CarouselProps>) {
     node.addEventListener(
       'scrollend',
       () => {
+        if (steering === undefined && userScrollFrom !== undefined) {
+          const next = nearest(node.scrollLeft)
+          if (next !== userScrollFrom)
+            node.dispatchEvent(
+              new CustomEvent('reflow:carousel-navigation', {
+                bubbles: true,
+                detail: next < userScrollFrom ? 'back' : 'forward',
+              }),
+            )
+        }
+        userScrollFrom = undefined
         steering = undefined
         clearTimeout(steerTimer)
         onScroll()

@@ -378,6 +378,13 @@ export function enhanceShowcaseSound() {
     if (event.target instanceof Element && event.target.closest('.site-preview-stage'))
       play('select', { emphasis: 'subtle' })
   })
+  document.addEventListener('reflow:carousel-navigation', (event) => {
+    if (!(event.target instanceof Element) || !event.target.closest('.site-preview-stage')) return
+    play('navigate', {
+      emphasis: 'subtle',
+      direction: (event as CustomEvent<string>).detail === 'back' ? 'back' : 'forward',
+    })
+  })
   document.addEventListener('reflow:question', (event) => {
     if (!(event.target instanceof Element) || !event.target.closest('.site-preview-stage')) return
     const cue = (event as CustomEvent<string>).detail
