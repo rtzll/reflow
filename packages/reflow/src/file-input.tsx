@@ -52,7 +52,12 @@ export function FileInput(handle: Handle<FileInputProps>) {
         rejections.push(`${file.name}: exceeds the limit of ${limit} files.`)
       else next.push(file)
     }
+    const added = next.length > previous.length
     change(next.length === 0 ? files : next)
+    input.dispatchEvent(new CustomEvent('reflow:files', {
+      bubbles: true,
+      detail: rejections.length ? (added ? 'warning' : 'error') : 'select',
+    }))
   }
 
   const reset = onFormReset(() => {
@@ -153,6 +158,7 @@ export function FileInput(handle: Handle<FileInputProps>) {
                       disabled={disabled}
                       mix={on<HTMLButtonElement, 'click'>('click', (event) => {
                         rejections = []
+                        input?.dispatchEvent(new CustomEvent('reflow:files', { bubbles: true, detail: 'close' }))
                         const list = event.currentTarget.closest('ul')
                         change(files.filter((_, position) => position !== index))
                         handle.queueTask(() => {

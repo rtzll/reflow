@@ -99,6 +99,7 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
 
   function removeFile(file: File) {
     error = ''
+    fileInput?.dispatchEvent(new CustomEvent('reflow:files', { bubbles: true, detail: 'close' }))
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return finishRemoval(file)
     if (exiting.has(file)) return
     // The fade normally finishes the removal first. Keep a fallback for hidden or unstyled composers.
@@ -137,6 +138,10 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
           ? `You can attach up to ${limit} files.`
           : ''
     changeFiles([...files, ...additions.slice(0, Math.max(0, remaining))])
+    fileInput?.dispatchEvent(new CustomEvent('reflow:files', {
+      bubbles: true,
+      detail: error ? (additions.length > 0 && remaining > 0 ? 'warning' : 'error') : 'select',
+    }))
   }
 
   function changeQueue(next: ComposerQueuedMessage[]) {

@@ -295,6 +295,12 @@ export function enhanceShowcaseSound() {
     if (event.target instanceof Element && event.target.closest('.site-preview-stage'))
       play('select', { emphasis: 'subtle' })
   })
+  document.addEventListener('reflow:files', (event) => {
+    if (!(event.target instanceof Element) || !event.target.closest('.site-preview-stage')) return
+    const cue = (event as CustomEvent<string>).detail
+    if (cue === 'select' || cue === 'close' || cue === 'warning' || cue === 'error')
+      play(cue, { emphasis: 'subtle' })
+  })
   document.addEventListener('rmx:tabs-change', (event) => {
     if (event.target instanceof Element && event.target.closest('.site-preview-stage .rf-tabs'))
       play('select', { emphasis: 'subtle' })
