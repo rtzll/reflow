@@ -26,6 +26,27 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       'A picture or initials for a person, team or agent, alone or in an overlapping group.',
     code: `<Avatar name="Ada Lovelace" src={photo} status="online" />\n<AvatarGroup avatars={editors} max={4} />`,
   },
+  skeleton: {
+    description: 'Decorative placeholders that reserve space for content while it loads.',
+    code: `<Table aria-label="Team members" aria-busy="true">
+  <TableHeader>
+    <TableRow hover={false}>
+      <TableHead>Name</TableHead>
+      <TableHead>Role</TableHead>
+      <TableHead>Status</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody aria-hidden="true">
+    {[0, 1, 2].map((row) => (
+      <TableRow key={row} hover={false}>
+        <TableCell><Skeleton width="60%" /></TableCell>
+        <TableCell><Skeleton width="78%" /></TableCell>
+        <TableCell><Skeleton width="60%" /></TableCell>
+      </TableRow>
+    ))}
+  </TableBody>
+</Table>`,
+  },
   badge: {
     description: 'A compact label with solid and dot treatments.',
     code: `<Badge color="violet">Fiction</Badge>\n<Badge color="amber">Science</Badge>\n<Badge color="green">Philosophy</Badge>\n<Badge color="blue">History</Badge>\n<Badge color="rose">Poetry</Badge>`,
@@ -319,6 +340,7 @@ const components = [
   ['segmented-control', 'SegmentedControl'],
   ['select', 'Select'],
   ['sidebar', 'Sidebar'],
+  ['skeleton', 'Skeleton'],
   ['slider', 'Slider'],
   ['switch', 'Switch'],
   ['table', 'Table'],

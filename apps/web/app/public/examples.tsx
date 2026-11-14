@@ -1,3 +1,4 @@
+import { TeamTableExample } from './team-table-example.tsx'
 import { BreadcrumbDemo } from './breadcrumb-example.tsx'
 import { SegmentedControlDemo } from './segmented-control-example.tsx'
 import { PopoverDemo } from './popover-example.tsx'
@@ -74,12 +75,6 @@ import {
   Sidebar,
   Slider,
   Switch,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
   Tabs,
   Textarea,
   ThinkingIndicator,
@@ -972,36 +967,11 @@ export const Example = clientEntry(
               <Switch label="Sound effects" />
             </div>
           )
+        case 'skeleton':
+          return <TeamTableExample loading />
         case 'table':
           return (
-            <div
-              className="example-block"
-              style={{ width: handle.props.showcase ? 'min(100%, 420px)' : 'min(100%, 566px)' }}
-            >
-              <Table aria-label="Team members">
-                <TableHeader>
-                  <TableRow hover={false}>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {[
-                    ['Alice', 'Engineer', 'Active'],
-                    ['Bob', 'Designer', 'Away'],
-                    ['Carol', handle.props.gallery ? 'PM' : 'Manager', 'Active'],
-                    ...(handle.props.gallery ? [['Dan', 'Engineer', 'Offline']] : []),
-                  ].map((row) => (
-                    <TableRow key={row[0]}>
-                      {row.map((cell) => (
-                        <TableCell key={cell}>{cell}</TableCell>
-                      ))}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <TeamTableExample gallery={handle.props.gallery} showcase={handle.props.showcase} />
           )
         case 'textarea':
           return (

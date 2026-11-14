@@ -11,6 +11,37 @@ export interface ApiSection {
 }
 
 export const componentApi: Record<string, readonly ApiSection[]> = {
+  skeleton: [
+    {
+      name: 'Skeleton',
+      props: [
+        {
+          name: 'width / height',
+          type: 'string',
+          required: false,
+          description: 'CSS dimensions. Defaults to the available width and a line of text.',
+        },
+        {
+          name: 'shape',
+          type: "'rounded' | 'circle'",
+          required: false,
+          description: 'Uses the shared radius by default. Give circles equal dimensions.',
+        },
+        {
+          name: 'animate',
+          type: 'boolean',
+          required: false,
+          description: 'Enables the shimmer when motion is allowed. Defaults to true.',
+        },
+        {
+          name: 'class',
+          type: 'string',
+          required: false,
+          description: 'Additional class for sizing or layout.',
+        },
+      ],
+    },
+  ],
   'queued-stack': [
     {
       name: 'QueuedStack',
