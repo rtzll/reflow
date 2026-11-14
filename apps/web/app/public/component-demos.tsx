@@ -1670,9 +1670,11 @@ export function ComponentDemo(
   let streaming = true
   let lastQueuedId: string | undefined
   let timeout: ReturnType<typeof setTimeout> | undefined
+  let alertTimer: ReturnType<typeof setTimeout> | undefined
   handle.signal.addEventListener('abort', () => clearTimeout(timeout), {
     once: true,
   })
+  handle.signal.addEventListener('abort', () => clearTimeout(alertTimer), { once: true })
   const say = (value: string) => {
     output = value
     handle.update()
@@ -2484,7 +2486,11 @@ export function ComponentDemo(
               description="Your unsaved changes will be discarded."
               cancelLabel="Keep editing"
               confirmLabel="Leave"
-              onConfirm={() => say('Left editor')}
+              onConfirm={() => {
+                clearTimeout(alertTimer)
+                say('Left editor')
+                alertTimer = setTimeout(() => say(''), 3000)
+              }}
             />
             <span class="example-status" role="status">
               {output}

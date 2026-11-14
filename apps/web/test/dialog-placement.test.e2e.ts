@@ -37,3 +37,23 @@ it('opens both dialog panels at the center of the viewport', async (t) => {
     for (const offset of center) expect(Math.abs(offset)).toBeLessThan(1)
   }
 })
+
+it('clears the deletion confirmation and restarts its timer on another confirmation', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.clock.install()
+  await open(page, '/')
+  const example = page.locator('[data-component="alert-dialog"]')
+  const confirm = async () => {
+    await example.getByRole('button', { name: 'Delete draft', exact: true }).click()
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Delete draft' }).click()
+  }
+  await confirm()
+  await expect(example.getByRole('status')).toHaveText('Draft deleted')
+  await page.clock.runFor(2000)
+  await confirm()
+  await page.clock.runFor(2000)
+  await expect(example.getByRole('status')).toHaveText('Draft deleted')
+  await page.clock.runFor(1000)
+  await expect(example.getByRole('status')).toBeEmpty()
+})

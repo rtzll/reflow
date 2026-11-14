@@ -221,6 +221,8 @@ export const Example = clientEntry(
     let startTimer: ReturnType<typeof setTimeout> | undefined
     handle.signal.addEventListener('abort', () => clearTimeout(startTimer), { once: true })
     let lastAction = ''
+    let alertTimer: ReturnType<typeof setTimeout> | undefined
+    handle.signal.addEventListener('abort', () => clearTimeout(alertTimer), { once: true })
     let selectedFeature: string | undefined = 'Spring animations'
     let slide = 1
     let opacity = 35
@@ -705,8 +707,13 @@ export const Example = clientEntry(
                 description="This permanently removes the draft."
                 confirmLabel="Delete draft"
                 onConfirm={() => {
+                  clearTimeout(alertTimer)
                   lastAction = 'Draft deleted'
                   void handle.update()
+                  alertTimer = setTimeout(() => {
+                    lastAction = ''
+                    void handle.update()
+                  }, 3000)
                 }}
               />
               <span class="example-status" role="status">
