@@ -4,6 +4,7 @@ import { on, ref } from 'remix/component'
 import type { Handle } from 'remix/component'
 import * as popover from '@remix-run/ui/popover'
 import { fluidHover } from './systems/fluid-hover.ts'
+import { onFormReset } from './behaviors/form-reset.ts'
 import {
   type DateValue,
   type CalendarProps,
@@ -227,20 +228,12 @@ export function DatePicker(handle: Handle<DatePickerProps>) {
         data-variant={variant}
         mix={[
           hover,
-          ref((element, signal) => {
-            element.closest('form')?.addEventListener(
-              'reset',
-              (event) =>
-                queueMicrotask(() => {
-                  if (signal.aborted || event.defaultPrevented) return
-                  selection = handle.props.defaultValue ?? null
-                  localTime = handle.props.defaultTime ?? '09:00'
-                  localEndTime = handle.props.defaultEndTime ?? '17:00'
-                  calendarKey++
-                  changeOpen(false)
-                }),
-              { signal },
-            )
+          onFormReset(() => {
+            selection = handle.props.defaultValue ?? null
+            localTime = handle.props.defaultTime ?? '09:00'
+            localEndTime = handle.props.defaultEndTime ?? '17:00'
+            calendarKey++
+            changeOpen(false)
           }),
         ]}
       >

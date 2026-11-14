@@ -4,6 +4,7 @@ import * as menu from '@remix-run/ui/menu'
 import * as popover from '@remix-run/ui/popover'
 import type { ControlSize } from './systems/styling.ts'
 import { Icon } from './icon.tsx'
+import { onFormReset } from './behaviors/form-reset.ts'
 import { fluidHover } from './systems/fluid-hover.ts'
 import { Tooltip } from './tooltip.tsx'
 import { Slider } from './slider.tsx'
@@ -1136,24 +1137,15 @@ export function ColorPicker(handle: Handle<ColorPickerProps>) {
         data-density={size}
         data-disabled={disabled || undefined}
         data-in-popover={props.variant === 'popover' || undefined}
-        mix={ref((element, signal) => {
-          element.closest('form')?.addEventListener(
-            'reset',
-            (event) => {
-              queueMicrotask(() => {
-                if (event.defaultPrevented || signal.aborted) return
-                const current = handle.props
-                if (current.value === undefined) {
-                  localValue = current.defaultValue ?? defaultColor
-                  hsv = startColor(localValue)
-                  oklchHue = null
-                }
-                if (current.format === undefined) localFormat = current.defaultFormat ?? 'hex'
-                void handle.update()
-              })
-            },
-            { signal },
-          )
+        mix={onFormReset(() => {
+          const current = handle.props
+          if (current.value === undefined) {
+            localValue = current.defaultValue ?? defaultColor
+            hsv = startColor(localValue)
+            oklchHue = null
+          }
+          if (current.format === undefined) localFormat = current.defaultFormat ?? 'hex'
+          void handle.update()
         })}
       >
         {name && (

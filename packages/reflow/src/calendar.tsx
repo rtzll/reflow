@@ -2,6 +2,7 @@ import { Icon } from './icon.tsx'
 import { on, ref } from 'remix/component'
 import type { Handle, RemixNode } from 'remix/component'
 import { fluidHover } from './systems/fluid-hover.ts'
+import { onFormReset } from './behaviors/form-reset.ts'
 import { Tooltip } from './tooltip.tsx'
 import { motion } from './systems/motion.ts'
 import { prefersReducedMotion } from '@remix-run/ui/animation'
@@ -154,6 +155,14 @@ export function Calendar(handle: Handle<CalendarProps>) {
   let previousRange: DateValue = selection
   let grid: HTMLElement | null = null
   const hover = fluidHover({ axis: 'both', selectedSelector: '[data-rf-selected]' })
+  const reset = onFormReset(() => {
+    if (handle.props.value !== undefined) return
+    selection = handle.props.defaultValue ?? null
+    focused = initialDate(handle.props, referenceDay())
+    firstMonth = monthStart(focused)
+    hovered = null
+    void handle.update()
+  })
   const gridRef = ref((node, signal) => {
     if (!(node instanceof HTMLElement)) return
     grid = node
@@ -170,19 +179,6 @@ export function Calendar(handle: Handle<CalendarProps>) {
         void handle.update()
       }
     }
-    node.closest('form')?.addEventListener(
-      'reset',
-      (event) =>
-        queueMicrotask(() => {
-          if (signal.aborted || event.defaultPrevented || handle.props.value !== undefined) return
-          selection = handle.props.defaultValue ?? null
-          focused = initialDate(handle.props, referenceDay())
-          firstMonth = monthStart(focused)
-          hovered = null
-          void handle.update()
-        }),
-      { signal },
-    )
     signal.addEventListener(
       'abort',
       () => {
@@ -421,6 +417,7 @@ export function Calendar(handle: Handle<CalendarProps>) {
           class="rf-calendar-months"
           mix={[
             gridRef,
+            reset,
             hover,
             on('pointerleave', () => {
               if (hovered === null) return

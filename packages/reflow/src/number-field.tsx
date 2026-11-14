@@ -2,6 +2,7 @@ import { on, ref, type Handle, type RemixNode } from 'remix/component'
 import { Field } from './field.tsx'
 import { Input } from './input.tsx'
 import type { ControlSize } from './systems/styling.ts'
+import { onFormReset } from './behaviors/form-reset.ts'
 
 export interface NumberFieldProps {
   label: string
@@ -26,20 +27,14 @@ export function NumberField(handle: Handle<NumberFieldProps>) {
   let input: HTMLInputElement | undefined
   let drag: { id: number; x: number; value: string; steps: number } | undefined
   let suppressClick = false
+  const reset = onFormReset(() => {
+    if (!input) return
+    const { value, onValueChange } = handle.props
+    if (value !== undefined) input.value = value == null ? '' : String(value)
+    else onValueChange?.(Number.isNaN(input.valueAsNumber) ? null : input.valueAsNumber)
+  })
   const inputRef = ref<HTMLInputElement>((element, signal) => {
     input = element
-    element.form?.addEventListener(
-      'reset',
-      (event) => {
-        queueMicrotask(() => {
-          if (event.defaultPrevented || signal.aborted) return
-          const { value, onValueChange } = handle.props
-          if (value !== undefined) element.value = value == null ? '' : String(value)
-          else onValueChange?.(Number.isNaN(element.valueAsNumber) ? null : element.valueAsNumber)
-        })
-      },
-      { signal },
-    )
     signal.addEventListener(
       'abort',
       () => {
@@ -112,6 +107,7 @@ export function NumberField(handle: Handle<NumberFieldProps>) {
             defaultValue={value === undefined ? defaultValue : undefined}
             mix={[
               inputRef,
+              reset,
               on<HTMLInputElement, 'input'>('input', (event) => {
                 const element = event.currentTarget
                 const number = element.valueAsNumber

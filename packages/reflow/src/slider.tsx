@@ -1,6 +1,7 @@
-import { on, ref } from 'remix/component'
+import { on } from 'remix/component'
 import type { Handle } from 'remix/component'
 import type { ControlSize } from './systems/styling.ts'
+import { onFormReset } from './behaviors/form-reset.ts'
 
 export type SliderValue = number | [number, number]
 export type ValuePosition = 'left' | 'right' | 'top' | 'bottom' | 'tooltip'
@@ -247,22 +248,11 @@ export function Slider(handle: Handle<SliderProps>) {
           <div
             class="rf-slider-track"
             mix={[
-              ref((element, signal) => {
-                if (!(element instanceof HTMLDivElement)) return
-                element.closest('form')?.addEventListener(
-                  'reset',
-                  (event) => {
-                    queueMicrotask(() => {
-                      if (event.defaultPrevented || signal.aborted) return
-                      const current = handle.props
-                      if (current.value === undefined)
-                        local = current.defaultValue ?? current.min ?? 0
-                      editing.clear()
-                      handle.update()
-                    })
-                  },
-                  { signal },
-                )
+              onFormReset(() => {
+                const current = handle.props
+                if (current.value === undefined) local = current.defaultValue ?? current.min ?? 0
+                editing.clear()
+                handle.update()
               }),
               on<HTMLDivElement, 'pointerdown'>('pointerdown', (event) => {
                 if (!event.isPrimary || event.button !== 0 || disabled) return

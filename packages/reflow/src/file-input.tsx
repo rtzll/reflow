@@ -5,6 +5,7 @@ import { Input } from './input.tsx'
 import type { ControlSize } from './systems/styling.ts'
 import { partitionFiles } from './behaviors/file-selection.ts'
 import { Icon } from './icon.tsx'
+import { onFormReset } from './behaviors/form-reset.ts'
 
 export interface FileInputProps {
   label: string
@@ -54,20 +55,14 @@ export function FileInput(handle: Handle<FileInputProps>) {
     change(next.length === 0 ? files : next)
   }
 
+  const reset = onFormReset(() => {
+    rejections = []
+    dragging = false
+    change([])
+  })
+
   const bind = ref<HTMLInputElement>((element, signal) => {
     input = element
-    element.form?.addEventListener(
-      'reset',
-      (event) => {
-        queueMicrotask(() => {
-          if (event.defaultPrevented || signal.aborted) return
-          rejections = []
-          dragging = false
-          change([])
-        })
-      },
-      { signal },
-    )
     signal.addEventListener(
       'abort',
       () => {
@@ -138,6 +133,7 @@ export function FileInput(handle: Handle<FileInputProps>) {
                 size={size}
                 mix={[
                   bind,
+                  reset,
                   on<HTMLInputElement, 'change'>('change', (event) =>
                     add(event.currentTarget.files),
                   ),
