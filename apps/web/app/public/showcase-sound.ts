@@ -197,31 +197,64 @@ function bindNumberSounds() {
     requestAnimationFrame(() => {
       const next = input.valueAsNumber
       if (Number.isFinite(next) && Number.isFinite(value) && next !== value)
-        play('select', { emphasis: 'subtle', volume: 0.35, direction: next > value ? 'forward' : 'back' })
+        play('select', {
+          emphasis: 'subtle',
+          volume: 0.35,
+          direction: next > value ? 'forward' : 'back',
+        })
       initial.set(input, next)
     })
   }
   document.addEventListener('focusin', (event) => {
     const input = event.target
-    if (input instanceof HTMLInputElement && input.type === 'number' && input.closest('.site-preview-stage') && !input.closest('.rf-slider')) initial.set(input, input.valueAsNumber)
+    if (
+      input instanceof HTMLInputElement &&
+      input.type === 'number' &&
+      input.closest('.site-preview-stage') &&
+      !input.closest('.rf-slider')
+    )
+      initial.set(input, input.valueAsNumber)
   })
-  document.addEventListener('pointerdown', (event) => {
-    if (!event.isPrimary || event.button !== 0 || !(event.target instanceof Element)) return
-    const target = event.target.closest('.site-preview-stage .rf-number-scrub, .site-preview-stage [data-slot="input-number"] button')
-    const input = target?.closest('.rf-field')?.querySelector<HTMLInputElement>('input[type="number"]')
-    if (input && !input.disabled && !input.readOnly) pointer = { id: event.pointerId, input, value: input.valueAsNumber }
-  }, { capture: true })
+  document.addEventListener(
+    'pointerdown',
+    (event) => {
+      if (!event.isPrimary || event.button !== 0 || !(event.target instanceof Element)) return
+      const target = event.target.closest(
+        '.site-preview-stage .rf-number-scrub, .site-preview-stage [data-slot="input-number"] button',
+      )
+      const input = target
+        ?.closest('.rf-field')
+        ?.querySelector<HTMLInputElement>('input[type="number"]')
+      if (input && !input.disabled && !input.readOnly)
+        pointer = { id: event.pointerId, input, value: input.valueAsNumber }
+    },
+    { capture: true },
+  )
   document.addEventListener('pointerup', (event) => {
     if (pointer?.id !== event.pointerId) return
     finish(pointer.input, pointer.value)
     pointer = undefined
   })
-  document.addEventListener('pointercancel', () => { pointer = undefined })
-  document.addEventListener('keydown', (event) => {
-    const input = event.target
-    if (!(input instanceof HTMLInputElement) || input.type !== 'number' || !input.closest('.site-preview-stage') || input.closest('.rf-slider') || !['ArrowUp', 'ArrowDown'].includes(event.key) || event.repeat) return
-    key = { input, value: input.valueAsNumber }
-  }, { capture: true })
+  document.addEventListener('pointercancel', () => {
+    pointer = undefined
+  })
+  document.addEventListener(
+    'keydown',
+    (event) => {
+      const input = event.target
+      if (
+        !(input instanceof HTMLInputElement) ||
+        input.type !== 'number' ||
+        !input.closest('.site-preview-stage') ||
+        input.closest('.rf-slider') ||
+        !['ArrowUp', 'ArrowDown'].includes(event.key) ||
+        event.repeat
+      )
+        return
+      key = { input, value: input.valueAsNumber }
+    },
+    { capture: true },
+  )
   document.addEventListener('keyup', (event) => {
     if (!key || event.target !== key.input || !['ArrowUp', 'ArrowDown'].includes(event.key)) return
     finish(key.input, key.value)
@@ -346,20 +379,36 @@ export function enhanceShowcaseSound() {
       play('tap', { emphasis: 'subtle' })
   })
   document.addEventListener('reflow:queue-reorder', (event) => {
-    if (event.target instanceof Element && event.target.closest('.site-preview-stage')) play('select', { emphasis: 'subtle' })
+    if (event.target instanceof Element && event.target.closest('.site-preview-stage'))
+      play('select', { emphasis: 'subtle' })
   })
+  document.addEventListener(
+    'click',
+    (event) => {
+      if (!(event.target instanceof Element)) return
+      const button = event.target.closest<HTMLButtonElement>(
+        '.site-preview-stage .rf-queue-wrap button',
+      )
+      if (!button || button.disabled) return
+      const action = button.dataset.queueAction
+      if (button.matches('.rf-queue-toggle'))
+        play(button.getAttribute('aria-expanded') === 'true' ? 'close' : 'open', {
+          emphasis: 'subtle',
+        })
+      else if (action === 'up' || action === 'down')
+        play('select', { emphasis: 'subtle', direction: action === 'up' ? 'back' : 'forward' })
+      else if (action === 'remove') play('close', { emphasis: 'subtle' })
+      else if (action === 'send') play('tap', { emphasis: 'subtle' })
+    },
+    { capture: true },
+  )
   document.addEventListener('click', (event) => {
-    if (!(event.target instanceof Element)) return
-    const button = event.target.closest<HTMLButtonElement>('.site-preview-stage .rf-queue-wrap button')
-    if (!button || button.disabled) return
-    const action = button.dataset.queueAction
-    if (button.matches('.rf-queue-toggle')) play(button.getAttribute('aria-expanded') === 'true' ? 'close' : 'open', { emphasis: 'subtle' })
-    else if (action === 'up' || action === 'down') play('select', { emphasis: 'subtle', direction: action === 'up' ? 'back' : 'forward' })
-    else if (action === 'remove') play('close', { emphasis: 'subtle' })
-    else if (action === 'send') play('tap', { emphasis: 'subtle' })
-  }, { capture: true })
-  document.addEventListener('click', (event) => {
-    if (event.target instanceof Element && event.target.closest('.site-preview-stage .rf-composer-send[aria-label="Stop response"]:not(:disabled)'))
+    if (
+      event.target instanceof Element &&
+      event.target.closest(
+        '.site-preview-stage .rf-composer-send[aria-label="Stop response"]:not(:disabled)',
+      )
+    )
       play('close', { emphasis: 'subtle' })
   })
   document.addEventListener('reflow:files', (event) => {
@@ -374,20 +423,40 @@ export function enhanceShowcaseSound() {
   })
   document.addEventListener('rmx:menu-select', (event) => {
     if (!(event.target instanceof Element) || !event.target.closest('.site-preview-stage')) return
-    const { item } = event as HTMLElementEventMap['rmx:menu-select']
+    const { item } = event as Event & { item: { type: string; checked?: boolean } }
     play(item.type === 'checkbox' ? 'toggle' : 'select', {
       emphasis: 'subtle',
       direction: item.checked === false ? 'back' : 'forward',
     })
   })
   document.addEventListener('click', (event) => {
-    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
-    const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('.site-preview-stage .rf-pagination a') : null
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    )
+      return
+    const link =
+      event.target instanceof Element
+        ? event.target.closest<HTMLAnchorElement>('.site-preview-stage .rf-pagination a')
+        : null
     if (!link || link.getAttribute('aria-current') === 'page') return
-    const current = Number(link.closest('.rf-pagination')?.querySelector('[aria-current="page"]')?.getAttribute('aria-label')?.match(/\d+/)?.[0])
+    const current = Number(
+      link
+        .closest('.rf-pagination')
+        ?.querySelector('[aria-current="page"]')
+        ?.getAttribute('aria-label')
+        ?.match(/\d+/)?.[0],
+    )
     const label = link.getAttribute('aria-label') ?? ''
     const target = Number(label.match(/\d+/)?.[0])
-    play('navigate', { emphasis: 'subtle', direction: label === 'Previous page' || (target && target < current) ? 'back' : 'forward' })
+    play('navigate', {
+      emphasis: 'subtle',
+      direction: label === 'Previous page' || (target && target < current) ? 'back' : 'forward',
+    })
   })
   document.addEventListener('rmx:tabs-change', (event) => {
     if (event.target instanceof Element && event.target.closest('.site-preview-stage .rf-tabs'))

@@ -25,7 +25,14 @@ export function QueuedStack(handle: Handle<QueuedStackProps>) {
   let expanded = false
   let list: HTMLOListElement | undefined
   let drag:
-    | { id: string; pointer: number; origin: number; grabOffset: number; started: boolean; moved: boolean }
+    | {
+        id: string
+        pointer: number
+        origin: number
+        grabOffset: number
+        started: boolean
+        moved: boolean
+      }
     | undefined
   const listRef = ref((node) => {
     if (node instanceof HTMLOListElement) list = node

@@ -138,10 +138,12 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
           ? `You can attach up to ${limit} files.`
           : ''
     changeFiles([...files, ...additions.slice(0, Math.max(0, remaining))])
-    fileInput?.dispatchEvent(new CustomEvent('reflow:files', {
-      bubbles: true,
-      detail: error ? (additions.length > 0 && remaining > 0 ? 'warning' : 'error') : 'select',
-    }))
+    fileInput?.dispatchEvent(
+      new CustomEvent('reflow:files', {
+        bubbles: true,
+        detail: error ? (additions.length > 0 && remaining > 0 ? 'warning' : 'error') : 'select',
+      }),
+    )
   }
 
   function changeQueue(next: ComposerQueuedMessage[]) {
@@ -189,7 +191,7 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
   async function submit(event: SubmitEvent) {
     event.preventDefault()
     if (handle.props.disabled || sending || (!draft.trim() && files.length === 0)) return
-    event.currentTarget.dispatchEvent(new Event('reflow:message-send', { bubbles: true }))
+    event.currentTarget?.dispatchEvent(new Event('reflow:message-send', { bubbles: true }))
     if (handle.props.status === 'streaming') {
       changeQueue([
         ...(handle.props.queue ?? queued),
