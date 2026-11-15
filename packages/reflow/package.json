@@ -24,9 +24,9 @@
     "check": "tsc -p tsconfig.json --noEmit"
   },
   "peerDependencies": {
-    "@shikijs/transformers": "^4.5.0",
+    "@shikijs/transformers": "^4.6.0",
     "remix": "3.2.0",
-    "shiki": "^4.5.0"
+    "shiki": "^4.6.0"
   },
   "peerDependenciesMeta": {
     "@shikijs/transformers": {
@@ -37,9 +37,9 @@
     }
   },
   "devDependencies": {
-    "@shikijs/transformers": "4.5.0",
+    "@shikijs/transformers": "4.6.0",
     "remix": "3.2.0",
-    "shiki": "4.5.0"
+    "shiki": "4.6.0"
   },
   "dependencies": {
     "@remix-run/ui": "0.13.1"

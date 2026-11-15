@@ -10,4 +10,4 @@ overrides:
 
 allowBuilds:
   esbuild@0.28.2: true
-  workerd@1.20261104.1: true
+  workerd@1.20261113.1: true
