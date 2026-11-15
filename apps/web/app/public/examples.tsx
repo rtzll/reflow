@@ -234,6 +234,7 @@ export const Example = clientEntry(
     let slide = 1
     let opacity = 35
     let message = ''
+    let emailError: string | undefined
     const initialQueue = [
       { id: 'draft', content: 'Draft an intro' },
       { id: 'demo', content: 'Review demo' },
@@ -800,6 +801,18 @@ export const Example = clientEntry(
                       label="Email"
                       placeholder="you@example.com"
                       icon={handle.props.gallery ? <Icon name="mail" /> : undefined}
+                      error={emailError}
+                      onChange={() => {
+                        if (!emailError) return
+                        emailError = undefined
+                        void handle.update()
+                      }}
+                      mix={on<HTMLInputElement, 'blur'>('blur', (event) => {
+                        emailError = event.currentTarget.validity.valid
+                          ? undefined
+                          : 'Enter a valid email address.'
+                        void handle.update()
+                      })}
                     />
                     {handle.props.gallery && (
                       <NumberField

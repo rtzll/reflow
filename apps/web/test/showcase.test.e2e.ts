@@ -147,6 +147,51 @@ it('keeps the loading Button label and size while showing the two-dot spinner', 
   assert.equal(await circle.evaluate((element) => getComputedStyle(element).animationName), 'none')
 })
 
+it('validates the gallery email on leaving the field and clears its error when typing resumes', async (t) => {
+  const page = await t.serve(await createTestServer(router.fetch))
+  await open(page, '/')
+  const group = page.locator('.site-gallery [data-component="input-group"]')
+  const email = group.getByRole('textbox', { name: 'Email', exact: true })
+  const name = group.getByRole('textbox', { name: 'Name', exact: true })
+  const guests = group.getByRole('spinbutton', { name: 'Guests', exact: true })
+  const error = group.getByRole('alert')
+
+  await email.fill('not-an-email')
+  await expect(error).toHaveCount(0)
+  await expect(email).not.toHaveAttribute('aria-invalid')
+
+  await email.press('Tab')
+  await expect(guests).toBeFocused()
+  await expect(error).toHaveText('Enter a valid email address.')
+  await expect(email).toHaveAttribute('aria-invalid', 'true')
+  await expect(email).toHaveAccessibleDescription('Enter a valid email address.')
+  await expect(email).toHaveValue('not-an-email')
+
+  await email.click()
+  await expect(error).toBeVisible()
+  await email.press('ControlOrMeta+a')
+  await email.press('x')
+  await expect(email).toHaveValue('x')
+  await expect(error).toHaveCount(0)
+  await expect(email).not.toHaveAttribute('aria-invalid')
+  await expect(email).not.toHaveAttribute('aria-describedby')
+
+  await name.click()
+  await expect(name).toBeFocused()
+  await expect(error).toBeVisible()
+  await expect(email).toHaveAttribute('aria-invalid', 'true')
+
+  await email.fill('ada+demo@example.com')
+  await email.press('Tab')
+  await expect(error).toHaveCount(0)
+  await expect(email).not.toHaveAttribute('aria-invalid')
+
+  await email.fill('')
+  await email.press('Tab')
+  await expect(error).toHaveCount(0)
+  await expect(email).not.toHaveAttribute('aria-invalid')
+})
+
 it('customizes the focused Button demo and keeps the reference slide order', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
   await open(page, '/demo?c=button&theme=dark')
