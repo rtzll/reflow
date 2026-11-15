@@ -117,9 +117,15 @@ try {
     .evaluateAll((links) => [...new Set(links.map((link) => new URL(link.href).pathname))])
   assert.ok(docs.length > 30)
 
+  await openShowcase('/')
+  const buttonExample = page.locator('.site-gallery [data-component="button"]')
+  const start = buttonExample.getByRole('button', { name: 'Primary', exact: true })
+  await start.click()
+  await expect(start).toHaveAttribute('aria-busy', 'true')
+  await expect(start).toBeEnabled()
+  await expect(buttonExample.locator('.example-status')).toHaveCount(0)
+
   await openShowcase('/docs/button')
-  await preview.getByRole('button', { name: 'Get started', exact: true }).click()
-  await expect(preview.getByText('Ready to start')).toBeVisible()
   await page
     .locator('.site-right .doc-playground-controls')
     .getByLabel('Label', { exact: true })

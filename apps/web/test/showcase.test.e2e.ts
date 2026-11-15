@@ -2,6 +2,7 @@ import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
+import { pauseClock } from './clock.ts'
 import { finishMotion } from './motion.ts'
 import { open, router } from './showcase-router.ts'
 
@@ -71,13 +72,23 @@ it('collapses closed accordion panels and keeps the code example linkable', asyn
 
 it('updates the live playground and copied code while preserving replay and inspection', async (t) => {
   const page = await t.serve(await createTestServer(router.fetch))
+  await page.clock.install()
   await open(page, '/docs/button?theme=dark')
+  await pauseClock(page)
   const preview = page.locator('.doc-preview').first()
   const controls = page.locator('.site-right .doc-playground-controls')
-  await preview.getByRole('button', { name: 'Get started', exact: true }).click()
-  await preview.getByText('Ready to start').waitFor()
+  const start = preview.getByRole('button', { name: 'Get started', exact: true })
+  await start.click()
+  await expect(start).toHaveAttribute('aria-busy', 'true')
   await preview.getByRole('button', { name: 'Replay example' }).click()
-  await preview.getByText('Ready to start').waitFor({ state: 'hidden' })
+  await expect(start).toBeEnabled()
+  await start.click()
+  await expect(start).toHaveAttribute('aria-busy', 'true')
+  await page.clock.runFor(900)
+  await expect(start).toBeEnabled()
+  await expect(start).not.toHaveAttribute('aria-busy')
+  await expect(preview.locator('.example-status')).toHaveCount(0)
+  await page.clock.resume()
   await controls.getByLabel('Variant', { exact: true }).selectOption('destructive')
   await controls.getByLabel('Label', { exact: true }).fill('Delete project')
   const button = preview.getByRole('button', { name: 'Delete project', exact: true })

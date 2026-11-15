@@ -216,10 +216,17 @@ export const Example = clientEntry(
       code?: HighlightedCode
     }>,
   ) {
-    let saved = false
     let starting = false
     let startTimer: ReturnType<typeof setTimeout> | undefined
     handle.signal.addEventListener('abort', () => clearTimeout(startTimer), { once: true })
+    const start = () => {
+      starting = true
+      void handle.update()
+      startTimer = setTimeout(() => {
+        starting = false
+        void handle.update()
+      }, 900)
+    }
     let lastAction = ''
     let alertTimer: ReturnType<typeof setTimeout> | undefined
     handle.signal.addEventListener('abort', () => clearTimeout(alertTimer), { once: true })
@@ -265,20 +272,7 @@ export const Example = clientEntry(
             <div className="example-stack">
               {handle.props.showcase || handle.props.slug === 'toolbar' ? (
                 <Toolbar class="example-row" label="Button variants">
-                  <Button
-                    size="compact"
-                    loading={starting}
-                    mix={on('click', () => {
-                      starting = true
-                      saved = false
-                      void handle.update()
-                      startTimer = setTimeout(() => {
-                        starting = false
-                        saved = true
-                        void handle.update()
-                      }, 900)
-                    })}
-                  >
+                  <Button size="compact" loading={starting} mix={on('click', start)}>
                     Primary
                   </Button>
                   <Button size="compact" variant="secondary">
@@ -292,18 +286,10 @@ export const Example = clientEntry(
                   </Button>
                 </Toolbar>
               ) : (
-                <Button
-                  mix={on('click', () => {
-                    saved = true
-                    handle.update()
-                  })}
-                >
+                <Button loading={starting} mix={on('click', start)}>
                   Get started
                 </Button>
               )}
-              <span className="example-status" role="status">
-                {saved ? 'Ready to start' : ''}
-              </span>
             </div>
           )
         case 'tabs':
