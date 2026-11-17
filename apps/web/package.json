@@ -23,7 +23,7 @@
   "devDependencies": {
     "esbuild": "0.28.2",
     "playwright": "1.65.1",
-    "wrangler": "4.162.0"
+    "wrangler": "4.164.0"
   },
   "engines": {
     "node": ">=24.3.0"
