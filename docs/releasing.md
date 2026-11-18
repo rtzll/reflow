@@ -44,7 +44,7 @@ If npm succeeds but the GitHub step fails, rerun the workflow on the same commit
 ```sh
 pnpm install --frozen-lockfile
 pnpm lint
-pnpm format:check
+pnpm fmt:check
 pnpm check
 pnpm --filter @reflow/web exec playwright install chromium
 pnpm test:run

@@ -34,7 +34,7 @@ A new component, or a new upstream one, is done when it has all of the following
 
 - Exported from [`index.ts`](../packages/reflow/src/index.ts) with typed, documented props, and styles in the package stylesheet.
 - Tests for every behavior. Styling and layout checks go in `*.test.e2e.ts`, because browser tests load no CSS. Write the failing test first.
-- `pnpm format:check`, `pnpm lint`, `pnpm check`, `pnpm test:run` and `pnpm test:deployment` pass; run `pnpm test:package` after export changes.
+- `pnpm fmt:check`, `pnpm lint`, `pnpm check`, `pnpm test:run` and `pnpm test:deployment` pass; run `pnpm test:package` after export changes.
 
 **Showcase and docs**
 

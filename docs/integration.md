@@ -4,7 +4,7 @@ Reflow uses Remix 3's component runtime. The package is available on [npm](https
 
 ## Compatibility
 
-Use Node 24.3+ and pnpm 12.18.0 for the documented workflow. Reflow requires `remix@3.2.0` as a peer dependency and includes `@remix-run/ui@0.13.1` as a dependency. Remix UI is independently versioned and unstable. Keep these pins when integrating; other version combinations have not been verified.
+Use Node 24.3+ and the pnpm version pinned in the workspace's `package.json` for the documented workflow. Reflow requires `remix@3.2.0` as a peer dependency and includes `@remix-run/ui@0.13.1` as a dependency. Remix UI is independently versioned and unstable. Keep these pins when integrating; other version combinations have not been verified.
 
 Use ESM (`"type": "module"`) and configure TypeScript with `"jsx": "react-jsx"` and `"jsxImportSource": "remix/component"`. The JSX compiler option does not introduce a React dependency. See the [starter tsconfig](../examples/starter/tsconfig.json) for the complete configuration.
 
