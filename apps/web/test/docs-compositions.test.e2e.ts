@@ -7,14 +7,18 @@ import { showcaseServer, open } from './showcase-router.ts'
 it('lets external question controls load, navigate, and clear answer state', async (t) => {
   const page = await t.serve(showcaseServer)
   const hydration = Promise.withResolvers<void>()
-  await page.route(/\/doc-preview(?:\.@[^.]+)?\.tsx(?:\?.*)?$/, async (route) => {
+  const previewModule = /\/doc-preview(?:(?:\.@[^.]+)?\.tsx|-[\w-]+\.js)(?:\?.*)?$/
+  await page.route(previewModule, async (route) => {
     await hydration.promise
     await route.continue()
   })
   const example = page.locator('#controlled .doc-preview')
   const loadSample = example.getByRole('button', { name: 'Load sample answer' })
   try {
-    await open(page, '/docs/ask-user-questions', { hydrate: false, waitUntil: 'commit' })
+    await Promise.all([
+      page.waitForRequest(previewModule),
+      open(page, '/docs/ask-user-questions', { hydrate: false, waitUntil: 'commit' }),
+    ])
     await loadSample.waitFor()
     assert.ok(await loadSample.isDisabled())
   } finally {

@@ -47,6 +47,7 @@ pnpm lint
 pnpm fmt:check
 pnpm check
 pnpm --filter @reflow/web exec playwright install chromium
+pnpm --filter @reflow/web build
 pnpm test:run
 pnpm --filter @reflow/web exec remix doctor
 node tools/check-package.mjs
@@ -54,4 +55,4 @@ node tools/check-package.mjs
 
 Before a release, also run `pnpm test:linux` to run the suite on Linux, as CI does. [Testing](testing.md)
 
-`pnpm check` builds once; `pnpm test:run` and `node tools/check-package.mjs` reuse that build. `pnpm test` and `pnpm test:package` build first for standalone local use. No local validation command publishes. The smoke test cleans up its temporary app, browser, and server even on failure.
+`pnpm test:run` reuses the library and showcase builds. `node tools/check-package.mjs` reuses the library build. `pnpm test` and `pnpm test:package` build first for standalone local use. No local validation command publishes. The smoke test cleans up its temporary app, browser, and server even on failure.
