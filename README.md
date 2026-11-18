@@ -14,21 +14,21 @@ Reflow includes `@remix-run/ui@0.13.1`. See the [integration guide](docs/integra
 
 ## Try it
 
-Use Node 24.3+ and pnpm 12.18.0. From this checkout, run the following commands.
+Use Node 24.3+, the workspace's pinned pnpm version, and the [global Vite+ CLI](https://viteplus.dev/guide/global-cli). Run these commands from this checkout.
 
 ```sh
-pnpm install --frozen-lockfile
-pnpm dev
+vp install --frozen-lockfile
+vp run dev
 ```
 
 Open the address printed in the terminal. The gallery is at `/`, component docs at `/docs`, and focused demos at `/demo`.
 
-To test the production website locally on Cloudflare's runtime, run `pnpm preview:web` and open the address printed in the terminal. [Website build and deployment](docs/deployment.md)
+To test the production website locally on Cloudflare's runtime, run `vp run preview:web` and open the address printed in the terminal. [Website build and deployment](docs/deployment.md)
 
 ## Start a fresh app
 
 ```sh
-pnpm starter /absolute/path/to/my-app
+vp run starter /absolute/path/to/my-app
 cd /absolute/path/to/my-app
 pnpm check
 pnpm dev
@@ -71,6 +71,6 @@ Keyboard navigation, focus management, form behavior, reduced motion, server ren
 ## Use and change Reflow
 
 - Use the installed types and component docs for props and examples. For integrating Reflow into an app, see the [Reflow skill](skills/reflow/SKILL.md) and the [starter settings page](examples/starter/app/public/settings.tsx).
-- Run `pnpm check` and `pnpm test` for library changes. [Development guide](docs/development.md) · [Scope](docs/scope.md) · [Components](docs/components.md)
+- Run `vp run check` and `vp run test` for library changes. [Development guide](docs/development.md) · [Scope](docs/scope.md) · [Components](docs/components.md)
 
 [MIT license](LICENSE) · [Third-party notices](packages/reflow/NOTICE)

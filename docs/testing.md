@@ -47,7 +47,7 @@ On a fake clock, exact times are fine: the ThinkingSteps test expects steps at e
 ## Running tests
 
 ```sh
-pnpm test                 # build, then everything CI runs
+vp run test                 # build, then everything CI runs
 ./apps/web/node_modules/.bin/remix test --type e2e apps/web/test/drawer.test.e2e.ts
 ```
 
@@ -55,11 +55,11 @@ Before pushing, run the suites your change touches. CI runs everything on Linux 
 
 ## When a test flakes
 
-1. Reproduce it: `pnpm test:stress apps/web/test/<file>.test.e2e.ts --runs 10` runs the file ten times, five at once, which loads the machine like a CI runner.
+1. Reproduce it: `vp run test:stress apps/web/test/<file>.test.e2e.ts --runs 10` runs the file ten times, five at once, which loads the machine like a CI runner.
 2. Decide whether the component or the test is wrong. A component bug gets fixed in the component, with a test that would have caught it.
 3. Fix the cause in the test. Usually it acts before hydration, depends on real time, or shares state with another test.
 4. Never add waits or retries to make a failure go away.
 
 ## Before a release
 
-`pnpm test:linux` runs the suite in Playwright's Linux image for the pinned version, as CI does, through Docker (start OrbStack with `orb start`). Pass e2e files to run only those. Linux renders fonts and schedules frames differently from macOS, so run it before a release; CI stays the gate for every push.
+`vp run test:linux` runs the suite in Playwright's Linux image for the pinned version, as CI does, through Docker (start OrbStack with `orb start`). Pass e2e files to run only those. Linux renders fonts and schedules frames differently from macOS, so run it before a release; CI stays the gate for every push.

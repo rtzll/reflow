@@ -7,17 +7,17 @@ The Cloudflare target hosts the existing `apps/web` showcase: `/` for the galler
 Use the Node and pnpm versions described in [development](development.md).
 
 ```sh
-pnpm install --frozen-lockfile
-pnpm preview:web
+vp install --frozen-lockfile
+vp run preview:web
 ```
 
 Open `http://127.0.0.1:44101`. This builds the library and website, then runs Wrangler with `--local`. It does not upload a Worker or change DNS. Stop it with Ctrl+C. For a different port, build first and run `pnpm --filter @reflow/web preview --port 44102`.
 
-The existing `pnpm dev` command still uses Remix's Node asset server for development. Changes to source require rebuilding before testing the production preview.
+The existing `vp run dev` command still uses Remix's Node asset server for development. Changes to source require rebuilding before testing the production preview.
 
 ## Production build
 
-`pnpm build:web` creates these ignored files under `apps/web/build`:
+`vp run build:web` creates these ignored files under `apps/web/build`:
 
 - `client/`: bundled JavaScript, CSS, fonts, explicitly copied public images, and license notices. This is the only directory uploaded as public static assets.
 - `worker/index.js`: the server bundle, containing the existing router, server rendering, and an embedded asset manifest.
@@ -32,11 +32,11 @@ Cloudflare serves static files before invoking the Worker. Hashed assets use imm
 ## Local validation
 
 ```sh
-pnpm check
-pnpm lint
-pnpm format:check
+vp run check
+vp run lint
+vp run format:check
 pnpm --filter @reflow/web exec playwright install chromium
-pnpm test:deployment
+vp run test:deployment
 pnpm --filter @reflow/web deploy:dry-run
 pnpm --filter @reflow/web exec remix doctor
 ```
