@@ -32,12 +32,20 @@ jobs:
       - run: pnpm fmt:check
       - run: pnpm check
       - run: pnpm --filter @reflow/web exec playwright install --with-deps --only-shell chromium
-      - name: Build and test the local Cloudflare deployment
+      - run: pnpm --filter @reflow/web build
+      - name: Run tests and check the local Cloudflare deployment
         run: |
-          pnpm --filter @reflow/web build
-          pnpm --filter @reflow/web test:deployment
-          pnpm --filter @reflow/web deploy:dry-run
-      - run: pnpm test:run
+          deployment_log="$RUNNER_TEMP/deployment-test.log"
+          pnpm --filter @reflow/web test:deployment > "$deployment_log" 2>&1 &
+          deployment_pid=$!
+
+          tests_status=0
+          pnpm test:run || tests_status=$?
+          deployment_status=0
+          wait "$deployment_pid" || deployment_status=$?
+          cat "$deployment_log"
+          (( tests_status == 0 && deployment_status == 0 ))
+      - run: pnpm --filter @reflow/web deploy:dry-run
       - run: pnpm --filter @reflow/web exec remix doctor
       - name: Pack and test the installable artifact
         run: |
