@@ -1,10 +1,9 @@
 import { expect } from 'playwright/test'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { open, router } from './showcase-router.ts'
+import { open, showcaseServer } from './showcase-router.ts'
 
 it('opens a team page from its URL and follows links without JavaScript', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.route('**/*.js', (route) => route.abort())
   await open(page, '/?teamPage=2', { hydrate: false })
   const tile = page.locator('[data-component="table"]')
@@ -22,7 +21,7 @@ it('opens a team page from its URL and follows links without JavaScript', async 
 })
 
 it('changes the team page without moving the table in the viewport', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1440, height: 900 })
   await open(page, '/')
   const tile = page.locator('[data-component="table"]')

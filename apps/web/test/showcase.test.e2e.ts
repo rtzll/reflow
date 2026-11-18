@@ -1,13 +1,12 @@
 import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
 import { pauseClock } from './clock.ts'
 import { finishMotion } from './motion.ts'
-import { open, router } from './showcase-router.ts'
+import { open, showcaseServer } from './showcase-router.ts'
 
 it('hydrates previews across docs and deep-linked demo pages', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
   page.on('console', (message) => {
@@ -48,7 +47,7 @@ it('hydrates previews across docs and deep-linked demo pages', async (t) => {
 })
 
 it('collapses closed accordion panels and keeps the code example linkable', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/accordion?theme=dark')
   const preview = page.locator('.doc-preview').first()
   const closed = preview.locator('.rf-accordion-panel[data-state="closed"]')
@@ -71,7 +70,7 @@ it('collapses closed accordion panels and keeps the code example linkable', asyn
 })
 
 it('updates the live playground and copied code while preserving replay and inspection', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.clock.install()
   await open(page, '/docs/button?theme=dark')
   await pauseClock(page)
@@ -129,7 +128,7 @@ it('updates the live playground and copied code while preserving replay and insp
 })
 
 it('keeps the loading Button label and size while showing the two-dot spinner', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/button', { motion: true })
   const button = page.getByRole('button', { name: 'Click me', exact: true })
   const width = () => button.evaluate((element) => element.getBoundingClientRect().width)
@@ -148,7 +147,7 @@ it('keeps the loading Button label and size while showing the two-dot spinner', 
 })
 
 it('validates the gallery email on leaving the field and clears its error when typing resumes', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/')
   const group = page.locator('.site-gallery [data-component="input-group"]')
   const email = group.getByRole('textbox', { name: 'Email', exact: true })
@@ -193,7 +192,7 @@ it('validates the gallery email on leaving the field and clears its error when t
 })
 
 it('customizes the focused Button demo and keeps the reference slide order', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/demo?c=button&theme=dark')
   const slide = page.getByRole('article', { name: 'Slide 8 of 33: Button' })
   const stage = slide.locator('.site-demo-stage')
@@ -230,7 +229,7 @@ it('customizes the focused Button demo and keeps the reference slide order', asy
 })
 
 it('loads each demo with its own defaults during carousel navigation', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 1000 })
   await open(page, '/demo?c=input-message&theme=dark')
   const stage = page.locator('.site-demo-stage')
@@ -272,7 +271,7 @@ it('loads each demo with its own defaults during carousel navigation', async (t)
 })
 
 it('routes demo arrows to the focused widget or to slide navigation', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/demo?c=checkbox-group&theme=dark&fit=1')
   const stage = page.locator('.site-demo-stage')
   const bananas = stage.getByRole('checkbox', { name: 'Bananas', exact: true })
@@ -320,7 +319,7 @@ it('routes demo arrows to the focused widget or to slide navigation', async (t) 
 })
 
 it('advances demo questions without focusing the title and preserves keyboard navigation in the answers', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/demo?c=ask-user-questions')
   const stage = page.locator('.site-demo-stage')
   await stage.getByRole('radio', { name: /^Designer/ }).click()
@@ -345,7 +344,7 @@ it('advances demo questions without focusing the title and preserves keyboard na
 })
 
 it('configures keyboard prompts and a native attachment picker for the InputMessage demo', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/demo?c=input-message&theme=dark')
   const stage = page.locator('.site-demo-stage')
   const message = stage.getByRole('textbox', { name: 'Message', exact: true })
@@ -402,7 +401,7 @@ it('configures keyboard prompts and a native attachment picker for the InputMess
 })
 
 it('advances the gallery carousel through its dots, pausing over the slides', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1475, height: 900 })
   await open(page, '/?theme=dark', { motion: true })
   const tile = page.locator('.site-gallery [data-component="carousel"]')
@@ -441,7 +440,7 @@ it('advances the gallery carousel through its dots, pausing over the slides', as
 })
 
 it('keeps the gallery Combobox aligned and scrollable after a third choice wraps', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1475, height: 1000 })
   await open(page, '/?theme=dark&icons=lucide')
   const tile = page.locator('.site-gallery [data-component="combobox"]')
@@ -495,7 +494,7 @@ it('keeps the gallery Combobox aligned and scrollable after a third choice wraps
 })
 
 it('smooths text with grayscale antialiasing across the site, as the reference does', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/button')
   for (const selector of ['body', '.site-doc h1', '.rf-button']) {
     assert.equal(

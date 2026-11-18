@@ -1,10 +1,9 @@
 import * as assert from 'remix/assert'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { open, router } from './showcase-router.ts'
+import { open, showcaseServer } from './showcase-router.ts'
 
 it('switches real icon geometry in place and remembers the selection across routes', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/')
   const icon = page.locator('.site-main [data-rf-icon="home"]').first()
   const trigger = page.locator('.site-right [data-setting-trigger="icons"]')
@@ -81,7 +80,7 @@ it('switches real icon geometry in place and remembers the selection across rout
 })
 
 it('applies Button icon, active and icon-only settings to the preview and generated code', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/button')
   const preview = page.locator('.doc-preview').first()
   const button = preview.getByRole('button', { name: 'Get started', exact: true })

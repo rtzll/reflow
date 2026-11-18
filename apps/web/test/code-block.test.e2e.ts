@@ -1,9 +1,8 @@
 import { readFileSync } from 'node:fs'
 import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { open, router } from './showcase-router.ts'
+import { open, showcaseServer } from './showcase-router.ts'
 
 // The card's own source, as the file has it, less the notation comment.
 function cardSource() {
@@ -18,7 +17,7 @@ function cardSource() {
 }
 
 it('shows the gallery card its own source, highlighted on the server', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1440, height: 900 })
   // No script: the colours arrive with the page.
   await page.route('**/*.{js,mjs}', (route) => route.abort())
@@ -44,7 +43,7 @@ it('shows the gallery card its own source, highlighted on the server', async (t)
 })
 
 it('copies the code without its line numbers and confirms it', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
   await open(page, '/docs/code-block')
   const block = page.locator('#line-numbers [data-slot="code-block"]')
@@ -68,7 +67,7 @@ it('copies the code without its line numbers and confirms it', async (t) => {
 })
 
 it('folds long code, blurs unfocused lines, and follows a light and dark theme pair', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   await open(page, '/docs/code-block?theme=light')
 
@@ -105,7 +104,7 @@ it('folds long code, blurs unfocused lines, and follows a light and dark theme p
 })
 
 it('wraps long lines to the block instead of scrolling them', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 390, height: 844 })
   await open(page, '/docs/code-block')
   const viewport = page.locator('#wrapping [data-slot="code-block"] .rf-code-viewport')

@@ -1,14 +1,13 @@
 import { expect, type Locator } from 'playwright/test'
 import * as assert from 'remix/assert'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { open, router } from './showcase-router.ts'
+import { open, showcaseServer } from './showcase-router.ts'
 
 const fromEnd = (viewport: Locator) =>
   viewport.evaluate((node) => Math.round(node.scrollHeight - node.scrollTop - node.clientHeight))
 
 it('opens at the newest message and jumps back to it from the history', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   await open(page, '/docs/chat-layout')
   const example = page.locator('#long-history')
@@ -26,7 +25,7 @@ it('opens at the newest message and jumps back to it from the history', async (t
 })
 
 it('stays on a streaming reply while the reader does', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   await open(page, '/docs/chat-layout')
   const example = page.locator('#long-history')
@@ -68,7 +67,7 @@ it('stays on a streaming reply while the reader does', async (t) => {
 })
 
 it('leaves a reader who scrolled back where they are while a reply streams', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   // The reply streams on timers, which the test moves on itself.
   await page.clock.install()

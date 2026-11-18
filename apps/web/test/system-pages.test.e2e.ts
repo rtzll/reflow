@@ -1,11 +1,10 @@
 import * as assert from 'remix/assert'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
 import { expect } from 'playwright/test'
-import { open, router } from './showcase-router.ts'
+import { open, showcaseServer } from './showcase-router.ts'
 
 it('fits the size toolbar controls and height guides without overlap', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1440, height: 900 })
   await open(page, '/docs/sizes')
 
@@ -46,7 +45,7 @@ it('fits the size toolbar controls and height guides without overlap', async (t)
 })
 
 it('applies region density to both the Sizes toolbar and its inline sort menu', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1440, height: 900 })
   await open(page, '/docs/sizes')
   const demo = page.locator('.system-density-demo')
@@ -70,7 +69,7 @@ it('applies region density to both the Sizes toolbar and its inline sort menu', 
 })
 
 it('aligns the three hover axes and keeps the card grid interactive', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1440, height: 900 })
   await open(page, '/docs/fluid-hover')
 
@@ -113,7 +112,7 @@ it('aligns the three hover axes and keeps the card grid interactive', async (t) 
 })
 
 it('staggers the landing hero on both presets and on replay', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1440, height: 1100 })
   await page.addInitScript(() => {
     const animate = HTMLElement.prototype.animate
@@ -149,7 +148,7 @@ it('staggers the landing hero on both presets and on replay', async (t) => {
 })
 
 it('uses the native viewport through the custom scrollbar', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/scrollbars')
   const viewport = page.getByRole('region', { name: 'Scrollable example', exact: true }).first()
   await viewport.hover()
@@ -163,7 +162,7 @@ it('uses the native viewport through the custom scrollbar', async (t) => {
 })
 
 it('follows scroll reveal progress, and holds still with reduced motion', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/reveal', { motion: true })
   const revealViewport = page.getByRole('region', { name: 'Scroll reveal preview', exact: true })
   await revealViewport.waitFor()
@@ -197,7 +196,7 @@ it('follows scroll reveal progress, and holds still with reduced motion', async 
 })
 
 it('renders editable Markdown tables and nested tasks while treating raw HTML as text', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/typography')
   const specimen = page.locator('.system-markdown-specimen')
   await specimen.getByRole('table').waitFor()

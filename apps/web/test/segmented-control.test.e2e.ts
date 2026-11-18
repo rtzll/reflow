@@ -1,8 +1,7 @@
 import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { open, router } from './showcase-router.ts'
+import { open, showcaseServer } from './showcase-router.ts'
 
 // The track's geometry, and the boxes of the thumb and the checked segment.
 function measure(control: Element) {
@@ -30,7 +29,7 @@ function measure(control: Element) {
 }
 
 it('sits on the size ladder with a concentric thumb on the checked segment', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/segmented-control')
   for (const [example, height, segment, padding] of [
     ['basic', 36, 28, 4],
@@ -46,7 +45,7 @@ it('sits on the size ladder with a concentric thumb on the checked segment', asy
 })
 
 it('glides the thumb, follows arrow keys and squeezes while pressed', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/segmented-control')
   const control = page.locator('#basic .rf-segmented')
   const segment = (name: string) => control.locator('label', { hasText: name })
@@ -79,7 +78,7 @@ it('glides the thumb, follows arrow keys and squeezes while pressed', async (t) 
 })
 
 it('fills its container with equal segments and names icon-only segments in a tooltip', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   await open(page, '/docs/segmented-control')
   const fill = await page.locator('#fill-width .rf-segmented').evaluate((control) => {

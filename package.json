@@ -24,7 +24,7 @@
     "test:linux": "node tools/test-linux.mjs",
     "test:package": "pnpm build && node tools/check-package.mjs",
     "test:stress": "node tools/test-stress.mjs",
-    "test:run": "node --test tools/release.test.mjs tools/check-tests.test.mjs && ./apps/web/node_modules/.bin/remix test --type server --type browser && ./apps/web/node_modules/.bin/remix test --type e2e --concurrency 3"
+    "test:run": "node --test tools/release.test.mjs tools/check-tests.test.mjs && ./apps/web/node_modules/.bin/remix test --type server --type browser && ./apps/web/node_modules/.bin/remix test --type e2e --concurrency 3 --setup apps/web/test/showcase-server.ts"
   },
   "devDependencies": {
     "@types/node": "26.6.6",

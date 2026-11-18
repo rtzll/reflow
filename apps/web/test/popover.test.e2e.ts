@@ -1,11 +1,10 @@
 import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { open, router } from './showcase-router.ts'
+import { open, showcaseServer } from './showcase-router.ts'
 
 it('anchors the panel 8px from its trigger on the chosen side', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   await open(page, '/docs/popover')
   const gap = async (example: string, name: string) => {
@@ -49,7 +48,7 @@ it('anchors the panel 8px from its trigger on the chosen side', async (t) => {
 })
 
 it('shares the menu surfaces’ motion and closes on an outside click', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/popover')
   const trigger = page.locator('#basic').getByRole('button', { name: 'Dimensions', exact: true })
   await trigger.click()
@@ -69,7 +68,7 @@ it('shares the menu surfaces’ motion and closes on an outside click', async (t
 })
 
 it('leaves no closed panel in the way of clicks', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/popover')
   const hits = await page.evaluate(
     () =>

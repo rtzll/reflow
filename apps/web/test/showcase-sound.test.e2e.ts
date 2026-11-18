@@ -1,8 +1,7 @@
 import { expect, type Page } from 'playwright/test'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
 import { finishMotion } from './motion.ts'
-import { router, waitForShowcase, open } from './showcase-router.ts'
+import { showcaseServer, waitForShowcase, open } from './showcase-router.ts'
 
 async function trackAudio(page: Page) {
   await page.addInitScript(() => {
@@ -25,7 +24,7 @@ async function trackAudio(page: Page) {
 }
 
 it('renders the saved sound state before the browser initializes audio', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.route('**/*', (route) =>
     route.request().resourceType() === 'script' ? route.abort() : route.continue(),
@@ -51,7 +50,7 @@ it('renders the saved sound state before the browser initializes audio', async (
 })
 
 it('defaults sound on, migrates the saved preference, and keeps it out of shared URLs', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
   await open(page, '/docs/accordion')
   const settings = page.locator('.site-right')
@@ -80,7 +79,7 @@ it('defaults sound on, migrates the saved preference, and keeps it out of shared
 })
 
 it('plays quiet cues on committed changes and stays silent when muted', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   const audioStarts = await trackAudio(page)
   const visit = async (path: string) => {
     await open(page, path)
@@ -156,7 +155,7 @@ it('plays quiet cues on committed changes and stays silent when muted', async (t
 })
 
 it('confirms each successful InputCopy action, including a quick repeat', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   const audioStarts = await trackAudio(page)
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
   await open(page, '/docs/input-copy')
@@ -171,7 +170,7 @@ it('confirms each successful InputCopy action, including a quick repeat', async 
 })
 
 it('plays an error cue after a failed clipboard action', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   const audioStarts = await trackAudio(page)
   await page.addInitScript(() => {
     Clipboard.prototype.writeText = async () => {
@@ -190,7 +189,7 @@ it('plays an error cue after a failed clipboard action', async (t) => {
 })
 
 it('plays the ready cue when the ThinkingSteps stream finishes', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   const audioStarts = await trackAudio(page)
   await page.clock.install()
   await open(page, '/docs/thinking-steps', { motion: true })
@@ -205,7 +204,7 @@ it('plays the ready cue when the ThinkingSteps stream finishes', async (t) => {
 })
 
 it('plays a cue on manual carousel changes and leaves autoplay silent', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   const audioStarts = await trackAudio(page)
   await open(page, '/docs/carousel-dots', { motion: true })
   const carousel = page.locator('#autoplay .example-carousel')
@@ -226,7 +225,7 @@ it('plays a cue on manual carousel changes and leaves autoplay silent', async (t
 })
 
 it('plays a cue as each toast arrives and as a promise toast settles', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   const audioStarts = await trackAudio(page)
   await open(page, '/docs/toaster')
   await page.locator('#status').getByRole('button', { name: 'Success', exact: true }).click()
@@ -244,7 +243,7 @@ it('plays a cue as each toast arrives and as a promise toast settles', async (t)
 })
 
 it('confirms a CodeBlock copy with the copy cue', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
   const audioStarts = await trackAudio(page)
   await open(page, '/docs/code-block')
@@ -255,7 +254,7 @@ it('confirms a CodeBlock copy with the copy cue', async (t) => {
 })
 
 it('plays the copy cue from the CodeBlock gallery card too', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
   const audioStarts = await trackAudio(page)
   await page.setViewportSize({ width: 1440, height: 900 })
@@ -267,7 +266,7 @@ it('plays the copy cue from the CodeBlock gallery card too', async (t) => {
 })
 
 it('plays the error cue when a CodeBlock copy fails, as InputCopy does', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   const audioStarts = await trackAudio(page)
   await page.addInitScript(() => {
     Clipboard.prototype.writeText = async () => {
@@ -287,7 +286,7 @@ it('plays the error cue when a CodeBlock copy fails, as InputCopy does', async (
 })
 
 it('keeps the sound button working after moving between demo slides', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1440, height: 900 })
   await open(page, '/demo?c=carousel')
   const documentStart = await page.evaluate(() => performance.timeOrigin)
@@ -308,7 +307,7 @@ it('keeps the sound button working after moving between demo slides', async (t) 
 })
 
 it('plays the navigate cue for Carousel buttons and dots, not for autoplay', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   const audioStarts = await trackAudio(page)
   await open(page, '/docs/carousel', { motion: true })
   const example = page.locator('#basic')
@@ -332,7 +331,7 @@ it('plays the navigate cue for Carousel buttons and dots, not for autoplay', asy
 })
 
 it('plays open and close cues for a Drawer', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   const audioStarts = await trackAudio(page)
   await open(page, '/docs/drawer')
   await page.locator('#basic').getByRole('button', { name: 'Filters', exact: true }).click()
@@ -345,7 +344,7 @@ it('plays open and close cues for a Drawer', async (t) => {
 })
 
 it('plays open and close cues for a Popover', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   const audioStarts = await trackAudio(page)
   await open(page, '/docs/popover')
   const trigger = page.locator('#basic').getByRole('button', { name: 'Dimensions', exact: true })
@@ -359,7 +358,7 @@ it('plays open and close cues for a Popover', async (t) => {
 })
 
 it('keeps HoverCard previews silent', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   const audioStarts = await trackAudio(page)
   await open(page, '/docs/hover-card')
   await page.locator('#basic .doc-hover-trigger').hover()
@@ -369,7 +368,7 @@ it('keeps HoverCard previews silent', async (t) => {
 })
 
 it('sounds committed tree, number, queue and mention interactions', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   const audioStarts = await trackAudio(page)
   await open(page, '/')
   const cue = async (action: () => Promise<unknown>) => {
@@ -397,7 +396,7 @@ it('sounds committed tree, number, queue and mention interactions', async (t) =>
 })
 
 it('sounds accepted and rejected files but stays silent after muting', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   const audioStarts = await trackAudio(page)
   await open(page, '/docs/file-input')
   const input = page.getByLabel('Cover image').last()
@@ -426,7 +425,7 @@ it('sounds accepted and rejected files but stays silent after muting', async (t)
 })
 
 it('sounds custom selection and gallery pagination', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   const audioStarts = await trackAudio(page)
   await open(page, '/')
   const select = page.locator('[data-component="select"]')

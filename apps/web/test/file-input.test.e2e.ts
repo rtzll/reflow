@@ -1,10 +1,9 @@
 import { expect } from 'playwright/test'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { open, router } from './showcase-router.ts'
+import { open, showcaseServer } from './showcase-router.ts'
 
 it('adds and removes a review file in the gallery details drawer', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/')
   await page.locator('[data-component="drawer"]').getByRole('button', { name: 'Details' }).click()
   const drawer = page.getByRole('dialog', { name: 'Details' })

@@ -1,10 +1,9 @@
 import { expect } from 'playwright/test'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { open, router } from './showcase-router.ts'
+import { open, showcaseServer } from './showcase-router.ts'
 
 it('centers the AlertDialog trigger in its gallery card and docs preview', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   for (const [url, selector] of [
     ['/', 'article[data-component="alert-dialog"] .site-preview-stage'],
     ['/docs/alert-dialog', '#playground .doc-preview-stage'],
@@ -21,7 +20,7 @@ it('centers the AlertDialog trigger in its gallery card and docs preview', async
 })
 
 it('opens both dialog panels at the center of the viewport', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   for (const [url, name, role] of [
     ['/docs/dialog', 'Open dialog', 'dialog'],
     ['/docs/alert-dialog', 'Delete draft', 'alertdialog'],
@@ -39,7 +38,7 @@ it('opens both dialog panels at the center of the viewport', async (t) => {
 })
 
 it('clears the deletion confirmation and restarts its timer on another confirmation', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 390, height: 844 })
   await page.clock.install()
   await open(page, '/')

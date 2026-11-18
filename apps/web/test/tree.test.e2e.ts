@@ -1,10 +1,9 @@
 import { expect } from 'playwright/test'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { open, router } from './showcase-router.ts'
+import { open, showcaseServer } from './showcase-router.ts'
 
 it('opens a file from the gallery tree without moving focus into its preview', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/')
   const tile = page.locator('[data-component="code-block"]')
   const tree = tile.getByRole('tree', { name: 'Project files' })
@@ -30,7 +29,7 @@ it('opens a file from the gallery tree without moving focus into its preview', a
 })
 
 it('gives the gallery file browser its own row', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   for (const width of [1440, 768, 390]) {
     await page.setViewportSize({ width, height: 900 })
     await open(page, '/')

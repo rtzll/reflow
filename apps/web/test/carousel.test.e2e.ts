@@ -1,9 +1,8 @@
 import { expect, type Locator } from 'playwright/test'
 import * as assert from 'remix/assert'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
 import { finishMotion } from './motion.ts'
-import { open, router } from './showcase-router.ts'
+import { open, showcaseServer } from './showcase-router.ts'
 
 // Which slide rests at the start of the viewport, or -1 between slides.
 const resting = (viewport: Locator) =>
@@ -14,7 +13,7 @@ const resting = (viewport: Locator) =>
   )
 
 it('snaps to the next slide after a mouse drag, and keeps a short drag in place', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   await open(page, '/docs/carousel')
   const example = page.locator('#basic')
@@ -56,7 +55,7 @@ it('snaps to the next slide after a mouse drag, and keeps a short drag in place'
 })
 
 it('scrolls with the keyboard and its buttons without moving the page', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   await open(page, '/docs/carousel')
   const example = page.locator('#basic')
@@ -81,7 +80,7 @@ it('scrolls with the keyboard and its buttons without moving the page', async (t
 })
 
 it('does not follow a link a drag ends on, but follows a click', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   await open(page, '/docs/carousel')
   const example = page.locator('#linked-slides')
@@ -101,7 +100,7 @@ it('does not follow a link a drag ends on, but follows a click', async (t) => {
 })
 
 it('autoplays through its dots, pauses while pointed at, and stops with its button', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   await open(page, '/docs/carousel', { motion: true })
   const example = page.locator('#autoplay')
@@ -130,7 +129,7 @@ it('autoplays through its dots, pauses while pointed at, and stops with its butt
 })
 
 it('counts only the stops it can reach when several slides are in view', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   await open(page, '/docs/carousel')
   const example = page.locator('#several-in-view')
@@ -149,7 +148,7 @@ it('counts only the stops it can reach when several slides are in view', async (
 })
 
 it('works the same in a right-to-left page', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   await open(page, '/docs/carousel')
   const example = page.locator('#basic')

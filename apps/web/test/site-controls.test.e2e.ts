@@ -1,11 +1,10 @@
 import * as assert from 'remix/assert'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
 import { expect } from 'playwright/test'
-import { router, waitForShowcase, open } from './showcase-router.ts'
+import { showcaseServer, waitForShowcase, open } from './showcase-router.ts'
 
 it('applies preferences immediately, keeps links clean, and persists through reload', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/?theme=light')
   const panel = page.locator('.site-right')
   await panel.locator('[data-setting-trigger="theme"]').click()
@@ -45,7 +44,7 @@ it('applies preferences immediately, keeps links clean, and persists through rel
 })
 
 it('keeps settings menus exclusive and dismisses them with pointer and keyboard input', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs')
   const panel = page.locator('.site-right')
   const theme = panel.locator('[data-setting-trigger="theme"]')
@@ -121,7 +120,7 @@ it('keeps settings menus exclusive and dismisses them with pointer and keyboard 
 })
 
 it('keeps the accent picker open while committing hex and RGB edits', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs')
   const panel = page.locator('.site-right')
   const accent = panel.locator('[data-setting-trigger="accent"]')
@@ -150,7 +149,7 @@ it('keeps the accent picker open while committing hex and RGB edits', async (t) 
 })
 
 it('opens a full-height mobile drawer and keeps page interaction behind it', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 390, height: 844 })
   await open(page, '/docs?theme=dark')
   const mobile = page.locator('.site-mobile[data-enhanced]')
@@ -240,7 +239,7 @@ it('opens a full-height mobile drawer and keeps page interaction behind it', asy
 })
 
 it('server-renders native settings disclosures before client enhancement', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs?theme=dark')
   const context = await page.context().browser()!.newContext({ javaScriptEnabled: false })
   try {
@@ -278,7 +277,7 @@ it('server-renders native settings disclosures before client enhancement', async
 })
 
 it('opens global search with Mod+K, applies commands, and shows individual shortcut keycaps', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
   await open(page, '/?theme=dark')
@@ -308,7 +307,7 @@ it('opens global search with Mod+K, applies commands, and shows individual short
 })
 
 it('browses a custom heading family and restores its weight and stylesheet', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   const requestedFonts: string[] = []
   await page.route('https://fonts.googleapis.com/**', async (route) => {
     requestedFonts.push(route.request().url())
@@ -357,7 +356,7 @@ it('browses a custom heading family and restores its weight and stylesheet', asy
 })
 
 it('saves the settings of a shared link over older cookies and shows the clean URL', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/')
   await page.context().addCookies([
     { name: 'reflow_theme', value: 'dark', url: page.url() },
@@ -449,7 +448,7 @@ it('saves the settings of a shared link over older cookies and shows the clean U
 })
 
 it('scrolls the page from over the right rail and keeps the left rail self-contained', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1440, height: 900 })
   await open(page, '/docs/button')
   const right = page.locator('.site-right')

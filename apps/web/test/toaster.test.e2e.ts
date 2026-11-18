@@ -1,11 +1,10 @@
 import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { open, router } from './showcase-router.ts'
+import { open, showcaseServer } from './showcase-router.ts'
 
 it('applies the sharp shape to every position marker in the gallery preview', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/?shape=sharp')
   const markers = page.locator('[data-component="toaster"] .example-toaster-screen label')
   await expect(markers).toHaveCount(6)
@@ -19,7 +18,7 @@ it('applies the sharp shape to every position marker in the gallery preview', as
 })
 
 it('piles toasts on QueuedStack’s values and spreads them a gap apart when pointed at', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1440, height: 900 })
   await open(page, '/docs/toaster')
   const status = page.locator('#status')
@@ -69,7 +68,7 @@ it('piles toasts on QueuedStack’s values and spreads them a gap apart when poi
 })
 
 it('moves to each of the six positions and slides a swiped toast away', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1440, height: 900 })
   await open(page, '/docs/toaster')
   await page.locator('#position').getByRole('button', { name: 'top-center', exact: true }).click()
@@ -99,7 +98,7 @@ it('moves to each of the six positions and slides a swiped toast away', async (t
 })
 
 it('reaches the newest toast with Alt+T and dismisses it with Escape', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/toaster')
   const archive = page.locator('#action').getByRole('button', { name: 'Archive', exact: true })
   await archive.click()

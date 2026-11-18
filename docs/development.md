@@ -36,7 +36,7 @@ How to write and run tests, including motion and timers, and what to do when one
 
 When changing an interaction, verify the component where the showcase uses it. Check pointer, keyboard, touch, reduced motion and form behavior where they apply, and use the built-in browser for visual checks. For a component that follows upstream, compare the same state with Fluid Functionalism when changing its motion or presentation.
 
-Checks run on pull requests and pushes to `main`; superseded check runs are cancelled. CI reuses the build from `pnpm check` by running `pnpm test:run`. The install smoke test then checks the packed artifact. The catalog's HTTP rendering is covered by a server test, and `pnpm test:deployment` checks hydration and overflow on every docs page at desktop and mobile widths. Showcase tests import the router from `apps/web/test/showcase-router.ts`, which closes asset watchers after each suite so workers exit promptly. [Release preparation and enablement](releasing.md) are separate and require a manual trigger after migration.
+Checks run on pull requests and pushes to `main`; superseded check runs are cancelled. CI reuses the build from `pnpm check` by running `pnpm test:run`. The install smoke test then checks the packed artifact. The catalog's HTTP rendering is covered by a server test, and `pnpm test:deployment` checks hydration and overflow on every docs page at desktop and mobile widths. The E2E suite starts one showcase server so workers can reuse compiled development assets. Each test opens a fresh browser context. Running an E2E file directly starts a server for that file. [Release preparation and enablement](releasing.md) are separate and require a manual trigger after migration.
 
 ## Try a clean install
 

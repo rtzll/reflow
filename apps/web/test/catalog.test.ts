@@ -1,7 +1,10 @@
 import * as assert from 'remix/assert'
-import { it } from 'remix/test'
+import { afterAll, it } from 'remix/test'
 import { catalog } from '../app/catalog.tsx'
-import { router } from './showcase-router.ts'
+import { assets } from '../app/assets.ts'
+import { router } from '../app/router.ts'
+
+afterAll(() => assets.close())
 
 it('renders every documented component and includes the right assets', async () => {
   const index = await router.fetch(new Request('http://localhost/docs'))

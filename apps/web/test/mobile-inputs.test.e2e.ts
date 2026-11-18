@@ -1,10 +1,9 @@
 import { expect } from 'playwright/test'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { open, router } from './showcase-router.ts'
+import { open, showcaseServer } from './showcase-router.ts'
 
 it('keeps editable controls at least 16px on touch screens without disabling zoom', async (t) => {
-  const desktop = await t.serve(await createTestServer(router.fetch))
+  const desktop = await t.serve(showcaseServer)
   await open(desktop, '/docs/input')
   const origin = new URL(desktop.url()).origin
   const context = await desktop

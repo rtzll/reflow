@@ -1,12 +1,11 @@
 import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
 import { catalog } from '../app/catalog.tsx'
-import { open, router } from './showcase-router.ts'
+import { open, showcaseServer } from './showcase-router.ts'
 
 it('opens on a resting pointer, stays open over the card, and closes after leaving', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   await open(page, '/docs/hover-card')
   const trigger = page.locator('#basic .doc-hover-trigger')
@@ -39,7 +38,7 @@ it('opens on a resting pointer, stays open over the card, and closes after leavi
 })
 
 it('keeps a card whose trigger sits in a paragraph inside that paragraph', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   // As parsed from the server's HTML, before any script runs.
   await page.route('**/*.{js,mjs}', (route) => route.abort())
   await open(page, '/docs/hover-card', { hydrate: false })
@@ -50,7 +49,7 @@ it('keeps a card whose trigger sits in a paragraph inside that paragraph', async
 })
 
 it('shows the catalog totals in the Reflow profile on the gallery and docs', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   const systemCount = catalog.filter((entry) => entry.category === 'system').length
   const componentCount = catalog.length - systemCount
   for (const [url, preview] of [

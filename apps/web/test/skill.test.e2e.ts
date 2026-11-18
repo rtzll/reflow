@@ -1,16 +1,15 @@
 import { readFileSync } from 'node:fs'
 import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { open, router } from './showcase-router.ts'
+import { open, showcaseServer } from './showcase-router.ts'
 
 const { version } = JSON.parse(
   readFileSync(new URL('../../../packages/reflow/package.json', import.meta.url), 'utf8'),
 ) as { version: string }
 
 it('lets the visitor take over skill examples and replay their initial state', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
   await open(page, '/docs/skill')
@@ -31,7 +30,7 @@ it('lets the visitor take over skill examples and replay their initial state', a
 })
 
 it('copies an installation prompt that includes the active preferences', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
   await open(
     page,
@@ -56,7 +55,7 @@ it('copies an installation prompt that includes the active preferences', async (
 })
 
 it('copies a prompt that installs the skill with npx and audits the project', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
   await open(page, '/docs/skill')
   await page.getByRole('button', { name: 'Copy prompt', exact: true }).first().click()

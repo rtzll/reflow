@@ -1,12 +1,11 @@
 import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
 import { pauseClock } from './clock.ts'
-import { router, open } from './showcase-router.ts'
+import { showcaseServer, open } from './showcase-router.ts'
 
 it('lets external question controls load, navigate, and clear answer state', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   const hydration = Promise.withResolvers<void>()
   await page.route(/\/doc-preview(?:\.@[^.]+)?\.tsx(?:\?.*)?$/, async (route) => {
     await hydration.promise
@@ -39,7 +38,7 @@ it('lets external question controls load, navigate, and clear answer state', asy
 })
 
 it('streams reasoning text, replays it, and displays local images and expandable sources', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/thinking-steps', { motion: true })
   const basic = page.locator('#basic .rf-thinking-steps-disclosure')
   const trigger = basic.locator(':scope > summary')
@@ -86,7 +85,7 @@ it('streams reasoning text, replays it, and displays local images and expandable
 })
 
 it('keeps workspace switching, project creation and profile controls functional inside the sidebar composition', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/sidebar')
   const example = page.locator('#workspace-composition .doc-preview')
   await example.getByRole('button', { name: 'Acme Inc', exact: true }).click()
@@ -108,7 +107,7 @@ it('keeps workspace switching, project creation and profile controls functional 
 })
 
 it('streams thinking steps on the reference schedule and ends the connector with the text', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   // The stream runs on timers, so the test holds the clock and steps it on.
   await page.clock.install()
   await open(page, '/docs/thinking-steps', { motion: true })
@@ -163,7 +162,7 @@ it('streams thinking steps on the reference schedule and ends the connector with
 })
 
 it('plays, pauses and replays a streaming example from the preview header', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.clock.install()
   await open(page, '/docs/thinking-steps', { motion: true })
   const preview = page.locator('#full-example .doc-preview')

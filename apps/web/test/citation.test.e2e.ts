@@ -1,11 +1,10 @@
 import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { open, router } from './showcase-router.ts'
+import { open, showcaseServer } from './showcase-router.ts'
 
 it('keeps citations and their previews inside the paragraph the server sends', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   // As parsed from the server's HTML, before any script runs.
   await page.route('**/*.{js,mjs}', (route) => route.abort())
   for (const path of ['/docs/citation']) {
@@ -23,7 +22,7 @@ it('keeps citations and their previews inside the paragraph the server sends', a
 })
 
 it('sits within the line and previews its sources above it', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   await open(page, '/docs/citation')
   const paragraph = page.locator('#several-sources .doc-citation-text')
@@ -61,7 +60,7 @@ it('sits within the line and previews its sources above it', async (t) => {
 })
 
 it('follows the shape setting, sharp to pill', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   const radius = async (shape: string) => {
     await open(page, `/docs/citation?shape=${shape}`)
     return page
@@ -81,7 +80,7 @@ it('follows the shape setting, sharp to pill', async (t) => {
 })
 
 it('closes its preview when the page scrolls instead of trailing behind it', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   await open(page, '/docs/citation')
   const chip = page.locator('#several-sources a.rf-citation')

@@ -1,11 +1,10 @@
 import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { open, router } from './showcase-router.ts'
+import { open, showcaseServer } from './showcase-router.ts'
 
 it('gives neighbours in a group different colours, overlaps them, and spreads them on hover', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   await open(page, '/docs/avatar')
   const group = page.getByRole('list', { name: 'Editors' })
@@ -41,7 +40,7 @@ it('gives neighbours in a group different colours, overlaps them, and spreads th
 })
 
 it('falls back to initials for a failed image and shows the image that loads', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/avatar')
   const row = page.locator('#images-and-initials .doc-avatar-row')
   const broken = row.getByRole('img', { name: 'Broken Image' })

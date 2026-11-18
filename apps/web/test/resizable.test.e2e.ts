@@ -1,10 +1,9 @@
 import { expect } from 'playwright/test'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { open, router } from './showcase-router.ts'
+import { open, showcaseServer } from './showcase-router.ts'
 
 it('resizes the gallery file browser with the keyboard and pointer', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/')
   const tile = page.locator('[data-component="code-block"]')
   const separator = tile.getByRole('separator', { name: 'Resize project files' })
@@ -25,7 +24,7 @@ it('resizes the gallery file browser with the keyboard and pointer', async (t) =
 })
 
 it('lists each cited source in the same order as the conversation', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/resizable')
   const example = page.locator('#playground')
   const citations = example.getByRole('link', { name: /^Source \d+:/ })
@@ -42,7 +41,7 @@ it('lists each cited source in the same order as the conversation', async (t) =>
 })
 
 it('marks the source links with an underline before hover in both themes', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   for (const theme of ['light', 'dark']) {
     await open(page, `/docs/resizable?theme=${theme}`)
     const source = page

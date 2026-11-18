@@ -1,11 +1,10 @@
 import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
-import { open, router } from './showcase-router.ts'
+import { open, showcaseServer } from './showcase-router.ts'
 
 it('aligns newly created gallery threads with the existing threads', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/?theme=dark')
   const sidebar = page.locator('.site-gallery [data-component="sidebar"]')
   const create = sidebar.getByRole('link', { name: 'New thread', exact: true })
@@ -28,7 +27,7 @@ it('aligns newly created gallery threads with the existing threads', async (t) =
 })
 
 it('keeps the focused Sidebar frame in place as the inset fills it', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 1000 })
   await open(page, '/demo?c=sidebar')
   const shell = page.locator('.site-demo-stage .example-sidebar-playground > .rf-sidebar-layout')
@@ -50,7 +49,7 @@ it('keeps the focused Sidebar frame in place as the inset fills it', async (t) =
 })
 
 it('uses the focused Sidebar workspace, shortcuts, section actions and user menu', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 1000 })
   await open(page, '/demo?c=sidebar')
   const shell = page.locator('.site-demo-stage .example-sidebar-playground > .rf-sidebar-layout')
@@ -122,7 +121,7 @@ it('uses the focused Sidebar workspace, shortcuts, section actions and user menu
 })
 
 it('keeps the profile and workspace menus inside a resized rail with visible keyboard focus', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 1000 })
   await open(page, '/demo?c=sidebar&theme=dark')
   const shell = page.locator('.site-demo-stage .example-sidebar-playground > .rf-sidebar-layout')
@@ -151,7 +150,7 @@ it('keeps the profile and workspace menus inside a resized rail with visible key
 })
 
 it('peeks without expanding the content grid, dismisses on Escape and outside press, and pins open', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   await open(page, '/docs/sidebar')
   const click = page.locator('#resize-collapse-peek .rf-sidebar-layout').nth(1)
@@ -188,7 +187,7 @@ it('peeks without expanding the content grid, dismisses on Escape and outside pr
 })
 
 it('uses the Settings dialog in Sidebar docs and provides a mobile section selector', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
   await open(page, '/docs/sidebar')
@@ -207,7 +206,7 @@ it('uses the Settings dialog in Sidebar docs and provides a mobile section selec
 })
 
 it('moves the rail into a 288px left Drawer on a phone and closes it with a drag', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 390, height: 844 })
   await open(page, '/docs/sidebar?theme=dark')
   const trigger = page

@@ -1,8 +1,21 @@
 import type { Page } from 'playwright'
 import { afterAll } from 'remix/test'
-import { assets } from '../app/assets.ts'
 
-export { router } from '../app/router.ts'
+// The full suite owns one router and asset compiler. Direct Remix invocations
+// start their own server for this file. t.serve still creates a fresh browser
+// context for each test, and closes that context when the test finishes.
+async function standaloneOrigin() {
+  const { startShowcase } = await import('./showcase-server.ts')
+  const server = await startShowcase()
+  afterAll(() => server.close())
+  return server.baseUrl
+}
+
+export const showcaseServer = {
+  baseUrl: process.env.REFLOW_TEST_ORIGIN ?? (await standaloneOrigin()),
+  // The suite or standalone file owns the server's lifetime.
+  async close() {},
+}
 
 export async function waitForShowcase(page: Page) {
   // Wait for every client entry and the showcase's page-level handlers.
@@ -37,7 +50,3 @@ export async function open(page: Page, url: string, options: OpenOptions = {}) {
   if (options.hydrate !== false) await waitForShowcase(page)
   return response
 }
-
-// HTTP servers close through t.serve(); the shared asset watchers need their
-// own cleanup so workers can exit without the runner's shutdown timeout.
-afterAll(() => assets.close())

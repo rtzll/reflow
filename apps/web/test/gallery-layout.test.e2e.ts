@@ -1,14 +1,13 @@
 import type { Page } from 'playwright'
 import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
-import { createTestServer } from 'remix/node-fetch-server/test'
 import { it } from 'remix/test'
 import { pauseClock } from './clock.ts'
 import { holdMotion, releaseMotion, seekMotion } from './motion.ts'
-import { open, router } from './showcase-router.ts'
+import { open, showcaseServer } from './showcase-router.ts'
 
 it('preserves the gallery order and keeps previews above their footers', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.emulateMedia({ reducedMotion: 'reduce' })
   const expected = [
     'carousel',
@@ -188,7 +187,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
 })
 
 it('uses one hover fill for grouped inputs and places the Volume preview above the track', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/?theme=dark')
   const inputGroup = page.locator('.site-gallery [data-component="input-group"]')
   const textbox = page.getByRole('textbox', { name: 'Name', exact: true })
@@ -217,7 +216,7 @@ it('uses one hover fill for grouped inputs and places the Volume preview above t
 })
 
 it('restores dismissed banners and allows clearing the selected feature', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   // The banner returns on a timer, which the test moves on itself.
   await page.clock.install()
   await open(page, '/?theme=dark', { motion: true })
@@ -258,7 +257,7 @@ it('restores dismissed banners and allows clearing the selected feature', async 
 })
 
 it('moves the hovered switch thumb without jumping and settles a drag from the thumb position', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/?theme=dark', { motion: true })
   const tile = page.locator('.site-gallery [data-component="switch"]')
   const input = tile.getByRole('switch', {
@@ -326,7 +325,7 @@ it('moves the hovered switch thumb without jumping and settles a drag from the t
 })
 
 it('fans out the queue and reorders during a drag before release', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/queued-stack')
   const pile = page.getByRole('list', { name: 'Queued messages' })
   const height = (await pile.boundingBox())!.height
@@ -351,7 +350,7 @@ it('fans out the queue and reorders during a drag before release', async (t) => 
 })
 
 it('caps a long searchable dropdown while leaving its lower options reachable', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1200, height: 1000 })
   await open(page, '/docs/dropdown#searchable-menu')
   const trigger = page.locator('#searchable-menu').getByRole('button', { name: 'Auto detect' })
@@ -394,13 +393,12 @@ it('caps a long searchable dropdown while leaving its lower options reachable', 
 })
 
 it('supports the queue, nested menus, and a compact picker on a touch viewport', async (t) => {
-  const server = await createTestServer(router.fetch)
-  const page = await t.serve(server)
+  const page = await t.serve(showcaseServer)
   const context = await page
     .context()
     .browser()!
     .newContext({
-      baseURL: server.baseUrl,
+      baseURL: showcaseServer.baseUrl,
       hasTouch: true,
       isMobile: true,
       viewport: { width: 390, height: 844 },
@@ -451,7 +449,7 @@ it('supports the queue, nested menus, and a compact picker on a touch viewport',
 })
 
 it('moves the inline menu focus ring and preserves its forced-colors fallback', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/dropdown#basic')
   const menu = page.getByRole('menu', { name: 'Library' })
   const first = menu.getByRole('menuitemradio', { name: 'Teamspaces' })
@@ -480,7 +478,7 @@ it('moves the inline menu focus ring and preserves its forced-colors fallback', 
 })
 
 it('moves one focus ring between the rows of a triggered menu', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/dropdown#triggered-menu')
   const trigger = page.locator('#triggered-menu .rf-dropdown-trigger')
   await trigger.focus()
@@ -519,7 +517,7 @@ it('moves one focus ring between the rows of a triggered menu', async (t) => {
 })
 
 it('marks the checked color format and moves a focus ring between formats', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/color-picker')
   const trigger = page.locator('.rf-color-format-trigger').locator('visible=true').first()
   await trigger.focus()
@@ -559,7 +557,7 @@ it('marks the checked color format and moves a focus ring between formats', asyn
 })
 
 it('animates the accordion panel height on the first open as on later opens', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/accordion', { motion: true })
   await page
     .locator('.rf-accordion-trigger[aria-expanded="false"]')
@@ -592,7 +590,7 @@ it('animates the accordion panel height on the first open as on later opens', as
 })
 
 it('strengthens the command list header line and drops the end line at the bottom', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/command-menu')
   const marked = await page.evaluate(() => {
     const root = Array.from(document.querySelectorAll<HTMLElement>('.rf-command-scroll')).find(
@@ -640,7 +638,7 @@ it('strengthens the command list header line and drops the end line at the botto
 })
 
 it('previews a dropdown on hover, keeps it across the gap, and closes it on leave', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/dropdown')
   const trigger = page.getByRole('button', { name: 'Recent' }).locator('visible=true').first()
   await trigger.scrollIntoViewIfNeeded()
@@ -658,7 +656,7 @@ it('previews a dropdown on hover, keeps it across the gap, and closes it on leav
 })
 
 it('renders a fitting gallery breadcrumb before hydration', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.route('**/*', (route) =>
     route.request().resourceType() === 'script' ? route.abort() : route.continue(),
@@ -676,7 +674,7 @@ it('renders a fitting gallery breadcrumb before hydration', async (t) => {
 })
 
 it('can reopen either gallery breadcrumb menu after switching and selecting', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1440, height: 900 })
   await open(page, '/')
   const trail = page.locator('[data-component="breadcrumb"] .rf-breadcrumb')
@@ -712,7 +710,7 @@ it('can reopen either gallery breadcrumb menu after switching and selecting', as
 })
 
 it('glides one hover along the breadcrumb, names cut steps, and collapses on overflow', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/breadcrumb')
 
   const basic = page.locator('#basic .rf-breadcrumb').first()
@@ -792,7 +790,7 @@ it('glides one hover along the breadcrumb, names cut steps, and collapses on ove
 })
 
 it('grows, merges and splits the checked fill in a CheckboxGroup', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/checkbox-group')
   const group = page.getByRole('group', { name: 'Fruit' }).first()
   const list = group.locator('.rf-choice-group-list')
@@ -918,7 +916,7 @@ async function pressAlpha(page: Page) {
 }
 
 it('scrubs a color channel with a locked pointer and a virtual cursor', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.addInitScript(grantPointerLock)
   await open(page, '/docs/color-picker')
   const cursor = page.locator('.rf-scrub-cursor')
@@ -953,7 +951,7 @@ const refusePointerLock = () => {
 }
 
 it('keeps scrubbing on the OS cursor when the pointer lock is refused', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.addInitScript(refusePointerLock)
   await open(page, '/docs/color-picker')
   const { alpha, moveTo } = await pressAlpha(page)
@@ -965,7 +963,7 @@ it('keeps scrubbing on the OS cursor when the pointer lock is refused', async (t
 })
 
 it('glides earlier chat messages up when a new one is sent', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await open(page, '/docs/input-message', { motion: true })
   const box = page.locator('.doc-composer-preview textarea').first()
   await box.scrollIntoViewIfNeeded()
@@ -1008,7 +1006,7 @@ it('glides earlier chat messages up when a new one is sent', async (t) => {
 })
 
 it('fills the InputMessage playground and demo with the conversation, composer at the bottom', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   await open(page, '/docs/input-message')
   const stage = page.locator('.doc-preview-stage[data-playground][data-component="input-message"]')
@@ -1050,7 +1048,7 @@ it('fills the InputMessage playground and demo with the conversation, composer a
 })
 
 it('anchors docs previews 48px below the header, as the reference does', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
   const offset = (frame: string, target: string) =>
@@ -1117,7 +1115,7 @@ it('anchors docs previews 48px below the header, as the reference does', async (
 })
 
 it('lays out calendar headers like the reference for one, side-by-side and stacked months', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   await open(page, '/docs/calendar')
   const layout = (example: string) =>
@@ -1161,7 +1159,7 @@ it('lays out calendar headers like the reference for one, side-by-side and stack
 })
 
 it('shows stacked months under one weekday row with up and down arrows, as the reference does', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   await open(page, '/docs/calendar')
   const stacked = await page.locator('#stacked-months .rf-calendar').evaluate((calendar) => {
@@ -1210,7 +1208,7 @@ it('shows stacked months under one weekday row with up and down arrows, as the r
 })
 
 it('fills the proposed range end like a selected day, with a faint inner ring', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' })
   await open(page, '/docs/calendar?theme=dark')
@@ -1248,7 +1246,7 @@ it('fills the proposed range end like a selected day, with a faint inner ring', 
 })
 
 it('sends a queued message up into the card’s conversation and restores the queue after', async (t) => {
-  const page = await t.serve(await createTestServer(router.fetch))
+  const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1440, height: 900 })
   // The card resets on a timer; the test moves the clock on rather than waiting.
   await page.clock.install()
