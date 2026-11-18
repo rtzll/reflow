@@ -28,7 +28,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
-      - run: pnpm format:check
+      - run: pnpm fmt:check
       - run: pnpm check
       - run: pnpm --filter @reflow/web exec playwright install --with-deps --only-shell chromium
       - name: Build and test the local Cloudflare deployment
