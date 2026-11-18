@@ -1,6 +1,6 @@
 # Development
 
-Use Node 24.3 or newer and the pnpm version pinned in `package.json`. Install the workspace and start the app from the repository root.
+Use Node 26 LTS and the pnpm version pinned in `package.json`. Install the workspace and start the app from the repository root.
 
 ```sh
 pnpm install --frozen-lockfile

@@ -14,7 +14,7 @@ Reflow includes `@remix-run/ui@0.13.1`. See the [integration guide](docs/integra
 
 ## Try it
 
-Use Node 24.3+ and the pnpm version pinned in `package.json`. Run these commands from this checkout.
+Use Node 26 LTS and pnpm 12.21.0. Run these commands from this checkout.
 
 ```sh
 pnpm install --frozen-lockfile

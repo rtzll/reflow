@@ -52,8 +52,8 @@ const test =
     : 'pnpm test'
 const script = [
   'set -e',
-  "node -e \"const [a,b]=process.versions.node.split('.').map(Number); if (a<24||(a===24&&b<3)) { console.error('The image has Node '+process.version+'; Reflow needs 24.3 or later.'); process.exit(1) }\"",
-  `npm install --global --silent pnpm@${pnpm}`,
+  `npm install --prefix /tmp/reflow-tools --no-save --silent "node@$(cat .node-version)" pnpm@${pnpm}`,
+  'export PATH="/tmp/reflow-tools/node_modules/.bin:$PATH"',
   'pnpm config set store-dir /pnpm-store',
   'pnpm install --frozen-lockfile',
   test,
