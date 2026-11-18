@@ -1,13 +1,19 @@
 import type { Page } from 'playwright'
 import { afterAll } from 'remix/test'
 
-// The full suite owns one router and asset compiler. Direct Remix invocations
-// start their own server for this file. t.serve still creates a fresh browser
-// context for each test, and closes that context when the test finishes.
+// The full suite shares one built Worker. Direct file runs serve current source.
 async function standaloneOrigin() {
-  const { startShowcase } = await import('./showcase-server.ts')
-  const server = await startShowcase()
-  afterAll(() => server.close())
+  const { createTestServer } = await import('remix/node-fetch-server/test')
+  const { router } = await import('../app/router.ts')
+  const { assets } = await import('../app/assets.ts')
+  const server = await createTestServer(router.fetch)
+  afterAll(async () => {
+    try {
+      await server.close()
+    } finally {
+      await assets.close()
+    }
+  })
   return server.baseUrl
 }
 

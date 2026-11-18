@@ -5,12 +5,10 @@ import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
 import { expect } from 'playwright/test'
+import { startLocalWorker } from './local-worker.ts'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
 process.chdir(root)
-process.env.WRANGLER_LOG_PATH = resolve(root, '.wrangler/logs')
-process.env.WRANGLER_SEND_METRICS = 'false'
-const { unstable_dev } = await import('wrangler')
 
 // Inspect both the public files and Worker bundle for machine-specific paths.
 for (const directory of ['client', 'worker']) {
@@ -27,21 +25,7 @@ const metadata = JSON.parse(await readFile(resolve(root, 'build/metadata.json'),
 assert.ok(!Object.keys(metadata.worker.inputs).includes('app/assets.ts'))
 assert.ok(!Object.keys(metadata.worker.inputs).some((path) => path.includes('@remix-run/assets')))
 
-const worker = await unstable_dev('build/worker/index.js', {
-  config: 'wrangler.jsonc',
-  local: true,
-  ip: '127.0.0.1',
-  port: 0,
-  inspectorPort: 0,
-  persist: false,
-  logLevel: 'error',
-  experimental: {
-    forceLocal: true,
-    watch: false,
-    disableDevRegistry: true,
-    disableExperimentalWarning: true,
-  },
-})
+const worker = await startLocalWorker()
 let browser
 try {
   const origin = `http://${worker.address}:${worker.port}`

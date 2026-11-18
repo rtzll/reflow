@@ -374,6 +374,7 @@ it('saves the settings of a shared link over older cookies and shows the clean U
   assert.equal(await reveal.getAttribute('href'), '/docs/reveal')
   await reveal.click()
   await page.waitForURL((url) => url.pathname === '/docs/reveal' && url.search === '')
+  await expect(page.getByRole('heading', { level: 1, name: 'Reveal', exact: true })).toBeVisible()
   for (const [key, value] of Object.entries(shared))
     assert.equal(await page.locator('html').getAttribute(`data-${key}`), value)
 

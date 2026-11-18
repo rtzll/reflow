@@ -1,29 +1,13 @@
-import { createTestServer, type TestServer } from 'remix/node-fetch-server/test'
-import { assets } from '../app/assets.ts'
-import { router } from '../app/router.ts'
+import { startLocalWorker } from '../tools/local-worker.ts'
 
-export async function startShowcase(): Promise<TestServer> {
-  const server = await createTestServer(router.fetch)
-  return {
-    baseUrl: server.baseUrl,
-    async close() {
-      try {
-        await server.close()
-      } finally {
-        await assets.close()
-      }
-    },
-  }
-}
-
-let server: TestServer | undefined
+let worker: Awaited<ReturnType<typeof startLocalWorker>> | undefined
 
 export async function globalSetup() {
-  server = await startShowcase()
-  process.env.REFLOW_TEST_ORIGIN = server.baseUrl
+  worker = await startLocalWorker()
+  process.env.REFLOW_TEST_ORIGIN = `http://${worker.address}:${worker.port}`
 }
 
 export async function globalTeardown() {
   delete process.env.REFLOW_TEST_ORIGIN
-  await server?.close()
+  await worker?.stop()
 }
