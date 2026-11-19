@@ -48,7 +48,7 @@ const volumes = packages.flatMap((path) => [
 
 const test =
   files.length > 0
-    ? `pnpm build:web && ./apps/web/node_modules/.bin/remix test --type e2e --concurrency 3 --setup apps/web/test/showcase-server.ts ${files.map((file) => `'${file}'`).join(' ')}`
+    ? `pnpm build:web && pnpm test:e2e ${files.map((file) => `'${file}'`).join(' ')}`
     : 'pnpm test'
 const script = [
   'set -e',

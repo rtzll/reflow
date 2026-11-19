@@ -16,15 +16,16 @@
     "check": "pnpm build && pnpm -r check && tsc -p tsconfig.json",
     "fmt": "oxfmt . --write",
     "fmt:check": "oxfmt . --check",
-    "format": "pnpm run fmt",
-    "format:check": "pnpm run fmt:check",
     "lint": "oxlint . --max-warnings=0",
     "lint:fix": "oxlint . --fix --max-warnings=0",
     "test": "pnpm build:web && pnpm test:run",
     "test:linux": "node tools/test-linux.ts",
     "test:package": "pnpm build && node tools/check-package.ts",
     "test:stress": "node tools/test-stress.ts",
-    "test:run": "node --test tools/*.test.ts packages/create-reflow/test/*.test.ts && ./apps/web/node_modules/.bin/remix test --type server --type browser && ./apps/web/node_modules/.bin/remix test --type e2e --concurrency 3 --setup apps/web/test/showcase-server.ts"
+    "test:run": "pnpm test:unit && pnpm test:browser && pnpm test:e2e",
+    "test:unit": "node --test tools/*.test.ts packages/create-reflow/test/*.test.ts",
+    "test:browser": "./apps/web/node_modules/.bin/remix test --type server --type browser",
+    "test:e2e": "./apps/web/node_modules/.bin/remix test --type e2e --concurrency 3 --setup apps/web/test/showcase-server.ts"
   },
   "devDependencies": {
     "@types/node": "26.6.6",

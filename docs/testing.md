@@ -48,8 +48,13 @@ On a fake clock, exact times are fine: the ThinkingSteps test expects steps at e
 
 ```sh
 pnpm test                 # build, then everything CI runs
+pnpm test:unit            # tool and create-command tests; needs no build
+pnpm test:browser         # server and browser tests, after pnpm build:web
+pnpm test:e2e             # end-to-end tests on the built showcase, after pnpm build:web
 ./apps/web/node_modules/.bin/remix test --type e2e apps/web/test/drawer.test.e2e.ts
 ```
+
+`pnpm test:run` runs those three suites without building. The final command runs one file against a development server.
 
 Before pushing, run the suites your change touches. CI runs everything on Linux and is the gate. End-to-end tests run three at a time, and nothing is retried: a test that fails once has failed.
 
