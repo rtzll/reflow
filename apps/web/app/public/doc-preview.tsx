@@ -1,5 +1,5 @@
 import type { ExampleImages } from '../assets.ts'
-import { clientEntry, on, ref, type Handle, type RemixNode } from 'remix/component'
+import { clientEntry, on, ref, updateUrl, type Handle, type RemixNode } from 'remix/component'
 import { Icon, Switch } from '@rtzll/reflow'
 import { Example } from './examples.tsx'
 import { PreviewInspector } from './preview-inspector.tsx'
@@ -94,7 +94,7 @@ export const DocPreview = clientEntry(
         const url = new URL(location.href)
         if (next) url.searchParams.set('view', 'code')
         else url.searchParams.delete('view')
-        history.replaceState(null, '', url)
+        void updateUrl(url.href)
       }
       handle.update()
     }

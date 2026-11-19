@@ -64,7 +64,7 @@ it('collapses closed accordion panels and keeps the code example linkable', asyn
       '<Accordion defaultValue="item-1" items={items}',
     ),
   )
-  assert.ok(page.url().includes('view=code'))
+  await page.waitForURL(/[?&]view=code/)
   assert.ok(!page.url().includes('theme='))
   assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark')
 })
