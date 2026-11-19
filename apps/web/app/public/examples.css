@@ -2063,6 +2063,10 @@
   padding: 4px;
 }
 
+/* The file panel fills the pane like the tree beside it: short files leave
+   the frame's empty space below the code, long ones grow and the pane
+   scrolls. */
 .example-project-tree .rf-code-block {
   inline-size: 100%;
+  min-block-size: 100%;
 }
