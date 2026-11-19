@@ -154,7 +154,10 @@ if (import.meta.main) {
     assert.deepEqual(missing, [], `Run bootstrap first to create ${missing.join(', ')} on npm`)
   } else {
     assert.notDeepEqual(missing, [], 'Every package exists on npm; use publish')
-    assert.ok(process.env.NODE_AUTH_TOKEN, 'Set the temporary npm environment NPM_BOOTSTRAP_TOKEN')
+    assert.ok(
+      process.env.NPM_BOOTSTRAP_TOKEN,
+      'Set the temporary npm environment NPM_BOOTSTRAP_TOKEN',
+    )
   }
 
   for (const { name, tarball, details, integrity } of releases) {
@@ -164,10 +167,14 @@ if (import.meta.main) {
       execFileSync(
         'npm',
         ['stage', 'publish', tarball, '--access', 'public', '--provenance', '--ignore-scripts'],
-        { stdio: 'inherit' },
+        // Only staging gets the token. With it, npm stages a publish too.
+        {
+          stdio: 'inherit',
+          env: { ...process.env, NODE_AUTH_TOKEN: process.env.NPM_BOOTSTRAP_TOKEN },
+        },
       )
     } else {
-      // Trusted publishing: npm prefers the workflow's OIDC identity to a token.
+      // Trusted publishing, as in publish mode: no token, the workflow's OIDC identity.
       execFileSync(
         'npm',
         ['publish', tarball, '--access', 'public', '--provenance', '--ignore-scripts'],

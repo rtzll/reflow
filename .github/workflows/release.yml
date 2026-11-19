@@ -65,7 +65,7 @@ jobs:
         if: inputs.mode == 'bootstrap'
         run: node tools/release.ts bootstrap
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_BOOTSTRAP_TOKEN }}
+          NPM_BOOTSTRAP_TOKEN: ${{ secrets.NPM_BOOTSTRAP_TOKEN }}
       - name: Publish the verified packages and GitHub release
         if: inputs.mode == 'publish'
         run: node tools/release.ts publish
