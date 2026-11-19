@@ -1,16 +1,16 @@
+// pnpm starter <directory>: creates a starter app that installs this
+// checkout's Reflow, through the same command as pnpm create @rtzll/reflow.
 import { execFileSync } from 'node:child_process'
-import { cpSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, realpathSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { basename, dirname, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = realpathSync(fileURLToPath(new URL('../', import.meta.url)))
-const template = join(root, 'examples/starter')
-const library = join(root, 'packages/reflow')
-const [target, flag, archive, ...extra] = process.argv.slice(2)
-const tarball = flag === '--tarball' && archive ? resolve(archive) : undefined
+const [target, ...extra] = process.argv.slice(2).filter((arg) => arg !== '--')
 
-if (!target || extra.length || (flag && !tarball)) {
-  console.error('Usage: pnpm starter <new-directory-outside-the-workspace> [--tarball <file>]')
+if (!target || extra.length) {
+  console.error('Usage: pnpm starter <new-directory-outside-the-workspace>')
   process.exit(1)
 }
 
@@ -22,38 +22,21 @@ if (fromRoot !== '..' && !fromRoot.startsWith(`..${sep}`)) {
   process.exit(1)
 }
 
-const readManifest = (directory: string) =>
-  JSON.parse(readFileSync(join(directory, 'package.json'), 'utf8'))
-const manifest = readManifest(template)
-const workspace = readManifest(root)
-manifest.packageManager = workspace.packageManager
-manifest.engines = workspace.engines
-manifest.dependencies.remix = readManifest(library).peerDependencies.remix
-manifest.devDependencies = {
-  '@types/node': workspace.devDependencies['@types/node'],
-  typescript: workspace.devDependencies.typescript,
+const run = (command: string, args: string[], cwd = root) =>
+  execFileSync(command, args, { cwd, stdio: 'inherit' })
+
+const temporary = mkdtempSync(join(tmpdir(), 'reflow-starter-'))
+try {
+  const tarball = join(temporary, 'rtzll-reflow.tgz')
+  run('pnpm', ['build'])
+  run('pnpm', ['pack', '--silent', '--out', tarball], join(root, 'packages/reflow'))
+  run(process.execPath, [
+    join(root, 'packages/create-reflow/dist/index.js'),
+    destination,
+    '--tarball',
+    tarball,
+  ])
+  console.log('Keep vendor/rtzll-reflow.tgz with the app; it installs from that file.')
+} finally {
+  rmSync(temporary, { recursive: true, force: true })
 }
-
-function pnpm(args: string[], cwd: string) {
-  execFileSync('pnpm', args, { cwd, stdio: 'inherit' })
-}
-
-mkdirSync(destination)
-cpSync(template, destination, {
-  recursive: true,
-  filter: (path) => !['node_modules', '.git', 'pnpm-lock.yaml'].includes(basename(path)),
-})
-writeFileSync(join(destination, 'package.json'), JSON.stringify(manifest, null, 2) + '\n')
-mkdirSync(join(destination, 'vendor'))
-
-const vendor = join(destination, 'vendor/rtzll-reflow.tgz')
-if (tarball) {
-  cpSync(tarball, vendor)
-} else {
-  pnpm(['build'], library)
-  pnpm(['pack', '--silent', '--out', vendor], library)
-}
-pnpm(['install'], destination)
-
-console.log(`\nStarter ready at ${destination}`)
-console.log('From that directory, run pnpm check and pnpm dev.')

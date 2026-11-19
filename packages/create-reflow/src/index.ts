@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { relative } from 'node:path'
+import { isAbsolute, relative, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { create, readOptions, usage } from './create.ts'
 
@@ -11,7 +11,11 @@ try {
     console.log(usage)
   } else {
     const { destination, installed } = create(options, template)
-    const path = relative(process.cwd(), destination) || '.'
+    const nearby = relative(process.cwd(), destination)
+    const path =
+      nearby === '..' || nearby.startsWith(`..${sep}`) || isAbsolute(nearby)
+        ? destination
+        : nearby || '.'
     console.log(`\nCreated a Reflow app in ${path}.\n\nNext:`)
     if (path !== '.') console.log(`  cd ${path}`)
     if (!installed) {

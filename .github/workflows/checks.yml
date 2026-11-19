@@ -40,16 +40,19 @@ jobs:
           pnpm --filter @reflow/web deploy:dry-run
       - run: pnpm test:run
       - run: pnpm --filter @reflow/web exec remix doctor
-      - name: Pack and test the installable artifact
+      - name: Pack and test the installable artifacts
         run: |
           mkdir -p .artifacts
           pnpm --filter @rtzll/reflow pack --out "$GITHUB_WORKSPACE/.artifacts/rtzll-reflow.tgz"
-          node tools/check-package.ts .artifacts/rtzll-reflow.tgz
+          pnpm --filter @rtzll/create-reflow pack --out "$GITHUB_WORKSPACE/.artifacts/rtzll-create-reflow.tgz"
+          node tools/check-package.ts .artifacts/rtzll-reflow.tgz .artifacts/rtzll-create-reflow.tgz
       - name: Pass the tested artifact to the release workflow
         if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: npm-package
-          path: .artifacts/rtzll-reflow.tgz
+          path: |
+            .artifacts/rtzll-reflow.tgz
+            .artifacts/rtzll-create-reflow.tgz
           if-no-files-found: error
           retention-days: 7

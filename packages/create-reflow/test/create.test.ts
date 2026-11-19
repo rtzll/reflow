@@ -55,10 +55,6 @@ test('creates an app for the matching Reflow release', () => {
   assert.ok(!existsSync(join(directory, '_gitignore')))
   assert.ok(existsSync(join(directory, 'app/public/settings.tsx')))
   assert.ok(!existsSync(join(directory, 'node_modules')))
-  assert.match(
-    readFileSync(join(directory, 'pnpm-workspace.yaml'), 'utf8'),
-    new RegExp(`- '@rtzll/reflow@${library.version.replaceAll('.', '\\.')}'`),
-  )
 })
 
 test('installs with pnpm unless asked not to', () => {

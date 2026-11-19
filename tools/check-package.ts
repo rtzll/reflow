@@ -12,18 +12,27 @@ import type { Browser } from 'playwright/test'
 const root = fileURLToPath(new URL('../', import.meta.url))
 const temporary = realpathSync(mkdtempSync(join(tmpdir(), 'reflow-package-')))
 const destination = join(temporary, 'starter')
-const tarball = process.argv[2] ? resolve(process.argv[2]) : join(temporary, 'rtzll-reflow.tgz')
+// Pass both archives to check them without packing: <reflow.tgz> <create-reflow.tgz>
+const given = process.argv.slice(2).filter((arg) => arg !== '--')
+const tarball = given[0] ? resolve(given[0]) : join(temporary, 'rtzll-reflow.tgz')
+const createTarball = given[1] ? resolve(given[1]) : join(temporary, 'rtzll-create-reflow.tgz')
 let server: ChildProcess | undefined
 let browser: Browser | undefined
 
 const run = (command: string, args: string[], cwd = root) =>
   execFileSync(command, args, { cwd, stdio: 'inherit', timeout: 180_000 })
+const list = (archive: string) =>
+  execFileSync('tar', ['-tzf', archive], { encoding: 'utf8' }).trim().split('\n')
+const extract = (archive: string, file: string) =>
+  execFileSync('tar', ['-xOzf', archive, file], { encoding: 'utf8' })
 
 try {
-  if (!process.argv[2]) {
+  assert.ok(given.length === 0 || given.length === 2, 'Pass both archives or neither')
+  if (given.length === 0) {
     run('pnpm', ['pack', '--silent', '--out', tarball], join(root, 'packages/reflow'))
+    run('pnpm', ['pack', '--silent', '--out', createTarball], join(root, 'packages/create-reflow'))
   }
-  const files = execFileSync('tar', ['-tzf', tarball], { encoding: 'utf8' }).trim().split('\n')
+  const files = list(tarball)
   for (const name of [
     'package.json',
     'LICENSE',
@@ -43,17 +52,82 @@ try {
       /^package\/(?:package\.json|LICENSE|NOTICE|README\.md|dist\/(?:(?:behaviors|systems)\/)?[^/]+\.(?:js|ts|css))$/,
     )
   }
-  assert.equal(
-    execFileSync('tar', ['-xOzf', tarball, 'package/LICENSE'], { encoding: 'utf8' }),
-    readFileSync(join(root, 'LICENSE'), 'utf8'),
-  )
+  assert.equal(extract(tarball, 'package/LICENSE'), readFileSync(join(root, 'LICENSE'), 'utf8'))
   // Shiki is opt-in: only the highlight entry may import it.
   for (const file of files.filter((name) => /^package\/dist\/.+\.js$/.test(name))) {
     if (file === 'package/dist/highlight.js') continue
-    const source = execFileSync('tar', ['-xOzf', tarball, file], { encoding: 'utf8' })
+    const source = extract(tarball, file)
     assert.doesNotMatch(source, /from ['"](?:shiki|@shikijs\/)/, `${file} must not import Shiki`)
   }
-  run(process.execPath, ['tools/create-starter.ts', destination, '--tarball', tarball])
+
+  // The create package ships its command and the starter, pinned to this release.
+  const library = JSON.parse(extract(tarball, 'package/package.json'))
+  const createFiles = list(createTarball)
+  for (const name of [
+    'package.json',
+    'LICENSE',
+    'README.md',
+    'dist/index.js',
+    'dist/create.js',
+    'template/_gitignore',
+    'template/package.json',
+    'template/pnpm-workspace.yaml',
+    'template/server.ts',
+  ]) {
+    assert.ok(createFiles.includes(`package/${name}`), `Create package is missing ${name}`)
+  }
+  for (const file of createFiles) {
+    assert.match(
+      file,
+      /^package\/(?:package\.json|LICENSE|README\.md|dist\/[^/]+\.js|template\/.+)$/,
+    )
+    assert.doesNotMatch(file, /\/(?:node_modules|vendor)\/|pnpm-lock\.yaml$|\/\.gitignore$/)
+  }
+  const created = JSON.parse(extract(createTarball, 'package/package.json'))
+  assert.equal(created.version, library.version, 'Both packages share one version')
+  assert.equal(
+    JSON.parse(extract(createTarball, 'package/template/package.json')).dependencies[
+      '@rtzll/reflow'
+    ],
+    library.version,
+    'The template installs the Reflow release with the same version',
+  )
+  // As npm create runs it. This version may not be on npm yet, so install
+  // the packed library instead in the second run.
+  run(
+    'npm',
+    [
+      'exec',
+      '--yes',
+      `--package=${createTarball}`,
+      '--',
+      'create-reflow',
+      destination,
+      '--no-install',
+    ],
+    temporary,
+  )
+  assert.equal(
+    JSON.parse(readFileSync(join(destination, 'package.json'), 'utf8')).dependencies[
+      '@rtzll/reflow'
+    ],
+    library.version,
+  )
+  rmSync(destination, { recursive: true })
+  run(
+    'npm',
+    [
+      'exec',
+      '--yes',
+      `--package=${createTarball}`,
+      '--',
+      'create-reflow',
+      destination,
+      '--tarball',
+      tarball,
+    ],
+    temporary,
+  )
   run('pnpm', ['install', '--frozen-lockfile'], destination)
   run('pnpm', ['check'], destination)
   const installed = realpathSync(join(destination, 'node_modules/@rtzll/reflow'))
@@ -139,7 +213,7 @@ try {
   )
   assert.deepEqual(errors, [])
   console.log(
-    'Package contents, isolated install, production assets, and starter interactions passed.',
+    'Package contents, the create command, isolated install, production assets, and starter interactions passed.',
   )
 } finally {
   await browser?.close()

@@ -41,14 +41,6 @@ export function buildTemplate(destination: string) {
     typescript: workspace.devDependencies.typescript,
   }
   writeFileSync(join(destination, 'package.json'), JSON.stringify(manifest, null, 2) + '\n')
-
-  // pnpm holds back versions published in the last day. An app created right
-  // after a release still installs the Reflow version it was created for.
-  const settings = join(destination, 'pnpm-workspace.yaml')
-  writeFileSync(
-    settings,
-    `${readFileSync(settings, 'utf8').trimEnd()}\n\nminimumReleaseAgeExclude:\n  - '@rtzll/reflow@${library.version}'\n`,
-  )
 }
 
 if (import.meta.main) {
