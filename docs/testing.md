@@ -47,7 +47,8 @@ On a fake clock, exact times are fine: the ThinkingSteps test expects steps at e
 ## Running tests
 
 ```sh
-pnpm test                 # build, then everything CI runs
+pnpm verify               # lint, format, types, all tests, and the package check
+pnpm test                 # build, then every test suite
 pnpm test:unit            # tool and create-command tests; needs no build
 pnpm test:browser         # server and browser tests, after pnpm build:web
 pnpm test:e2e             # end-to-end tests on the built showcase, after pnpm build:web

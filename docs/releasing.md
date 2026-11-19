@@ -43,16 +43,9 @@ If npm succeeds but the GitHub step fails, rerun the workflow on the same commit
 
 ```sh
 pnpm install --frozen-lockfile
-pnpm lint
-pnpm fmt:check
-pnpm check
-pnpm --filter @reflow/web exec playwright install chromium
-pnpm --filter @reflow/web build
-pnpm test:run
-pnpm --filter @reflow/web exec remix doctor
-node tools/check-package.ts
+pnpm exec playwright install chromium   # once per Playwright version
+pnpm verify
+pnpm test:linux
 ```
 
-Before a release, also run `pnpm test:linux` to run the suite on Linux, as CI does. [Testing](testing.md)
-
-`pnpm test:run` reuses the library and showcase builds. `node tools/check-package.ts` reuses both package builds. `pnpm test` and `pnpm test:package` build first for standalone local use. No local validation command publishes. The smoke test cleans up its temporary app, browser, and server even on failure.
+`pnpm verify` runs lint, the format check, type checks, every test suite, and the package check, building what each needs. `pnpm test:linux` runs the suite on Linux, as CI does. [Testing](testing.md) No local validation command publishes. The smoke test cleans up its temporary app, browser, and server even on failure.
