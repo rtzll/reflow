@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "pnpm build && pnpm --filter @reflow/web dev",
     "starter": "node tools/create-starter.ts",
-    "build": "pnpm --filter @rtzll/reflow build",
+    "build": "pnpm --filter @rtzll/reflow --filter @rtzll/create-reflow build",
     "build:web": "pnpm build && pnpm --filter @reflow/web build",
     "preview:web": "pnpm build:web && pnpm --filter @reflow/web preview",
     "test:deployment": "pnpm build:web && pnpm --filter @reflow/web test:deployment",
@@ -24,7 +24,7 @@
     "test:linux": "node tools/test-linux.ts",
     "test:package": "pnpm build && node tools/check-package.ts",
     "test:stress": "node tools/test-stress.ts",
-    "test:run": "node --test tools/release.test.ts tools/check-tests.test.ts && ./apps/web/node_modules/.bin/remix test --type server --type browser && ./apps/web/node_modules/.bin/remix test --type e2e --concurrency 3 --setup apps/web/test/showcase-server.ts"
+    "test:run": "node --test tools/*.test.ts packages/create-reflow/test/*.test.ts && ./apps/web/node_modules/.bin/remix test --type server --type browser && ./apps/web/node_modules/.bin/remix test --type e2e --concurrency 3 --setup apps/web/test/showcase-server.ts"
   },
   "devDependencies": {
     "@types/node": "26.6.6",

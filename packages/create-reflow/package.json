@@ -1,0 +1,44 @@
+{
+  "name": "@rtzll/create-reflow",
+  "version": "0.10.0",
+  "type": "module",
+  "bin": {
+    "create-reflow": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "template",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "rm -rf dist template && tsc -p tsconfig.build.json && node scripts/template.ts",
+    "check": "tsc -p tsconfig.json"
+  },
+  "engines": {
+    "node": "^26.13.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rtzll/reflow.git",
+    "directory": "packages/create-reflow"
+  },
+  "description": "Create a Remix 3 app that uses Reflow components.",
+  "author": "Christian Rotzoll",
+  "keywords": [
+    "remix",
+    "reflow",
+    "create",
+    "starter",
+    "template"
+  ],
+  "homepage": "https://github.com/rtzll/reflow#readme",
+  "bugs": {
+    "url": "https://github.com/rtzll/reflow/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}
