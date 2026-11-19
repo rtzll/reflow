@@ -17,3 +17,11 @@ test('end-to-end tests navigate only through open()', () => {
   )
   assert.deepEqual(offenders, [], `use open(page, url) instead of goto: ${offenders.join(', ')}`)
 })
+
+// The package check imports Playwright from the root; CI's container image
+// follows the showcase's pin. Both must be the same version.
+test('the root and the showcase pin the same Playwright', () => {
+  const pin = (path: string) =>
+    JSON.parse(readFileSync(new URL(path, import.meta.url), 'utf8')).devDependencies.playwright
+  assert.equal(pin('../package.json'), pin('../apps/web/package.json'))
+})

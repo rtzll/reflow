@@ -87,7 +87,7 @@ const code = await highlight(source, { lang: 'tsx' })
 // <CodeBlock code={code} filename="Button.tsx" />
 ```
 
-The result is plain data, so it can cross into a client entry as props, and the browser loads no highlighter. Highlight in the browser only for code that arrives later, such as a streamed reply. On platforms with a bundle size limit, such as Cloudflare Workers, highlight known code at build time; the showcase's [build](../apps/web/tools/build.mjs) does this for its samples.
+The result is plain data, so it can cross into a client entry as props, and the browser loads no highlighter. Highlight in the browser only for code that arrives later, such as a streamed reply. On platforms with a bundle size limit, such as Cloudflare Workers, highlight known code at build time; the showcase's [build](../apps/web/tools/build.ts) does this for its samples.
 
 ## Check the integration
 

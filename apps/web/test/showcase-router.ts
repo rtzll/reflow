@@ -48,7 +48,7 @@ export interface OpenOptions {
 /**
  * Opens a showcase page with reduced motion and, unless told not to, waits
  * until it has hydrated. End-to-end tests navigate only through this, so none can act on
- * markup before its scripts are wired; tools/check-tests.test.mjs enforces it.
+ * markup before its scripts are wired; tools/check-tests.test.ts enforces it.
  */
 export async function open(page: Page, url: string, options: OpenOptions = {}) {
   await page.emulateMedia({ reducedMotion: options.motion ? 'no-preference' : 'reduce' })

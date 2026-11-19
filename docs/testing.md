@@ -12,7 +12,7 @@ Each test checks one behaviour, with its own setup, and its name says which. Pre
 
 ## Opening pages
 
-End-to-end tests open pages only through `open(page, url)` from `apps/web/test/showcase-router.ts`. It waits until the page has hydrated, so no test acts on markup before its scripts are wired. `tools/check-tests.test.mjs` fails the run if a test calls `page.goto` directly.
+End-to-end tests open pages only through `open(page, url)` from `apps/web/test/showcase-router.ts`. It waits until the page has hydrated, so no test acts on markup before its scripts are wired. `tools/check-tests.test.ts` fails the run if a test calls `page.goto` directly.
 
 `open()` emulates reduced motion, so a test of behaviour is not timed against animations. A test of the motion itself passes `{ motion: true }`. Pass `{ hydrate: false }` only to check the server's HTML before scripts run.
 

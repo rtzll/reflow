@@ -14,7 +14,7 @@ const root = fileURLToPath(new URL('..', import.meta.url))
 const remix = `${root}apps/web/node_modules/.bin/remix`
 
 const args = process.argv.slice(2)
-const files = []
+const files: string[] = []
 let runs = 10
 let parallel = Math.max(2, Math.min(5, Math.floor(availableParallelism() / 2)))
 for (let i = 0; i < args.length; i++) {
@@ -27,8 +27,8 @@ if (files.length === 0 || !(runs > 0) || !(parallel > 0)) {
   process.exit(2)
 }
 
-function run(index) {
-  return new Promise((resolve) => {
+function run(index: number) {
+  return new Promise<{ passed: boolean; output: string }>((resolve) => {
     const child = spawn(remix, ['test', '--type', 'e2e', ...files], { cwd: root })
     let output = ''
     child.stdout.on('data', (chunk) => (output += chunk))
@@ -42,7 +42,7 @@ function run(index) {
 }
 
 console.log(`Running ${files.join(', ')} ${runs} times, ${parallel} at once.`)
-const results = []
+const results: { passed: boolean; output: string }[] = []
 let next = 0
 await Promise.all(
   Array.from({ length: Math.min(parallel, runs) }, async () => {

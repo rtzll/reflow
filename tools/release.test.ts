@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
-import { alreadyPublished, checkTag, releaseDetails } from './release.mjs'
+import { alreadyPublished, checkTag, releaseDetails } from './release.ts'
+import type { Env } from './release.ts'
 
 const checkedIn = JSON.parse(
   readFileSync(new URL('../packages/reflow/package.json', import.meta.url), 'utf8'),
@@ -24,7 +25,7 @@ test('allows the explicitly enabled new public repository and committed version'
   assert.equal(releaseDetails(manifest, env, event).tag, `v${manifest.version}`)
 })
 
-for (const [label, change] of [
+const rejected: [string, Env][] = [
   ['disabled publishing', { RELEASE_ENABLED: '' }],
   ['missing migration configuration', { RELEASE_REPOSITORY_ID: '' }],
   ['the archived repository even if renamed back', { GITHUB_REPOSITORY_ID: 'old-repo-id' }],
@@ -32,7 +33,8 @@ for (const [label, change] of [
   ['a push event', { GITHUB_EVENT_NAME: 'push' }],
   ['another branch', { GITHUB_REF: 'refs/heads/feature' }],
   ['a version that was not committed', { RELEASE_VERSION: '999.0.0' }],
-]) {
+]
+for (const [label, change] of rejected) {
   test(`rejects ${label}`, () => {
     assert.throws(() => releaseDetails(manifest, { ...env, ...change }, event))
   })

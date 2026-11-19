@@ -63,9 +63,9 @@ jobs:
           path: .artifacts
       - name: Stage the first package for npm account setup
         if: inputs.mode == 'bootstrap'
-        run: node tools/release.mjs bootstrap
+        run: node tools/release.ts bootstrap
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_BOOTSTRAP_TOKEN }}
       - name: Publish the verified package and GitHub release
         if: inputs.mode == 'publish'
-        run: node tools/release.mjs publish
+        run: node tools/release.ts publish

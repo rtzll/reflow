@@ -1,4 +1,5 @@
 import { build } from 'esbuild'
+import type { BuildOptions, Metafile, Plugin } from 'esbuild'
 import { copyFile, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { dirname, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -6,7 +7,7 @@ import { fileURLToPath } from 'node:url'
 const root = fileURLToPath(new URL('../', import.meta.url))
 const output = resolve(root, 'build')
 const publicDir = resolve(root, 'app/public')
-const clientEntries = new Map()
+const clientEntries = new Map<string, string>()
 for (const file of await readdir(publicDir, { recursive: true })) {
   if (!/\.tsx?$/.test(file) || /\.test\./.test(file)) continue
   const path = resolve(publicDir, file)
@@ -15,7 +16,7 @@ for (const file of await readdir(publicDir, { recursive: true })) {
   }
 }
 
-const clientEntryPlugin = {
+const clientEntryPlugin: Plugin = {
   name: 'reflow-client-entries',
   setup(builder) {
     builder.onLoad({ filter: /\.tsx?$/ }, async ({ path }) => {
@@ -32,7 +33,7 @@ const clientEntryPlugin = {
 }
 
 await rm(output, { recursive: true, force: true })
-const common = {
+const common: BuildOptions = {
   absWorkingDir: root,
   bundle: true,
   format: 'esm',
@@ -68,31 +69,34 @@ const [client, samples] = await Promise.all([
   import('../app/code-samples.ts').then(({ codeSamples }) => codeSamples()),
 ])
 
-function outputOf(source) {
-  const entry = Object.entries(client.metafile.outputs).find(
+if (!client.metafile) throw new Error('esbuild returned no metafile')
+const clientMeta: Metafile = client.metafile
+
+function outputOf(source: string) {
+  const entry = Object.entries(clientMeta.outputs).find(
     ([, value]) => value.entryPoint && resolve(root, value.entryPoint) === resolve(root, source),
   )
   if (!entry) throw new Error(`Missing browser output for ${source}`)
   return entry[0]
 }
-function publicHref(file) {
+function publicHref(file: string) {
   return '/' + relative(resolve(output, 'client'), resolve(root, file)).replaceAll('\\', '/')
 }
-function href(source) {
+function href(source: string) {
   return publicHref(outputOf(source))
 }
 // Every chunk a module imports statically, however deep. Preloading them lets
 // the browser fetch a page's scripts at once instead of one import level per
 // round trip, which on a slow connection costs seconds before hydration.
-function staticImports(file, found = new Set()) {
-  for (const { path, kind, external } of client.metafile.outputs[file]?.imports ?? []) {
+function staticImports(file: string, found = new Set<string>()) {
+  for (const { path, kind, external } of clientMeta.outputs[file]?.imports ?? []) {
     if (kind !== 'import-statement' || external || found.has(path)) continue
     found.add(path)
     staticImports(path, found)
   }
   return found
 }
-function scriptEntry(source) {
+function scriptEntry(source: string) {
   const file = outputOf(source)
   return {
     href: publicHref(file),

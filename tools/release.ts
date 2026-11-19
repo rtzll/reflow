@@ -3,8 +3,26 @@ import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 
+export interface Manifest {
+  name: string
+  version: string
+  private?: boolean
+  license?: string
+  repository?: { url?: string }
+  [key: string]: unknown
+}
+export type Env = Record<string, string | undefined>
+export interface ReleaseEvent {
+  repository?: { private?: boolean }
+}
+export interface ReleaseDetails {
+  name: string
+  version: string
+  tag: string
+}
+
 // Keep the publication policy testable without credentials or network calls.
-export function releaseDetails(manifest, env, event) {
+export function releaseDetails(manifest: Manifest, env: Env, event: ReleaseEvent): ReleaseDetails {
   assert.equal(env.RELEASE_ENABLED, 'true', 'Publishing is disabled')
   assert.ok(env.RELEASE_REPOSITORY_ID, 'Set the NEW repository ID after migration')
   assert.equal(env.GITHUB_REPOSITORY_ID, env.RELEASE_REPOSITORY_ID, 'Wrong repository ID')
@@ -25,12 +43,16 @@ export function releaseDetails(manifest, env, event) {
     manifest.version,
     'Release input must match the committed version',
   )
-  assert.equal(manifest.repository.url, 'git+https://github.com/rtzll/reflow.git')
+  assert.equal(manifest.repository?.url, 'git+https://github.com/rtzll/reflow.git')
   assert.equal(manifest.license, 'MIT')
   return { name: manifest.name, version: manifest.version, tag: `v${manifest.version}` }
 }
 
-export async function alreadyPublished(details, integrity, request = fetch) {
+export async function alreadyPublished(
+  details: ReleaseDetails,
+  integrity: string,
+  request: (url: string) => Promise<Response> = fetch,
+) {
   const response = await request(
     `https://registry.npmjs.org/${encodeURIComponent(details.name)}/${details.version}`,
   )
@@ -45,7 +67,7 @@ export async function alreadyPublished(details, integrity, request = fetch) {
   return true
 }
 
-export function checkTag(refs, tag, sha) {
+export function checkTag(refs: string, tag: string, sha: string | undefined) {
   const lines = refs
     .trim()
     .split('\n')
@@ -61,7 +83,9 @@ if (import.meta.main) {
   const mode = process.argv[2]
   assert.ok(mode === 'publish' || mode === 'bootstrap', 'Use publish or bootstrap')
   const manifest = JSON.parse(readFileSync('packages/reflow/package.json', 'utf8'))
-  const event = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'))
+  const { GITHUB_EVENT_PATH, GITHUB_SHA } = process.env
+  assert.ok(GITHUB_EVENT_PATH && GITHUB_SHA, 'Run this in the release workflow')
+  const event = JSON.parse(readFileSync(GITHUB_EVENT_PATH, 'utf8'))
   const details = releaseDetails(manifest, process.env, event)
   const tarball = '.artifacts/rtzll-reflow.tgz'
   const packed = JSON.parse(
@@ -74,7 +98,7 @@ if (import.meta.main) {
     ['ls-remote', '--tags', 'origin', `refs/tags/${details.tag}`, `refs/tags/${details.tag}^{}`],
     { encoding: 'utf8' },
   )
-  checkTag(refs, details.tag, process.env.GITHUB_SHA)
+  checkTag(refs, details.tag, GITHUB_SHA)
 
   if (mode === 'bootstrap') {
     assert.ok(process.env.NODE_AUTH_TOKEN, 'Set the temporary npm environment NPM_BOOTSTRAP_TOKEN')
@@ -119,7 +143,7 @@ if (import.meta.main) {
           '--repo',
           'rtzll/reflow',
           '--target',
-          process.env.GITHUB_SHA,
+          GITHUB_SHA,
           '--title',
           details.tag,
           '--generate-notes',

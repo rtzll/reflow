@@ -22,7 +22,7 @@ if (fromRoot !== '..' && !fromRoot.startsWith(`..${sep}`)) {
   process.exit(1)
 }
 
-const readManifest = (directory) =>
+const readManifest = (directory: string) =>
   JSON.parse(readFileSync(join(directory, 'package.json'), 'utf8'))
 const manifest = readManifest(template)
 const workspace = readManifest(root)
@@ -34,7 +34,7 @@ manifest.devDependencies = {
   typescript: workspace.devDependencies.typescript,
 }
 
-function pnpm(args, cwd) {
+function pnpm(args: string[], cwd: string) {
   execFileSync('pnpm', args, { cwd, stdio: 'inherit' })
 }
 

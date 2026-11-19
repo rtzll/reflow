@@ -4,6 +4,7 @@ import { homedir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
+import type { Browser } from 'playwright'
 import { expect } from 'playwright/test'
 import { startLocalWorker } from './local-worker.ts'
 
@@ -26,13 +27,13 @@ assert.ok(!Object.keys(metadata.worker.inputs).includes('app/assets.ts'))
 assert.ok(!Object.keys(metadata.worker.inputs).some((path) => path.includes('@remix-run/assets')))
 
 const worker = await startLocalWorker()
-let browser
+let browser: Browser | undefined
 try {
   const origin = `http://${worker.address}:${worker.port}`
   for (const path of ['/', '/docs', '/docs/button', '/demo?c=dropdown&theme=dark']) {
     const response = await fetch(origin + path)
     assert.equal(response.status, 200, path)
-    assert.match(response.headers.get('content-type'), /text\/html/)
+    assert.match(response.headers.get('content-type') ?? '', /text\/html/)
     assert.equal(response.headers.get('cache-control'), 'private, no-store')
     assert.ok(!(await response.text()).includes(homedir()), path)
   }
@@ -40,6 +41,7 @@ try {
   const home = await (await fetch(origin + '/docs/button')).text()
   const ogImage = home.match(/<meta property="og:image" content="([^"]+)"/)?.[1]
   assert.equal(ogImage, `${origin}/og.png`)
+  assert.ok(ogImage)
   const image = await fetch(ogImage)
   assert.equal(image.status, 200)
   assert.equal(image.headers.get('content-type'), 'image/png')
@@ -59,20 +61,23 @@ try {
     assert.equal((await fetch(origin + path)).status, 404, path)
   }
   const manifest = JSON.parse(await readFile(resolve(root, 'build/manifest.json'), 'utf8'))
-  for (const [path, type] of [
+  const assets: [string, RegExp][] = [
     [manifest.page.entry.href, /javascript/],
-    ...manifest.page.stylesheets.map((href) => [href, /text\/css/]),
-    ...Object.values(manifest.entries).map(({ href }) => [href, /javascript/]),
-  ]) {
+    ...manifest.page.stylesheets.map((href: string): [string, RegExp] => [href, /text\/css/]),
+    ...Object.values(manifest.entries as Record<string, { href: string }>).map(
+      ({ href }): [string, RegExp] => [href, /javascript/],
+    ),
+  ]
+  for (const [path, type] of assets) {
     const response = await fetch(origin + path)
     assert.equal(response.status, 200, path)
-    assert.match(response.headers.get('content-type'), type, path)
-    assert.match(response.headers.get('cache-control'), /immutable/, path)
+    assert.match(response.headers.get('content-type') ?? '', type, path)
+    assert.match(response.headers.get('cache-control') ?? '', /immutable/, path)
   }
 
   browser = await chromium.launch()
   const page = await browser.newPage({ baseURL: origin })
-  async function openShowcase(path) {
+  async function openShowcase(path: string) {
     const response = await page.goto(path)
     assert.equal(response?.status(), 200, path)
     // The entry waits for Remix hydration before it finishes evaluating.
@@ -81,7 +86,7 @@ try {
     }, manifest.page.entry.href)
     return response
   }
-  const errors = []
+  const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
   page.on('console', (message) => {
     if (message.type() === 'error') errors.push(message.text())
@@ -98,7 +103,9 @@ try {
 
   const docs = await page
     .locator('.site-left a[href^="/docs/"]')
-    .evaluateAll((links) => [...new Set(links.map((link) => new URL(link.href).pathname))])
+    .evaluateAll((links) => [
+      ...new Set(links.map((link) => new URL((link as HTMLAnchorElement).href).pathname)),
+    ])
   assert.ok(docs.length > 30)
 
   await openShowcase('/')
@@ -142,16 +149,16 @@ try {
     { width: 390, height: 844, theme: 'light' },
   ]) {
     await page.setViewportSize({ width, height })
-    const overflow = []
+    const overflow: string[] = []
     for (const path of docs) {
       const response = await openShowcase(`${path}?theme=${theme}&density=default&font=inter`)
-      if (theme === 'dark') assert.match(await response.text(), /<\/html>/, path)
+      if (theme === 'dark') assert.match((await response?.text()) ?? '', /<\/html>/, path)
       const dimensions = await page.evaluate(() => ({
         width: document.documentElement.clientWidth,
         scroll: document.documentElement.scrollWidth,
       }))
       if (dimensions.scroll > dimensions.width + 1) {
-        const elements = await page.locator('main *').evaluateAll((nodes) =>
+        const elements: string[] = await page.locator('main *').evaluateAll((nodes) =>
           nodes
             .filter(
               (node) =>
@@ -165,7 +172,7 @@ try {
         )
       }
       assert.deepEqual(errors, [], `${path} at ${width}px`)
-      const slug = path.split('/').at(-1)
+      const slug = path.split('/').at(-1) ?? ''
       if (process.env.REFLOW_SCREENSHOT_DIR && ['button', 'skill'].includes(slug)) {
         await page.screenshot({
           path: join(process.env.REFLOW_SCREENSHOT_DIR, `reflow-${slug}-${width}.png`),

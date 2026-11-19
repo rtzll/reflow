@@ -1,22 +1,22 @@
 import assert from 'node:assert/strict'
 import { execFileSync, spawn } from 'node:child_process'
+import type { ChildProcess } from 'node:child_process'
 import { once } from 'node:events'
 import { existsSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync } from 'node:fs'
-import { createRequire } from 'node:module'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { chromium, expect } from 'playwright/test'
+import type { Browser } from 'playwright/test'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
-const require = createRequire(new URL('../apps/web/package.json', import.meta.url))
-const { chromium, expect } = require('playwright/test')
 const temporary = realpathSync(mkdtempSync(join(tmpdir(), 'reflow-package-')))
 const destination = join(temporary, 'starter')
 const tarball = process.argv[2] ? resolve(process.argv[2]) : join(temporary, 'rtzll-reflow.tgz')
-let server
-let browser
+let server: ChildProcess | undefined
+let browser: Browser | undefined
 
-const run = (command, args, cwd = root) =>
+const run = (command: string, args: string[], cwd = root) =>
   execFileSync(command, args, { cwd, stdio: 'inherit', timeout: 180_000 })
 
 try {
@@ -53,7 +53,7 @@ try {
     const source = execFileSync('tar', ['-xOzf', tarball, file], { encoding: 'utf8' })
     assert.doesNotMatch(source, /from ['"](?:shiki|@shikijs\/)/, `${file} must not import Shiki`)
   }
-  run(process.execPath, ['tools/create-starter.mjs', destination, '--tarball', tarball])
+  run(process.execPath, ['tools/create-starter.ts', destination, '--tarball', tarball])
   run('pnpm', ['install', '--frozen-lockfile'], destination)
   run('pnpm', ['check'], destination)
   const installed = realpathSync(join(destination, 'node_modules/@rtzll/reflow'))
@@ -66,15 +66,16 @@ try {
     'Installing Reflow must not install Shiki',
   )
 
-  server = spawn(process.execPath, ['--import', 'remix/node-tsx', 'server.ts'], {
+  const starter = spawn(process.execPath, ['--import', 'remix/node-tsx', 'server.ts'], {
     cwd: destination,
     env: { ...process.env, NODE_ENV: 'production', HOST: '127.0.0.1', PORT: '0' },
     stdio: ['ignore', 'pipe', 'pipe'],
   })
-  const url = await new Promise((resolve, reject) => {
+  server = starter
+  const url = await new Promise<string>((resolve, reject) => {
     let output = ''
     const timeout = setTimeout(() => reject(new Error(`Starter did not start: ${output}`)), 30_000)
-    const receive = (chunk) => {
+    const receive = (chunk: Buffer) => {
       output += chunk.toString()
       const match = output.match(/listening on (http:\/\/127\.0\.0\.1:\d+)/)
       if (match) {
@@ -82,20 +83,20 @@ try {
         resolve(match[1])
       }
     }
-    server.stdout.on('data', receive)
-    server.stderr.on('data', receive)
-    server.once('error', (error) => {
+    starter.stdout.on('data', receive)
+    starter.stderr.on('data', receive)
+    starter.once('error', (error) => {
       clearTimeout(timeout)
       reject(error)
     })
-    server.once('exit', (code) => {
+    starter.once('exit', (code) => {
       clearTimeout(timeout)
       reject(new Error(`Starter exited (${code}): ${output}`))
     })
   })
   browser = await chromium.launch()
   const page = await browser.newPage({ reducedMotion: 'reduce' })
-  const errors = []
+  const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
   page.on('console', (message) => {
     if (message.type() === 'error') errors.push(message.text())
@@ -143,9 +144,10 @@ try {
 } finally {
   await browser?.close()
   if (server && server.exitCode === null) {
-    const stopped = once(server, 'exit')
-    server.kill('SIGTERM')
-    const force = setTimeout(() => server.kill('SIGKILL'), 5000)
+    const running = server
+    const stopped = once(running, 'exit')
+    running.kill('SIGTERM')
+    const force = setTimeout(() => running.kill('SIGKILL'), 5000)
     await stopped
     clearTimeout(force)
   }

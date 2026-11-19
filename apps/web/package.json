@@ -5,13 +5,13 @@
   "scripts": {
     "dev": "node --watch --import remix/node-tsx server.ts",
     "start": "node --import remix/node-tsx server.ts",
-    "build": "node tools/build.mjs",
+    "build": "node tools/build.ts",
     "preview": "WRANGLER_LOG_PATH=.wrangler/logs WRANGLER_SEND_METRICS=false wrangler dev --local --ip 127.0.0.1 --port 44101",
     "types": "WRANGLER_LOG_PATH=.wrangler/logs WRANGLER_SEND_METRICS=false wrangler types worker/env.d.ts --include-runtime=false",
-    "test:deployment": "node tools/test-deployment.mjs",
+    "test:deployment": "node tools/test-deployment.ts",
     "deploy:dry-run": "WRANGLER_LOG_PATH=.wrangler/logs WRANGLER_SEND_METRICS=false wrangler deploy --dry-run --outdir build/dry-run",
     "check": "tsc --noEmit",
-    "og:image": "node tools/og-image.mjs"
+    "og:image": "node tools/og-image.ts"
   },
   "dependencies": {
     "@rtzll/reflow": "workspace:*",
