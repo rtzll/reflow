@@ -13,14 +13,6 @@ allowBuilds:
   workerd@1.20261117.1: true
 
 minimumReleaseAgeExclude:
-  - '@cloudflare/workerd-darwin-64@1.20261117.1'
-  - '@cloudflare/workerd-darwin-arm64@1.20261117.1'
-  - '@cloudflare/workerd-linux-64@1.20261117.1'
-  - '@cloudflare/workerd-linux-arm64@1.20261117.1'
-  - '@cloudflare/workerd-windows-64@1.20261117.1'
-  - miniflare@5.20261117.0-beta
-  - workerd@1.20261117.1
-  - wrangler@4.164.0
   - '@remix-run/assets@1.0.3'
   - '@remix-run/async-context-middleware@1.0.1'
   - '@remix-run/auth-middleware@1.0.2'
