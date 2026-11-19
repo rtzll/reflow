@@ -1,3 +1,4 @@
+import * as toastUi from '@remix-run/ui/toast'
 import { Spinner } from './spinner.tsx'
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
 import { Button } from './button.tsx'
@@ -184,13 +185,6 @@ const swipeVelocity = 0.11
 const exitDuration = 200
 const interactive = 'button, a, input, select, textarea, [contenteditable]'
 
-interface Timer {
-  version: number
-  remaining: number
-  started: number
-  timeout?: ReturnType<typeof setTimeout>
-}
-
 interface Swipe {
   id: string
   pointer: number
@@ -207,71 +201,78 @@ interface Swipe {
  * anything that scrolls. The newest toast sits in front with up to two
  * peeking behind it, on QueuedStack's stacking values; pointing at or
  * focusing the stack spreads it out and pauses the timers. A swipe toward
- * the nearest edge, Escape, or the close button dismisses a toast, and the
- * hotkey moves focus to the newest one.
+ * the nearest edge, Escape, or the close button dismisses a toast; the
+ * hotkey moves focus to the newest one, and F6 moves into the stack and back.
+ *
+ * Remix UI's toast primitives own the region and dialog semantics, the
+ * announcements, focus recovery and the close timers.
  */
 export function Toaster(handle: Handle<ToasterProps>) {
-  let list: HTMLOListElement | null = null
-  let hovered = false
-  let focused = false
+  let region: HTMLElement | null = null
+  let list: HTMLElement | null = null
   let swipe: Swipe | undefined
-  let returnFocus: HTMLElement | null = null
-  const timers = new Map<string, Timer>()
   const leaving = new Map<string, ReturnType<typeof setTimeout>>()
   let resizeObserver: ResizeObserver | undefined
+  // Open toasts, mirrored for the primitives, with the version last sent.
+  const manager = toastUi.createToastManager()
+  const mirrored = new Map<string, number>()
 
   const position = () => handle.props.position ?? 'bottom-right'
-  const expanded = () => Boolean(handle.props.expand) || hovered || focused
-  const paused = () => hovered || focused || Boolean(swipe) || document.visibilityState === 'hidden'
+  const visibleToasts = () => Math.max(1, Math.floor(handle.props.visibleToasts ?? 3))
 
-  const sync = () => void handle.update()
-  listeners.add(sync)
+  function timeout(entry: Entry) {
+    // A loading toast waits; its close timer starts once it settles.
+    if (entry.status === 'loading') return undefined
+    const duration = entry.duration ?? handle.props.duration ?? 4000
+    return Number.isFinite(duration) ? Math.max(0, duration) : undefined
+  }
 
-  // Keeps each toast's close timer running, paused or cleared to match.
-  function schedule() {
-    const now = performance.now()
-    const live = new Set<string>()
-    for (const entry of entries) {
-      if (entry.dismissed) continue
-      const duration = entry.duration ?? handle.props.duration ?? 4000
-      if (entry.status === 'loading' || !Number.isFinite(duration)) continue
-      live.add(entry.id)
-      let timer = timers.get(entry.id)
-      if (!timer || timer.version !== entry.version) {
-        if (timer) clearTimeout(timer.timeout)
-        timer = { version: entry.version, remaining: Math.max(0, duration), started: now }
-        timers.set(entry.id, timer)
-      }
-      if (paused()) {
-        if (timer.timeout !== undefined) {
-          clearTimeout(timer.timeout)
-          timer.timeout = undefined
-          timer.remaining -= now - timer.started
-        }
-      } else if (timer.timeout === undefined) {
-        timer.started = now
-        timer.timeout = setTimeout(() => {
-          timers.delete(entry.id)
-          close(entry.id, 'auto')
-        }, timer.remaining)
-      }
+  function mirror() {
+    const open = entries.filter((entry) => !entry.dismissed)
+    for (const id of mirrored.keys()) {
+      if (open.some((entry) => entry.id === id)) continue
+      mirrored.delete(id)
+      manager.close(id)
     }
-    for (const [id, timer] of timers) {
-      if (live.has(id)) continue
-      clearTimeout(timer.timeout)
-      timers.delete(id)
+    // Oldest first, so the newest lands in front.
+    for (const entry of open.toReversed()) {
+      if (mirrored.get(entry.id) === entry.version) continue
+      mirrored.set(entry.id, entry.version)
+      manager.add({
+        id: entry.id,
+        title: entry.title,
+        description: entry.description,
+        timeout: timeout(entry),
+      })
     }
   }
 
-  // Hands focus on before a focused toast leaves.
-  function handOff(item: HTMLElement) {
-    if (!item.contains(document.activeElement)) return
-    const next = list?.querySelector<HTMLElement>(
-      ':scope > .rf-toast:not([data-removed], [data-hidden])',
+  // Escape and the close button go through close() first, so a toast the
+  // primitives close on their own has run out of time.
+  function expired() {
+    const open = new Set(manager.items.map((item) => item.id))
+    for (const id of mirrored.keys()) {
+      if (open.has(id)) continue
+      mirrored.delete(id)
+      close(id, 'auto')
+    }
+  }
+  manager.addEventListener('change', expired)
+
+  const sync = () => {
+    mirror()
+    void handle.update()
+  }
+  listeners.add(sync)
+  mirror()
+
+  // The region expands while pointed at or focused; the list carries it too,
+  // alongside the `expand` prop, for styling.
+  function syncExpanded() {
+    list?.toggleAttribute(
+      'data-expanded',
+      Boolean(handle.props.expand) || Boolean(region?.hasAttribute('data-expanded')),
     )
-    if (next && next !== item) next.focus({ preventScroll: true })
-    else if (returnFocus?.isConnected) returnFocus.focus({ preventScroll: true })
-    else item.blur()
   }
 
   // Writes the stack's measurements: each toast's depth, its own height and
@@ -284,7 +285,7 @@ export function Toaster(handle: Handle<ToasterProps>) {
     const style = getComputedStyle(list)
     const gap = parseFloat(style.getPropertyValue('--rf-stack-gap')) || 5
     const peek = parseFloat(style.getPropertyValue('--rf-stack-peek')) || 6
-    const visible = Math.max(1, handle.props.visibleToasts ?? 3)
+    const visible = visibleToasts()
     let offset = 0
     let spread = 0
     for (const [depth, item] of items.entries()) {
@@ -317,7 +318,6 @@ export function Toaster(handle: Handle<ToasterProps>) {
       if (inner) resizeObserver?.observe(inner)
       const id = item.dataset.toastId!
       if (item.hasAttribute('data-removed') && !leaving.has(id)) {
-        handOff(item)
         leaving.set(
           id,
           setTimeout(() => {
@@ -327,8 +327,8 @@ export function Toaster(handle: Handle<ToasterProps>) {
         )
       }
     }
+    syncExpanded()
     layout()
-    schedule()
   }
 
   function endSwipe(event: PointerEvent, item: HTMLElement) {
@@ -358,54 +358,25 @@ export function Toaster(handle: Handle<ToasterProps>) {
     }
   }
 
-  const listMix = ref((element, signal) => {
-    if (!(element instanceof HTMLOListElement)) return
-    list = element
-    const options = { signal }
-    resizeObserver = new ResizeObserver(() => layout())
-    element.addEventListener(
-      'pointerenter',
-      (event) => {
-        if (event.pointerType === 'touch') return
-        hovered = true
-        void handle.update()
-      },
-      options,
-    )
-    element.addEventListener(
-      'pointerleave',
+  const regionMix = ref((element, signal) => {
+    if (!(element instanceof HTMLElement)) return
+    region = element
+    const observer = new MutationObserver(syncExpanded)
+    observer.observe(element, { attributes: true, attributeFilter: ['data-expanded'] })
+    signal.addEventListener(
+      'abort',
       () => {
-        if (!hovered) return
-        hovered = false
-        void handle.update()
+        observer.disconnect()
+        if (region === element) region = null
       },
-      options,
+      { once: true },
     )
-    element.addEventListener(
-      'focusin',
-      (event) => {
-        const from = event.relatedTarget
-        if (from instanceof HTMLElement && !element.contains(from)) returnFocus = from
-        if (focused) return
-        focused = true
-        void handle.update()
-      },
-      options,
-    )
-    element.addEventListener(
-      'focusout',
-      (event) => {
-        const next = event.relatedTarget
-        if (next instanceof Node && element.contains(next)) return
-        // A toast that leaves with focus inside hands it on in the same frame.
-        queueMicrotask(() => {
-          if (element.contains(document.activeElement)) return
-          focused = false
-          void handle.update()
-        })
-      },
-      options,
-    )
+  })
+
+  const listMix = ref((element, signal) => {
+    if (!(element instanceof HTMLElement)) return
+    list = element
+    resizeObserver = new ResizeObserver(() => layout())
     element.ownerDocument.addEventListener(
       'keydown',
       (event) => {
@@ -413,13 +384,11 @@ export function Toaster(handle: Handle<ToasterProps>) {
         const front = element.querySelector<HTMLElement>(':scope > .rf-toast:not([data-removed])')
         if (!front) return
         event.preventDefault()
-        const active = document.activeElement
-        if (active instanceof HTMLElement && !element.contains(active)) returnFocus = active
-        front.focus()
+        // Focused as by keyboard, so the stack expands and focus can return.
+        front.focus({ preventScroll: true, focusVisible: true } as FocusOptions)
       },
-      options,
+      { signal },
     )
-    element.ownerDocument.addEventListener('visibilitychange', () => schedule(), options)
     signal.addEventListener(
       'abort',
       () => {
@@ -434,9 +403,10 @@ export function Toaster(handle: Handle<ToasterProps>) {
     'abort',
     () => {
       listeners.delete(sync)
+      // Not through a listener signal: server runtimes reject the handle's.
+      manager.removeEventListener('change', expired)
       // With no Toaster left to play their exit, closed toasts leave now.
       if (!listeners.size) entries = entries.filter((entry) => !entry.dismissed)
-      for (const timer of timers.values()) clearTimeout(timer.timeout)
       for (const timeout of leaving.values()) clearTimeout(timeout)
     },
     { once: true },
@@ -452,109 +422,118 @@ export function Toaster(handle: Handle<ToasterProps>) {
         statusIcon(entry.status)
       ))
     return (
-      <li
-        key={entry.id}
-        class="rf-toast"
-        tabIndex={0}
-        data-toast-id={entry.id}
-        data-status={entry.status}
-        data-removed={entry.dismissed || undefined}
-        data-dismissible={dismissible ? undefined : 'false'}
-        aria-atomic="true"
-        mix={[
-          on('keydown', (event) => {
-            if (event.key !== 'Escape' || !dismissible || entry.dismissed) return
-            event.preventDefault()
-            event.stopPropagation()
-            close(entry.id, 'dismiss')
-          }),
-          on('pointerdown', (event) => {
-            if (!dismissible || entry.dismissed || event.button !== 0) return
-            if (event.target instanceof Element && event.target.closest(interactive)) return
-            swipe = {
-              id: entry.id,
-              pointer: event.pointerId,
-              x: event.clientX,
-              y: event.clientY,
-              time: performance.now(),
-              dx: 0,
-              dy: 0,
-            }
-            try {
-              event.currentTarget.setPointerCapture(event.pointerId)
-            } catch {
-              // Synthetic pointers have nothing to capture.
-            }
-            void handle.update()
-          }),
-          on('pointermove', (event) => {
-            if (!swipe || swipe.pointer !== event.pointerId || swipe.id !== entry.id) return
-            const item = event.currentTarget
-            const dx = event.clientX - swipe.x
-            const dy = event.clientY - swipe.y
-            if (!swipe.axis) {
-              if (Math.max(Math.abs(dx), Math.abs(dy)) < 2) return
-              swipe.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y'
-              item.setAttribute('data-swiping', '')
-            }
-            const [y, x] = position().split('-')
-            const toward =
-              swipe.axis === 'x'
-                ? x === 'right'
-                  ? 1
-                  : x === 'left'
-                    ? -1
-                    : 0
-                : y === 'bottom'
-                  ? 1
-                  : -1
-            const delta = swipe.axis === 'x' ? dx : dy
-            // Toward the edge it follows the pointer; away from it, it resists.
-            const moved = Math.sign(delta) === toward ? delta : delta / (1 + Math.abs(delta) / 24)
-            swipe.dx = swipe.axis === 'x' ? moved : 0
-            swipe.dy = swipe.axis === 'y' ? moved : 0
-            item.style.setProperty('--rf-swipe-x', `${Math.round(swipe.dx)}px`)
-            item.style.setProperty('--rf-swipe-y', `${Math.round(swipe.dy)}px`)
-          }),
-          on('pointerup', (event) => endSwipe(event, event.currentTarget)),
-          on('pointercancel', (event) => endSwipe(event, event.currentTarget)),
-        ]}
-      >
-        <div class="rf-toast-inner">
-          {icon && (
-            <span class="rf-toast-icon" aria-hidden="true">
-              {icon}
-            </span>
-          )}
-          <div class="rf-toast-content">
-            <div class="rf-toast-title">{entry.title}</div>
-            {entry.description && <div class="rf-toast-description">{entry.description}</div>}
+      <toastUi.ItemContext key={entry.id} value={entry.id}>
+        <div
+          key={entry.id}
+          class="rf-toast"
+          data-toast-id={entry.id}
+          data-status={entry.status}
+          data-removed={entry.dismissed || undefined}
+          data-dismissible={dismissible ? undefined : 'false'}
+          mix={[
+            // Ahead of toast.item(), which closes any toast on Escape.
+            on('keydown', (event) => {
+              if (event.key !== 'Escape' || event.defaultPrevented) return
+              event.preventDefault()
+              if (!dismissible || entry.dismissed) return
+              event.stopPropagation()
+              close(entry.id, 'dismiss')
+            }),
+            on('pointerdown', (event) => {
+              if (!dismissible || entry.dismissed || event.button !== 0) return
+              if (event.target instanceof Element && event.target.closest(interactive)) return
+              swipe = {
+                id: entry.id,
+                pointer: event.pointerId,
+                x: event.clientX,
+                y: event.clientY,
+                time: performance.now(),
+                dx: 0,
+                dy: 0,
+              }
+              try {
+                event.currentTarget.setPointerCapture(event.pointerId)
+              } catch {
+                // Synthetic pointers have nothing to capture.
+              }
+              void handle.update()
+            }),
+            on('pointermove', (event) => {
+              if (!swipe || swipe.pointer !== event.pointerId || swipe.id !== entry.id) return
+              const item = event.currentTarget
+              const dx = event.clientX - swipe.x
+              const dy = event.clientY - swipe.y
+              if (!swipe.axis) {
+                if (Math.max(Math.abs(dx), Math.abs(dy)) < 2) return
+                swipe.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y'
+                item.setAttribute('data-swiping', '')
+              }
+              const [y, x] = position().split('-')
+              const toward =
+                swipe.axis === 'x'
+                  ? x === 'right'
+                    ? 1
+                    : x === 'left'
+                      ? -1
+                      : 0
+                  : y === 'bottom'
+                    ? 1
+                    : -1
+              const delta = swipe.axis === 'x' ? dx : dy
+              // Toward the edge it follows the pointer; away from it, it resists.
+              const moved = Math.sign(delta) === toward ? delta : delta / (1 + Math.abs(delta) / 24)
+              swipe.dx = swipe.axis === 'x' ? moved : 0
+              swipe.dy = swipe.axis === 'y' ? moved : 0
+              item.style.setProperty('--rf-swipe-x', `${Math.round(swipe.dx)}px`)
+              item.style.setProperty('--rf-swipe-y', `${Math.round(swipe.dy)}px`)
+            }),
+            on('pointerup', (event) => endSwipe(event, event.currentTarget)),
+            on('pointercancel', (event) => endSwipe(event, event.currentTarget)),
+            toastUi.item(),
+          ]}
+        >
+          <div class="rf-toast-inner">
+            {icon && (
+              <span class="rf-toast-icon" aria-hidden="true">
+                {icon}
+              </span>
+            )}
+            <div class="rf-toast-content">
+              <div class="rf-toast-title" mix={toastUi.title()}>
+                {entry.title}
+              </div>
+              {entry.description && (
+                <div class="rf-toast-description" mix={toastUi.description()}>
+                  {entry.description}
+                </div>
+              )}
+            </div>
+            {entry.action && (
+              <Button
+                variant="secondary"
+                size="compact"
+                class="rf-toast-action"
+                mix={on('click', (event) => {
+                  entry.action?.onClick(event)
+                  if (!event.defaultPrevented) close(entry.id, 'dismiss')
+                })}
+              >
+                {entry.action.label}
+              </Button>
+            )}
+            {handle.props.closeButton && dismissible && (
+              <button
+                type="button"
+                class="rf-toast-close"
+                aria-label="Close"
+                mix={on('click', () => close(entry.id, 'dismiss'))}
+              >
+                <Icon name="x" />
+              </button>
+            )}
           </div>
-          {entry.action && (
-            <Button
-              variant="secondary"
-              size="compact"
-              class="rf-toast-action"
-              mix={on('click', (event) => {
-                entry.action?.onClick(event)
-                if (!event.defaultPrevented) close(entry.id, 'dismiss')
-              })}
-            >
-              {entry.action.label}
-            </Button>
-          )}
-          {handle.props.closeButton && dismissible && (
-            <button
-              type="button"
-              class="rf-toast-close"
-              aria-label="Close"
-              mix={on('click', () => close(entry.id, 'dismiss'))}
-            >
-              <Icon name="x" />
-            </button>
-          )}
         </div>
-      </li>
+      </toastUi.ItemContext>
     )
   }
 
@@ -562,25 +541,22 @@ export function Toaster(handle: Handle<ToasterProps>) {
     handle.queueTask(afterRender)
     const { label = 'Notifications', size, hotkey = 'alt+t' } = handle.props
     return (
-      <section
-        class={handle.props.class ? `rf-toaster-region ${handle.props.class}` : 'rf-toaster-region'}
-        aria-label={label}
-        aria-keyshortcuts={ariaShortcut(hotkey)}
-        aria-live="polite"
-        aria-relevant="additions text"
-        aria-atomic="false"
-        tabIndex={-1}
-        data-density={size}
-      >
-        <ol
-          class="rf-toaster"
-          data-position={position()}
-          data-expanded={expanded() || undefined}
-          mix={listMix}
-        >
-          {entries.map(renderToast)}
-        </ol>
-      </section>
+      <toastUi.Context manager={manager} limit={visibleToasts()}>
+        {() => (
+          <section
+            class={
+              handle.props.class ? `rf-toaster-region ${handle.props.class}` : 'rf-toaster-region'
+            }
+            aria-keyshortcuts={ariaShortcut(hotkey)}
+            data-density={size}
+            mix={[toastUi.root({ label }), regionMix]}
+          >
+            <div class="rf-toaster" data-position={position()} mix={listMix}>
+              {entries.map(renderToast)}
+            </div>
+          </section>
+        )}
+      </toastUi.Context>
     )
   }
 }

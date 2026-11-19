@@ -18,13 +18,17 @@ async function mount(props: ToasterProps = {}) {
   toast.dismiss()
   const view = render(<Toaster {...props} />)
   const region = view.$('section.rf-toaster-region') as HTMLElement
-  const list = () => region.querySelector('ol.rf-toaster') as HTMLOListElement
+  const list = () => region.querySelector('.rf-toaster') as HTMLElement
+  // The primitives announce through a polite live region beside the toasts.
+  const announcer = () =>
+    region.parentElement!.querySelector<HTMLElement>(':scope > [aria-live="polite"]')!
   const live = () =>
     Array.from(region.querySelectorAll<HTMLElement>('.rf-toast:not([data-removed])'))
   await waitFor(() => !region.querySelector('.rf-toast'))
   return {
     region,
     list,
+    announcer,
     live,
     cleanup() {
       toast.dismiss()
@@ -40,10 +44,10 @@ function pointer(node: Element, type: string, init: PointerEventInit = {}) {
 }
 
 describe('Toaster', () => {
-  it('shows a toast in a polite region and dismisses it by id', async (t) => {
-    const { region, live, cleanup } = await mount()
+  it('shows a toast in a named region, announces it and dismisses it by id', async (t) => {
+    const { region, announcer, live, cleanup } = await mount()
     t.after(cleanup)
-    equal(region.getAttribute('aria-live'), 'polite')
+    equal(region.getAttribute('role'), 'region')
     equal(region.getAttribute('aria-label'), 'Notifications')
     equal(region.getAttribute('aria-keyshortcuts'), 'Alt+T')
 
@@ -54,6 +58,10 @@ describe('Toaster', () => {
     equal(item.querySelector('.rf-toast-description')?.textContent, 'Friday, 10:00')
     equal(item.dataset.status, 'default')
     ok(!item.querySelector('.rf-toast-icon'), 'a plain toast has no icon')
+    equal(item.getAttribute('role'), 'dialog')
+    equal(item.getAttribute('aria-labelledby'), item.querySelector('.rf-toast-title')!.id)
+    equal(item.getAttribute('aria-describedby'), item.querySelector('.rf-toast-description')!.id)
+    await waitFor(() => announcer().textContent === 'Event createdFriday, 10:00')
 
     toast.dismiss(id)
     await waitFor(() => item.hasAttribute('data-removed'))
@@ -181,6 +189,36 @@ describe('Toaster', () => {
     equal(dismissed.length, 1)
   })
 
+  it('announces the message without the toast’s controls', async (t) => {
+    const { announcer, live, cleanup } = await mount({ closeButton: true })
+    t.after(cleanup)
+    toast('Message archived', { action: { label: 'Undo', onClick: () => {} } })
+    await waitFor(() => live().length === 1)
+    await waitFor(() => announcer().textContent === 'Message archived')
+    ok(live()[0]!.querySelector('button.rf-toast-action'))
+  })
+
+  it('ignores Escape on a toast that cannot be dismissed', async (t) => {
+    const { live, cleanup } = await mount()
+    t.after(cleanup)
+    const closed: string[] = []
+    toast('Pinned', {
+      dismissible: false,
+      duration: Infinity,
+      onDismiss: (item) => closed.push(`dismiss ${item.id}`),
+      onAutoClose: (item) => closed.push(`auto ${item.id}`),
+    })
+    await waitFor(() => live().length === 1)
+    const item = live()[0]!
+    item.focus()
+    item.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    )
+    await pause(60)
+    equal(closed.join(), '')
+    equal(live().length, 1)
+  })
+
   it('keeps three toasts in view and stacks the newest in front', async (t) => {
     const { list, live, cleanup } = await mount({ position: 'top-center' })
     t.after(cleanup)
@@ -202,6 +240,9 @@ describe('Toaster', () => {
     )
     ok(live()[0]!.hasAttribute('data-front'))
     ok(!live()[2]!.hasAttribute('data-hidden'))
+    // The one waiting behind can't be reached until a toast in view leaves.
+    ok(live()[3]!.inert)
+    ok(!live()[2]!.inert)
   })
 
   it('dismisses on a swipe toward its edge and springs back from a short one', async (t) => {
@@ -254,12 +295,16 @@ describe('Toaster', () => {
       new KeyboardEvent('keydown', { key: '†', code: 'KeyT', altKey: true, bubbles: true }),
     )
     await waitFor(() => document.activeElement === live()[0])
-    ok(list().hasAttribute('data-expanded'))
+    await waitFor(() => list().hasAttribute('data-expanded'))
 
-    live()[0]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    live()[0]!.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    )
     await waitFor(() => live().length === 1)
     await waitFor(() => document.activeElement === live()[0])
-    live()[0]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    live()[0]!.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    )
     await waitFor(() => live().length === 0)
     await waitFor(() => document.activeElement === outside)
   })
