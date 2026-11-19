@@ -86,7 +86,7 @@ The approach is feasible, but full equivalence is a library project, not a mecha
 
 Calendars, rich editing within composed experiences, attachment previews, color manipulation, drag/reorder interactions, and nested popup edge cases need deeper audit. If an upstream feature depends on a substantial external subsystem, record its exact behavior and implementation cost; do not silently remove it or add an unapproved runtime dependency. Native HTML alone does not guarantee equivalent behavior.
 
-The workspace pins Remix 3.2.0 and Remix UI 0.13.1. Reflow wraps the independently versioned Remix UI primitives so its app and consumers can use the same component API. The committed lockfile pins transitive packages.
+The workspace pins Remix 3.3.0 and Remix UI 0.14.0. Reflow wraps the independently versioned Remix UI primitives so its app and consumers can use the same component API. The committed lockfile pins transitive packages.
 
 ## Relationship to Fluid Functionalism
 

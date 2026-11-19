@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@rtzll/reflow": "file:vendor/rtzll-reflow.tgz",
-    "remix": "3.2.0"
+    "remix": "3.3.0"
   },
   "devDependencies": {
     "@types/node": "26.6.6",

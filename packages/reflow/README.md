@@ -2,7 +2,7 @@
 
 Native Remix 3 UI components with spring motion, shared hover highlights, and keyboard-friendly controls. Inspired by [Fluid Functionalism](https://github.com/mickadesign/fluid-functionalism).
 
-Reflow is in development and tracks unstable Remix APIs. Use `remix@3.2.0`; Reflow includes `@remix-run/ui@0.13.1`. It uses Remix's component runtime, not React.
+Reflow is in development and tracks unstable Remix APIs. Use `remix@3.3.0`; Reflow includes `@remix-run/ui@0.14.0`. It uses Remix's component runtime, not React.
 
 ```tsx
 import { Button, Dialog, Sidebar, Switch } from '@rtzll/reflow'

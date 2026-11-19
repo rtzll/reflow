@@ -285,7 +285,7 @@ function DropdownSurface(
   const highlight = fluidHover({ highlightedSelector: '[data-highlighted]' })
   const checked = new Map<string, boolean>()
 
-  // Remix UI 0.13.1 unconditionally closes after its activation path. Keep
+  // Remix UI 0.14.0 unconditionally closes after its activation path. Keep
   // registration, navigation and popup behavior, but commit persistent rows
   // before that path runs (the selection event itself is not cancelable).
   function selectPersistent(event: MouseEvent | KeyboardEvent) {

@@ -25,7 +25,7 @@
   },
   "peerDependencies": {
     "@shikijs/transformers": "^4.6.0",
-    "remix": "3.2.0",
+    "remix": "3.3.0",
     "shiki": "^4.6.0"
   },
   "peerDependenciesMeta": {
@@ -38,11 +38,11 @@
   },
   "devDependencies": {
     "@shikijs/transformers": "4.6.0",
-    "remix": "3.2.0",
+    "remix": "3.3.0",
     "shiki": "4.6.0"
   },
   "dependencies": {
-    "@remix-run/ui": "0.13.1"
+    "@remix-run/ui": "0.14.0"
   },
   "license": "MIT",
   "repository": {

@@ -4,7 +4,7 @@ Reflow uses Remix 3's component runtime. The package is available on [npm](https
 
 ## Compatibility
 
-Use Node 26 LTS and the pnpm version pinned in the workspace's `package.json` for the documented workflow. Reflow requires `remix@3.2.0` as a peer dependency and includes `@remix-run/ui@0.13.1` as a dependency. Remix UI is independently versioned and unstable. Keep these pins when integrating; other version combinations have not been verified.
+Use Node 26 LTS and the pnpm version pinned in the workspace's `package.json` for the documented workflow. Reflow requires `remix@3.3.0` as a peer dependency and includes `@remix-run/ui@0.14.0` as a dependency. Remix UI is independently versioned and unstable. Keep these pins when integrating; other version combinations have not been verified.
 
 Use ESM (`"type": "module"`) and configure TypeScript with `"jsx": "react-jsx"` and `"jsxImportSource": "remix/component"`. The JSX compiler option does not introduce a React dependency. See the [starter tsconfig](../examples/starter/tsconfig.json) for the complete configuration.
 
@@ -13,7 +13,7 @@ Use ESM (`"type": "module"`) and configure TypeScript with `"jsx": "react-jsx"` 
 From your app's root, install Reflow and its Remix peer dependency:
 
 ```sh
-pnpm add --save-exact @rtzll/reflow@0.9.0 remix@3.2.0
+pnpm add --save-exact @rtzll/reflow@0.9.0 remix@3.3.0
 ```
 
 For a new project, the [starter command](development.md#try-a-clean-install) generates an app wired up to a local build of Reflow.
@@ -33,7 +33,7 @@ From your app's root, copy that tarball into the project and install it alongsid
 ```sh
 mkdir -p vendor
 cp /absolute/path/to/rtzll-reflow.tgz vendor/rtzll-reflow.tgz
-pnpm add ./vendor/rtzll-reflow.tgz remix@3.2.0 --save-exact
+pnpm add ./vendor/rtzll-reflow.tgz remix@3.3.0 --save-exact
 ```
 
 Keep the tarball and lockfile with the app so `pnpm install --frozen-lockfile` works in another checkout. Library edits require rebuilding, repacking, and reinstalling the tarball.
