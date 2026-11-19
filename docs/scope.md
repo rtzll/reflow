@@ -58,8 +58,11 @@ Primitives Reflow checked and does not use, and why:
 - **`combobox` for Combobox.** The primitive holds one value and clears unmatched text on blur. Combobox also selects several values as chips and creates new options from the typed text.
 - **`toggle` for Switch.** Switch is a native checkbox that can be dragged. The primitive reads the checked state during the click, before a drag that settles on the current value cancels it, and drops `defaultChecked` from the input, so a form reset no longer restores it.
 - **`listbox` for CommandMenu.** The primitive marks the committed value as selected and clears the highlight when the pointer leaves. CommandMenu runs commands, so it has no committed value, and it keeps the highlighted command marked selected for the input's `aria-activedescendant`.
+- **`form` for Field.** The module is a validation layer, not markup, and it is marked experimental: its API may change in patch releases. Field stays presentational, so its controls can take the module's mixins.
 
 Tabs uses the `tabs` primitive but handles its arrow keys first: the primitive selects the tab an arrow moves to, and Reflow's Tabs moves focus only, selecting on Enter, Space or a click.
+
+Toaster uses the `toast` primitive for the region, the dialog semantics of each toast, announcements, F6 and Tab movement, focus recovery and the close timers. Its `toast()` store stays the source of truth: each Toaster mirrors the open toasts into a manager and keeps closed ones rendered until their exit ends. It handles Escape first, so a toast that cannot be dismissed stays and the close reaches `onDismiss`; a toast the primitive closes on its own has timed out and reaches `onAutoClose`. Swipes, the pile and the hotkey stay Reflow's.
 
 Check again when Remix UI updates.
 
@@ -82,7 +85,7 @@ Check again when Remix UI updates.
 
 ## Implementation boundaries
 
-The approach is feasible, but full equivalence is a library project, not a mechanical conversion. Remix UI currently supplies accordion, anchor, combobox, form, listbox, menu, popover, select, tabs, toggle, and animation modules. It does not expose a ready-made counterpart for every upstream component.
+The approach is feasible, but full equivalence is a library project, not a mechanical conversion. Remix UI currently supplies accordion, anchor, combobox, form, listbox, menu, popover, select, tabs, toast, toggle, and animation modules. It does not expose a ready-made counterpart for every upstream component.
 
 Calendars, rich editing within composed experiences, attachment previews, color manipulation, drag/reorder interactions, and nested popup edge cases need deeper audit. If an upstream feature depends on a substantial external subsystem, record its exact behavior and implementation cost; do not silently remove it or add an unapproved runtime dependency. Native HTML alone does not guarantee equivalent behavior.
 

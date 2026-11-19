@@ -3813,7 +3813,8 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
         {
           name: 'hotkey',
           type: 'string',
-          description: 'Moves focus to the newest toast. Default alt+t.',
+          description:
+            'Moves focus to the newest toast. F6 also moves into the stack and back. Default alt+t.',
           required: false,
         },
         {
