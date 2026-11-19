@@ -8,7 +8,7 @@ Reflow is in development and tracks unstable Remix APIs. Use `remix@3.3.0`; Refl
 import { Button, Dialog, Sidebar, Switch } from '@rtzll/reflow'
 ```
 
-Serve `@rtzll/reflow/styles.css` with your app and enable Remix's browser runtime for interactive controls.
+Serve `@rtzll/reflow/styles.css` with your app and enable Remix's browser runtime for interactive controls. To start a new app with both set up, run `pnpm create @rtzll/reflow my-app`.
 
 - [Installation and runtime setup](https://github.com/rtzll/reflow/blob/main/docs/integration.md)
 - [Components and roadmap](https://github.com/rtzll/reflow/blob/main/docs/components.md)

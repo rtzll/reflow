@@ -40,7 +40,9 @@ Checks run on pull requests and pushes to `main`; superseded check runs are canc
 
 ## Try a clean install
 
-Run `pnpm starter /absolute/path/to/my-app` from an installed Reflow checkout. The destination must be a new directory with an existing parent outside the workspace. The command builds and packs `@rtzll/reflow`, copies the starter, and installs dependencies in the new directory. The resulting app has its own lockfile and depends on `file:vendor/rtzll-reflow.tgz`. Keep that tarball with the app to reinstall with `pnpm install --frozen-lockfile`.
+`pnpm create @rtzll/reflow my-app` creates an app from the Reflow release on npm. To create the same app with this checkout's Reflow, run `pnpm starter /absolute/path/to/my-app` from an installed checkout. The destination must be a new directory with an existing parent outside the workspace. The command builds both packages, packs `@rtzll/reflow`, and runs the create command from `packages/create-reflow` with that archive. The resulting app has its own lockfile and depends on `file:vendor/rtzll-reflow.tgz`. Keep that tarball with the app to reinstall with `pnpm install --frozen-lockfile`.
+
+The create package's template is built from `examples/starter`, so change the starter there. Its build pins the Reflow version from `packages/reflow`; both packages always share one version.
 
 From the generated directory:
 
@@ -51,4 +53,4 @@ pnpm dev
 
 Open the address printed in the terminal. Toggle the sidebar, select Dark, switch on Compact layout, and open and dismiss Preview alert. Use Apply settings and reload to confirm the URL restores both appearance and notification choices. Reset restores the choices from the last page load.
 
-The starter imports components through `@rtzll/reflow`. Its asset server allows `remix` and `@rtzll/reflow`, and resolves `@rtzll/reflow/styles.css` through the package export. The installed tarball supplies the JavaScript, declarations, and styles. `pnpm test:package` checks those files, installs a temporary starter outside the workspace, and exercises its production UI. It closes the browser and server and deletes the temporary app afterward. To check an existing archive without rebuilding, run `node tools/check-package.ts /absolute/path/to/package.tgz`. Use the starter when you need to check that those files work in an independent Remix project. [Starter source](../examples/starter/app/actions/controller.tsx)
+The starter imports components through `@rtzll/reflow`. Its asset server allows `remix` and `@rtzll/reflow`, and resolves `@rtzll/reflow/styles.css` through the package export. The installed tarball supplies the JavaScript, declarations, and styles. `pnpm test:package` packs both packages and checks their files. It runs the packed create command the way `npm create` does, installs the packed library in a temporary app outside the workspace, and exercises its production UI. It closes the browser and server and deletes the temporary app afterward. To check existing archives without rebuilding, run `node tools/check-package.ts /absolute/path/to/rtzll-reflow.tgz /absolute/path/to/rtzll-create-reflow.tgz`. Use the starter when you need to check that those files work in an independent Remix project. [Starter source](../examples/starter/app/actions/controller.tsx)

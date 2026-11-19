@@ -28,13 +28,12 @@ To test the production website locally on Cloudflare's runtime, run `pnpm previe
 ## Start a fresh app
 
 ```sh
-pnpm starter /absolute/path/to/my-app
-cd /absolute/path/to/my-app
-pnpm check
+pnpm create @rtzll/reflow my-app
+cd my-app
 pnpm dev
 ```
 
-Choose a new directory outside this checkout. The starter installs a local tarball of Reflow. Open the address printed by `pnpm dev`. It includes a sidebar, appearance controls, a notification form, and a dialog. [Clean install guide](docs/development.md#try-a-clean-install)
+Open the address printed by `pnpm dev`. The app is a settings page with a sidebar, appearance controls, a notification form, and a dialog. It needs Node 26 and pnpm 12. To try local changes to Reflow in the same app, see the [clean install guide](docs/development.md#try-a-clean-install).
 
 ## Use a component
 

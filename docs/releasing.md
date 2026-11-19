@@ -15,27 +15,27 @@ Keep `packages/reflow/package.json` private and leave `RELEASE_ENABLED` and `REL
 ## Enable only in the new repository
 
 1. Confirm Checks pass on the public repository. Configure an `npm` GitHub environment restricted to `main`.
-2. In a reviewed commit, remove `private` from **only** `packages/reflow/package.json`. Keep the root, showcase, and starter private. Commit the intended version and update installation docs when npm installation becomes available.
+2. In a reviewed commit, remove `private` from **only** the published manifests, `packages/reflow/package.json` and `packages/create-reflow/package.json`. Keep the root, showcase, and starter private. Commit the intended version and update installation docs when npm installation becomes available.
 3. Set repository variables `RELEASE_ENABLED=true` and `RELEASE_REPOSITORY_ID` to the **new** repository's numeric ID (`gh api repos/rtzll/reflow --jq .id`). The ID prevents the renamed archive from publishing even if its old name is reused.
 4. Configure npm authentication as below. Do not enable or configure these settings in the archive.
 
-## First npm version
+## A new package name
 
-npm trusted publishing is configured on an existing package. To create it through CI, use the release workflow's one-time `bootstrap` mode:
+The release publishes two packages with one version: `@rtzll/reflow`, then `@rtzll/create-reflow`. npm trusted publishing is configured on an existing package. `@rtzll/reflow` was created this way at 0.1.0; `@rtzll/create-reflow` is created the same way with its first release. To create a package through CI, use the release workflow's `bootstrap` mode:
 
-1. Create a short-lived, stage-only granular npm token with access to create `@rtzll/reflow`. Save it as `NPM_BOOTSTRAP_TOKEN` in the new repository's `npm` environment.
-2. Manually run **Release** on `main`, enter the committed version (initially `0.1.0`), and choose `bootstrap`. CI runs all checks and the isolated starter smoke test, then stages that exact tarball. npm creates a public placeholder; the real version still needs your approval. This mode does not create a GitHub release.
+1. Create a short-lived, stage-only granular npm token with access to create the new package. Save it as `NPM_BOOTSTRAP_TOKEN` in the new repository's `npm` environment.
+2. Manually run **Release** on `main`, enter the committed version, and choose `bootstrap`. CI runs all checks and the isolated install smoke test. It publishes the packages that already exist on npm through trusted publishing, then stages the new package's exact tarball. npm creates a public placeholder; the staged version still needs your approval. This mode does not create a GitHub release, and it fails if every package already exists.
 3. Review and approve the staged version on npm with 2FA. Revoke the bootstrap token and delete the environment secret.
-4. Run **Release** in `publish` mode on the **same commit**. It verifies the approved tarball's integrity, skips the existing npm version, and creates the matching GitHub tag and release.
-5. Before the next new version, configure the package's GitHub trusted publisher for owner `rtzll`, repository `reflow`, workflow `release.yml`, environment `npm`, with publishing permission. Complete that publish within npm's two-day activation window; otherwise recreate the connection.
+4. Run **Release** in `publish` mode on the **same commit**. It verifies the approved tarballs' integrity, skips the existing npm versions, and creates the matching GitHub tag and release.
+5. Before the next new version, configure the new package's GitHub trusted publisher for owner `rtzll`, repository `reflow`, workflow `release.yml`, environment `npm`, with publishing permission. Complete that publish within npm's two-day activation window; otherwise recreate the connection.
 
 This one-time account setup uses [npm staged publishing](https://docs.npmjs.com/staged-publishing/). Later versions use [trusted publishing](https://docs.npmjs.com/trusted-publishers/) without a stored npm token. The workflow pins npm 12.2.3 on Node 26 LTS.
 
 ## Subsequent releases
 
-1. Commit a new `X.Y.Z` version in the library manifest, with relevant documentation and release notes. The workflow does not bump versions or commit changes.
-2. Manually run **Release** on `main` in `publish` mode and enter that version. No push or tag automatically publishes.
-3. CI verifies the code, packs once, checks an isolated install of that tarball, publishes it to npm, and creates `vX.Y.Z` and a GitHub release containing the same archive.
+1. Commit a new `X.Y.Z` version in both `packages/reflow/package.json` and `packages/create-reflow/package.json`, with relevant documentation and release notes. The workflow does not bump versions or commit changes.
+2. Manually run **Release** on `main` in `publish` mode and enter that version. No push or tag automatically publishes. It stops before publishing anything if a package is not on npm yet.
+3. CI verifies the code, packs each package once, and checks an app created by the packed create command with the packed library. It checks that the template installs the Reflow release with the same version. It publishes the library, then the create package, and creates `vX.Y.Z` and a GitHub release containing both archives.
 
 If npm succeeds but the GitHub step fails, rerun the workflow on the same commit. It accepts an existing npm version only when the archive integrity matches and rejects a tag pointing at another commit. Never overwrite or reuse a released version for changed contents.
 
@@ -55,4 +55,4 @@ node tools/check-package.ts
 
 Before a release, also run `pnpm test:linux` to run the suite on Linux, as CI does. [Testing](testing.md)
 
-`pnpm test:run` reuses the library and showcase builds. `node tools/check-package.ts` reuses the library build. `pnpm test` and `pnpm test:package` build first for standalone local use. No local validation command publishes. The smoke test cleans up its temporary app, browser, and server even on failure.
+`pnpm test:run` reuses the library and showcase builds. `node tools/check-package.ts` reuses both package builds. `pnpm test` and `pnpm test:package` build first for standalone local use. No local validation command publishes. The smoke test cleans up its temporary app, browser, and server even on failure.

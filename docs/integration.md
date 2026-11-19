@@ -16,7 +16,7 @@ From your app's root, install Reflow and its Remix peer dependency:
 pnpm add --save-exact @rtzll/reflow@0.10.0 remix@3.3.0
 ```
 
-For a new project, the [starter command](development.md#try-a-clean-install) generates an app wired up to a local build of Reflow.
+For a new project, `pnpm create @rtzll/reflow my-app` creates an app that is already set up this way. To try a local build of Reflow, use the [starter command](development.md#try-a-clean-install).
 
 ### Test a local build
 
