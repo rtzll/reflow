@@ -292,8 +292,11 @@ it('keeps the sound button working after moving between demo slides', async (t) 
   const documentStart = await page.evaluate(() => performance.timeOrigin)
   await page.getByRole('link', { name: 'Next slide', exact: true }).click()
   await expect(page).toHaveURL(/c=breadcrumb/)
-  await page.getByRole('link', { name: 'Previous slide', exact: true }).click()
+  const previous = page.getByRole('link', { name: 'Previous slide', exact: true })
+  await expect(previous).toHaveAttribute('href', /[?&]c=carousel(?:&|$)/)
+  await previous.click()
   await expect(page).toHaveURL(/c=carousel/)
+  await expect(page.getByRole('article', { name: /^Slide .*: Carousel$/ })).toBeVisible()
   // The deck moved within the same document.
   expect(await page.evaluate(() => performance.timeOrigin)).toBe(documentStart)
 
