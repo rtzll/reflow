@@ -1,6 +1,6 @@
 {
   "name": "@rtzll/create-reflow",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "type": "module",
   "bin": {
     "create-reflow": "./dist/index.js"
