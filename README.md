@@ -63,7 +63,7 @@ Theme, density, accent, shape, typography, and hover behavior are configurable t
 - **Display and feedback** · `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `BarChart`, `Card`, `CodeBlock`, `DataTable`, `RoutedDataTable`, `Markdown`, `Progress`, `Skeleton`, `Spinner`, `Table`, `Toaster`
 - **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `Citation`, `InputMessage`, `QueuedStack`, `ThinkingIndicator`, `ThinkingSteps`, `TriggerMenu`
 
-ContextMenu, DataTable, RoutedDataTable, Markdown, TimeGrid, and BarChart are available on `main` ahead of their first npm release. Browse the [component catalog and roadmap](docs/components.md) and [usage examples](apps/web/app/public/examples.tsx) directly in the repository, or run the showcase and visit `/docs` for props, examples, and playgrounds.
+Browse the [component catalog and roadmap](docs/components.md) and [usage examples](apps/web/app/public/examples.tsx) directly in the repository, or run the showcase and visit `/docs` for props, examples, and playgrounds.
 
 Keyboard navigation, focus management, form behavior, reduced motion, server rendering, and hydration are part of the implementation and regression checks. See [verification](docs/development.md#verification) and the [known gap and deliberate differences](docs/scope.md#relationship-to-fluid-functionalism).
 

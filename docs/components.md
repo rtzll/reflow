@@ -66,11 +66,11 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 7 | `Pagination` (shipped) | [UI SDK](https://ui-sdk.dev/docs/react/components/pagination) | Native links, Table |
 | 7 | `Toolbar` (shipped) | [UI SDK](https://ui-sdk.dev/docs/react/components/toolbar) | Button, keyboard focus navigation |
 | 7 | `Tree` (shipped) | [UI SDK](https://ui-sdk.dev/docs/react/components/tree) | Fluid hover, Resizable, CodeBlock |
-| 8 | [`ContextMenu` (implemented, awaiting release)](context-menu.md) | [Fluid Functionalism ContextMenu](https://github.com/mickadesign/fluid-functionalism/blob/13fef6966428b5b16952f1609aa3814e9bdf115b/registry/default/context-menu.tsx) | Dropdown's menu surface and Remix UI's menu primitive, demonstrated in the project tree |
-| 8 | [`DataTable` (implemented, awaiting release)](data-table.md) | [Fluid Functionalism DataTable](https://github.com/mickadesign/fluid-functionalism/blob/13fef6966428b5b16952f1609aa3814e9bdf115b/registry/default/data-table.tsx) | Table, Pagination, ContextMenu, Dropdown, Input, and Skeleton |
-| 8 | `Markdown` (implemented, awaiting release) | — | CodeBlock and Table, used in Typography and the Chat workspace |
-| 8 | [`TimeGrid` (implemented, awaiting release)](time-grid.md) | — | Controlled timed layout, pointer/keyboard moves and resizes, used in the Calendar workspace |
-| 8 | [`BarChart` (implemented, awaiting release)](bar-chart.md) | — | Tooltip and roving list navigation, used in Build timings and the Analytics workspace |
+| 8 | [`ContextMenu` (shipped)](context-menu.md) | [Fluid Functionalism ContextMenu](https://github.com/mickadesign/fluid-functionalism/blob/13fef6966428b5b16952f1609aa3814e9bdf115b/registry/default/context-menu.tsx) | Dropdown's menu surface and Remix UI's menu primitive, demonstrated in the project tree |
+| 8 | [`DataTable` (shipped)](data-table.md) | [Fluid Functionalism DataTable](https://github.com/mickadesign/fluid-functionalism/blob/13fef6966428b5b16952f1609aa3814e9bdf115b/registry/default/data-table.tsx) | Table, Pagination, ContextMenu, Dropdown, Input, and Skeleton |
+| 8 | `Markdown` (shipped) | — | CodeBlock and Table, used in Typography and the Chat workspace |
+| 8 | [`TimeGrid` (shipped)](time-grid.md) | — | Controlled timed layout, pointer/keyboard moves and resizes, used in the Calendar workspace |
+| 8 | [`BarChart` (shipped)](bar-chart.md) | — | Tooltip and roving list navigation, used in Build timings and the Analytics workspace |
 
 ### Decisions so far
 
