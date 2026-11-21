@@ -2,6 +2,7 @@ import {
   DataTable,
   type DataTableColumn,
   type DataTableProps,
+  Icon,
   Skeleton,
   Switch,
   Table,
@@ -36,6 +37,19 @@ const columns: readonly DataTableColumn<Member>[] = [
   { id: 'status', label: 'Status', value: (member) => member.status },
 ]
 
+const memberActions = [
+  { value: 'name', label: 'Copy member name', icon: <Icon name="users" /> },
+  {
+    value: 'details',
+    label: 'Copy details',
+    icon: <Icon name="copy" />,
+    children: [
+      { value: 'role', label: 'Role', icon: <Icon name="square-library" /> },
+      { value: 'status', label: 'Status', icon: <Icon name="circle" /> },
+    ],
+  },
+]
+
 export function teamTableCode(pageSize = 4) {
   const examples = members.map((member) => '  ' + JSON.stringify(member)).join(',\n')
   return `const members = [
@@ -44,15 +58,23 @@ ${examples}
 
 let message = ''
 let loading = false
-async function copyName(name: string) {
+async function copyValue(value: string) {
   try {
-    await navigator.clipboard.writeText(name)
-    message = 'Copied ' + name + '.'
+    await navigator.clipboard.writeText(value)
+    message = 'Copied ' + value + '.'
   } catch {
-    message = 'Could not copy the member name.'
+    message = 'Could not copy to the clipboard.'
   }
   if (!handle.signal.aborted) void handle.update()
 }
+
+const memberActions = [
+  { value: 'name', label: 'Copy member name', icon: <Icon name="users" /> },
+  { value: 'details', label: 'Copy details', icon: <Icon name="copy" />, children: [
+    { value: 'role', label: 'Role', icon: <Icon name="square-library" /> },
+    { value: 'status', label: 'Status', icon: <Icon name="circle" /> },
+  ] },
+]
 
 <DataTable label="Team members" rows={members} rowKey={(member) => member.name}
   loading={loading}
@@ -64,8 +86,10 @@ async function copyName(name: string) {
     { id: 'status', label: 'Status', value: (member) => member.status },
   ]} rowActions={{
     label: (member) => 'Actions for ' + member.name,
-    items: [{ value: 'copy', label: 'Copy member name' }],
-    onSelect: (_action, member) => void copyName(member.name),
+    items: memberActions,
+    onSelect: (key, member) => {
+      if (key === 'name' || key === 'role' || key === 'status') void copyValue(member[key])
+    },
   }} />
 <span role="status">{message}</span>`
 }
@@ -73,12 +97,12 @@ async function copyName(name: string) {
 export function TeamDirectory(handle: Handle<{ query?: string; pageSize?: number }>) {
   let loading = false
   let message = ''
-  async function copyName(member: Member) {
+  async function copyValue(value: string) {
     try {
-      await navigator.clipboard.writeText(member.name)
-      message = `Copied ${member.name}.`
+      await navigator.clipboard.writeText(value)
+      message = `Copied ${value}.`
     } catch {
-      message = 'Could not copy the member name.'
+      message = 'Could not copy to the clipboard.'
     }
     if (!handle.signal.aborted) void handle.update()
   }
@@ -105,10 +129,10 @@ export function TeamDirectory(handle: Handle<{ query?: string; pageSize?: number
         />
       ),
       rowActions: {
-        items: [{ value: 'copy', label: 'Copy member name' }],
+        items: memberActions,
         label: (member) => `Actions for ${member.name}`,
-        onSelect: (_action, member) => {
-          void copyName(member)
+        onSelect: (key, member) => {
+          if (key === 'name' || key === 'role' || key === 'status') void copyValue(member[key])
         },
       },
     }

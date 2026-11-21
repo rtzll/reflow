@@ -2,6 +2,26 @@ import { expect } from 'playwright/test'
 import { it } from 'remix/test'
 import { open, showcaseServer } from './showcase-router.ts'
 
+it('copies details of the filtered team member from the row menu and the actions button', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+  await open(page, '/?q=table&teamFilter=Bob')
+  const tile = page.locator('[data-component="data-table"]')
+  const row = tile.getByRole('row', { name: /Bob/ })
+  await row.click({ button: 'right' })
+  const contextMenu = tile.getByRole('menu', { name: 'Team members row actions' })
+  await contextMenu.getByRole('menuitem', { name: 'Copy details' }).hover()
+  await contextMenu.getByRole('menuitem', { name: 'Role', exact: true }).click()
+  await expect(tile.getByRole('status').filter({ hasText: 'Copied Designer.' })).toBeVisible()
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe('Designer')
+  await expect(contextMenu).toBeHidden()
+  await row.getByRole('button', { name: 'Actions for Bob' }).click()
+  const buttonMenu = tile.getByRole('menu', { name: 'Actions for Bob' })
+  await buttonMenu.getByRole('menuitem', { name: 'Copy details' }).press('ArrowRight')
+  await buttonMenu.getByRole('menuitem', { name: 'Status', exact: true }).press('Enter')
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe('Away')
+})
+
 it('keeps team filtering, sorting, and pagination in the URL across reload and Back', async (t) => {
   const page = await t.serve(showcaseServer)
   await open(page, '/?q=table&teamPage=3')
