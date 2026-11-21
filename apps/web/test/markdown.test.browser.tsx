@@ -1,4 +1,4 @@
-import { Markdown } from '@rtzll/reflow'
+import { Markdown } from '@rtzll/reflow/markdown'
 import { deepEqual, equal, ok } from 'remix/assert'
 import { render } from 'remix/component/test'
 import { describe, it } from 'remix/test'
@@ -48,6 +48,91 @@ describe('Markdown', () => {
     )
   })
 
+  it('checks link destinations after decoding character references and escapes', (t) => {
+    const source = [
+      '[a](/&#x2f;example.org) [b](/&#47;example.org) [c](/&#x5c;example.org)',
+      '[d](javascript&#x3a;alert(1)) [e](/\\/example.org) [f](/a&#x7f;b)',
+      '![g](/&#x2f;example.org/x.png)',
+      '[ok](/docs?a=1&amp;b=2 "Fish &amp; chips")',
+    ].join(' ')
+    const { container, cleanup } = render(<Markdown source={source} />)
+    t.after(cleanup)
+    deepEqual(
+      Array.from(container.querySelectorAll('a'), (link) => [
+        link.getAttribute('href'),
+        link.getAttribute('title'),
+      ]),
+      [['/docs?a=1&b=2', 'Fish & chips']],
+    )
+    ok(container.textContent?.includes('g'))
+  })
+
+  it('decodes character references in text but keeps code spans literal', (t) => {
+    const source = 'Fish &amp; chips &copy; 2026 &#8212; &nbsp;`a&amp;b` &unknown;'
+    const { $, cleanup } = render(<Markdown source={source} />)
+    t.after(cleanup)
+    equal($('p')?.textContent, 'Fish & chips © 2026 —  a&amp;b &unknown;')
+    equal($('code')?.textContent, 'a&amp;b')
+  })
+
+  it('shows a raw HTML block as a paragraph of text', (t) => {
+    const { $, cleanup } = render(
+      <Markdown source={'Before\n\n<script>alert(1)</script>\n\nAfter'} />,
+    )
+    t.after(cleanup)
+    equal($('script'), null)
+    deepEqual(
+      Array.from(document.querySelectorAll('.rf-markdown > p'), (p) => p.textContent),
+      ['Before', '<script>alert(1)</script>', 'After'],
+    )
+  })
+
+  it('follows CommonMark for emphasis inside words and links containing parentheses', (t) => {
+    const source = 'Rename snake_case_name. See [the note](https://example.org/a_(b)).'
+    const { $, cleanup } = render(<Markdown source={source} />)
+    t.after(cleanup)
+    equal($('em'), null)
+    equal($('p')?.textContent, 'Rename snake_case_name. See the note.')
+    equal($('a')?.getAttribute('href'), 'https://example.org/a_(b)')
+  })
+
+  it('renders read-only, labeled task checkboxes and keeps paragraphs inside list items', (t) => {
+    const source = [
+      '- [x] Book the ferry',
+      '- [ ] Pack',
+      '  - Socks',
+      '',
+      '1. First',
+      '',
+      '   More on first.',
+      '',
+      '* [x] Loose task',
+      '',
+      '  With details.',
+    ].join('\n')
+    const { $$, $, cleanup } = render(
+      <>
+        <Markdown source={source} />
+        <Markdown source={source} />
+      </>,
+    )
+    t.after(cleanup)
+    const boxes = Array.from($$('input[type="checkbox"]')) as HTMLInputElement[]
+    const label = (box: HTMLInputElement) =>
+      document.getElementById(box.getAttribute('aria-labelledby')!)?.textContent
+    deepEqual(
+      boxes.slice(0, 3).map((box) => [box.disabled, box.checked, label(box)]),
+      [
+        [true, true, 'Book the ferry'],
+        [true, false, 'Pack'],
+        [true, true, 'Loose task'],
+      ],
+    )
+    const ids = boxes.map((box) => box.getAttribute('aria-labelledby'))
+    equal(new Set(ids).size, 6)
+    equal($('ol li')?.querySelectorAll('p').length, 2)
+  })
+
   it('updates partial inline marks and keeps an open fence readable as text arrives', async (t) => {
     const { $, root, act, cleanup } = render(<Markdown source="A **partial" />)
     t.after(cleanup)
@@ -82,7 +167,15 @@ describe('Markdown', () => {
     ok($('p')?.textContent?.includes('foo_bar_baz'))
     equal($$('p code')[1]?.textContent, 'use `ticks`')
     equal($('a')?.getAttribute('href'), 'https://en.wikipedia.org/wiki/Remix_(web_framework)')
-    equal($$('a').length, 1)
+    // The image shows as a link to it, never as an image.
+    deepEqual(
+      Array.from($$('a'), (link) => [link.textContent, link.getAttribute('href')]),
+      [
+        ['Remix', 'https://en.wikipedia.org/wiki/Remix_(web_framework)'],
+        ['Diagram', 'https://example.org/a.png'],
+      ],
+    )
+    equal($('img'), null)
     ok(!$('p')?.textContent?.includes('!Diagram'))
     equal($('pre'), null)
     equal($('table th')?.textContent, 'Only')
@@ -92,8 +185,31 @@ describe('Markdown', () => {
     const checkbox = $('.rf-markdown-task input[type="checkbox"]') as HTMLInputElement
     ok(checkbox.disabled)
     equal(checkbox.checked, true)
-    ok(checkbox.getAttribute('aria-labelledby'))
+    equal(
+      document.getElementById(checkbox.getAttribute('aria-labelledby')!)?.textContent,
+      'Ship release',
+    )
     equal(checkbox.getAttribute('aria-label'), null)
-    equal($('ol .rf-markdown-task'), null)
+    // GFM makes ordered items tasks too, as GitHub renders them.
+    equal($('ol')?.getAttribute('start'), null)
+    ok($('ol .rf-markdown-task input[type="checkbox"]'))
+  })
+
+  it('passes the size on to fenced code', (t) => {
+    const { $, cleanup } = render(<Markdown source={'```ts\nconst a = 1\n```'} size="compact" />)
+    t.after(cleanup)
+    equal($('[data-density]')?.getAttribute('data-density'), 'compact')
+  })
+
+  it('keeps footnote syntax visible as text', (t) => {
+    const { container, cleanup } = render(
+      <Markdown source={'A claim.[^1]\n\n[^1]: https://example.org'} />,
+    )
+    t.after(cleanup)
+    equal(container.querySelector('a'), null)
+    deepEqual(
+      Array.from(container.querySelectorAll('.rf-markdown > p'), (p) => p.textContent),
+      ['A claim.[^1]', '[^1]: https://example.org'],
+    )
   })
 })
