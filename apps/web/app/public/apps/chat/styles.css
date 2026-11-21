@@ -366,3 +366,11 @@
     max-inline-size: 90%;
   }
 }
+
+@media (max-width: 650px) and (scripting: none) {
+  .site-app-workspace[data-app='chat'] .site-app-nav {
+    position: static;
+    display: flex;
+    flex-shrink: 0;
+  }
+}
