@@ -70,3 +70,4 @@
 @import './toolbar.css' layer(reflow);
 @import './tree.css' layer(reflow);
 @import './data-table.css' layer(reflow);
+@import './time-grid.css' layer(reflow);
