@@ -1,4 +1,4 @@
-import { CodeBlock, Resizable, Tree, type HighlightedCode } from '@rtzll/reflow'
+import { CodeBlock, ContextMenu, Resizable, Tree, type HighlightedCode } from '@rtzll/reflow'
 import type { Handle } from 'remix/component'
 import { play } from 'cuelume'
 import { CodeBlockCard } from './code-block-example.tsx'
@@ -11,6 +11,11 @@ const projectFiles = [
 export function ProjectTreeExample(handle: Handle<{ source?: HighlightedCode }>) {
   let file = handle.props.source ? 'source' : 'readme'
   let expanded = ['app']
+  function openFile(value: string) {
+    play('select', { emphasis: 'subtle' })
+    file = value
+    void handle.update()
+  }
   return () => (
     <Resizable
       class="example-project-tree"
@@ -20,22 +25,29 @@ export function ProjectTreeExample(handle: Handle<{ source?: HighlightedCode }>)
       max={55}
       onValueCommit={() => play('select', { emphasis: 'subtle', volume: 0.35 })}
       first={
-        <Tree
-          label="Project files"
-          items={projectFiles}
-          defaultExpanded={['app']}
-          onExpandedChange={(next) => {
-            play(next.length > expanded.length ? 'open' : 'close', { emphasis: 'subtle' })
-            expanded = next
-          }}
-          value={file}
+        <ContextMenu
+          label="File actions"
+          target='[role="treeitem"][aria-selected]'
           size="compact"
-          onValueChange={(value) => {
-            play('select', { emphasis: 'subtle' })
-            file = value
-            void handle.update()
+          items={[{ value: 'open', label: 'Open file' }]}
+          onSelect={(_action, row) => {
+            const value = row.dataset.treeValue
+            if (value !== undefined) openFile(value)
           }}
-        />
+        >
+          <Tree
+            label="Project files"
+            items={projectFiles}
+            defaultExpanded={['app']}
+            onExpandedChange={(next) => {
+              play(next.length > expanded.length ? 'open' : 'close', { emphasis: 'subtle' })
+              expanded = next
+            }}
+            value={file}
+            size="compact"
+            onValueChange={openFile}
+          />
+        </ContextMenu>
       }
       second={
         file === 'readme' ? (
