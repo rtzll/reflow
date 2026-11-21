@@ -2094,3 +2094,18 @@
   padding-block: 0.35rem;
   border-bottom: 1px solid var(--rf-border);
 }
+
+.example-file-preview {
+  display: grid;
+  gap: var(--rf-gap);
+  min-inline-size: 0;
+}
+
+.example-file-preview [aria-pressed='true'] {
+  background: var(--rf-surface-3);
+  color: var(--rf-text);
+}
+
+.example-file-preview .rf-code-block {
+  min-block-size: 0;
+}

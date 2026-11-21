@@ -10,10 +10,15 @@ import {
 } from '@rtzll/reflow'
 import type { Handle } from 'remix/component'
 import { play } from 'cuelume'
+import { FilePreview } from './file-preview.tsx'
 import { CodeBlockCard } from './code-block-example.tsx'
 
 const sourcePath = 'app/code-block-example.tsx'
 const readmePath = 'README.md'
+const readme =
+  '# Reflow\n\nFluid components for Remix, with shared keyboard navigation, accessible focus management, and a customizable theme.\n\npnpm add @rtzll/reflow'
+const sourceExample =
+  'export function Example() {\n  return () => <CodeBlock filename="README.md" code="# Reflow" />\n}'
 const projectFiles = [
   {
     value: 'app',
@@ -76,7 +81,7 @@ const fileActions = [
 }
 
 export function ProjectTreeExample(
-  handle: Handle<{ source?: HighlightedCode; size?: ContextMenuProps['size'] }>,
+  handle: Handle<{ source?: HighlightedCode; size?: ContextMenuProps['size']; toolbar?: boolean }>,
 ) {
   let file = handle.props.source ? sourcePath : readmePath
   let expanded = ['app']
@@ -128,14 +133,19 @@ export function ProjectTreeExample(
         </ContextMenu>
       }
       second={
-        file === readmePath ? (
+        handle.props.toolbar ? (
+          <FilePreview
+            filename={file}
+            code={file === readmePath ? readme : (handle.props.source ?? sourceExample)}
+          />
+        ) : file === readmePath ? (
           <CodeBlock
             key="readme"
             language="md"
             filename="README.md"
             size="compact"
             wrap
-            code={'# Reflow\n\nFluid components for Remix.\n\npnpm add @rtzll/reflow'}
+            code={readme}
           />
         ) : handle.props.source ? (
           <CodeBlockCard key="source" source={handle.props.source} />
@@ -145,9 +155,7 @@ export function ProjectTreeExample(
             filename="code-block-example.tsx"
             size="compact"
             wrap
-            code={
-              'export function Example() {\n  return () => <CodeBlock code="Hello, Reflow" />\n}'
-            }
+            code={sourceExample}
           />
         )
       }

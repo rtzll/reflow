@@ -268,10 +268,11 @@ export const Example = clientEntry(
             </div>
           )
         case 'toolbar':
+          return <ProjectTreeExample toolbar />
         case 'button':
           return (
             <div className="example-stack">
-              {handle.props.showcase || handle.props.slug === 'toolbar' ? (
+              {handle.props.showcase ? (
                 <Toolbar class="example-row" label="Button variants">
                   <Button size="compact" loading={starting} mix={on('click', start)}>
                     Primary

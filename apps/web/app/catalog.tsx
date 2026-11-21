@@ -56,13 +56,7 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
   },
   toolbar: {
     description:
-      'A labeled row or column of action controls with one tab stop and arrow-key navigation.',
-    code: `<Toolbar label="Button variants">
-  <Button>Primary</Button>
-  <Button variant="secondary">Secondary</Button>
-  <Button variant="tertiary">Tertiary</Button>
-  <Button variant="ghost">Ghost</Button>
-</Toolbar>`,
+      'Wrap lines, show line numbers, or copy the selected file. Tab into the toolbar and use the arrow keys to move between actions.',
   },
   spinner: {
     description: 'An indeterminate loading indicator shared by Button and Toaster.',
