@@ -1,0 +1,105 @@
+import * as menu from '@remix-run/ui/menu'
+import * as popover from '@remix-run/ui/popover'
+import { on, type Handle, type RemixNode } from 'remix/component'
+import { DropdownSurface, type DropdownItem } from './dropdown.tsx'
+import type { ControlSize } from './systems/styling.ts'
+
+export interface ContextMenuProps {
+  /** Accessible name of the menu. */
+  label: string
+  /** CSS selector for focusable descendants that have these actions. */
+  target: string
+  children: RemixNode
+  items: readonly DropdownItem[]
+  size?: ControlSize
+  /** The target is the matched element that opened the menu. */
+  onSelect?: (value: string, target: HTMLElement, checked?: boolean) => void
+}
+
+interface Invocation {
+  row: HTMLElement
+  anchor: HTMLElement | { x: number; y: number }
+}
+
+export function ContextMenu(handle: Handle<ContextMenuProps>) {
+  let invocation: Invocation | undefined
+  let generation = 0
+
+  function open(event: MouseEvent | KeyboardEvent) {
+    if (event.defaultPrevented || !(event.target instanceof Element)) return
+    if (
+      event instanceof KeyboardEvent &&
+      event.key !== 'ContextMenu' &&
+      !(event.shiftKey && event.key === 'F10')
+    )
+      return
+    if (
+      event.target.closest('input, textarea, select') ||
+      event.target.closest<HTMLElement>('[contenteditable]')?.isContentEditable
+    )
+      return
+    const row = event.target.closest(handle.props.target)
+    if (
+      !(row instanceof HTMLElement) ||
+      !(event.currentTarget instanceof HTMLElement) ||
+      !event.currentTarget.contains(row)
+    )
+      return
+    event.preventDefault()
+    invocation = {
+      row,
+      anchor: event instanceof KeyboardEvent ? row : { x: event.clientX, y: event.clientY },
+    }
+    generation++
+    void handle.update()
+  }
+
+  return () => (
+    <>
+      <div
+        mix={[
+          on<HTMLElement, 'contextmenu'>('contextmenu', open),
+          on<HTMLElement, 'keydown'>('keydown', open),
+        ]}
+      >
+        {handle.props.children}
+      </div>
+      {invocation && (
+        <menu.Context key={generation} label={handle.props.label}>
+          <ContextMenuPopup
+            invocation={invocation}
+            items={handle.props.items}
+            size={handle.props.size}
+            onSelect={handle.props.onSelect}
+          />
+        </menu.Context>
+      )}
+    </>
+  )
+}
+
+function ContextMenuPopup(
+  handle: Handle<
+    Pick<ContextMenuProps, 'items' | 'size' | 'onSelect'> & { invocation: Invocation }
+  >,
+) {
+  const context = handle.context.get(menu.Context)
+  const panel = handle.context.get(popover.Context)
+  const { row, anchor } = handle.props.invocation
+  handle.queueTask(() => {
+    panel.anchor = { target: anchor, options: { placement: 'bottom-start', offset: 2 } }
+    context.registerTrigger(row, row.id)
+    void context.open()
+  })
+
+  return () => (
+    <div
+      data-density={handle.props.size}
+      mix={menu.onMenuSelect((event) => {
+        handle.props.onSelect?.(event.item.value ?? event.item.name, row, event.item.checked)
+      })}
+    >
+      <DropdownSurface items={handle.props.items} />
+    </div>
+  )
+}

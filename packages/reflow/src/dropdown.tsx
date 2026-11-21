@@ -270,7 +270,7 @@ function matchesMenuQuery(item: DropdownItem, query: string): boolean {
   )
 }
 
-function DropdownSurface(
+export function DropdownSurface(
   handle: Handle<{
     items: readonly DropdownItem[]
     search?: MenuSearch
