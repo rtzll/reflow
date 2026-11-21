@@ -26,3 +26,18 @@ it('serves the app directory without JavaScript and rejects an unknown app', asy
   const response = await open(page, '/apps/missing', { hydrate: false })
   expect(response?.status()).toBe(404)
 })
+
+it('reserves workspace shortcuts for the app and restores showcase shortcuts on return', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await open(page, '/apps?theme=light')
+  await page.getByRole('main').getByRole('link', { name: 'Chat workspace' }).click()
+  const theme = page.locator('html')
+  const directory = page
+    .getByRole('navigation', { name: 'App navigation' })
+    .getByRole('link', { name: 'Apps' })
+  await directory.press('t')
+  await expect(theme).toHaveAttribute('data-theme', 'light')
+  await directory.click()
+  await page.getByRole('main').getByRole('link', { name: 'Chat workspace' }).press('t')
+  await expect(theme).toHaveAttribute('data-theme', 'dark')
+})
