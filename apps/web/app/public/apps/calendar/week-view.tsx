@@ -162,7 +162,7 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
       <article class="week-app">
         <header class="week-header">
           <div>
-            <h1>Team calendar</h1>
+            <h1>Calendar</h1>
             <p>November 16–22, 2026</p>
           </div>
           <Button leadingIcon={<Icon name="plus" />} mix={on('click', () => showEditor())}>

@@ -310,7 +310,7 @@ export function enhanceShowcase() {
     const setting = settingRows.find(
       (row) => row.shortcut.toLowerCase() === event.key.toLowerCase(),
     )
-    if (setting) {
+    if (setting && !(setting.key === 'shape' && document.querySelector('.site-app-directory'))) {
       event.preventDefault()
       const values: readonly string[] =
         setting.key === 'font' && document.documentElement.dataset.customFont
