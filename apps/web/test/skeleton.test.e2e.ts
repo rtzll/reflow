@@ -23,9 +23,7 @@ it('keeps the team table at the same height while loading', async (t) => {
         centered: Math.abs(control.y + control.height / 2 - (search.y + search.height / 2)) <= 1,
       }
     }
-    await expect
-      .poll(alignment)
-      .toEqual({ afterSearch: true, rightEdge: true, centered: true })
+    await expect.poll(alignment).toEqual({ afterSearch: true, rightEdge: true, centered: true })
   }
   await filter.press('Tab')
   await expect(toggle).toBeFocused()
