@@ -93,6 +93,15 @@ it('applies a context action to its invoking issue and preserves an unrelated se
   await expect(list.getByRole('option', { selected: true })).toHaveCount(0)
 })
 
+it('disables the context action that would move an issue to its own status', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await open(page, '/apps/issues')
+  const list = page.getByRole('listbox', { name: 'Cycle issues' })
+  await list.getByRole('option', { name: /AT-139/ }).click({ button: 'right' })
+  await expect(page.getByRole('menuitem', { name: 'Move to Todo' })).toBeDisabled()
+  await expect(page.getByRole('menuitem', { name: 'Move to Done' })).toBeEnabled()
+})
+
 it('extends and contracts a range across groups while J and K only navigate', async (t) => {
   const page = await t.serve(showcaseServer)
   await open(page, '/apps/issues')

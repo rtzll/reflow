@@ -69,6 +69,15 @@ export const IssueTracker = clientEntry(
       return selected.has(id) ? selected : new Set([id])
     }
 
+    // A status is offered only while at least one of the issues would change.
+    function moveItems(ids: ReadonlySet<string>) {
+      return statuses.map((status) => ({
+        value: status,
+        label: 'Move to ' + status,
+        disabled: !issues.some((issue) => ids.has(issue.id) && issue.status !== status),
+      }))
+    }
+
     function orderedIssues() {
       const scope = filter
       const visible = scope ? issues.filter((issue) => issue[scope.field] === scope.value) : issues
@@ -204,7 +213,6 @@ export const IssueTracker = clientEntry(
     return () => {
       const visible = orderedIssues()
       const detail = issues.find((issue) => issue.id === detailId)
-      const moveItems = statuses.map((status) => ({ value: status, label: 'Move to ' + status }))
       return (
         <article class="issue-tracker">
           <header class="issues-heading">
@@ -259,7 +267,10 @@ export const IssueTracker = clientEntry(
             <ContextMenu
               label="Issue actions"
               target="[data-issue-id]"
-              items={[{ value: 'details', label: 'Open issue' }, ...moveItems]}
+              items={(row) => [
+                { value: 'details', label: 'Open issue' },
+                ...moveItems(movingIds(row.dataset.issueId ?? '')),
+              ]}
               onSelect={(value, row) => {
                 const id = row.dataset.issueId
                 if (!id) return
@@ -351,12 +362,7 @@ export const IssueTracker = clientEntry(
                     label="Move to"
                     size="compact"
                     side="top"
-                    items={moveItems.map((item) => ({
-                      ...item,
-                      disabled: !issues.some(
-                        (issue) => selected.has(issue.id) && issue.status !== item.value,
-                      ),
-                    }))}
+                    items={moveItems(selected)}
                     onSelect={(value) => {
                       const status = statuses.find((item) => item === value)
                       if (status) void move(selected, status, active)
