@@ -275,6 +275,7 @@ export function enhanceShowcase() {
   window.addEventListener('keydown', (event) => {
     if (
       event.defaultPrevented ||
+      document.querySelector('.site-app-workspace') ||
       event.isComposing ||
       event.altKey ||
       event.shiftKey ||
