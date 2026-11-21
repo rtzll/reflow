@@ -99,3 +99,60 @@ it('clamps the visible page and waits for the owner to apply controlled changes'
   equal($('tbody')!.textContent?.includes('No matching results'), true)
   equal($('nav'), null)
 })
+
+it('keeps independent checks when a keyboard range contracts and clears them when the view changes', async (t) => {
+  let current = rows
+  let loading = false
+  let owner: Handle
+  function Directory(handle: Handle) {
+    owner = handle
+    return () => (
+      <DataTable
+        {...props}
+        rows={current}
+        pageSize={4}
+        loading={loading}
+        rowSelection={{
+          label: (row) => 'Select ' + row.name,
+          actions: (selected) => selected.map((row) => row.name).join(', '),
+        }}
+      />
+    )
+  }
+  const { $, $$, act, cleanup } = render(<Directory />)
+  t.after(cleanup)
+  const box = (name: string) => $('input[aria-label="Select ' + name + '"]') as HTMLInputElement
+  const all = () => $('thead input[type=checkbox]') as HTMLInputElement
+  const checked = () =>
+    Array.from($$('tbody input:checked'), (node) => node.getAttribute('aria-label'))
+  function arrow(name: string, key: string) {
+    return act(() =>
+      box(name).dispatchEvent(
+        new KeyboardEvent('keydown', { key, shiftKey: true, bubbles: true, cancelable: true }),
+      ),
+    )
+  }
+  await act(() => box('Cal').click())
+  await act(() => box('Zoe').focus())
+  await arrow('Zoe', 'ArrowDown')
+  await arrow('Amy', 'ArrowDown')
+  await arrow('Ben', 'ArrowUp')
+  deepEqual(checked(), ['Select Zoe', 'Select Amy', 'Select Cal'])
+  equal(document.activeElement, box('Amy'))
+  equal(all().indeterminate, true)
+  await act(() => $('thead th:nth-child(2) button')!.click())
+  deepEqual(checked(), [])
+  await act(() => all().click())
+  equal(all().checked, true)
+  current = current.filter((row) => row.name !== 'Zoe')
+  await owner!.update()
+  deepEqual(checked(), [])
+  await act(() => box('Ben').click())
+  loading = true
+  await owner!.update()
+  equal($('tbody input[type=checkbox]'), null)
+  equal(all().disabled, true)
+  loading = false
+  await owner!.update()
+  deepEqual(checked(), [])
+})

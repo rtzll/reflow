@@ -79,3 +79,17 @@
 .rf-data-action-cell > .rf-dropdown {
   display: flex;
 }
+
+.rf-data-select-cell {
+  inline-size: 1%;
+}
+.rf-data-select-cell > .rf-checkbox {
+  vertical-align: middle;
+}
+.rf-data-selection {
+  gap: 4px;
+}
+.rf-data-selection > span {
+  padding-inline: 6px;
+  font-variant-numeric: tabular-nums;
+}

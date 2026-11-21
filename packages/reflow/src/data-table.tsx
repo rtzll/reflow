@@ -1,4 +1,8 @@
-import { on, type Handle, type RemixNode } from 'remix/component'
+import { on, ref, type Handle, type RemixNode } from 'remix/component'
+import { createRangeSelection } from './behaviors/range-selection.ts'
+import { Button } from './button.tsx'
+import { Checkbox } from './checkbox.tsx'
+import { Toolbar } from './toolbar.tsx'
 import { ContextMenu } from './context-menu.tsx'
 import { Dropdown, type DropdownItem } from './dropdown.tsx'
 import { Skeleton } from './skeleton.tsx'
@@ -56,6 +60,11 @@ export interface DataTableProps<Row> {
     items: readonly DropdownItem[]
     onSelect: (action: string, row: Row, checked?: boolean) => void
   }
+  /** Select rows on the current page. A changed view clears the selection. */
+  rowSelection?: {
+    label: (row: Row) => string
+    actions: (rows: readonly Row[], clear: () => void) => RemixNode
+  }
   paginationLabel?: string
   id?: string
 }
@@ -64,6 +73,21 @@ const collator = new Intl.Collator('en', { numeric: true, sensitivity: 'base' })
 
 export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
   let local: DataTableState = { filter: '', sort: null, page: 1, ...handle.props.defaultState }
+
+  const range = createRangeSelection<string>()
+  let selected = new Set<string>()
+  let selectionView: string | undefined
+  let lastFocused: string | undefined
+  let root: HTMLDivElement
+  const mount = ref<HTMLDivElement>((node) => {
+    root = node
+  })
+
+  function checkbox(key: string | undefined) {
+    return key === undefined
+      ? null
+      : root.querySelector<HTMLInputElement>(`input[data-rf-select-row="${CSS.escape(key)}"]`)
+  }
 
   function change(next: DataTableState) {
     local = next
@@ -135,7 +159,57 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
       )
     }
 
-    const { rowActions, loading } = handle.props
+    const { rowActions, rowSelection, loading } = handle.props
+    const keys = visible.map(rowKey)
+    const view =
+      rowSelection && !loading
+        ? JSON.stringify([
+            state.filter,
+            state.sort?.column,
+            state.sort?.direction,
+            page,
+            limit,
+            keys,
+          ])
+        : undefined
+    if (selectionView !== view) {
+      selectionView = view
+      selected = new Set()
+      lastFocused = undefined
+      range.reset()
+    }
+    const snapshot = selected
+    async function clearSelection() {
+      // An asynchronous action may finish after a newer selection or view has replaced it.
+      if (handle.signal.aborted || snapshot !== selected) return
+      const returnFocus = root
+        .querySelector('.rf-data-selection')
+        ?.contains(root.ownerDocument.activeElement)
+      selected = new Set()
+      range.reset()
+      await handle.update()
+      if (returnFocus && !handle.signal.aborted)
+        (checkbox(lastFocused) ?? checkbox(keys[0]))?.focus()
+    }
+    function navigateSelection(event: KeyboardEvent, index: number) {
+      if (event.key === 'Tab') range.reset()
+      if (
+        event.defaultPrevented ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.isComposing ||
+        (event.key !== 'ArrowDown' && event.key !== 'ArrowUp')
+      )
+        return
+      event.preventDefault()
+      const next = keys[index + (event.key === 'ArrowDown' ? 1 : -1)]
+      if (!event.shiftKey) range.reset()
+      if (next === undefined) return
+      if (event.shiftKey) selected = range.extend(keys, selected, keys[index]!, next)
+      checkbox(next)?.focus()
+      void handle.update()
+    }
     const table = (
       <Table
         id={handle.props.id}
@@ -146,6 +220,22 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
       >
         <TableHeader>
           <TableRow hover={false}>
+            {rowSelection && (
+              <TableHead class="rf-data-select-cell">
+                <Checkbox
+                  aria-label="Select all rows on this page"
+                  size={size}
+                  disabled={loading || !keys.length}
+                  checked={!!keys.length && selected.size === keys.length}
+                  indeterminate={selected.size > 0 && selected.size < keys.length}
+                  onCheckedChange={(checked) => {
+                    range.reset()
+                    selected = new Set(checked ? keys : [])
+                    void handle.update()
+                  }}
+                />
+              </TableHead>
+            )}
             {columns.map(header)}
             {rowActions && (
               <TableHead class="rf-data-action-cell">
@@ -155,53 +245,91 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
           </TableRow>
         </TableHeader>
         <TableBody aria-hidden={loading || undefined}>
-          {visible.map((row) => (
-            <TableRow
-              key={rowKey(row)}
-              hover={!!rowActions && !loading}
-              data-rf-data-row={rowActions && !loading ? rowKey(row) : undefined}
-              tabIndex={rowActions && !loading ? -1 : undefined}
-            >
-              {columns.map((column) => {
-                const content = loading ? (
-                  <Skeleton />
-                ) : column.cell ? (
-                  column.cell(row)
-                ) : (
-                  column.value(row)
-                )
-                return column.rowHeader ? (
-                  <th key={column.id} scope="row">
-                    {content}
-                  </th>
-                ) : (
-                  <TableCell key={column.id}>{content}</TableCell>
-                )
-              })}
-              {rowActions && (
-                <TableCell class="rf-data-action-cell">
-                  {loading ? (
-                    <Skeleton width="24px" height="24px" />
+          {visible.map((row, index) => {
+            const key = keys[index]!
+            return (
+              <TableRow
+                key={key}
+                selected={!!rowSelection && selected.has(key)}
+                hover={!!rowActions && !loading}
+                data-rf-data-row={rowActions && !loading ? key : undefined}
+                tabIndex={rowActions && !loading ? -1 : undefined}
+              >
+                {rowSelection && (
+                  <TableCell class="rf-data-select-cell">
+                    {loading ? (
+                      <Skeleton width="16px" height="16px" />
+                    ) : (
+                      <Checkbox
+                        size={size}
+                        aria-label={rowSelection.label(row)}
+                        data-rf-select-row={key}
+                        checked={selected.has(key)}
+                        onCheckedChange={(checked) => {
+                          range.reset()
+                          selected = new Set(selected)
+                          if (checked) selected.add(key)
+                          else selected.delete(key)
+                          void handle.update()
+                        }}
+                        mix={[
+                          on('focus', () => {
+                            lastFocused = key
+                          }),
+                          on('blur', (event) => {
+                            if (
+                              !(event.relatedTarget instanceof HTMLInputElement) ||
+                              !event.relatedTarget.hasAttribute('data-rf-select-row')
+                            )
+                              range.reset()
+                          }),
+                          on('keydown', (event) => navigateSelection(event, index)),
+                        ]}
+                      />
+                    )}
+                  </TableCell>
+                )}
+                {columns.map((column) => {
+                  const content = loading ? (
+                    <Skeleton />
+                  ) : column.cell ? (
+                    column.cell(row)
                   ) : (
-                    <Dropdown
-                      label={rowActions.label(row)}
-                      variant="bare"
-                      triggerClass="rf-data-actions"
-                      triggerContent={<Icon name="more-horizontal" size={16} />}
-                      chevron={false}
-                      align="end"
-                      size={size}
-                      items={rowActions.items}
-                      onSelect={(action, checked) => rowActions.onSelect(action, row, checked)}
-                    />
-                  )}
-                </TableCell>
-              )}
-            </TableRow>
-          ))}
+                    column.value(row)
+                  )
+                  return column.rowHeader ? (
+                    <th key={column.id} scope="row">
+                      {content}
+                    </th>
+                  ) : (
+                    <TableCell key={column.id}>{content}</TableCell>
+                  )
+                })}
+                {rowActions && (
+                  <TableCell class="rf-data-action-cell">
+                    {loading ? (
+                      <Skeleton width="24px" height="24px" />
+                    ) : (
+                      <Dropdown
+                        label={rowActions.label(row)}
+                        variant="bare"
+                        triggerClass="rf-data-actions"
+                        triggerContent={<Icon name="more-horizontal" size={16} />}
+                        chevron={false}
+                        align="end"
+                        size={size}
+                        items={rowActions.items}
+                        onSelect={(action, checked) => rowActions.onSelect(action, row, checked)}
+                      />
+                    )}
+                  </TableCell>
+                )}
+              </TableRow>
+            )
+          })}
           {!visible.length && (
             <TableEmpty
-              colSpan={columns.length + (rowActions ? 1 : 0)}
+              colSpan={columns.length + (rowActions ? 1 : 0) + (rowSelection ? 1 : 0)}
               title={loading ? 'Loading' : query ? 'No matching results' : 'No results'}
             />
           )}
@@ -209,7 +337,7 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
       </Table>
     )
     return (
-      <div class="rf-data-table">
+      <div class="rf-data-table" mix={mount}>
         <div class="rf-data-filter">
           <Input
             {...handle.props.filterInput}
@@ -239,6 +367,18 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
           </ContextMenu>
         ) : (
           table
+        )}
+        {rowSelection && selected.size > 0 && (
+          <Toolbar label="Selected row actions" class="rf-data-selection">
+            <span>{selected.size} selected</span>
+            {rowSelection.actions(
+              visible.filter((_, index) => selected.has(keys[index]!)),
+              clearSelection,
+            )}
+            <Button size="compact" variant="ghost" mix={on('click', clearSelection)}>
+              Clear selection
+            </Button>
+          </Toolbar>
         )}
         <span role="status" class="rf-basic-sr-only">
           {sorted.length} {sorted.length === 1 ? 'result' : 'results'}, page {page} of {pageCount}
