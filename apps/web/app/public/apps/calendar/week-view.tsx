@@ -10,6 +10,8 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
   let activeDay = 0
   let draft: WeekEvent | undefined
   let schedule: HTMLElement
+  let invoker: HTMLElement | undefined
+  let sequence = 0
   let message = ''
   let lastAdjustment: { event: WeekEvent; verb: string } | undefined
   const restoreSchedule = ref((node) => {
@@ -20,6 +22,10 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
   })
 
   function showEditor(event?: WeekEvent) {
+    invoker =
+      schedule?.ownerDocument.activeElement instanceof HTMLElement
+        ? schedule.ownerDocument.activeElement
+        : undefined
     draft = event ?? {
       id: '',
       title: '',
@@ -39,13 +45,14 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
 
   function save(event: WeekEvent, prefix = '') {
     if (!event.id) {
-      event = { ...event, id: crypto.randomUUID() }
+      event = { ...event, id: crypto.randomUUID?.() ?? `event-${++sequence}` }
       events = [...events, event]
     } else {
       events = events.map((entry) => (entry.id === event.id ? event : entry))
     }
     persistWeekEvent(event)
     draft = undefined
+    invoker = undefined
     message = prefix + eventLabel(event) + (lastAdjustment ? '. Undo available.' : '')
     select(event)
     handle.queueTask(() =>
@@ -112,8 +119,14 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
                 aria-label={name}
                 aria-pressed={day === activeDay}
                 mix={on('click', () => {
+                  const keep =
+                    day === activeDay && events.some((e) => e.id === selectedId && e.day === day)
                   activeDay = day
-                  selectedId = events.find((event) => event.day === day)?.id
+                  if (!keep) {
+                    selectedId = events
+                      .filter((event) => event.day === day)
+                      .sort((a, b) => a.start - b.start)[0]?.id
+                  }
                   handle.update()
                 })}
               >
@@ -187,8 +200,21 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
         <EventEditor
           draft={draft}
           close={() => {
+            const target = invoker
+            const editingId = draft?.id
             draft = undefined
+            invoker = undefined
             handle.update()
+            handle.queueTask(() => {
+              if (handle.signal.aborted) return
+              if (target?.isConnected && target !== schedule?.ownerDocument.body) {
+                target.focus()
+              } else if (editingId) {
+                schedule
+                  ?.querySelector<HTMLElement>(`[data-event="${CSS.escape(editingId)}"]`)
+                  ?.focus()
+              }
+            })
           }}
           save={(event) => {
             lastAdjustment = undefined
