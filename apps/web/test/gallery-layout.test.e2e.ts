@@ -15,7 +15,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'toaster',
     'hover-card',
     'code-block',
-    'card',
+    'data-table',
     'avatar',
     'command-menu',
     'select',
@@ -36,7 +36,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'input-message',
     'input-group',
     'button',
-    'data-table',
+    'card',
     'alert-dialog',
     'calendar',
     'date-picker',
@@ -122,9 +122,9 @@ it('preserves the gallery order and keeps previews above their footers', async (
       ).toBeVisible()
       const tile = (slug: string) =>
         gallery.locator(`article[data-component="${slug}"]`).boundingBox()
-      const [table, dialog, datePicker, wideCalendar, segmented, thinking] = await Promise.all(
+      const [card, dialog, datePicker, wideCalendar, segmented, thinking] = await Promise.all(
         [
-          'data-table',
+          'card',
           'alert-dialog',
           'date-picker',
           'calendar',
@@ -132,7 +132,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
           'thinking-steps',
         ].map(tile),
       )
-      assert.equal(table!.y, dialog!.y)
+      assert.equal(card!.y, dialog!.y)
       assert.equal(datePicker!.y, wideCalendar!.y)
       assert.ok(datePicker!.x < wideCalendar!.x)
       assert.equal(segmented!.y, thinking!.y)
@@ -149,7 +149,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
       assert.equal(Math.round(chat!.y + chat!.height), Math.round(drawer!.y + drawer!.height))
       // Wide cards alternate sides down the gallery: the tall Carousel on the
       // right of the first band and Toaster on the left of the next row. The file
-      // browser gets the row after, then the card grid starts with Card on the left.
+      // browser gets the row after, then DataTable appears on the left.
       const sides = await gallery.evaluate((node) => {
         const left = node.getBoundingClientRect().left
         return Array.from(
