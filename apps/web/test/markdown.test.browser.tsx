@@ -1,4 +1,4 @@
-import { Markdown } from '@rtzll/reflow'
+import { Markdown } from '@rtzll/reflow/markdown'
 import { deepEqual, equal, ok } from 'remix/assert'
 import { render } from 'remix/component/test'
 import { describe, it } from 'remix/test'

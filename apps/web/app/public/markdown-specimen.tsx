@@ -1,4 +1,5 @@
-import { Button, Markdown, Switch, Textarea } from '@rtzll/reflow'
+import { Button, Switch, Textarea } from '@rtzll/reflow'
+import { Markdown } from '@rtzll/reflow/markdown'
 import { on, type Handle } from 'remix/component'
 
 const sample = `# Getting started with Reflow
