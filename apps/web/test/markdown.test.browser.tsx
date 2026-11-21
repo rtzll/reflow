@@ -61,4 +61,39 @@ describe('Markdown', () => {
     equal($('pre code')?.textContent, 'Coast road')
     equal($('p:last-child')?.textContent, 'Next')
   })
+
+  it('preserves snake_case, nested emphasis, multi-backtick code, parenthesized links, images, 1-column tables, and compact size', (t) => {
+    const source = [
+      'Use `foo_bar_baz` and foo_bar_baz with **bold and *italic* text** and `` use `ticks` ``.',
+      'See [Remix](https://en.wikipedia.org/wiki/Remix_(web_framework)) and ![Diagram](https://example.org/a.png).',
+      '```inline code``` stays inline.',
+      '',
+      '| Only |',
+      '| --- |',
+      '| Value\\|1 |',
+      '## Next | Heading',
+      '',
+      '- [x] **Ship** release',
+      '1. [x] Ordered stays numbered',
+    ].join('\n')
+    const { $, $$, cleanup } = render(<Markdown source={source} size="compact" />)
+    t.after(cleanup)
+    equal($('em')?.textContent, 'italic')
+    ok($('p')?.textContent?.includes('foo_bar_baz'))
+    equal($$('p code')[1]?.textContent, 'use `ticks`')
+    equal($('a')?.getAttribute('href'), 'https://en.wikipedia.org/wiki/Remix_(web_framework)')
+    equal($$('a').length, 1)
+    ok(!$('p')?.textContent?.includes('!Diagram'))
+    equal($('pre'), null)
+    equal($('table th')?.textContent, 'Only')
+    equal($('table td')?.textContent, 'Value|1')
+    equal($('h2')?.textContent, 'Next | Heading')
+    equal($('.rf-table-container')?.getAttribute('data-size'), 'compact')
+    const checkbox = $('.rf-markdown-task input[type="checkbox"]') as HTMLInputElement
+    ok(checkbox.disabled)
+    equal(checkbox.checked, true)
+    ok(checkbox.getAttribute('aria-labelledby'))
+    equal(checkbox.getAttribute('aria-label'), null)
+    equal($('ol .rf-markdown-task'), null)
+  })
 })
