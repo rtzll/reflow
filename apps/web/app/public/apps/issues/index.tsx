@@ -1,4 +1,6 @@
 import type { ExampleApp } from '../types.ts'
+import { issues } from './fixtures.ts'
+import { IssueTracker } from './issue-tracker.tsx'
 
 export const issuesApp: ExampleApp = {
   slug: 'issues',
@@ -7,6 +9,7 @@ export const issuesApp: ExampleApp = {
   components: [
     { slug: 'context-menu', name: 'ContextMenu' },
     { slug: 'toolbar', name: 'Toolbar' },
-    { slug: 'combobox', name: 'Combobox' },
+    { slug: 'progress', name: 'Progress' },
   ],
+  render: () => <IssueTracker initialIssues={issues} />,
 }
