@@ -52,7 +52,7 @@ const styles = [
   'app/public/site.css',
   'app/public/examples.css',
 ]
-const [client, samples] = await Promise.all([
+const [client, samples, sources] = await Promise.all([
   build({
     ...common,
     entryPoints: ['app/public/entry.ts', ...clientEntries.keys(), ...styles],
@@ -67,6 +67,7 @@ const [client, samples] = await Promise.all([
   }),
   // Highlight the CodeBlock samples while bundling, so the worker never includes Shiki.
   import('../app/code-samples.ts').then(({ codeSamples }) => codeSamples()),
+  import('../app/code-samples.ts').then(({ exampleSources }) => exampleSources()),
 ])
 
 if (!client.metafile) throw new Error('esbuild returned no metafile')
@@ -146,6 +147,7 @@ const worker = await build({
   define: {
     ...common.define,
     REFLOW_ASSETS: JSON.stringify(manifest),
+    REFLOW_EXAMPLE_SOURCES: JSON.stringify(sources),
     REFLOW_CODE_SAMPLES: JSON.stringify(samples),
   },
   plugins: [

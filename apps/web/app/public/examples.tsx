@@ -1,3 +1,5 @@
+import { ComponentDirectory } from './component-directory.tsx'
+import { components } from './catalog-entries.ts'
 import { ProjectTreeExample } from './project-tree-example.tsx'
 import { TeamDirectory, TeamTableExample } from './team-table-example.tsx'
 import { BreadcrumbDemo } from './breadcrumb-example.tsx'
@@ -64,7 +66,6 @@ import {
   InputField,
   Icon,
   InputGroup,
-  Pagination,
   Progress,
   TriggerMenu,
   NumberField,
@@ -211,7 +212,7 @@ export const Example = clientEntry(
       showcase?: boolean
       gallery?: boolean
       avatar?: string
-      tableQuery?: string
+      query?: string
       code?: HighlightedCode
     }>,
   ) {
@@ -1001,20 +1002,12 @@ export const Example = clientEntry(
             </div>
           )
         case 'pagination':
-          return (
-            <Pagination
-              page={5}
-              pageCount={12}
-              href={(page) => `/?teamPage=${Math.min(page, 3)}#team-table`}
-            />
-          )
+          return <ComponentDirectory entries={components} query={handle.props.query} />
         case 'skeleton':
           return <TeamTableExample loading />
         case 'data-table':
           return (
-            <TeamDirectory
-              query={handle.props.gallery ? (handle.props.tableQuery ?? '') : undefined}
-            />
+            <TeamDirectory query={handle.props.gallery ? (handle.props.query ?? '') : undefined} />
           )
         case 'table':
           return <TeamTableExample showcase={handle.props.showcase} />

@@ -35,6 +35,8 @@ interface DocPreviewProps {
   variant?: string
   images: ExampleImages
   code: string
+  source?: string
+  query?: string
   initialCode?: boolean
 }
 
@@ -134,10 +136,12 @@ export const DocPreview = clientEntry(
     let copied = false
     let copyFailed = false
     return () => {
-      const code = documentationCode(
-        handle.props.slug,
-        playground ? playgroundFragment(handle.props.slug, playground) : handle.props.code,
-      )
+      const code =
+        handle.props.source ??
+        documentationCode(
+          handle.props.slug,
+          playground ? playgroundFragment(handle.props.slug, playground) : handle.props.code,
+        )
       const playbackLabel =
         playback === 'playing'
           ? 'Pause example'
@@ -257,7 +261,7 @@ export const DocPreview = clientEntry(
                     images={handle.props.images}
                   />
                 ) : (
-                  <Example slug={handle.props.slug} />
+                  <Example slug={handle.props.slug} query={handle.props.query} />
                 )}
               </fieldset>
               {inspect && !codeVisible && (

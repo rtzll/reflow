@@ -29,6 +29,7 @@ export interface ShowcaseComponent {
   description: string
   preview?: RemixNode
   controls?: RemixNode
+  source?: string
   code?: string
   category?: string
   props?: readonly { name: string; type: string; description: string; defaultValue?: string }[]
@@ -825,6 +826,8 @@ function ComponentDoc(
                 </div>
                 <DocPreview
                   slug={component.slug}
+                  query={component.slug === 'pagination' ? handle.props.query : undefined}
+                  source={component.source}
                   code={component.code ?? `import { ${component.name} } from '@rtzll/reflow'`}
                   initialCode={showCode}
                   images={previewImages(images, undefined)}

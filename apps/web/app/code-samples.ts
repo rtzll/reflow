@@ -110,6 +110,25 @@ async function loadSamples(): Promise<CodeSamples> {
   )
 }
 
+// Ship the source behind each interactive docs example so its Code tab stays in sync.
+const exampleFiles: Record<string, string> = {
+  pagination: 'component-directory',
+}
+
+export async function exampleSource(slug: string) {
+  const file = exampleFiles[slug]
+  if (file)
+    return (await readFile(new URL('./public/' + file + '.tsx', import.meta.url), 'utf8')).trim()
+}
+
+export async function exampleSources() {
+  return Object.fromEntries(
+    await Promise.all(
+      Object.keys(exampleFiles).map(async (slug) => [slug, await exampleSource(slug)]),
+    ),
+  )
+}
+
 let samples: Promise<CodeSamples> | undefined
 
 export function codeSamples() {

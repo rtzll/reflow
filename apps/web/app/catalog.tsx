@@ -30,8 +30,8 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
     code: `<Avatar name="Ada Lovelace" src={photo} status="online" />\n<AvatarGroup avatars={editors} max={4} />`,
   },
   pagination: {
-    description: 'Previous, next, and numbered links for navigating page-based results.',
-    code: `<Pagination page={2} pageCount={3} href={(page) => \`/?teamPage=\${page}#team-table\`} />`,
+    description:
+      'Browse the component directory five records at a time. Each page has a shareable URL.',
   },
   'data-table': {
     description:
@@ -372,7 +372,11 @@ export function galleryCatalog(
               showcase
               gallery={gallery}
               avatar={avatar}
-              tableQuery={component.slug === 'data-table' ? query?.toString() : undefined}
+              query={
+                ['data-table', 'pagination'].includes(component.slug)
+                  ? query?.toString()
+                  : undefined
+              }
               code={component.slug === 'code-block' ? samples?.card : undefined}
             />
           ),

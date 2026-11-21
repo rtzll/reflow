@@ -41,3 +41,25 @@ it('changes the team page without moving the table in the viewport', async (t) =
   await expect(table.getByRole('cell', { name: 'Emilia', exact: true })).toBeVisible()
   expect(Math.abs((await table.boundingBox())!.y - top)).toBeLessThanOrEqual(1)
 })
+
+it('pages through the component directory in place and restores its records with Back', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.route('**/*.js', (route) => route.abort())
+  for (const path of ['/docs/pagination', '/demo?c=pagination']) {
+    await open(page, path + (path.includes('?') ? '&' : '?') + 'page=5', { hydrate: false })
+    const directory = page.getByRole('list', { name: 'Component directory' })
+    const pages = page.getByRole('navigation', { name: 'Component pages' })
+    await expect(directory.getByRole('link', { name: 'CommandMenu', exact: true })).toBeVisible()
+    const records = await directory.getByRole('link').allTextContents()
+    await pages.getByRole('link', { name: 'Page 12' }).click()
+    await expect(page).toHaveURL(new RegExp(path.replace('?', '\\?') + '[?&]page=12'))
+    await expect(pages.getByRole('link', { name: 'Page 12' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
+    await expect(directory.getByRole('link', { name: 'TriggerMenu' })).toBeVisible()
+    await expect(directory.getByRole('link')).toHaveCount(3)
+    await page.goBack()
+    await expect(directory.getByRole('link')).toHaveText(records)
+  }
+})

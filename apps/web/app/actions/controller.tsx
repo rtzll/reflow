@@ -1,7 +1,7 @@
 import { createController } from 'remix/router'
 import { assets, getPageAssets } from '../assets.ts'
 import { catalog, galleryCatalog } from '../catalog.tsx'
-import { codeSamples } from '../code-samples.ts'
+import { codeSamples, exampleSource } from '../code-samples.ts'
 import { Document } from '../document.tsx'
 import type { AppContext } from '../router.ts'
 import { routes } from '../routes.ts'
@@ -48,6 +48,7 @@ async function show(context: AppContext, page: ShowcaseProps['page'], slug?: str
   const samples =
     page === 'gallery' || page === 'demo' || slug === 'code-block' ? await codeSamples() : undefined
   const images = slug === 'code-block' ? { ...pageAssets.images, code: samples } : pageAssets.images
+  const source = page === 'component' && slug ? await exampleSource(slug) : undefined
   const components =
     page === 'gallery' || page === 'demo'
       ? galleryCatalog(
@@ -56,7 +57,9 @@ async function show(context: AppContext, page: ShowcaseProps['page'], slug?: str
           samples,
           url.searchParams,
         )
-      : catalog
+      : source
+        ? catalog.map((entry) => (entry.slug === slug ? { ...entry, source } : entry))
+        : catalog
   return context.render(
     <Document assets={pageAssets} settings={settings} title={title} url={url}>
       <Showcase
