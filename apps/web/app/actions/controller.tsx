@@ -5,7 +5,7 @@ import { codeSamples, exampleSource } from '../code-samples.ts'
 import { Document } from '../document.tsx'
 import type { AppContext } from '../router.ts'
 import { routes } from '../routes.ts'
-import { AppWorkspace, exampleApps } from '../ui/example-apps.tsx'
+import { AppsIndex, AppWorkspace, exampleApps } from '../ui/example-apps.tsx'
 import { readSettings, Showcase, type ShowcaseProps } from '../ui/site.tsx'
 import { settingCookies, settingRows, withoutSettings } from '../public/site-settings.ts'
 
@@ -15,7 +15,11 @@ const moved: Record<string, string> = {
   'settings-dialog': '/docs/dialog#with-a-sidebar',
 }
 
-async function show(context: AppContext, page: ShowcaseProps['page'] | 'app', slug?: string) {
+async function show(
+  context: AppContext,
+  page: ShowcaseProps['page'] | 'app' | 'apps',
+  slug?: string,
+) {
   const url = new URL(context.request.url)
   const query = url.search
   // A shared link carries settings: save them as the visitor's own and show
@@ -37,18 +41,18 @@ async function show(context: AppContext, page: ShowcaseProps['page'] | 'app', sl
       301,
     )
   }
-  if (page === 'app') {
+  if (page === 'app' || page === 'apps') {
     const app = exampleApps.find((entry) => entry.slug === slug)
-    if (!app) return new Response('App not found', { status: 404 })
-    const assets = await getPageAssets(app.slug)
+    if (page === 'app' && !app) return new Response('App not found', { status: 404 })
+    const assets = await getPageAssets(app?.slug ?? 'directory')
     return context.render(
       <Document
         assets={assets}
         settings={{ ...settings, shape: 'rounded' }}
-        title={`${app.name} · Reflow`}
+        title={`${app?.name ?? 'Example apps'} · Reflow`}
         url={url}
       >
-        <AppWorkspace app={app} search={query} />
+        {app ? <AppWorkspace app={app} search={query} /> : <AppsIndex />}
       </Document>,
     )
   }
@@ -58,7 +62,7 @@ async function show(context: AppContext, page: ShowcaseProps['page'] | 'app', sl
   const title =
     page === 'gallery'
       ? 'Reflow'
-      : `${component?.name ?? (page === 'apps' ? 'Example apps' : page === 'docs' ? 'Documentation' : 'Demo')} · Reflow`
+      : `${component?.name ?? (page === 'docs' ? 'Documentation' : 'Demo')} · Reflow`
   const pageAssets = await getPageAssets()
   // CodeBlock's samples are highlighted on the server, for the pages that show them.
   const samples =

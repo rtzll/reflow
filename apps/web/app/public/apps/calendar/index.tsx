@@ -3,7 +3,7 @@ import { WeekView } from './week-view.tsx'
 
 export const calendarApp: ExampleApp = {
   slug: 'calendar',
-  name: 'Team calendar',
+  name: 'Calendar',
   description: 'Plan a week, move an event, and adjust its duration.',
   render: () => <WeekView />,
 }

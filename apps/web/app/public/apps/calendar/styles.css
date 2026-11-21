@@ -162,7 +162,7 @@
   padding: 4px 6px;
   border: 1px solid color-mix(in srgb, var(--event-color) 24%, transparent);
   border-inline-start: 3px solid var(--event-color);
-  border-radius: min(var(--rf-item-radius), 5px);
+  border-radius: var(--rf-item-radius);
   background: var(--event-fill);
   color: var(--rf-fg);
   font: inherit;
