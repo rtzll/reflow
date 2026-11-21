@@ -2,7 +2,7 @@
 
 Reflow is a native Remix 3 component library and showcase inspired by Fluid Functionalism. The goal is upstream's behavior, visual restraint, and motion quality, expressed through Remix APIs rather than React compatibility, across upstream's catalog and the components Reflow adds.
 
-The library covers the Fluid Functionalism catalog and now grows beyond it. [Components](components.md) lists the catalog, what every component needs before it ships, and the roadmap.
+Reflow started with the Fluid Functionalism catalog and adds components of its own. [Components](components.md) lists what ships, the criteria for new components, and the roadmap.
 
 ## Deliverables
 
@@ -122,6 +122,7 @@ The former `/docs/app-sidebar` and `/docs/settings-dialog` pages redirect to Sid
 
 ## References
 
+- The [ContextMenu design note](context-menu.md) follows the upstream catalog at `13fef6966428b5b16952f1609aa3814e9bdf115b`. [Pinned registry](https://github.com/mickadesign/fluid-functionalism/blob/13fef6966428b5b16952f1609aa3814e9bdf115b/registry.json) · [ContextMenu source](https://github.com/mickadesign/fluid-functionalism/blob/13fef6966428b5b16952f1609aa3814e9bdf115b/registry/default/context-menu.tsx)
 - [Fluid Functionalism source](https://github.com/mickadesign/fluid-functionalism), initial inspected commit `7e6ae290dd8f5a7657ae4a433a42e165bac3ece4`. Breadcrumb, Dropdown's `openOnHover`, and the demo deck follow `2bfb830023e46ea9bcf5d326e015d4511ab9ef38`. The showcase shape default follows `7f5601a` and the Button spinner follows `cc276ca`.
 - [Upstream showcase](https://www.fluidfunctionalism.com/) and [focused demo](https://www.fluidfunctionalism.com/demo).
 - [Upstream MIT license](https://github.com/mickadesign/fluid-functionalism/blob/main/LICENSE) is included in `packages/reflow/NOTICE`. The Inter font used by the website has a separate SIL Open Font License notice next to its asset.
