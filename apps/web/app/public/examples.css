@@ -2070,3 +2070,8 @@
   inline-size: 100%;
   min-block-size: 100%;
 }
+
+.example-team-directory {
+  inline-size: min(100%, 566px);
+  min-inline-size: 0;
+}

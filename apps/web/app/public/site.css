@@ -1749,30 +1749,30 @@ html[data-font='geist-serif'] {
   font-size: 14px;
   font-weight: 550;
 }
-.doc-api-component .site-props {
+.doc-api-component :is(.site-props, .rf-table) {
   font-size: 12px;
   line-height: 1.6;
 }
-.doc-api-component .site-props :is(th, td) {
+.doc-api-component :is(.site-props, .rf-table) :is(th, td) {
   padding: 12px 10px;
 }
-.doc-api-component .site-props th {
+.doc-api-component :is(.site-props, .rf-table) th {
   font-weight: 450;
 }
-.doc-api-component .site-props thead th {
+.doc-api-component :is(.site-props, .rf-table) thead th {
   font-weight: 550;
   color: var(--rf-muted);
 }
-.doc-api-component .site-props td:nth-child(2) {
+.doc-api-component :is(.site-props, .rf-table) td:nth-child(2) {
   max-width: 240px;
 }
-.doc-api-component .site-props code {
+.doc-api-component :is(.site-props, .rf-table) code {
   white-space: normal;
   overflow-wrap: anywhere;
   font-size: 11px;
   color: var(--rf-fg);
 }
-.doc-api-component .site-props th code {
+.doc-api-component :is(.site-props, .rf-table) th code {
   white-space: nowrap;
   color: var(--rf-accent);
 }
@@ -1815,7 +1815,7 @@ html[data-font='geist-serif'] {
     gap: 4px;
     font-size: 11px;
   }
-  .doc-api-component .site-props {
+  .doc-api-component :is(.site-props, .rf-table) {
     min-width: 500px;
   }
   .doc-demo-padding {

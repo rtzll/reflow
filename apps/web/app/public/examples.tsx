@@ -211,8 +211,7 @@ export const Example = clientEntry(
       showcase?: boolean
       gallery?: boolean
       avatar?: string
-      teamPage?: string
-      search?: string
+      tableQuery?: string
       code?: HighlightedCode
     }>,
   ) {
@@ -1011,13 +1010,14 @@ export const Example = clientEntry(
           )
         case 'skeleton':
           return <TeamTableExample loading />
+        case 'data-table':
+          return <TeamTableExample interactive />
         case 'table':
           return (
             <TeamTableExample
               gallery={handle.props.gallery}
               showcase={handle.props.showcase}
-              teamPage={handle.props.teamPage}
-              search={handle.props.search}
+              query={handle.props.tableQuery}
             />
           )
         case 'textarea':

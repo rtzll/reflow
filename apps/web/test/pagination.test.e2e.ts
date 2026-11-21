@@ -12,12 +12,12 @@ it('opens a team page from its URL and follows links without JavaScript', async 
     'aria-current',
     'page',
   )
-  await expect(tile.getByRole('cell', { name: 'Emilia' })).toBeVisible()
+  await expect(tile.getByRole('cell', { name: 'Emilia', exact: true })).toBeVisible()
   await navigation.getByRole('link', { name: 'Next page' }).click()
   await expect(page).toHaveURL(/teamPage=3/)
-  await expect(tile.getByRole('cell', { name: 'Iris' })).toBeVisible()
+  await expect(tile.getByRole('cell', { name: 'Iris', exact: true })).toBeVisible()
   await page.goBack()
-  await expect(tile.getByRole('cell', { name: 'Emilia' })).toBeVisible()
+  await expect(tile.getByRole('cell', { name: 'Emilia', exact: true })).toBeVisible()
 })
 
 it('changes the team page without moving the table in the viewport', async (t) => {
@@ -31,13 +31,13 @@ it('changes the team page without moving the table in the viewport', async (t) =
   const top = (await table.boundingBox())!.y
   const next = navigation.getByRole('link', { name: 'Next page' })
   await next.click()
-  await expect(table.getByRole('cell', { name: 'Emilia' })).toBeVisible()
+  await expect(table.getByRole('cell', { name: 'Emilia', exact: true })).toBeVisible()
   await expect(page).toHaveURL(/teamPage=2/)
   expect(Math.abs((await table.boundingBox())!.y - top)).toBeLessThanOrEqual(1)
   await next.press('Enter')
-  await expect(table.getByRole('cell', { name: 'Iris' })).toBeVisible()
+  await expect(table.getByRole('cell', { name: 'Iris', exact: true })).toBeVisible()
   expect(Math.abs((await table.boundingBox())!.y - top)).toBeLessThanOrEqual(1)
   await page.goBack()
-  await expect(table.getByRole('cell', { name: 'Emilia' })).toBeVisible()
+  await expect(table.getByRole('cell', { name: 'Emilia', exact: true })).toBeVisible()
   expect(Math.abs((await table.boundingBox())!.y - top)).toBeLessThanOrEqual(1)
 })

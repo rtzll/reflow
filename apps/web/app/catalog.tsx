@@ -365,10 +365,7 @@ export function galleryCatalog(
               showcase
               gallery={gallery}
               avatar={avatar}
-              teamPage={
-                component.slug === 'table' ? (query?.get('teamPage') ?? undefined) : undefined
-              }
-              search={component.slug === 'table' ? (query?.get('q') ?? undefined) : undefined}
+              tableQuery={component.slug === 'table' ? query?.toString() : undefined}
               code={component.slug === 'code-block' ? samples?.card : undefined}
             />
           ),

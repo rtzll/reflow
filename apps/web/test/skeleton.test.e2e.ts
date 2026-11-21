@@ -16,5 +16,5 @@ it('keeps the team table at the same height while loading', async (t) => {
   await expect(placeholder).toHaveCSS('animation-name', 'none')
   expect((await table.boundingBox())!.height).toBe(before)
   await tile.getByRole('switch', { name: 'Loading preview' }).click()
-  await expect(table.getByRole('cell', { name: 'Alice' })).toBeVisible()
+  await expect(table.getByRole('cell', { name: 'Alice', exact: true })).toBeVisible()
 })

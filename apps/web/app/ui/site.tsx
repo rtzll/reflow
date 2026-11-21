@@ -4,6 +4,7 @@ import type { ExampleImages } from '../assets.ts'
 import { samplesFor } from '../public/code-block-example.tsx'
 import { routes } from '../routes.ts'
 import { PlaygroundControls } from '../public/doc-playground.tsx'
+import { ApiPropTable } from '../public/api-prop-table.tsx'
 import { DocPreview } from '../public/doc-preview.tsx'
 import { componentExamples } from '../public/component-demos.tsx'
 import { componentApi, componentDefaults } from '../docs-data.ts'
@@ -750,6 +751,7 @@ function ComponentDoc(
     previous?: PageLink
     next?: PageLink
     showCode?: boolean
+    query?: string
     images: ExampleImages
   }>,
 ) {
@@ -863,37 +865,49 @@ function ComponentDoc(
                       role="region"
                       aria-label={`${section.name} API reference`}
                     >
-                      <table class="site-props">
-                        <thead>
-                          <tr>
-                            <th scope="col">Prop</th>
-                            <th scope="col">Type</th>
-                            <th scope="col">Default</th>
-                            <th scope="col">Description</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {section.props.map((prop) => (
-                            <tr key={prop.name}>
-                              <th scope="row">
-                                <code>{prop.name}</code>
-                                {prop.required && (
-                                  <span class="doc-required" title="Required">
-                                    *
-                                  </span>
-                                )}
-                              </th>
-                              <td>
-                                <code>{prop.type}</code>
-                              </td>
-                              <td>
-                                <code>{componentDefaults[section.name]?.[prop.name] ?? '—'}</code>
-                              </td>
-                              <td>{prop.description}</td>
+                      {section === api[0] && section.props.length > 12 ? (
+                        <ApiPropTable
+                          name={section.name}
+                          path={routes.component.href({ slug: component.slug })}
+                          search={handle.props.query ?? ''}
+                          rows={section.props.map((prop) => ({
+                            ...prop,
+                            defaultValue: componentDefaults[section.name]?.[prop.name] ?? '—',
+                          }))}
+                        />
+                      ) : (
+                        <table class="site-props">
+                          <thead>
+                            <tr>
+                              <th scope="col">Prop</th>
+                              <th scope="col">Type</th>
+                              <th scope="col">Default</th>
+                              <th scope="col">Description</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody>
+                            {section.props.map((prop) => (
+                              <tr key={prop.name}>
+                                <th scope="row">
+                                  <code>{prop.name}</code>
+                                  {prop.required && (
+                                    <span class="doc-required" title="Required">
+                                      *
+                                    </span>
+                                  )}
+                                </th>
+                                <td>
+                                  <code>{prop.type}</code>
+                                </td>
+                                <td>
+                                  <code>{componentDefaults[section.name]?.[prop.name] ?? '—'}</code>
+                                </td>
+                                <td>{prop.description}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      )}
                     </div>
                   </section>
                 ))}
@@ -1206,6 +1220,7 @@ export function Showcase(handle: Handle<ShowcaseProps>) {
               settings={settings}
               images={images}
               showCode={params.get('view') === 'code'}
+              query={handle.props.query}
               previous={
                 previous
                   ? {
