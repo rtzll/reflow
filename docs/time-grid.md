@@ -1,6 +1,6 @@
 # TimeGrid
 
-TimeGrid lays out timed appointments in one or more day columns. The studio booking example uses a single four-hour window and half-hour reservations. The Calendar workspace uses the same grid for a seven-day UTC schedule and its event editor. [Booking example](/docs/time-grid) · [Calendar workspace](/apps/calendar)
+TimeGrid lays out timed appointments in one or more day columns. The studio booking example uses a single four-hour window and half-hour reservations. The Calendar workspace uses the same grid for a seven-day UTC schedule and its event editor. [Booking example](../apps/web/app/public/studio-bookings.tsx) (`/docs/time-grid`) · [Calendar workspace](../apps/web/app/public/apps/calendar/index.tsx) (`/apps/calendar`)
 
 Each event has a unique ID, a title, a zero-based day index, a start in minutes since midnight, and a duration in minutes. Supply day names for accessible labels. The owner chooses the dates and timezone, renders column headers, and can add fields such as a room or calendar name. Events that intersect share lanes. One event ending as another begins leaves the next lane free.
 

@@ -35,7 +35,7 @@ Separate reusable geometry, color, date, and state logic from DOM measurement an
 
 ### Code structure
 
-To anyone using the package, everything it exports is a component, however many other components it is built from. Inside `packages/reflow/src`, code that is not a component sits in one of three layers, and components build on them:
+To anyone using the package, everything it exports is a component, a documented system, or a focused behavior helper shared with apps (such as `createRangeSelection`). Inside `packages/reflow/src`, code that is not a component sits in one of three layers, and components build on them:
 
 | Layer | What it is | Where |
 | --- | --- | --- |

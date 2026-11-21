@@ -228,10 +228,10 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
         },
         {
           name: 'rowActions',
-          type: '{ items: readonly DropdownItem[]; label: (row: Row) => string; onSelect: (action: string, row: Row, checked?: boolean) => void }',
+          type: '{ items: readonly DropdownItem[] | ((row: Row) => readonly DropdownItem[]); label: (row: Row) => string; onSelect: (action: string, row: Row, checked?: boolean) => void }',
           required: false,
           description:
-            'Shows the same actions in a named button menu and a context menu for each record.',
+            'Shows the same actions in a named button menu and a context menu for each record. items can be a function of the row to tailor or disable actions.',
         },
         {
           name: 'rowSelection',
@@ -256,7 +256,13 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           type: '{ path: string; search: string; prefix: string; anchor: string }',
           required: true,
           description:
-            'Supply the request pathname and search string, a unique parameter prefix, and the table section ID. The URL stores the filter, sort, and page.',
+            'Supply the request pathname and search string, a unique parameter prefix, and the table section ID. Accepts all DataTable props except state, defaultState, href, onStateChange, and filterInput.',
+        },
+        {
+          name: 'class',
+          type: 'string',
+          required: false,
+          description: 'Optional class name applied to the outer routed wrapper.',
         },
       ],
     },
@@ -325,6 +331,7 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
         },
       ],
     },
+    menuItemApi,
   ],
   'context-menu': [
     {
@@ -1288,7 +1295,7 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           name: 'onCreate',
           type: '(range: TimeGridRange) => void',
           description:
-            'Receive a selected interval on pointer release or Enter. Open a form or append an event.',
+            'Receive a selected interval after dragging across open time or pressing Enter on a keyboard slot. A click without a drag creates nothing.',
           required: false,
         },
         {

@@ -1,6 +1,6 @@
 # Website build and deployment
 
-The Cloudflare target hosts the existing `apps/web` showcase: `/` for the gallery, `/docs` and `/docs/:slug` for documentation, and `/demo` for focused examples. It needs no database, account binding, or application secret. The library package and the generated starter remain independent of Cloudflare.
+The Cloudflare target hosts the existing `apps/web` showcase: `/` for the gallery, `/docs` and `/docs/:slug` for documentation, `/demo` for focused examples, and `/apps` and `/apps/:slug` for example workspaces. It needs no database, account binding, or application secret. The library package and the generated starter remain independent of Cloudflare.
 
 ## Build and preview locally
 
@@ -25,7 +25,7 @@ The existing `pnpm dev` command still uses Remix's Node asset server for develop
 
 The build discovers modules under `app/public` that call `clientEntry(...)`. Keep those calls in browser modules, use `import.meta.url` as the source ID, and export the named component. The build replaces those source URLs with stable, project-relative IDs in both bundles. Function names are preserved because Remix uses them to resolve hydration exports.
 
-For the Worker bundle only, the build replaces `app/assets.ts` with `worker/assets.ts`. This resolves script entries from the generated manifest instead of compiling files at request time. Development continues to use the original asset server. A shared browser module graph keeps the Remix runtime consistent across hydrated entries.
+For the Worker bundle only, the build replaces `app/assets.ts` with `worker/assets.ts`, replaces `app/code-samples.ts` with `worker/code-samples.ts` (inlining build-time highlighted samples and example sources so the Worker never bundles Shiki), and stubs the client-only drag adapter. This resolves script entries from the generated manifest instead of compiling files at request time. Development continues to use the original asset server. A shared browser module graph keeps the Remix runtime consistent across hydrated entries.
 
 Cloudflare serves static files before invoking the Worker. Hashed assets use immutable caching; server-rendered responses use `private, no-store` because appearance settings can come from cookies. Missing routes and assets return 404, without an SPA fallback. Source maps are disabled. No environment variables are injected into browser code other than the constant production mode.
 
