@@ -12,7 +12,13 @@ export interface ActivityRange {
   end: string
 }
 
-const articles = ['Field notes', 'Studio journal', 'Autumn lookbook', 'Materials guide', 'Print archive']
+const articles = [
+  'Field notes',
+  'Studio journal',
+  'Autumn lookbook',
+  'Materials guide',
+  'Print archive',
+]
 const changes = ['Draft updated', 'Review requested', 'Page published']
 const dailyEdits = [4, 6, 5, 7, 4, 2, 3, 6, 8, 5, 7, 6, 4, 3]
 
@@ -66,7 +72,9 @@ export function rangeHref(path: string, search: string, range: ActivityRange) {
 }
 
 const formatter = new Intl.DateTimeFormat('en-US', {
-  month: 'short', day: 'numeric', timeZone: 'UTC',
+  month: 'short',
+  day: 'numeric',
+  timeZone: 'UTC',
 })
 
 export function dayLabel(day: string) {
@@ -74,5 +82,7 @@ export function dayLabel(day: string) {
 }
 
 export function rangeLabel(range: ActivityRange) {
-  return range.start === range.end ? dayLabel(range.start) : dayLabel(range.start) + ' – ' + dayLabel(range.end)
+  return range.start === range.end
+    ? dayLabel(range.start)
+    : dayLabel(range.start) + ' – ' + dayLabel(range.end)
 }
