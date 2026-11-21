@@ -1,6 +1,6 @@
 import { expect } from 'playwright/test'
 import { it } from 'remix/test'
-import { open, showcaseServer } from './showcase-router.ts'
+import { open, showcaseServer, waitForShowcase } from './showcase-router.ts'
 
 it('keeps drafts with their conversations on a narrow screen', async (t) => {
   const page = await t.serve(showcaseServer)
@@ -154,4 +154,61 @@ it('adds a skill to an existing draft using the narrow-screen picker', async (t)
   await expect(scenes).toHaveCount(3)
   await expect(scenes.nth(2)).toContainText('Closing image')
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+})
+
+it('restores a seed thread and its draft through history and refresh', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1280, height: 800 })
+  await open(page, '/apps/chat?theme=dark&thread=photo-sequence#main')
+  const draft = 'Use the empty waiting room.'
+  const field = page.getByRole('textbox', { name: 'Message' })
+  await field.fill(draft)
+  const interview = page.getByRole('link', { name: 'Interview notes' })
+  await expect(interview).toHaveAttribute('href', /theme=dark&thread=interview-notes#main$/)
+  await interview.press('Enter')
+  await expect(page).toHaveURL(/theme=dark&thread=interview-notes#main$/)
+  await field.fill('Ask Mara about fog.')
+  await page.goBack()
+  await expect(page.getByRole('log', { name: 'Photo essay sequence' })).toBeVisible()
+  await expect(field).toBeFocused()
+  await expect(field).toHaveValue(draft)
+  await page.goForward()
+  await expect(field).toHaveValue('Ask Mara about fog.')
+  await page.goBack()
+  await page.reload()
+  await waitForShowcase(page)
+  await expect(field).toBeFocused()
+  await page.keyboard.type(' Keep the seats.')
+  await expect(field).toHaveValue(draft + ' Keep the seats.')
+})
+
+it('gives new chats reusable URLs before the first send and retains their transcripts', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await open(page, '/apps/chat?view=compact')
+  const first = new URL(page.url())
+  expect(first.searchParams.get('thread')).toBeTruthy()
+  const field = page.getByRole('textbox', { name: 'Message' })
+  await field.fill('First cover sketch')
+  await page.getByRole('button', { name: 'New chat', exact: true }).click()
+  const second = page.url()
+  expect(second).not.toBe(first.href)
+  expect(new URL(second).searchParams.get('view')).toBe('compact')
+  await field.fill('Second cover sketch')
+  await page.goBack()
+  await expect(field).toHaveValue('First cover sketch')
+  await page.reload()
+  await waitForShowcase(page)
+  await expect(field).toHaveValue('First cover sketch')
+  await expect(field).toBeFocused()
+  await field.press('Enter')
+  await page.getByRole('button', { name: 'Stop response' }).click()
+  await open(page, second)
+  await expect(field).toHaveValue('Second cover sketch')
+  await page.getByRole('link', { name: 'First cover sketch' }).click()
+  await expect(page).toHaveURL(first.href)
+  await expect(field).toHaveValue('')
+  await expect(page.getByRole('log').getByRole('article', { name: 'You' })).toHaveText(
+    'First cover sketch',
+  )
+  await expect(page.getByRole('log')).toContainText('Response stopped')
 })
