@@ -25,7 +25,11 @@ Use official Remix packages and standard platform APIs. The expected runtime fou
 
 No React runtime, Radix, Base UI, Motion, third-party calendar/editor package, or third-party runtime utility is part of the baseline.
 
-Optional adapters are the one exception, for work a small local implementation cannot do well, such as highlighting every language. An adapter lives at its own import path, takes its library as an optional peer dependency, and is imported by nothing else in Reflow, so an app that does not import it never installs or loads the library. The component it serves keeps working without it. `@rtzll/reflow/highlight` wraps Shiki for CodeBlock this way, and the package check fails if any other module imports Shiki or if installing Reflow pulls it in.
+Two kinds of exception exist, both for work a small local implementation cannot do well.
+
+Markdown parsing is a required dependency. Parsing is the component's whole job, so there is no useful version without it, and a hand-written parser kept meeting CommonMark's edge cases. Markdown uses the same unified, remark and rehype packages that the Remix and React Router websites use for their docs, pinned to exact versions, and maps the resulting tree onto Reflow's own CodeBlock and Table. It lives at its own import path, `@rtzll/reflow/markdown`, and nothing else in Reflow imports those packages, so a page loads them only when it renders Markdown in the browser. Server-rendered Markdown sends no parser to the browser. The package check fails if any other module imports them.
+
+Optional adapters are the other exception, for enhancements, such as highlighting every language. An adapter lives at its own import path, takes its library as an optional peer dependency, and is imported by nothing else in Reflow, so an app that does not import it never installs or loads the library. The component it serves keeps working without it. `@rtzll/reflow/highlight` wraps Shiki for CodeBlock this way, and the package check fails if any other module imports Shiki or if installing Reflow pulls it in.
 
 ## Architecture direction
 
