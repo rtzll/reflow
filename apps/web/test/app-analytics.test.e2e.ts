@@ -55,7 +55,12 @@ it('inspects the spike by keyboard and opens its underlying events', async (t) =
   await page.goBack()
   await expect(filter).toHaveValue('')
   await chart.getByRole('link', { name: 'View 19 media imports' }).click()
+  // Unfiltered page 2 shows the same imports, so page only once the filter has landed.
+  await expect(filter).toHaveValue('Media import')
   await page.getByRole('link', { name: 'Next page' }).click()
+  await expect(
+    page.getByRole('status').filter({ hasText: '19 results, page 2 of 4' }),
+  ).toBeVisible()
   await expect(page.getByRole('cell', { name: 'Autumn lookbook / 13' })).toBeVisible()
   const shared = new URL(page.url())
   expect(shared.searchParams.get('from')).toBe('2026-10-14')
