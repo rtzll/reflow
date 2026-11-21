@@ -36,3 +36,28 @@ it('sorts the full collection before paging and filters back to the first page',
   deepEqual(names(), ['Cal', 'Zoe'])
   equal($('th[aria-sort]')!.getAttribute('aria-sort'), 'descending')
 })
+
+it('runs a context action on the filtered record and gives each record a visible actions button', async (t) => {
+  let chosen = ''
+  const { $, act, cleanup } = render(
+    <DataTable
+      {...props}
+      defaultState={{ filter: 'Cal' }}
+      rowActions={{
+        label: (row) => 'Actions for ' + row.name,
+        items: [{ value: 'copy', label: 'Copy name' }],
+        onSelect: (action, row) => {
+          chosen = action + ':' + row.name
+        },
+      }}
+    />,
+  )
+  t.after(cleanup)
+  const cell = $('tbody td')!
+  await act(() =>
+    cell.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true })),
+  )
+  await act(() => $(':popover-open [role=menuitem]')!.click())
+  equal(chosen, 'copy:Cal')
+  equal($('tbody button[aria-label="Actions for Cal"]')?.getAttribute('aria-haspopup'), 'menu')
+})

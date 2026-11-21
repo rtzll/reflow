@@ -1,4 +1,7 @@
 import { on, type Handle, type RemixNode } from 'remix/component'
+import { ContextMenu } from './context-menu.tsx'
+import { Dropdown, type DropdownItem } from './dropdown.tsx'
+import { Skeleton } from './skeleton.tsx'
 import { Icon } from './icon.tsx'
 import { Input } from './input.tsx'
 import { Pagination } from './pagination.tsx'
@@ -42,6 +45,13 @@ export interface DataTableProps<Row> {
   onStateChange?: (state: DataTableState) => void
   /** Render native sort and page links. The destination supplies the new state. */
   href?: (state: DataTableState) => string
+  loading?: boolean
+  /** The same actions are available from the row button and the context menu. */
+  rowActions?: {
+    label: (row: Row) => string
+    items: readonly DropdownItem[]
+    onSelect: (action: string, row: Row, checked?: boolean) => void
+  }
   paginationLabel?: string
   id?: string
 }
@@ -90,7 +100,7 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
     const filterLabel = `Filter ${label}`
 
     function header(column: DataTableColumn<Row>) {
-      if (column.sortable === false) return <TableHead>{column.label}</TableHead>
+      if (column.sortable === false) return <TableHead key={column.id}>{column.label}</TableHead>
       const direction = sortedColumn === column ? state.sort?.direction : undefined
       const next: DataTableState = {
         ...state,
@@ -107,7 +117,7 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
         </>
       )
       return (
-        <TableHead aria-sort={direction}>
+        <TableHead key={column.id} aria-sort={direction}>
           {href ? (
             <a class="rf-data-sort" href={href(next)} data-rmx-reset-scroll="manual">
               {content}
@@ -121,6 +131,79 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
       )
     }
 
+    const { rowActions, loading } = handle.props
+    const table = (
+      <Table
+        id={handle.props.id}
+        size={size}
+        aria-label={label}
+        aria-busy={loading}
+        fluidHover={!!rowActions && !loading}
+      >
+        <TableHeader>
+          <TableRow hover={false}>
+            {columns.map(header)}
+            {rowActions && (
+              <TableHead class="rf-data-action-cell">
+                <span class="rf-basic-sr-only">Actions</span>
+              </TableHead>
+            )}
+          </TableRow>
+        </TableHeader>
+        <TableBody aria-hidden={loading || undefined}>
+          {visible.map((row) => (
+            <TableRow
+              key={rowKey(row)}
+              hover={!!rowActions && !loading}
+              data-rf-data-row={rowActions && !loading ? rowKey(row) : undefined}
+              tabIndex={rowActions && !loading ? -1 : undefined}
+            >
+              {columns.map((column) => {
+                const content = loading ? (
+                  <Skeleton />
+                ) : column.cell ? (
+                  column.cell(row)
+                ) : (
+                  column.value(row)
+                )
+                return column.rowHeader ? (
+                  <th key={column.id} scope="row">
+                    {content}
+                  </th>
+                ) : (
+                  <TableCell key={column.id}>{content}</TableCell>
+                )
+              })}
+              {rowActions && (
+                <TableCell class="rf-data-action-cell">
+                  {loading ? (
+                    <Skeleton width="24px" height="24px" />
+                  ) : (
+                    <Dropdown
+                      label={rowActions.label(row)}
+                      variant="bare"
+                      triggerClass="rf-data-actions"
+                      triggerContent={<Icon name="more-horizontal" size={16} />}
+                      chevron={false}
+                      align="end"
+                      size={size}
+                      items={rowActions.items}
+                      onSelect={(action, checked) => rowActions.onSelect(action, row, checked)}
+                    />
+                  )}
+                </TableCell>
+              )}
+            </TableRow>
+          ))}
+          {!visible.length && (
+            <TableEmpty
+              colSpan={columns.length + (rowActions ? 1 : 0)}
+              title={loading ? 'Loading' : query ? 'No matching results' : 'No results'}
+            />
+          )}
+        </TableBody>
+      </Table>
+    )
     return (
       <div class="rf-data-table">
         <Input
@@ -133,33 +216,22 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
             change({ ...state, filter: event.currentTarget.value, page: 1 }),
           )}
         />
-        <Table id={handle.props.id} size={size} aria-label={label} fluidHover={false}>
-          <TableHeader>
-            <TableRow hover={false}>{columns.map((column) => header(column))}</TableRow>
-          </TableHeader>
-          <TableBody>
-            {visible.map((row) => (
-              <TableRow key={rowKey(row)} hover={false}>
-                {columns.map((column) => {
-                  const content = column.cell ? column.cell(row) : column.value(row)
-                  return column.rowHeader ? (
-                    <th key={column.id} scope="row">
-                      {content}
-                    </th>
-                  ) : (
-                    <TableCell key={column.id}>{content}</TableCell>
-                  )
-                })}
-              </TableRow>
-            ))}
-            {!visible.length && (
-              <TableEmpty
-                colSpan={columns.length}
-                title={query ? 'No matching results' : 'No results'}
-              />
-            )}
-          </TableBody>
-        </Table>
+        {rowActions ? (
+          <ContextMenu
+            label={`${label} row actions`}
+            target="[data-rf-data-row]"
+            items={rowActions.items}
+            size={size}
+            onSelect={(action, target, checked) => {
+              const row = visible.find((item) => rowKey(item) === target.dataset.rfDataRow)
+              if (row !== undefined && target.isConnected) rowActions.onSelect(action, row, checked)
+            }}
+          >
+            {table}
+          </ContextMenu>
+        ) : (
+          table
+        )}
         <span role="status" class="rf-basic-sr-only">
           {sorted.length} {sorted.length === 1 ? 'result' : 'results'}, page {page} of {pageCount}
         </span>
