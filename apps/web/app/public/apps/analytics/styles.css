@@ -138,6 +138,13 @@
   outline-offset: 2px;
   border-radius: 3px;
 }
+@media (pointer: coarse) {
+  .analytics-event-trigger {
+    min-block-size: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
 @container (max-width: 36rem) {
   .analytics-metrics {
     gap: 8px;

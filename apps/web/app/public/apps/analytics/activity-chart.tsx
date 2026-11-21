@@ -83,7 +83,9 @@ export function ActivityChart(handle: Handle<ChartProps>) {
               : 'Choose the first day of the range.'
             : 'Use the arrow keys to inspect a day. Select a bar to see its events.'}
         </p>
-        <span class="site-sr-only">Showing events for {rangeLabel(range)}.</span>
+        <span class="site-sr-only" aria-live="polite">
+          Showing events for {rangeLabel(range)}.
+        </span>
       </section>
     )
   }

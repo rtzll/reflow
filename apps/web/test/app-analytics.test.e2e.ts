@@ -148,6 +148,14 @@ it('cancels a pending endpoint with Escape and when the date picker commits a ne
   await expect(page.getByText('Oct 10 – Oct 11 · 5 events')).toBeVisible()
   await expect(select).toHaveAttribute('aria-pressed', 'false')
   await expect(spike).not.toHaveAttribute('aria-current', 'true')
+
+  const rangeButton = page.getByRole('button', { name: /Activity date range/ })
+  const committedLabel = await rangeButton.textContent()
+  await rangeButton.click()
+  await picker.locator('[data-rf-day="2026-10-14"]').click()
+  await page.keyboard.press('Escape')
+  await expect(picker).toBeHidden()
+  await expect(rangeButton).toHaveText(committedLabel!)
 })
 
 it('follows the busiest day and its source from a server-rendered mobile chart', async (t) => {

@@ -7,7 +7,7 @@ import {
   type DataTableColumn,
   type DateRange,
 } from '@rtzll/reflow'
-import { clientEntry, navigate, type Handle } from 'remix/component'
+import { clientEntry, navigate, ref, type Handle } from 'remix/component'
 import { ActivityChart } from './activity-chart.tsx'
 import {
   days,
@@ -36,7 +36,7 @@ const columns: readonly DataTableColumn<ActivityEvent>[] = [
             {...trigger}
             type="button"
             class="analytics-event-trigger"
-            aria-label={`Inspect ${row.action} for ${row.item}`}
+            aria-label={`Inspect ${row.action} for ${row.item}, ${dayLabel(row.day)} ${row.time} UTC`}
           >
             {row.action}
           </button>
@@ -126,6 +126,18 @@ export const AnalyticsExplorer = clientEntry(
   function AnalyticsExplorer(handle: Handle<{ path: string; search: string }>) {
     let draft: DateRange | undefined
     let previousRange: string | undefined
+    const clearDraftOnClose = ref<HTMLDivElement>((node, signal) => {
+      node.addEventListener(
+        'toggle',
+        (event) => {
+          if ((event as ToggleEvent).newState === 'closed' && draft && !draft.end) {
+            draft = undefined
+            void handle.update()
+          }
+        },
+        { capture: true, signal },
+      )
+    })
     return () => {
       const { path, search } = handle.props
       const range = readRange(search)
@@ -145,7 +157,7 @@ export const AnalyticsExplorer = clientEntry(
         <article class="analytics-explorer">
           <header class="analytics-header">
             <h1>Analytics</h1>
-            <div class="analytics-controls">
+            <div class="analytics-controls" mix={clearDraftOnClose}>
               <DatePicker
                 label="Activity date range"
                 mode="range"
