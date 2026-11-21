@@ -21,6 +21,7 @@ interface Invocation {
   row: HTMLElement
   anchor: { x: number; y: number; width?: number; height?: number }
   items: readonly DropdownItem[]
+  event: MouseEvent | KeyboardEvent
 }
 
 export function ContextMenu(handle: Handle<ContextMenuProps>) {
@@ -75,6 +76,7 @@ export function ContextMenu(handle: Handle<ContextMenuProps>) {
         row,
         anchor: { x: rect.left, y: rect.top, width: rect.width, height: rect.height },
         items: resolved,
+        event,
       }
     } else {
       lastKeyboardOpen = undefined
@@ -82,6 +84,7 @@ export function ContextMenu(handle: Handle<ContextMenuProps>) {
         row,
         anchor: { x: event.clientX, y: event.clientY },
         items: resolved,
+        event,
       }
     }
     generation++
@@ -134,7 +137,7 @@ function ContextMenuPopup(
 ) {
   const context = handle.context.get(menu.Context)
   const panel = handle.context.get(popover.Context)
-  const { row, anchor, items } = handle.props.invocation
+  const { row, anchor, items, event: openingEvent } = handle.props.invocation
   let closeTimer: number | undefined
   let closeFrame: number | undefined
   let container: HTMLDivElement | undefined
@@ -184,7 +187,7 @@ function ContextMenuPopup(
     node.ownerDocument.addEventListener(
       'contextmenu',
       (event) => {
-        if (handle.props.isSyntheticContextMenu(event)) return
+        if (event === openingEvent || handle.props.isSyntheticContextMenu(event)) return
         if (event.target instanceof Node && container?.contains(event.target)) return
         if (context.isOpen || context.state !== 'idle') {
           context.unregisterTrigger(row)
