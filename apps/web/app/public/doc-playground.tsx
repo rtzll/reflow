@@ -17,7 +17,8 @@ import { AvatarDemo } from './avatar-example.tsx'
 import { ChatLayoutDemo } from './chat-layout-example.tsx'
 import { CarouselDemo } from './carousel-demo.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
-import { paletteCommands, paletteGroups, paletteSuggestions } from './component-demos.tsx'
+import { ProjectCommands } from './project-commands.tsx'
+import { setShowcaseTheme } from './site-settings.ts'
 import { SoundCombobox } from './sound-combobox.tsx'
 import { playCopySuccess } from './showcase-sound.ts'
 import {
@@ -50,7 +51,6 @@ import {
   Checkbox,
   CheckboxGroup,
   ColorPicker,
-  CommandMenu,
   DatePicker,
   Dropdown,
   Field,
@@ -799,20 +799,12 @@ export function PlaygroundExample(
         )
       case 'command-menu':
         return (
-          <div class="doc-command-palette">
-            <CommandMenu
-              trigger={v.modal ? 'Open command menu' : undefined}
-              shortcut={false}
-              footer
-              filters={v.filters ? paletteGroups : undefined}
-              suggestions={paletteSuggestions}
-              items={
-                v.descriptions
-                  ? paletteCommands
-                  : paletteCommands.map((item) => ({ ...item, description: undefined }))
-              }
-            />
-          </div>
+          <ProjectCommands
+            modal={Boolean(v.modal)}
+            filters={Boolean(v.filters)}
+            descriptions={Boolean(v.descriptions)}
+            setTheme={setShowcaseTheme}
+          />
         )
       case 'date-picker': {
         const range = v.mode === 'Range'

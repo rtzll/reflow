@@ -80,8 +80,6 @@ import {
   Checkbox,
   CheckboxGroup,
   ColorPicker,
-  CommandMenu,
-  CommandShortcut,
   DatePicker,
   Dialog,
   Dropdown,
@@ -140,8 +138,8 @@ function demo(
   return { title, variant, code, description }
 }
 
-export { paletteGroups, paletteSuggestions, paletteCommands } from './palette-example-data.tsx'
-import { paletteGroups, paletteSuggestions, paletteCommands } from './palette-example-data.tsx'
+import { CommandVariants } from './project-commands.tsx'
+import { setShowcaseTheme } from './site-settings.ts'
 
 const frameworks = [
   { value: 'next', label: 'Next.js' },
@@ -647,49 +645,49 @@ function setEditing(open: boolean) {
     demo(
       'Basic',
       'basic',
-      `<CommandMenu items={commands} onSelect={runCommand} />`,
+      `<CommandVariants variant="basic" />`,
       'Type to filter, press ↓ ↑ to move, Enter to run. Rows come from items, grouped by group.',
     ),
     demo(
       'Descriptions, shortcuts, disabled rows',
       'descriptions',
-      `<CommandMenu items={[\n  { value: 'new-file', label: 'New file', description: 'Blank document', shortcut: 'mod+n', keywords: ['create'] },\n  { value: 'settings', label: 'Settings', shortcut: 'mod+,' },\n  { value: 'export', label: 'Export as PDF', description: 'Pro plan', disabled: true },\n]} onSelect={runCommand} />`,
-      '3 more fields per row: description, shortcut caps, and disabled, which the arrows skip. Type clipboard: keywords match too.',
+      `<CommandVariants variant="descriptions" />`,
+      'Type clipboard to find Copy page link. Its shortcut works while focus is in the menu. Arrow keys skip the disabled export.',
     ),
     demo(
       'Suggestions',
       'groups',
-      `<CommandMenu items={commands} suggestions={['calendar', 'new-file', 'settings']} suggestionsLabel="Recent" onSelect={runCommand} />`,
+      `<CommandVariants variant="groups" />`,
       '3 suggested rows lead until you type 1 letter, then the groups take over.',
     ),
     demo(
       'Tabs',
       'filters',
-      `<CommandMenu filters={['Actions', 'Go to', 'Help']} items={commands} onSelect={runCommand} />`,
+      `<CommandVariants variant="filters" />`,
       'Click a tab or press ← →, and the rows follow. Controls hug the end of the row beneath the field.',
     ),
     demo(
       'Filters',
       'controls',
-      `<CommandMenu items={commands} controls={<>\n  <Select variant="ghost" label="Type" options={types} />\n  <Select variant="ghost" label="Sort" options={sorts} />\n</>} onSelect={runCommand} />`,
+      `<CommandVariants variant="controls" />`,
       'A compact, borderless row under the field for selects or ghost buttons; the list divider closes it.',
     ),
     demo(
       'Dialog and trigger shortcut',
       'dialog',
-      `<CommandMenu trigger={<>Open <CommandShortcut keys="mod+p" /></>} shortcut="mod+p" suggestions={['calendar', 'new-file', 'settings']} items={commands} onSelect={runCommand} />`,
+      `<CommandVariants variant="dialog" />`,
       'Press the combo anywhere on the page. A pick or Escape closes it.',
     ),
     demo(
       'Footer hints',
       'footer',
-      `<CommandMenu items={commands} filters={['Actions', 'Go to', 'Help']} suggestions={['calendar', 'new-file', 'settings']} footer onSelect={runCommand} />`,
+      `<CommandVariants variant="footer" />`,
       'Hints follow the menu: ← → with tabs, Esc in a dialog, and ↵ named after the highlighted row.',
     ),
     demo(
       'Custom rows',
       'custom',
-      `<CommandMenu items={commands} renderItem={(item) => (\n  <><span>{item.label}</span><span>{item.group}</span></>\n)} onSelect={runCommand} />`,
+      `<CommandVariants variant="custom" />`,
       'renderItem replaces the row content; the icon and caps stay in your hands.',
     ),
   ],
@@ -1675,8 +1673,6 @@ export function ComponentDemo(
   let enabled = false
   let loading = false
   let color = '#6B97FF'
-  let paletteType = 'all'
-  let paletteSort = 'default'
   let fill = '#6B97FF'
   let streaming = true
   let lastQueuedId: string | undefined
@@ -2336,85 +2332,8 @@ export function ComponentDemo(
           </div>,
         )
       }
-      case 'command-menu': {
-        const plain = variant === 'basic'
-        const rows =
-          variant === 'controls'
-            ? paletteCommands
-                .filter((item) => paletteType === 'all' || item.group === paletteType)
-                .toSorted((a, b) => (paletteSort === 'az' ? a.label.localeCompare(b.label) : 0))
-            : plain
-              ? paletteCommands.map(({ description, shortcut, ...item }) => item)
-              : paletteCommands
-        return width(
-          <div class="doc-command-palette" data-dialog={variant === 'dialog' || undefined}>
-            <CommandMenu
-              items={rows}
-              suggestions={
-                ['dialog', 'groups', 'footer'].includes(variant) ? paletteSuggestions : undefined
-              }
-              suggestionsLabel={variant === 'groups' ? 'Recent' : undefined}
-              footer={variant === 'footer' ? true : undefined}
-              renderItem={
-                variant === 'custom'
-                  ? (item) => (
-                      <>
-                        <span>{item.label}</span>
-                        <span>{item.group}</span>
-                      </>
-                    )
-                  : undefined
-              }
-              filters={['filters', 'footer'].includes(variant) ? paletteGroups : undefined}
-              controls={
-                variant === 'controls' ? (
-                  <>
-                    <Select
-                      variant="ghost"
-                      size="compact"
-                      label="Type"
-                      value={paletteType}
-                      options={[
-                        { value: 'all', label: 'All types' },
-                        ...paletteGroups.map((group) => ({ value: group, label: group })),
-                      ]}
-                      onValueChange={(value) => {
-                        paletteType = value ?? 'all'
-                        handle.update()
-                      }}
-                    />
-                    <Select
-                      variant="ghost"
-                      size="compact"
-                      label="Sort"
-                      value={paletteSort}
-                      options={[
-                        { value: 'default', label: 'Default order' },
-                        { value: 'az', label: 'A to Z' },
-                      ]}
-                      onValueChange={(value) => {
-                        paletteSort = value ?? 'default'
-                        handle.update()
-                      }}
-                    />
-                  </>
-                ) : undefined
-              }
-              trigger={
-                variant === 'dialog' ? (
-                  <>
-                    Open <CommandShortcut keys="mod+p" />
-                  </>
-                ) : undefined
-              }
-              shortcut={variant === 'dialog' ? 'mod+p' : false}
-              onSelect={say}
-            />
-            {feedback}
-          </div>,
-          true,
-        )
-      }
+      case 'command-menu':
+        return width(<CommandVariants variant={variant} setTheme={setShowcaseTheme} />, true)
       case 'date-picker': {
         const today = datePickerToday()
         const range = ['presets', 'booked'].includes(variant)

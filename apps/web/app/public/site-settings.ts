@@ -243,3 +243,7 @@ export function applySetting(key: SettingKey, value: string) {
   }
   window.dispatchEvent(new CustomEvent('reflow:settings-change', { detail: { key, value } }))
 }
+
+export function setShowcaseTheme(theme: 'light' | 'dark') {
+  applySetting('theme', theme)
+}

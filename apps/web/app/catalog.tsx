@@ -179,8 +179,8 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
     code: `<Combobox label="Component" name="component" options={[\n  { value: 'button', label: 'Button' },\n  { value: 'tabs', label: 'Tabs' },\n]} />`,
   },
   'command-menu': {
-    description: 'Filter and invoke grouped actions with pointer or keyboard navigation.',
-    code: `<CommandMenu items={commands} onSelect={runCommand} trigger="Open commands" />`,
+    description:
+      'Find a project command and run it with Enter or a click. Open the Tree docs, copy this page’s link, or switch themes.',
   },
   'date-picker': {
     description: 'A date field with an anchored calendar and local ISO date values.',

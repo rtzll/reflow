@@ -847,6 +847,7 @@ function ComponentDoc(
                 <DocPreview
                   slug={component.slug}
                   variant={example.variant}
+                  source={component.slug === 'command-menu' ? component.source : undefined}
                   code={example.code}
                   images={previewImages(images, example.variant)}
                 />

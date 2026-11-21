@@ -151,10 +151,6 @@
 .doc-slider-positions {
   gap: 24px;
 }
-.example-command {
-  width: min(100%, 540px);
-  min-width: 0;
-}
 .example-questions {
   width: min(100%, 520px);
   min-width: 0;

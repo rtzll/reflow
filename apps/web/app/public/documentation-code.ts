@@ -39,10 +39,6 @@ export function documentationCode(slug: string, fragment: string): string {
         `const items = ['Apple', 'Banana', 'Cherry', 'Mango'].map((label) => ({ value: label.toLowerCase(), label }))`,
       )
   }
-  if (uses('commands'))
-    setup.push(
-      `const commands = [\n  { value: 'new', label: 'New project', group: 'Actions' },\n  { value: 'settings', label: 'Settings', group: 'Pages' },\n  { value: 'search', label: 'Search files', group: 'Actions' },\n]`,
-    )
   if (uses('sections'))
     setup.push(
       `const sections = [{ label: 'Workspace', items: [\n  { label: 'Inbox', href: '#inbox', badge: '3' },\n  { label: 'Projects', href: '#projects' },\n] }]`,
@@ -94,8 +90,6 @@ export function documentationCode(slug: string, fragment: string): string {
     setup.push(`const setCopied = (value: boolean) => { console.log('Copied', value) }`)
   if (uses('saveFruit'))
     setup.push(`const saveFruit = (value: string) => { console.log('Created', value) }`)
-  if (uses('runCommand'))
-    setup.push(`const runCommand = (value: string) => { console.log('Selected', value) }`)
   if (uses('saveAnswers'))
     setup.push(
       `const saveAnswers = (answers: Record<string, AskUserAnswer>) => { console.log(answers) }`,
@@ -389,7 +383,7 @@ ${opening} label="Components" placeholder="${values.multiple ? 'Add componentsâ€
     case 'color-picker':
       return `${opening} swatches={[]} triggerLabel="Fill" placement="right-start" />`
     case 'command-menu':
-      return `<CommandMenu items={commands}${values.modal ? ' trigger="Open command menu"' : ''}${values.filters ? " filters={['Actions', 'Go to', 'Help']}" : ''} suggestions={['calendar', 'new-file', 'settings']} />`
+      return `<ProjectCommands modal={${values.modal}} filters={${values.filters}} descriptions={${values.descriptions}} />`
     case 'dialog':
       return `<TeamspacesExample size="${values.size}" position="${values.position}" modal={${values.modal}} showCloseButton={${values.showCloseButton}} dismissOnBackdrop={${values.dismissOnBackdrop}} />`
     case 'breadcrumb': {

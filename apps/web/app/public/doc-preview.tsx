@@ -140,9 +140,13 @@ export const DocPreview = clientEntry(
       const fragment = playground
         ? playgroundFragment(handle.props.slug, playground)
         : handle.props.code
-      const code = handle.props.source
-        ? handle.props.source +
-          (playground
+      const source =
+        handle.props.slug === 'command-menu' && !handle.props.variant
+          ? handle.props.source?.split('// The detailed examples')[0].trimEnd()
+          : handle.props.source
+      const code = source
+        ? source +
+          (playground || handle.props.variant
             ? '\n\nexport function Example() {\n  return () => (\n    ' + fragment + '\n  )\n}'
             : '')
         : documentationCode(handle.props.slug, fragment)

@@ -15,8 +15,8 @@ import { ChatLayoutDemo } from './chat-layout-example.tsx'
 import { DesignConversation, ResizableDemo } from './resizable-example.tsx'
 import { CarouselDemo } from './carousel-demo.tsx'
 import { HoverCardDemo } from './hover-card-example.tsx'
-import { paletteCommands, paletteSuggestions } from './palette-example-data.tsx'
-import { accents } from './site-settings.ts'
+import { ProjectCommands } from './project-commands.tsx'
+import { accents, setShowcaseTheme } from './site-settings.ts'
 import { ChatExample } from './chat-example.tsx'
 import { questionExample, questionPlayground } from './question-example-data.ts'
 import { CarouselExample } from './carousel-example.tsx'
@@ -55,7 +55,6 @@ import {
   Checkbox,
   CheckboxGroup,
   ColorPicker,
-  CommandMenu,
   DatePicker,
   Dropdown,
   FileInput,
@@ -664,22 +663,7 @@ export const Example = clientEntry(
             </div>
           )
         case 'command-menu':
-          return (
-            <div className="example-command">
-              <CommandMenu
-                placeholder="Type a command or search…"
-                suggestions={paletteSuggestions}
-                items={paletteCommands}
-                onSelect={(value) => {
-                  lastAction = value
-                  handle.update()
-                }}
-              />
-              <div className="example-note" role="status">
-                {lastAction && `Selected ${lastAction}`}
-              </div>
-            </div>
-          )
+          return <ProjectCommands setTheme={setShowcaseTheme} />
         case 'date-picker':
           if (handle.props.gallery)
             return <DatePicker label="Start date" defaultValue={datePickerToday()} clearable />
