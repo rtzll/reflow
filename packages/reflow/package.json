@@ -17,6 +17,10 @@
       "types": "./dist/highlight.d.ts",
       "default": "./dist/highlight.js"
     },
+    "./markdown": {
+      "types": "./dist/markdown.d.ts",
+      "default": "./dist/markdown.js"
+    },
     "./styles.css": "./dist/styles.css"
   },
   "scripts": {
@@ -42,7 +46,8 @@
     "shiki": "4.6.0"
   },
   "dependencies": {
-    "@remix-run/ui": "0.14.0"
+    "@remix-run/ui": "0.14.0",
+    "marked": "18.2.1"
   },
   "license": "MIT",
   "repository": {

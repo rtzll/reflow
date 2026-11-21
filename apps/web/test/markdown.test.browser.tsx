@@ -1,4 +1,4 @@
-import { Markdown } from '@rtzll/reflow'
+import { Markdown } from '@rtzll/reflow/markdown'
 import { deepEqual, equal, ok } from 'remix/assert'
 import { render } from 'remix/component/test'
 import { describe, it } from 'remix/test'
@@ -46,6 +46,57 @@ describe('Markdown', () => {
       Array.from(container.querySelectorAll('a'), (link) => link.getAttribute('href')),
       ['/docs/typography', 'https://example.org', '#notes', 'mailto:editor@example.org'],
     )
+  })
+
+  it('decodes character references in text but keeps code spans literal', (t) => {
+    const source = 'Fish &amp; chips &copy; 2026 &#8212; &nbsp;`a&amp;b` &unknown;'
+    const { $, cleanup } = render(<Markdown source={source} />)
+    t.after(cleanup)
+    equal($('p')?.textContent, 'Fish & chips © 2026 —  a&amp;b &unknown;')
+    equal($('code')?.textContent, 'a&amp;b')
+  })
+
+  it('shows a raw HTML block as a paragraph of text', (t) => {
+    const { $, cleanup } = render(
+      <Markdown source={'Before\n\n<script>alert(1)</script>\n\nAfter'} />,
+    )
+    t.after(cleanup)
+    equal($('script'), null)
+    deepEqual(
+      Array.from(document.querySelectorAll('.rf-markdown > p'), (p) => p.textContent),
+      ['Before', '<script>alert(1)</script>', 'After'],
+    )
+  })
+
+  it('follows CommonMark for emphasis inside words and links containing parentheses', (t) => {
+    const source = 'Rename snake_case_name. See [the note](https://example.org/a_(b)).'
+    const { $, cleanup } = render(<Markdown source={source} />)
+    t.after(cleanup)
+    equal($('em'), null)
+    equal($('p')?.textContent, 'Rename snake_case_name. See the note.')
+    equal($('a')?.getAttribute('href'), 'https://example.org/a_(b)')
+  })
+
+  it('renders read-only, labeled task checkboxes and keeps paragraphs inside list items', (t) => {
+    const source = [
+      '- [x] Book the ferry',
+      '- [ ] Pack',
+      '',
+      '1. First',
+      '',
+      '   More on first.',
+    ].join('\n')
+    const { $$, $, cleanup } = render(<Markdown source={source} />)
+    t.after(cleanup)
+    const boxes = Array.from($$('input[type="checkbox"]')) as HTMLInputElement[]
+    deepEqual(
+      boxes.map((box) => [box.disabled, box.checked, box.getAttribute('aria-label')]),
+      [
+        [true, true, 'Book the ferry'],
+        [true, false, 'Pack'],
+      ],
+    )
+    equal($('ol li')?.querySelectorAll('p').length, 2)
   })
 
   it('updates partial inline marks and keeps an open fence readable as text arrives', async (t) => {

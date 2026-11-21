@@ -116,7 +116,13 @@ export function documentationCode(slug: string, fragment: string): string {
       .split('\n')
       .map((line) => ' '.repeat(spaces) + line)
       .join('\n')
-  return `import { ${components.join(', ')} } from '@rtzll/reflow'\nimport { type Handle${/\bon\(/.test(combined) ? ', on' : ''} } from 'remix/component'\n\nexport function Example(handle: Handle) {\n${setup.length ? indentation(setup.join('\n\n'), 2) + '\n\n' : ''}  return () => (\n    <>\n${indentation(markup, 6)}\n    </>\n  )\n}`
+  // Markdown has its own entry so its parser loads only where it is used.
+  const imports = [
+    components.some((name) => name !== 'Markdown') &&
+      `import { ${components.filter((name) => name !== 'Markdown').join(', ')} } from '@rtzll/reflow'`,
+    components.includes('Markdown') && `import { Markdown } from '@rtzll/reflow/markdown'`,
+  ].filter(Boolean)
+  return `${imports.join('\n')}\nimport { type Handle${/\bon\(/.test(combined) ? ', on' : ''} } from 'remix/component'\n\nexport function Example(handle: Handle) {\n${setup.length ? indentation(setup.join('\n\n'), 2) + '\n\n' : ''}  return () => (\n    <>\n${indentation(markup, 6)}\n    </>\n  )\n}`
 }
 
 export function playgroundFragment(slug: string, values: PlaygroundValues): string {
