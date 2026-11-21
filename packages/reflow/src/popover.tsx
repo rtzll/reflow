@@ -1,6 +1,7 @@
 import { on, type Handle, type MixInput, type RemixNode } from 'remix/component'
 import * as popover from '@remix-run/ui/popover'
 import { Button, type ButtonProps } from './button.tsx'
+import { containEscape } from './behaviors/contain-escape.ts'
 
 export type PopoverPlacement =
   | 'top'
@@ -130,6 +131,7 @@ export function Popover(handle: Handle<PopoverProps>) {
                 closeOnAnchorClick: false,
                 onHide: () => setOpen(false),
               }),
+              containEscape(),
               focusInside,
             ]}
           >

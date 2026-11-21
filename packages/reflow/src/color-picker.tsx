@@ -5,6 +5,7 @@ import * as popover from '@remix-run/ui/popover'
 import type { ControlSize } from './systems/styling.ts'
 import { Icon } from './icon.tsx'
 import { onFormReset } from './behaviors/form-reset.ts'
+import { containEscape } from './behaviors/contain-escape.ts'
 import { fluidHover } from './systems/fluid-hover.ts'
 import { Tooltip } from './tooltip.tsx'
 import { Slider } from './slider.tsx'
@@ -1297,6 +1298,7 @@ export function ColorPicker(handle: Handle<ColorPickerProps>) {
                   if (isOpen) setOpen(false)
                 },
               }),
+              containEscape(),
               on<HTMLDivElement, 'toggle'>('toggle', (event) => {
                 if (event.newState === 'open')
                   event.currentTarget

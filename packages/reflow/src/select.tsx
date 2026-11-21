@@ -5,6 +5,7 @@ import * as popover from '@remix-run/ui/popover'
 import * as select from '@remix-run/ui/select'
 import { fluidHover } from './systems/fluid-hover.ts'
 import { positionPickerPopup } from './behaviors/picker-popup.ts'
+import { containEscape } from './behaviors/contain-escape.ts'
 import { onFormReset } from './behaviors/form-reset.ts'
 
 export interface ChoiceOption {
@@ -113,7 +114,7 @@ export function Select(handle: Handle<SelectProps>) {
           <popover.Context>
             <div
               class="rf-menu-surface rf-picker-surface rf-select-surface"
-              mix={[positionPickerPopup(), select.popover()]}
+              mix={[positionPickerPopup(), select.popover(), containEscape()]}
             >
               <div class="rf-menu-list" aria-label={label} mix={[select.list(), highlight]}>
                 <span class="rf-highlight rf-picker-hover" aria-hidden="true" data-rf-hover-layer />

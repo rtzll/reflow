@@ -1,15 +1,15 @@
-import { Input, Popover } from '@rtzll/reflow'
+import { ColorPicker, Combobox, DatePicker, Input, Popover, Select } from '@rtzll/reflow'
 import { equal, ok } from 'remix/assert'
 import { render } from 'remix/component/test'
 import { on, type Handle } from 'remix/component'
 import { describe, it } from 'remix/test'
 
-async function waitFor(check: () => boolean) {
+async function waitFor(check: () => boolean, message = 'Expected popover state did not settle') {
   for (let i = 0; i < 60; i++) {
     if (check()) return
     await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
   }
-  ok(check(), 'Expected popover state did not settle')
+  ok(check(), message)
 }
 
 function press(node: Element, key: string) {
@@ -132,4 +132,76 @@ it('focuses the panel rather than a button when it has no field', async (t) => {
   await act(() => ($('button[aria-haspopup]') as HTMLButtonElement).click())
   await waitFor(() => panel.matches(':popover-open'))
   await waitFor(() => document.activeElement === panel)
+})
+
+describe('a popup inside a Popover', () => {
+  const options = [
+    { value: 'viewer', label: 'Viewer' },
+    { value: 'editor', label: 'Editor' },
+  ]
+  // Each case opens the inner popup from inside the outer panel and returns the
+  // element Escape is pressed on and a check that the inner popup is closed.
+  const cases = [
+    {
+      name: 'Popover',
+      inner: (
+        <Popover label="Inner" trigger="Inner">
+          <Input aria-label="Inner field" />
+        </Popover>
+      ),
+    },
+    { name: 'Select', inner: <Select label="Role" defaultValue="viewer" options={options} /> },
+    { name: 'DatePicker', inner: <DatePicker label="Due date" /> },
+    { name: 'ColorPicker', inner: <ColorPicker variant="popover" label="Accent" /> },
+  ]
+
+  for (const { name, inner } of cases) {
+    it(`closes only the ${name} on Escape`, async (t) => {
+      const { $, act, cleanup } = render(
+        <Popover label="Outer" trigger="Outer">
+          {inner}
+        </Popover>,
+      )
+      t.after(cleanup)
+      const outer = $('[role="dialog"][aria-label="Outer"]') as HTMLElement
+      await act(() => ($('button[aria-haspopup]') as HTMLButtonElement).click())
+      await waitFor(() => outer.matches(':popover-open'), 'The outer Popover did not open')
+
+      const trigger = outer.querySelector('button[aria-haspopup]') as HTMLButtonElement
+      const popup = () => outer.querySelector(':popover-open')
+      await act(() => trigger.click())
+      await waitFor(() => popup() !== null, `The ${name} did not open`)
+      await waitFor(
+        () => popup()?.contains(document.activeElement) ?? false,
+        `Focus did not move into the ${name}`,
+      )
+
+      await act(() => press(document.activeElement!, 'Escape'))
+      await waitFor(() => popup() === null, `Escape did not close the ${name}`)
+      ok(outer.matches(':popover-open'), `Escape in the ${name} also closed the Popover around it`)
+      await waitFor(() => document.activeElement === trigger, `Focus did not return to the ${name}`)
+    })
+  }
+
+  it('closes only the Combobox list on Escape', async (t) => {
+    const { $, act, cleanup } = render(
+      <Popover label="Outer" trigger="Outer">
+        <Combobox label="Role" options={options} />
+      </Popover>,
+    )
+    t.after(cleanup)
+    const outer = $('[role="dialog"][aria-label="Outer"]') as HTMLElement
+    await act(() => ($('button[aria-haspopup]') as HTMLButtonElement).click())
+    await waitFor(() => outer.matches(':popover-open'))
+
+    const input = outer.querySelector('[role="combobox"]') as HTMLInputElement
+    input.focus()
+    await act(() => press(input, 'ArrowDown'))
+    await waitFor(() => input.getAttribute('aria-expanded') === 'true')
+
+    await act(() => press(input, 'Escape'))
+    await waitFor(() => input.getAttribute('aria-expanded') === 'false')
+    ok(outer.matches(':popover-open'), 'Escape in the Combobox also closed the Popover around it')
+    equal(document.activeElement, input)
+  })
 })

@@ -5,6 +5,7 @@ import type { Handle } from 'remix/component'
 import * as popover from '@remix-run/ui/popover'
 import { fluidHover } from './systems/fluid-hover.ts'
 import { onFormReset } from './behaviors/form-reset.ts'
+import { containEscape } from './behaviors/contain-escape.ts'
 import {
   type DateValue,
   type CalendarProps,
@@ -274,6 +275,7 @@ export function DatePicker(handle: Handle<DatePickerProps>) {
                 closeOnAnchorClick: false,
                 onHide: () => changeOpen(false),
               }),
+              containEscape(),
               on('toggle', (event) => {
                 if (event.newState === 'open') {
                   event.currentTarget

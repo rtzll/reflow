@@ -14,6 +14,7 @@ import { navigationIndex } from './behaviors/list-navigation.ts'
 import { type ChoiceOption, type ChoiceProps, ChoiceChevron, ChoiceContent } from './select.tsx'
 import { positionPickerPopup } from './behaviors/picker-popup.ts'
 import { onFormReset } from './behaviors/form-reset.ts'
+import { containEscape } from './behaviors/contain-escape.ts'
 
 export interface ComboboxProps extends ChoiceProps {
   leadingIcon?: RemixNode
@@ -228,6 +229,7 @@ export function Combobox(handle: Handle<ComboboxProps>) {
         focusChip(selectedValues[index - 1])
       } else if (event.key === 'Escape' && open) {
         event.preventDefault()
+        event.stopPropagation()
         changeOpen(false)
         input?.focus()
       }
@@ -236,7 +238,9 @@ export function Combobox(handle: Handle<ComboboxProps>) {
     function navigate(event: KeyboardEvent) {
       if (event.isComposing || event.ctrlKey || event.metaKey || event.altKey) return
       if (event.key === 'Escape' && open) {
+        // Stop the key so a Popover around the field stays open.
         event.preventDefault()
+        event.stopPropagation()
         changeOpen(false)
         return
       }
@@ -424,6 +428,7 @@ export function Combobox(handle: Handle<ComboboxProps>) {
             mix={[
               positionPickerPopup(true),
               popover.surface({ open, onHide: () => changeOpen(false), closeOnAnchorClick: false }),
+              containEscape(),
             ]}
           >
             <ScrollArea label={`${label} options`} fade={32} tabIndex={-1}>
