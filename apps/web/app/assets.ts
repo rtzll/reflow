@@ -27,6 +27,7 @@ export const assets = createAssetServer({
           define: {
             'process.env.NODE_ENV': JSON.stringify(production ? 'production' : 'development'),
           },
+          minify: production,
           write: false,
         })
         return { format: 'module', source: bundle.outputFiles[0]!.text, shortCircuit: true }

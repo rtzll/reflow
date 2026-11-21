@@ -172,6 +172,15 @@ const worker = await build({
           if (resolve(resolveDir, path) === resolve(root, 'app/code-samples.ts'))
             return { path: resolve(root, 'worker/code-samples.ts') }
         })
+        builder.onLoad({ filter: /drag-adapter\.ts$/ }, ({ path }) => {
+          if (path === resolve(root, 'app/public/apps/issues/drag-adapter.ts')) {
+            return {
+              contents:
+                'export const draggable = () => () => {}\nexport const dropTargetForElements = () => () => {}\n',
+              loader: 'ts',
+            }
+          }
+        })
       },
     },
   ],

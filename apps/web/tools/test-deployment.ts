@@ -25,6 +25,11 @@ for (const directory of ['client', 'worker']) {
 const metadata = JSON.parse(await readFile(resolve(root, 'build/metadata.json'), 'utf8'))
 assert.ok(!Object.keys(metadata.worker.inputs).includes('app/assets.ts'))
 assert.ok(!Object.keys(metadata.worker.inputs).some((path) => path.includes('@remix-run/assets')))
+assert.ok(
+  !Object.keys(metadata.worker.inputs).some((path) =>
+    path.includes('@atlaskit/pragmatic-drag-and-drop'),
+  ),
+)
 
 const worker = await startLocalWorker()
 let browser: Browser | undefined
