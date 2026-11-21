@@ -176,6 +176,12 @@
   font-size: var(--rf-text-caption);
   font-weight: 600;
 }
+.studio-stopped {
+  display: block;
+  margin-block-start: 6px;
+  font-size: var(--rf-text-caption);
+  color: var(--rf-muted);
+}
 .studio-empty h3 {
   color: var(--rf-fg);
   font-size: 20px;

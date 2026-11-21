@@ -1,5 +1,4 @@
 import type { ExampleApp } from '../types.ts'
-
 import { conversations } from './fixtures.ts'
 import { ChatWorkspace } from './workspace.tsx'
 

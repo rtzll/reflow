@@ -1,6 +1,6 @@
 import { Button, ChatLayout, ChatMessage, Icon, InputMessage } from '@rtzll/reflow'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
-import type { Conversation } from './fixtures.ts'
+import type { ChatEntry, Conversation } from './fixtures.ts'
 
 interface Thread extends Conversation {
   draft: string
@@ -123,9 +123,38 @@ export const ChatWorkspace = clientEntry(
 function ConversationPane(handle: Handle<{ thread: Thread; onChange: () => void }>) {
   const { thread } = handle.props
 
+  let response: ChatEntry | undefined
+  let timer: ReturnType<typeof setInterval> | undefined
+  handle.signal.addEventListener('abort', () => clearInterval(timer), { once: true })
+
+  function finish(stopped: boolean) {
+    clearInterval(timer)
+    if (response) response.stopped = stopped
+    response = undefined
+    handle.props.onChange()
+  }
+
+  function stop() {
+    const field = document.activeElement?.closest('form')?.querySelector('textarea')
+    finish(true)
+    handle.queueTask(() => field?.focus())
+  }
+
   function send(text: string) {
+    // Sending a queued message immediately also ends the preceding reply.
+    if (response) finish(true)
     if (!thread.messages.length) thread.title = text.length > 48 ? text.slice(0, 47) + '…' : text
-    thread.messages.push({ role: 'user', text })
+    const words = replyTo(text).split(' ')
+    let shown = 2
+    response = { role: 'assistant', text: words.slice(0, shown).join(' ') }
+    thread.messages.push({ role: 'user', text }, response)
+    timer = setInterval(() => {
+      if (!response) return
+      shown = Math.min(shown + 2, words.length)
+      response.text = words.slice(0, shown).join(' ')
+      if (shown === words.length) finish(false)
+      else void handle.update()
+    }, 140)
     handle.props.onChange()
   }
 
@@ -135,7 +164,9 @@ function ConversationPane(handle: Handle<{ thread: Thread; onChange: () => void 
       header={
         <header class="studio-heading">
           <h2>{thread.title}</h2>
-          <p>Simulated conversation with Studio assistant</p>
+          <p role="status">
+            {response ? 'Studio assistant is replying…' : 'Studio assistant · Simulated replies'}
+          </p>
         </header>
       }
       empty={
@@ -149,6 +180,20 @@ function ConversationPane(handle: Handle<{ thread: Thread; onChange: () => void 
         <InputMessage
           attachments={false}
           placeholder="Message Studio assistant…"
+          status={response ? 'streaming' : 'idle'}
+          onStop={stop}
+          actions={
+            response && thread.draft.trim() ? (
+              <Button
+                size="compact"
+                variant="ghost"
+                leadingIcon={<Icon name="square-stop" size={12} />}
+                mix={on('click', stop)}
+              >
+                Stop response
+              </Button>
+            ) : undefined
+          }
           defaultValue={thread.draft}
           onValueChange={(draft) => {
             thread.draft = draft
@@ -161,9 +206,20 @@ function ConversationPane(handle: Handle<{ thread: Thread; onChange: () => void 
       {thread.messages.map((message, index) => (
         <ChatMessage key={index} role={message.role} animate={false}>
           {message.role === 'assistant' && <strong class="studio-author">Studio assistant</strong>}
-          {message.text}
+          <span aria-busy={message === response || undefined}>{message.text}</span>
+          {message.stopped && <span class="studio-stopped">Response stopped</span>}
         </ChatMessage>
       ))}
     </ChatLayout>
   )
+}
+
+function replyTo(text: string) {
+  if (/\b(cover|masthead|type|layout)\b/i.test(text))
+    return 'Print the two versions at the size your reader will hold. Set them side by side and step back. Which one makes the subject clear first? Keep that version, then adjust the spacing around the title in small increments.'
+  if (/\b(photo|photograph|sequence|essay)\b/i.test(text))
+    return 'Lay the photographs out as small prints. Choose your opening and closing frames first, then build the middle around a change of distance or pace. Read the sequence without captions once before deciding where the page turns belong.'
+  if (/\b(interview|question|mara)\b/i.test(text))
+    return 'Start with a moment your subject can place in time. Ask what they could see or hear, then leave room for the details to emerge. Use one of those details to shape your next question.'
+  return 'Start by choosing one thing you want the reader to remember. Write it in a sentence, then pick a detail that makes it concrete. Read the two together and see which words you can take away without losing the idea.'
 }
