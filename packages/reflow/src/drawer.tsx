@@ -44,7 +44,8 @@ export interface DrawerProps {
 // pixels per millisecond, closes it; anything less springs back.
 const closeShare = 0.25
 const flickVelocity = 0.4
-const interactive = 'button, a, input, select, textarea, label, [contenteditable], [role="slider"]'
+const interactive =
+  'button, a, input, select, textarea, label, pre, code, [contenteditable], [role="slider"]'
 
 interface Drag {
   pointer: number
