@@ -384,7 +384,9 @@ export function galleryCatalog(
               avatar={avatar}
               query={
                 ['data-table', 'pagination'].includes(component.slug)
-                  ? query?.toString()
+                  ? query?.size
+                    ? '?' + query.toString()
+                    : ''
                   : undefined
               }
               code={component.slug === 'code-block' ? samples?.card : undefined}

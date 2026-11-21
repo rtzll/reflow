@@ -212,3 +212,23 @@ it('retains the gallery selection after a clipboard failure so the action can be
   await expect(checkbox).not.toBeChecked()
   await expect(checkbox).toBeFocused()
 })
+
+it('clears a locally typed gallery filter when navigating back to the initial URL and suppresses empty Enter submits', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await open(page, '/')
+  const tile = page.locator('[data-component="data-table"]')
+  const filter = tile.getByRole('searchbox')
+  await filter.fill('Alice')
+  await expect(tile.locator('tbody tr')).toHaveCount(1)
+  await filter.fill('')
+  await filter.press('Enter')
+  expect(new URL(page.url()).searchParams.has('teamFilter')).toBe(false)
+  await filter.fill('Alice')
+  await expect(tile.locator('tbody tr')).toHaveCount(1)
+  await page
+    .locator('.site-primary-nav')
+    .getByRole('link', { name: 'Showcase', exact: true })
+    .click()
+  await expect(filter).toHaveValue('')
+  await expect(tile.locator('tbody tr')).toHaveCount(4)
+})

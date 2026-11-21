@@ -1,5 +1,5 @@
 import { DataTable, type DataTableProps, type DataTableState } from './data-table.tsx'
-import { ref, updateUrl, type Handle } from 'remix/component'
+import { on, ref, updateUrl, type Handle } from 'remix/component'
 
 export interface DataTableRoute {
   path: string
@@ -13,37 +13,48 @@ export type RoutedDataTableProps<Row> = Omit<
   'state' | 'defaultState' | 'href' | 'onStateChange' | 'filterInput'
 > & { route: DataTableRoute; class?: string }
 
+function normalizeSearch(value: string) {
+  return value && !value.startsWith('?') ? '?' + value : value
+}
+
 /** Derive state from the request so links and filter submission work before hydration. */
 export function RoutedDataTable<Row>(handle: Handle<RoutedDataTableProps<Row>>) {
-  let requestSearch = handle.props.route.search
+  let requestSearch = normalizeSearch(handle.props.route.search)
   let search = requestSearch
   const history = ref((_node, signal) => {
     function readLocation() {
       if (search === location.search) return
       search = location.search
+      requestSearch = normalizeSearch(handle.props.route.search)
       void handle.update()
     }
-    window.navigation?.addEventListener(
-      'currententrychange',
-      (event) => {
-        if (event.navigationType === 'replace') readLocation()
-      },
-      { signal },
-    )
-    // A link can return to the last server query after a local filter edit.
-    // Wait for the response so the current table stays usable while the link loads.
-    window.navigation?.addEventListener('navigatesuccess', readLocation, { signal })
+    if (window.navigation) {
+      window.navigation.addEventListener(
+        'currententrychange',
+        (event) => {
+          if (event.navigationType === 'replace') readLocation()
+        },
+        { signal },
+      )
+      // A link can return to the last server query after a local filter edit.
+      // Wait for the response so the current table stays usable while the link loads.
+      window.navigation.addEventListener('navigatesuccess', readLocation, { signal })
+    } else {
+      window.addEventListener('popstate', readLocation, { signal })
+    }
   })
 
   return () => {
     const { route, class: className, ...props } = handle.props
-    if (route.search !== requestSearch) {
-      requestSearch = route.search
+    const normalizedRouteSearch = normalizeSearch(route.search)
+    if (normalizedRouteSearch !== requestSearch) {
+      requestSearch = normalizedRouteSearch
       search = requestSearch
     }
     const params = new URLSearchParams(search)
     const name = (field: string) => route.prefix + field
     const formId = handle.id + '-filter'
+    const hash = route.anchor ? '#' + route.anchor : ''
     const filterFields = Array.from(params).filter(
       ([key]) => key !== name('Filter') && key !== name('Page'),
     )
@@ -69,18 +80,19 @@ export function RoutedDataTable<Row>(handle: Handle<RoutedDataTableProps<Row>>) 
         query.set(name('Sort'), next.sort.column)
         if (next.sort.direction === 'descending') query.set(name('Dir'), 'desc')
       }
-      return route.path + (query.size ? '?' + query : '') + '#' + route.anchor
+      return route.path + (query.size ? '?' + query : '') + hash
     }
     return (
       <div class={className} mix={history}>
         <form
           id={formId}
-          action={route.path + '#' + route.anchor}
+          action={route.path + hash}
           method="get"
           data-rmx-reset-scroll="manual"
+          mix={on('submit', (event) => event.preventDefault())}
         >
-          {filterFields.map(([key, value]) => (
-            <input type="hidden" name={key} value={value} />
+          {filterFields.map(([key, value], index) => (
+            <input key={`${key}-${index}`} type="hidden" name={key} value={value} />
           ))}
         </form>
         <DataTable
