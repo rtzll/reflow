@@ -78,7 +78,7 @@ export function ProjectCommands(handle: Handle<CommandOptions>) {
         shortcut={false}
         onSelect={async (value) => {
           feedback = (await runProjectCommand(value, handle.props.setTheme)) ?? ''
-          void handle.update()
+          if (!handle.signal.aborted) void handle.update()
         }}
       />
       <span class="example-note" role="status">
@@ -129,6 +129,7 @@ export function CommandVariants(
   let paletteSort = 'default'
   let feedback = ''
   function say(message: string) {
+    if (handle.signal.aborted) return
     feedback = message
     void handle.update()
   }
@@ -156,6 +157,8 @@ export function CommandVariants(
             variant === 'descriptions' &&
             event.altKey &&
             event.shiftKey &&
+            !event.metaKey &&
+            !event.ctrlKey &&
             event.code === 'KeyC'
           ) {
             event.preventDefault()

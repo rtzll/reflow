@@ -1937,7 +1937,8 @@
 
 .example-team-directory {
   display: grid;
-  width: min(100%, 566px);
+  inline-size: min(100%, 566px);
+  min-inline-size: 0;
   gap: 8px;
 }
 
@@ -1967,11 +1968,6 @@
 .example-project-tree .rf-code-block {
   inline-size: 100%;
   min-block-size: 100%;
-}
-
-.example-team-directory {
-  inline-size: min(100%, 566px);
-  min-inline-size: 0;
 }
 
 .example-directory {

@@ -15,6 +15,7 @@ export function TeamspacesExample(handle: Handle<Options>) {
   let creating = false
   let name = ''
   let pending: (typeof spaces)[number] | undefined
+  let pendingName = 'teamspace'
   let newButton: HTMLButtonElement | undefined
   const rememberButton = ref<HTMLButtonElement>((button) => {
     newButton = button
@@ -37,7 +38,7 @@ export function TeamspacesExample(handle: Handle<Options>) {
     spaces = spaces.filter((space) => space.id !== id)
     pending = undefined
     await handle.update()
-    newButton?.focus()
+    if (!handle.signal.aborted) newButton?.focus()
   }
 
   return () => (
@@ -65,6 +66,7 @@ export function TeamspacesExample(handle: Handle<Options>) {
                 aria-haspopup="dialog"
                 mix={on('click', () => {
                   pending = space
+                  pendingName = space.name
                   void handle.update()
                 })}
               >
@@ -110,7 +112,7 @@ export function TeamspacesExample(handle: Handle<Options>) {
       </Dialog>
       <AlertDialog
         open={!!pending}
-        title={'Delete ' + (pending?.name ?? 'teamspace') + '?'}
+        title={'Delete ' + (pending?.name ?? pendingName) + '?'}
         description="This teamspace will be removed from the list."
         confirmLabel="Delete teamspace"
         onOpenChange={(open) => {

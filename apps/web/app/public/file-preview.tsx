@@ -18,7 +18,7 @@ export function FilePreview(handle: Handle<FilePreviewProps>) {
     } catch {
       feedback = { filename, message: 'Could not copy ' + filename }
     }
-    void handle.update()
+    if (!handle.signal.aborted) void handle.update()
   }
   return () => (
     <div class="example-file-preview">
@@ -29,7 +29,7 @@ export function FilePreview(handle: Handle<FilePreviewProps>) {
           aria-pressed={wrap}
           mix={on('click', () => {
             wrap = !wrap
-            void handle.update()
+            if (!handle.signal.aborted) void handle.update()
           })}
         >
           Wrap lines
@@ -40,7 +40,7 @@ export function FilePreview(handle: Handle<FilePreviewProps>) {
           aria-pressed={lineNumbers}
           mix={on('click', () => {
             lineNumbers = !lineNumbers
-            void handle.update()
+            if (!handle.signal.aborted) void handle.update()
           })}
         >
           Line numbers
