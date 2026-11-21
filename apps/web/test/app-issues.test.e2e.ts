@@ -1,3 +1,4 @@
+import type { Locator, Page } from 'playwright'
 import { expect } from 'playwright/test'
 import { it } from 'remix/test'
 import { open, showcaseServer } from './showcase-router.ts'
@@ -152,3 +153,63 @@ it('drills into live cycle and assignee summaries and clears an empty status fil
   await expect(rows).toHaveCount(10)
   await expect(rows.first()).toBeFocused()
 })
+
+// Begin the native drag before scrolling to the destination. Scrolling the
+// page between pointerdown and dragstart can put another row under the pointer.
+async function dragIssue(page: Page, source: Locator, destination: Locator) {
+  await source.hover()
+  const start = (await source.boundingBox())!
+  await page.mouse.down()
+  await page.mouse.move(start.x + start.width / 2 + 10, start.y + start.height / 2, { steps: 4 })
+  await expect(source).toHaveAttribute('data-dragging', '')
+  await destination.scrollIntoViewIfNeeded()
+  const end = (await destination.boundingBox())!
+  const x = end.x + end.width / 2
+  const y = end.y + end.height / 2
+  await page.mouse.move(x, y, { steps: 8 })
+  await page.mouse.move(x + 1, y)
+  await page.mouse.up()
+}
+
+for (const layout of ['Board', 'List']) {
+  it('drags issues between populated and empty groups in ' + layout, async (t) => {
+    const page = await t.serve(showcaseServer)
+    await page.setViewportSize({ width: 1440, height: 950 })
+    await open(page, '/apps/issues')
+    if (layout === 'List') await page.getByRole('radio', { name: 'Board' }).press('ArrowRight')
+    const issues = page.getByRole('listbox', { name: 'Cycle issues' })
+    const todo = issues.getByRole('group', { name: 'Todo', exact: true })
+    const started = issues.getByRole('group', { name: 'In progress', exact: true })
+    const done = issues.getByRole('group', { name: 'Done', exact: true })
+    const first = todo.getByRole('option', { name: /AT-142/ })
+    const unrelated = todo.getByRole('option', { name: /AT-139/ })
+    await unrelated.click()
+    await dragIssue(page, first, page.getByRole('heading', { name: 'Issue tracker', exact: true }))
+    await expect(first).toBeVisible()
+    await expect(issues.locator('[data-dragging], [data-drag-over]')).toHaveCount(0)
+    await expect(first).toHaveAttribute('draggable', 'true')
+    await dragIssue(page, first, started.getByRole('option').first())
+    await expect(started.getByRole('option', { name: /AT-142/ })).toBeVisible()
+    await expect(unrelated).toBeFocused()
+    await expect(unrelated).toHaveAttribute('aria-selected', 'true')
+    await unrelated.press('Escape')
+
+    await done.getByRole('option').first().click()
+    await page.keyboard.press('Shift+ArrowDown')
+    await page.keyboard.press('Shift+ArrowDown')
+    await dragIssue(page, done.getByRole('option').first(), started)
+    await expect(done).toContainText('No issues in Done.')
+    await expect(page.getByRole('status')).toHaveText('Moved 3 issues to In progress.')
+    await expect(issues.getByRole('option', { selected: true })).toHaveCount(0)
+    await expect(page.getByRole('region', { name: 'Cycle progress' })).toContainText('0%')
+
+    await dragIssue(
+      page,
+      started.getByRole('option', { name: /AT-142/ }),
+      done.getByText('No issues in Done.'),
+    )
+    await expect(done.getByRole('option', { name: /AT-142/ })).toBeVisible()
+    await expect(page.getByRole('status')).toHaveText('Moved 1 issue to Done.')
+    await expect(page.getByRole('region', { name: 'Cycle progress' })).toContainText('10%')
+  })
+}
