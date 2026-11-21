@@ -29,6 +29,45 @@ export const IssueTracker = clientEntry(
       list = element
     })
 
+    const mountDraggable = ref<HTMLDivElement>(async (element, signal) => {
+      const { draggable } = await import('./drag-adapter.ts')
+      if (signal.aborted) return
+      const cleanup = draggable({
+        element,
+        onDragStart: () => element.setAttribute('data-dragging', ''),
+        onDrop: () => element.removeAttribute('data-dragging'),
+      })
+      signal.addEventListener('abort', cleanup, { once: true })
+    })
+
+    const mountDropTarget = ref<HTMLDivElement>(async (element, signal) => {
+      const { dropTargetForElements } = await import('./drag-adapter.ts')
+      if (signal.aborted) return
+      const status = statuses.find((item) => item === element.dataset.status)!
+      const leave = () => element.removeAttribute('data-drag-over')
+      const cleanup = dropTargetForElements({
+        element,
+        canDrop: ({ source }) => {
+          const id = source.element.dataset.issueId
+          if (!id || !list?.contains(source.element)) return false
+          const ids = movingIds(id)
+          return issues.some((issue) => ids.has(issue.id) && issue.status !== status)
+        },
+        onDragEnter: () => element.setAttribute('data-drag-over', ''),
+        onDragLeave: leave,
+        onDrop: ({ source }) => {
+          leave()
+          const id = source.element.dataset.issueId!
+          void move(movingIds(id), status, id)
+        },
+      })
+      signal.addEventListener('abort', cleanup, { once: true })
+    })
+
+    function movingIds(id: string) {
+      return selected.has(id) ? selected : new Set([id])
+    }
+
     function orderedIssues() {
       const scope = filter
       const visible = scope ? issues.filter((issue) => issue[scope.field] === scope.value) : issues
@@ -226,7 +265,7 @@ export const IssueTracker = clientEntry(
                 if (!id) return
                 if (value === 'details') openDetails(id)
                 const status = statuses.find((item) => item === value)
-                if (status) void move(selected.has(id) ? selected : new Set([id]), status, id)
+                if (status) void move(movingIds(id), status, id)
               }}
             >
               <div
@@ -253,7 +292,14 @@ export const IssueTracker = clientEntry(
                   .map((status) => {
                     const group = visible.filter((issue) => issue.status === status)
                     return (
-                      <div role="group" key={status} aria-label={status} class="issues-group">
+                      <div
+                        role="group"
+                        key={status}
+                        aria-label={status}
+                        data-status={status}
+                        class="issues-group"
+                        mix={mountDropTarget}
+                      >
                         <div class="issues-group-heading" aria-hidden="true">
                           <span class="issues-status-mark" data-status={status} />
                           <strong>{status}</strong>
@@ -269,6 +315,7 @@ export const IssueTracker = clientEntry(
                               aria-selected={selected.has(issue.id)}
                               tabIndex={active === issue.id ? 0 : -1}
                               mix={[
+                                mountDraggable,
                                 on('focus', () => {
                                   active = issue.id
                                   void handle.update()

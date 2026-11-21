@@ -1,4 +1,5 @@
 import { fileURLToPath } from 'node:url'
+import { buildSync } from 'esbuild'
 import { createAssetServer } from 'remix/assets'
 import { loadConfig } from 'remix/cli'
 import type { CodeSamples } from './public/code-block-example.tsx'
@@ -7,9 +8,31 @@ const config = await loadConfig(fileURLToPath(new URL('../', import.meta.url)))
 const production = process.env.NODE_ENV === 'production'
 if (!config.assets?.allowFiles) throw new Error('Missing asset allowlist in remix.json')
 
+// The element adapter includes CommonJS dependencies. Serve this one browser
+// module as ESM in source mode, as the Worker build does for production.
+const dragAdapter = new URL('./public/apps/issues/drag-adapter.ts', import.meta.url)
 export const assets = createAssetServer({
   ...config.assets,
   allowFiles: config.assets.allowFiles,
+  scripts: {
+    loaders: [
+      (url, context, nextLoad) => {
+        if (url !== dragAdapter.href) return nextLoad(url, context)
+        const bundle = buildSync({
+          entryPoints: [fileURLToPath(dragAdapter)],
+          bundle: true,
+          format: 'esm',
+          platform: 'browser',
+          target: 'es2022',
+          define: {
+            'process.env.NODE_ENV': JSON.stringify(production ? 'production' : 'development'),
+          },
+          write: false,
+        })
+        return { format: 'module', source: bundle.outputFiles[0]!.text, shortCircuit: true }
+      },
+    ],
+  },
   minify: production,
   fingerprint: production,
   watch: !production,

@@ -412,3 +412,20 @@
     min-height: 44px;
   }
 }
+
+.issues-row[draggable='true'] {
+  cursor: grab;
+  user-select: none;
+}
+.issues-row[data-dragging] {
+  opacity: 0.55;
+}
+.issues-group[data-drag-over] {
+  outline: 2px solid var(--issue-done);
+  outline-offset: 3px;
+  border-radius: 10px;
+  background: color-mix(in oklab, var(--issue-done) 9%, transparent);
+}
+.issues-collection[data-layout='board'] .issues-group {
+  align-self: stretch;
+}
