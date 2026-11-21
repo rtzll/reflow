@@ -2,6 +2,27 @@ import { expect } from 'playwright/test'
 import { it } from 'remix/test'
 import { open, showcaseServer } from './showcase-router.ts'
 
+it('inspects a filtered event and returns keyboard focus to the same row', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await open(
+    page,
+    '/apps/analytics?from=2026-10-14&to=2026-10-14&eventFilter=Media+import&eventPage=4',
+  )
+  const result = page.getByRole('button', {
+    name: 'Inspect Asset imported for Autumn lookbook / 01',
+  })
+  await result.press('Enter')
+  const details = page.getByRole('dialog', { name: 'Asset imported' })
+  await expect(details).toBeVisible()
+  await expect(details.locator('code')).toContainText('2026-10-14-import-0')
+  await page.keyboard.press('Escape')
+  await expect(details).toBeHidden()
+  await expect(result).toBeFocused()
+  await expect(page.getByRole('searchbox', { name: 'Filter Studio events' })).toHaveValue(
+    'Media import',
+  )
+})
+
 it('inspects the spike by keyboard and opens its underlying events', async (t) => {
   const page = await t.serve(showcaseServer)
   await open(page, '/apps/analytics')

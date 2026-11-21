@@ -1,4 +1,11 @@
-import { Button, DatePicker, type DataTableColumn, type DateRange } from '@rtzll/reflow'
+import {
+  Button,
+  CodeBlock,
+  DatePicker,
+  Drawer,
+  type DataTableColumn,
+  type DateRange,
+} from '@rtzll/reflow'
 import { clientEntry, navigate, type Handle } from 'remix/component'
 import { RoutedDataTable } from '../../routed-data-table.tsx'
 import { ActivityChart } from './activity-chart.tsx'
@@ -14,7 +21,36 @@ import {
 } from './activity.ts'
 
 const columns: readonly DataTableColumn<ActivityEvent>[] = [
-  { id: 'action', label: 'Event', value: (row) => row.action, rowHeader: true },
+  {
+    id: 'action',
+    label: 'Event',
+    value: (row) => row.action,
+    rowHeader: true,
+    cell: (row) => (
+      <Drawer
+        title={row.action}
+        description={`${row.item} · ${dayLabel(row.day)}, ${row.time} UTC`}
+        side="right"
+        renderTrigger={(trigger) => (
+          <button
+            {...trigger}
+            type="button"
+            class="analytics-event-trigger"
+            aria-label={`Inspect ${row.action} for ${row.item}`}
+          >
+            {row.action}
+          </button>
+        )}
+      >
+        <CodeBlock
+          code={JSON.stringify(row, null, 2)}
+          filename="event.json"
+          label="Event payload"
+          wrap
+        />
+      </Drawer>
+    ),
+  },
   { id: 'item', label: 'Item', value: (row) => row.item },
   { id: 'source', label: 'Source', value: (row) => row.source },
   {
@@ -52,10 +88,7 @@ export const AnalyticsExplorer = clientEntry(
       return (
         <article class="analytics-explorer">
           <header class="analytics-header">
-            <div>
-              <h1>Analytics explorer</h1>
-              <p>Studio publishing activity · October 2026</p>
-            </div>
+            <h1>Analytics</h1>
             <div class="analytics-controls">
               <DatePicker
                 label="Activity date range"
