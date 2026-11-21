@@ -93,6 +93,7 @@ interface Gesture<E> {
   x: number
   y: number
   dayWidth: number
+  readoutPoint?: { x: number; y: number }
   singleDay: boolean
 }
 
@@ -161,6 +162,26 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
         ? events.map((e) => (e.id === dragged.id ? { ...e, ...gesture!.preview } : e))
         : events
 
+    const point = gesture?.readoutPoint
+    if (point) {
+      handle.queueTask(() => {
+        const readout = board.querySelector<HTMLElement>('.rf-time-grid-readout')
+        if (!readout) return
+        // Keep the label outside the card, inside both the grid and the visible viewport.
+        const rect = board.getBoundingClientRect()
+        const { width, height } = readout.getBoundingClientRect()
+        const left = Math.max(0, rect.left) + 4
+        const right = Math.min(document.documentElement.clientWidth, rect.right) - 4
+        const top = Math.max(0, rect.top) + 4
+        const bottom = Math.min(document.documentElement.clientHeight, rect.bottom) - 4
+        const x = clamp(point.x + 12, left, Math.max(left, right - width))
+        const above = point.y - 12 - height
+        const y = clamp(above >= top ? above : point.y + 12, top, Math.max(top, bottom - height))
+        readout.style.left = x - rect.left + 'px'
+        readout.style.top = y - rect.top + 'px'
+      })
+    }
+
     function placement(range: TimeGridRange, lane = 0, lanes = 1) {
       const start = Math.max(first, range.start)
       const end = Math.min(last, range.start + range.duration)
@@ -228,6 +249,12 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
           duration: end === anchor.start ? anchor.duration : Math.abs(end - anchor.start),
         }
       } else {
+        if (
+          gesture.readoutPoint ||
+          Math.hypot(e.clientX - gesture.x, e.clientY - gesture.y) >= dragThreshold
+        ) {
+          gesture.readoutPoint = { x: e.clientX, y: e.clientY }
+        }
         const delta = step * Math.round((((e.clientY - gesture.y) / rect.height) * span) / step)
         gesture.preview =
           mode === 'resize'
@@ -424,6 +451,12 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
               </button>
             )
           })}
+          {point && gesture && (
+            <span class="rf-time-grid-readout" aria-hidden="true">
+              {days[gesture.preview.day]} · {clock(gesture.preview.start)}–
+              {clock(gesture.preview.start + gesture.preview.duration)}
+            </span>
+          )}
           {selectedRange && (
             <div class="rf-time-grid-event rf-time-grid-range" style={placement(selectedRange)}>
               {clock(selectedRange.start)}–{clock(selectedRange.start + selectedRange.duration)}
