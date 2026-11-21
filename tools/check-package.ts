@@ -42,6 +42,9 @@ try {
     'dist/index.d.ts',
     'dist/highlight.js',
     'dist/highlight.d.ts',
+    'dist/markdown.js',
+    'dist/markdown.d.ts',
+    'dist/markdown-licenses.txt',
     'dist/styles.css',
   ]) {
     assert.ok(files.includes(`package/${name}`), `Package is missing ${name}`)
@@ -49,7 +52,7 @@ try {
   for (const file of files) {
     assert.match(
       file,
-      /^package\/(?:package\.json|LICENSE|NOTICE|README\.md|dist\/(?:(?:behaviors|systems)\/)?[^/]+\.(?:js|ts|css))$/,
+      /^package\/(?:package\.json|LICENSE|NOTICE|README\.md|dist\/markdown-licenses\.txt|dist\/(?:(?:behaviors|systems)\/)?[^/]+\.(?:js|ts|css))$/,
     )
   }
   assert.equal(extract(tarball, 'package/LICENSE'), readFileSync(join(root, 'LICENSE'), 'utf8'))
@@ -58,6 +61,29 @@ try {
     if (file === 'package/dist/highlight.js') continue
     const source = extract(tarball, file)
     assert.doesNotMatch(source, /from ['"](?:shiki|@shikijs\/)/, `${file} must not import Shiki`)
+  }
+  // Markdown's parser is bundled into its entry: it imports only Remix and Reflow's own
+  // modules, and no other module reaches for the parser packages.
+  const markdownImports = [
+    ...extract(tarball, 'package/dist/markdown.js').matchAll(/\bfrom\s*["']([^"']+)["']/g),
+  ].map((match) => match[1]!)
+  assert.ok(markdownImports.length > 0, 'dist/markdown.js has no imports to check')
+  for (const specifier of markdownImports) {
+    assert.match(specifier, /^(?:\.\/|remix\/)/, `dist/markdown.js must not import ${specifier}`)
+  }
+  const parser = /from ['"](?:unified|remark-|rehype-|micromark|mdast-|hast-)/
+  for (const file of files.filter((name) => /^package\/dist\/.+\.js$/.test(name))) {
+    assert.doesNotMatch(extract(tarball, file), parser, `${file} must not import the parser`)
+  }
+  const manifest = JSON.parse(extract(tarball, 'package/package.json'))
+  for (const field of ['dependencies', 'peerDependencies'] as const) {
+    for (const name of Object.keys(manifest[field] ?? {})) {
+      assert.doesNotMatch(
+        name,
+        /^(?:unified|remark-|rehype-|micromark|mdast-|hast-)/,
+        `${name} is bundled into dist/markdown.js and must not be a ${field} entry`,
+      )
+    }
   }
 
   // The create package ships its command and the starter, pinned to this release.
