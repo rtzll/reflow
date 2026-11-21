@@ -1,3 +1,4 @@
+import { ProjectTreeExample } from './project-tree-example.tsx'
 import { SidebarPlaygroundExample } from './sidebar-demos.tsx'
 import { CarouselExample } from './carousel-example.tsx'
 import { questionPlayground } from './question-example-data.ts'
@@ -108,6 +109,7 @@ const label = (initial: string): Control => ({
 })
 
 export const playgroundControls: Record<string, readonly Control[]> = {
+  'context-menu': [size],
   progress: [
     toggle('indeterminate', 'Indeterminate'),
     toggle('showValue', 'Show percentage', true),
@@ -570,6 +572,8 @@ export function PlaygroundExample(
     const disabled = Boolean(v.disabled)
     const content = <p>Build thoughtful interfaces with fluid motion.</p>
     switch (slug) {
+      case 'context-menu':
+        return <ProjectTreeExample size={density} />
       case 'button':
         return (
           <Button

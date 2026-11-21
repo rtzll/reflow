@@ -7,7 +7,7 @@ Reflow started as a native Remix port of the [Fluid Functionalism](https://githu
 - **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `Field`, `FileInput`, `Input`, `InputCopy`, `InputGroup`, `NumberField`, `RadioGroup`, `SegmentedControl`, `Select`, `Slider`, `Switch`, `Textarea`
 - **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`
 - **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `Pagination`, `Resizable`, `Sidebar`, `Tabs`, `Toolbar`, `Tree`
-- **Menus and overlays** · `AlertDialog`, `CommandMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
+- **Menus and overlays** · `AlertDialog`, `CommandMenu`, `ContextMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
 - **Display and feedback** · `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `Card`, `CodeBlock`, `Progress`, `Skeleton`, `Spinner`, `Table`, `Toaster`
 - **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `Citation`, `InputMessage`, `QueuedStack`, `ThinkingIndicator`, `ThinkingSteps`, `TriggerMenu`
 
@@ -66,7 +66,7 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 7 | `Pagination` (shipped) | [UI SDK](https://ui-sdk.dev/docs/react/components/pagination) | Native links, Table |
 | 7 | `Toolbar` (shipped) | [UI SDK](https://ui-sdk.dev/docs/react/components/toolbar) | Button, keyboard focus navigation |
 | 7 | `Tree` (shipped) | [UI SDK](https://ui-sdk.dev/docs/react/components/tree) | Fluid hover, Resizable, CodeBlock |
-| 8 | [`ContextMenu` (proposed)](context-menu.md) | [Fluid Functionalism ContextMenu](https://github.com/mickadesign/fluid-functionalism/blob/13fef6966428b5b16952f1609aa3814e9bdf115b/registry/default/context-menu.tsx) | Dropdown's menu surface and Remix UI's menu primitive, demonstrated in the project tree |
+| 8 | [`ContextMenu` (implemented, awaiting release)](context-menu.md) | [Fluid Functionalism ContextMenu](https://github.com/mickadesign/fluid-functionalism/blob/13fef6966428b5b16952f1609aa3814e9bdf115b/registry/default/context-menu.tsx) | Dropdown's menu surface and Remix UI's menu primitive, demonstrated in the project tree |
 
 ### Decisions so far
 

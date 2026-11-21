@@ -337,6 +337,8 @@ export const Example = clientEntry(
           )
         case 'citation':
           return <CitationDemo variant="playground" />
+        case 'context-menu':
+          return <ProjectTreeExample size="default" />
         case 'tree':
           return <ProjectTreeExample />
         case 'code-block':

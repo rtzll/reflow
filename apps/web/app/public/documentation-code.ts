@@ -1,3 +1,4 @@
+import { projectFileMenuCode } from './project-tree-example.tsx'
 import { bannerFragment } from './banner-example.tsx'
 import {
   checkboxFruit,
@@ -127,6 +128,8 @@ export function documentationCode(slug: string, fragment: string): string {
 }
 
 export function playgroundFragment(slug: string, values: PlaygroundValues): string {
+  if (slug === 'context-menu')
+    return projectFileMenuCode(values.size === 'compact' ? 'compact' : 'default')
   if (slug === 'dropdown') return dropdownPlaygroundCode(values)
   if (slug === 'date-picker') return datePickerPlaygroundCode(values)
   const names: Record<string, string> = {

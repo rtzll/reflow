@@ -1,10 +1,10 @@
 # ContextMenu design note
 
-Proposed for wave 8. In the [project tree](../apps/web/app/public/project-tree-example.tsx), a reader previewing `code-block-example.tsx` can right-click `README.md` to see its file actions. Choosing **Open file** switches the preview to the README. Dismissing the menu with **Escape** returns focus to the README row while the source file stays in view.
+Implemented for wave 8. In the [project tree](../apps/web/app/public/project-tree-example.tsx), a reader previewing `code-block-example.tsx` can right-click `README.md` to see its file actions. Choosing **Open file** switches the preview to the README. Dismissing the menu with **Escape** returns focus to the README row while the source file stays in view.
 
-## Proposed API
+## API
 
-Wrap the tree in one `ContextMenu` and identify the rows that can open it. In this tree, file rows have `aria-selected` and folders have `aria-expanded`. Document the existing `data-tree-value` attribute as the way to read a row's `TreeItem.value`. Both activation paths call `openFile(value)`, the example's handler for updating the preview.
+Wrap the tree in one `ContextMenu` and identify the rows that can open it. In this tree, file rows have `aria-selected` and folders have `aria-expanded`. Read the row’s `TreeItem.value` from its `data-tree-value` attribute. Both activation paths call `openFile(value)`, the example's handler for updating the preview.
 
 ```tsx
 <ContextMenu

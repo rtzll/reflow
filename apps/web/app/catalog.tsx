@@ -7,6 +7,7 @@ import { questionCode, questionPlayground } from './public/question-example-data
 import { requestFormCode } from './public/request-form-example.tsx'
 import { carouselExampleCode } from './public/carousel-example.tsx'
 import { triggerMenuCode } from './public/component-example-data.ts'
+import { projectFileMenuCode } from './public/project-tree-example.tsx'
 import { SystemPage } from './public/system-page.tsx'
 import { SkillPage } from './public/skill-page.tsx'
 import { Example } from './public/examples.tsx'
@@ -30,6 +31,10 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
   pagination: {
     description: 'Previous, next, and numbered links for navigating page-based results.',
     code: `<Pagination page={2} pageCount={3} href={(page) => \`/?teamPage=\${page}#team-table\`} />`,
+  },
+  'context-menu': {
+    description: 'Right-click a file or press Shift+F10 on its row to open file actions.',
+    code: projectFileMenuCode(),
   },
   tree: {
     description:

@@ -12,6 +12,7 @@ const sharedPlaygroundDefaults = new Set([
   'color-picker',
   'combobox',
   'command-menu',
+  'context-menu',
   'date-picker',
   'dropdown',
   'input-message',

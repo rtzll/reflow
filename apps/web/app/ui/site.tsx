@@ -953,10 +953,12 @@ const demoOrder = [
   'drawer',
   'code-block',
   'chat-layout',
+  'context-menu',
   'settings',
 ]
 
 const customizableSlides = new Set([
+  'context-menu',
   'accordion',
   'ask-user-questions',
   'banner',

@@ -1,4 +1,11 @@
-import { CodeBlock, ContextMenu, Resizable, Tree, type HighlightedCode } from '@rtzll/reflow'
+import {
+  CodeBlock,
+  ContextMenu,
+  Resizable,
+  Tree,
+  type ContextMenuProps,
+  type HighlightedCode,
+} from '@rtzll/reflow'
 import type { Handle } from 'remix/component'
 import { play } from 'cuelume'
 import { CodeBlockCard } from './code-block-example.tsx'
@@ -8,7 +15,28 @@ const projectFiles = [
   { value: 'readme', label: 'README.md' },
 ]
 
-export function ProjectTreeExample(handle: Handle<{ source?: HighlightedCode }>) {
+export function projectFileMenuCode(size: ContextMenuProps['size'] = 'default') {
+  return `const files = ${JSON.stringify(projectFiles, null, 2)}
+let file = 'readme'
+function openFile(value: string) {
+  file = value
+  void handle.update()
+}
+
+<ContextMenu label="File actions" target='[role="treeitem"][aria-selected]' size="${size}"
+  items={[{ value: 'open', label: 'Open file' }]}
+  onSelect={(_action, row) => {
+    const value = row.dataset.treeValue
+    if (value !== undefined) openFile(value)
+  }}>
+  <Tree label="Project files" items={files} value={file} defaultExpanded={['app']}
+    size="${size}" onValueChange={openFile} />
+</ContextMenu>`
+}
+
+export function ProjectTreeExample(
+  handle: Handle<{ source?: HighlightedCode; size?: ContextMenuProps['size'] }>,
+) {
   let file = handle.props.source ? 'source' : 'readme'
   let expanded = ['app']
   function openFile(value: string) {
@@ -28,7 +56,7 @@ export function ProjectTreeExample(handle: Handle<{ source?: HighlightedCode }>)
         <ContextMenu
           label="File actions"
           target='[role="treeitem"][aria-selected]'
-          size="compact"
+          size={handle.props.size ?? 'compact'}
           items={[{ value: 'open', label: 'Open file' }]}
           onSelect={(_action, row) => {
             const value = row.dataset.treeValue
@@ -44,7 +72,7 @@ export function ProjectTreeExample(handle: Handle<{ source?: HighlightedCode }>)
               expanded = next
             }}
             value={file}
-            size="compact"
+            size={handle.props.size ?? 'compact'}
             onValueChange={openFile}
           />
         </ContextMenu>

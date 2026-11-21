@@ -54,6 +54,51 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  'context-menu': [
+    {
+      name: 'ContextMenu',
+      props: [
+        {
+          name: 'label',
+          type: 'string',
+          required: true,
+          description: 'Accessible name of the menu.',
+        },
+        {
+          name: 'target',
+          type: 'string',
+          required: true,
+          description:
+            'CSS selector for focusable descendants. The closest match to the pointer or keyboard event receives the action. Editable controls keep their native menu.',
+        },
+        {
+          name: 'children',
+          type: 'RemixNode',
+          required: true,
+          description: 'Content containing the action targets.',
+        },
+        {
+          name: 'items',
+          type: 'readonly DropdownItem[]',
+          required: true,
+          description: 'Dropdown actions, including disabled items, checked items, and submenus.',
+        },
+        {
+          name: 'onSelect',
+          type: '(value: string, target: HTMLElement, checked?: boolean) => void',
+          required: false,
+          description:
+            'Receives the action value, the element that opened the menu, and the new checked state for checkbox or radio actions.',
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          required: false,
+          description: 'Menu row density.',
+        },
+      ],
+    },
+  ],
   tree: [
     {
       name: 'Tree',
@@ -111,7 +156,8 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           name: 'value',
           type: 'string',
           required: true,
-          description: 'Unique identifier across the tree.',
+          description:
+            'Unique identifier across the tree, exposed as data-tree-value on the item’s row.',
         },
         {
           name: 'label',
