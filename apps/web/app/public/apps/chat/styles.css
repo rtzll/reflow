@@ -194,7 +194,11 @@
 .studio-pane .rf-chat-message[data-role='assistant'] {
   max-inline-size: 100%;
 }
+.studio-pane .rf-markdown {
+  font: inherit;
+}
 .studio-pane .rf-chat-body {
+  max-inline-size: 100%;
   font-size: 15px;
   line-height: 1.6;
   overflow-wrap: anywhere;

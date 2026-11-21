@@ -1,6 +1,6 @@
-import { Button, ChatLayout, ChatMessage, Icon, InputMessage } from '@rtzll/reflow'
+import { Button, ChatLayout, ChatMessage, Icon, InputMessage, Markdown } from '@rtzll/reflow'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
-import type { ChatEntry, Conversation } from './fixtures.ts'
+import { replyTo, type ChatEntry, type Conversation } from './fixtures.ts'
 
 interface Thread extends Conversation {
   draft: string
@@ -246,20 +246,16 @@ function ConversationPane(handle: Handle<{ thread: Thread; onChange: () => void 
       {thread.messages.map((message, index) => (
         <ChatMessage key={index} role={message.role} animate={false}>
           {message.role === 'assistant' && <strong class="studio-author">Reflow</strong>}
-          <span aria-busy={message === response || undefined}>{message.text}</span>
+          {message.role === 'assistant' ? (
+            <div aria-busy={message === response || undefined}>
+              <Markdown source={message.text} />
+            </div>
+          ) : (
+            <span>{message.text}</span>
+          )}
           {message.stopped && <span class="studio-stopped">Response stopped</span>}
         </ChatMessage>
       ))}
     </ChatLayout>
   )
-}
-
-function replyTo(text: string) {
-  if (/\b(cover|masthead|type|layout)\b/i.test(text))
-    return 'Print the two versions at the size your reader will hold. Set them side by side and step back. Which one makes the subject clear first? Keep that version, then adjust the spacing around the title in small increments.'
-  if (/\b(photo|photograph|sequence|essay)\b/i.test(text))
-    return 'Lay the photographs out as small prints. Choose your opening and closing frames first, then build the middle around a change of distance or pace. Read the sequence without captions once before deciding where the page turns belong.'
-  if (/\b(interview|question|mara)\b/i.test(text))
-    return 'Start with a moment your subject can place in time. Ask what they could see or hear, then leave room for the details to emerge. Use one of those details to shape your next question.'
-  return 'Start by choosing one thing you want the reader to remember. Write it in a sentence, then pick a detail that makes it concrete. Read the two together and see which words you can take away without losing the idea.'
 }
