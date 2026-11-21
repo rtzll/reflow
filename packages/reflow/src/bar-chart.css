@@ -1,0 +1,122 @@
+.rf-bar-chart {
+  --plot-height: var(--rf-bar-chart-height, 10rem);
+  position: relative;
+  min-inline-size: 0;
+  font: var(--rf-text-caption) / 1.4 var(--rf-font);
+  font-variant-numeric: tabular-nums;
+}
+.rf-bar-chart[data-axes] {
+  padding-inline-start: 2.25rem;
+}
+.rf-bar-chart-grid {
+  position: absolute;
+  inset: 0 0 auto;
+  height: var(--plot-height);
+  pointer-events: none;
+}
+.rf-bar-chart-grid > span {
+  position: absolute;
+  inset-inline: 0;
+  border-block-start: 1px dashed var(--rf-border);
+}
+.rf-bar-chart[data-axes] .rf-bar-chart-grid > span {
+  inset-inline-start: 2.25rem;
+}
+.rf-bar-chart-grid > span:last-child {
+  border-block-start-style: solid;
+}
+.rf-bar-chart-grid > span > span {
+  position: absolute;
+  inset-inline-end: calc(100% + 6px);
+  transform: translateY(-50%);
+  color: var(--rf-muted);
+}
+.rf-bar-chart-columns,
+.rf-bar-chart-ticks {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+}
+.rf-bar-chart-columns {
+  position: relative;
+  height: var(--plot-height);
+}
+.rf-bar-chart-column {
+  position: relative;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: var(--rf-item-radius);
+}
+:is(a, button).rf-bar-chart-column {
+  cursor: pointer;
+}
+.rf-bar-chart-fill {
+  position: relative;
+  width: 68%;
+  max-width: 36px;
+  border-radius: 3px 3px 0 0;
+  background: var(--rf-neutral-fill);
+}
+.rf-bar-chart-column[data-active] .rf-bar-chart-fill {
+  background: var(--rf-bar-chart-color, color-mix(in oklab, var(--rf-accent) 70%, var(--rf-fg)));
+}
+.rf-bar-chart-column[data-active][data-peak] .rf-bar-chart-fill {
+  background: var(--rf-bar-chart-peak, var(--rf-accent));
+  box-shadow: inset 0 2px var(--rf-fg);
+}
+:is(a, button).rf-bar-chart-column:is(:hover, :focus-visible, [aria-current]) {
+  background: var(--rf-hover);
+}
+.rf-bar-chart-column[aria-current]::after {
+  content: '';
+  position: absolute;
+  inset-inline: 12%;
+  inset-block-end: -3px;
+  border-block-end: 2px solid var(--rf-fg);
+}
+.rf-bar-chart-column:focus-visible {
+  outline: 2px solid var(--rf-fg);
+  outline-offset: -2px;
+}
+.rf-bar-chart-ticks {
+  margin-block-start: 7px;
+  color: var(--rf-muted);
+  text-align: center;
+  white-space: nowrap;
+}
+.rf-bar-chart-ticks span {
+  justify-self: center;
+}
+.rf-bar-chart-ticks span:first-child {
+  justify-self: start;
+}
+.rf-bar-chart-ticks span:last-child {
+  justify-self: end;
+}
+.rf-bar-chart-empty {
+  color: var(--rf-muted);
+}
+
+@media (forced-colors: active) {
+  .rf-bar-chart-fill {
+    forced-color-adjust: none;
+    background: GrayText;
+  }
+  .rf-bar-chart-column[data-active] .rf-bar-chart-fill,
+  .rf-bar-chart-column[data-active][data-peak] .rf-bar-chart-fill {
+    background: CanvasText;
+    box-shadow: none;
+  }
+  .rf-bar-chart-column[aria-current]::after {
+    border-color: Highlight;
+  }
+  .rf-bar-chart-column:focus-visible {
+    outline-color: Highlight;
+  }
+}
