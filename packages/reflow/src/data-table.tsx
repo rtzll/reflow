@@ -3,7 +3,7 @@ import { ContextMenu } from './context-menu.tsx'
 import { Dropdown, type DropdownItem } from './dropdown.tsx'
 import { Skeleton } from './skeleton.tsx'
 import { Icon } from './icon.tsx'
-import { Input } from './input.tsx'
+import { Input, type InputProps } from './input.tsx'
 import { Pagination } from './pagination.tsx'
 import type { ControlSize } from './systems/styling.ts'
 import {
@@ -43,6 +43,8 @@ export interface DataTableProps<Row> {
   state?: DataTableState
   defaultState?: Partial<DataTableState>
   onStateChange?: (state: DataTableState) => void
+  /** Associate search with a native form for server-rendered filtering. */
+  filterInput?: Pick<InputProps, 'name' | 'form'>
   /** Render native sort and page links. The destination supplies the new state. */
   href?: (state: DataTableState) => string
   loading?: boolean
@@ -207,6 +209,7 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
     return (
       <div class="rf-data-table">
         <Input
+          {...handle.props.filterInput}
           type="search"
           size={size}
           aria-label={filterLabel}

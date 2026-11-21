@@ -8,7 +8,7 @@ export interface TableRoute {
   anchor: string
 }
 
-/** The request supplies the initial rows. Sort and page links work before hydration. */
+/** Derive state from the request so links and filter submission work before hydration. */
 export function RoutedDataTable<Row>(
   handle: Handle<
     Omit<DataTableProps<Row>, 'state' | 'href' | 'onStateChange'> & { route: TableRoute }
@@ -17,14 +17,13 @@ export function RoutedDataTable<Row>(
   let requestSearch = handle.props.route.search
   let search = requestSearch
   const history = ref((_node, signal) => {
-    window.addEventListener(
-      'popstate',
-      () => {
-        search = location.search
-        void handle.update()
-      },
-      { signal },
-    )
+    function syncSearch() {
+      if (search === location.search) return
+      search = location.search
+      void handle.update()
+    }
+    window.addEventListener('popstate', syncSearch, { signal })
+    window.navigation?.addEventListener('currententrychange', syncSearch, { signal })
   })
 
   return () => {
@@ -35,6 +34,10 @@ export function RoutedDataTable<Row>(
     }
     const params = new URLSearchParams(search)
     const name = (field: string) => route.prefix + field
+    const formId = handle.id + '-filter'
+    const filterFields = Array.from(params).filter(
+      ([key]) => key !== name('Filter') && key !== name('Page'),
+    )
     const sortColumn = params.get(name('Sort'))
     const state: DataTableState = {
       filter: params.get(name('Filter')) ?? '',
@@ -61,8 +64,19 @@ export function RoutedDataTable<Row>(
     }
     return (
       <div mix={history}>
+        <form
+          id={formId}
+          action={route.path + '#' + route.anchor}
+          method="get"
+          data-rmx-reset-scroll="manual"
+        >
+          {filterFields.map(([key, value]) => (
+            <input type="hidden" name={key} value={value} />
+          ))}
+        </form>
         <DataTable
           {...props}
+          filterInput={{ name: name('Filter'), form: formId }}
           state={state}
           href={destination}
           onStateChange={(next) => {

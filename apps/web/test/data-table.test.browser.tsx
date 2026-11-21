@@ -1,5 +1,6 @@
-import { DataTable } from '@rtzll/reflow'
+import { DataTable, type DataTableState } from '@rtzll/reflow'
 import { deepEqual, equal } from 'remix/assert'
+import type { Handle } from 'remix/component'
 import { render } from 'remix/component/test'
 import { it } from 'remix/test'
 
@@ -60,4 +61,41 @@ it('runs a context action on the filtered record and gives each record a visible
   await act(() => $(':popover-open [role=menuitem]')!.click())
   equal(chosen, 'copy:Cal')
   equal($('tbody button[aria-label="Actions for Cal"]')?.getAttribute('aria-haspopup'), 'menu')
+  chosen = ''
+  await act(() => $('tbody button[aria-label="Actions for Cal"]')!.click())
+  await act(() => $(':popover-open [role=menuitem]')!.click())
+  equal(chosen, 'copy:Cal')
+})
+
+it('clamps the visible page and waits for the owner to apply controlled changes', async (t) => {
+  let state: DataTableState = { filter: '', sort: null, page: 99 }
+  let requested: DataTableState | undefined
+  let owner: Handle
+  function Directory(handle: Handle) {
+    owner = handle
+    return () => (
+      <DataTable
+        {...props}
+        state={state}
+        onStateChange={(next) => {
+          requested = next
+        }}
+      />
+    )
+  }
+  const { $, act, cleanup } = render(<Directory />)
+  t.after(cleanup)
+  equal($('tbody tr td')!.textContent, 'Ben')
+  equal($('button[aria-current=page]')!.textContent, '2')
+  await act(() => $('thead button')!.click())
+  deepEqual(requested, { filter: '', sort: { column: 'name', direction: 'ascending' }, page: 1 })
+  equal($('th[aria-sort]'), null)
+  state = requested!
+  await owner!.update()
+  equal($('tbody tr td')!.textContent, 'Amy')
+  state = { ...state, filter: 'absent', page: 99 }
+  await owner!.update()
+  equal($('[role=status]')!.textContent, '0 results, page 1 of 1')
+  equal($('tbody')!.textContent?.includes('No matching results'), true)
+  equal($('nav'), null)
 })

@@ -8,7 +8,9 @@ Give `DataTable` a table label, rows, a stable string key for each row, and colu
 
 Filter across columns, sort the full result, then take the requested page. Equal values keep their input order. Typing a filter or changing the sort starts at page one. Clicking a sorted header reverses its direction. A shrinking collection clamps the visible page. Zero matches show an empty state with the filter still in reach.
 
-The table can own its state or receive `state` and `onStateChange`. A screen that owns its URL supplies `href` for native sort and page links. The gallery preserves `teamPage`, its catalog search, and the team-table anchor. Long API references use their own query parameters and retain the required marker, type, default, and description of each prop.
+The table can own its state or receive `state` and `onStateChange`. A screen that owns its URL supplies `href` for native sort and page links. It can associate the search input with a GET form through `filterInput`. Both showcase screens let visitors press Enter to filter before hydration, and update results as they type after hydration.
+
+The team directory uses `teamFilter`, `teamSort`, `teamDir`, and `teamPage`, preserving the gallery search and the `#team-table` anchor. Component API references with more than twelve primary props use the same controls with an `api` prefix. They retain row headers, the required marker, type, default, and description. The standalone example at `/docs/data-table` demonstrates local state and configurable page size.
 
 ## Interaction and verification
 
