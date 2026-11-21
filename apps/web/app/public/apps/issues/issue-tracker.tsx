@@ -9,7 +9,8 @@ export const IssueTracker = clientEntry(
   function IssueTracker(handle: Handle<{ initialIssues: Issue[] }>) {
     let issues = handle.props.initialIssues
     let active: string | undefined = issues[0]?.id
-    const selected = new Set<string>()
+    let selected = new Set<string>()
+    let range: { anchor: number; previous: Set<string> } | undefined
     let announcement = ''
     let list: HTMLDivElement | undefined
     const mountList = ref<HTMLDivElement>((element) => {
@@ -25,6 +26,7 @@ export const IssueTracker = clientEntry(
     }
 
     function toggle(id: string) {
+      range = undefined
       if (selected.has(id)) selected.delete(id)
       else selected.add(id)
       announcement = ''
@@ -32,6 +34,7 @@ export const IssueTracker = clientEntry(
     }
 
     async function clear() {
+      range = undefined
       selected.clear()
       announcement = 'Selection cleared.'
       await handle.update()
@@ -42,6 +45,7 @@ export const IssueTracker = clientEntry(
       const before = orderedIssues()
       const moved = before.filter((issue) => ids.has(issue.id) && issue.status !== status)
       if (!moved.length) return
+      range = undefined
       // Continue at the next stationary issue in the old reading order. At the end,
       // step back. If every row moved, follow the original issue to its new group.
       const index = before.findIndex((issue) => issue.id === anchor)
@@ -58,21 +62,38 @@ export const IssueTracker = clientEntry(
     }
 
     function navigate(event: KeyboardEvent, id: string) {
-      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.isComposing)
-        return
+      if (event.altKey || event.ctrlKey || event.metaKey || event.isComposing) return
+      const arrow = event.key === 'ArrowDown' || event.key === 'ArrowUp'
+      if (event.shiftKey && !arrow) return
       const rows = orderedIssues()
       const index = rows.findIndex((issue) => issue.id === id)
       switch (event.key) {
+        case 'j':
+        case 'k':
         case 'ArrowDown':
-          focusIssue(rows[Math.min(index + 1, rows.length - 1)]?.id)
+        case 'ArrowUp': {
+          const step = event.key === 'j' || event.key === 'ArrowDown' ? 1 : -1
+          const next = Math.max(0, Math.min(index + step, rows.length - 1))
+          if (!event.shiftKey) range = undefined
+          else if (next !== index) {
+            // Rebuild from the original selection so shrinking the range preserves
+            // independent selections inside and outside it.
+            range ??= { anchor: index, previous: new Set(selected) }
+            selected = new Set(range.previous)
+            const start = Math.min(range.anchor, next)
+            const end = Math.max(range.anchor, next)
+            for (const issue of rows.slice(start, end + 1)) selected.add(issue.id)
+            announcement = ''
+          }
+          focusIssue(rows[next]?.id)
           break
-        case 'ArrowUp':
-          focusIssue(rows[Math.max(index - 1, 0)]?.id)
-          break
+        }
         case 'Home':
+          range = undefined
           focusIssue(rows[0]?.id)
           break
         case 'End':
+          range = undefined
           focusIssue(rows.at(-1)?.id)
           break
         case ' ':
@@ -131,7 +152,16 @@ export const IssueTracker = clientEntry(
                   aria-multiselectable="true"
                   aria-labelledby={handle.id + '-title'}
                   aria-describedby={handle.id + '-keys'}
-                  mix={mountList}
+                  mix={[
+                    mountList,
+                    on('focusout', (event) => {
+                      if (
+                        !(event.relatedTarget instanceof Node) ||
+                        !event.currentTarget.contains(event.relatedTarget)
+                      )
+                        range = undefined
+                    }),
+                  ]}
                 >
                   {statuses.map((status, groupIndex) => {
                     const group = issues.filter((issue) => issue.status === status)
@@ -208,7 +238,10 @@ export const IssueTracker = clientEntry(
                 )}
                 <p id={handle.id + '-keys'} class="issues-keys">
                   <span>
-                    <kbd>↑</kbd> <kbd>↓</kbd> Navigate
+                    <kbd>↑</kbd> <kbd>↓</kbd> or <kbd>J</kbd> <kbd>K</kbd> Navigate
+                  </span>
+                  <span>
+                    <kbd>Shift</kbd> + <kbd>↑</kbd> <kbd>↓</kbd> Select range
                   </span>
                   <span>
                     <kbd>Space</kbd> Select
