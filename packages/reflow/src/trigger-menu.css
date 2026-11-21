@@ -40,6 +40,7 @@
   display: block;
   color: var(--rf-muted);
   font-size: var(--rf-text-caption);
+  line-height: var(--rf-leading-caption);
 }
 
 @media (forced-colors: active) {

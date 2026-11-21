@@ -109,7 +109,7 @@ export function TriggerMenu(handle: Handle<TriggerMenuProps>) {
     }
     if (
       dismissed?.start === next.start &&
-      dismissed.trigger === next.trigger &&
+      dismissed.trigger.character === next.trigger.character &&
       dismissed.query === next.query
     )
       return close()
@@ -121,8 +121,13 @@ export function TriggerMenu(handle: Handle<TriggerMenuProps>) {
         item.description?.toLocaleLowerCase().includes(query),
     )
     if (!items.length) return close()
-    if (match?.query !== next.query || match.start !== next.start || match.trigger !== next.trigger)
+    if (
+      match?.query !== next.query ||
+      match.start !== next.start ||
+      match.trigger.character !== next.trigger.character
+    )
       active = 0
+    else active = Math.min(active, items.length - 1)
     match = next
     options = items
     measureCaret?.()
@@ -282,11 +287,22 @@ export function TriggerMenu(handle: Handle<TriggerMenuProps>) {
               data-rf-hover-item
               mix={[
                 on('mousedown', (event) => event.preventDefault()),
+                on<HTMLDivElement, 'pointermove'>('pointermove', (event) => {
+                  if (event.pointerType === 'mouse' && active !== index) {
+                    active = index
+                    void handle.update()
+                  }
+                }),
                 on('click', () => choose(item)),
               ]}
             >
               {item.label}
-              {item.description && <span class="rf-trigger-description">{item.description}</span>}
+              {item.description && (
+                <>
+                  {' '}
+                  <span class="rf-trigger-description">{item.description}</span>
+                </>
+              )}
             </div>
           ))}
         </div>
