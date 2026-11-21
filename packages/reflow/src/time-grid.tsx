@@ -51,7 +51,12 @@ function showsSingleDay(board: HTMLElement) {
 // Pointer travel below this is a click, not a drag.
 const dragThreshold = 4
 function clock(minutes: number) {
-  return [Math.floor(minutes / 60), minutes % 60].map((n) => String(n).padStart(2, '0')).join(':')
+  const safe = Math.max(0, Math.round(minutes))
+  return [Math.floor(safe / 60), safe % 60].map((n) => String(n).padStart(2, '0')).join(':')
+}
+
+function validMinute(value: number | undefined): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) ? Math.trunc(value) : undefined
 }
 
 // Events that overlap transitively share a width. Reuse a lane as soon as its
@@ -95,22 +100,28 @@ interface Gesture<E> {
   dayWidth: number
   readoutPoint?: { x: number; y: number }
   singleDay: boolean
+  dragged: boolean
 }
 
 export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E>>) {
   let board: HTMLDivElement
   let gesture: Gesture<E> | undefined
   let cursor: TimeGridRange | undefined
-  const helpId = handle.id + '-help'
+  let statusMessage = ''
+  let suppressClick = false
+  const boardHelpId = handle.id + '-board-help'
+  const eventHelpId = handle.id + '-event-help'
   const boardRef = ref((node, signal) => {
     board = node as HTMLDivElement
     board.ownerDocument.addEventListener(
       'keydown',
       (e) => {
-        if (e.key !== 'Escape' || (!gesture && !cursor)) return
+        if (e.defaultPrevented || e.key !== 'Escape' || (!gesture && !cursor)) return
         e.preventDefault()
-        if (gesture && board.hasPointerCapture(gesture.pointer))
-          board.releasePointerCapture(gesture.pointer)
+        if (gesture) {
+          if (gesture.event) suppressClick = true
+          if (board.hasPointerCapture(gesture.pointer)) board.releasePointerCapture(gesture.pointer)
+        }
         gesture = undefined
         cursor = undefined
         handle.update()
@@ -132,17 +143,18 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
       getEventClass,
       describedBy,
     } = handle.props
+    const explicitStart = validMinute(handle.props.startMinute)
+    const explicitEnd = validMinute(handle.props.endMinute)
     const first = clamp(
-      handle.props.startMinute ??
-        Math.floor(
-          Math.min(540, (handle.props.endMinute ?? 1440) - 1, ...events.map((e) => e.start)) / 60,
-        ) * 60,
+      explicitStart ??
+        Math.floor(Math.min(540, (explicitEnd ?? 1440) - 1, ...events.map((e) => e.start)) / 60) *
+          60,
       0,
       1439,
     )
     const last = clamp(
-      handle.props.endMinute ??
-        Math.ceil(Math.max(1020, ...events.map((e) => e.start + e.duration)) / 60) * 60,
+      explicitEnd ??
+        Math.ceil(Math.max(1020, first + 1, ...events.map((e) => e.start + e.duration)) / 60) * 60,
       first + 1,
       1440,
     )
@@ -154,8 +166,15 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
     )
     const hours = Array.from({ length: Math.ceil(span / 60) }, (_, i) => first + 60 * i)
     const compactDay = clamp(handle.props.compactDay ?? 0, 0, Math.max(0, days.length - 1))
-    const described = [helpId, describedBy].filter(Boolean).join(' ')
-    const selectedRange = gesture?.mode === 'create' ? gesture.preview : cursor
+    if (cursor && (!onCreate || !days.length || cursor.day >= days.length)) cursor = undefined
+    const hasBoardHelp = !!onCreate
+    const hasEventHelp = !!onEventChange || !!onActivate
+    const boardDescribed =
+      [hasBoardHelp ? boardHelpId : '', describedBy].filter(Boolean).join(' ') || undefined
+    const eventDescribed =
+      [hasEventHelp ? eventHelpId : '', describedBy].filter(Boolean).join(' ') || undefined
+    const selectedRange =
+      gesture?.mode === 'create' ? (gesture.dragged ? gesture.preview : undefined) : cursor
     const dragged = gesture?.event
     const displayed =
       dragged && gesture
@@ -184,7 +203,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
 
     function placement(range: TimeGridRange, lane = 0, lanes = 1) {
       const start = Math.max(first, range.start)
-      const end = Math.min(last, range.start + range.duration)
+      const end = Math.max(start, Math.min(last, range.start + range.duration))
       return {
         '--day': range.day,
         '--lane': lane,
@@ -195,9 +214,11 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
     }
 
     function begin(e: PointerEvent, event?: E) {
+      suppressClick = false
       if (gesture || !days.length || !e.isPrimary || e.button !== 0) return
       if (event ? !onEventChange : !onCreate || e.target !== board) return
       const rect = board.getBoundingClientRect()
+      if (rect.width <= 0 || rect.height <= 0) return
       const singleDay = showsSingleDay(board)
       const dayWidth = rect.width / (singleDay ? 1 : days.length)
       const offset = clamp(((e.clientY - rect.top) / rect.height) * span, 0, span - 1)
@@ -222,9 +243,14 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
         y: e.clientY,
         dayWidth,
         singleDay,
+        dragged: false,
       }
       cursor = undefined
-      board.setPointerCapture(e.pointerId)
+      try {
+        board.setPointerCapture(e.pointerId)
+      } catch {
+        // Ignore synthetic or ended pointers that cannot be captured.
+      }
       if (event) onSelect?.(event)
       handle.update()
     }
@@ -238,6 +264,12 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
       if (e.pointerId !== gesture?.pointer || !gesture) return false
       const { anchor, mode } = gesture
       const rect = board.getBoundingClientRect()
+      if (rect.width <= 0 || rect.height <= 0) return false
+      if (
+        !gesture.dragged &&
+        Math.hypot(e.clientX - gesture.x, e.clientY - gesture.y) >= dragThreshold
+      )
+        gesture.dragged = true
       if (mode === 'create') {
         const offset = clamp(((e.clientY - rect.top) / rect.height) * span, 0, span)
         const lower = first + step * Math.floor(offset / step)
@@ -256,6 +288,14 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
           gesture.readoutPoint = { x: e.clientX, y: e.clientY }
         }
         const delta = step * Math.round((((e.clientY - gesture.y) / rect.height) * span) / step)
+        const maxDuration = Math.max(anchor.duration, last - anchor.start)
+        const minDuration = Math.min(
+          maxDuration,
+          Math.max(
+            Math.min(step, Math.max(1, last - anchor.start)),
+            Math.max(0, first - anchor.start) + 1,
+          ),
+        )
         gesture.preview =
           mode === 'resize'
             ? {
@@ -263,11 +303,13 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
                 duration:
                   delta === 0
                     ? anchor.duration
-                    : clamp(
-                        anchor.duration + delta,
-                        Math.min(step, last - anchor.start),
-                        last - anchor.start,
-                      ),
+                    : delta > 0 && anchor.start + anchor.duration >= last
+                      ? anchor.duration
+                      : clamp(
+                          anchor.duration + delta,
+                          minDuration,
+                          Math.min(maxDuration, last - anchor.start),
+                        ),
               }
             : {
                 ...anchor,
@@ -291,7 +333,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
       if (!gesture || e.pointerId !== gesture.pointer) return
       track(e)
       const { event, preview, anchor, mode, x, y } = gesture
-      const dragged = Math.hypot(e.clientX - x, e.clientY - y) >= dragThreshold
+      const dragged = gesture.dragged || Math.hypot(e.clientX - x, e.clientY - y) >= dragThreshold
       gesture = undefined
       handle.update()
       if (!event) {
@@ -330,24 +372,29 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
         ...(event ?? cursor ?? { day: compactDay, start: first, duration: step }),
       }
       // A keyboard edit in an automatically fitted window may reveal another hour.
-      const min = event && handle.props.startMinute === undefined ? 0 : first
-      const max = event && handle.props.endMinute === undefined ? 1440 : last
+      const min = event && explicitStart === undefined ? 0 : first
+      const max = event && explicitEnd === undefined ? 1440 : last
       switch (e.key) {
         case 'ArrowLeft':
         case 'ArrowRight':
-          next.day = clamp(next.day + (e.key === 'ArrowRight' ? 1 : -1), 0, days.length - 1)
-          if (!event && showsSingleDay(board)) next.day = compactDay
+          next.day = showsSingleDay(board)
+            ? event
+              ? event.day
+              : compactDay
+            : clamp(next.day + (e.key === 'ArrowRight' ? 1 : -1), 0, days.length - 1)
           break
         case 'ArrowDown':
         case 'ArrowUp': {
           const delta = e.key === 'ArrowDown' ? step : -step
-          if (e.shiftKey)
-            next.duration = clamp(
-              next.duration + delta,
-              Math.min(step, max - next.start),
-              max - next.start,
+          if (e.shiftKey) {
+            if (delta > 0 && next.start + next.duration >= max) break
+            const maxDuration = Math.max(1, max - next.start)
+            const minDuration = Math.min(
+              maxDuration,
+              Math.max(Math.min(step, maxDuration), Math.max(0, first - next.start) + 1),
             )
-          else if (!event) {
+            next.duration = clamp(next.duration + delta, minDuration, maxDuration)
+          } else if (!event) {
             next.start = clamp(next.start + delta, min, first + (Math.ceil(span / step) - 1) * step)
             next.duration = Math.min(Math.max(step, next.duration), last - next.start)
           } else if (next.duration <= max - min)
@@ -357,6 +404,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
         case 'Enter':
           e.preventDefault()
           cursor = undefined
+          statusMessage = ''
           handle.update()
           onCreate?.(next)
           return
@@ -365,13 +413,30 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
       }
       e.preventDefault()
       if (event) {
-        onEventChange?.({ ...event, ...next })
+        if (
+          next.day === event.day &&
+          next.start === event.start &&
+          next.duration === event.duration
+        )
+          return
+        const updated = { ...event, ...next }
+        statusMessage =
+          getEventLabel?.(updated) ??
+          `${updated.title}, ${days[updated.day]}, ${clock(updated.start)}–${clock(updated.start + updated.duration)}`
+        onEventChange?.(updated)
         handle.queueTask(() =>
           board.querySelector<HTMLButtonElement>(`[data-event="${CSS.escape(event.id)}"]`)?.focus(),
         )
-      } else cursor = next
+      } else {
+        statusMessage = ''
+        cursor = next
+      }
       handle.update()
     }
+
+    const rangeAnnouncement = cursor
+      ? `${days[cursor.day]}, ${clock(cursor.start)}–${clock(cursor.start + cursor.duration)}`
+      : statusMessage
 
     return (
       <div
@@ -388,7 +453,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
           class="rf-time-grid-board"
           role="group"
           aria-label={handle.props.label}
-          aria-describedby={described}
+          aria-describedby={boardDescribed}
           tabindex={onCreate && days.length ? 0 : undefined}
           data-create={!!onCreate || undefined}
           mix={[
@@ -416,6 +481,8 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
             const label =
               getEventLabel?.(event) ??
               `${event.title}, ${days[event.day]}, ${clock(event.start)}–${clock(event.start + event.duration)}`
+            const visibleDuration =
+              Math.min(last, event.start + event.duration) - Math.max(first, event.start)
             return (
               <button
                 key={event.id}
@@ -423,20 +490,26 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
                 class={classList('rf-time-grid-event', getEventClass?.(event))}
                 data-event={event.id}
                 data-visible={event.day === compactDay}
-                data-short={event.duration <= 30}
+                data-short={visibleDuration <= 30}
                 data-editable={!!onEventChange || undefined}
                 aria-label={label}
                 title={label}
                 aria-pressed={
                   onSelect || selectedId !== undefined ? event.id === selectedId : undefined
                 }
-                aria-describedby={described}
+                aria-describedby={eventDescribed}
                 disabled={!onSelect && !onActivate && !onEventChange}
                 style={placement(event, lane, lanes)}
                 mix={[
                   on('pointerdown', (e) => begin(e, event)),
                   on('keydown', (e) => keydown(e, event)),
-                  on('click', () => (onSelect ?? onActivate)?.(event)),
+                  on('click', () => {
+                    if (suppressClick) {
+                      suppressClick = false
+                      return
+                    }
+                    ;(onSelect ?? onActivate)?.(event)
+                  }),
                 ]}
               >
                 <span class="rf-time-grid-time">{clock(event.start)}</span>
@@ -458,21 +531,31 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
             </span>
           )}
           {selectedRange && (
-            <div class="rf-time-grid-event rf-time-grid-range" style={placement(selectedRange)}>
+            <div
+              class="rf-time-grid-event rf-time-grid-range"
+              data-visible={selectedRange.day === compactDay}
+              style={placement(selectedRange)}
+            >
               {clock(selectedRange.start)}–{clock(selectedRange.start + selectedRange.duration)}
             </div>
           )}
         </div>
-        <span class="rf-time-grid-help" role="status">
-          {cursor &&
-            `${days[cursor.day]}, ${clock(cursor.start)}–${clock(cursor.start + cursor.duration)}`}
+        <span class="rf-basic-sr-only" role="status">
+          {rangeAnnouncement}
         </span>
-        <span id={helpId} class="rf-time-grid-help">
-          {onCreate &&
-            'Focus the schedule and use arrows to choose a slot, Shift with Up or Down to change its duration, and Enter to create. '}
-          {onEventChange && 'On an event, use arrows to move and Shift with Up or Down to resize. '}
-          {onActivate && 'Press Enter on an event to open it.'}
-        </span>
+        {hasBoardHelp && (
+          <span id={boardHelpId} class="rf-basic-sr-only">
+            Focus the schedule and use arrows to choose a slot, Shift with Up or Down to change its
+            duration, and Enter to create.
+          </span>
+        )}
+        {hasEventHelp && (
+          <span id={eventHelpId} class="rf-basic-sr-only">
+            {onEventChange &&
+              'On an event, use arrows to move and Shift with Up or Down to resize. '}
+            {onActivate && 'Press Enter on an event to open it.'}
+          </span>
+        )}
       </div>
     )
   }

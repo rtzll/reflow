@@ -161,3 +161,81 @@ it('creates a keyboard range and clears it on Escape before starting another', a
   await press('Enter')
   deepEqual(created, { day: 0, start: 600, duration: 20 })
 })
+
+it('does not activate after an Escape-canceled drag, skips boundary no-ops, and handles evening startMinute', async (t) => {
+  let activated = 0
+  let changes = 0
+  const event = { id: 'late', title: 'Late shift', day: 0, start: 1080, duration: 30 }
+  const { $, $$, act, cleanup } = render(
+    <TimeGrid
+      label="Evening"
+      days={['Friday']}
+      events={[event]}
+      startMinute={1080}
+      onActivate={() => {
+        activated++
+      }}
+      onEventChange={() => {
+        changes++
+      }}
+      onCreate={() => {}}
+    />,
+  )
+  t.after(cleanup)
+  deepEqual(
+    Array.from($$('.rf-time-grid-times span'), (node) => node.textContent),
+    ['18:00'],
+  )
+  const board = $('[role=group]')!
+  board.getBoundingClientRect = () => new DOMRect(0, 0, 100, 100)
+  board.setPointerCapture = () => {}
+  // Pointerdown alone should not flash a creation preview before travel meets the drag threshold.
+  await act(() =>
+    board.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        pointerId: 1,
+        isPrimary: true,
+        clientX: 20,
+        clientY: 20,
+        bubbles: true,
+      }),
+    ),
+  )
+  equal($('.rf-time-grid-range'), null)
+  await act(() =>
+    board.dispatchEvent(
+      new PointerEvent('pointerup', {
+        pointerId: 1,
+        isPrimary: true,
+        clientX: 20,
+        clientY: 20,
+        bubbles: true,
+      }),
+    ),
+  )
+
+  const button = $('button')!
+  // Boundary ArrowLeft on a single-day grid should not emit a redundant onEventChange.
+  await act(() =>
+    button.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true })),
+  )
+  equal(changes, 0)
+
+  // Canceling an active drag with Escape must suppress the subsequent click activation.
+  await act(() =>
+    button.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        pointerId: 2,
+        isPrimary: true,
+        clientX: 20,
+        clientY: 20,
+        bubbles: true,
+      }),
+    ),
+  )
+  await act(() =>
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })),
+  )
+  await act(() => button.click())
+  equal(activated, 0)
+})
