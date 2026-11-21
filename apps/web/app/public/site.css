@@ -1714,9 +1714,6 @@ html[data-font='geist-serif'] {
   gap: 16px;
   width: 100%;
 }
-.example-tab-note {
-  padding-inline: 12px;
-}
 .doc-demo-feedback {
   display: block;
   color: var(--rf-muted);

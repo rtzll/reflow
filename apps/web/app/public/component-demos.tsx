@@ -1,3 +1,4 @@
+import { ProjectTabs } from './project-tabs.tsx'
 import type { ExampleImages } from '../assets.ts'
 import { SettingsDialogExample } from './settings-dialog-example.tsx'
 import { BannerMockPage, bannerStatuses } from './banner-example.tsx'
@@ -114,7 +115,6 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  Tabs,
   Textarea,
   ThinkingIndicator,
   ThinkingSteps,
@@ -1556,13 +1556,9 @@ const userMenu = (
     ),
   ],
   tabs: [
-    demo(
-      'With Icons',
-      'icons',
-      `<Tabs label="Navigation" items={[\n  { value: 'home', label: 'Home', icon: homeIcon },\n  { value: 'inbox', label: 'Inbox', icon: inboxIcon },\n  { value: 'settings', label: 'Settings', icon: settingsIcon },\n]} />`,
-    ),
-    demo('Active Label', 'active-label', `<Tabs activeLabel label="Navigation" items={items} />`),
-    demo('Underline', 'underline', `<Tabs variant="underline" label="Workspace" items={items} />`),
+    demo('With Icons', 'icons', `<ProjectTabs icons />`),
+    demo('Active Label', 'active-label', `<ProjectTabs activeLabel />`),
+    demo('Underline', 'underline', `<ProjectTabs variant="underline" />`),
   ],
   textarea: [
     demo(
@@ -2971,22 +2967,11 @@ export function ComponentDemo(
         )
       case 'tabs':
         return (
-          <div class="doc-demo-fill">
-            <Tabs
-              label="Navigation"
-              activeLabel={variant === 'active-label'}
-              variant={variant === 'underline' ? 'underline' : 'pill'}
-              items={['Teamspaces', 'Recents', 'Favorites', 'Shared'].map((label, position) => ({
-                value: label.toLowerCase(),
-                label,
-                panel: <p class="example-note example-tab-note">{label} content goes here.</p>,
-                icon:
-                  variant !== 'underline' && variant !== 'basic'
-                    ? icon((['square-library', 'clock', 'star', 'users'] as const)[position])
-                    : undefined,
-              }))}
-            />
-          </div>
+          <ProjectTabs
+            icons={variant === 'icons'}
+            activeLabel={variant === 'active-label'}
+            variant={variant === 'underline' ? 'underline' : 'pill'}
+          />
         )
       case 'thinking-indicator':
         return (

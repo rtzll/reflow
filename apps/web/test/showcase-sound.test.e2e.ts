@@ -112,13 +112,13 @@ it('plays quiet cues on committed changes and stays silent when muted', async (t
 
   await visit('/docs/tabs')
   const tabs = page.locator('.doc-preview-stage[data-playground]')
-  await tabs.getByRole('tab', { name: 'Teamspaces' }).press('ArrowRight')
-  const recents = tabs.getByRole('tab', { name: 'Recents' })
-  await expect(recents).toBeFocused()
+  await tabs.getByRole('tab', { name: 'Files' }).press('ArrowRight')
+  const activity = tabs.getByRole('tab', { name: 'Activity' })
+  await expect(activity).toBeFocused()
   expect(await audioStarts()).toBe(0)
-  await cue(() => recents.press('Enter'))
+  await cue(() => activity.press('Enter'))
   const selected = await audioStarts()
-  await recents.press('Enter')
+  await activity.press('Enter')
   expect(await audioStarts()).toBe(selected)
 
   await visit('/docs/accordion')

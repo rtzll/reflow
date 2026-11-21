@@ -1,3 +1,4 @@
+import { ProjectTabs } from './project-tabs.tsx'
 import { ComponentDirectory } from './component-directory.tsx'
 import { components } from './catalog-entries.ts'
 import { ProjectTreeExample } from './project-tree-example.tsx'
@@ -76,7 +77,6 @@ import {
   Slider,
   Spinner,
   Switch,
-  Tabs,
   Textarea,
   ThinkingIndicator,
   ThinkingSteps,
@@ -291,34 +291,7 @@ export const Example = clientEntry(
             </div>
           )
         case 'tabs':
-          if (handle.props.showcase)
-            return (
-              <Tabs
-                label="Navigation"
-                activeLabel
-                defaultValue="home"
-                items={[
-                  { value: 'home', label: 'Home', icon: <Icon name="home" /> },
-                  { value: 'chat', label: 'Chat', icon: <Icon name="message-circle" /> },
-                  { value: 'inbox', label: 'Inbox', icon: <Icon name="inbox" /> },
-                ]}
-              />
-            )
-          return (
-            <div className="doc-demo-fill">
-              <Tabs
-                label="Workspace"
-                defaultValue="teamspaces"
-                items={['Teamspaces', 'Recents', 'Favorites', 'Shared'].map((label) => ({
-                  value: label.toLowerCase(),
-                  label,
-                  panel: (
-                    <p className="example-note example-tab-note">{label} content goes here.</p>
-                  ),
-                }))}
-              />
-            </div>
-          )
+          return <ProjectTabs activeLabel={handle.props.showcase} />
         case 'hover-card':
           return <HoverCardDemo variant="basic" />
         case 'carousel':

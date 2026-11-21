@@ -2132,3 +2132,26 @@
   display: grid;
   gap: 6px;
 }
+
+.example-project-tabs {
+  display: grid;
+  gap: 8px;
+  inline-size: min(100%, 21rem);
+}
+.example-project-tabs ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  min-block-size: 6rem;
+}
+.example-project-tabs li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-block: 6px;
+  border-top: 1px solid var(--rf-border);
+}
+.example-project-tabs small {
+  margin-inline-start: auto;
+  color: var(--rf-muted);
+}

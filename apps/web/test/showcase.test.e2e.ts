@@ -14,8 +14,8 @@ it('hydrates previews across docs and deep-linked demo pages', async (t) => {
   })
 
   await open(page, '/docs/tabs?theme=dark&density=compact')
-  await page.locator('.doc-preview').first().getByRole('tab', { name: 'Recents' }).click()
-  await page.locator('.doc-preview').first().getByRole('tabpanel', { name: 'Recents' }).waitFor()
+  await page.locator('.doc-preview').first().getByRole('tab', { name: 'Activity' }).click()
+  await page.locator('.doc-preview').first().getByRole('tabpanel', { name: 'Activity' }).waitFor()
   assert.equal(await page.locator('html').getAttribute('data-density'), 'compact')
 
   await page.getByRole('link', { name: 'Sidebar', exact: true }).click()

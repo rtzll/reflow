@@ -96,8 +96,8 @@ try {
   })
   await openShowcase('/docs/tabs?theme=dark&density=compact')
   const preview = page.locator('.doc-preview').first()
-  await preview.getByRole('tab', { name: 'Recents' }).click()
-  await expect(preview.getByRole('tabpanel', { name: 'Recents' })).toBeVisible()
+  await preview.getByRole('tab', { name: 'Activity' }).click()
+  await expect(preview.getByRole('tabpanel', { name: 'Activity' })).toBeVisible()
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
   await expect(page.locator('html')).toHaveAttribute('data-density', 'compact')
 

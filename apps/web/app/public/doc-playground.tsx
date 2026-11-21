@@ -1,3 +1,4 @@
+import { ProjectTabs } from './project-tabs.tsx'
 import { TeamDirectory } from './team-table-example.tsx'
 import { TeamspacesExample } from './teamspaces-example.tsx'
 import { ProjectTreeExample } from './project-tree-example.tsx'
@@ -71,7 +72,6 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  Tabs,
   Textarea,
   ThinkingIndicator,
   ThinkingSteps,
@@ -1117,19 +1117,11 @@ export function PlaygroundExample(
         )
       case 'tabs':
         return (
-          <div class="doc-demo-wide">
-            <Tabs
-              label="Navigation"
-              variant={v.variant === 'underline' ? 'underline' : 'pill'}
-              activeLabel={Boolean(v.activeLabel)}
-              size={density}
-              items={['Teamspaces', 'Recents', 'Favorites', 'Shared'].map((label) => ({
-                value: label.toLowerCase(),
-                label,
-                panel: <p>{label} content goes here.</p>,
-              }))}
-            />
-          </div>
+          <ProjectTabs
+            variant={v.variant === 'underline' ? 'underline' : 'pill'}
+            activeLabel={Boolean(v.activeLabel)}
+            size={density}
+          />
         )
       case 'textarea':
         return (

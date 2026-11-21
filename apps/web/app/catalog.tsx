@@ -309,8 +309,7 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
   },
   tabs: {
     description:
-      'Switch between related views using a moving selection indicator and arrow-key navigation.',
-    code: `import { Tabs } from '@rtzll/reflow'\n\n<Tabs label="Workspace" defaultValue="item-1" items={[\n  { value: 'overview', label: 'Overview', panel: <p>Overview</p> },\n  { value: 'activity', label: 'Activity', panel: <p>Activity</p> },\n]} />`,
+      'Explore a project’s files, recent activity, and members. Use the arrow keys to focus a tab and Enter to open its panel.',
     props: [
       { name: 'items', type: 'TabItem[]', description: 'Tab labels and panel contents.' },
       { name: 'defaultValue', type: 'string', description: 'Initially selected tab.' },

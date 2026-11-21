@@ -28,12 +28,7 @@ export function documentationCode(slug: string, fragment: string): string {
   const options = `const options = ['Apple', 'Banana', 'Cherry', 'Mango'].map((label) => ({ value: label.toLowerCase(), label }))`
   if (uses('options')) setup.push(options)
   if (uses('items') && /\{items\}|\bitems\.map/.test(markup)) {
-    if (slug === 'tabs')
-      setup.push(
-        `const items = ['Home', 'Inbox', 'Settings'].map((label) => ({ value: label.toLowerCase(), label, panel: <p>{label}</p> }))`,
-      )
-    else if (slug === 'accordion')
-      setup.push(`const items = ${JSON.stringify(accordionItems, null, 2)}`)
+    if (slug === 'accordion') setup.push(`const items = ${JSON.stringify(accordionItems, null, 2)}`)
     else
       setup.push(
         `const items = ['Apple', 'Banana', 'Cherry', 'Mango'].map((label) => ({ value: label.toLowerCase(), label }))`,
@@ -442,7 +437,7 @@ ${opening} sections={sections}
     case 'table':
       return `<Table><TableBody><TableRow selected={${values.selected}} hover={${values.hover}}><TableCell>Alice</TableCell><TableCell>Engineer</TableCell></TableRow></TableBody></Table>`
     case 'tabs':
-      return `${opening} label="Navigation" items={items} />`
+      return `<ProjectTabs variant="${values.variant}" size="${values.size}" activeLabel={${values.activeLabel}} />`
     case 'textarea':
       return `${opening} aria-label="Message"${values.invalid ? ' aria-invalid="true"' : ''} placeholder="Type your message here." />`
     case 'thinking-steps':
