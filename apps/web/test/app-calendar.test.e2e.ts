@@ -95,3 +95,64 @@ it('switches days and reschedules a selected event on a narrow screen', async (t
   await expect(page.getByRole('button', { name: /^Research synthesis,/ })).toBeHidden()
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
 })
+
+it('previews a dragged time range and opens a new event with its day, start, and duration', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await open(page, '/apps/calendar')
+  const board = page.getByRole('group', { name: 'Timed events' })
+  const rect = (await board.boundingBox())!
+  const hour = rect.height / 8
+  const sunday = rect.x + (rect.width * 6.5) / 7
+  await page.mouse.move(sunday, rect.y + hour * 1.28)
+  await page.mouse.down()
+  const range = board.locator('.week-range')
+  await expect(range).toHaveText('10:15–10:30')
+  await page.mouse.move(sunday - rect.width / 7, rect.y + hour * 2.52, { steps: 5 })
+  await expect(range).toHaveText('10:15–11:30')
+  await expect(page.getByRole('dialog')).toBeHidden()
+  await page.mouse.up()
+  const editor = page.getByRole('dialog', { name: 'New event' })
+  await expect(editor.getByLabel('Day', { exact: true })).toHaveValue('6')
+  await expect(editor.getByLabel('Start (UTC)')).toHaveValue('10:15')
+  await expect(editor.getByLabel('Duration (minutes)')).toHaveValue('75')
+  await editor.getByLabel('Event title').fill('Studio visit')
+  await editor.getByRole('button', { name: 'Create event' }).click()
+  await expect(
+    board.getByRole('button', { name: 'Studio visit, Sunday, 10:15–11:30 UTC' }),
+  ).toBeFocused()
+  await expect(range).toHaveCount(0)
+})
+
+it('cancels range selection and clamps it at the end of the displayed day', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 390, height: 900 })
+  await open(page, '/apps/calendar')
+  await page
+    .getByRole('group', { name: 'Day to display' })
+    .getByRole('button', { name: 'Saturday' })
+    .click()
+  const board = page.getByRole('group', { name: 'Timed events' })
+  const rect = (await board.boundingBox())!
+  const x = rect.x + rect.width / 2
+  await page.mouse.move(x, rect.y + 1)
+  await page.mouse.down()
+  await page.mouse.move(x, rect.y + rect.height / 4)
+  const range = board.locator('.week-range')
+  await expect(range).toHaveText('09:00–11:00')
+  await page.keyboard.press('Escape')
+  await page.mouse.up()
+  await expect(range).toHaveCount(0)
+  await expect(page.getByRole('dialog')).toBeHidden()
+  await page.mouse.move(x, rect.y + rect.height - 2)
+  await page.mouse.down()
+  await page.mouse.move(x, rect.y + rect.height + 12)
+  await expect(range).toHaveText('16:45–17:00')
+  await page.mouse.up()
+  const editor = page.getByRole('dialog', { name: 'New event' })
+  await expect(editor.getByLabel('Day', { exact: true })).toHaveValue('5')
+  await expect(editor.getByLabel('Start (UTC)')).toHaveValue('16:45')
+  await expect(editor.getByLabel('Duration (minutes)')).toHaveValue('15')
+  await editor.getByRole('button', { name: 'Cancel' }).click()
+  await expect(page.getByText('No events on Saturday.')).toBeVisible()
+})
