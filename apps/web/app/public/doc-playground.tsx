@@ -1,3 +1,4 @@
+import { BuildTimings } from './build-timings.tsx'
 import { StudioBookings } from './studio-bookings.tsx'
 import { ProjectTabs } from './project-tabs.tsx'
 import { TeamDirectory } from './team-table-example.tsx'
@@ -163,6 +164,7 @@ export const playgroundControls: Record<string, readonly Control[]> = {
     toggle('loading', 'Loading'),
     disabled,
   ],
+  'bar-chart': [toggle('showAxes', 'Show axis labels', true)],
   'time-grid': [choice('stepMinutes', 'Booking interval (minutes)', ['30', '15', '10'])],
   calendar: [
     choice('mode', 'Mode', ['range', 'single']),
@@ -642,6 +644,8 @@ export function PlaygroundExample(
             />
           </div>
         )
+      case 'bar-chart':
+        return <BuildTimings showAxes={Boolean(v.showAxes)} />
       case 'time-grid':
         return <StudioBookings stepMinutes={Number(v.stepMinutes)} />
       case 'calendar':

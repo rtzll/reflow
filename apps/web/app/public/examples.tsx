@@ -1,3 +1,4 @@
+import { BuildTimings } from './build-timings.tsx'
 import { StudioBookings } from './studio-bookings.tsx'
 import { ProjectTabs } from './project-tabs.tsx'
 import { ComponentDirectory } from './component-directory.tsx'
@@ -511,6 +512,8 @@ export const Example = clientEntry(
           )
         case 'banner':
           return handle.props.showcase ? <BannerPreview /> : <BannerExample />
+        case 'bar-chart':
+          return <BuildTimings />
         case 'time-grid':
           return <StudioBookings />
         case 'calendar':

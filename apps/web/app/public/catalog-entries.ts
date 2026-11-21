@@ -5,6 +5,7 @@ export const components = [
   ['avatar', 'Avatar'],
   ['badge', 'Badge'],
   ['banner', 'Banner'],
+  ['bar-chart', 'BarChart'],
   ['breadcrumb', 'Breadcrumb'],
   ['button', 'Button'],
   ['calendar', 'Calendar'],

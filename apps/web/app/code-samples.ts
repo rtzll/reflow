@@ -112,6 +112,7 @@ async function loadSamples(): Promise<CodeSamples> {
 
 // Ship the source behind each interactive docs example so its Code tab stays in sync.
 const exampleFiles: Record<string, string> = {
+  'bar-chart': 'build-timings',
   'time-grid': 'studio-bookings',
   pagination: 'component-directory',
   toolbar: 'file-preview',

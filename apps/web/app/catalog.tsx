@@ -102,6 +102,10 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       'A trail of links to the current page with a shared hover, step menus, and collapse on overflow.',
     code: `<Breadcrumb items={[\n  { label: 'Home', href: '/' },\n  { label: 'Components', href: '/docs' },\n  { label: 'Breadcrumb' },\n]} />`,
   },
+  'bar-chart': {
+    description: 'Compare values on a zero baseline and inspect a category by pointer or keyboard.',
+    code: '<BuildTimings showAxes={true} />',
+  },
   'time-grid': {
     description:
       'Book a time slot, move an appointment, or change its duration using the pointer or keyboard.',

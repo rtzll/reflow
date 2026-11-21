@@ -125,6 +125,7 @@ export function playgroundFragment(slug: string, values: PlaygroundValues): stri
   if (slug === 'data-table') return teamTableCode(Number(values.pageSize))
   if (slug === 'context-menu')
     return projectFileMenuCode(values.size === 'compact' ? 'compact' : 'default')
+  if (slug === 'bar-chart') return `<BuildTimings showAxes={${Boolean(values.showAxes)}} />`
   if (slug === 'time-grid') return `<StudioBookings stepMinutes={${Number(values.stepMinutes)}} />`
   if (slug === 'dropdown') return dropdownPlaygroundCode(values)
   if (slug === 'date-picker') return datePickerPlaygroundCode(values)

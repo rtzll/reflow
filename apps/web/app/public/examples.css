@@ -2080,3 +2080,33 @@
   color: var(--rf-muted);
   font-size: var(--rf-text-caption);
 }
+
+.build-timings {
+  --rf-bar-chart-height: 7rem;
+  display: grid;
+  gap: 16px;
+  width: min(100%, 32rem);
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-panel-radius);
+  background: var(--rf-surface-2);
+}
+.build-timings header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px;
+}
+.build-timings header span,
+.build-timings p {
+  color: var(--rf-muted);
+}
+.build-timings p {
+  margin: 0;
+  border-top: 1px solid var(--rf-border);
+  padding-top: 8px;
+}
+.build-timings p strong {
+  color: var(--rf-fg);
+}

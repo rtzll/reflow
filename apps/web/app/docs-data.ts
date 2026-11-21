@@ -1124,6 +1124,86 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  'bar-chart': [
+    {
+      name: 'BarChart',
+      props: [
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the chart.',
+          required: true,
+        },
+        {
+          name: 'items',
+          type: 'readonly Item[]',
+          description: 'Categories in display order. Item extends BarChartItem.',
+          required: true,
+        },
+        {
+          name: 'range',
+          type: '{ start: string; end: string }',
+          description:
+            'Highlight the inclusive interval between two item IDs. A single ID at both ends marks the current category.',
+          required: false,
+        },
+        {
+          name: 'formatValue',
+          type: '(value: number) => string',
+          description: 'Format the quantity and its units for tooltips and accessible bar names.',
+          required: false,
+        },
+        {
+          name: 'href',
+          type: '(item: Item) => string',
+          description: 'Render each bar as a native link to its drill-down view.',
+          required: false,
+        },
+        {
+          name: 'onSelect',
+          type: '(item: Item, event: MouseEvent) => void',
+          description:
+            'Activate a bar by pointer or keyboard. With href, call event.preventDefault() to handle an ordinary link activation.',
+          required: false,
+        },
+        {
+          name: 'describedBy',
+          type: 'string',
+          description: 'IDs of supplementary instructions or a summary.',
+          required: false,
+        },
+        {
+          name: 'showAxes',
+          type: 'boolean',
+          description: 'Show numeric and category labels along the axes.',
+          required: false,
+        },
+      ],
+    },
+    {
+      name: 'BarChartItem',
+      props: [
+        {
+          name: 'id',
+          type: 'string',
+          description: 'Unique category ID, stable across updates.',
+          required: true,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Short category name for the axis and tooltip.',
+          required: true,
+        },
+        {
+          name: 'value',
+          type: 'number',
+          description: 'Finite nonnegative magnitude. Zero sits on the baseline.',
+          required: true,
+        },
+      ],
+    },
+  ],
   'time-grid': [
     {
       name: 'TimeGrid',
@@ -5734,6 +5814,7 @@ export const componentDefaults: Record<string, Record<string, string>> = {
     label: 'Notifications',
     offset: '24',
   },
+  BarChart: { showAxes: 'true' },
   TimeGrid: { stepMinutes: '15' },
   Calendar: {
     label: 'Calendar',
