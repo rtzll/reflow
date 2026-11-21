@@ -1,3 +1,4 @@
+import { StudioBookings } from './studio-bookings.tsx'
 import { ProjectTabs } from './project-tabs.tsx'
 import { TeamDirectory } from './team-table-example.tsx'
 import { TeamspacesExample } from './teamspaces-example.tsx'
@@ -162,6 +163,7 @@ export const playgroundControls: Record<string, readonly Control[]> = {
     toggle('loading', 'Loading'),
     disabled,
   ],
+  'time-grid': [choice('stepMinutes', 'Booking interval (minutes)', ['30', '15', '10'])],
   calendar: [
     choice('mode', 'Mode', ['range', 'single']),
     choice('numberOfMonths', 'Months', ['2', '1']),
@@ -640,6 +642,8 @@ export function PlaygroundExample(
             />
           </div>
         )
+      case 'time-grid':
+        return <StudioBookings stepMinutes={Number(v.stepMinutes)} />
       case 'calendar':
         return (
           <Calendar

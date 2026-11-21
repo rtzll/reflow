@@ -1124,6 +1124,155 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  'time-grid': [
+    {
+      name: 'TimeGrid',
+      props: [
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the schedule.',
+          required: true,
+        },
+        {
+          name: 'days',
+          type: 'readonly string[]',
+          description: 'Column names in display order. Event day indexes refer to this list.',
+          required: true,
+        },
+        {
+          name: 'events',
+          type: 'readonly E[]',
+          description: 'Controlled event collection. E extends TimeGridEvent.',
+          required: true,
+        },
+        {
+          name: 'startMinute',
+          type: 'number',
+          description:
+            'Inclusive start in local wall-clock minutes. Omit to fit earlier events and include 09:00.',
+          required: false,
+        },
+        {
+          name: 'endMinute',
+          type: 'number',
+          description:
+            'Exclusive end in local wall-clock minutes. Omit to fit later events and include 17:00.',
+          required: false,
+        },
+        {
+          name: 'stepMinutes',
+          type: 'number',
+          description:
+            'Positive whole-minute increment for pointer and keyboard edits, anchored at the start of the grid.',
+          required: false,
+        },
+        {
+          name: 'compactDay',
+          type: 'number',
+          description: 'Zero-based day to show on viewports up to 800px. Omit to keep all columns.',
+          required: false,
+        },
+        {
+          name: 'selectedId',
+          type: 'string',
+          description: 'ID of the selected event.',
+          required: false,
+        },
+        {
+          name: 'onSelect',
+          type: '(event: E) => void',
+          description: 'Select an event by clicking it or pressing Space.',
+          required: false,
+        },
+        {
+          name: 'onActivate',
+          type: '(event: E) => void',
+          description: 'Open an event with Enter. Clicking also opens when onSelect is omitted.',
+          required: false,
+        },
+        {
+          name: 'onEventChange',
+          type: '(event: E) => void',
+          description: 'Request a move or resize. Update the collection to accept the change.',
+          required: false,
+        },
+        {
+          name: 'onCreate',
+          type: '(range: TimeGridRange) => void',
+          description:
+            'Receive a selected interval on pointer release or Enter. Open a form or append an event.',
+          required: false,
+        },
+        {
+          name: 'getEventLabel',
+          type: '(event: E) => string',
+          description: 'Customize the accessible event name, for example to include a timezone.',
+          required: false,
+        },
+        {
+          name: 'getEventClass',
+          type: '(event: E) => string',
+          description: 'Add a class to style the event surface and accent.',
+          required: false,
+        },
+        {
+          name: 'describedBy',
+          type: 'string',
+          description: 'IDs of supplementary instructions for the board and its event buttons.',
+          required: false,
+        },
+      ],
+    },
+    {
+      name: 'TimeGridEvent',
+      props: [
+        {
+          name: 'id',
+          type: 'string',
+          description: 'Unique, stable event identifier.',
+          required: true,
+        },
+        {
+          name: 'title',
+          type: 'string',
+          description: 'Visible appointment title.',
+          required: true,
+        },
+        { name: 'day', type: 'number', description: 'Zero-based index in days.', required: true },
+        {
+          name: 'start',
+          type: 'number',
+          description: 'Minutes since midnight on that day.',
+          required: true,
+        },
+        {
+          name: 'duration',
+          type: 'number',
+          description: 'Positive duration in whole minutes, ending by midnight.',
+          required: true,
+        },
+      ],
+    },
+    {
+      name: 'TimeGridRange',
+      props: [
+        { name: 'day', type: 'number', description: 'Zero-based index in days.', required: true },
+        {
+          name: 'start',
+          type: 'number',
+          description: 'Minutes since midnight on that day.',
+          required: true,
+        },
+        {
+          name: 'duration',
+          type: 'number',
+          description: 'Positive duration in whole minutes, ending by midnight.',
+          required: true,
+        },
+      ],
+    },
+  ],
   calendar: [
     {
       name: 'Calendar',
@@ -5585,6 +5734,7 @@ export const componentDefaults: Record<string, Record<string, string>> = {
     label: 'Notifications',
     offset: '24',
   },
+  TimeGrid: { stepMinutes: '15' },
   Calendar: {
     label: 'Calendar',
     mode: 'single',

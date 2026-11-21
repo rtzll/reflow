@@ -2051,3 +2051,32 @@
   margin-inline-start: auto;
   color: var(--rf-muted);
 }
+
+.booking-example {
+  --rf-time-grid-hour-size: 48px;
+  width: min(100%, 34rem);
+  overflow: hidden;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-panel-radius);
+  background: var(--rf-surface-2);
+}
+.booking-example > header,
+.booking-example > footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  padding: 8px 12px;
+}
+.booking-example > header {
+  border-bottom: 1px solid var(--rf-border);
+}
+.booking-example > footer {
+  min-height: 38px;
+  border-top: 1px solid var(--rf-border);
+}
+.booking-example > :is(header, footer) > span {
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption);
+}

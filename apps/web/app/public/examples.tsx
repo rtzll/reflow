@@ -1,3 +1,4 @@
+import { StudioBookings } from './studio-bookings.tsx'
 import { ProjectTabs } from './project-tabs.tsx'
 import { ComponentDirectory } from './component-directory.tsx'
 import { components } from './catalog-entries.ts'
@@ -510,6 +511,8 @@ export const Example = clientEntry(
           )
         case 'banner':
           return handle.props.showcase ? <BannerPreview /> : <BannerExample />
+        case 'time-grid':
+          return <StudioBookings />
         case 'calendar':
           if (handle.props.gallery) return <GalleryCalendar />
           return (

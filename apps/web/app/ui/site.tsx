@@ -512,6 +512,7 @@ const galleryOrder = [
   'switch',
   'markdown',
   'combobox',
+  'time-grid',
 ]
 
 const wideCards = new Set([
@@ -983,9 +984,11 @@ const demoOrder = [
   'context-menu',
   'data-table',
   'markdown',
+  'time-grid',
 ]
 
 const customizableSlides = new Set([
+  'time-grid',
   'markdown',
   'data-table',
   'context-menu',

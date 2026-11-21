@@ -53,6 +53,7 @@ export const components = [
   ['textarea', 'Textarea'],
   ['thinking-indicator', 'ThinkingIndicator'],
   ['thinking-steps', 'ThinkingSteps'],
+  ['time-grid', 'TimeGrid'],
   ['toaster', 'Toaster'],
   ['toolbar', 'Toolbar'],
   ['tooltip', 'Tooltip'],

@@ -9,6 +9,7 @@ import { playCopyError } from './showcase-sound.ts'
 import { initialPlayground, PlaygroundExample, type PlaygroundValues } from './doc-playground.tsx'
 
 const sharedPlaygroundDefaults = new Set([
+  'time-grid',
   'color-picker',
   'combobox',
   'command-menu',

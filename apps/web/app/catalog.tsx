@@ -102,6 +102,11 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       'A trail of links to the current page with a shared hover, step menus, and collapse on overflow.',
     code: `<Breadcrumb items={[\n  { label: 'Home', href: '/' },\n  { label: 'Components', href: '/docs' },\n  { label: 'Breadcrumb' },\n]} />`,
   },
+  'time-grid': {
+    description:
+      'Book a time slot, move an appointment, or change its duration using the pointer or keyboard.',
+    code: '<StudioBookings stepMinutes={30} />',
+  },
   calendar: {
     description:
       'An accessible calendar for selecting one date or a range, with month navigation and optional week numbers.',
