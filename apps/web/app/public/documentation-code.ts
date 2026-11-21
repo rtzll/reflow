@@ -1,3 +1,4 @@
+import { teamTableCode } from './team-table-example.tsx'
 import { projectFileMenuCode } from './project-tree-example.tsx'
 import { bannerFragment } from './banner-example.tsx'
 import {
@@ -128,6 +129,7 @@ export function documentationCode(slug: string, fragment: string): string {
 }
 
 export function playgroundFragment(slug: string, values: PlaygroundValues): string {
+  if (slug === 'data-table') return teamTableCode(Number(values.pageSize))
   if (slug === 'context-menu')
     return projectFileMenuCode(values.size === 'compact' ? 'compact' : 'default')
   if (slug === 'dropdown') return dropdownPlaygroundCode(values)

@@ -8,7 +8,7 @@ Reflow started as a native Remix port of the [Fluid Functionalism](https://githu
 - **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`
 - **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `Pagination`, `Resizable`, `Sidebar`, `Tabs`, `Toolbar`, `Tree`
 - **Menus and overlays** · `AlertDialog`, `CommandMenu`, `ContextMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
-- **Display and feedback** · `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `Card`, `CodeBlock`, `Progress`, `Skeleton`, `Spinner`, `Table`, `Toaster`
+- **Display and feedback** · `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `Card`, `CodeBlock`, `DataTable`, `Progress`, `Skeleton`, `Spinner`, `Table`, `Toaster`
 - **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `Citation`, `InputMessage`, `QueuedStack`, `ThinkingIndicator`, `ThinkingSteps`, `TriggerMenu`
 
 Every component has a docs page with a live preview, highlighted code and an API table; most also have a playground. Run the showcase and open `/docs`, or read the [usage examples](../apps/web/app/public/examples.tsx).
@@ -67,6 +67,7 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 7 | `Toolbar` (shipped) | [UI SDK](https://ui-sdk.dev/docs/react/components/toolbar) | Button, keyboard focus navigation |
 | 7 | `Tree` (shipped) | [UI SDK](https://ui-sdk.dev/docs/react/components/tree) | Fluid hover, Resizable, CodeBlock |
 | 8 | [`ContextMenu` (implemented, awaiting release)](context-menu.md) | [Fluid Functionalism ContextMenu](https://github.com/mickadesign/fluid-functionalism/blob/13fef6966428b5b16952f1609aa3814e9bdf115b/registry/default/context-menu.tsx) | Dropdown's menu surface and Remix UI's menu primitive, demonstrated in the project tree |
+| 8 | [`DataTable` (implemented, awaiting release)](data-table.md) | [Fluid Functionalism DataTable](https://github.com/mickadesign/fluid-functionalism/blob/13fef6966428b5b16952f1609aa3814e9bdf115b/registry/default/data-table.tsx) | Table, Pagination, ContextMenu, Dropdown, Input, and Skeleton |
 
 ### Decisions so far
 

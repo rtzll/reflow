@@ -5,7 +5,7 @@ import { open, showcaseServer } from './showcase-router.ts'
 it('keeps the team table at the same height while loading', async (t) => {
   const page = await t.serve(showcaseServer)
   await open(page, '/')
-  const tile = page.locator('[data-component="table"]')
+  const tile = page.locator('[data-component="data-table"]')
   const table = tile.getByRole('table', { name: 'Team members' })
   const before = (await table.boundingBox())!.height
   await tile.getByRole('switch', { name: 'Loading preview' }).click()

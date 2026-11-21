@@ -1,3 +1,4 @@
+import { TeamDirectory } from './team-table-example.tsx'
 import { ProjectTreeExample } from './project-tree-example.tsx'
 import { SidebarPlaygroundExample } from './sidebar-demos.tsx'
 import { CarouselExample } from './carousel-example.tsx'
@@ -109,6 +110,7 @@ const label = (initial: string): Control => ({
 })
 
 export const playgroundControls: Record<string, readonly Control[]> = {
+  'data-table': [choice('pageSize', 'Rows per page', ['4', '8', '12'])],
   'context-menu': [size],
   progress: [
     toggle('indeterminate', 'Indeterminate'),
@@ -572,6 +574,8 @@ export function PlaygroundExample(
     const disabled = Boolean(v.disabled)
     const content = <p>Build thoughtful interfaces with fluid motion.</p>
     switch (slug) {
+      case 'data-table':
+        return <TeamDirectory pageSize={Number(v.pageSize)} />
       case 'context-menu':
         return <ProjectTreeExample size={density} />
       case 'button':

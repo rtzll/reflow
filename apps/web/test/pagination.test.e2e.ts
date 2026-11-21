@@ -6,7 +6,7 @@ it('opens a team page from its URL and follows links without JavaScript', async 
   const page = await t.serve(showcaseServer)
   await page.route('**/*.js', (route) => route.abort())
   await open(page, '/?teamPage=2', { hydrate: false })
-  const tile = page.locator('[data-component="table"]')
+  const tile = page.locator('[data-component="data-table"]')
   const navigation = tile.getByRole('navigation', { name: 'Team pages' })
   await expect(navigation.getByRole('link', { name: 'Page 2' })).toHaveAttribute(
     'aria-current',
@@ -24,7 +24,7 @@ it('changes the team page without moving the table in the viewport', async (t) =
   const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1440, height: 900 })
   await open(page, '/')
-  const tile = page.locator('[data-component="table"]')
+  const tile = page.locator('[data-component="data-table"]')
   const navigation = tile.getByRole('navigation', { name: 'Team pages' })
   const table = tile.getByRole('table', { name: 'Team members' })
   await table.evaluate((element) => element.scrollIntoView({ block: 'center' }))

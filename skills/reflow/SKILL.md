@@ -33,6 +33,8 @@ Use Pagination with a one-based page number and a function that returns real pag
 
 Use Toolbar for grouped actions that share a tab stop. Name the group and use the arrows to move between its buttons or links. Text fields keep their own tab stops.
 
+Use DataTable when readers need to filter, sort, or page through records. Supply stable row keys and columns with comparable values. Use a cell renderer for rich markup. Supply href and route state for link-based navigation. Table remains useful for short, hand-authored tables.
+
 Use ContextMenu for actions on focusable rows. Set `target` to a selector for eligible descendants and use the element passed to `onSelect` to identify the row. Users can right-click it or press Shift+F10.
 
 Use Tree for expandable hierarchies with selection. Give every item a unique value and use the selected leaf to drive an adjacent preview.

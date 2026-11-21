@@ -2043,6 +2043,12 @@
   padding-inline-start: 1.25em;
 }
 
+.example-team-directory {
+  display: grid;
+  width: min(100%, 566px);
+  gap: 8px;
+}
+
 .example-table-actions {
   display: flex;
   flex-wrap: wrap;

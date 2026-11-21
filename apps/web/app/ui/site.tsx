@@ -495,7 +495,7 @@ const galleryOrder = [
   'input-message',
   'input-group',
   'button',
-  'table',
+  'data-table',
   'alert-dialog',
   'calendar',
   'date-picker',
@@ -518,7 +518,7 @@ const wideCards = new Set([
   'banner',
   'accordion',
   'carousel',
-  'table',
+  'data-table',
   'calendar',
   'chat-message',
   'toaster',
@@ -968,10 +968,12 @@ const demoOrder = [
   'code-block',
   'chat-layout',
   'context-menu',
+  'data-table',
   'settings',
 ]
 
 const customizableSlides = new Set([
+  'data-table',
   'context-menu',
   'accordion',
   'ask-user-questions',

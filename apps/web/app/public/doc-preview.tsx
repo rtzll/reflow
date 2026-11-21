@@ -13,6 +13,7 @@ const sharedPlaygroundDefaults = new Set([
   'combobox',
   'command-menu',
   'context-menu',
+  'data-table',
   'date-picker',
   'dropdown',
   'input-message',

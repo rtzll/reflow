@@ -30,8 +30,15 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
         {
           name: 'href',
           type: '(page: number) => string',
-          required: true,
-          description: 'Builds the URL for every available page link.',
+          required: false,
+          description: 'Builds a native link for each page. Supply href or onPageChange.',
+        },
+        {
+          name: 'onPageChange',
+          type: '(page: number) => void',
+          required: false,
+          description:
+            'Use buttons to change a locally managed page. Supply this when href is omitted.',
         },
         {
           name: 'resetScroll',
@@ -50,6 +57,172 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           type: "'default' | 'compact'",
           required: false,
           description: 'Control density.',
+        },
+      ],
+    },
+  ],
+  'data-table': [
+    {
+      name: 'DataTable',
+      props: [
+        {
+          name: 'label',
+          type: 'string',
+          required: true,
+          description: 'Accessible table name, also used to name the filter and pagination.',
+        },
+        {
+          name: 'rows',
+          type: 'readonly Row[]',
+          required: true,
+          description: 'Complete collection to filter, sort, and page through.',
+        },
+        {
+          name: 'columns',
+          type: 'readonly DataTableColumn<Row>[]',
+          required: true,
+          description: 'Column definitions in display order.',
+        },
+        {
+          name: 'rowKey',
+          type: '(row: Row) => string',
+          required: true,
+          description: 'Unique, stable record identifier used for rendering and row actions.',
+        },
+        {
+          name: 'pageSize',
+          type: 'number',
+          required: false,
+          description: 'Positive integer row limit. Omit to display all matching rows.',
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          required: false,
+          description: 'Table and control density.',
+        },
+        {
+          name: 'state',
+          type: 'DataTableState',
+          required: false,
+          description: 'Current filter, sort, and one-based page in controlled mode.',
+        },
+        {
+          name: 'defaultState',
+          type: 'Partial<DataTableState>',
+          required: false,
+          description: 'Initial values in locally managed mode.',
+        },
+        {
+          name: 'onStateChange',
+          type: '(next: DataTableState) => void',
+          required: false,
+          description:
+            'Reports local edits. Linked sorting and pagination navigate to href instead.',
+        },
+        {
+          name: 'href',
+          type: '(next: DataTableState) => string',
+          required: false,
+          description:
+            'Builds native links for sorting and pagination. Read their state from the destination URL.',
+        },
+        {
+          name: 'paginationLabel',
+          type: 'string',
+          required: false,
+          description: 'Accessible name for page navigation.',
+        },
+        {
+          name: 'filterInput',
+          type: '{ name?: string; form?: string }',
+          required: false,
+          description:
+            'Connect the search input to an application-owned GET form for submission before hydration.',
+        },
+        {
+          name: 'loading',
+          type: 'boolean',
+          required: false,
+          description: 'Marks the table busy and replaces visible row contents with skeletons.',
+        },
+        {
+          name: 'rowActions',
+          type: '{ items: readonly DropdownItem[]; label: (row: Row) => string; onSelect: (action: string, row: Row, checked?: boolean) => void }',
+          required: false,
+          description:
+            'Shows the same actions in a named button menu and a context menu for each record.',
+        },
+        {
+          name: 'id',
+          type: 'string',
+          required: false,
+          description: 'ID of the native table, suitable for a URL fragment.',
+        },
+      ],
+    },
+    {
+      name: 'DataTableColumn',
+      props: [
+        {
+          name: 'id',
+          type: 'string',
+          required: true,
+          description: 'Unique stable column identifier, also used in sort state.',
+        },
+        {
+          name: 'label',
+          type: 'string',
+          required: true,
+          description: 'Column header text.',
+        },
+        {
+          name: 'value',
+          type: '(row: Row) => string | number',
+          required: true,
+          description: 'Value used for filtering, sorting, and default display.',
+        },
+        {
+          name: 'cell',
+          type: '(row: Row) => RemixNode',
+          required: false,
+          description: 'Optional formatted display. Filtering and sorting still use value.',
+        },
+        {
+          name: 'sortable',
+          type: 'boolean',
+          required: false,
+          description: 'Set to false for a static column header. Defaults to true.',
+        },
+        {
+          name: 'rowHeader',
+          type: 'boolean',
+          required: false,
+          description: 'Render each cell as a native row header.',
+        },
+      ],
+    },
+    {
+      name: 'DataTableState',
+      props: [
+        {
+          name: 'filter',
+          type: 'string',
+          required: true,
+          description: 'Case-insensitive text matched across column values.',
+        },
+        {
+          name: 'sort',
+          type: "{ column: string; direction: 'ascending' | 'descending' } | null",
+          required: true,
+          description: 'Active column and direction. Null preserves input order.',
+        },
+        {
+          name: 'page',
+          type: 'number',
+          required: true,
+          description:
+            'One-based page, clamped to the available results. Filter and sort edits reset it to one.',
         },
       ],
     },
@@ -5348,6 +5521,8 @@ export const componentDefaults: Record<string, Record<string, string>> = {
   Citation: { index: '1', variant: 'number', placement: 'top', openDelay: '300' },
   CodeBlock: { startLine: '1', copyable: 'true' },
   'highlight()': { lang: 'text', notation: 'true' },
+  DataTable: { defaultState: "{ filter: '', sort: null, page: 1 }", loading: 'false' },
+  DataTableColumn: { sortable: 'true', rowHeader: 'false' },
   Drawer: {
     side: 'bottom',
     triggerVariant: 'tertiary',

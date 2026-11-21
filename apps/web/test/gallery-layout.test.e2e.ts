@@ -36,7 +36,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'input-message',
     'input-group',
     'button',
-    'table',
+    'data-table',
     'alert-dialog',
     'calendar',
     'date-picker',
@@ -124,7 +124,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
         gallery.locator(`article[data-component="${slug}"]`).boundingBox()
       const [table, dialog, datePicker, wideCalendar, segmented, thinking] = await Promise.all(
         [
-          'table',
+          'data-table',
           'alert-dialog',
           'date-picker',
           'calendar',

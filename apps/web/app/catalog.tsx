@@ -7,6 +7,7 @@ import { questionCode, questionPlayground } from './public/question-example-data
 import { requestFormCode } from './public/request-form-example.tsx'
 import { carouselExampleCode } from './public/carousel-example.tsx'
 import { triggerMenuCode } from './public/component-example-data.ts'
+import { teamTableCode } from './public/team-table-example.tsx'
 import { projectFileMenuCode } from './public/project-tree-example.tsx'
 import { SystemPage } from './public/system-page.tsx'
 import { SkillPage } from './public/skill-page.tsx'
@@ -31,6 +32,11 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
   pagination: {
     description: 'Previous, next, and numbered links for navigating page-based results.',
     code: `<Pagination page={2} pageCount={3} href={(page) => \`/?teamPage=\${page}#team-table\`} />`,
+  },
+  'data-table': {
+    description:
+      'Filter, sort, and page through records. Open a row’s actions from its menu button or with a right-click.',
+    code: teamTableCode(),
   },
   'context-menu': {
     description: 'Right-click a file or press Shift+F10 on its row to open file actions.',
@@ -365,7 +371,7 @@ export function galleryCatalog(
               showcase
               gallery={gallery}
               avatar={avatar}
-              tableQuery={component.slug === 'table' ? query?.toString() : undefined}
+              tableQuery={component.slug === 'data-table' ? query?.toString() : undefined}
               code={component.slug === 'code-block' ? samples?.card : undefined}
             />
           ),

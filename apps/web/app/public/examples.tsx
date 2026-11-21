@@ -1,5 +1,5 @@
 import { ProjectTreeExample } from './project-tree-example.tsx'
-import { TeamTableExample } from './team-table-example.tsx'
+import { TeamDirectory, TeamTableExample } from './team-table-example.tsx'
 import { BreadcrumbDemo } from './breadcrumb-example.tsx'
 import { SegmentedControlDemo } from './segmented-control-example.tsx'
 import { PopoverDemo } from './popover-example.tsx'
@@ -1011,15 +1011,13 @@ export const Example = clientEntry(
         case 'skeleton':
           return <TeamTableExample loading />
         case 'data-table':
-          return <TeamTableExample interactive />
-        case 'table':
           return (
-            <TeamTableExample
-              gallery={handle.props.gallery}
-              showcase={handle.props.showcase}
-              query={handle.props.tableQuery}
+            <TeamDirectory
+              query={handle.props.gallery ? (handle.props.tableQuery ?? '') : undefined}
             />
           )
+        case 'table':
+          return <TeamTableExample showcase={handle.props.showcase} />
         case 'textarea':
           return (
             <div className="example-block" style={{ width: 'min(100%, 384px)' }}>

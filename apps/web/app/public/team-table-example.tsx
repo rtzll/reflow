@@ -15,100 +15,120 @@ import { RoutedDataTable } from './routed-data-table.tsx'
 import type { Handle } from 'remix/component'
 
 const members = [
-  ['Alice', 'Engineer', 'Active'],
-  ['Bob', 'Designer', 'Away'],
-  ['Carol', 'PM', 'Active'],
-  ['Dan', 'Engineer', 'Offline'],
-  ['Emilia', 'Engineer', 'Active'],
-  ['Faye', 'Designer', 'Away'],
-  ['Gus', 'PM', 'Offline'],
-  ['Hugo', 'Engineer', 'Active'],
-  ['Iris', 'Designer', 'Away'],
-  ['Jo', 'PM', 'Active'],
-  ['Kai', 'Engineer', 'Active'],
-  ['Lina', 'Designer', 'Offline'],
+  { name: 'Alice', role: 'Engineer', status: 'Active' },
+  { name: 'Bob', role: 'Designer', status: 'Away' },
+  { name: 'Carol', role: 'PM', status: 'Active' },
+  { name: 'Dan', role: 'Engineer', status: 'Offline' },
+  { name: 'Emilia', role: 'Engineer', status: 'Active' },
+  { name: 'Faye', role: 'Designer', status: 'Away' },
+  { name: 'Gus', role: 'PM', status: 'Offline' },
+  { name: 'Hugo', role: 'Engineer', status: 'Active' },
+  { name: 'Iris', role: 'Designer', status: 'Away' },
+  { name: 'Jo', role: 'PM', status: 'Active' },
+  { name: 'Kai', role: 'Engineer', status: 'Active' },
+  { name: 'Lina', role: 'Designer', status: 'Offline' },
 ]
 
 type Member = (typeof members)[number]
-const columns: readonly DataTableColumn<Member>[] = ['Name', 'Role', 'Status'].map(
-  (label, index) => ({
-    id: label.toLowerCase(),
-    label,
-    value: (member) => member[index]!,
-  }),
-)
+const columns: readonly DataTableColumn<Member>[] = [
+  { id: 'name', label: 'Name', value: (member) => member.name },
+  { id: 'role', label: 'Role', value: (member) => member.role },
+  { id: 'status', label: 'Status', value: (member) => member.status },
+]
 
-export function TeamTableExample(
-  handle: Handle<{
-    gallery?: boolean
-    interactive?: boolean
-    showcase?: boolean
-    loading?: boolean
-    query?: string
-    pageSize?: number
-  }>,
-) {
-  let loading = handle.props.loading ?? false
+export function teamTableCode(pageSize = 4) {
+  const examples = members.map((member) => '  ' + JSON.stringify(member)).join(',\n')
+  return `const members = [
+${examples}
+]
+
+let message = ''
+async function copyName(name: string) {
+  try {
+    await navigator.clipboard.writeText(name)
+    message = 'Copied ' + name + '.'
+  } catch {
+    message = 'Could not copy the member name.'
+  }
+  if (!handle.signal.aborted) void handle.update()
+}
+
+<DataTable label="Team members" rows={members} rowKey={(member) => member.name}
+  pageSize={${pageSize}} size="compact" columns={[
+    { id: 'name', label: 'Name', value: (member) => member.name },
+    { id: 'role', label: 'Role', value: (member) => member.role },
+    { id: 'status', label: 'Status', value: (member) => member.status },
+  ]} rowActions={{
+    label: (member) => 'Actions for ' + member.name,
+    items: [{ value: 'copy', label: 'Copy member name' }],
+    onSelect: (_action, member) => void copyName(member.name),
+  }} />
+<span role="status">{message}</span>`
+}
+
+export function TeamDirectory(handle: Handle<{ query?: string; pageSize?: number }>) {
+  let loading = false
   let message = ''
   async function copyName(member: Member) {
     try {
-      await navigator.clipboard.writeText(member[0]!)
-      message = `Copied ${member[0]}.`
+      await navigator.clipboard.writeText(member.name)
+      message = `Copied ${member.name}.`
     } catch {
       message = 'Could not copy the member name.'
     }
     if (!handle.signal.aborted) void handle.update()
   }
   return () => {
-    const { gallery, interactive, query = '', pageSize = 4 } = handle.props
-    const rows = members.slice(0, 3)
-    const loadingControl = (
-      <Switch
-        label="Loading preview"
-        size="compact"
-        checked={loading}
-        onCheckedChange={(value) => {
-          loading = value
-          void handle.update()
-        }}
-      />
-    )
-    if (interactive || gallery) {
-      const props: DataTableProps<Member> = {
-        label: 'Team members',
-        rows: members,
-        columns,
-        rowKey: (member) => member[0]!,
-        pageSize,
-        paginationLabel: 'Team pages',
-        size: 'compact',
-        loading,
-        rowActions: {
-          items: [{ value: 'copy', label: 'Copy member name' }],
-          label: (member) => `Actions for ${member[0]}`,
-          onSelect: (_action, member) => {
-            void copyName(member)
-          },
+    const { query, pageSize = 4 } = handle.props
+    const props: DataTableProps<Member> = {
+      label: 'Team members',
+      rows: members,
+      columns,
+      rowKey: (member) => member.name,
+      pageSize,
+      paginationLabel: 'Team pages',
+      size: 'compact',
+      loading,
+      rowActions: {
+        items: [{ value: 'copy', label: 'Copy member name' }],
+        label: (member) => `Actions for ${member.name}`,
+        onSelect: (_action, member) => {
+          void copyName(member)
         },
-      }
-      return (
-        <div class="example-block example-team-directory">
-          {gallery ? (
-            <RoutedDataTable
-              {...props}
-              id="team-table"
-              route={{ path: '/', search: query, prefix: 'team', anchor: 'team-table' }}
-            />
-          ) : (
-            <DataTable {...props} />
-          )}
-          <div class="example-table-actions">
-            {loadingControl}
-            <span role="status">{message}</span>
-          </div>
-        </div>
-      )
+      },
     }
+    return (
+      <div class="example-block example-team-directory">
+        {query !== undefined ? (
+          <RoutedDataTable
+            {...props}
+            id="team-table"
+            route={{ path: '/', search: query, prefix: 'team', anchor: 'team-table' }}
+          />
+        ) : (
+          <DataTable {...props} />
+        )}
+        <div class="example-table-actions">
+          <Switch
+            label="Loading preview"
+            size="compact"
+            checked={loading}
+            onCheckedChange={(value) => {
+              loading = value
+              void handle.update()
+            }}
+          />
+          <span role="status">{message}</span>
+        </div>
+      </div>
+    )
+  }
+}
+
+export function TeamTableExample(handle: Handle<{ showcase?: boolean; loading?: boolean }>) {
+  let loading = handle.props.loading ?? false
+  return () => {
+    const rows = members.slice(0, 3)
     return (
       <div
         class="example-block"
@@ -124,17 +144,33 @@ export function TeamTableExample(
           </TableHeader>
           <TableBody aria-hidden={loading || undefined}>
             {rows.map((row) => (
-              <TableRow key={row[0]} hover={!loading}>
-                {row.map((cell, column) => (
-                  <TableCell key={column}>
-                    {loading ? <Skeleton width={column === 1 ? '78%' : '60%'} /> : cell}
+              <TableRow key={row.name} hover={!loading}>
+                {columns.map((column) => (
+                  <TableCell key={column.id}>
+                    {loading ? (
+                      <Skeleton width={column.id === 'role' ? '78%' : '60%'} />
+                    ) : (
+                      column.value(row)
+                    )}
                   </TableCell>
                 ))}
               </TableRow>
             ))}
           </TableBody>
         </Table>
-        {handle.props.loading && <div class="example-table-actions">{loadingControl}</div>}
+        {handle.props.loading && (
+          <div class="example-table-actions">
+            <Switch
+              label="Loading preview"
+              size="compact"
+              checked={loading}
+              onCheckedChange={(value) => {
+                loading = value
+                void handle.update()
+              }}
+            />
+          </div>
+        )}
       </div>
     )
   }
