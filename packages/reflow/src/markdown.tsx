@@ -41,7 +41,7 @@ export function Markdown(handle: Handle<MarkdownProps>) {
         },
       },
     })
-    .use(rehypeReflow)
+    .use(rehypeReflow, handle.id + '-')
 
   return () => (
     <div
@@ -110,36 +110,48 @@ function text(node: HastNodes): string {
   return 'children' in node ? node.children.map(text).join('') : ''
 }
 
-// Give each task its label and the layout Markdown's stylesheet expects:
-// a read-only checkbox beside the item's content.
-function rehypeReflow() {
+// Prefix the footnote heading's fixed ID per instance, and give each task its label and the
+// layout Markdown's stylesheet expects: a read-only checkbox beside the item's content.
+function rehypeReflow(prefix: string) {
+  const labelId = prefix + 'footnote-label'
   function visit(node: HastNodes) {
+    if (node.type === 'element') {
+      if (node.properties.id === 'footnote-label') node.properties.id = labelId
+      const described = node.properties.ariaDescribedBy
+      if (Array.isArray(described))
+        node.properties.ariaDescribedBy = described.map((id) =>
+          id === 'footnote-label' ? labelId : id,
+        )
+    }
     if (!('children' in node)) return
     for (const child of node.children) visit(child)
-    if (node.type !== 'element' || node.tagName !== 'li') return
-    const classes = node.properties.className
-    if (!Array.isArray(classes) || !classes.includes('task-list-item')) return
-    // In a loose list the checkbox sits inside the item's first paragraph.
-    const host: Element =
-      node.children.find(
-        (child): child is Element => child.type === 'element' && child.tagName === 'p',
-      ) ?? node
-    const index = host.children.findIndex(
-      (child) => child.type === 'element' && child.tagName === 'input',
-    )
-    if (index === -1) return
-    const [input] = host.children.splice(index, 1) as [Element]
-    const content = node.children.filter(
-      (child) => !(child.type === 'element' && ['ul', 'ol'].includes(child.tagName)),
-    )
-    input.properties.ariaLabel = content.map(text).join('').trim()
-    node.properties.className = ['rf-markdown-task']
-    node.children = [
-      input,
-      { type: 'element', tagName: 'div', properties: {}, children: node.children },
-    ] as ElementContent[]
+    if (node.type === 'element' && node.tagName === 'li') task(node)
   }
   return (tree: HastRoot) => visit(tree)
+}
+
+function task(node: Element) {
+  const classes = node.properties.className
+  if (!Array.isArray(classes) || !classes.includes('task-list-item')) return
+  // In a loose list the checkbox sits inside the item's first paragraph.
+  const host: Element =
+    node.children.find(
+      (child): child is Element => child.type === 'element' && child.tagName === 'p',
+    ) ?? node
+  const index = host.children.findIndex(
+    (child) => child.type === 'element' && child.tagName === 'input',
+  )
+  if (index === -1) return
+  const [input] = host.children.splice(index, 1) as [Element]
+  const content = node.children.filter(
+    (child) => !(child.type === 'element' && ['ul', 'ol'].includes(child.tagName)),
+  )
+  input.properties.ariaLabel = content.map(text).join('').trim()
+  node.properties.className = ['rf-markdown-task']
+  node.children = [
+    input,
+    { type: 'element', tagName: 'div', properties: {}, children: node.children },
+  ] as ElementContent[]
 }
 
 interface PartProps {

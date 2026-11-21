@@ -48,6 +48,27 @@ describe('Markdown', () => {
     )
   })
 
+  it('keeps footnote IDs unique when several replies share a page', (t) => {
+    const source = 'A claim.[^1]\n\n[^1]: The source.'
+    const { container, cleanup } = render(
+      <>
+        <Markdown source={source} />
+        <Markdown source={source} />
+      </>,
+    )
+    t.after(cleanup)
+    const ids = Array.from(container.querySelectorAll('[id]'), (node) => node.id)
+    equal(ids.length, 6)
+    equal(new Set(ids).size, ids.length)
+    for (const reference of container.querySelectorAll('[aria-describedby]')) {
+      ok(
+        reference
+          .closest('.rf-markdown')!
+          .querySelector('#' + CSS.escape(reference.getAttribute('aria-describedby')!)),
+      )
+    }
+  })
+
   it('shows a raw HTML block as a paragraph of text', (t) => {
     const { $, cleanup } = render(
       <Markdown source={'Before\n\n<script>alert(1)</script>\n\nAfter'} />,
