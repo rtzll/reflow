@@ -93,3 +93,28 @@ it('rounds the axis up to whole steps and scales bars to it', (t) => {
   ok($('[data-peak]'))
   equal(Number.parseFloat($('[data-peak] .rf-bar-chart-fill')!.style.height).toFixed(2), '95.83')
 })
+
+it('handles extreme finite peaks without NaN or Infinity, marks static current bars, and avoids duplicate descriptions', (t) => {
+  const { $, $$, cleanup } = render(
+    <div>
+      <BarChart
+        label="Huge"
+        items={[{ id: 'max', label: 'Max', value: 1.6e308 }]}
+        range={{ start: 'max', end: 'max' }}
+      />
+      <BarChart label="Tiny" items={[{ id: 'min', label: 'Min', value: Number.MIN_VALUE }]} />
+      <BarChart label="Interactive" items={bars} onSelect={() => {}} />
+    </div>,
+  )
+  t.after(cleanup)
+  const charts = Array.from($$('.rf-bar-chart'))
+  equal(charts[0]!.querySelector('[data-current]')?.getAttribute('role'), 'img')
+  equal(charts[0]!.querySelector('.rf-bar-chart-fill')?.getAttribute('style'), 'height: 100%;')
+  equal(charts[1]!.querySelector('.rf-bar-chart-fill')?.getAttribute('style'), 'height: 100%;')
+  for (const label of Array.from($$('.rf-bar-chart-grid > span > span'), (el) => el.textContent)) {
+    ok(label && !label.includes('NaN') && !label.includes('∞'))
+  }
+  const firstButton = charts[2]!.querySelector('button')!
+  equal(firstButton.getAttribute('aria-describedby'), null)
+  ok(firstButton.getAttribute('aria-label'))
+})

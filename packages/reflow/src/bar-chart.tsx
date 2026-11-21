@@ -33,8 +33,12 @@ const axisNumbers = new Intl.NumberFormat('en', {
 const roundSteps = [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]
 function axisTop(peak: number) {
   const step = peak / 3
+  if (!(step > 0)) return peak
   const magnitude = 10 ** Math.floor(Math.log10(step))
-  return 3 * magnitude * roundSteps.find((round) => round * magnitude >= step * (1 - 1e-9))!
+  if (!(magnitude > 0)) return peak
+  const round = roundSteps.find((value) => value * magnitude >= step * (1 - 1e-9)) ?? 10
+  const top = 3 * magnitude * round
+  return Number.isFinite(top) && top >= peak ? top : peak
 }
 
 export function BarChart<Item extends BarChartItem>(handle: Handle<BarChartProps<Item>>) {
@@ -63,7 +67,9 @@ export function BarChart<Item extends BarChartItem>(handle: Handle<BarChartProps
     const start = items.findIndex(({ id }) => id === range?.start)
     const end = items.findIndex(({ id }) => id === range?.end)
     const bounded = start >= 0 && end >= 0
-    const tabId = items.some(({ id }) => id === focusId) ? focusId : items[bounded ? start : 0]?.id
+    const tabId = items.some(({ id }) => id === focusId)
+      ? focusId
+      : items[bounded ? Math.min(start, end) : 0]?.id
     const last = items.length - 1
     const ticks = new Set([0, Math.round(last / 3), Math.round((last * 2) / 3), last])
 
@@ -98,6 +104,7 @@ export function BarChart<Item extends BarChartItem>(handle: Handle<BarChartProps
                   class: 'rf-bar-chart-column',
                   'aria-label': name,
                   'data-active': active || undefined,
+                  'data-current': current || undefined,
                   'data-peak': (peak > 0 && value === peak) || undefined,
                 }
                 const fill = (
@@ -120,14 +127,16 @@ export function BarChart<Item extends BarChartItem>(handle: Handle<BarChartProps
                     followCursor="x"
                     delayDuration={100}
                     renderTrigger={(trigger) => {
+                      const { 'aria-describedby': _tooltipId, ...triggerProps } = trigger
                       const control = {
                         ...attrs,
-                        ...trigger,
+                        ...triggerProps,
                         tabIndex: !mounted || item.id === tabId ? 0 : -1,
                         'aria-current': current || undefined,
                         mix: [
                           trigger.mix,
                           on<HTMLElement, 'focus'>('focus', () => {
+                            if (focusId === item.id) return
                             focusId = item.id
                             void handle.update()
                           }),
@@ -146,7 +155,12 @@ export function BarChart<Item extends BarChartItem>(handle: Handle<BarChartProps
                           on<HTMLElement, 'click'>('click', (event) => {
                             if (
                               href &&
-                              (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+                              (event.defaultPrevented ||
+                                event.button !== 0 ||
+                                event.metaKey ||
+                                event.ctrlKey ||
+                                event.shiftKey ||
+                                event.altKey)
                             )
                               return
                             onSelect?.(item, event)

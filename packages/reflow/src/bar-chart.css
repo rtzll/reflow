@@ -6,7 +6,8 @@
   font-variant-numeric: tabular-nums;
 }
 .rf-bar-chart[data-axes] {
-  padding-inline-start: 2.25rem;
+  padding-inline-start: var(--rf-bar-chart-axis-width, 2.5rem);
+  padding-block-start: 0.5lh;
 }
 .rf-bar-chart-grid {
   position: absolute;
@@ -14,13 +15,16 @@
   height: var(--plot-height);
   pointer-events: none;
 }
+.rf-bar-chart[data-axes] .rf-bar-chart-grid {
+  inset-block-start: 0.5lh;
+}
 .rf-bar-chart-grid > span {
   position: absolute;
   inset-inline: 0;
   border-block-start: 1px dashed var(--rf-border);
 }
 .rf-bar-chart[data-axes] .rf-bar-chart-grid > span {
-  inset-inline-start: 2.25rem;
+  inset-inline-start: var(--rf-bar-chart-axis-width, 2.5rem);
 }
 .rf-bar-chart-grid > span:last-child {
   border-block-start-style: solid;
@@ -73,7 +77,7 @@
 :is(a, button).rf-bar-chart-column:is(:hover, :focus-visible, [aria-current]) {
   background: var(--rf-hover);
 }
-.rf-bar-chart-column[aria-current]::after {
+.rf-bar-chart-column:is([aria-current], [data-current])::after {
   content: '';
   position: absolute;
   inset-inline: 12%;
@@ -92,12 +96,16 @@
 }
 .rf-bar-chart-ticks span {
   justify-self: center;
+  min-inline-size: 0;
 }
 .rf-bar-chart-ticks span:first-child {
   justify-self: start;
 }
 .rf-bar-chart-ticks span:last-child {
   justify-self: end;
+}
+.rf-bar-chart-ticks span:only-child {
+  justify-self: center;
 }
 .rf-bar-chart-empty {
   color: var(--rf-muted);
@@ -113,7 +121,7 @@
     background: CanvasText;
     box-shadow: none;
   }
-  .rf-bar-chart-column[aria-current]::after {
+  .rf-bar-chart-column:is([aria-current], [data-current])::after {
     border-color: Highlight;
   }
   .rf-bar-chart-column:focus-visible {
