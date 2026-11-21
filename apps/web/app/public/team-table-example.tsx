@@ -1,4 +1,5 @@
 import {
+  Button,
   RoutedDataTable,
   DataTable,
   type DataTableColumn,
@@ -13,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from '@rtzll/reflow'
-import type { Handle } from 'remix/component'
+import { on, type Handle } from 'remix/component'
 
 const members = [
   { name: 'Alice', role: 'Engineer', status: 'Active' },
@@ -58,10 +59,11 @@ ${examples}
 
 let message = ''
 let loading = false
-async function copyValue(value: string) {
+async function copyValue(value: string, success = 'Copied ' + value + '.', clear?: () => void) {
   try {
     await navigator.clipboard.writeText(value)
-    message = 'Copied ' + value + '.'
+    message = success
+    clear?.()
   } catch {
     message = 'Could not copy to the clipboard.'
   }
@@ -84,7 +86,16 @@ const memberActions = [
     { id: 'name', label: 'Name', value: (member) => member.name },
     { id: 'role', label: 'Role', value: (member) => member.role },
     { id: 'status', label: 'Status', value: (member) => member.status },
-  ]} rowActions={{
+  ]} rowSelection={{
+    label: (member) => 'Select ' + member.name,
+    actions: (rows, clear) => (
+      <Button size="compact" variant="secondary" mix={on('click', () => void copyValue(
+        rows.map((row) => row.name).join('\\n'),
+        'Copied ' + rows.length + (rows.length === 1 ? ' member name.' : ' member names.'),
+        clear,
+      ))}>Copy names</Button>
+    ),
+  }} rowActions={{
     label: (member) => 'Actions for ' + member.name,
     items: memberActions,
     onSelect: (key, member) => {
@@ -97,10 +108,11 @@ const memberActions = [
 export function TeamDirectory(handle: Handle<{ query?: string; pageSize?: number }>) {
   let loading = false
   let message = ''
-  async function copyValue(value: string) {
+  async function copyValue(value: string, success = 'Copied ' + value + '.', clear?: () => void) {
     try {
       await navigator.clipboard.writeText(value)
-      message = `Copied ${value}.`
+      message = success
+      clear?.()
     } catch {
       message = 'Could not copy to the clipboard.'
     }
@@ -128,6 +140,26 @@ export function TeamDirectory(handle: Handle<{ query?: string; pageSize?: number
           }}
         />
       ),
+      rowSelection: {
+        label: (member) => 'Select ' + member.name,
+        actions: (rows, clear) => (
+          <Button
+            size="compact"
+            variant="secondary"
+            mix={on(
+              'click',
+              () =>
+                void copyValue(
+                  rows.map((row) => row.name).join('\n'),
+                  `Copied ${rows.length} member ${rows.length === 1 ? 'name' : 'names'}.`,
+                  clear,
+                ),
+            )}
+          >
+            Copy names
+          </Button>
+        ),
+      },
       rowActions: {
         items: memberActions,
         label: (member) => `Actions for ${member.name}`,

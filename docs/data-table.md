@@ -14,6 +14,16 @@ Import `RoutedDataTable` from `@rtzll/reflow` to bind a table to the request URL
 
 The team directory uses `teamFilter`, `teamSort`, `teamDir`, and `teamPage`, preserving the gallery search and the `#team-table` anchor. Component API references with more than twelve primary props use the same controls with an `api` prefix. They retain row headers, the required marker, type, default, and description. The standalone example at `/docs/data-table` demonstrates local state and configurable page size.
 
+## Selecting rows
+
+Pass `rowSelection` with a `label(row)` for each checkbox and an `actions(rows, clear)` renderer. The renderer receives selected records in displayed order and appears in a toolbar with the selection count and a clear button. Team members uses it to copy one name per line. A successful copy clears the selection and returns keyboard focus to the last focused row checkbox, or the first visible checkbox when the page header selected all rows. A failed copy leaves the selection available to retry.
+
+The header checkbox selects or clears the current page and shows a mixed state for a partial selection. With a row checkbox focused, Space toggles it and Up or Down moves to the adjacent checkbox. Shift with either arrow extends or contracts a range in the displayed order. Rows checked independently before the gesture stay selected when the range contracts.
+
+Selection lasts for the current filter, sort, page and page size. Changing any of these, showing loading placeholders, or changing the visible sequence of row keys clears it. Updating cell values while keeping the same view and keys preserves the checks. Selection stays local to the table and the URL continues to describe its view.
+
+Custom collections can use `createRangeSelection<Key>()` from `@rtzll/reflow`. Call `extend(orderedKeys, selectedKeys, fromKey, toKey)` on each adjacent Shift move and use its returned set. Call `reset()` when the gesture ends or the order changes. Issues uses the same helper for the board and list.
+
 ## Interaction and verification
 
 Use native column headers with `aria-sort` on the active column. Sorting controls, search, and pagination work from the keyboard. When row actions are supplied, a visible menu button and ContextMenu both act on the same record after filtering or sorting. Present the loaded row count to assistive technology, use Table’s density and surface styles, and keep skeleton rows aligned while loading.

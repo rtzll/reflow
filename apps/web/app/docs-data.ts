@@ -234,6 +234,13 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
             'Shows the same actions in a named button menu and a context menu for each record.',
         },
         {
+          name: 'rowSelection',
+          type: '{ label: (row: Row) => string; actions: (rows: readonly Row[], clear: () => void) => RemixNode }',
+          description:
+            'Adds native checkboxes for the current page. Render bulk actions for the selected rows in display order. Call clear after success to restore focus. Changing the view or entering loading clears the checks.',
+          required: false,
+        },
+        {
           name: 'id',
           type: 'string',
           required: false,
