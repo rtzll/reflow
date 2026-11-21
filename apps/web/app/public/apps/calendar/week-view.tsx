@@ -1,38 +1,14 @@
-import { Button, Icon } from '@rtzll/reflow'
+import { Button, Icon, TimeGrid } from '@rtzll/reflow'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import { EventEditor } from './event-editor.tsx'
-import {
-  calendars,
-  clamp,
-  days,
-  eventLabel,
-  positionEvents,
-  seedEvents,
-  timeLabel,
-  type WeekEvent,
-} from './events.ts'
-
-interface Drag {
-  pointer: number
-  original: WeekEvent
-  preview: WeekEvent
-  mode: 'create' | 'move' | 'resize'
-  x: number
-  y: number
-  dayWidth: number
-  minutesPerPixel: number
-  first: number
-  last: number
-  singleDay: boolean
-}
+import { calendars, days, eventLabel, seedEvents, timeLabel, type WeekEvent } from './events.ts'
 
 export const WeekView = clientEntry(import.meta.url, function WeekView(handle: Handle) {
   let events = [...seedEvents]
   let selectedId: string | undefined = 'kickoff'
   let activeDay = 0
   let draft: WeekEvent | undefined
-  let drag: Drag | undefined
-  let board: HTMLDivElement
+  let schedule: HTMLElement
   let message = ''
 
   function showEditor(event?: WeekEvent) {
@@ -65,144 +41,12 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
     select(event)
     if (focus)
       handle.queueTask(() =>
-        board.querySelector<HTMLElement>(`[data-event="${event.id}"]`)?.focus(),
+        schedule.querySelector<HTMLElement>(`[data-event="${CSS.escape(event.id)}"]`)?.focus(),
       )
   }
 
-  function keydown(e: KeyboardEvent, event: WeekEvent) {
-    if (e.altKey || e.metaKey || e.ctrlKey) return
-    const next = { ...event }
-    switch (e.key) {
-      case 'ArrowLeft':
-        next.day = clamp(event.day - 1, 0, 6)
-        break
-      case 'ArrowRight':
-        next.day = clamp(event.day + 1, 0, 6)
-        break
-      case 'ArrowDown':
-      case 'ArrowUp': {
-        const delta = e.key === 'ArrowDown' ? 15 : -15
-        if (e.shiftKey) next.duration = clamp(event.duration + delta, 15, 1440 - event.start)
-        else next.start = clamp(event.start + delta, 0, 1440 - event.duration)
-        break
-      }
-      case 'Enter':
-        e.preventDefault()
-        select(event)
-        showEditor(event)
-        return
-      default:
-        return
-    }
-    e.preventDefault()
-    save(next, true)
-  }
-
-  function begin(e: PointerEvent, first: number, last: number, event?: WeekEvent) {
-    if (drag || e.button !== 0 || !e.isPrimary || (!event && e.target !== board)) return
-    const rect = board.getBoundingClientRect()
-    const singleDay = getComputedStyle(board).getPropertyValue('--day-count').trim() === '1'
-    const dayWidth = rect.width / (singleDay ? 1 : days.length)
-    const minutesPerPixel = (last - first) / rect.height
-    const original = event ?? {
-      id: '',
-      title: '',
-      day: singleDay
-        ? activeDay
-        : clamp(Math.floor((e.clientX - rect.left) / dayWidth), 0, days.length - 1),
-      start: clamp(
-        first + 15 * Math.floor(((e.clientY - rect.top) * minutesPerPixel) / 15),
-        first,
-        last - 15,
-      ),
-      duration: 15,
-      calendar: 'Studio',
-    }
-    drag = {
-      pointer: e.pointerId,
-      original,
-      preview: original,
-      mode: !event
-        ? 'create'
-        : e.target instanceof Element && e.target.closest('.week-resize')
-          ? 'resize'
-          : 'move',
-      x: e.clientX,
-      y: e.clientY,
-      dayWidth,
-      minutesPerPixel,
-      first,
-      last,
-      singleDay,
-    }
-    board.setPointerCapture(e.pointerId)
-    if (event) select(event)
-    else handle.update()
-  }
-
-  function move(e: PointerEvent) {
-    if (!drag || e.pointerId !== drag.pointer) return
-    const { original, first, last } = drag
-    if (drag.mode === 'create') {
-      const minute = first + (e.clientY - board.getBoundingClientRect().top) * drag.minutesPerPixel
-      const end = clamp(Math.round(minute / 15) * 15, first, last)
-      drag.preview = {
-        ...original,
-        start: Math.min(original.start, end),
-        duration: Math.max(15, Math.abs(end - original.start)),
-      }
-      handle.update()
-      return
-    }
-    const delta = Math.round(((e.clientY - drag.y) * drag.minutesPerPixel) / 15) * 15
-    drag.preview =
-      drag.mode === 'resize'
-        ? { ...original, duration: clamp(original.duration + delta, 15, last - original.start) }
-        : {
-            ...original,
-            day: drag.singleDay
-              ? original.day
-              : clamp(original.day + Math.round((e.clientX - drag.x) / drag.dayWidth), 0, 6),
-            start: clamp(original.start + delta, first, last - original.duration),
-          }
-    handle.update()
-  }
-
-  function finish(e: PointerEvent) {
-    if (!drag || e.pointerId !== drag.pointer) return
-    move(e)
-    const { mode, preview } = drag
-    drag = undefined
-    if (mode === 'create') showEditor(preview)
-    else save(preview)
-  }
-
-  function cancel(e: PointerEvent) {
-    if (e.pointerId !== drag?.pointer) return
-    drag = undefined
-    handle.update()
-  }
-
   return () => {
-    const range = drag?.mode === 'create' ? drag.preview : undefined
-    const displayed =
-      drag && !range
-        ? events.map((event) => (event.id === drag!.original.id ? drag!.preview : event))
-        : events
-    const selected = displayed.find((event) => event.id === selectedId)
-    const first = Math.floor(Math.min(540, ...events.map((event) => event.start)) / 60) * 60
-    const last =
-      Math.ceil(Math.max(1020, ...events.map((event) => event.start + event.duration)) / 60) * 60
-    const hours = Array.from({ length: (last - first) / 60 }, (_, index) => first + index * 60)
-    function placement(event: WeekEvent, lane = 0, lanes = 1) {
-      return {
-        '--day': event.day,
-        '--lane': lane,
-        '--lanes': lanes,
-        top: `${(100 * (event.start - first)) / (last - first)}%`,
-        height: `calc(${(100 * event.duration) / (last - first)}% - 2px)`,
-      }
-    }
+    const selected = events.find((event) => event.id === selectedId)
     return (
       <article class="week-app">
         <header class="week-header">
@@ -214,7 +58,13 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
             New event
           </Button>
         </header>
-        <section class="week-schedule" aria-label="Studio schedule">
+        <section
+          class="week-schedule"
+          aria-label="Studio schedule"
+          mix={ref((node) => {
+            schedule = node as HTMLElement
+          })}
+        >
           <div class="week-toolbar">
             <h2>
               <Icon name="calendar" />
@@ -256,74 +106,20 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
               </div>
             ))}
           </div>
-          <div class="week-timeline" style={{ '--hours': hours.length }}>
-            <div class="week-times" aria-hidden="true">
-              {hours.map((hour) => (
-                <span key={hour}>{timeLabel(hour)}</span>
-              ))}
-            </div>
-            <div
-              class="week-board"
-              aria-label="Timed events"
-              role="group"
-              mix={[
-                ref((node, signal) => {
-                  board = node as HTMLDivElement
-                  board.ownerDocument.addEventListener(
-                    'keydown',
-                    (e) => {
-                      if (e.key !== 'Escape' || !drag) return
-                      e.preventDefault()
-                      board.releasePointerCapture(drag.pointer)
-                      drag = undefined
-                      handle.update()
-                    },
-                    { signal },
-                  )
-                }),
-                on<HTMLDivElement, 'pointerdown'>('pointerdown', (e) => begin(e, first, last)),
-                on<HTMLDivElement, 'pointermove'>('pointermove', move),
-                on<HTMLDivElement, 'pointerup'>('pointerup', finish),
-                on<HTMLDivElement, 'pointercancel'>('pointercancel', cancel),
-                on<HTMLDivElement, 'lostpointercapture'>('lostpointercapture', cancel),
-              ]}
-            >
-              {positionEvents(displayed).map(({ event, lane, lanes }) => (
-                <button
-                  key={event.id}
-                  type="button"
-                  class="week-event"
-                  data-event={event.id}
-                  data-calendar={event.calendar}
-                  data-visible={event.day === activeDay}
-                  data-short={event.duration <= 30}
-                  aria-label={eventLabel(event)}
-                  aria-pressed={event.id === selectedId}
-                  aria-describedby="week-shortcuts"
-                  title={eventLabel(event)}
-                  style={placement(event, lane, lanes)}
-                  mix={[
-                    on('pointerdown', (e) => begin(e, first, last, event)),
-                    on('keydown', (e) => keydown(e, event)),
-                    on('click', () => select(event)),
-                  ]}
-                >
-                  <span class="week-event-time">{timeLabel(event.start)}</span>
-                  <strong>{event.title}</strong>
-                  <span class="week-resize" aria-hidden="true" title="Drag to change duration" />
-                </button>
-              ))}
-              {range && (
-                <div
-                  class="week-event week-range"
-                  data-calendar={range.calendar}
-                  style={placement(range)}
-                >
-                  {timeLabel(range.start)}–{timeLabel(range.start + range.duration)}
-                </div>
-              )}
-            </div>
-          </div>
+          <TimeGrid
+            label="Timed events"
+            days={days}
+            events={events}
+            compactDay={activeDay}
+            selectedId={selectedId}
+            onSelect={select}
+            onActivate={showEditor}
+            onEventChange={(event) => save(event)}
+            onCreate={(range) => showEditor({ ...range, id: '', title: '', calendar: 'Studio' })}
+            getEventClass={(event) => 'week-' + event.calendar}
+            getEventLabel={eventLabel}
+            describedBy="week-shortcuts"
+          />
           {selected ? (
             <div class="week-detail" data-calendar={selected.calendar}>
               <div>

@@ -61,7 +61,7 @@ it('places overlapping events side by side and previews pointer moves and durati
   await expect(event).toHaveAttribute('aria-pressed', 'true')
   const moved = (await event.boundingBox())!
   expect(moved.width).toBeLessThan(original!.width / 2)
-  const edge = (await event.locator('.week-resize').boundingBox())!
+  const edge = (await event.locator('.rf-time-grid-resize').boundingBox())!
   await page.mouse.move(edge.x + edge.width / 2, edge.y + edge.height / 2)
   await page.mouse.down()
   await page.mouse.move(edge.x + edge.width / 2, edge.y + edge.height / 2 + board.height / 16)
@@ -106,7 +106,7 @@ it('previews a dragged time range and opens a new event with its day, start, and
   const sunday = rect.x + (rect.width * 6.5) / 7
   await page.mouse.move(sunday, rect.y + hour * 1.28)
   await page.mouse.down()
-  const range = board.locator('.week-range')
+  const range = board.locator('.rf-time-grid-range')
   await expect(range).toHaveText('10:15–10:30')
   await page.mouse.move(sunday - rect.width / 7, rect.y + hour * 2.52, { steps: 5 })
   await expect(range).toHaveText('10:15–11:30')
@@ -138,7 +138,7 @@ it('cancels range selection and clamps it at the end of the displayed day', asyn
   await page.mouse.move(x, rect.y + 1)
   await page.mouse.down()
   await page.mouse.move(x, rect.y + rect.height / 4)
-  const range = board.locator('.week-range')
+  const range = board.locator('.rf-time-grid-range')
   await expect(range).toHaveText('09:00–11:00')
   await page.keyboard.press('Escape')
   await page.mouse.up()

@@ -1,14 +1,11 @@
+import type { TimeGridEvent } from '@rtzll/reflow'
+
 export const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 export const calendars = ['Studio', 'Design', 'Focus'] as const
 export type CalendarName = (typeof calendars)[number]
 
-export interface WeekEvent {
-  id: string
-  title: string
+export interface WeekEvent extends TimeGridEvent {
   calendar: CalendarName
-  day: number
-  start: number
-  duration: number
 }
 
 // November 16–22, 2026. Wall-clock minutes in UTC keep the example independent
@@ -55,38 +52,4 @@ export function timeLabel(minutes: number) {
 
 export function eventLabel(event: WeekEvent) {
   return `${event.title}, ${days[event.day]}, ${timeLabel(event.start)}–${timeLabel(event.start + event.duration)} UTC`
-}
-
-export function clamp(value: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, value))
-}
-
-// Events that overlap transitively share a width. Reuse a lane as soon as its
-// previous event ends, including when an event starts at that exact minute.
-export function positionEvents(events: WeekEvent[]) {
-  const positioned: { event: WeekEvent; lane: number; lanes: number }[] = []
-  for (let day = 0; day < days.length; day++) {
-    const sorted = events.filter((event) => event.day === day).sort((a, b) => a.start - b.start)
-    let groupStart = positioned.length
-    let groupEnd = -1
-    let laneEnds: number[] = []
-    function finishGroup() {
-      for (let i = groupStart; i < positioned.length; i++) positioned[i]!.lanes = laneEnds.length
-    }
-    for (const event of sorted) {
-      if (event.start >= groupEnd) {
-        finishGroup()
-        groupStart = positioned.length
-        laneEnds = []
-      }
-      let lane = laneEnds.findIndex((end) => end <= event.start)
-      if (lane === -1) lane = laneEnds.length
-      const end = event.start + event.duration
-      laneEnds[lane] = end
-      groupEnd = Math.max(groupEnd, end)
-      positioned.push({ event, lane, lanes: 1 })
-    }
-    finishGroup()
-  }
-  return positioned
 }

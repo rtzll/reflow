@@ -1,22 +1,25 @@
 .week-app {
-  --week-gutter: 60px;
-  --hour-size: 64px;
+  --rf-time-grid-gutter: 60px;
+  --rf-time-grid-hour-size: 64px;
   width: min(100%, 1440px);
   margin: 0 auto;
   padding: clamp(22px, 3vw, 48px);
   color: var(--rf-fg);
 }
-.week-app [data-calendar='Studio'] {
-  --event-color: light-dark(#4b65a7, #a5bafc);
-  --event-fill: light-dark(#e9eef9, #293247);
+.week-app [data-calendar='Studio'],
+.week-app .week-Studio {
+  --rf-time-grid-event-color: light-dark(#4b65a7, #a5bafc);
+  --rf-time-grid-event-fill: light-dark(#e9eef9, #293247);
 }
-.week-app [data-calendar='Design'] {
-  --event-color: light-dark(#36705e, #9ecfbd);
-  --event-fill: light-dark(#e3f1ea, #253a32);
+.week-app [data-calendar='Design'],
+.week-app .week-Design {
+  --rf-time-grid-event-color: light-dark(#36705e, #9ecfbd);
+  --rf-time-grid-event-fill: light-dark(#e3f1ea, #253a32);
 }
-.week-app [data-calendar='Focus'] {
-  --event-color: light-dark(#8a5a23, #ebc089);
-  --event-fill: light-dark(#f7eddd, #403426);
+.week-app [data-calendar='Focus'],
+.week-app .week-Focus {
+  --rf-time-grid-event-color: light-dark(#8a5a23, #ebc089);
+  --rf-time-grid-event-fill: light-dark(#f7eddd, #403426);
 }
 .week-header,
 .week-toolbar,
@@ -78,14 +81,31 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--event-color);
+  background: var(--rf-time-grid-event-color);
+}
+.week-day-picker button:focus-visible {
+  outline: 2px solid var(--rf-fg);
+  outline-offset: -2px;
+}
+@media (min-width: 801px) {
+  .week-app .rf-time-grid {
+    background: linear-gradient(
+      to right,
+      var(--rf-surface-3)
+        calc(var(--rf-time-grid-gutter) + (100% - var(--rf-time-grid-gutter)) * 5 / 7),
+      var(--rf-muted-bg) 0
+    );
+  }
+  .week-app .rf-time-grid-board {
+    background-color: transparent;
+  }
 }
 .week-day-picker {
   display: none;
 }
 .week-dates {
   display: grid;
-  grid-template-columns: var(--week-gutter) repeat(7, minmax(0, 1fr));
+  grid-template-columns: var(--rf-time-grid-gutter) repeat(7, minmax(0, 1fr));
   border-block: 1px solid var(--rf-border);
 }
 .week-dates > div {
@@ -114,120 +134,6 @@
   text-align: center;
   font-size: 10px;
   font-weight: 600;
-}
-.week-timeline {
-  display: grid;
-  grid-template-columns: var(--week-gutter) minmax(0, 1fr);
-}
-.week-times {
-  display: grid;
-  grid-auto-rows: var(--hour-size);
-  color: var(--rf-muted);
-  text-align: center;
-  font: 500 10px/1.5 var(--rf-font);
-  font-variant-numeric: tabular-nums;
-}
-.week-times span {
-  padding-top: 4px;
-}
-.week-board {
-  --day-count: 7;
-  cursor: crosshair;
-  user-select: none;
-  position: relative;
-  height: calc(var(--hours) * var(--hour-size));
-  background-color: var(--rf-surface-3);
-  background-image:
-    linear-gradient(to right, var(--rf-border) 1px, transparent 1px),
-    linear-gradient(to bottom, transparent calc(100% - 1px), var(--rf-border) 1px),
-    linear-gradient(
-      to bottom,
-      transparent calc(100% - 1px),
-      color-mix(in srgb, var(--rf-border) 44%, transparent) 1px
-    ),
-    linear-gradient(to right, transparent calc(500% / 7), var(--rf-muted-bg) 0);
-  background-size:
-    calc(100% / var(--day-count)) 100%,
-    100% var(--hour-size),
-    100% calc(var(--hour-size) / 2),
-    100% 100%;
-}
-.week-event {
-  position: absolute;
-  left: calc((var(--day) + var(--lane) / var(--lanes)) * 100% / var(--day-count) + 3px);
-  width: calc(100% / var(--day-count) / var(--lanes) - 5px);
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  align-items: stretch;
-  overflow: hidden;
-  padding: 4px 6px;
-  border: 1px solid color-mix(in srgb, var(--event-color) 24%, transparent);
-  border-inline-start: 3px solid var(--event-color);
-  border-radius: var(--rf-item-radius);
-  background: var(--event-fill);
-  color: var(--rf-fg);
-  font: inherit;
-  line-height: 1.23;
-  text-align: start;
-  touch-action: none;
-  user-select: none;
-  cursor: grab;
-}
-.week-range {
-  pointer-events: none;
-  z-index: 2;
-  padding-block: 0;
-  border-color: var(--event-color);
-  border-style: dashed;
-  background: color-mix(in srgb, var(--event-fill) 85%, transparent);
-  color: var(--event-color);
-  font-size: var(--rf-text-caption);
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
-}
-.week-event[aria-pressed='true'] {
-  box-shadow: inset 0 0 0 1px var(--event-color);
-  border-color: var(--event-color);
-}
-.week-event:focus-visible,
-.week-day-picker button:focus-visible {
-  outline: 2px solid var(--rf-fg);
-  outline-offset: -2px;
-  z-index: 1;
-}
-.week-event:active {
-  cursor: grabbing;
-}
-.week-event-time {
-  font-size: 10px;
-  color: var(--event-color);
-  font-variant-numeric: tabular-nums;
-}
-.week-event strong {
-  font-size: var(--rf-text-caption);
-  font-weight: 600;
-  overflow-wrap: anywhere;
-}
-.week-event[data-short='true'] {
-  flex-direction: row;
-  align-items: baseline;
-  gap: 4px;
-  padding-block: 0;
-}
-.week-resize {
-  position: absolute;
-  inset: auto 0 0;
-  height: 8px;
-  cursor: ns-resize;
-}
-.week-event:is(:hover, :focus-visible, [aria-pressed='true']) .week-resize::after {
-  content: '';
-  position: absolute;
-  inset: auto calc(50% - 7px) 2px;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--event-color);
 }
 .week-detail {
   padding: 12px 16px;
@@ -287,8 +193,8 @@
 }
 @media (max-width: 800px) {
   .week-app {
-    --week-gutter: 45px;
-    --hour-size: 56px;
+    --rf-time-grid-gutter: 45px;
+    --rf-time-grid-hour-size: 56px;
     padding: 22px 12px;
   }
   .week-header {
@@ -322,7 +228,7 @@
     background: var(--rf-tint);
   }
   .week-dates {
-    grid-template-columns: var(--week-gutter) 1fr;
+    grid-template-columns: var(--rf-time-grid-gutter) 1fr;
     border-top: 0;
   }
   .week-dates > div {
@@ -331,18 +237,8 @@
   .week-dates > div strong {
     font-size: 13px;
   }
-  .week-dates > div[data-active='false'],
-  .week-event[data-visible='false'] {
+  .week-dates > div[data-active='false'] {
     display: none;
-  }
-  .week-board {
-    --day-count: 1;
-    background-image:
-      linear-gradient(to right, var(--rf-border) 1px, transparent 1px),
-      linear-gradient(to bottom, transparent calc(100% - 1px), var(--rf-border) 1px);
-  }
-  .week-event {
-    --day: 0 !important;
   }
   .week-detail > div {
     display: grid;
