@@ -98,7 +98,7 @@
   flex: 1;
   min-inline-size: 0;
 }
-.rf-markdown-task input:checked + div > p:first-child {
+.rf-markdown-task input:checked + div > :is(p, span):first-child {
   color: var(--rf-muted);
 }
 
