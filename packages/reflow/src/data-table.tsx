@@ -57,7 +57,7 @@ export interface DataTableProps<Row> {
   /** The same actions are available from the row button and the context menu. */
   rowActions?: {
     label: (row: Row) => string
-    items: readonly DropdownItem[]
+    items: readonly DropdownItem[] | ((row: Row) => readonly DropdownItem[])
     onSelect: (action: string, row: Row, checked?: boolean) => void
   }
   /** Select rows on the current page. A changed view clears the selection. */
@@ -90,9 +90,11 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
   }
 
   function change(next: DataTableState) {
-    local = next
     handle.props.onStateChange?.(next)
-    void handle.update()
+    if (handle.props.state === undefined) {
+      local = next
+      void handle.update()
+    }
   }
 
   return () => {
@@ -113,7 +115,13 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
           const right = sortedColumn.value(b)
           const difference =
             typeof left === 'number' && typeof right === 'number'
-              ? left - right
+              ? left === right
+                ? 0
+                : Number.isNaN(left)
+                  ? 1
+                  : Number.isNaN(right)
+                    ? -1
+                    : left - right
               : collator.compare(String(left), String(right))
           return state.sort?.direction === 'descending' ? -difference : difference
         })
@@ -173,10 +181,21 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
           ])
         : undefined
     if (selectionView !== view) {
+      const hadSelection = selected.size > 0
+      const focusInToolbar =
+        hadSelection &&
+        !!root?.querySelector('.rf-data-selection')?.contains(root.ownerDocument.activeElement)
       selectionView = view
       selected = new Set()
       lastFocused = undefined
       range.reset()
+      if (focusInToolbar) {
+        handle.queueTask(() => {
+          if (!handle.signal.aborted) {
+            root?.querySelector<HTMLInputElement>('input[data-rf-select-row]')?.focus()
+          }
+        })
+      }
     }
     const snapshot = selected
     async function clearSelection() {
@@ -188,8 +207,11 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
       selected = new Set()
       range.reset()
       await handle.update()
-      if (returnFocus && !handle.signal.aborted)
-        (checkbox(lastFocused) ?? checkbox(keys[0]))?.focus()
+      if (returnFocus && !handle.signal.aborted) {
+        ;(
+          checkbox(lastFocused) ?? root.querySelector<HTMLInputElement>('input[data-rf-select-row]')
+        )?.focus()
+      }
     }
     function navigateSelection(event: KeyboardEvent, index: number) {
       if (event.key === 'Tab') range.reset()
@@ -206,9 +228,11 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
       const next = keys[index + (event.key === 'ArrowDown' ? 1 : -1)]
       if (!event.shiftKey) range.reset()
       if (next === undefined) return
-      if (event.shiftKey) selected = range.extend(keys, selected, keys[index]!, next)
       checkbox(next)?.focus()
-      void handle.update()
+      if (event.shiftKey) {
+        selected = range.extend(keys, selected, keys[index]!, next)
+        void handle.update()
+      }
     }
     const table = (
       <Table
@@ -244,7 +268,7 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
             )}
           </TableRow>
         </TableHeader>
-        <TableBody aria-hidden={loading || undefined}>
+        <TableBody aria-hidden={loading && visible.length > 0 ? true : undefined}>
           {visible.map((row, index) => {
             const key = keys[index]!
             return (
@@ -279,6 +303,7 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
                           on('blur', (event) => {
                             if (
                               !(event.relatedTarget instanceof HTMLInputElement) ||
+                              !root.contains(event.relatedTarget) ||
                               !event.relatedTarget.hasAttribute('data-rf-select-row')
                             )
                               range.reset()
@@ -318,7 +343,11 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
                         chevron={false}
                         align="end"
                         size={size}
-                        items={rowActions.items}
+                        items={
+                          typeof rowActions.items === 'function'
+                            ? rowActions.items(row)
+                            : rowActions.items
+                        }
                         onSelect={(action, checked) => rowActions.onSelect(action, row, checked)}
                       />
                     )}
@@ -337,7 +366,7 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
       </Table>
     )
     return (
-      <div class="rf-data-table" mix={mount}>
+      <div class="rf-data-table" data-size={size} mix={mount}>
         <div class="rf-data-filter">
           <Input
             {...handle.props.filterInput}
@@ -356,11 +385,19 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
           <ContextMenu
             label={`${label} row actions`}
             target="[data-rf-data-row]"
-            items={rowActions.items}
+            items={
+              typeof rowActions.items === 'function'
+                ? ((buildItems) => (target: HTMLElement) => {
+                    const row = visible.find((item) => rowKey(item) === target.dataset.rfDataRow)
+                    return row !== undefined && !loading ? buildItems(row) : []
+                  })(rowActions.items)
+                : rowActions.items
+            }
             size={size}
             onSelect={(action, target, checked) => {
               const row = visible.find((item) => rowKey(item) === target.dataset.rfDataRow)
-              if (row !== undefined && target.isConnected) rowActions.onSelect(action, row, checked)
+              if (!loading && row !== undefined && target.isConnected)
+                rowActions.onSelect(action, row, checked)
             }}
           >
             {table}
@@ -381,7 +418,9 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
           </Toolbar>
         )}
         <span role="status" class="rf-basic-sr-only">
-          {sorted.length} {sorted.length === 1 ? 'result' : 'results'}, page {page} of {pageCount}
+          {loading
+            ? 'Loading'
+            : `${sorted.length} ${sorted.length === 1 ? 'result' : 'results'}, page ${page} of ${pageCount}`}
         </span>
         <Pagination
           page={page}

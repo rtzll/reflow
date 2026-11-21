@@ -1,4 +1,4 @@
-import { DataTable, type DataTableState } from '@rtzll/reflow'
+import { DataTable, createRangeSelection, type DataTableState } from '@rtzll/reflow'
 import { deepEqual, equal } from 'remix/assert'
 import type { Handle } from 'remix/component'
 import { render } from 'remix/component/test'
@@ -155,4 +155,36 @@ it('keeps independent checks when a keyboard range contracts and clears them whe
   loading = false
   await owner!.update()
   deepEqual(checked(), [])
+})
+
+it('announces loading with empty rows, supports per-row action lists, and re-anchors range selection when the anchor leaves', async (t) => {
+  const { $, $$, act, cleanup } = render(
+    <div>
+      <DataTable {...props} rows={[]} loading={true} />
+      <DataTable
+        {...props}
+        rowActions={{
+          label: (row) => 'Actions for ' + row.name,
+          items: (row) => [
+            { value: 'promote', label: 'Promote', disabled: row.role === 'Engineer' },
+          ],
+          onSelect: () => {},
+        }}
+      />
+    </div>,
+  )
+  t.after(cleanup)
+  equal($('[role=status]')!.textContent, 'Loading')
+  equal($('tbody')!.getAttribute('aria-hidden'), null)
+
+  const secondTable = $$('.rf-data-table')[1]!
+  const zoeButton = secondTable.querySelector('button[aria-label="Actions for Zoe"]') as HTMLElement
+  await act(() => zoeButton.click())
+  equal($(':popover-open [role=menuitem]')!.getAttribute('aria-disabled'), 'true')
+
+  const selection = createRangeSelection<string>()
+  const initial = selection.extend(['a', 'b', 'c'], new Set(), 'a', 'b')
+  deepEqual(Array.from(initial), ['a', 'b'])
+  const afterAnchorRemoved = selection.extend(['b', 'c'], initial, 'b', 'c')
+  deepEqual(Array.from(afterAnchorRemoved), ['a', 'b', 'c'])
 })

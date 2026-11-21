@@ -1,11 +1,13 @@
 .rf-data-table {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
   min-inline-size: 0;
 }
 
 .rf-data-filter {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
@@ -91,5 +93,7 @@
 }
 .rf-data-selection > span {
   padding-inline: 6px;
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
   font-variant-numeric: tabular-nums;
+  color: var(--rf-muted);
 }
