@@ -19,3 +19,16 @@ it('books a room in a single day with half-hour range selection', async (t) => {
     board.getByRole('button', { name: 'Studio booking, Friday, 11:00–12:30' }),
   ).toBeVisible()
 })
+
+it('does not create an event from a click on open time', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await open(page, '/docs/time-grid')
+  const board = page.getByRole('group', { name: 'Studio bookings' }).first()
+  await board.scrollIntoViewIfNeeded()
+  const bookings = board.getByRole('button')
+  const count = await bookings.count()
+  const rect = (await board.boundingBox())!
+  await page.mouse.click(rect.x + rect.width / 2, rect.y + rect.height * 0.9)
+  await expect(board.locator('.rf-time-grid-range')).toHaveCount(0)
+  await expect(bookings).toHaveCount(count)
+})

@@ -108,14 +108,18 @@ it('keeps a partial final slot on the configured grid when creating by pointer',
   const board = $('[role=group]')!
   board.getBoundingClientRect = () => new DOMRect(0, 0, 100, 100)
   board.setPointerCapture = () => {}
-  for (const type of ['pointerdown', 'pointerup']) {
+  // A short drag that stays in the final, shorter slot.
+  for (const [type, clientY] of [
+    ['pointerdown', 99],
+    ['pointerup', 104],
+  ] as const) {
     await act(() =>
       board.dispatchEvent(
         new PointerEvent(type, {
           pointerId: 1,
           isPrimary: true,
           clientX: 20,
-          clientY: 99,
+          clientY,
           bubbles: true,
         }),
       ),

@@ -25,10 +25,16 @@ export interface TimeGridProps<Event extends TimeGridEvent = TimeGridEvent> {
   /** When provided, show only this day at viewport widths up to 800px. */
   compactDay?: number
   selectedId?: string
+  /** A click, Space, or the start of a drag on an event. */
   onSelect?: (event: Event) => void
+  /**
+   * Enter on an event. A click activates only when `onSelect` is omitted, so with both,
+   * a click selects and the owner offers its own way to open the selection.
+   */
   onActivate?: (event: Event) => void
   /** Apply the requested change in the owner to commit it. Extra event fields are preserved. */
   onEventChange?: (event: Event) => void
+  /** A drag across open time, or Enter on the keyboard slot. A click alone creates nothing. */
   onCreate?: (range: TimeGridRange) => void
   getEventLabel?: (event: Event) => string
   getEventClass?: (event: Event) => string
@@ -38,6 +44,12 @@ export interface TimeGridProps<Event extends TimeGridEvent = TimeGridEvent> {
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value))
 }
+// The stylesheet collapses a compact grid to the chosen day at narrow widths.
+function showsSingleDay(board: HTMLElement) {
+  return getComputedStyle(board).getPropertyValue('--visible-days').trim() === '1'
+}
+// Pointer travel below this is a click, not a drag.
+const dragThreshold = 4
 function clock(minutes: number) {
   return [Math.floor(minutes / 60), minutes % 60].map((n) => String(n).padStart(2, '0')).join(':')
 }
@@ -165,7 +177,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
       if (gesture || !days.length || !e.isPrimary || e.button !== 0) return
       if (event ? !onEventChange : !onCreate || e.target !== board) return
       const rect = board.getBoundingClientRect()
-      const singleDay = getComputedStyle(board).getPropertyValue('--visible-days').trim() === '1'
+      const singleDay = showsSingleDay(board)
       const dayWidth = rect.width / (singleDay ? 1 : days.length)
       const offset = clamp(((e.clientY - rect.top) / rect.height) * span, 0, span - 1)
       const slot = first + step * Math.floor(offset / step)
@@ -197,7 +209,12 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
     }
 
     function move(e: PointerEvent) {
-      if (e.pointerId !== gesture?.pointer || !gesture) return
+      if (track(e)) handle.update()
+    }
+
+    // Update the gesture preview from the pointer; reports whether it applied.
+    function track(e: PointerEvent) {
+      if (e.pointerId !== gesture?.pointer || !gesture) return false
       const { anchor, mode } = gesture
       const rect = board.getBoundingClientRect()
       if (mode === 'create') {
@@ -240,17 +257,19 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
                     : clamp(anchor.start + delta, first, last - anchor.duration),
               }
       }
-      handle.update()
+      return true
     }
 
     function finish(e: PointerEvent) {
       if (!gesture || e.pointerId !== gesture.pointer) return
-      move(e)
+      track(e)
       const { event, preview, anchor, mode, x, y } = gesture
+      const dragged = Math.hypot(e.clientX - x, e.clientY - y) >= dragThreshold
       gesture = undefined
       handle.update()
-      if (!event) onCreate?.(preview)
-      else {
+      if (!event) {
+        if (dragged) onCreate?.(preview)
+      } else {
         const current = events.find((item) => item.id === event.id)
         if (!current) return
         if (
@@ -259,8 +278,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
           preview.duration !== anchor.duration
         )
           onEventChange?.({ ...current, ...preview })
-        else if (!onSelect && mode === 'move' && Math.hypot(e.clientX - x, e.clientY - y) < 4)
-          onActivate?.(current)
+        else if (!onSelect && mode === 'move' && !dragged) onActivate?.(current)
       }
     }
 
@@ -291,8 +309,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
         case 'ArrowLeft':
         case 'ArrowRight':
           next.day = clamp(next.day + (e.key === 'ArrowRight' ? 1 : -1), 0, days.length - 1)
-          if (!event && getComputedStyle(board).getPropertyValue('--visible-days').trim() === '1')
-            next.day = compactDay
+          if (!event && showsSingleDay(board)) next.day = compactDay
           break
         case 'ArrowDown':
         case 'ArrowUp': {
