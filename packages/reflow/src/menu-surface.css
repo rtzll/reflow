@@ -1,3 +1,7 @@
+.rf-context-menu {
+  display: contents;
+}
+
 .rf-menu-surface {
   --rf-menu-rest-transform: translateY(-4px) scaleY(0.96);
   box-sizing: border-box;

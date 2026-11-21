@@ -227,3 +227,58 @@ it('builds the items for the row that opened the menu', async (t) => {
   await untilFocused($('[role="menu"]')!)
   equal(disabled(), 'Move to Done')
 })
+
+it('unmounts closed menus, leaves empty item lists to the browser, and ignores synthetic keyboard contextmenu events', async (t) => {
+  let builds = 0
+  const { $, act, cleanup } = render(
+    <div>
+      <ContextMenu
+        label="Dynamic actions"
+        target="button"
+        items={(row) => {
+          builds++
+          return row.id === 'empty' ? [] : [{ value: 'open', label: 'Open' }]
+        }}
+      >
+        <button id="normal">Normal</button>
+        <button id="empty">Empty</button>
+      </ContextMenu>
+      <p id="outside">Blank</p>
+    </div>,
+  )
+  t.after(cleanup)
+
+  const empty = $('#empty') as HTMLButtonElement
+  await act(() => {
+    ok(empty.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true })))
+  })
+  equal($('[role="menu"]'), null)
+
+  const normal = $('#normal') as HTMLButtonElement
+  builds = 0
+  await act(() => press(normal, 'ContextMenu'))
+  const menu = $('[role="menu"]')!
+  await untilFocused(menu)
+  equal(builds, 1)
+
+  // A synthetic contextmenu event following the keyboard open should not remount the menu.
+  await act(() => {
+    equal(
+      normal.dispatchEvent(
+        new MouseEvent('contextmenu', { bubbles: true, cancelable: true, button: 0 }),
+      ),
+      false,
+    )
+  })
+  equal(builds, 1)
+  equal($('[role="menu"]'), menu)
+
+  // Right-clicking blank space dismisses and unmounts the closed menu surface.
+  await act(() => {
+    $('#outside')!.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))
+  })
+  for (let i = 0; i < 60 && $('[role="menu"]'); i++) {
+    await new Promise<void>((resolve) => setTimeout(resolve, 10))
+  }
+  equal($('[role="menu"]'), null)
+})

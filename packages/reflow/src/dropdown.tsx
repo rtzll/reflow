@@ -278,9 +278,11 @@ const closeOnRemoval = createMixin<HTMLElement, []>(
     handle.addEventListener('insert', (event) => {
       surface = event.node
     })
-    handle.addEventListener('beforeRemove', () => {
+    const close = () => {
       if (surface?.matches(':popover-open')) surface.hidePopover()
-    })
+    }
+    handle.addEventListener('beforeRemove', close)
+    handle.addEventListener('remove', close)
     return () => handle.element
   },
   { ssr: false },
