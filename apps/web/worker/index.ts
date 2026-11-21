@@ -4,10 +4,16 @@ export default {
   async fetch(request: Request): Promise<Response> {
     try {
       const response = await router.fetch(request)
-      // Pages depend on URL settings and preference cookies.
-      response.headers.set('Cache-Control', 'private, no-store')
-      response.headers.set('X-Content-Type-Options', 'nosniff')
-      return response
+      // Pages depend on URL settings and preference cookies. Clone headers so
+      // immutable responses such as Response.redirect() can be updated safely.
+      const headers = new Headers(response.headers)
+      headers.set('Cache-Control', 'private, no-store')
+      headers.set('X-Content-Type-Options', 'nosniff')
+      return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers,
+      })
     } catch (error) {
       console.error(
         JSON.stringify({

@@ -23,5 +23,7 @@ export const assets = {
 export async function getPageAssets(appSlug?: string) {
   const page = REFLOW_ASSETS.page
   if (!appSlug) return page
-  return { ...page, stylesheets: [...page.stylesheets, REFLOW_ASSETS.appStyles[appSlug]] }
+  const style = REFLOW_ASSETS.appStyles[appSlug]
+  if (!style) throw new Error(`Unknown app stylesheet: ${appSlug}`)
+  return { ...page, stylesheets: [...page.stylesheets, style] }
 }

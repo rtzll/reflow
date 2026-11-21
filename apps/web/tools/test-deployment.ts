@@ -30,12 +30,30 @@ const worker = await startLocalWorker()
 let browser: Browser | undefined
 try {
   const origin = `http://${worker.address}:${worker.port}`
-  for (const path of ['/', '/docs', '/docs/button', '/demo?c=dropdown&theme=dark']) {
+  for (const path of [
+    '/',
+    '/docs',
+    '/docs/button',
+    '/demo?c=dropdown&theme=dark',
+    '/apps',
+    '/apps/issues',
+    '/apps/chat',
+    '/apps/calendar',
+    '/apps/analytics',
+  ]) {
     const response = await fetch(origin + path)
     assert.equal(response.status, 200, path)
     assert.match(response.headers.get('content-type') ?? '', /text\/html/)
     assert.equal(response.headers.get('cache-control'), 'private, no-store')
     assert.ok(!(await response.text()).includes(homedir()), path)
+  }
+  for (const [path, destination] of [
+    ['/docs/app-sidebar', '/docs/sidebar'],
+    ['/docs/settings-dialog', '/docs/dialog#with-a-sidebar'],
+  ]) {
+    const response = await fetch(origin + path, { redirect: 'manual' })
+    assert.equal(response.status, 301, path)
+    assert.equal(response.headers.get('location'), origin + destination, path)
   }
   // Link previews need an absolute image URL that the built site serves.
   const home = await (await fetch(origin + '/docs/button')).text()
@@ -49,6 +67,7 @@ try {
   for (const path of [
     '/missing',
     '/docs/not-a-component',
+    '/apps/not-an-app',
     '/assets/missing.js',
     '/.env',
     '/.dev.vars',
@@ -64,6 +83,10 @@ try {
   const assets: [string, RegExp][] = [
     [manifest.page.entry.href, /javascript/],
     ...manifest.page.stylesheets.map((href: string): [string, RegExp] => [href, /text\/css/]),
+    ...Object.values(manifest.appStyles as Record<string, string>).map((href): [string, RegExp] => [
+      href,
+      /text\/css/,
+    ]),
     ...Object.values(manifest.entries as Record<string, { href: string }>).map(
       ({ href }): [string, RegExp] => [href, /javascript/],
     ),
@@ -129,6 +152,11 @@ try {
   await expect(
     page.locator('button[aria-haspopup="menu"]', { hasText: 'Notifications' }),
   ).toBeVisible()
+
+  await openShowcase('/apps')
+  await expect(page.getByRole('heading', { name: 'Example apps', exact: true })).toBeVisible()
+  await openShowcase('/apps/issues')
+  await expect(page.getByRole('heading', { name: 'Issue tracker', exact: true })).toBeVisible()
 
   await page.setViewportSize({ width: 390, height: 844 })
   await openShowcase('/docs/input-message')
