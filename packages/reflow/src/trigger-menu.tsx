@@ -5,6 +5,8 @@ import { navigationIndex } from './behaviors/list-navigation.ts'
 
 export interface TriggerMenuItem {
   label: string
+  /** Optional supporting text shown below the label. */
+  description?: string
   /** Replacement text, including the trigger if it should be kept. */
   value: string
 }
@@ -113,8 +115,10 @@ export function TriggerMenu(handle: Handle<TriggerMenuProps>) {
       return close()
     dismissed = undefined
     const query = next.query.toLocaleLowerCase()
-    const items = next.trigger.items.filter((item) =>
-      item.label.toLocaleLowerCase().includes(query),
+    const items = next.trigger.items.filter(
+      (item) =>
+        item.label.toLocaleLowerCase().includes(query) ||
+        item.description?.toLocaleLowerCase().includes(query),
     )
     if (!items.length) return close()
     if (match?.query !== next.query || match.start !== next.start || match.trigger !== next.trigger)
@@ -282,6 +286,7 @@ export function TriggerMenu(handle: Handle<TriggerMenuProps>) {
               ]}
             >
               {item.label}
+              {item.description && <span class="rf-trigger-description">{item.description}</span>}
             </div>
           ))}
         </div>

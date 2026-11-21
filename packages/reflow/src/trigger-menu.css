@@ -36,6 +36,12 @@
   cursor: pointer;
 }
 
+.rf-trigger-description {
+  display: block;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption);
+}
+
 @media (forced-colors: active) {
   .rf-trigger-menu [aria-selected='true'] {
     outline: 1px solid Highlight;
