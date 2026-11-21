@@ -30,6 +30,23 @@ export const issues: Issue[] = [
     owner: 'Leo Park',
   },
   {
+    id: 'AT-138',
+    title: 'Mark water stops on the trail map',
+    description:
+      'Include drinking water in the map legend and distinguish seasonal taps from year-round sources.',
+    status: 'Todo',
+    area: 'Maps',
+    owner: 'Iris Chen',
+  },
+  {
+    id: 'AT-137',
+    title: 'Sort offline regions by last use',
+    description: 'Keep the most recently opened regions at the top of the downloaded maps list.',
+    status: 'Todo',
+    area: 'Offline',
+    owner: 'Sam Reed',
+  },
+  {
     id: 'AT-136',
     title: 'Make trail labels legible at dusk',
     description:
@@ -48,6 +65,14 @@ export const issues: Issue[] = [
     owner: 'Mina Ortiz',
   },
   {
+    id: 'AT-130',
+    title: 'Preserve captions in shared notes',
+    description: 'Carry photo captions through to the read-only version of a field note.',
+    status: 'In progress',
+    area: 'Field notes',
+    owner: 'Mina Ortiz',
+  },
+  {
     id: 'AT-128',
     title: 'Group saved places by region',
     description:
@@ -55,6 +80,14 @@ export const issues: Issue[] = [
     status: 'Done',
     area: 'Collections',
     owner: 'Leo Park',
+  },
+  {
+    id: 'AT-127',
+    title: 'Show elevation gain on route previews',
+    description: 'Summarize total ascent next to distance before a walker opens the full route.',
+    status: 'Done',
+    area: 'Maps',
+    owner: 'Mina Ortiz',
   },
   {
     id: 'AT-125',
