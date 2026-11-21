@@ -1,5 +1,6 @@
 import { Button, Icon, TimeGrid } from '@rtzll/reflow'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
+import { persistWeekEvent, restoreWeekEvents } from './local-events.ts'
 import { EventEditor } from './event-editor.tsx'
 import { calendars, days, eventLabel, seedEvents, timeLabel, type WeekEvent } from './events.ts'
 
@@ -10,6 +11,13 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
   let draft: WeekEvent | undefined
   let schedule: HTMLElement
   let message = ''
+  let lastAdjustment: { event: WeekEvent; verb: string } | undefined
+  const restoreSchedule = ref((node) => {
+    schedule = node as HTMLElement
+    events = restoreWeekEvents()
+    activeDay = events.find((event) => event.id === selectedId)?.day ?? 0
+    handle.update()
+  })
 
   function showEditor(event?: WeekEvent) {
     draft = event ?? {
@@ -29,20 +37,43 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
     handle.update()
   }
 
-  function save(event: WeekEvent, focus = false) {
+  function save(event: WeekEvent, prefix = '') {
     if (!event.id) {
       event = { ...event, id: crypto.randomUUID() }
       events = [...events, event]
     } else {
       events = events.map((entry) => (entry.id === event.id ? event : entry))
     }
+    persistWeekEvent(event)
     draft = undefined
-    message = eventLabel(event)
+    message = prefix + eventLabel(event) + (lastAdjustment ? '. Undo available.' : '')
     select(event)
-    if (focus)
-      handle.queueTask(() =>
-        schedule.querySelector<HTMLElement>(`[data-event="${CSS.escape(event.id)}"]`)?.focus(),
-      )
+    handle.queueTask(() =>
+      schedule.querySelector<HTMLElement>(`[data-event="${CSS.escape(event.id)}"]`)?.focus(),
+    )
+  }
+
+  function reschedule(event: WeekEvent) {
+    const before = events.find((entry) => entry.id === event.id)
+    if (
+      !before ||
+      (before.day === event.day &&
+        before.start === event.start &&
+        before.duration === event.duration)
+    )
+      return
+    lastAdjustment = {
+      event: before,
+      verb: before.duration === event.duration ? 'Moved' : 'Resized',
+    }
+    save(event)
+  }
+
+  function undoAdjustment() {
+    if (!lastAdjustment) return
+    const previous = lastAdjustment.event
+    lastAdjustment = undefined
+    save(previous, 'Restored ')
   }
 
   return () => {
@@ -58,13 +89,7 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
             New event
           </Button>
         </header>
-        <section
-          class="week-schedule"
-          aria-label="Studio schedule"
-          mix={ref((node) => {
-            schedule = node as HTMLElement
-          })}
-        >
+        <section class="week-schedule" aria-label="Studio schedule" mix={restoreSchedule}>
           <div class="week-toolbar">
             <h2>
               <Icon name="calendar" />
@@ -114,7 +139,7 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
             selectedId={selectedId}
             onSelect={select}
             onActivate={showEditor}
-            onEventChange={(event) => save(event)}
+            onEventChange={reschedule}
             onCreate={(range) => showEditor({ ...range, id: '', title: '', calendar: 'Studio' })}
             getEventClass={(event) => 'week-' + event.calendar}
             getEventLabel={eventLabel}
@@ -141,6 +166,16 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
           ) : (
             <div class="week-detail">No events on {days[activeDay]}.</div>
           )}
+          {lastAdjustment && (
+            <div class="week-undo">
+              <span>
+                {lastAdjustment.verb} <strong>{lastAdjustment.event.title}</strong>
+              </span>
+              <Button variant="secondary" size="compact" mix={on('click', undoAdjustment)}>
+                Undo
+              </Button>
+            </div>
+          )}
         </section>
         <p class="week-hint">
           Drag down an empty time slot to create an event. Drag an event to move it or its bottom
@@ -155,7 +190,10 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
             draft = undefined
             handle.update()
           }}
-          save={(event) => save(event, true)}
+          save={(event) => {
+            lastAdjustment = undefined
+            save(event)
+          }}
         />
       </article>
     )

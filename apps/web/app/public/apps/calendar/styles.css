@@ -153,6 +153,26 @@
 .week-detail .rf-button {
   flex: none;
 }
+.week-undo {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  border-top: 1px solid var(--rf-border);
+  background: var(--rf-surface-2);
+  font-size: var(--rf-text-caption);
+}
+.week-undo span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.week-undo .rf-button {
+  flex: none;
+}
 .week-hint {
   margin: 10px 2px 0;
 }
