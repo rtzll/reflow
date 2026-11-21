@@ -3363,7 +3363,7 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           type: 'readonly TriggerMenuTrigger[]',
           required: true,
           description:
-            'Each trigger has a character, accessible list label and an array of items with labels and replacement values.',
+            'Each trigger has a character, an accessible list label and items with a label, replacement value and optional description. Typing filters by label and description.',
         },
         {
           name: 'renderField',

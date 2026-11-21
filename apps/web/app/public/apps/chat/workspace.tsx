@@ -1,6 +1,7 @@
 import { Button, ChatLayout, ChatMessage, Icon, InputMessage, Markdown } from '@rtzll/reflow'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import { replyTo, type ChatEntry, type Conversation } from './fixtures.ts'
+import { skillReply, skillTriggers } from './skills.ts'
 
 interface Thread extends Conversation {
   draft: string
@@ -97,7 +98,7 @@ export const ChatWorkspace = clientEntry(
             >
               <Icon name="panel-left" size={18} />
             </button>
-            <h1>Reflow Chat</h1>
+            <h1>Chat</h1>
           </header>
           <button type="button" class="studio-new" mix={on('click', create)}>
             <Icon name="pencil" size={16} />
@@ -166,8 +167,9 @@ function ConversationPane(handle: Handle<{ thread: Thread; onChange: () => void 
   function send(text: string) {
     // Sending a queued message immediately also ends the preceding reply.
     if (response) finish(true)
+    const subject = thread.messages.length ? thread.title : 'your story'
+    const words = (skillReply(text, subject) ?? replyTo(text)).split(' ')
     if (!thread.messages.length) thread.title = text.length > 48 ? text.slice(0, 47) + '…' : text
-    const words = replyTo(text).split(' ')
     let shown = 2
     response = { role: 'assistant', text: words.slice(0, shown).join(' ') }
     thread.messages.push({ role: 'user', text }, response)
@@ -184,34 +186,47 @@ function ConversationPane(handle: Handle<{ thread: Thread; onChange: () => void 
   return () => (
     <ChatLayout
       label={thread.title}
-      header={
-        thread.messages.length ? (
-          <header class="studio-heading">
-            <h2>{thread.title}</h2>
-            <p role="status">{response ? 'Replying…' : 'Simulated replies'}</p>
-          </header>
-        ) : undefined
-      }
       composer={
         <>
           {!thread.messages.length && <h2 class="studio-welcome">Where should we begin?</h2>}
           <InputMessage
             key="composer"
             attachments={false}
-            placeholder="Ask Reflow"
+            placeholder="Message or type / for skills"
+            triggers={skillTriggers}
             status={response ? 'streaming' : 'idle'}
             onStop={stop}
             actions={
-              response && thread.draft.trim() ? (
+              <>
                 <Button
+                  class="studio-skills-button"
                   size="icon-compact"
                   variant="ghost"
-                  aria-label="Stop response"
-                  mix={on('click', stop)}
+                  aria-label="Choose a skill"
+                  title="Choose a skill"
+                  mix={on<HTMLButtonElement, 'click'>('click', (event) => {
+                    const field = event.currentTarget.form?.querySelector('textarea')
+                    if (!field) return
+                    if (!field.value.startsWith('/'))
+                      field.setRangeText(field.value ? '/ ' : '/', 0, 0)
+                    field.setSelectionRange(1, 1)
+                    field.focus()
+                    field.dispatchEvent(new Event('input', { bubbles: true }))
+                  })}
                 >
-                  <Icon name="square-stop" size={14} />
+                  /
                 </Button>
-              ) : undefined
+                {response && thread.draft.trim() && (
+                  <Button
+                    size="icon-compact"
+                    variant="ghost"
+                    aria-label="Stop response"
+                    mix={on('click', stop)}
+                  >
+                    <Icon name="square-stop" size={14} />
+                  </Button>
+                )}
+              </>
             }
             defaultValue={thread.draft}
             onValueChange={(draft) => {
@@ -220,6 +235,11 @@ function ConversationPane(handle: Handle<{ thread: Thread; onChange: () => void 
             }}
             onSend={({ text }) => send(text)}
           />
+          {thread.messages.length > 0 && (
+            <p class="studio-status" role="status">
+              {response ? 'Replying…' : 'Simulated replies'}
+            </p>
+          )}
           {!thread.messages.length && !thread.draft && (
             <div class="studio-starters" aria-label="Suggested prompts" role="group">
               {starters.map(({ icon, label, prompt }) => (

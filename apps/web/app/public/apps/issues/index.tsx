@@ -5,6 +5,6 @@ import { IssueTracker } from './issue-tracker.tsx'
 export const issuesApp: ExampleApp = {
   slug: 'issues',
   name: 'Issue tracker',
-  description: 'Organize issues by status and move a selection together.',
+  description: 'Track cycle progress and team workload, then manage issues on a board or list.',
   render: () => <IssueTracker initialIssues={issues} />,
 }

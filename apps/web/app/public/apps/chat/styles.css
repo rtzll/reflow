@@ -161,28 +161,14 @@
   --rf-chat-gutter: clamp(16px, 3vw, 32px);
   --rf-chat-width: calc(46rem + 2 * var(--rf-chat-gutter));
 }
-.studio-pane .rf-chat-layout-header {
-  inline-size: 100%;
-  padding: 16px var(--rf-chat-gutter);
-}
-.studio-heading {
-  display: flex;
-  align-items: baseline;
-  gap: 16px;
-  justify-content: space-between;
-}
-.studio-heading h2 {
-  overflow: hidden;
-  font-size: 15px;
-  font-weight: 550;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.studio-heading p,
+.studio-status,
 .studio-stopped {
-  flex: none;
   color: var(--rf-muted);
   font-size: var(--rf-text-caption);
+}
+.studio-status {
+  padding-block-start: 8px;
+  text-align: center;
 }
 .studio-pane .rf-chat-transcript {
   row-gap: 24px;
@@ -293,6 +279,15 @@
   --rf-control-height: 34px;
   border-radius: 50%;
 }
+.studio-pane .studio-skills-button {
+  --rf-control-height: 34px;
+  border-radius: 50%;
+  color: var(--rf-muted);
+  font-size: 18px;
+}
+.studio-pane .rf-trigger-menu {
+  min-inline-size: min(15rem, calc(100vw - 32px));
+}
 .studio-pane .rf-composer-files-region {
   display: none;
 }
@@ -362,9 +357,6 @@
   .studio-pane .rf-composer .rf-textarea,
   .studio-pane .rf-chat-body {
     font-size: 16px;
-  }
-  .studio-pane .rf-chat-layout-header {
-    padding-block: 10px;
   }
   .studio-pane .rf-chat-message[data-role='user'] {
     max-inline-size: 90%;
