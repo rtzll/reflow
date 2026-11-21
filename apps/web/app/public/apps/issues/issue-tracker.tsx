@@ -7,6 +7,7 @@ import {
   Icon,
   SegmentedControl,
   Toolbar,
+  createRangeSelection,
 } from '@rtzll/reflow'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import { CycleOverview, type IssueFilter } from './cycle-overview.tsx'
@@ -18,7 +19,7 @@ export const IssueTracker = clientEntry(
     let issues = handle.props.initialIssues
     let active: string | undefined = issues[0]?.id
     let selected = new Set<string>()
-    let range: { anchor: number; previous: Set<string> } | undefined
+    const range = createRangeSelection<string>()
     let announcement = ''
     let filter: IssueFilter | undefined
     let layout = 'board'
@@ -85,7 +86,7 @@ export const IssueTracker = clientEntry(
     async function setFilter(next?: IssueFilter) {
       filter =
         next && filter?.field === next.field && filter.value === next.value ? undefined : next
-      range = undefined
+      range.reset()
       selected.clear()
       announcement = ''
       active = orderedIssues()[0]?.id
@@ -99,7 +100,7 @@ export const IssueTracker = clientEntry(
     }
 
     function toggle(id: string) {
-      range = undefined
+      range.reset()
       if (selected.has(id)) selected.delete(id)
       else selected.add(id)
       announcement = ''
@@ -107,7 +108,7 @@ export const IssueTracker = clientEntry(
     }
 
     async function clear() {
-      range = undefined
+      range.reset()
       selected.clear()
       announcement = 'Selection cleared.'
       await handle.update()
@@ -118,7 +119,7 @@ export const IssueTracker = clientEntry(
       const before = orderedIssues()
       const moved = before.filter((issue) => ids.has(issue.id) && issue.status !== status)
       if (!moved.length) return
-      range = undefined
+      range.reset()
       // Continue at the next stationary issue in the old reading order. At the end,
       // step back. If every row moved, follow the original issue to its new group.
       const index = before.findIndex((issue) => issue.id === anchor)
@@ -148,15 +149,14 @@ export const IssueTracker = clientEntry(
         case 'ArrowUp': {
           const step = event.key === 'j' || event.key === 'ArrowDown' ? 1 : -1
           const next = Math.max(0, Math.min(index + step, rows.length - 1))
-          if (!event.shiftKey) range = undefined
+          if (!event.shiftKey) range.reset()
           else if (next !== index) {
-            // Rebuild from the original selection so shrinking the range preserves
-            // independent selections inside and outside it.
-            range ??= { anchor: index, previous: new Set(selected) }
-            selected = new Set(range.previous)
-            const start = Math.min(range.anchor, next)
-            const end = Math.max(range.anchor, next)
-            for (const issue of rows.slice(start, end + 1)) selected.add(issue.id)
+            selected = range.extend(
+              rows.map((issue) => issue.id),
+              selected,
+              id,
+              rows[next]!.id,
+            )
             announcement = ''
           }
           focusIssue(rows[next]?.id)
@@ -174,18 +174,18 @@ export const IssueTracker = clientEntry(
           const next = groups[column + step]
           if (next)
             focusIssue(next[Math.min(groups[column]!.indexOf(current), next.length - 1)]?.id)
-          range = undefined
+          range.reset()
           break
         }
         case 'Enter':
           openDetails(id)
           break
         case 'Home':
-          range = undefined
+          range.reset()
           focusIssue(rows[0]?.id)
           break
         case 'End':
-          range = undefined
+          range.reset()
           focusIssue(rows.at(-1)?.id)
           break
         case ' ':
@@ -283,7 +283,7 @@ export const IssueTracker = clientEntry(
                       !(event.relatedTarget instanceof Node) ||
                       !event.currentTarget.contains(event.relatedTarget)
                     )
-                      range = undefined
+                      range.reset()
                   }),
                 ]}
               >
