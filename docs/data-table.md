@@ -10,6 +10,8 @@ Filter across columns, sort the full result, then take the requested page. Equal
 
 The table can own its state or receive `state` and `onStateChange`. A screen that owns its URL supplies `href` for native sort and page links. It can associate the search input with a GET form through `filterInput`. Both showcase screens let visitors press Enter to filter before hydration, and update results as they type after hydration.
 
+Import `RoutedDataTable` from `@rtzll/reflow` to bind a table to the request URL. It accepts the same rows and columns and a `route` prop, for example `{ path: url.pathname, search: url.search, prefix: 'team', anchor: 'team-table' }`. Give each table a unique prefix and attach the anchor ID to its section. The wrapper supplies the native GET form, sort and page links, and history updates.
+
 The team directory uses `teamFilter`, `teamSort`, `teamDir`, and `teamPage`, preserving the gallery search and the `#team-table` anchor. Component API references with more than twelve primary props use the same controls with an `api` prefix. They retain row headers, the required marker, type, default, and description. The standalone example at `/docs/data-table` demonstrates local state and configurable page size.
 
 ## Interaction and verification

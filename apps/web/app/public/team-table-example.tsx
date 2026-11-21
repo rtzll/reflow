@@ -1,4 +1,5 @@
 import {
+  RoutedDataTable,
   DataTable,
   type DataTableColumn,
   type DataTableProps,
@@ -12,7 +13,6 @@ import {
   TableHeader,
   TableRow,
 } from '@rtzll/reflow'
-import { RoutedDataTable } from './routed-data-table.tsx'
 import type { Handle } from 'remix/component'
 
 const members = [

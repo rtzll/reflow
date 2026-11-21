@@ -242,6 +242,18 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
     {
+      name: 'RoutedDataTable',
+      props: [
+        {
+          name: 'route',
+          type: '{ path: string; search: string; prefix: string; anchor: string }',
+          required: true,
+          description:
+            'Supply the request pathname and search string, a unique parameter prefix, and the table section ID. The URL stores the filter, sort, and page.',
+        },
+      ],
+    },
+    {
       name: 'DataTableColumn',
       props: [
         {

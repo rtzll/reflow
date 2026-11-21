@@ -1,7 +1,6 @@
-import type { DataTableColumn } from '@rtzll/reflow'
+import { RoutedDataTable, type DataTableColumn } from '@rtzll/reflow'
 import { clientEntry, type Handle } from 'remix/component'
 import type { ApiProperty } from '../docs-data.ts'
-import { RoutedDataTable } from './routed-data-table.tsx'
 
 type PropRow = ApiProperty & { defaultValue: string }
 

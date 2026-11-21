@@ -1,19 +1,20 @@
-import { DataTable, type DataTableProps, type DataTableState } from '@rtzll/reflow'
+import { DataTable, type DataTableProps, type DataTableState } from './data-table.tsx'
 import { ref, updateUrl, type Handle } from 'remix/component'
 
-export interface TableRoute {
+export interface DataTableRoute {
   path: string
   search: string
   prefix: string
   anchor: string
 }
 
+export type RoutedDataTableProps<Row> = Omit<
+  DataTableProps<Row>,
+  'state' | 'defaultState' | 'href' | 'onStateChange' | 'filterInput'
+> & { route: DataTableRoute; class?: string }
+
 /** Derive state from the request so links and filter submission work before hydration. */
-export function RoutedDataTable<Row>(
-  handle: Handle<
-    Omit<DataTableProps<Row>, 'state' | 'href' | 'onStateChange'> & { route: TableRoute }
-  >,
-) {
+export function RoutedDataTable<Row>(handle: Handle<RoutedDataTableProps<Row>>) {
   let requestSearch = handle.props.route.search
   let search = requestSearch
   const history = ref((_node, signal) => {
@@ -30,7 +31,7 @@ export function RoutedDataTable<Row>(
   })
 
   return () => {
-    const { route, ...props } = handle.props
+    const { route, class: className, ...props } = handle.props
     if (route.search !== requestSearch) {
       requestSearch = route.search
       search = requestSearch
@@ -66,7 +67,7 @@ export function RoutedDataTable<Row>(
       return route.path + (query.size ? '?' + query : '') + '#' + route.anchor
     }
     return (
-      <div mix={history}>
+      <div class={className} mix={history}>
         <form
           id={formId}
           action={route.path + '#' + route.anchor}

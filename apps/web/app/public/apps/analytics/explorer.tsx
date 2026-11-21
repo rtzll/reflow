@@ -1,4 +1,5 @@
 import {
+  RoutedDataTable,
   Button,
   CodeBlock,
   DatePicker,
@@ -7,7 +8,6 @@ import {
   type DateRange,
 } from '@rtzll/reflow'
 import { clientEntry, navigate, type Handle } from 'remix/component'
-import { RoutedDataTable } from '../../routed-data-table.tsx'
 import { ActivityChart } from './activity-chart.tsx'
 import {
   days,
