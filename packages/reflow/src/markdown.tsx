@@ -1,4 +1,12 @@
+import type { Element, ElementContent, Nodes as HastNodes, Root as HastRoot } from 'hast'
+import { toJsxRuntime, type Components } from 'hast-util-to-jsx-runtime'
+import type { Nodes as MdastNodes, Root as MdastRoot } from 'mdast'
+import remarkGfm from 'remark-gfm'
+import remarkParse from 'remark-parse'
+import remarkRehype from 'remark-rehype'
 import type { Handle, RemixNode } from 'remix/component'
+import { Fragment, jsx, jsxs } from 'remix/component/jsx-runtime'
+import { unified } from 'unified'
 import { CodeBlock } from './code-block.tsx'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './table.tsx'
 import { classList, type ControlSize } from './systems/styling.ts'
@@ -12,205 +20,183 @@ export interface MarkdownProps {
   class?: string
 }
 
-/** Structured prose with native headings, lists and links, CodeBlock fences, and pipe tables. */
+/** CommonMark and GitHub Flavored Markdown, with CodeBlock fences and Table for pipe tables. */
 export function Markdown(handle: Handle<MarkdownProps>) {
+  // Footnote IDs are prefixed per instance so several replies can share a page.
+  const processor = unified()
+    .use(remarkParse)
+    .use(remarkGfm)
+    .use(remarkReflow)
+    .use(remarkRehype, {
+      clobberPrefix: handle.id + '-',
+      footnoteLabelProperties: { className: ['rf-basic-sr-only'] },
+      // Raw HTML stays visible as text instead of being rendered or dropped. An HTML block
+      // reads as its own paragraph.
+      handlers: {
+        html: (_state, node, parent) => {
+          const text = { type: 'text' as const, value: node.value }
+          return parent && blockContainers.has(parent.type)
+            ? { type: 'element', tagName: 'p', properties: {}, children: [text] }
+            : text
+        },
+      },
+    })
+    .use(rehypeReflow, handle.id + '-')
+
   return () => (
     <div
       class={classList('rf-markdown', handle.props.class)}
       data-slot="markdown"
       data-size={handle.props.size}
     >
-      {renderMarkdown(handle.props.source)}
+      {toJsxRuntime(processor.runSync(processor.parse(handle.props.source)), {
+        Fragment,
+        jsx: jsx as never,
+        jsxs: jsxs as never,
+        components,
+        passNode: true,
+        elementAttributeNameCase: 'html',
+        stylePropertyNameCase: 'dom',
+      })}
     </div>
   )
 }
 
-function inline(text: string, depth = 0): RemixNode[] {
-  if (depth > 8) return [text]
-  const nodes: RemixNode[] = []
-  const pattern =
-    /\\([\\`*_~\[\]])|`([^`]+)`|\*\*([^*]+)\*\*|__([^_]+)__|~~([^~]+)~~|\*([^*]+)\*|_([^_]+)_|\[([^\]]+)\]\(([^\s)]+)\)/g
-  let offset = 0
-  for (const match of text.matchAll(pattern)) {
-    nodes.push(text.slice(offset, match.index))
-    if (match[1]) nodes.push(match[1])
-    else if (match[2]) nodes.push(<code key={match.index}>{match[2]}</code>)
-    else if (match[3] || match[4])
-      nodes.push(<strong key={match.index}>{inline(match[3] ?? match[4], depth + 1)}</strong>)
-    else if (match[5]) nodes.push(<s key={match.index}>{inline(match[5], depth + 1)}</s>)
-    else if (match[6] || match[7])
-      nodes.push(<em key={match.index}>{inline(match[6] ?? match[7], depth + 1)}</em>)
-    else {
-      const href = match[9]
-      const safe =
-        /^(?:https?:\/\/|mailto:|\/(?!\/)|#)/i.test(href) &&
-        !href.includes('\\') &&
-        !Array.from(href).some((char) => char.charCodeAt(0) < 32)
-      nodes.push(
-        safe ? (
-          <a key={match.index} href={href}>
-            {inline(match[8], depth + 1)}
-          </a>
-        ) : (
-          match[8]
-        ),
-      )
-    }
-    offset = match.index! + match[0].length
-  }
-  nodes.push(text.slice(offset))
-  return nodes
+// Nodes whose HTML children are blocks rather than inline markup.
+const blockContainers = new Set(['root', 'blockquote', 'listItem', 'footnoteDefinition'])
+
+// Only web, mail, same-site path and fragment links, checked before remark
+// normalizes the destination.
+function safeUrl(url: string) {
+  return (
+    /^(?:https?:\/\/|mailto:|\/(?!\/)|#)/i.test(url) &&
+    !url.includes('\\') &&
+    !Array.from(url).some((char) => char.charCodeAt(0) < 32)
+  )
 }
 
-function cells(line: string) {
-  return line
-    .trim()
-    .replace(/^\||\|$/g, '')
-    .split(/(?<!\\)\|/)
-    .map((value) => value.trim().replace(/\\\|/g, '|'))
+// Unwrap unsafe links and show images as links, so Markdown never loads remote images.
+function remarkReflow() {
+  function rewrite(node: MdastNodes): MdastNodes[] {
+    if (node.type === 'definition' && !safeUrl(node.url)) return []
+    if (node.type === 'image' || node.type === 'imageReference') {
+      const label = { type: 'text' as const, value: node.alt || ('url' in node ? node.url : '') }
+      if (node.type === 'imageReference')
+        return [
+          {
+            type: 'linkReference',
+            identifier: node.identifier,
+            label: node.label,
+            referenceType: node.referenceType,
+            children: [label],
+          },
+        ]
+      return safeUrl(node.url) ? [{ type: 'link', url: node.url, children: [label] }] : [label]
+    }
+    if ('children' in node) {
+      const children = node.children.flatMap(rewrite)
+      if (node.type === 'link' && !safeUrl(node.url)) return children
+      ;(node as { children: MdastNodes[] }).children = children
+    }
+    return [node]
+  }
+  return (tree: MdastRoot) => {
+    rewrite(tree)
+  }
 }
 
-// Reparse the available text on each revision, including an unfinished last block.
-function renderMarkdown(source: string, depth = 0): RemixNode[] {
-  if (depth >= 24) return [source]
-  const lines = source.replace(/\r\n?/g, '\n').split('\n')
-  const blocks: RemixNode[] = []
-  let index = 0
-  const blockStart = (line: string) =>
-    /^(?:#{1,6}\s|```|~~~|>\s?|\s*(?:[-+*]|\d+[.)])\s|(?:---+|___+|\*\*\*+)\s*$)/.test(line)
-  while (index < lines.length) {
-    const line = lines[index]
-    if (!line.trim()) {
-      index++
-      continue
-    }
-    const key = index
-    const fence = /^(\s*)(```+|~~~+)(.*)$/.exec(line)
-    if (fence) {
-      index++
-      const code: string[] = []
-      const closingFence = new RegExp('^\\s*' + fence[2][0] + '{' + fence[2].length + ',}\\s*$')
-      while (index < lines.length && !closingFence.test(lines[index])) code.push(lines[index++])
-      if (index < lines.length) index++
-      blocks.push(
-        <CodeBlock key={key} code={code.join('\n')} language={fence[3].trim().split(/\s+/)[0]} />,
-      )
-      continue
-    }
-    const heading = /^(#{1,6})\s+(.+?)(?:\s+#+)?\s*$/.exec(line)
-    if (heading) {
-      const text = inline(heading[2])
-      const Heading = (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const)[heading[1].length - 1]
-      blocks.push(<Heading key={key}>{text}</Heading>)
-      index++
-      continue
-    }
-    if (/^(?:---+|___+|\*\*\*+)\s*$/.test(line)) {
-      blocks.push(<hr key={key} />)
-      index++
-      continue
-    }
-    if (/^>/.test(line)) {
-      const quote: string[] = []
-      while (index < lines.length && /^>/.test(lines[index]))
-        quote.push(lines[index++].replace(/^>\s?/, ''))
-      blocks.push(<blockquote key={key}>{renderMarkdown(quote.join('\n'), depth + 1)}</blockquote>)
-      continue
-    }
-    const list = /^(\s*)([-+*]|\d+[.)])\s+(.*)$/.exec(line)
-    if (list) {
-      const indentation = list[1].length
-      const ordered = /^\d/.test(list[2])
-      const items: RemixNode[] = []
-      while (index < lines.length) {
-        const item = /^(\s*)([-+*]|\d+[.)])\s+(.*)$/.exec(lines[index])
-        if (!item || item[1].length !== indentation || /^\d/.test(item[2]) !== ordered) break
-        const itemKey = index++
-        const content = [item[3]]
-        while (
-          index < lines.length &&
-          lines[index].trim() &&
-          lines[index].match(/^\s*/)![0].length > indentation
-        ) {
-          content.push(lines[index++].slice(indentation + 2))
-        }
-        const task = /^\[([ xX])\]\s+(.*)$/.exec(content[0])
-        if (task) {
-          content[0] = task[2]
-          items.push(
-            <li key={itemKey} class="rf-markdown-task">
-              <input
-                type="checkbox"
-                key={task[1]}
-                aria-label={task[2]}
-                defaultChecked={task[1].toLowerCase() === 'x'}
-              />
-              <div>{renderMarkdown(content.join('\n'), depth + 1)}</div>
-            </li>,
-          )
-        } else items.push(<li key={itemKey}>{renderMarkdown(content.join('\n'), depth + 1)}</li>)
-      }
-      blocks.push(
-        ordered ? (
-          <ol key={key} start={Number.parseInt(list[2], 10)}>
-            {items}
-          </ol>
-        ) : (
-          <ul key={key}>{items}</ul>
-        ),
-      )
-      continue
-    }
-    if (
-      line.includes('|') &&
-      index + 1 < lines.length &&
-      /^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(lines[index + 1])
-    ) {
-      const headers = cells(line)
-      const alignments = cells(lines[index + 1]).map((value) =>
-        value.startsWith(':') && value.endsWith(':')
-          ? 'center'
-          : value.endsWith(':')
-            ? 'right'
-            : 'left',
-      )
-      index += 2
-      const rows: string[][] = []
-      while (index < lines.length && lines[index].includes('|') && lines[index].trim())
-        rows.push(cells(lines[index++]))
-      blocks.push(
-        <Table key={key} fluidHover={false}>
-          <TableHeader>
-            <TableRow hover={false}>
-              {headers.map((header, column) => (
-                <TableHead key={column} style={{ textAlign: alignments[column] }}>
-                  {inline(header)}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rows.map((row, rowIndex) => (
-              <TableRow key={rowIndex} hover={false}>
-                {headers.map((_, column) => (
-                  <TableCell key={column} style={{ textAlign: alignments[column] }}>
-                    {inline(row[column] ?? '')}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>,
-      )
-      continue
-    }
-    const paragraph = [line]
-    index++
-    while (index < lines.length && lines[index].trim() && !blockStart(lines[index])) {
-      if (lines[index].includes('|') && /^\s*\|?\s*:?-{3,}/.test(lines[index + 1] ?? '')) break
-      paragraph.push(lines[index++])
-    }
-    blocks.push(<p key={key}>{inline(paragraph.join('\n'))}</p>)
-  }
-  return blocks
+function text(node: HastNodes): string {
+  if (node.type === 'text') return node.value
+  return 'children' in node ? node.children.map(text).join('') : ''
 }
+
+// Prefix the footnote heading's fixed ID per instance, and give each task its label and the
+// layout Markdown's stylesheet expects: a read-only checkbox beside the item's content.
+function rehypeReflow(prefix: string) {
+  const labelId = prefix + 'footnote-label'
+  function visit(node: HastNodes) {
+    if (node.type === 'element') {
+      if (node.properties.id === 'footnote-label') node.properties.id = labelId
+      const described = node.properties.ariaDescribedBy
+      if (Array.isArray(described))
+        node.properties.ariaDescribedBy = described.map((id) =>
+          id === 'footnote-label' ? labelId : id,
+        )
+    }
+    if (!('children' in node)) return
+    for (const child of node.children) visit(child)
+    if (node.type === 'element' && node.tagName === 'li') task(node)
+  }
+  return (tree: HastRoot) => visit(tree)
+}
+
+function task(node: Element) {
+  const classes = node.properties.className
+  if (!Array.isArray(classes) || !classes.includes('task-list-item')) return
+  // In a loose list the checkbox sits inside the item's first paragraph.
+  const host: Element =
+    node.children.find(
+      (child): child is Element => child.type === 'element' && child.tagName === 'p',
+    ) ?? node
+  const index = host.children.findIndex(
+    (child) => child.type === 'element' && child.tagName === 'input',
+  )
+  if (index === -1) return
+  const [input] = host.children.splice(index, 1) as [Element]
+  const content = node.children.filter(
+    (child) => !(child.type === 'element' && ['ul', 'ol'].includes(child.tagName)),
+  )
+  input.properties.ariaLabel = content.map(text).join('').trim()
+  node.properties.className = ['rf-markdown-task']
+  node.children = [
+    input,
+    { type: 'element', tagName: 'div', properties: {}, children: node.children },
+  ] as ElementContent[]
+}
+
+interface PartProps {
+  node: Element
+  children?: RemixNode
+  align?: string
+  style?: Record<string, string>
+}
+
+// Reflow's components in place of the native table elements, keeping column alignment.
+function part(
+  Component: (handle: Handle<never>) => () => RemixNode,
+  extra: Record<string, unknown> = {},
+) {
+  return (handle: Handle<PartProps>) => () => {
+    const { children, align, style } = handle.props
+    return jsx(Component as never, {
+      ...extra,
+      children,
+      style: align ? { ...style, textAlign: align } : style,
+    })
+  }
+}
+
+function Fence(handle: Handle<{ node: Element }>) {
+  return () => {
+    const pre = handle.props.node
+    const code = pre.children.find(
+      (child): child is Element => child.type === 'element' && child.tagName === 'code',
+    )
+    const className = code?.properties.className
+    const language = (Array.isArray(className) ? className : [])
+      .map(String)
+      .find((name) => name.startsWith('language-'))
+      ?.slice('language-'.length)
+    return <CodeBlock code={text(code ?? pre).replace(/\n$/, '')} language={language} />
+  }
+}
+
+const components = {
+  pre: Fence,
+  table: part(Table, { fluidHover: false }),
+  thead: part(TableHeader),
+  tbody: part(TableBody),
+  tr: part(TableRow, { hover: false }),
+  th: part(TableHead),
+  td: part(TableCell),
+} as unknown as Partial<Components>

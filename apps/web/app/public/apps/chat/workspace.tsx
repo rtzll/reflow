@@ -1,4 +1,5 @@
-import { Button, ChatLayout, ChatMessage, Icon, InputMessage, Markdown } from '@rtzll/reflow'
+import { Button, ChatLayout, ChatMessage, Icon, InputMessage } from '@rtzll/reflow'
+import { Markdown } from '@rtzll/reflow/markdown'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import { replyTo, type ChatEntry, type Conversation } from './fixtures.ts'
 import { skillReply, skillTriggers } from './skills.ts'
