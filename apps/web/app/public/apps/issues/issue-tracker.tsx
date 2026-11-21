@@ -89,7 +89,7 @@ export const IssueTracker = clientEntry(
         reset?.focus()
         return
       }
-      list?.querySelector<HTMLElement>(`[data-issue-id="${id}"]`)?.focus()
+      list?.querySelector<HTMLElement>(`[data-issue-id="${CSS.escape(id)}"]`)?.focus()
     }
 
     async function setFilter(next?: IssueFilter) {
