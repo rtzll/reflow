@@ -1,4 +1,4 @@
-import { Markdown } from '@rtzll/reflow'
+import { Markdown } from '@rtzll/reflow/markdown'
 import { deepEqual, equal, ok } from 'remix/assert'
 import { render } from 'remix/component/test'
 import { describe, it } from 'remix/test'
@@ -45,6 +45,18 @@ describe('Markdown', () => {
     deepEqual(
       Array.from(container.querySelectorAll('a'), (link) => link.getAttribute('href')),
       ['/docs/typography', 'https://example.org', '#notes', 'mailto:editor@example.org'],
+    )
+  })
+
+  it('shows a raw HTML block as a paragraph of text', (t) => {
+    const { $, cleanup } = render(
+      <Markdown source={'Before\n\n<script>alert(1)</script>\n\nAfter'} />,
+    )
+    t.after(cleanup)
+    equal($('script'), null)
+    deepEqual(
+      Array.from(document.querySelectorAll('.rf-markdown > p'), (p) => p.textContent),
+      ['Before', '<script>alert(1)</script>', 'After'],
     )
   })
 

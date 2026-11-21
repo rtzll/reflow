@@ -34,7 +34,11 @@ const result = await build({
   allowOverwrite: true,
   bundle: true,
   format: 'esm',
-  platform: 'browser',
+  // One file for the browser and server rendering: no browser or node conditions, so each
+  // package's portable build is chosen. The browser build of
+  // decode-named-character-reference, for one, needs the DOM.
+  platform: 'neutral',
+  mainFields: ['module', 'main'],
   target: 'es2022',
   minify: true,
   metafile: true,

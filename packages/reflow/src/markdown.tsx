@@ -30,8 +30,16 @@ export function Markdown(handle: Handle<MarkdownProps>) {
     .use(remarkRehype, {
       clobberPrefix: handle.id + '-',
       footnoteLabelProperties: { className: ['rf-basic-sr-only'] },
-      // Raw HTML stays visible as text instead of being rendered or dropped.
-      handlers: { html: (_state, node) => ({ type: 'text', value: node.value }) },
+      // Raw HTML stays visible as text instead of being rendered or dropped. An HTML block
+      // reads as its own paragraph.
+      handlers: {
+        html: (_state, node, parent) => {
+          const text = { type: 'text' as const, value: node.value }
+          return parent && blockContainers.has(parent.type)
+            ? { type: 'element', tagName: 'p', properties: {}, children: [text] }
+            : text
+        },
+      },
     })
     .use(rehypeReflow)
 
@@ -53,6 +61,9 @@ export function Markdown(handle: Handle<MarkdownProps>) {
     </div>
   )
 }
+
+// Nodes whose HTML children are blocks rather than inline markup.
+const blockContainers = new Set(['root', 'blockquote', 'listItem', 'footnoteDefinition'])
 
 // Only web, mail, same-site path and fragment links, checked before remark
 // normalizes the destination.
