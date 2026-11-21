@@ -188,3 +188,22 @@ it('announces loading with empty rows, supports per-row action lists, and re-anc
   const afterAnchorRemoved = selection.extend(['b', 'c'], initial, 'b', 'c')
   deepEqual(Array.from(afterAnchorRemoved), ['a', 'b', 'c'])
 })
+
+it('moves focus to the current page button when Next or Previous reaches a boundary', async (t) => {
+  const { $, act, cleanup } = render(<DataTable {...props} />)
+  t.after(cleanup)
+  const next = $('button[aria-label="Next page"]') as HTMLButtonElement
+  await act(() => {
+    next.focus()
+    next.click()
+  })
+  equal(document.activeElement, $('button[aria-current="page"]'))
+  equal(document.activeElement?.textContent, '2')
+  const prev = $('button[aria-label="Previous page"]') as HTMLButtonElement
+  await act(() => {
+    prev.focus()
+    prev.click()
+  })
+  equal(document.activeElement, $('button[aria-current="page"]'))
+  equal(document.activeElement?.textContent, '1')
+})

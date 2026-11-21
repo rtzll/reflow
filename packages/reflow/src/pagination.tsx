@@ -1,4 +1,4 @@
-import { on, type Handle, type RemixNode } from 'remix/component'
+import { on, ref, type Handle, type RemixNode } from 'remix/component'
 import type { ControlSize } from './systems/styling.ts'
 import { Icon } from './icon.tsx'
 
@@ -30,11 +30,25 @@ function pageNumbers(page: number, count: number) {
 }
 
 export function Pagination(handle: Handle<PaginationProps>) {
+  let nav: HTMLElement | undefined
+  let restoreFocusPage: number | undefined
+  const mount = ref<HTMLElement>((node) => {
+    nav = node
+  })
+
   return () => {
     const { page, pageCount, href, label = 'Pagination', size, resetScroll } = handle.props
     const count = Number.isFinite(pageCount) ? Math.max(0, Math.floor(pageCount)) : 0
     if (count < 2) return null
     const current = Number.isFinite(page) ? Math.min(count, Math.max(1, Math.floor(page))) : 1
+    if (restoreFocusPage === current) {
+      restoreFocusPage = undefined
+      handle.queueTask(() => {
+        if (!handle.signal.aborted && !nav?.contains(nav?.ownerDocument.activeElement ?? null)) {
+          nav?.querySelector<HTMLElement>('[aria-current="page"]')?.focus()
+        }
+      })
+    }
 
     function control(next: number, name: string, content: RemixNode, arrow = false) {
       const attributes = {
@@ -56,7 +70,11 @@ export function Pagination(handle: Handle<PaginationProps>) {
         <button
           {...attributes}
           type="button"
-          mix={on('click', () => handle.props.onPageChange?.(next))}
+          mix={on('click', () => {
+            if (next === current) return
+            if (arrow && (next === 1 || next === count)) restoreFocusPage = next
+            handle.props.onPageChange?.(next)
+          })}
         >
           {content}
         </button>
@@ -64,7 +82,7 @@ export function Pagination(handle: Handle<PaginationProps>) {
     }
 
     return (
-      <nav class="rf-pagination" aria-label={label} data-size={size}>
+      <nav class="rf-pagination" aria-label={label} data-size={size} mix={mount}>
         <ul>
           <li>{control(current - 1, 'Previous page', <Icon name="chevron-left" />, true)}</li>
           {pageNumbers(current, count).map((number, index) => (
