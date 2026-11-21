@@ -1,7 +1,7 @@
 name: Release
 
-# Preparation only: the repository variables are intentionally unset and the
-# library is still private. Enable only in the NEW repository after migration.
+# Publishes only from the public rtzll/reflow, whose ID RELEASE_REPOSITORY_ID
+# holds, so the renamed private archive can never publish. See docs/releasing.md.
 on:
   workflow_dispatch:
     inputs:
