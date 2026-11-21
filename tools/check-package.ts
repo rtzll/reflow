@@ -42,6 +42,8 @@ try {
     'dist/index.d.ts',
     'dist/highlight.js',
     'dist/highlight.d.ts',
+    'dist/markdown.js',
+    'dist/markdown.d.ts',
     'dist/styles.css',
   ]) {
     assert.ok(files.includes(`package/${name}`), `Package is missing ${name}`)
@@ -59,6 +61,20 @@ try {
     const source = extract(tarball, file)
     assert.doesNotMatch(source, /from ['"](?:shiki|@shikijs\/)/, `${file} must not import Shiki`)
   }
+  // marked loads only with the Markdown entry, so other pages never download it.
+  for (const file of files.filter((name) => /^package\/dist\/.+\.js$/.test(name))) {
+    if (file === 'package/dist/markdown.js') continue
+    assert.doesNotMatch(
+      extract(tarball, file),
+      /from ['"]marked['"]/,
+      `${file} must not import marked`,
+    )
+  }
+  assert.match(
+    extract(tarball, 'package/dist/markdown.js'),
+    /from ['"]marked['"]/,
+    'dist/markdown.js should import marked',
+  )
 
   // The create package ships its command and the starter, pinned to this release.
   const library = JSON.parse(extract(tarball, 'package/package.json'))
