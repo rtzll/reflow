@@ -8,8 +8,22 @@ interface Thread extends Conversation {
 
 interface ChatProps {
   conversations: Conversation[]
-  initialId: string
+  initialId?: string
 }
+
+const starters = [
+  {
+    icon: 'pencil',
+    label: 'Work on a cover',
+    prompt: 'How should I choose a cover for the next issue?',
+  },
+  { icon: 'image', label: 'Sequence a photo essay', prompt: 'How do I sequence a photo essay?' },
+  {
+    icon: 'message-circle',
+    label: 'Prepare an interview',
+    prompt: 'What makes a good opening interview question?',
+  },
+] as const
 
 export const ChatWorkspace = clientEntry(
   import.meta.url,
@@ -19,22 +33,39 @@ export const ChatWorkspace = clientEntry(
       messages: [...thread.messages],
       draft: '',
     }))
-    let activeId = handle.props.initialId
+    let sequence = 0
+    function newThread() {
+      const thread: Thread = {
+        id: `conversation-${++sequence}`,
+        title: 'New chat',
+        messages: [],
+        draft: '',
+      }
+      threads.unshift(thread)
+      return thread
+    }
+
+    let activeId = handle.props.initialId ?? newThread().id
     // Keep each opened composer mounted so its queue and editing state follow the thread.
     const opened = new Set([activeId])
-    let sequence = 0
+    let historyOpen = false
     let root: HTMLElement | undefined
 
     function select(id: string) {
       activeId = id
       opened.add(id)
+      if (historyOpen) {
+        historyOpen = false
+        handle.queueTask(() =>
+          root?.querySelector<HTMLButtonElement>('.studio-history-toggle')?.focus(),
+        )
+      }
       void handle.update()
     }
 
     function create() {
-      const id = `conversation-${++sequence}`
-      threads.unshift({ id, title: 'Untitled conversation', messages: [], draft: '' })
-      select(id)
+      const blank = threads.find((thread) => !thread.messages.length && !thread.draft)
+      select((blank ?? newThread()).id)
       handle.queueTask(() =>
         root?.querySelector<HTMLTextAreaElement>('.studio-pane:not([hidden]) textarea')?.focus(),
       )
@@ -47,61 +78,53 @@ export const ChatWorkspace = clientEntry(
           root = node as HTMLElement
         })}
       >
-        <aside class="studio-library" aria-label="Conversation library">
+        <aside
+          class="studio-library"
+          aria-label="Conversation library"
+          data-open={historyOpen || undefined}
+        >
           <header class="studio-library-header">
-            <span class="studio-mark">
-              <Icon name="book" size={20} />
-            </span>
-            <h1>Studio chat</h1>
+            <button
+              type="button"
+              class="studio-history-toggle"
+              aria-label="Chat history"
+              aria-expanded={historyOpen}
+              aria-controls={`${handle.id}-history`}
+              mix={on('click', () => {
+                historyOpen = !historyOpen
+                void handle.update()
+              })}
+            >
+              <Icon name="panel-left" size={18} />
+            </button>
+            <h1>Reflow Chat</h1>
           </header>
-          <Button
-            class="studio-new"
-            variant="secondary"
-            leadingIcon={<Icon name="plus" />}
-            mix={on('click', create)}
-          >
-            New conversation
-          </Button>
-          <div class="studio-list">
-            <h2>Conversations</h2>
-            <ul>
-              {threads.map((thread) => (
-                <li key={thread.id}>
-                  <button
-                    type="button"
-                    class="studio-thread"
-                    aria-label={thread.title}
-                    aria-current={activeId === thread.id ? 'true' : undefined}
-                    mix={on('click', () => select(thread.id))}
-                  >
-                    <Icon name="message-circle" size={15} />
-                    <span class="studio-thread-summary">
-                      <strong>{thread.title}</strong>
-                      <span>
-                        {thread.draft
-                          ? `Draft · ${thread.draft}`
-                          : thread.messages.at(-1)?.text || 'No messages yet'}
-                      </span>
-                    </span>
-                  </button>
-                </li>
-              ))}
+          <button type="button" class="studio-new" mix={on('click', create)}>
+            <Icon name="pencil" size={16} />
+            New chat
+          </button>
+          <nav class="studio-list" aria-label="Chat history" id={`${handle.id}-history`}>
+            <h2>Your chats</h2>
+            <ul role="list">
+              {threads
+                .filter((thread) => thread.messages.length || thread.draft)
+                .map((thread) => (
+                  <li key={thread.id}>
+                    <button
+                      type="button"
+                      class="studio-thread"
+                      aria-label={thread.messages.length ? thread.title : `Draft · ${thread.draft}`}
+                      aria-current={activeId === thread.id ? 'true' : undefined}
+                      mix={on('click', () => select(thread.id))}
+                    >
+                      <Icon name="message-circle" size={16} />
+                      <span>{thread.messages.length ? thread.title : thread.draft}</span>
+                      {thread.draft && <small>Draft</small>}
+                    </button>
+                  </li>
+                ))}
             </ul>
-          </div>
-          <select
-            class="studio-picker"
-            aria-label="Conversation"
-            mix={on<HTMLSelectElement, 'change'>('change', (event) =>
-              select(event.currentTarget.value),
-            )}
-          >
-            {threads.map((thread) => (
-              <option key={thread.id} value={thread.id} selected={activeId === thread.id}>
-                {thread.title}
-                {thread.draft ? ' · Draft' : ''}
-              </option>
-            ))}
-          </select>
+          </nav>
         </aside>
         {threads
           .filter((thread) => opened.has(thread.id))
@@ -162,50 +185,67 @@ function ConversationPane(handle: Handle<{ thread: Thread; onChange: () => void 
     <ChatLayout
       label={thread.title}
       header={
-        <header class="studio-heading">
-          <h2>{thread.title}</h2>
-          <p role="status">
-            {response ? 'Studio assistant is replying…' : 'Studio assistant · Simulated replies'}
-          </p>
-        </header>
-      }
-      empty={
-        <div class="studio-empty">
-          <Icon name="pencil" size={24} />
-          <h3>What are you working on?</h3>
-          <p>Send a message to start this conversation.</p>
-        </div>
+        thread.messages.length ? (
+          <header class="studio-heading">
+            <h2>{thread.title}</h2>
+            <p role="status">{response ? 'Replying…' : 'Simulated replies'}</p>
+          </header>
+        ) : undefined
       }
       composer={
-        <InputMessage
-          attachments={false}
-          placeholder="Message Studio assistant…"
-          status={response ? 'streaming' : 'idle'}
-          onStop={stop}
-          actions={
-            response && thread.draft.trim() ? (
-              <Button
-                size="compact"
-                variant="ghost"
-                leadingIcon={<Icon name="square-stop" size={12} />}
-                mix={on('click', stop)}
-              >
-                Stop response
-              </Button>
-            ) : undefined
-          }
-          defaultValue={thread.draft}
-          onValueChange={(draft) => {
-            thread.draft = draft
-            handle.props.onChange()
-          }}
-          onSend={({ text }) => send(text)}
-        />
+        <>
+          {!thread.messages.length && <h2 class="studio-welcome">Where should we begin?</h2>}
+          <InputMessage
+            key="composer"
+            attachments={false}
+            placeholder="Ask Reflow"
+            status={response ? 'streaming' : 'idle'}
+            onStop={stop}
+            actions={
+              response && thread.draft.trim() ? (
+                <Button
+                  size="icon-compact"
+                  variant="ghost"
+                  aria-label="Stop response"
+                  mix={on('click', stop)}
+                >
+                  <Icon name="square-stop" size={14} />
+                </Button>
+              ) : undefined
+            }
+            defaultValue={thread.draft}
+            onValueChange={(draft) => {
+              thread.draft = draft
+              handle.props.onChange()
+            }}
+            onSend={({ text }) => send(text)}
+          />
+          {!thread.messages.length && !thread.draft && (
+            <div class="studio-starters" aria-label="Suggested prompts" role="group">
+              {starters.map(({ icon, label, prompt }) => (
+                <button
+                  key={label}
+                  type="button"
+                  mix={on<HTMLButtonElement, 'click'>('click', (event) => {
+                    const field = event.currentTarget
+                      .closest('.rf-chat-layout-composer')
+                      ?.querySelector('textarea')
+                    send(prompt)
+                    handle.queueTask(() => field?.focus())
+                  })}
+                >
+                  <Icon name={icon} size={16} />
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+        </>
       }
     >
       {thread.messages.map((message, index) => (
         <ChatMessage key={index} role={message.role} animate={false}>
-          {message.role === 'assistant' && <strong class="studio-author">Studio assistant</strong>}
+          {message.role === 'assistant' && <strong class="studio-author">Reflow</strong>}
           <span aria-busy={message === response || undefined}>{message.text}</span>
           {message.stopped && <span class="studio-stopped">Response stopped</span>}
         </ChatMessage>

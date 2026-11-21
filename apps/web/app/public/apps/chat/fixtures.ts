@@ -58,4 +58,43 @@ export const conversations: Conversation[] = [
       },
     ],
   },
+  {
+    id: 'opening-paragraph',
+    title: 'Opening paragraph',
+    messages: [
+      {
+        role: 'user',
+        text: 'The first paragraph of our ferry story feels slow. It starts with the history of the route.',
+      },
+      {
+        role: 'assistant',
+        text: 'Open with the first passenger stepping onto the deck. You can bring in the history once the reader has crossed the threshold with them.',
+      },
+    ],
+  },
+  {
+    id: 'caption-edit',
+    title: 'A shorter caption',
+    messages: [
+      { role: 'user', text: 'What should I keep in a caption for the waiting room photograph?' },
+      {
+        role: 'assistant',
+        text: 'Keep the place and the time of the last departure. The photograph already shows the empty seats.',
+      },
+    ],
+  },
+  {
+    id: 'print-proof',
+    title: 'Print proof checklist',
+    messages: [
+      {
+        role: 'user',
+        text: 'What should we check on the last proof before sending the issue to print?',
+      },
+      {
+        role: 'assistant',
+        text: 'Fold the proof and read it as a reader would. Check the sequence and page numbers first, then look at the image crops, captions, and text near the fold.',
+      },
+    ],
+  },
 ]

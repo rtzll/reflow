@@ -5,15 +5,24 @@ import { open, showcaseServer } from './showcase-router.ts'
 it('opens each workspace from the showcase and returns to the directory', async (t) => {
   const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1440, height: 900 })
-  await open(page, '/')
+  await open(page, '/?shape=pill')
   await page.locator('.site-left').getByRole('link', { name: 'Apps', exact: true }).click()
-  for (const name of ['Issue tracker', 'Chat workspace', 'Team calendar', 'Analytics explorer']) {
+  const workspaces = [
+    ['Issue tracker', page.getByRole('listbox', { name: 'Cycle issues' })],
+    ['Chat workspace', page.getByRole('textbox', { name: 'Message' })],
+    ['Team calendar', page.getByRole('button', { name: 'New event' })],
+    ['Analytics explorer', page.getByRole('table', { name: 'Studio events' })],
+  ] as const
+  for (const [name, workspaceControl] of workspaces) {
     await page.getByRole('main').getByRole('link', { name }).click()
     await expect(page).toHaveTitle(name + ' · Reflow')
+    await expect(workspaceControl).toBeVisible()
+    await expect(page.locator('html')).toHaveAttribute('data-shape', 'rounded')
     const nav = page.getByRole('navigation', { name: 'App navigation' })
     await expect(nav.locator('[aria-current="page"]')).toHaveText(name)
     await nav.getByRole('link', { name: 'Apps' }).click()
     await expect(page.getByRole('heading', { name: 'Example apps' })).toBeVisible()
+    await expect(page.locator('html')).toHaveAttribute('data-shape', 'pill')
   }
 })
 
@@ -23,6 +32,7 @@ it('serves the app directory without JavaScript and rejects an unknown app', asy
   await open(page, '/apps', { hydrate: false })
   await page.getByRole('main').getByRole('link', { name: 'Team calendar' }).click()
   await expect(page).toHaveTitle('Team calendar · Reflow')
+  await expect(page.getByRole('button', { name: 'New event' })).toBeVisible()
   const response = await open(page, '/apps/missing', { hydrate: false })
   expect(response?.status()).toBe(404)
 })

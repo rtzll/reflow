@@ -71,7 +71,7 @@
 .analytics-chart {
   border: 1px solid var(--rf-border);
   background: var(--rf-surface-2);
-  border-radius: 12px;
+  border-radius: var(--rf-panel-radius);
   padding: clamp(14px, 3vw, 24px);
 }
 .analytics-explorer h2 {

@@ -42,7 +42,12 @@ async function show(context: AppContext, page: ShowcaseProps['page'] | 'app', sl
     if (!app) return new Response('App not found', { status: 404 })
     const assets = await getPageAssets(app.slug)
     return context.render(
-      <Document assets={assets} settings={settings} title={`${app.name} · Reflow`} url={url}>
+      <Document
+        assets={assets}
+        settings={{ ...settings, shape: 'rounded' }}
+        title={`${app.name} · Reflow`}
+        url={url}
+      >
         <AppWorkspace app={app} search={query} />
       </Document>,
     )

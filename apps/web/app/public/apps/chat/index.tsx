@@ -8,12 +8,7 @@ export const chatApp: ExampleApp = {
   description: 'Switch between conversations, compose a reply, and return to a draft.',
   render(search) {
     const thread = new URLSearchParams(search).get('thread')
-    const initialId = conversations.find(({ id }) => id === thread)?.id ?? conversations[0].id
+    const initialId = conversations.find(({ id }) => id === thread)?.id
     return <ChatWorkspace conversations={conversations} initialId={initialId} />
   },
-  components: [
-    { slug: 'chat-layout', name: 'ChatLayout' },
-    { slug: 'input-message', name: 'InputMessage' },
-    { slug: 'chat-message', name: 'ChatMessage' },
-  ],
 }

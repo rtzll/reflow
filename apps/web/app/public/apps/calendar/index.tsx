@@ -6,8 +6,4 @@ export const calendarApp: ExampleApp = {
   name: 'Team calendar',
   description: 'Plan a week, move an event, and adjust its duration.',
   render: () => <WeekView />,
-  components: [
-    { slug: 'button', name: 'Button' },
-    { slug: 'dialog', name: 'Dialog' },
-  ],
 }
