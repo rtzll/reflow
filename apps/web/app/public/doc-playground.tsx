@@ -26,6 +26,7 @@ import {
   datePickerBooked,
   datePickerPresets,
   datePickerToday,
+  markdownNote,
   accordionItems,
   cardItems,
   badgeColors,
@@ -48,6 +49,7 @@ import {
   CardHeader,
   CardMedia,
   CardTitle,
+  Markdown,
   ChatMessage,
   Checkbox,
   CheckboxGroup,
@@ -110,6 +112,7 @@ const label = (initial: string): Control => ({
 })
 
 export const playgroundControls: Record<string, readonly Control[]> = {
+  markdown: [size],
   'data-table': [choice('pageSize', 'Rows per page', ['4', '8', '12'])],
   'context-menu': [size],
   progress: [
@@ -574,6 +577,8 @@ export function PlaygroundExample(
     const disabled = Boolean(v.disabled)
     const content = <p>Build thoughtful interfaces with fluid motion.</p>
     switch (slug) {
+      case 'markdown':
+        return <Markdown source={markdownNote} size={density} />
       case 'data-table':
         return <TeamDirectory pageSize={Number(v.pageSize)} />
       case 'context-menu':

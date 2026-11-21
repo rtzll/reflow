@@ -22,6 +22,7 @@ import { ChatExample } from './chat-example.tsx'
 import { questionExample, questionPlayground } from './question-example-data.ts'
 import { CarouselExample } from './carousel-example.tsx'
 import {
+  markdownNote,
   accordionItems,
   badgeGenres,
   cardItems,
@@ -51,6 +52,7 @@ import {
   CardTitle,
   CarouselDots,
   ChatLayout,
+  Markdown,
   ChatMessage,
   Citation,
   Checkbox,
@@ -311,6 +313,8 @@ export const Example = clientEntry(
           return <ProjectTreeExample size="default" />
         case 'tree':
           return <ProjectTreeExample />
+        case 'markdown':
+          return <Markdown source={markdownNote} />
         case 'code-block':
           if (handle.props.gallery && handle.props.code)
             return <ProjectTreeExample source={handle.props.code} />

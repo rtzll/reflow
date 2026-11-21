@@ -1,3 +1,18 @@
+export const markdownNote = `### On the last ferry
+
+Hold the **waiting room** for the final spread.
+
+- Open with the first passenger.
+- Leave a page turn before the empty seats.`
+
+export const markdownTable = `| Frame | Position |
+| --- | ---: |
+| First passenger | 1 |
+| Waiting room | 8 |`
+
+export const markdownFence =
+  'Save the departure time in `crossing.json`.\n\n```json\n{ "departure": "18:40" }\n```'
+
 export const inputMessagePrompts = [
   'What is Reflow about?',
   'How does Reflow tune the springs behind these animations?',

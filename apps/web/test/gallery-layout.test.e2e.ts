@@ -45,6 +45,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'drawer',
     'color-picker',
     'switch',
+    'markdown',
     'combobox',
   ]
   const gallery = page.locator('.site-gallery')
@@ -157,7 +158,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
           (card) => (card.getBoundingClientRect().left - left < 50 ? 'L' : 'R'),
         ).join('')
       })
-      assert.equal(sides, 'RLLRLRLRLRLRLR')
+      assert.equal(sides, 'RLLRLRLRLRLRLRL')
       // The first band: QueuedStack and HoverCard stacked beside the Carousel.
       const [carousel, queue, hover, toaster, avatar] = await Promise.all(
         ['carousel', 'queued-stack', 'hover-card', 'toaster', 'avatar'].map(tile),

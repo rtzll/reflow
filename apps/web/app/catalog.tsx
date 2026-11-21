@@ -1,7 +1,12 @@
 import { components, systems } from './public/catalog-entries.ts'
 import { bannerDefaults, bannerFragment } from './public/banner-example.tsx'
 import { conversationCode } from './public/chat-example.tsx'
-import { accordionItems, checkboxFruit, radioOptions } from './public/component-example-data.ts'
+import {
+  accordionItems,
+  checkboxFruit,
+  markdownNote,
+  radioOptions,
+} from './public/component-example-data.ts'
 import { cardPlaygroundCode } from './public/card-example-code.ts'
 import { questionCode, questionPlayground } from './public/question-example-data.ts'
 import { requestFormCode } from './public/request-form-example.tsx'
@@ -198,6 +203,11 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
     description:
       'An inline source chip in generated text that links to the source and previews it.',
     code: `<p>\n  Good design is unobtrusive.\n  <Citation index={1} sources={{ title: 'Ten principles for good design', href }} />\n</p>`,
+  },
+  markdown: {
+    description:
+      'Render Markdown notes and streaming replies with semantic headings, lists, pipe tables, and copyable code.',
+    code: `<Markdown source={${JSON.stringify(markdownNote)}} />`,
   },
   'code-block': {
     description:

@@ -58,7 +58,7 @@ it('pages through the component directory in place and restores its records with
       'page',
     )
     await expect(directory.getByRole('link', { name: 'TriggerMenu' })).toBeVisible()
-    await expect(directory.getByRole('link')).toHaveCount(3)
+    await expect(directory.getByRole('link')).toHaveCount(4)
     await page.goBack()
     await expect(directory.getByRole('link')).toHaveText(records)
   }
