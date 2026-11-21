@@ -48,6 +48,37 @@ describe('Markdown', () => {
     )
   })
 
+  it('follows CommonMark for emphasis inside words and links containing parentheses', (t) => {
+    const source = 'Rename snake_case_name. See [the note](https://example.org/a_(b)).'
+    const { $, cleanup } = render(<Markdown source={source} />)
+    t.after(cleanup)
+    equal($('em'), null)
+    equal($('p')?.textContent, 'Rename snake_case_name. See the note.')
+    equal($('a')?.getAttribute('href'), 'https://example.org/a_(b)')
+  })
+
+  it('renders read-only, labeled task checkboxes and keeps paragraphs inside list items', (t) => {
+    const source = [
+      '- [x] Book the ferry',
+      '- [ ] Pack',
+      '',
+      '1. First',
+      '',
+      '   More on first.',
+    ].join('\n')
+    const { $$, $, cleanup } = render(<Markdown source={source} />)
+    t.after(cleanup)
+    const boxes = Array.from($$('input[type="checkbox"]')) as HTMLInputElement[]
+    deepEqual(
+      boxes.map((box) => [box.disabled, box.checked, box.getAttribute('aria-label')]),
+      [
+        [true, true, 'Book the ferry'],
+        [true, false, 'Pack'],
+      ],
+    )
+    equal($('ol li')?.querySelectorAll('p').length, 2)
+  })
+
   it('updates partial inline marks and keeps an open fence readable as text arrives', async (t) => {
     const { $, root, act, cleanup } = render(<Markdown source="A **partial" />)
     t.after(cleanup)
