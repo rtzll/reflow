@@ -221,7 +221,11 @@ export const composerTriggers = [
     character: '/',
     label: 'Commands',
     items: [
-      { label: 'Summarize', value: '/summarize' },
+      {
+        label: 'Summarize',
+        value: '/summarize',
+        description: 'Condense a passage into key points',
+      },
       { label: 'Explain', value: '/explain' },
     ],
   },
