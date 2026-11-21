@@ -1,3 +1,4 @@
+import { Lexer, type Token, type Tokens } from 'marked'
 import type { Handle, RemixNode } from 'remix/component'
 import { CodeBlock } from './code-block.tsx'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './table.tsx'
@@ -12,7 +13,7 @@ export interface MarkdownProps {
   class?: string
 }
 
-/** Structured prose with native headings, lists and links, CodeBlock fences, and pipe tables. */
+/** CommonMark and GitHub Flavored Markdown, with CodeBlock fences and Table for pipe tables. */
 export function Markdown(handle: Handle<MarkdownProps>) {
   return () => (
     <div
@@ -20,197 +21,220 @@ export function Markdown(handle: Handle<MarkdownProps>) {
       data-slot="markdown"
       data-size={handle.props.size}
     >
-      {renderMarkdown(handle.props.source)}
+      {blocks(new Lexer({ gfm: true }).lex(handle.props.source))}
     </div>
   )
 }
 
-function inline(text: string, depth = 0): RemixNode[] {
-  if (depth > 8) return [text]
-  const nodes: RemixNode[] = []
-  const pattern =
-    /\\([\\`*_~\[\]])|`([^`]+)`|\*\*([^*]+)\*\*|__([^_]+)__|~~([^~]+)~~|\*([^*]+)\*|_([^_]+)_|\[([^\]]+)\]\(([^\s)]+)\)/g
-  let offset = 0
-  for (const match of text.matchAll(pattern)) {
-    nodes.push(text.slice(offset, match.index))
-    if (match[1]) nodes.push(match[1])
-    else if (match[2]) nodes.push(<code key={match.index}>{match[2]}</code>)
-    else if (match[3] || match[4])
-      nodes.push(<strong key={match.index}>{inline(match[3] ?? match[4], depth + 1)}</strong>)
-    else if (match[5]) nodes.push(<s key={match.index}>{inline(match[5], depth + 1)}</s>)
-    else if (match[6] || match[7])
-      nodes.push(<em key={match.index}>{inline(match[6] ?? match[7], depth + 1)}</em>)
-    else {
-      const href = match[9]
-      const safe =
-        /^(?:https?:\/\/|mailto:|\/(?!\/)|#)/i.test(href) &&
-        !href.includes('\\') &&
-        !Array.from(href).some((char) => char.charCodeAt(0) < 32)
-      nodes.push(
-        safe ? (
-          <a key={match.index} href={href}>
-            {inline(match[8], depth + 1)}
+// Only web, mail, same-site path and fragment links.
+function safeUrl(url: string) {
+  return (
+    /^(?:https?:\/\/|mailto:|\/(?!\/)|#)/i.test(url) &&
+    !url.includes('\\') &&
+    !Array.from(url).some((char) => char.charCodeAt(0) < 32)
+  )
+}
+
+// marked decodes numeric character references but leaves named ones to an HTML parser.
+// Remix renders text literally, so decode the common named references here.
+const named: Record<string, string> = {
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+  nbsp: ' ',
+  copy: '©',
+  reg: '®',
+  trade: '™',
+  hellip: '…',
+  mdash: '—',
+  ndash: '–',
+  lsquo: '‘',
+  rsquo: '’',
+  ldquo: '“',
+  rdquo: '”',
+  laquo: '«',
+  raquo: '»',
+  bull: '•',
+  middot: '·',
+  deg: '°',
+  plusmn: '±',
+  times: '×',
+  divide: '÷',
+  euro: '€',
+  pound: '£',
+  yen: '¥',
+  cent: '¢',
+  sect: '§',
+  para: '¶',
+  shy: '­',
+  larr: '←',
+  rarr: '→',
+  uarr: '↑',
+  darr: '↓',
+  harr: '↔',
+  check: '✓',
+}
+function decode(text: string) {
+  return text.replace(/&(#\d+|#x[\da-f]+|[a-z][a-z\d]*);/gi, (reference, name: string) => {
+    if (name[0] !== '#') return named[name] ?? reference
+    const code = /^#x/i.test(name) ? Number.parseInt(name.slice(2), 16) : Number(name.slice(1))
+    return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : reference
+  })
+}
+
+function plain(tokens: readonly Token[]): string {
+  return tokens
+    .map((token) => {
+      if (token.type === 'list' || token.type === 'checkbox') return ''
+      if ('tokens' in token && token.tokens) return plain(token.tokens)
+      return 'text' in token ? decode(String(token.text)) : ''
+    })
+    .join('')
+}
+
+function blocks(tokens: readonly Token[]): RemixNode[] {
+  return tokens.map((token, key) => block(token, key))
+}
+
+function block(token: Token, key: number): RemixNode {
+  switch (token.type) {
+    case 'space':
+    case 'def':
+      return null
+    case 'heading': {
+      const Heading = (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const)[token.depth - 1]!
+      return <Heading key={key}>{inline(token.tokens ?? [])}</Heading>
+    }
+    case 'paragraph':
+      return <p key={key}>{inline(token.tokens ?? [])}</p>
+    // Unwrapped text in a tight list item.
+    case 'text':
+      return token.tokens ? inline(token.tokens) : decode(token.text)
+    case 'code':
+      return (
+        <CodeBlock
+          key={key}
+          code={token.text}
+          language={(token.lang ?? '').trim().split(/\s+/)[0] || undefined}
+        />
+      )
+    case 'blockquote':
+      return <blockquote key={key}>{blocks(token.tokens ?? [])}</blockquote>
+    case 'list': {
+      const list = token as Tokens.List
+      const items = list.items.map(item)
+      return list.ordered ? (
+        <ol key={key} start={list.start === '' || list.start === 1 ? undefined : list.start}>
+          {items}
+        </ol>
+      ) : (
+        <ul key={key}>{items}</ul>
+      )
+    }
+    case 'hr':
+      return <hr key={key} />
+    case 'table':
+      return table(token as Tokens.Table, key)
+    // Raw HTML stays visible as text. An HTML block reads as its own paragraph.
+    case 'html':
+      return <p key={key}>{token.text.replace(/\n+$/, '')}</p>
+    default:
+      return 'raw' in token ? token.raw : null
+  }
+}
+
+// Tasks get a read-only, labeled checkbox beside the item's content.
+function item(entry: Tokens.ListItem, key: number): RemixNode {
+  const content = blocks(entry.tokens.filter((token) => token.type !== 'checkbox'))
+  if (!entry.task) return <li key={key}>{content}</li>
+  return (
+    <li key={key} class="rf-markdown-task">
+      <input
+        type="checkbox"
+        disabled
+        checked={entry.checked === true}
+        aria-label={plain(entry.tokens).trim()}
+      />
+      <div>{content}</div>
+    </li>
+  )
+}
+
+function table(token: Tokens.Table, key: number): RemixNode {
+  const style = (column: number) => {
+    const align = token.align[column]
+    return align ? { textAlign: align } : undefined
+  }
+  return (
+    <Table key={key} fluidHover={false}>
+      <TableHeader>
+        <TableRow hover={false}>
+          {token.header.map((cell, column) => (
+            <TableHead key={column} style={style(column)}>
+              {inline(cell.tokens)}
+            </TableHead>
+          ))}
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {token.rows.map((row, index) => (
+          <TableRow key={index} hover={false}>
+            {row.map((cell, column) => (
+              <TableCell key={column} style={style(column)}>
+                {inline(cell.tokens)}
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  )
+}
+
+function inline(tokens: readonly Token[]): RemixNode[] {
+  return tokens.map((token, key): RemixNode => {
+    switch (token.type) {
+      case 'text':
+        return token.tokens ? inline(token.tokens) : decode(token.text)
+      case 'escape':
+        return token.text
+      case 'strong':
+        return <strong key={key}>{inline(token.tokens ?? [])}</strong>
+      case 'em':
+        return <em key={key}>{inline(token.tokens ?? [])}</em>
+      case 'del':
+        return <del key={key}>{inline(token.tokens ?? [])}</del>
+      // Code spans are literal, character references included.
+      case 'codespan':
+        return <code key={key}>{token.text}</code>
+      case 'br':
+        return <br key={key} />
+      case 'link':
+        return safeUrl(token.href) ? (
+          <a key={key} href={decode(token.href)} title={token.title ?? undefined}>
+            {inline(token.tokens ?? [])}
           </a>
         ) : (
-          match[8]
-        ),
-      )
-    }
-    offset = match.index! + match[0].length
-  }
-  nodes.push(text.slice(offset))
-  return nodes
-}
-
-function cells(line: string) {
-  return line
-    .trim()
-    .replace(/^\||\|$/g, '')
-    .split(/(?<!\\)\|/)
-    .map((value) => value.trim().replace(/\\\|/g, '|'))
-}
-
-// Reparse the available text on each revision, including an unfinished last block.
-function renderMarkdown(source: string, depth = 0): RemixNode[] {
-  if (depth >= 24) return [source]
-  const lines = source.replace(/\r\n?/g, '\n').split('\n')
-  const blocks: RemixNode[] = []
-  let index = 0
-  const blockStart = (line: string) =>
-    /^(?:#{1,6}\s|```|~~~|>\s?|\s*(?:[-+*]|\d+[.)])\s|(?:---+|___+|\*\*\*+)\s*$)/.test(line)
-  while (index < lines.length) {
-    const line = lines[index]
-    if (!line.trim()) {
-      index++
-      continue
-    }
-    const key = index
-    const fence = /^(\s*)(```+|~~~+)(.*)$/.exec(line)
-    if (fence) {
-      index++
-      const code: string[] = []
-      const closingFence = new RegExp('^\\s*' + fence[2][0] + '{' + fence[2].length + ',}\\s*$')
-      while (index < lines.length && !closingFence.test(lines[index])) code.push(lines[index++])
-      if (index < lines.length) index++
-      blocks.push(
-        <CodeBlock key={key} code={code.join('\n')} language={fence[3].trim().split(/\s+/)[0]} />,
-      )
-      continue
-    }
-    const heading = /^(#{1,6})\s+(.+?)(?:\s+#+)?\s*$/.exec(line)
-    if (heading) {
-      const text = inline(heading[2])
-      const Heading = (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const)[heading[1].length - 1]
-      blocks.push(<Heading key={key}>{text}</Heading>)
-      index++
-      continue
-    }
-    if (/^(?:---+|___+|\*\*\*+)\s*$/.test(line)) {
-      blocks.push(<hr key={key} />)
-      index++
-      continue
-    }
-    if (/^>/.test(line)) {
-      const quote: string[] = []
-      while (index < lines.length && /^>/.test(lines[index]))
-        quote.push(lines[index++].replace(/^>\s?/, ''))
-      blocks.push(<blockquote key={key}>{renderMarkdown(quote.join('\n'), depth + 1)}</blockquote>)
-      continue
-    }
-    const list = /^(\s*)([-+*]|\d+[.)])\s+(.*)$/.exec(line)
-    if (list) {
-      const indentation = list[1].length
-      const ordered = /^\d/.test(list[2])
-      const items: RemixNode[] = []
-      while (index < lines.length) {
-        const item = /^(\s*)([-+*]|\d+[.)])\s+(.*)$/.exec(lines[index])
-        if (!item || item[1].length !== indentation || /^\d/.test(item[2]) !== ordered) break
-        const itemKey = index++
-        const content = [item[3]]
-        while (
-          index < lines.length &&
-          lines[index].trim() &&
-          lines[index].match(/^\s*/)![0].length > indentation
-        ) {
-          content.push(lines[index++].slice(indentation + 2))
-        }
-        const task = /^\[([ xX])\]\s+(.*)$/.exec(content[0])
-        if (task) {
-          content[0] = task[2]
-          items.push(
-            <li key={itemKey} class="rf-markdown-task">
-              <input
-                type="checkbox"
-                key={task[1]}
-                aria-label={task[2]}
-                defaultChecked={task[1].toLowerCase() === 'x'}
-              />
-              <div>{renderMarkdown(content.join('\n'), depth + 1)}</div>
-            </li>,
-          )
-        } else items.push(<li key={itemKey}>{renderMarkdown(content.join('\n'), depth + 1)}</li>)
-      }
-      blocks.push(
-        ordered ? (
-          <ol key={key} start={Number.parseInt(list[2], 10)}>
-            {items}
-          </ol>
+          inline(token.tokens ?? [])
+        )
+      // Images show as links, so Markdown never loads remote images.
+      case 'image': {
+        const label = decode(token.text) || token.href
+        return safeUrl(token.href) ? (
+          <a key={key} href={decode(token.href)}>
+            {label}
+          </a>
         ) : (
-          <ul key={key}>{items}</ul>
-        ),
-      )
-      continue
+          label
+        )
+      }
+      // Inline raw HTML stays visible as text.
+      case 'html':
+        return token.text
+      default:
+        return 'raw' in token ? token.raw : null
     }
-    if (
-      line.includes('|') &&
-      index + 1 < lines.length &&
-      /^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(lines[index + 1])
-    ) {
-      const headers = cells(line)
-      const alignments = cells(lines[index + 1]).map((value) =>
-        value.startsWith(':') && value.endsWith(':')
-          ? 'center'
-          : value.endsWith(':')
-            ? 'right'
-            : 'left',
-      )
-      index += 2
-      const rows: string[][] = []
-      while (index < lines.length && lines[index].includes('|') && lines[index].trim())
-        rows.push(cells(lines[index++]))
-      blocks.push(
-        <Table key={key} fluidHover={false}>
-          <TableHeader>
-            <TableRow hover={false}>
-              {headers.map((header, column) => (
-                <TableHead key={column} style={{ textAlign: alignments[column] }}>
-                  {inline(header)}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rows.map((row, rowIndex) => (
-              <TableRow key={rowIndex} hover={false}>
-                {headers.map((_, column) => (
-                  <TableCell key={column} style={{ textAlign: alignments[column] }}>
-                    {inline(row[column] ?? '')}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>,
-      )
-      continue
-    }
-    const paragraph = [line]
-    index++
-    while (index < lines.length && lines[index].trim() && !blockStart(lines[index])) {
-      if (lines[index].includes('|') && /^\s*\|?\s*:?-{3,}/.test(lines[index + 1] ?? '')) break
-      paragraph.push(lines[index++])
-    }
-    blocks.push(<p key={key}>{inline(paragraph.join('\n'))}</p>)
-  }
-  return blocks
+  })
 }
