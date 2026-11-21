@@ -6,6 +6,7 @@ import { showcaseServer, waitForShowcase, open } from './showcase-router.ts'
 it('applies preferences immediately, keeps links clean, and persists through reload', async (t) => {
   const page = await t.serve(showcaseServer)
   await open(page, '/?theme=light')
+  await expect(page.locator('html')).toHaveAttribute('data-shape', 'rounded')
   const panel = page.locator('.site-right')
   await panel.locator('[data-setting-trigger="theme"]').click()
   await panel.getByRole('menuitemradio', { name: 'Dark', exact: true }).click()
@@ -21,12 +22,12 @@ it('applies preferences immediately, keeps links clean, and persists through rel
     'light-dark(#7F22FE, #A684FF)',
   )
   await page.locator('body').press('r')
-  assert.equal(await page.locator('html').getAttribute('data-shape'), 'rounded')
+  assert.equal(await page.locator('html').getAttribute('data-shape'), 'pill')
   assert.equal(
     await panel
       .locator('[data-setting-trigger="shape"] [data-setting-icon]')
       .getAttribute('data-value'),
-    'rounded',
+    'pill',
   )
   await page.locator('body').press('f')
   assert.equal(await page.locator('html').getAttribute('data-font'), 'geist-serif')
@@ -36,6 +37,7 @@ it('applies preferences immediately, keeps links clean, and persists through rel
   assert.equal(await introduction.getAttribute('href'), '/docs')
   assert.equal(new URL(page.url()).search, '')
   await open(page, '/docs')
+  await expect(page.locator('html')).toHaveAttribute('data-shape', 'pill')
   assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark')
   assert.equal(await page.locator('html').getAttribute('data-accent'), 'violet')
   assert.equal(await page.locator('html').getAttribute('data-font'), 'geist-serif')
@@ -408,7 +410,7 @@ it('saves the settings of a shared link over older cookies and shows the clean U
   await page.locator('body').press('r')
   await reset.click()
   assert.equal(await page.locator('html').getAttribute('data-theme'), 'system')
-  assert.equal(await page.locator('html').getAttribute('data-shape'), 'sharp')
+  assert.equal(await page.locator('html').getAttribute('data-shape'), 'rounded')
   await expect(reset).toBeDisabled()
   await page.reload()
   await waitForShowcase(page)
