@@ -127,6 +127,13 @@
   border-block-start: 1px solid var(--rf-border);
   padding-block: 12px;
 }
+.issues-actions:has([role='toolbar']) {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  padding-inline: 12px;
+  background: var(--rf-surface-3);
+}
 .issues-actions [role='toolbar'] {
   margin-block-end: 14px;
 }
