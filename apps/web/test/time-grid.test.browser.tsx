@@ -165,6 +165,7 @@ it('creates a keyboard range and clears it on Escape before starting another', a
 it('does not activate after an Escape-canceled drag, skips boundary no-ops, and handles evening startMinute', async (t) => {
   let activated = 0
   let changes = 0
+  let created = 0
   const event = { id: 'late', title: 'Late shift', day: 0, start: 1080, duration: 30 }
   const { $, $$, act, cleanup } = render(
     <TimeGrid
@@ -178,7 +179,9 @@ it('does not activate after an Escape-canceled drag, skips boundary no-ops, and 
       onEventChange={() => {
         changes++
       }}
-      onCreate={() => {}}
+      onCreate={() => {
+        created++
+      }}
     />,
   )
   t.after(cleanup)
@@ -189,7 +192,7 @@ it('does not activate after an Escape-canceled drag, skips boundary no-ops, and 
   const board = $('[role=group]')!
   board.getBoundingClientRect = () => new DOMRect(0, 0, 100, 100)
   board.setPointerCapture = () => {}
-  // Pointerdown alone should not flash a creation preview before travel meets the drag threshold.
+  // A click with no drag clears the preview on release without calling onCreate.
   await act(() =>
     board.dispatchEvent(
       new PointerEvent('pointerdown', {
@@ -201,7 +204,6 @@ it('does not activate after an Escape-canceled drag, skips boundary no-ops, and 
       }),
     ),
   )
-  equal($('.rf-time-grid-range'), null)
   await act(() =>
     board.dispatchEvent(
       new PointerEvent('pointerup', {
@@ -213,6 +215,8 @@ it('does not activate after an Escape-canceled drag, skips boundary no-ops, and 
       }),
     ),
   )
+  equal($('.rf-time-grid-range'), null)
+  equal(created, 0)
 
   const button = $('button')!
   // Boundary ArrowLeft on a single-day grid should not emit a redundant onEventChange.

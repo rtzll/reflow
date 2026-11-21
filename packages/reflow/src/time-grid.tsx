@@ -173,8 +173,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
       [hasBoardHelp ? boardHelpId : '', describedBy].filter(Boolean).join(' ') || undefined
     const eventDescribed =
       [hasEventHelp ? eventHelpId : '', describedBy].filter(Boolean).join(' ') || undefined
-    const selectedRange =
-      gesture?.mode === 'create' ? (gesture.dragged ? gesture.preview : undefined) : cursor
+    const selectedRange = gesture?.mode === 'create' ? gesture.preview : cursor
     const dragged = gesture?.event
     const displayed =
       dragged && gesture
