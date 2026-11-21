@@ -74,3 +74,22 @@ it('roves between controls and preserves the owner’s activation and range stat
   equal(selected, 'test')
   equal($('[aria-current]'), null)
 })
+
+it('rounds the axis up to whole steps and scales bars to it', (t) => {
+  const { $, $$, cleanup } = render(
+    <BarChart
+      label="Events"
+      items={[
+        { id: 'mon', label: 'Mon', value: 23 },
+        { id: 'tue', label: 'Tue', value: 4 },
+      ]}
+    />,
+  )
+  t.after(cleanup)
+  deepEqual(
+    Array.from($$('.rf-bar-chart-grid > span > span'), (tick) => tick.textContent),
+    ['24', '16', '8', '0'],
+  )
+  ok($('[data-peak]'))
+  equal(Number.parseFloat($('[data-peak] .rf-bar-chart-fill')!.style.height).toFixed(2), '95.83')
+})

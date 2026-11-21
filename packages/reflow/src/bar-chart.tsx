@@ -29,6 +29,14 @@ const axisNumbers = new Intl.NumberFormat('en', {
   maximumSignificantDigits: 3,
 })
 
+// Round the axis top up so each of its three gridline steps is a round number.
+const roundSteps = [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]
+function axisTop(peak: number) {
+  const step = peak / 3
+  const magnitude = 10 ** Math.floor(Math.log10(step))
+  return 3 * magnitude * roundSteps.find((round) => round * magnitude >= step * (1 - 1e-9))!
+}
+
 export function BarChart<Item extends BarChartItem>(handle: Handle<BarChartProps<Item>>) {
   let mounted = false
   let focusId: string | undefined
@@ -50,6 +58,8 @@ export function BarChart<Item extends BarChartItem>(handle: Handle<BarChartProps
     } = handle.props
     const values = items.map(({ value }) => (Number.isFinite(value) && value > 0 ? value : 0))
     const peak = values.reduce((max, value) => Math.max(max, value), 0)
+    // Without labels, the tallest bar fills the plot.
+    const top = peak > 0 && showAxes ? axisTop(peak) : peak
     const start = items.findIndex(({ id }) => id === range?.start)
     const end = items.findIndex(({ id }) => id === range?.end)
     const bounded = start >= 0 && end >= 0
@@ -73,7 +83,7 @@ export function BarChart<Item extends BarChartItem>(handle: Handle<BarChartProps
             <div class="rf-bar-chart-grid" aria-hidden="true">
               {(peak > 0 ? [1, 2 / 3, 1 / 3, 0] : [0]).map((ratio) => (
                 <span key={ratio} style={{ bottom: ratio * 100 + '%' }}>
-                  {showAxes && <span>{axisNumbers.format(peak * ratio)}</span>}
+                  {showAxes && <span>{axisNumbers.format(top * ratio)}</span>}
                 </span>
               ))}
             </div>
@@ -94,7 +104,7 @@ export function BarChart<Item extends BarChartItem>(handle: Handle<BarChartProps
                   <span
                     class="rf-bar-chart-fill"
                     data-value={value}
-                    style={{ height: (peak ? (value / peak) * 100 : 0) + '%' }}
+                    style={{ height: (top ? (value / top) * 100 : 0) + '%' }}
                   />
                 )
                 if (!href && !onSelect)
