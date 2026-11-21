@@ -86,3 +86,9 @@ export function rangeLabel(range: ActivityRange) {
     ? dayLabel(range.start)
     : dayLabel(range.start) + ' – ' + dayLabel(range.end)
 }
+
+export const activityBars = days.map(({ day, events }) => ({
+  id: day,
+  label: dayLabel(day),
+  value: events.length,
+}))

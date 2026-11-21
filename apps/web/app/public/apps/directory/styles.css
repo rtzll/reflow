@@ -250,30 +250,20 @@
   inline-size: min(90%, 254px);
   padding: 13px 16px 9px;
 }
-.app-preview-plot {
-  display: flex;
-  align-items: end;
-  gap: 3px;
-  block-size: 68px;
+.app-preview-activity .rf-bar-chart {
+  --rf-bar-chart-height: 68px;
+  --rf-bar-chart-color: light-dark(#9dbed3, #637e92);
+  --rf-bar-chart-peak: light-dark(#407597, #9ac9e5);
   margin-block-start: 15px;
-  border-block-end: 1px solid var(--preview-line);
-  background: repeating-linear-gradient(to top, transparent 0 21px, var(--preview-line) 21px 22px);
 }
-.app-preview-plot > span {
-  position: relative;
-  flex: 1;
-  background: light-dark(#9dbed3, #637e92);
-  border-radius: 3px 3px 0 0;
-}
-.app-preview-plot > [data-peak] {
-  background: light-dark(#407597, #9ac9e5);
-}
-.app-preview-plot b {
+.app-preview-activity [data-peak] .rf-bar-chart-fill::before {
+  content: attr(data-value);
   position: absolute;
   inset-block-end: 100%;
   inset-inline-start: 50%;
   transform: translateX(-50%);
   font-size: 10px;
+  font-weight: 600;
 }
 .app-preview-dates {
   display: flex;

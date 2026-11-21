@@ -1,5 +1,5 @@
-import { Icon } from '@rtzll/reflow'
-import { dayLabel, days as activity, fullRange } from '../public/apps/analytics/activity.ts'
+import { BarChart, Icon } from '@rtzll/reflow'
+import { activityBars, dayLabel, fullRange } from '../public/apps/analytics/activity.ts'
 import { seedEvents, timeLabel } from '../public/apps/calendar/events.ts'
 import { issues } from '../public/apps/issues/fixtures.ts'
 
@@ -75,21 +75,10 @@ function CalendarPreview() {
 }
 
 function AnalyticsPreview() {
-  const peak = Math.max(...activity.map((day) => day.events.length))
   return () => (
     <div class="app-preview-sheet app-preview-activity">
       <div class="app-preview-heading">Daily activity</div>
-      <div class="app-preview-plot">
-        {activity.map(({ day, events }) => (
-          <span
-            key={day}
-            style={{ height: (events.length / peak) * 100 + '%' }}
-            data-peak={events.length === peak || undefined}
-          >
-            {events.length === peak && <b>{events.length}</b>}
-          </span>
-        ))}
-      </div>
+      <BarChart label="Daily event counts" items={activityBars} showAxes={false} />
       <div class="app-preview-dates">
         <span>{dayLabel(fullRange.start)}</span>
         <span>{dayLabel(fullRange.end)}</span>
