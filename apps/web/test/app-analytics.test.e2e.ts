@@ -38,10 +38,23 @@ it('inspects the spike by keyboard and opens its underlying events', async (t) =
   await expect(page.getByText('Oct 14 · 24 events')).toBeVisible()
   await expect(spike).toBeFocused()
   const filter = page.getByRole('searchbox', { name: 'Filter Studio events' })
-  await filter.fill('Media import')
+  await expect(chart.getByText('Media import accounted for 19 of 24 events.')).toBeVisible()
+  await chart.getByRole('link', { name: 'View 19 events from Media import' }).press('Enter')
+  await expect(filter).toHaveValue('Media import')
   await expect(
     page.getByRole('status').filter({ hasText: '19 results, page 1 of 4' }),
   ).toBeVisible()
+  const latest = page.getByRole('button', {
+    name: 'Inspect Asset imported for Autumn lookbook / 19',
+  })
+  await latest.press('Enter')
+  const details = page.getByRole('dialog', { name: 'Asset imported' })
+  await expect(details.locator('code')).toContainText('2026-10-14-import-18')
+  await page.keyboard.press('Escape')
+  await expect(latest).toBeFocused()
+  await page.goBack()
+  await expect(filter).toHaveValue('')
+  await chart.getByRole('link', { name: 'View 19 events from Media import' }).click()
   await page.getByRole('link', { name: 'Next page' }).click()
   await expect(page.getByRole('cell', { name: 'Autumn lookbook / 13' })).toBeVisible()
   const shared = new URL(page.url())
@@ -130,4 +143,47 @@ it('cancels a pending endpoint with Escape and when the date picker commits a ne
   await expect(page.getByText('Oct 10 – Oct 11 · 5 events')).toBeVisible()
   await expect(select).toHaveAttribute('aria-pressed', 'false')
   await expect(spike).not.toHaveAttribute('aria-current', 'true')
+})
+
+it('follows the busiest day and its source from a server-rendered mobile chart', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.route('**/*.js', (route) => route.abort())
+  await open(page, '/apps/analytics', { hydrate: false })
+  await page.getByRole('link', { name: 'View 24 events on Oct 14' }).click()
+  await expect(page).toHaveURL(/from=2026-10-14&to=2026-10-14/)
+  const chart = page.getByRole('region', { name: 'Daily activity' })
+  await chart.getByRole('link', { name: 'View 19 events from Media import' }).click()
+  await expect(page).toHaveURL(/eventFilter=Media\+import#events$/)
+  const table = page.getByRole('table', { name: 'Studio events' })
+  await expect(table.getByRole('cell', { name: 'Media import', exact: true })).toHaveCount(6)
+  await expect(
+    page.getByRole('status').filter({ hasText: '19 results, page 1 of 4' }),
+  ).toBeVisible()
+})
+
+it('explains tied sources and regular editing days without losing the active range or sort', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await open(
+    page,
+    '/apps/analytics?from=2026-10-12&to=2026-10-14&eventPage=2&eventSort=item&eventDir=desc',
+  )
+  const chart = page.getByRole('region', { name: 'Daily activity' })
+  await expect(
+    chart.getByText('Media import and Studio editor each accounted for 19 of 38 events.'),
+  ).toBeVisible()
+  await chart.getByRole('link', { name: 'View 19 events from Studio editor' }).click()
+  const query = new URL(page.url()).searchParams
+  expect(query.get('from')).toBe('2026-10-12')
+  expect(query.get('to')).toBe('2026-10-14')
+  expect(query.get('eventFilter')).toBe('Studio editor')
+  expect(query.get('eventSort')).toBe('item')
+  expect(query.get('eventDir')).toBe('desc')
+  expect(query.has('eventPage')).toBe(false)
+  await expect(
+    page.getByRole('status').filter({ hasText: '19 results, page 1 of 4' }),
+  ).toBeVisible()
+  await chart.getByRole('link', { name: 'Oct 10, 2 events' }).click()
+  await expect(chart.getByText('Both events came from Studio editor.')).toBeVisible()
+  await expect(chart.getByRole('link', { name: /from Media import/ })).toHaveCount(0)
 })
