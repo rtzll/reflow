@@ -51,7 +51,11 @@ export function CycleOverview(handle: Handle<OverviewProps>) {
             <div class="issues-distribution">
               <div
                 class="issues-ring"
-                style={{ '--todo-end': todo + '%', '--started-end': started + '%' }}
+                style={
+                  issues.length
+                    ? { '--todo-end': todo + '%', '--started-end': started + '%' }
+                    : { background: 'var(--rf-muted-bg)' }
+                }
               >
                 <div>
                   <strong>{completion}</strong>
@@ -103,15 +107,17 @@ export function CycleOverview(handle: Handle<OverviewProps>) {
                     <Avatar name={name} size={21} decorative />
                     <span class="issues-owner">{name}</span>
                     <span class="issues-workload-track" aria-hidden="true">
-                      {breakdown.map(({ status, total }) => (
-                        <span
-                          key={status}
-                          data-status={status}
-                          style={{
-                            width: (total / largest) * 100 + '%',
-                          }}
-                        />
-                      ))}
+                      {breakdown
+                        .filter(({ total }) => total > 0)
+                        .map(({ status, total }) => (
+                          <span
+                            key={status}
+                            data-status={status}
+                            style={{
+                              width: (total / largest) * 100 + '%',
+                            }}
+                          />
+                        ))}
                     </span>
                     <strong>{assigned.length}</strong>
                   </button>

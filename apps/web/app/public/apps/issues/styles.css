@@ -339,6 +339,14 @@
 .issues-collection[data-layout='list'] .issues-row + .issues-row {
   margin-top: -1px;
 }
+.issues-collection[data-layout='list'] .issues-row:is(:hover, [aria-selected='true']) {
+  position: relative;
+  z-index: 1;
+}
+.issues-collection[data-layout='list'] .issues-row:focus-visible {
+  position: relative;
+  z-index: 2;
+}
 .issues-collection[data-layout='list'] .issues-row:first-child {
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;

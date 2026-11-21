@@ -31,39 +31,57 @@ export const IssueTracker = clientEntry(
       list = element
     })
 
+    let dragging = new Set<string>()
+
     const mountDraggable = ref<HTMLDivElement>(async (element, signal) => {
-      const { draggable } = await import('./drag-adapter.ts')
-      if (signal.aborted) return
-      const cleanup = draggable({
-        element,
-        onDragStart: () => element.setAttribute('data-dragging', ''),
-        onDrop: () => element.removeAttribute('data-dragging'),
-      })
-      signal.addEventListener('abort', cleanup, { once: true })
+      try {
+        const { draggable } = await import('./drag-adapter.ts')
+        if (signal.aborted) return
+        const cleanup = draggable({
+          element,
+          onDragStart: () => {
+            const id = element.dataset.issueId
+            dragging = id ? new Set(movingIds(id)) : new Set()
+            void handle.update()
+          },
+          onDrop: () => {
+            if (!dragging.size) return
+            dragging = new Set()
+            void handle.update()
+          },
+        })
+        signal.addEventListener('abort', cleanup, { once: true })
+      } catch {
+        // Drag-and-drop is progressive; keyboard and toolbar moves still work.
+      }
     })
 
     const mountDropTarget = ref<HTMLDivElement>(async (element, signal) => {
-      const { dropTargetForElements } = await import('./drag-adapter.ts')
-      if (signal.aborted) return
-      const status = statuses.find((item) => item === element.dataset.status)!
-      const leave = () => element.removeAttribute('data-drag-over')
-      const cleanup = dropTargetForElements({
-        element,
-        canDrop: ({ source }) => {
-          const id = source.element.dataset.issueId
-          if (!id || !list?.contains(source.element)) return false
-          const ids = movingIds(id)
-          return issues.some((issue) => ids.has(issue.id) && issue.status !== status)
-        },
-        onDragEnter: () => element.setAttribute('data-drag-over', ''),
-        onDragLeave: leave,
-        onDrop: ({ source }) => {
-          leave()
-          const id = source.element.dataset.issueId!
-          void move(movingIds(id), status, id)
-        },
-      })
-      signal.addEventListener('abort', cleanup, { once: true })
+      try {
+        const { dropTargetForElements } = await import('./drag-adapter.ts')
+        if (signal.aborted) return
+        const status = statuses.find((item) => item === element.dataset.status)!
+        const leave = () => element.removeAttribute('data-drag-over')
+        const cleanup = dropTargetForElements({
+          element,
+          canDrop: ({ source }) => {
+            const id = source.element.dataset.issueId
+            if (!id || !list?.contains(source.element)) return false
+            const ids = movingIds(id)
+            return issues.some((issue) => ids.has(issue.id) && issue.status !== status)
+          },
+          onDragEnter: () => element.setAttribute('data-drag-over', ''),
+          onDragLeave: leave,
+          onDrop: ({ source }) => {
+            leave()
+            const id = source.element.dataset.issueId!
+            void move(movingIds(id), status, id)
+          },
+        })
+        signal.addEventListener('abort', cleanup, { once: true })
+      } catch {
+        // Ignore chunk load failure; toolbar and context menu moves remain available.
+      }
     })
 
     function movingIds(id: string) {
@@ -133,10 +151,11 @@ export const IssueTracker = clientEntry(
       // Continue at the next stationary issue in the old reading order. At the end,
       // step back. If every row moved, follow the original issue to its new group.
       const index = before.findIndex((issue) => issue.id === anchor)
+      const start = index === -1 ? 0 : index
       const stationary = (issue: Issue) => !moved.includes(issue)
       active =
-        before.slice(index).find(stationary)?.id ??
-        before.slice(0, index).reverse().find(stationary)?.id ??
+        before.slice(start).find(stationary)?.id ??
+        before.slice(0, start).reverse().find(stationary)?.id ??
         anchor
       issues = issues.map((issue) => (ids.has(issue.id) ? { ...issue, status } : issue))
       if (!orderedIssues().some((issue) => issue.id === active)) active = orderedIssues()[0]?.id
@@ -202,6 +221,7 @@ export const IssueTracker = clientEntry(
               rows[next]!.id,
             )
             announcement = ''
+            void handle.update()
           }
           focusIssue(rows[next]?.id)
           break
@@ -284,8 +304,15 @@ export const IssueTracker = clientEntry(
                   type="button"
                   aria-label={'Clear filter ' + filter.value}
                   mix={[
-                    ref<HTMLButtonElement>((element) => {
+                    ref<HTMLButtonElement>((element, signal) => {
                       reset = element
+                      signal.addEventListener(
+                        'abort',
+                        () => {
+                          if (reset === element) reset = undefined
+                        },
+                        { once: true },
+                      )
                     }),
                     on('click', () => void setFilter()),
                   ]}
@@ -351,12 +378,13 @@ export const IssueTracker = clientEntry(
                           <strong>{status}</strong>
                           <span class="issues-count">{group.length}</span>
                         </div>
-                        <div class="issues-cards">
+                        <div class="issues-cards" role="none">
                           {group.map((issue) => (
                             <div
                               key={issue.id}
                               role="option"
                               data-issue-id={issue.id}
+                              data-dragging={dragging.has(issue.id) ? '' : undefined}
                               class="issues-row"
                               aria-selected={selected.has(issue.id)}
                               tabIndex={active === issue.id ? 0 : -1}
@@ -366,9 +394,21 @@ export const IssueTracker = clientEntry(
                                   active = issue.id
                                   void handle.update()
                                 }),
-                                on('click', () => {
+                                on('click', (event) => {
+                                  const from = active
                                   focusIssue(issue.id)
-                                  toggle(issue.id)
+                                  if (event.shiftKey && from && from !== issue.id) {
+                                    selected = range.extend(
+                                      visible.map((item) => item.id),
+                                      selected,
+                                      from,
+                                      issue.id,
+                                    )
+                                    announcement = ''
+                                    void handle.update()
+                                  } else {
+                                    toggle(issue.id)
+                                  }
                                 }),
                                 on('keydown', (event) => navigate(event, issue.id)),
                               ]}
@@ -382,7 +422,11 @@ export const IssueTracker = clientEntry(
                               <Avatar name={issue.owner} size={22} />
                             </div>
                           ))}
-                          {!group.length && <p class="issues-empty">No issues in {status}.</p>}
+                          {!group.length && (
+                            <p class="issues-empty" role="none">
+                              No issues in {status}.
+                            </p>
+                          )}
                         </div>
                       </div>
                     )
@@ -443,8 +487,11 @@ export const IssueTracker = clientEntry(
             open={!!detail}
             onOpenChange={(open) => {
               if (!open) {
+                const closedId = detailId
                 detailId = undefined
-                void handle.update()
+                void handle.update().then(() => {
+                  if (!handle.signal.aborted) focusIssue(closedId ?? active)
+                })
               }
             }}
           >
