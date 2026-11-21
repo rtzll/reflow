@@ -199,3 +199,31 @@ it('dismisses the previous menu when another region opens its own actions', asyn
   }
   equal($$(':popover-open').length, 1)
 })
+
+it('builds the items for the row that opened the menu', async (t) => {
+  const { $, $$, act, cleanup } = render(
+    <ContextMenu
+      label="Ticket actions"
+      target="button"
+      items={(row) => [
+        { value: 'todo', label: 'Move to Todo', disabled: row.dataset.status === 'todo' },
+        { value: 'done', label: 'Move to Done', disabled: row.dataset.status === 'done' },
+      ]}
+    >
+      <button data-status="todo">First</button>
+      <button data-status="done">Second</button>
+    </ContextMenu>,
+  )
+  t.after(cleanup)
+  const disabled = () =>
+    Array.from($$('[role="menuitem"][aria-disabled="true"]'), (item) => item.textContent).join()
+  const [first, second] = Array.from($$('button'))
+  await act(() => press(first!, 'ContextMenu'))
+  await untilFocused($('[role="menu"]')!)
+  equal(disabled(), 'Move to Todo')
+  await act(() => press($('[role="menu"]')!, 'Escape'))
+  await untilFocused(first!)
+  await act(() => press(second!, 'ContextMenu'))
+  await untilFocused($('[role="menu"]')!)
+  equal(disabled(), 'Move to Done')
+})

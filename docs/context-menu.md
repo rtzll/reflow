@@ -33,7 +33,7 @@ Wrap the tree in one `ContextMenu` and identify the rows that can open it. In th
 </ContextMenu>
 ```
 
-`label` names the menu. `target` is a CSS selector for focusable descendants. When the event starts on an icon or label, the closest matching row inside the wrapped content is the target. `items` takes Dropdown's `readonly DropdownItem[]`. `onSelect(value, target, checked?)` receives the action value, the matched `HTMLElement` captured on open, and the checked state for a checkbox or radio action. `size` is optional and follows Dropdown.
+`label` names the menu. `target` is a CSS selector for focusable descendants. When the event starts on an icon or label, the closest matching row inside the wrapped content is the target. `items` takes Dropdown's `readonly DropdownItem[]`, or a function that builds them from the matched row when the menu opens, so an action that does not apply to that row can be disabled. `onSelect(value, target, checked?)` receives the action value, the matched `HTMLElement` captured on open, and the checked state for a checkbox or radio action. `size` is optional and follows Dropdown.
 
 ## Interaction
 

@@ -351,10 +351,10 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
         },
         {
           name: 'items',
-          type: 'readonly DropdownItem[]',
+          type: 'readonly DropdownItem[] | ((target: HTMLElement) => readonly DropdownItem[])',
           required: true,
           description:
-            'Use icon for a leading icon, shortcut for a trailing key hint, and children for a submenu. Supports separators, disabled actions, and checked items.',
+            'Use icon for a leading icon, shortcut for a trailing key hint, and children for a submenu. Supports separators, disabled actions, and checked items. Pass a function to build the items for the row that opened the menu, for example to disable an action that does not apply to it.',
         },
         {
           name: 'onSelect',

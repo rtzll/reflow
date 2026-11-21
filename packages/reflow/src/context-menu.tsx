@@ -10,7 +10,8 @@ export interface ContextMenuProps {
   /** CSS selector for focusable descendants that have these actions. */
   target: string
   children: RemixNode
-  items: readonly DropdownItem[]
+  /** The menu's items, or a function that builds them for the row that opened it. */
+  items: readonly DropdownItem[] | ((target: HTMLElement) => readonly DropdownItem[])
   size?: ControlSize
   /** The target is the matched element that opened the menu. */
   onSelect?: (value: string, target: HTMLElement, checked?: boolean) => void
@@ -55,33 +56,39 @@ export function ContextMenu(handle: Handle<ContextMenuProps>) {
     void handle.update()
   }
 
-  return () => (
-    <>
-      <div
-        mix={[
-          on<HTMLElement, 'contextmenu'>('contextmenu', open),
-          on<HTMLElement, 'keydown'>('keydown', open),
-        ]}
-      >
-        {handle.props.children}
-      </div>
-      {invocation && (
-        <menu.Context key={generation} label={handle.props.label}>
-          <ContextMenuPopup
-            invocation={invocation}
-            items={handle.props.items}
-            size={handle.props.size}
-            onSelect={handle.props.onSelect}
-          />
-        </menu.Context>
-      )}
-    </>
-  )
+  return () => {
+    const { items } = handle.props
+    return (
+      <>
+        <div
+          mix={[
+            on<HTMLElement, 'contextmenu'>('contextmenu', open),
+            on<HTMLElement, 'keydown'>('keydown', open),
+          ]}
+        >
+          {handle.props.children}
+        </div>
+        {invocation && (
+          <menu.Context key={generation} label={handle.props.label}>
+            <ContextMenuPopup
+              invocation={invocation}
+              items={typeof items === 'function' ? items(invocation.row) : items}
+              size={handle.props.size}
+              onSelect={handle.props.onSelect}
+            />
+          </menu.Context>
+        )}
+      </>
+    )
+  }
 }
 
 function ContextMenuPopup(
   handle: Handle<
-    Pick<ContextMenuProps, 'items' | 'size' | 'onSelect'> & { invocation: Invocation }
+    Pick<ContextMenuProps, 'size' | 'onSelect'> & {
+      items: readonly DropdownItem[]
+      invocation: Invocation
+    }
   >,
 ) {
   const context = handle.context.get(menu.Context)
