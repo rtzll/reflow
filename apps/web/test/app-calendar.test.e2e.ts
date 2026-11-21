@@ -156,3 +156,13 @@ it('cancels range selection and clamps it at the end of the displayed day', asyn
   await editor.getByRole('button', { name: 'Cancel' }).click()
   await expect(page.getByText('No events on Saturday.')).toBeVisible()
 })
+
+it('describes events with the grid instructions once, without repeating the visible hint', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await open(page, '/apps/calendar')
+  const event = page.getByRole('group', { name: 'Timed events' }).getByRole('button').first()
+  await expect(event).toHaveAccessibleDescription(/use arrows to move/)
+  await expect(event).not.toHaveAccessibleDescription(/Drag down an empty time slot/)
+  await expect(page.getByText('Drag down an empty time slot')).toBeVisible()
+})

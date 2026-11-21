@@ -118,7 +118,6 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
             onCreate={(range) => showEditor({ ...range, id: '', title: '', calendar: 'Studio' })}
             getEventClass={(event) => 'week-' + event.calendar}
             getEventLabel={eventLabel}
-            describedBy="week-shortcuts"
           />
           {selected ? (
             <div class="week-detail" data-calendar={selected.calendar}>
@@ -143,7 +142,7 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
             <div class="week-detail">No events on {days[activeDay]}.</div>
           )}
         </section>
-        <p id="week-shortcuts" class="week-hint">
+        <p class="week-hint">
           Drag down an empty time slot to create an event. Drag an event to move it or its bottom
           edge to resize. Use arrow keys to move, Shift + ↑ or ↓ to resize, and Enter to edit.
         </p>
