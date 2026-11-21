@@ -11,9 +11,4 @@ export const chatApp: ExampleApp = {
     const initialId = conversations.find(({ id }) => id === thread)?.id ?? conversations[0].id
     return <ChatWorkspace conversations={conversations} initialId={initialId} />
   },
-  components: [
-    { slug: 'chat-layout', name: 'ChatLayout' },
-    { slug: 'input-message', name: 'InputMessage' },
-    { slug: 'chat-message', name: 'ChatMessage' },
-  ],
 }

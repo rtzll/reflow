@@ -38,17 +38,11 @@ html {
   padding: 12px 20px;
   border-block-end: 1px solid var(--rf-border);
 }
-.site-app-nav a,
-.site-app-overview a {
+.site-app-nav a {
   color: var(--rf-fg);
 }
 .site-app-nav span {
   color: var(--rf-muted);
-}
-.site-app-overview {
-  max-width: 56rem;
-  margin-inline: auto;
-  padding: 32px 20px;
 }
 
 html[data-accent='green'] {

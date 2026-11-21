@@ -9,9 +9,4 @@ export const analyticsApp: ExampleApp = {
   render: (search) => (
     <AnalyticsExplorer path={routes.app.href({ slug: 'analytics' })} search={search} />
   ),
-  components: [
-    { slug: 'data-table', name: 'DataTable' },
-    { slug: 'date-picker', name: 'DatePicker' },
-    { slug: 'tooltip', name: 'Tooltip' },
-  ],
 }

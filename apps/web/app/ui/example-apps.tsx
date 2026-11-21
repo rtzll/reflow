@@ -40,22 +40,7 @@ export function AppWorkspace(handle: Handle<{ app: ExampleApp; search: string }>
           <span aria-current="page">{app.name}</span>
         </nav>
         <main id="main" data-rmx-key={app.slug}>
-          {app.render ? (
-            app.render(search)
-          ) : (
-            <article class="site-app-overview">
-              <h1>{app.name}</h1>
-              <p>{app.description}</p>
-              <h2>Components to explore while this app is in development</h2>
-              <ul>
-                {app.components.map(({ slug, name }) => (
-                  <li key={slug}>
-                    <a href={routes.component.href({ slug })}>{name}</a>
-                  </li>
-                ))}
-              </ul>
-            </article>
-          )}
+          {app.render(search)}
         </main>
       </div>
     )
