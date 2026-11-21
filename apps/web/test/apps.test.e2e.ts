@@ -1,6 +1,36 @@
 import { expect } from 'playwright/test'
+import { setTimeout as delay } from 'node:timers/promises'
 import { it } from 'remix/test'
-import { open, showcaseServer } from './showcase-router.ts'
+import { open, showcaseServer, waitForShowcase } from './showcase-router.ts'
+
+it('paints a cold workspace with its stylesheet on the first visible frame', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.addInitScript(() => {
+    function sample() {
+      const schedule = document.querySelector('.week-schedule')
+      if (schedule) {
+        sessionStorage.setItem(
+          'first-calendar-radius',
+          getComputedStyle(schedule).borderTopLeftRadius,
+        )
+      } else requestAnimationFrame(sample)
+    }
+    requestAnimationFrame(sample)
+  })
+  await open(page, '/apps')
+  const calendarStyle = /\/(?:app-calendar-[^/]+|apps\/calendar\/styles)\.css(?:\?|$)/
+  await page.route(calendarStyle, async (route) => {
+    await delay(350)
+    await route.continue()
+  })
+  await Promise.all([
+    page.waitForRequest(calendarStyle),
+    page.getByRole('link', { name: 'Calendar', exact: true }).click(),
+  ])
+  await expect
+    .poll(() => page.evaluate(() => sessionStorage.getItem('first-calendar-radius')))
+    .toBe('12px')
+})
 
 it('opens each workspace from the showcase and returns to the directory', async (t) => {
   const page = await t.serve(showcaseServer)
@@ -63,6 +93,7 @@ it('reserves workspace shortcuts for the app and restores showcase shortcuts on 
   const page = await t.serve(showcaseServer)
   await open(page, '/apps?theme=light')
   await page.getByRole('main').getByRole('link', { name: 'Chat' }).click()
+  await waitForShowcase(page)
   const theme = page.locator('html')
   const directory = page
     .getByRole('navigation', { name: 'App navigation' })
@@ -70,6 +101,7 @@ it('reserves workspace shortcuts for the app and restores showcase shortcuts on 
   await directory.press('t')
   await expect(theme).toHaveAttribute('data-theme', 'light')
   await directory.click()
+  await waitForShowcase(page)
   await page.getByRole('main').getByRole('link', { name: 'Chat' }).press('t')
   await expect(theme).toHaveAttribute('data-theme', 'dark')
 })

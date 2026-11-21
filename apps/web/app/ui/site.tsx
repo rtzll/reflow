@@ -234,7 +234,9 @@ function Sidebar(handle: Handle<SidebarProps>) {
             <a href={pageHref(routes.demo.href())}>Demo</a>
           </li>
           <li>
-            <a href={routes.apps.href()}>Apps</a>
+            <a href={routes.apps.href()} data-rmx-document="">
+              Apps
+            </a>
           </li>
         </ul>
         {systems.length ? group('System', systems) : null}

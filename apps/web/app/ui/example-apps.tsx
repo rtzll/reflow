@@ -22,12 +22,18 @@ export function AppsIndex() {
         Skip to content
       </a>
       <nav class="site-app-shelf-nav" aria-label="Reflow">
-        <a href={routes.gallery.href()} class="site-app-wordmark">
+        <a href={routes.gallery.href()} data-rmx-document="" class="site-app-wordmark">
           Reflow
         </a>
-        <a href={routes.gallery.href()}>Showcase</a>
-        <a href={routes.demo.href()}>Demo</a>
-        <a href={routes.docs.href()}>Docs</a>
+        <a href={routes.gallery.href()} data-rmx-document="">
+          Showcase
+        </a>
+        <a href={routes.demo.href()} data-rmx-document="">
+          Demo
+        </a>
+        <a href={routes.docs.href()} data-rmx-document="">
+          Docs
+        </a>
         <a href={routes.apps.href()} aria-current="page">
           Apps
         </a>
@@ -37,23 +43,26 @@ export function AppsIndex() {
         <ul class="site-app-list" role="list">
           {exampleApps.map((app) => (
             <li key={app.slug}>
-              <Card
-                class="site-app-card"
+              {/* Each workspace has its own stylesheet. A document navigation loads it before first paint. */}
+              <a
+                class="site-app-link"
                 href={routes.app.href({ slug: app.slug })}
-                label={app.name}
-                border="outlined"
+                aria-labelledby={'app-title-' + app.slug}
+                data-rmx-document=""
               >
-                <div aria-hidden="true" class="app-preview" data-preview={app.slug}>
-                  <app.Preview />
-                </div>
-                <CardHeader>
-                  <div class="site-app-card-heading">
-                    <h2>{app.name}</h2>
-                    <Icon name="arrow-right" size={16} />
+                <Card class="site-app-card" border="outlined">
+                  <div aria-hidden="true" class="app-preview" data-preview={app.slug}>
+                    <app.Preview />
                   </div>
-                  <CardDescription>{app.description}</CardDescription>
-                </CardHeader>
-              </Card>
+                  <CardHeader>
+                    <div class="site-app-card-heading">
+                      <h2 id={'app-title-' + app.slug}>{app.name}</h2>
+                      <Icon name="arrow-right" size={16} />
+                    </div>
+                    <CardDescription>{app.description}</CardDescription>
+                  </CardHeader>
+                </Card>
+              </a>
             </li>
           ))}
         </ul>
@@ -71,8 +80,12 @@ export function AppWorkspace(handle: Handle<{ app: ExampleApp; search: string }>
           Skip to content
         </a>
         <nav aria-label="App navigation" class="site-app-nav">
-          <a href={routes.gallery.href()}>Reflow</a>
-          <a href={routes.apps.href()}>Apps</a>
+          <a href={routes.gallery.href()} data-rmx-document="">
+            Reflow
+          </a>
+          <a href={routes.apps.href()} data-rmx-document="">
+            Apps
+          </a>
           <span aria-current="page">{app.name}</span>
         </nav>
         <main id="main" data-rmx-key={app.slug}>

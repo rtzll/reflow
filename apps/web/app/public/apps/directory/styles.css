@@ -58,13 +58,23 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+.site-app-link {
+  display: block;
+  block-size: 100%;
+  border-radius: var(--rf-panel-radius);
+  color: inherit;
+  text-decoration: none;
+}
+.site-app-link:focus-visible {
+  outline: 2px solid var(--rf-accent);
+  outline-offset: 2px;
+}
 .site-app-card {
   block-size: 100%;
   --rf-card-line: var(--rf-border);
   background: var(--rf-surface-3);
 }
-.site-app-card:hover,
-.site-app-card:focus-within {
+.site-app-link:is(:hover, :focus-visible) .site-app-card {
   border-color: var(--rf-border-emphasis);
 }
 .site-app-card-heading {
