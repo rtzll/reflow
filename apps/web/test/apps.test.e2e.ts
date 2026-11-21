@@ -10,16 +10,17 @@ it('opens each workspace from the showcase and returns to the directory', async 
   await expect(page.locator('.site-app-card')).toHaveCount(4)
   await expect(page.locator('.site-app-card').first()).toHaveCSS('border-top-left-radius', '12px')
   const workspaces = [
-    ['Issue tracker', page.getByRole('listbox', { name: 'Cycle issues' })],
-    ['Chat', page.getByRole('textbox', { name: 'Message' })],
-    ['Calendar', page.getByRole('button', { name: 'New event' })],
-    ['Analytics', page.getByRole('table', { name: 'Studio events' })],
+    ['Issue tracker', page.getByRole('listbox', { name: 'Cycle issues' }), '.issues-insight'],
+    ['Chat', page.getByRole('textbox', { name: 'Message' }), '.rf-composer'],
+    ['Calendar', page.getByRole('button', { name: 'New event' }), '.week-schedule'],
+    ['Analytics', page.getByRole('table', { name: 'Studio events' }), '.analytics-chart'],
   ] as const
-  for (const [name, workspaceControl] of workspaces) {
+  for (const [name, workspaceControl, surface] of workspaces) {
     await page.getByRole('main').getByRole('link', { name }).click()
     await expect(page).toHaveTitle(name + ' · Reflow')
     await expect(workspaceControl).toBeVisible()
     await expect(page.locator('html')).toHaveAttribute('data-shape', 'rounded')
+    await expect(page.locator(surface).first()).toHaveCSS('border-top-left-radius', /^[1-9]\d*px$/)
     const nav = page.getByRole('navigation', { name: 'App navigation' })
     await expect(nav.locator('[aria-current="page"]')).toHaveText(name)
     await nav.getByRole('link', { name: 'Apps' }).click()

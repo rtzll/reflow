@@ -1,5 +1,5 @@
 import { Icon } from '@rtzll/reflow'
-import { days as activity } from '../public/apps/analytics/activity.ts'
+import { dayLabel, days as activity, fullRange } from '../public/apps/analytics/activity.ts'
 import { seedEvents, timeLabel } from '../public/apps/calendar/events.ts'
 import { issues } from '../public/apps/issues/fixtures.ts'
 
@@ -91,8 +91,8 @@ function AnalyticsPreview() {
         ))}
       </div>
       <div class="app-preview-dates">
-        <span>Oct 5</span>
-        <span>Oct 18</span>
+        <span>{dayLabel(fullRange.start)}</span>
+        <span>{dayLabel(fullRange.end)}</span>
       </div>
     </div>
   )

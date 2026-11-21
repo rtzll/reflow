@@ -139,11 +139,12 @@
   transform: rotate(-2deg);
 }
 .app-status-dot {
+  --status-color: light-dark(#9b7226, #e0b65f);
   inline-size: 11px;
   block-size: 11px;
-  border: 2px solid light-dark(#776794, #c1b2e1);
+  border: 2px solid var(--status-color);
   border-radius: 50%;
-  background: linear-gradient(90deg, light-dark(#776794, #c1b2e1) 50%, transparent 50%);
+  background: linear-gradient(90deg, var(--status-color) 50%, transparent 50%);
 }
 .app-preview-ticket {
   display: grid;
