@@ -130,3 +130,28 @@ it('releases the page scroll lock when an open context menu leaves the page', as
   }
   equal(document.documentElement.style.overflow, overflow)
 })
+
+it('dismisses the previous menu when another region opens its own actions', async (t) => {
+  const { $, $$, act, cleanup } = render(
+    <>
+      {['Files', 'Tabs'].map((label) => (
+        <ContextMenu
+          key={label}
+          label={label}
+          target="button"
+          items={[{ value: 'open', label: 'Open' }]}
+        >
+          <button>{label}</button>
+        </ContextMenu>
+      ))}
+    </>,
+  )
+  t.after(cleanup)
+  for (const button of $$('button')) {
+    await act(() =>
+      button.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true })),
+    )
+    await untilFocused($('[role="menu"][aria-label="' + button.textContent + '"]')!)
+  }
+  equal($$(':popover-open').length, 1)
+})

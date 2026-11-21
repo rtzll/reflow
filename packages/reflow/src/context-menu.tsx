@@ -42,6 +42,7 @@ export function ContextMenu(handle: Handle<ContextMenuProps>) {
     if (
       !(row instanceof HTMLElement) ||
       !(event.currentTarget instanceof HTMLElement) ||
+      row === event.currentTarget ||
       !event.currentTarget.contains(row)
     )
       return
@@ -118,6 +119,7 @@ function ContextMenuPopup(
             !event.currentTarget.contains(event.relatedTarget)
           ) {
             context.unregisterTrigger(row)
+            void context.closeAll({ focusRoot: false })
           }
         }),
       ]}
