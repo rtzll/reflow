@@ -3773,6 +3773,32 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  markdown: [
+    {
+      name: 'Markdown',
+      props: [
+        {
+          name: 'source',
+          type: 'string',
+          required: true,
+          description:
+            'Markdown text. Pass the accumulated text on each streaming update. Raw HTML stays literal. Links support HTTP, HTTPS, mailto, root paths and fragments.',
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          required: false,
+          description: 'Overrides the surrounding type density.',
+        },
+        {
+          name: 'class',
+          type: 'string',
+          required: false,
+          description: 'Adds a class to the container.',
+        },
+      ],
+    },
+  ],
   'code-block': [
     {
       name: 'CodeBlock',

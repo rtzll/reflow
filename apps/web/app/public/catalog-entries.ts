@@ -33,6 +33,7 @@ export const components = [
   ['input-copy', 'InputCopy'],
   ['input-group', 'InputGroup'],
   ['input-message', 'InputMessage'],
+  ['markdown', 'Markdown'],
   ['number-field', 'NumberField'],
   ['pagination', 'Pagination'],
   ['popover', 'Popover'],

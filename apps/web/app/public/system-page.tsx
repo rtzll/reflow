@@ -1633,9 +1633,7 @@ export const SystemPage = clientEntry(
                 title="Markdown"
                 description="Markdown uses the same type roles, including nested lists, to-dos, tables, and fenced code. Edit the source to see how the styles hold up."
               >
-                <SystemFrame
-                  code={'<article class="system-markdown">{renderMarkdown(source)}</article>'}
-                >
+                <SystemFrame code={'<Markdown source={source} />'}>
                   <MarkdownSpecimen />
                 </SystemFrame>
               </SystemSection>

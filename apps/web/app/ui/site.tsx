@@ -511,10 +511,12 @@ const galleryOrder = [
   'drawer',
   'color-picker',
   'switch',
+  'markdown',
   'combobox',
 ]
 
 const wideCards = new Set([
+  'markdown',
   'input-message',
   'color-picker',
   'card',
@@ -981,10 +983,12 @@ const demoOrder = [
   'chat-layout',
   'context-menu',
   'data-table',
+  'markdown',
   'settings',
 ]
 
 const customizableSlides = new Set([
+  'markdown',
   'data-table',
   'context-menu',
   'accordion',

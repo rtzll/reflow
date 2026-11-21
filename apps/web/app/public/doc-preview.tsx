@@ -24,6 +24,7 @@ const sharedPlaygroundDefaults = new Set([
   'thinking-steps',
   'toaster',
   'drawer',
+  'markdown',
   'code-block',
   'citation',
   'avatar',

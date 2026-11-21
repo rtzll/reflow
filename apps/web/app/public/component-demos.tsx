@@ -10,6 +10,8 @@ import {
   datePickerOffset,
   datePickerPresets,
   datePickerToday,
+  markdownTable,
+  markdownFence,
   accordionItems,
   multipleAccordionItems,
   rowHighlightAccordionItems,
@@ -77,6 +79,7 @@ import {
   CardHeader,
   CardGroup,
   CardTitle,
+  Markdown,
   ChatMessage,
   Checkbox,
   CheckboxGroup,
@@ -1186,6 +1189,20 @@ function setEditing(open: boolean) {
       'In a reply',
       'chat',
       `<ChatMessage role="assistant">\n  Mostly that you stop noticing it.\n  <Citation index={1} sources={rams} /> It lets you do what you came to do…\n  <Citation index={2} sources={[norman, laws]} />\n</ChatMessage>`,
+    ),
+  ],
+  markdown: [
+    demo(
+      'Pipe table',
+      'table',
+      `<Markdown source={${JSON.stringify(markdownTable)}} />`,
+      'A delimiter row creates column headings. Colons in the delimiter control alignment.',
+    ),
+    demo(
+      'Fenced code',
+      'code',
+      `<Markdown source={${JSON.stringify(markdownFence)}} />`,
+      'A fence renders a CodeBlock with its language and copy action. An open fence stays readable while more text arrives.',
     ),
   ],
   'code-block': [
@@ -2396,6 +2413,8 @@ export function ComponentDemo(
         return <ToasterDemo variant={variant} />
       case 'drawer':
         return <DrawerDemo variant={variant} />
+      case 'markdown':
+        return <Markdown source={variant === 'table' ? markdownTable : markdownFence} />
       case 'code-block':
         return <CodeBlockDemo variant={variant} samples={images.code} />
       case 'citation':
