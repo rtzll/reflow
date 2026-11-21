@@ -5,5 +5,7 @@ export const routes = route({
   docs: get('/docs'),
   component: get('/docs/:slug'),
   demo: get('/demo'),
+  apps: get('/apps'),
+  app: get('/apps/:slug'),
   assets: get('/assets/*path'),
 })

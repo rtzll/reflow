@@ -4,6 +4,7 @@ import type { getPageAssets as getDevelopmentPageAssets } from '../app/assets.ts
 // Replaced by the build with public URLs only, never filesystem paths.
 declare const REFLOW_ASSETS: {
   page: Awaited<ReturnType<typeof getDevelopmentPageAssets>>
+  appStyles: Record<string, string>
   entries: Record<string, ScriptEntry>
 }
 
@@ -19,6 +20,8 @@ export const assets = {
   },
 }
 
-export async function getPageAssets() {
-  return REFLOW_ASSETS.page
+export async function getPageAssets(appSlug?: string) {
+  const page = REFLOW_ASSETS.page
+  if (!appSlug) return page
+  return { ...page, stylesheets: [...page.stylesheets, REFLOW_ASSETS.appStyles[appSlug]] }
 }

@@ -22,7 +22,7 @@ export interface ExampleImages {
   code?: CodeSamples
 }
 
-export async function getPageAssets() {
+export async function getPageAssets(appSlug?: string) {
   const [entry, fonts, library, site, examples, favicon, sidebarAvatar, thinkingPreview, ogImage] =
     await Promise.all([
       assets.getScriptEntry('app/public/entry.ts'),
@@ -37,7 +37,15 @@ export async function getPageAssets() {
     ])
   return {
     entry,
-    stylesheets: [fonts, library, site, examples],
+    stylesheets: appSlug
+      ? [
+          fonts,
+          library,
+          site,
+          examples,
+          await assets.getHref(`app/public/apps/${appSlug}/styles.css`),
+        ]
+      : [fonts, library, site, examples],
     favicon,
     /** The link preview image every page shares. Regenerate it with `pnpm --filter @reflow/web og:image`. */
     ogImage,

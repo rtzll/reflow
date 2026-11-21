@@ -5,6 +5,7 @@ import { codeSamples, exampleSource } from '../code-samples.ts'
 import { Document } from '../document.tsx'
 import type { AppContext } from '../router.ts'
 import { routes } from '../routes.ts'
+import { AppWorkspace, exampleApps } from '../ui/example-apps.tsx'
 import { readSettings, Showcase, type ShowcaseProps } from '../ui/site.tsx'
 import { settingCookies, settingRows, withoutSettings } from '../public/site-settings.ts'
 
@@ -14,7 +15,7 @@ const moved: Record<string, string> = {
   'settings-dialog': '/docs/dialog#with-a-sidebar',
 }
 
-async function show(context: AppContext, page: ShowcaseProps['page'], slug?: string) {
+async function show(context: AppContext, page: ShowcaseProps['page'] | 'app', slug?: string) {
   const url = new URL(context.request.url)
   const query = url.search
   // A shared link carries settings: save them as the visitor's own and show
@@ -36,13 +37,23 @@ async function show(context: AppContext, page: ShowcaseProps['page'], slug?: str
       301,
     )
   }
-  const component = catalog.find((entry) => entry.slug === slug)
+  if (page === 'app') {
+    const app = exampleApps.find((entry) => entry.slug === slug)
+    if (!app) return new Response('App not found', { status: 404 })
+    const assets = await getPageAssets(app.slug)
+    return context.render(
+      <Document assets={assets} settings={settings} title={`${app.name} · Reflow`} url={url}>
+        <AppWorkspace app={app} search={query} />
+      </Document>,
+    )
+  }
+  const component = page === 'component' ? catalog.find((entry) => entry.slug === slug) : undefined
   if (page === 'component' && !component)
     return new Response('Component not found', { status: 404 })
   const title =
     page === 'gallery'
       ? 'Reflow'
-      : `${component?.name ?? (page === 'docs' ? 'Documentation' : 'Demo')} · Reflow`
+      : `${component?.name ?? (page === 'apps' ? 'Example apps' : page === 'docs' ? 'Documentation' : 'Demo')} · Reflow`
   const pageAssets = await getPageAssets()
   // CodeBlock's samples are highlighted on the server, for the pages that show them.
   const samples =
@@ -78,6 +89,8 @@ export default createController(routes, {
   actions: {
     gallery: (context) => show(context, 'gallery'),
     docs: (context) => show(context, 'docs'),
+    apps: (context) => show(context, 'apps'),
+    app: (context) => show(context, 'app', context.params.slug),
     component: (context) => show(context, 'component', context.params.slug),
     demo: (context) =>
       show(context, 'demo', new URL(context.request.url).searchParams.get('c') ?? undefined),

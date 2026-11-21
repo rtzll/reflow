@@ -1,6 +1,7 @@
 import { Icon as ReflowIcon, Switch, type IconName } from '@rtzll/reflow'
 import type { Handle, RemixNode } from 'remix/component'
 import type { ExampleImages } from '../assets.ts'
+import { AppsIndex } from './example-apps.tsx'
 import { samplesFor } from '../public/code-block-example.tsx'
 import { routes } from '../routes.ts'
 import { PlaygroundControls } from '../public/doc-playground.tsx'
@@ -36,7 +37,7 @@ export interface ShowcaseComponent {
 }
 
 export interface ShowcaseProps {
-  page: 'gallery' | 'docs' | 'component' | 'demo'
+  page: 'gallery' | 'docs' | 'component' | 'demo' | 'apps'
   components: readonly ShowcaseComponent[]
   slug?: string
   query?: string
@@ -232,6 +233,11 @@ function Sidebar(handle: Handle<SidebarProps>) {
           </li>
           <li>
             <a href={pageHref(routes.demo.href())}>Demo</a>
+          </li>
+          <li>
+            <a href={routes.apps.href()} aria-current={page === 'apps' ? 'page' : undefined}>
+              Apps
+            </a>
           </li>
         </ul>
         {systems.length ? group('System', systems) : null}
@@ -1218,6 +1224,7 @@ export function Showcase(handle: Handle<ShowcaseProps>) {
           />
         </aside>
         <main id="main" class="site-main">
+          {page === 'apps' ? <AppsIndex /> : null}
           {page === 'gallery' ? (
             <Gallery components={components} settings={settings} search={search} />
           ) : null}

@@ -52,10 +52,18 @@ const styles = [
   'app/public/site.css',
   'app/public/examples.css',
 ]
+const appStyles = (await readdir(resolve(publicDir, 'apps'), { withFileTypes: true }))
+  .filter((entry) => entry.isDirectory())
+  .map(({ name }) => [name, `app/public/apps/${name}/styles.css`] as const)
 const [client, samples, sources] = await Promise.all([
   build({
     ...common,
-    entryPoints: ['app/public/entry.ts', ...clientEntries.keys(), ...styles],
+    entryPoints: [
+      'app/public/entry.ts',
+      ...clientEntries.keys(),
+      ...styles,
+      ...appStyles.map(([slug, path]) => ({ in: path, out: `app-${slug}` })),
+    ],
     outdir: resolve(output, 'client'),
     entryNames: 'assets/[name]-[hash]',
     chunkNames: 'assets/chunk-[hash]',
@@ -128,6 +136,7 @@ await writeFile(
 )
 
 const manifest = {
+  appStyles: Object.fromEntries(appStyles.map(([slug, path]) => [slug, href(path)])),
   page: {
     entry: scriptEntry('app/public/entry.ts'),
     stylesheets: styles.map(href),
