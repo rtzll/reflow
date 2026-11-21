@@ -47,14 +47,20 @@ The dry run checks packaging without uploading anything. These checks do not est
 
 Run `pnpm --filter @reflow/web types` after changing Wrangler bindings. Generated `worker/env.d.ts` is ignored; the current site has no bindings.
 
+## Pull request previews
+
+Cloudflare Workers Builds is connected to the showcase repository. In the Worker's **Settings → Builds → Previews Base**, enable **Builds for Preview branches**. Use the repository root, the build command `pnpm build:web`, and the preview command `pnpm --filter @reflow/web exec wrangler preview`. The workspace filter selects the site's pinned Wrangler and configuration.
+
+Enable **Preview** under **Domains → Worker URL**. The checked-in configuration enables preview URLs and supplies an empty `previews` block because the showcase uses no application secrets or data bindings. After a successful branch build, Cloudflare posts the preview link on the pull request. Later pushes update the same branch URL. [Workers Builds branch configuration](https://developers.cloudflare.com/workers/ci-cd/builds/build-branches/) · [GitHub integration](https://developers.cloudflare.com/workers/ci-cd/builds/git-integration/github-integration/)
+
 ## Keep operator configuration private
 
-The checked-in `apps/web/wrangler.jsonc` has a generic Worker name, no account ID, and no custom domain. Both `workers.dev` and preview URLs are disabled. The repository has no deployment workflow or live deploy script.
+The checked-in `apps/web/wrangler.jsonc` has a generic Worker name, no account ID, and no custom domain. The production `workers.dev` URL is disabled. GitHub Actions validates the showcase locally. Cloudflare manages hosted builds through its GitHub integration.
 
 When preparing an actual deployment, copy that complete configuration to `apps/web/wrangler.local.jsonc`. This filename is ignored. Change the Worker name there and add the custom domain there, using the Cloudflare `routes` array with `custom_domain: true`. Keep the file beside the generic configuration so its relative build paths still resolve. Wrangler does not merge these two files: refresh the private copy when the generic configuration changes.
 
 Select the account through private configuration or `CLOUDFLARE_ACCOUNT_ID`. Keep authentication in Wrangler's local credential storage or a CI secret store. Never put tokens, account details, or personal hostnames in source, package scripts, committed examples, or browser build definitions. `.dev.vars`, `.env` files, `.wrangler` state, build output, and the private config are ignored. Review the staged diff before committing; ignore rules do not protect files already tracked by Git.
 
-After a separate decision to publish, rebuild, validate the private configuration with a dry run, and explicitly deploy with that same configuration. No command above publishes the website. Configure automated deployment separately if desired; the current CI only tests locally.
+For a manual production release, rebuild, validate the private configuration with a dry run, and explicitly deploy with that same configuration.
 
 References: [Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/), [Custom Domains](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/), [Wrangler configuration](https://developers.cloudflare.com/workers/wrangler/configuration/).
