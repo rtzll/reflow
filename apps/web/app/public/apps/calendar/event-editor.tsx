@@ -59,16 +59,16 @@ export function EventEditor(handle: Handle<EditorProps>) {
               Event title
               <input name="title" required maxlength={100} defaultValue={draft.title} autofocus />
             </label>
-            <label>
-              Day
-              <select name="day" defaultValue={String(draft.day)}>
+            <div class="week-form-field">
+              <label for="week-day">Day</label>
+              <select id="week-day" name="day" defaultValue={String(draft.day)}>
                 {days.map((name, i) => (
                   <option key={name} value={String(i)}>
                     {name}, November {16 + i}
                   </option>
                 ))}
               </select>
-            </label>
+            </div>
             <div class="week-form-pair">
               <label>
                 Start (UTC)
@@ -93,14 +93,14 @@ export function EventEditor(handle: Handle<EditorProps>) {
                 />
               </label>
             </div>
-            <label>
-              Calendar
-              <select name="calendar" defaultValue={draft.calendar}>
+            <div class="week-form-field">
+              <label for="week-calendar">Calendar</label>
+              <select id="week-calendar" name="calendar" defaultValue={draft.calendar}>
                 {calendars.map((name) => (
                   <option key={name}>{name}</option>
                 ))}
               </select>
-            </label>
+            </div>
             <div class="week-form-actions">
               <Button variant="secondary" mix={on('click', close)}>
                 Cancel

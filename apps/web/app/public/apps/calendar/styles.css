@@ -240,7 +240,8 @@
   display: grid;
   gap: 16px;
 }
-.week-form label {
+.week-form label,
+.week-form-field {
   display: grid;
   align-content: start;
   gap: 5px;

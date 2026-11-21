@@ -28,7 +28,7 @@ interface Drag {
 
 export const WeekView = clientEntry(import.meta.url, function WeekView(handle: Handle) {
   let events = [...seedEvents]
-  let selectedId = 'kickoff'
+  let selectedId: string | undefined = 'kickoff'
   let activeDay = 0
   let draft: WeekEvent | undefined
   let drag: Drag | undefined
@@ -153,7 +153,7 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
     const displayed = drag
       ? events.map((event) => (event.id === drag!.original.id ? drag!.preview : event))
       : events
-    const selected = displayed.find((event) => event.id === selectedId)!
+    const selected = displayed.find((event) => event.id === selectedId)
     const first = Math.floor(Math.min(540, ...events.map((event) => event.start)) / 60) * 60
     const last =
       Math.ceil(Math.max(1020, ...events.map((event) => event.start + event.duration)) / 60) * 60
@@ -193,6 +193,7 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
                 aria-pressed={day === activeDay}
                 mix={on('click', () => {
                   activeDay = day
+                  selectedId = events.find((event) => event.day === day)?.id
                   handle.update()
                 })}
               >
@@ -263,24 +264,28 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
               ))}
             </div>
           </div>
-          <div class="week-detail" data-calendar={selected.calendar}>
-            <div>
-              <span class="week-dot" />
-              <strong>{selected.title}</strong>
-              <span>
-                {days[selected.day]} · {timeLabel(selected.start)}–
-                {timeLabel(selected.start + selected.duration)} UTC
-              </span>
+          {selected ? (
+            <div class="week-detail" data-calendar={selected.calendar}>
+              <div>
+                <span class="week-dot" />
+                <strong>{selected.title}</strong>
+                <span>
+                  {days[selected.day]} · {timeLabel(selected.start)}–
+                  {timeLabel(selected.start + selected.duration)} UTC
+                </span>
+              </div>
+              <Button
+                variant="secondary"
+                size="compact"
+                leadingIcon={<Icon name="pencil" size={13} />}
+                mix={on('click', () => showEditor(selected))}
+              >
+                Edit event
+              </Button>
             </div>
-            <Button
-              variant="secondary"
-              size="compact"
-              leadingIcon={<Icon name="pencil" size={13} />}
-              mix={on('click', () => showEditor(selected))}
-            >
-              Edit event
-            </Button>
-          </div>
+          ) : (
+            <div class="week-detail">No events on {days[activeDay]}.</div>
+          )}
         </section>
         <p id="week-shortcuts" class="week-hint">
           Drag an event to move it or its bottom edge to resize. Use arrow keys to move, Shift + ↑
