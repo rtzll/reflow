@@ -864,11 +864,6 @@ body:has(.site-demo) {
 .site-demo-card .site-preview-footer > a:first-child {
   padding-right: 88px;
 }
-.site-demo-footer-label {
-  display: block;
-  padding: 12px 16px;
-  color: var(--rf-muted);
-}
 .site-demo-footer-actions {
   position: absolute;
   inset: 0 8px 0 auto;
@@ -901,12 +896,6 @@ body:has(.site-demo) {
 }
 .site-demo-settings .doc-playground-controls {
   margin-top: 20px;
-}
-.site-demo-setting-slide {
-  width: min(100%, 256px);
-}
-.site-demo-card:has(.site-demo-setting-slide) {
-  min-height: 390px;
 }
 .site-demo-pagination {
   position: relative;

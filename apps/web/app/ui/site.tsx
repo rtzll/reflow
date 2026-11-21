@@ -981,7 +981,6 @@ const demoOrder = [
   'context-menu',
   'data-table',
   'markdown',
-  'settings',
 ]
 
 const customizableSlides = new Set([
@@ -1023,16 +1022,14 @@ function Demo(
         .filter((component) => component.preview != null && component.category !== 'system')
         .map((component) => [component.slug, component]),
     )
-    available.set('settings', { slug: 'settings', name: 'Make them yours', description: '' })
     const slides = demoOrder.flatMap((slug) => available.get(slug) ?? [])
     const selectedIndex = slides.findIndex((slide) => slide.slug === slug)
     const current = available.get(slug ?? '') ?? slides[0]
     const position = Math.max(0, selectedIndex)
     const slideLabel =
-      selectedIndex >= 0 || !slug
+      selectedIndex >= 0 || !available.has(slug ?? '')
         ? `Slide ${position + 1} of ${slides.length}: ${current?.name}`
         : current?.name
-    const settingsSlide = current?.slug === 'settings'
     const customizable = current && customizableSlides.has(current.slug)
     let slideHref = (slide: ShowcaseComponent, scale = fit) =>
       pageHref(routes.demo.href(), { c: slide.slug, ...(scale ? { fit: '1' } : {}) })
@@ -1071,28 +1068,18 @@ function Demo(
                 {customizable ? (
                   <DemoPlayground slug={current.slug} fit={fit} avatar={avatar} />
                 ) : (
-                  <div class="site-demo-example" data-fit={fit && !settingsSlide ? '' : undefined}>
-                    {settingsSlide ? (
-                      <div class="site-demo-setting-slide">
-                        <SettingsPanel settings={settings} />
-                      </div>
-                    ) : (
-                      current.preview
-                    )}
+                  <div class="site-demo-example" data-fit={fit ? '' : undefined}>
+                    {current.preview}
                   </div>
                 )}
               </div>
               <footer class="site-preview-footer">
-                {settingsSlide ? (
-                  <span class="site-demo-footer-label">{current.name}</span>
-                ) : (
-                  <a
-                    href={pageHref(routes.component.href({ slug: current.slug }))}
-                    aria-label={`View ${current.name} documentation`}
-                  >
-                    {current.name}
-                  </a>
-                )}
+                <a
+                  href={pageHref(routes.component.href({ slug: current.slug }))}
+                  aria-label={`View ${current.name} documentation`}
+                >
+                  {current.name}
+                </a>
                 <div class="site-demo-footer-actions">
                   <a
                     class="site-icon-button site-demo-fit"
