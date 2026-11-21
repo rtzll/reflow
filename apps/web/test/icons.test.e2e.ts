@@ -5,7 +5,7 @@ import { open, showcaseServer } from './showcase-router.ts'
 it('switches real icon geometry in place and remembers the selection across routes', async (t) => {
   const page = await t.serve(showcaseServer)
   await open(page, '/')
-  const icon = page.locator('.site-main [data-rf-icon="home"]').first()
+  const icon = page.locator('article[data-component="tabs"] [role="tab"] [data-rf-icon="folder"]')
   const trigger = page.locator('.site-right [data-setting-trigger="icons"]')
   const geometry = () =>
     icon.evaluate((node) => {

@@ -180,7 +180,7 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
   },
   'command-menu': {
     description:
-      'Find a project command and run it with Enter or a click. Open the Tree docs, copy this page’s link, or switch themes.',
+      'Find a project command and run it with Enter or a click. Open the Tree docs, copy the current URL, or switch themes.',
   },
   'date-picker': {
     description: 'A date field with an anchored calendar and local ISO date values.',

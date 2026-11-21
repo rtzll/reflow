@@ -307,10 +307,10 @@ it('routes demo arrows to the focused widget or to slide navigation', async (t) 
   )
 
   await open(page, '/demo?c=tabs')
-  await stage.getByRole('tab', { name: 'Home', exact: true }).press('ArrowRight')
+  await stage.getByRole('tab', { name: 'Files', exact: true }).press('ArrowRight')
   assert.ok(
     await stage
-      .getByRole('tab', { name: 'Chat', exact: true })
+      .getByRole('tab', { name: 'Activity', exact: true })
       .evaluate(
         (tab) => tab === document.activeElement && tab.getAttribute('aria-selected') === 'false',
       ),

@@ -2099,7 +2099,7 @@
 
 .example-file-preview [aria-pressed='true'] {
   background: var(--rf-surface-3);
-  color: var(--rf-text);
+  color: var(--rf-fg);
 }
 
 .example-file-preview .rf-code-block {
