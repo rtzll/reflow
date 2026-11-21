@@ -83,3 +83,30 @@ it('submits a team filter without JavaScript and preserves sort and gallery sear
   )
   await expect(tile.locator('tbody tr').first()).toContainText('Lina')
 })
+
+it('keeps the current team page usable until a page link finishes loading', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await open(page, '/?q=table')
+  const tile = page.locator('[data-component="data-table"]')
+  const next = tile.getByRole('link', { name: 'Next page' })
+  const pending = page.waitForEvent(
+    'request',
+    (request) => new URL(request.url()).searchParams.get('teamPage') === '2',
+  )
+  const response = Promise.withResolvers<void>()
+  await page.route(/teamPage=2/, async (route) => {
+    await response.promise
+    await route.continue()
+  })
+  const navigating = next.press('Enter')
+  try {
+    await pending
+    await expect(tile.getByRole('link', { name: 'Page 1' })).toHaveAttribute('aria-current', 'page')
+  } finally {
+    response.resolve()
+    await navigating
+  }
+  await expect(tile.getByRole('cell', { name: 'Emilia', exact: true })).toBeVisible()
+  await page.goBack()
+  await expect(tile.getByRole('cell', { name: 'Alice', exact: true })).toBeVisible()
+})

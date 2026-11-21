@@ -17,13 +17,16 @@ export function RoutedDataTable<Row>(
   let requestSearch = handle.props.route.search
   let search = requestSearch
   const history = ref((_node, signal) => {
-    function syncSearch() {
-      if (search === location.search) return
-      search = location.search
-      void handle.update()
-    }
-    window.addEventListener('popstate', syncSearch, { signal })
-    window.navigation?.addEventListener('currententrychange', syncSearch, { signal })
+    window.navigation?.addEventListener(
+      'currententrychange',
+      (event) => {
+        // Local edits replace the URL. Page links and Back receive state with their rendered response.
+        if (event.navigationType !== 'replace' || search === location.search) return
+        search = location.search
+        void handle.update()
+      },
+      { signal },
+    )
   })
 
   return () => {
