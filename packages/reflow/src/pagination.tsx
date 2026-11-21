@@ -1,16 +1,18 @@
-import type { Handle } from 'remix/component'
+import { on, type Handle, type RemixNode } from 'remix/component'
 import type { ControlSize } from './systems/styling.ts'
 import { Icon } from './icon.tsx'
 
-export interface PaginationProps {
+export type PaginationProps = {
   page: number
   pageCount: number
-  href: (page: number) => string
   label?: string
   size?: ControlSize
   /** Keep the current scroll position during Remix navigation. */
   resetScroll?: 'manual' | 'after-transition'
-}
+} & (
+  | { href: (page: number) => string; onPageChange?: never }
+  | { href?: never; onPageChange: (page: number) => void }
+)
 
 function pageNumbers(page: number, count: number) {
   if (count <= 5) return Array.from({ length: count }, (_, index) => index + 1)
@@ -34,57 +36,47 @@ export function Pagination(handle: Handle<PaginationProps>) {
     if (count < 2) return null
     const current = Number.isFinite(page) ? Math.min(count, Math.max(1, Math.floor(page))) : 1
 
+    function control(next: number, name: string, content: RemixNode, arrow = false) {
+      const attributes = {
+        'aria-label': name,
+        'aria-current': !arrow && next === current ? ('page' as const) : undefined,
+        class: arrow ? 'rf-pagination-arrow' : undefined,
+      }
+      if (next < 1 || next > count)
+        return (
+          <span class="rf-pagination-arrow" aria-hidden="true">
+            {content}
+          </span>
+        )
+      return href ? (
+        <a {...attributes} href={href(next)} data-rmx-reset-scroll={resetScroll}>
+          {content}
+        </a>
+      ) : (
+        <button
+          {...attributes}
+          type="button"
+          mix={on('click', () => handle.props.onPageChange?.(next))}
+        >
+          {content}
+        </button>
+      )
+    }
+
     return (
       <nav class="rf-pagination" aria-label={label} data-size={size}>
         <ul>
-          <li>
-            {current > 1 ? (
-              <a
-                class="rf-pagination-arrow"
-                href={href(current - 1)}
-                data-rmx-reset-scroll={resetScroll}
-                aria-label="Previous page"
-              >
-                <Icon name="chevron-left" />
-              </a>
-            ) : (
-              <span class="rf-pagination-arrow" aria-hidden="true">
-                <Icon name="chevron-left" />
-              </span>
-            )}
-          </li>
+          <li>{control(current - 1, 'Previous page', <Icon name="chevron-left" />, true)}</li>
           {pageNumbers(current, count).map((number, index) => (
             <li key={number ?? `gap-${index}`}>
               {number === null ? (
                 <span aria-hidden="true">…</span>
               ) : (
-                <a
-                  href={href(number)}
-                  data-rmx-reset-scroll={resetScroll}
-                  aria-label={`Page ${number}`}
-                  aria-current={current === number ? 'page' : undefined}
-                >
-                  {number}
-                </a>
+                control(number, `Page ${number}`, number)
               )}
             </li>
           ))}
-          <li>
-            {current < count ? (
-              <a
-                class="rf-pagination-arrow"
-                href={href(current + 1)}
-                data-rmx-reset-scroll={resetScroll}
-                aria-label="Next page"
-              >
-                <Icon name="chevron-right" />
-              </a>
-            ) : (
-              <span class="rf-pagination-arrow" aria-hidden="true">
-                <Icon name="chevron-right" />
-              </span>
-            )}
-          </li>
+          <li>{control(current + 1, 'Next page', <Icon name="chevron-right" />, true)}</li>
         </ul>
       </nav>
     )

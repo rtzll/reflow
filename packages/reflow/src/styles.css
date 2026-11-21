@@ -68,3 +68,4 @@
 @import './pagination.css' layer(reflow);
 @import './toolbar.css' layer(reflow);
 @import './tree.css' layer(reflow);
+@import './data-table.css' layer(reflow);
