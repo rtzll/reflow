@@ -289,6 +289,36 @@ export const SiteControls = clientEntry(
           description: 'Explore interactive slides',
           href: routes.demo.href(),
         },
+        {
+          name: 'Apps',
+          slug: 'apps',
+          description: 'Full example workspaces built with Reflow',
+          href: routes.apps.href(),
+        },
+        {
+          name: 'Issue tracker',
+          slug: 'apps/issues',
+          description: 'Filter cycle issues and move selections across statuses',
+          href: routes.app.href({ slug: 'issues' }),
+        },
+        {
+          name: 'Chat',
+          slug: 'apps/chat',
+          description: 'Threaded conversations with slash skills and Markdown replies',
+          href: routes.app.href({ slug: 'chat' }),
+        },
+        {
+          name: 'Calendar',
+          slug: 'apps/calendar',
+          description: 'Weekly schedule with drag-to-create, move, and resize',
+          href: routes.app.href({ slug: 'calendar' }),
+        },
+        {
+          name: 'Analytics',
+          slug: 'apps/analytics',
+          description: 'Daily activity spikes and shareable event inspection',
+          href: routes.app.href({ slug: 'analytics' }),
+        },
       ]
       const docs = handle.props.pages.map((page) => ({
         ...page,

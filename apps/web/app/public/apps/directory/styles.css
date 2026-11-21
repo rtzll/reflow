@@ -11,6 +11,7 @@
 }
 .site-app-shelf-nav {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 3px;
   margin-inline: auto;
@@ -23,6 +24,13 @@
   border-radius: var(--rf-radius);
   color: var(--rf-muted);
   text-decoration: none;
+}
+@media (pointer: coarse) {
+  .site-app-shelf-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 44px;
+  }
 }
 .site-app-shelf-nav a:is(:hover, [aria-current]) {
   color: var(--rf-fg);

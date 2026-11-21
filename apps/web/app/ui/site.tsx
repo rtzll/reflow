@@ -874,13 +874,8 @@ function ComponentDoc(
                 {api.map((section) => (
                   <section key={section.name} class="doc-api-component">
                     <h3>{section.name}</h3>
-                    <div
-                      class="site-props-scroll"
-                      tabIndex={0}
-                      role="region"
-                      aria-label={`${section.name} API reference`}
-                    >
-                      {section === api[0] && section.props.length > 12 ? (
+                    {section === api[0] && section.props.length > 12 ? (
+                      <div role="region" aria-label={`${section.name} API reference`}>
                         <ApiPropTable
                           name={section.name}
                           path={routes.component.href({ slug: component.slug })}
@@ -890,7 +885,14 @@ function ComponentDoc(
                             defaultValue: componentDefaults[section.name]?.[prop.name] ?? '—',
                           }))}
                         />
-                      ) : (
+                      </div>
+                    ) : (
+                      <div
+                        class="site-props-scroll"
+                        tabIndex={0}
+                        role="region"
+                        aria-label={`${section.name} API reference`}
+                      >
                         <table class="site-props">
                           <thead>
                             <tr>
@@ -922,8 +924,8 @@ function ComponentDoc(
                             ))}
                           </tbody>
                         </table>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </section>
                 ))}
               </section>

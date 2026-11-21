@@ -16,6 +16,8 @@ const keyboardWidgets = [
   '[role="menubar"]',
   '[role="toolbar"]',
   '[role="tree"]',
+  '.rf-bar-chart',
+  '.rf-time-grid',
   '.site-accent-panel',
 ].join(', ')
 

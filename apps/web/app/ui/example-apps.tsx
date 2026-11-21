@@ -48,6 +48,7 @@ export function AppsIndex() {
                 class="site-app-link"
                 href={routes.app.href({ slug: app.slug })}
                 aria-labelledby={'app-title-' + app.slug}
+                aria-describedby={'app-desc-' + app.slug}
                 data-rmx-document=""
               >
                 <Card class="site-app-card" border="outlined">
@@ -59,7 +60,7 @@ export function AppsIndex() {
                       <h2 id={'app-title-' + app.slug}>{app.name}</h2>
                       <Icon name="arrow-right" size={16} />
                     </div>
-                    <CardDescription>{app.description}</CardDescription>
+                    <CardDescription id={'app-desc-' + app.slug}>{app.description}</CardDescription>
                   </CardHeader>
                 </Card>
               </a>
