@@ -47,6 +47,8 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'switch',
     'markdown',
     'combobox',
+    'time-grid',
+    'bar-chart',
   ]
   const gallery = page.locator('.site-gallery')
   for (const width of [1440, 1280, 768, 390]) {

@@ -1,5 +1,6 @@
 import { expect } from 'playwright/test'
 import { it } from 'remix/test'
+import { components } from '../app/public/catalog-entries.ts'
 import { open, showcaseServer } from './showcase-router.ts'
 
 it('opens a team page from its URL and follows links without JavaScript', async (t) => {
@@ -49,16 +50,19 @@ it('pages through the component directory in place and restores its records with
     await open(page, path + (path.includes('?') ? '&' : '?') + 'page=5', { hydrate: false })
     const directory = page.getByRole('list', { name: 'Component directory' })
     const pages = page.getByRole('navigation', { name: 'Component pages' })
-    await expect(directory.getByRole('link', { name: 'CommandMenu', exact: true })).toBeVisible()
-    const records = await directory.getByRole('link').allTextContents()
-    await pages.getByRole('link', { name: 'Page 12' }).click()
-    await expect(page).toHaveURL(new RegExp(path.replace('?', '\\?') + '[?&]page=12'))
-    await expect(pages.getByRole('link', { name: 'Page 12' })).toHaveAttribute(
-      'aria-current',
-      'page',
+    const pageSize = 5
+    await expect(directory.getByRole('link')).toHaveText(
+      components.slice(4 * pageSize, 5 * pageSize).map(([, name]) => name),
     )
-    await expect(directory.getByRole('link', { name: 'TriggerMenu' })).toBeVisible()
-    await expect(directory.getByRole('link')).toHaveCount(4)
+    const records = await directory.getByRole('link').allTextContents()
+    const lastPage = Math.ceil(components.length / pageSize)
+    const last = pages.getByRole('link', { name: 'Page ' + lastPage, exact: true })
+    await last.click()
+    await expect(page).toHaveURL(new RegExp(path.replace('?', '\\?') + '[?&]page=' + lastPage))
+    await expect(last).toHaveAttribute('aria-current', 'page')
+    await expect(directory.getByRole('link')).toHaveText(
+      components.slice((lastPage - 1) * pageSize).map(([, name]) => name),
+    )
     await page.goBack()
     await expect(directory.getByRole('link')).toHaveText(records)
   }
