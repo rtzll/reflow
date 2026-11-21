@@ -54,7 +54,6 @@ import {
   CardTitle,
   CarouselDots,
   ChatLayout,
-  Markdown,
   ChatMessage,
   Citation,
   Checkbox,
@@ -91,6 +90,7 @@ import {
   Tooltip,
   type HighlightedCode,
 } from '@rtzll/reflow'
+import { Markdown } from '@rtzll/reflow/markdown'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import { BannerExample, BannerPreview } from './banner-example.tsx'
 

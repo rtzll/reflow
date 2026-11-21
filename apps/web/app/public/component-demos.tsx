@@ -79,7 +79,6 @@ import {
   CardHeader,
   CardGroup,
   CardTitle,
-  Markdown,
   ChatMessage,
   Checkbox,
   CheckboxGroup,
@@ -124,6 +123,7 @@ import {
   Tooltip,
   type ButtonVariant,
 } from '@rtzll/reflow'
+import { Markdown } from '@rtzll/reflow/markdown'
 
 export interface DocumentationExample {
   title: string
