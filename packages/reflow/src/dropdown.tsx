@@ -1,7 +1,7 @@
 import { shortcutKeys } from './behaviors/shortcut.ts'
 import { hoverIntent } from './behaviors/hover-intent.ts'
 import { fluidHover } from './systems/fluid-hover.ts'
-import { attrs, on, ref } from 'remix/component'
+import { attrs, createMixin, on, ref } from 'remix/component'
 import type { Handle, MixInput, RemixNode } from 'remix/component'
 import * as menu from '@remix-run/ui/menu'
 import { Button } from './button.tsx'
@@ -270,6 +270,22 @@ function matchesMenuQuery(item: DropdownItem, query: string): boolean {
   )
 }
 
+// Remix UI releases its anchor observer and scroll lock on native close.
+// Run that lifecycle while the surface is still connected, even on unmount.
+const closeOnRemoval = createMixin<HTMLElement, []>(
+  (handle) => {
+    let surface: HTMLElement
+    handle.addEventListener('insert', (event) => {
+      surface = event.node
+    })
+    handle.addEventListener('beforeRemove', () => {
+      if (surface?.matches(':popover-open')) surface.hidePopover()
+    })
+    return () => handle.element
+  },
+  { ssr: false },
+)
+
 export function DropdownSurface(
   handle: Handle<{
     items: readonly DropdownItem[]
@@ -345,7 +361,7 @@ export function DropdownSurface(
         class="rf-menu-surface rf-dropdown-surface"
         data-inline={handle.props.inline || undefined}
         mix={[
-          !handle.props.inline && menu.popover(),
+          !handle.props.inline && [closeOnRemoval(), menu.popover()],
           // A hover-opened menu stays while the pointer is over it, submenus
           // included (they render inside this surface), and closes once the
           // pointer leaves both the menu and its trigger.

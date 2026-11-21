@@ -95,9 +95,32 @@ function ContextMenuPopup(
   return () => (
     <div
       data-density={handle.props.size}
-      mix={menu.onMenuSelect((event) => {
-        handle.props.onSelect?.(event.item.value ?? event.item.name, row, event.item.checked)
-      })}
+      mix={[
+        menu.onMenuSelect((event) => {
+          handle.props.onSelect?.(event.item.value ?? event.item.name, row, event.item.checked)
+        }),
+        // Let the browser continue Tab navigation from the invoking row.
+        on<HTMLElement, 'keydown'>(
+          'keydown',
+          (event) => {
+            if (event.key === 'Tab' && !event.defaultPrevented && row.isConnected) {
+              row.focus({ preventScroll: true })
+            }
+          },
+          true,
+        ),
+        on('focusout', (event) => {
+          // The primitive normally restores its trigger after the exit animation.
+          // Let a control the user or the action already focused keep focus.
+          if (
+            context.isOpen &&
+            event.relatedTarget instanceof Node &&
+            !event.currentTarget.contains(event.relatedTarget)
+          ) {
+            context.unregisterTrigger(row)
+          }
+        }),
+      ]}
     >
       <DropdownSurface items={handle.props.items} />
     </div>
