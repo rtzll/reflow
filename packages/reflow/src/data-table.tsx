@@ -45,6 +45,8 @@ export interface DataTableProps<Row> {
   onStateChange?: (state: DataTableState) => void
   /** Associate search with a native form for server-rendered filtering. */
   filterInput?: Pick<InputProps, 'name' | 'form'>
+  /** Optional control at the trailing edge of the filter row. */
+  filterAction?: RemixNode
   /** Render native sort and page links. The destination supplies the new state. */
   href?: (state: DataTableState) => string
   loading?: boolean
@@ -208,17 +210,20 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
     )
     return (
       <div class="rf-data-table">
-        <Input
-          {...handle.props.filterInput}
-          type="search"
-          size={size}
-          aria-label={filterLabel}
-          placeholder={filterLabel}
-          value={state.filter}
-          mix={on<HTMLInputElement, 'input'>('input', (event) =>
-            change({ ...state, filter: event.currentTarget.value, page: 1 }),
-          )}
-        />
+        <div class="rf-data-filter">
+          <Input
+            {...handle.props.filterInput}
+            type="search"
+            size={size}
+            aria-label={filterLabel}
+            placeholder={filterLabel}
+            value={state.filter}
+            mix={on<HTMLInputElement, 'input'>('input', (event) =>
+              change({ ...state, filter: event.currentTarget.value, page: 1 }),
+            )}
+          />
+          {handle.props.filterAction}
+        </div>
         {rowActions ? (
           <ContextMenu
             label={`${label} row actions`}

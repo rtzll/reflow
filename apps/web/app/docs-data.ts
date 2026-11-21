@@ -141,6 +141,12 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
             'Connect the search input to an application-owned GET form for submission before hydration.',
         },
         {
+          name: 'filterAction',
+          type: 'RemixNode',
+          required: false,
+          description: 'A control placed opposite the search input in the same row.',
+        },
+        {
           name: 'loading',
           type: 'boolean',
           required: false,

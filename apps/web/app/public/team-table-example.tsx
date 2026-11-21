@@ -43,6 +43,7 @@ ${examples}
 ]
 
 let message = ''
+let loading = false
 async function copyName(name: string) {
   try {
     await navigator.clipboard.writeText(name)
@@ -54,6 +55,9 @@ async function copyName(name: string) {
 }
 
 <DataTable label="Team members" rows={members} rowKey={(member) => member.name}
+  loading={loading}
+  filterAction={<Switch label="Loading preview" size="compact" checked={loading}
+    onCheckedChange={(value) => { loading = value; void handle.update() }} />}
   pageSize={${pageSize}} size="compact" columns={[
     { id: 'name', label: 'Name', value: (member) => member.name },
     { id: 'role', label: 'Role', value: (member) => member.role },
@@ -89,6 +93,17 @@ export function TeamDirectory(handle: Handle<{ query?: string; pageSize?: number
       paginationLabel: 'Team pages',
       size: 'compact',
       loading,
+      filterAction: (
+        <Switch
+          label="Loading preview"
+          size="compact"
+          checked={loading}
+          onCheckedChange={(value) => {
+            loading = value
+            void handle.update()
+          }}
+        />
+      ),
       rowActions: {
         items: [{ value: 'copy', label: 'Copy member name' }],
         label: (member) => `Actions for ${member.name}`,
@@ -108,18 +123,9 @@ export function TeamDirectory(handle: Handle<{ query?: string; pageSize?: number
         ) : (
           <DataTable {...props} />
         )}
-        <div class="example-table-actions">
-          <Switch
-            label="Loading preview"
-            size="compact"
-            checked={loading}
-            onCheckedChange={(value) => {
-              loading = value
-              void handle.update()
-            }}
-          />
-          <span role="status">{message}</span>
-        </div>
+        <span role="status" class={message ? undefined : 'rf-basic-sr-only'}>
+          {message}
+        </span>
       </div>
     )
   }

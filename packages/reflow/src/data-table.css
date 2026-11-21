@@ -4,8 +4,17 @@
   min-inline-size: 0;
 }
 
-.rf-data-table > input {
-  inline-size: min(100%, 24rem);
+.rf-data-filter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.rf-data-filter > input[type='search'] {
+  flex: 1;
+  min-inline-size: 0;
+  max-inline-size: 24rem;
 }
 
 .rf-data-sort {
