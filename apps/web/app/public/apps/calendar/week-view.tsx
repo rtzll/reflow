@@ -16,7 +16,7 @@ interface Drag {
   pointer: number
   original: WeekEvent
   preview: WeekEvent
-  resize: boolean
+  mode: 'create' | 'move' | 'resize'
   x: number
   y: number
   dayWidth: number
@@ -98,49 +98,83 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
     save(next, true)
   }
 
-  function begin(e: PointerEvent, event: WeekEvent, first: number, last: number) {
-    if (e.button !== 0 || !e.isPrimary) return
+  function begin(e: PointerEvent, first: number, last: number, event?: WeekEvent) {
+    if (drag || e.button !== 0 || !e.isPrimary || (!event && e.target !== board)) return
     const rect = board.getBoundingClientRect()
     const singleDay = getComputedStyle(board).getPropertyValue('--day-count').trim() === '1'
+    const dayWidth = rect.width / (singleDay ? 1 : days.length)
+    const minutesPerPixel = (last - first) / rect.height
+    const original = event ?? {
+      id: '',
+      title: '',
+      day: singleDay
+        ? activeDay
+        : clamp(Math.floor((e.clientX - rect.left) / dayWidth), 0, days.length - 1),
+      start: clamp(
+        first + 15 * Math.floor(((e.clientY - rect.top) * minutesPerPixel) / 15),
+        first,
+        last - 15,
+      ),
+      duration: 15,
+      calendar: 'Studio',
+    }
     drag = {
       pointer: e.pointerId,
-      original: event,
-      preview: event,
-      resize: e.target instanceof Element && !!e.target.closest('.week-resize'),
+      original,
+      preview: original,
+      mode: !event
+        ? 'create'
+        : e.target instanceof Element && e.target.closest('.week-resize')
+          ? 'resize'
+          : 'move',
       x: e.clientX,
       y: e.clientY,
-      dayWidth: rect.width / (singleDay ? 1 : 7),
-      minutesPerPixel: (last - first) / rect.height,
+      dayWidth,
+      minutesPerPixel,
       first,
       last,
       singleDay,
     }
     board.setPointerCapture(e.pointerId)
-    select(event)
+    if (event) select(event)
+    else handle.update()
   }
 
   function move(e: PointerEvent) {
     if (!drag || e.pointerId !== drag.pointer) return
     const { original, first, last } = drag
+    if (drag.mode === 'create') {
+      const minute = first + (e.clientY - board.getBoundingClientRect().top) * drag.minutesPerPixel
+      const end = clamp(Math.round(minute / 15) * 15, first, last)
+      drag.preview = {
+        ...original,
+        start: Math.min(original.start, end),
+        duration: Math.max(15, Math.abs(end - original.start)),
+      }
+      handle.update()
+      return
+    }
     const delta = Math.round(((e.clientY - drag.y) * drag.minutesPerPixel) / 15) * 15
-    drag.preview = drag.resize
-      ? { ...original, duration: clamp(original.duration + delta, 15, last - original.start) }
-      : {
-          ...original,
-          day: drag.singleDay
-            ? original.day
-            : clamp(original.day + Math.round((e.clientX - drag.x) / drag.dayWidth), 0, 6),
-          start: clamp(original.start + delta, first, last - original.duration),
-        }
+    drag.preview =
+      drag.mode === 'resize'
+        ? { ...original, duration: clamp(original.duration + delta, 15, last - original.start) }
+        : {
+            ...original,
+            day: drag.singleDay
+              ? original.day
+              : clamp(original.day + Math.round((e.clientX - drag.x) / drag.dayWidth), 0, 6),
+            start: clamp(original.start + delta, first, last - original.duration),
+          }
     handle.update()
   }
 
   function finish(e: PointerEvent) {
     if (!drag || e.pointerId !== drag.pointer) return
     move(e)
-    const event = drag.preview
+    const { mode, preview } = drag
     drag = undefined
-    save(event)
+    if (mode === 'create') showEditor(preview)
+    else save(preview)
   }
 
   function cancel(e: PointerEvent) {
@@ -150,14 +184,25 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
   }
 
   return () => {
-    const displayed = drag
-      ? events.map((event) => (event.id === drag!.original.id ? drag!.preview : event))
-      : events
+    const range = drag?.mode === 'create' ? drag.preview : undefined
+    const displayed =
+      drag && !range
+        ? events.map((event) => (event.id === drag!.original.id ? drag!.preview : event))
+        : events
     const selected = displayed.find((event) => event.id === selectedId)
     const first = Math.floor(Math.min(540, ...events.map((event) => event.start)) / 60) * 60
     const last =
       Math.ceil(Math.max(1020, ...events.map((event) => event.start + event.duration)) / 60) * 60
     const hours = Array.from({ length: (last - first) / 60 }, (_, index) => first + index * 60)
+    function placement(event: WeekEvent, lane = 0, lanes = 1) {
+      return {
+        '--day': event.day,
+        '--lane': lane,
+        '--lanes': lanes,
+        top: `${(100 * (event.start - first)) / (last - first)}%`,
+        height: `calc(${(100 * event.duration) / (last - first)}% - 2px)`,
+      }
+    }
     return (
       <article class="week-app">
         <header class="week-header">
@@ -222,9 +267,21 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
               aria-label="Timed events"
               role="group"
               mix={[
-                ref((node) => {
+                ref((node, signal) => {
                   board = node as HTMLDivElement
+                  board.ownerDocument.addEventListener(
+                    'keydown',
+                    (e) => {
+                      if (e.key !== 'Escape' || !drag) return
+                      e.preventDefault()
+                      board.releasePointerCapture(drag.pointer)
+                      drag = undefined
+                      handle.update()
+                    },
+                    { signal },
+                  )
                 }),
+                on<HTMLDivElement, 'pointerdown'>('pointerdown', (e) => begin(e, first, last)),
                 on<HTMLDivElement, 'pointermove'>('pointermove', move),
                 on<HTMLDivElement, 'pointerup'>('pointerup', finish),
                 on<HTMLDivElement, 'pointercancel'>('pointercancel', cancel),
@@ -244,15 +301,9 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
                   aria-pressed={event.id === selectedId}
                   aria-describedby="week-shortcuts"
                   title={eventLabel(event)}
-                  style={{
-                    '--day': event.day,
-                    '--lane': lane,
-                    '--lanes': lanes,
-                    top: `${(100 * (event.start - first)) / (last - first)}%`,
-                    height: `calc(${(100 * event.duration) / (last - first)}% - 2px)`,
-                  }}
+                  style={placement(event, lane, lanes)}
                   mix={[
-                    on('pointerdown', (e) => begin(e, event, first, last)),
+                    on('pointerdown', (e) => begin(e, first, last, event)),
                     on('keydown', (e) => keydown(e, event)),
                     on('click', () => select(event)),
                   ]}
@@ -262,6 +313,15 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
                   <span class="week-resize" aria-hidden="true" title="Drag to change duration" />
                 </button>
               ))}
+              {range && (
+                <div
+                  class="week-event week-range"
+                  data-calendar={range.calendar}
+                  style={placement(range)}
+                >
+                  {timeLabel(range.start)}–{timeLabel(range.start + range.duration)}
+                </div>
+              )}
             </div>
           </div>
           {selected ? (
@@ -288,8 +348,8 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
           )}
         </section>
         <p id="week-shortcuts" class="week-hint">
-          Drag an event to move it or its bottom edge to resize. Use arrow keys to move, Shift + ↑
-          or ↓ to resize, and Enter to edit.
+          Drag down an empty time slot to create an event. Drag an event to move it or its bottom
+          edge to resize. Use arrow keys to move, Shift + ↑ or ↓ to resize, and Enter to edit.
         </p>
         <span class="site-sr-only" role="status">
           {message}
