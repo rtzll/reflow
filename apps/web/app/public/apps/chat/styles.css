@@ -309,6 +309,8 @@
     inset-block: var(--studio-mobile-header) auto;
     inline-size: 100%;
     border: 0;
+    background: light-dark(var(--rf-bg), var(--studio-canvas));
+    z-index: 2;
   }
   .site-app-workspace[data-app='chat']:has(.studio-library[data-open]) .site-app-nav {
     display: flex;

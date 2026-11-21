@@ -16,6 +16,15 @@ interface ChatProps {
   search: string
 }
 
+function randomId() {
+  if (typeof crypto.randomUUID === 'function') return crypto.randomUUID()
+  const bytes = crypto.getRandomValues(new Uint8Array(16))
+  bytes[6] = (bytes[6]! & 0x0f) | 0x40
+  bytes[8] = (bytes[8]! & 0x3f) | 0x80
+  const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
+}
+
 const starters = [
   {
     icon: 'pencil',
@@ -58,6 +67,15 @@ export const ChatWorkspace = clientEntry(
       field.setSelectionRange(field.value.length, field.value.length)
     }
 
+    function closeHistory() {
+      if (!historyOpen) return
+      historyOpen = false
+      handle.queueTask(() =>
+        root?.querySelector<HTMLButtonElement>('.studio-history-toggle')?.focus(),
+      )
+      void handle.update()
+    }
+
     function select(thread: Thread, navigation: 'link' | 'new' | 'history') {
       if (navigation !== 'history' && activeId !== thread.id)
         history.pushState(history.state, '', href(thread.id))
@@ -76,7 +94,7 @@ export const ChatWorkspace = clientEntry(
         const transition = window.navigation?.transition
         if (transition) void transition.finished.then(focus, () => {})
         else handle.queueTask(focus)
-      } else if (thread.draft || navigation === 'new') handle.queueTask(focusComposer)
+      } else if (thread.draft.trim() || navigation === 'new') handle.queueTask(focusComposer)
       else if (fromMenu)
         handle.queueTask(() =>
           root?.querySelector<HTMLButtonElement>('.studio-history-toggle')?.focus(),
@@ -84,9 +102,9 @@ export const ChatWorkspace = clientEntry(
     }
 
     function create() {
-      let thread = threads.find((thread) => !thread.messages.length && !thread.draft)
+      let thread = threads.find((thread) => !thread.messages.length && !thread.draft.trim())
       if (!thread) {
-        thread = blankThread(`conversation-${crypto.randomUUID()}`)
+        thread = blankThread(`conversation-${randomId()}`)
         threads.unshift(thread)
       }
       select(thread, 'new')
@@ -98,7 +116,7 @@ export const ChatWorkspace = clientEntry(
       if (new URLSearchParams(location.search).get('thread') !== activeId)
         history.replaceState(history.state, '', href(activeId))
       void handle.update()
-      if (threads.find(({ id }) => id === activeId)?.draft) handle.queueTask(focusComposer)
+      if (threads.find(({ id }) => id === activeId)?.draft.trim()) handle.queueTask(focusComposer)
       window.addEventListener(
         'popstate',
         () => {
@@ -115,7 +133,18 @@ export const ChatWorkspace = clientEntry(
     })
 
     return () => (
-      <div class="studio-chat" mix={mount}>
+      <div
+        class="studio-chat"
+        mix={[
+          mount,
+          on<HTMLDivElement, 'keydown'>('keydown', (event) => {
+            if (event.key === 'Escape' && !event.defaultPrevented && historyOpen) {
+              event.preventDefault()
+              closeHistory()
+            }
+          }),
+        ]}
+      >
         <aside
           class="studio-library"
           aria-label="Conversation library"
@@ -145,56 +174,63 @@ export const ChatWorkspace = clientEntry(
             <h2>Your chats</h2>
             <ul role="list">
               {threads
-                .filter((thread) => thread.messages.length || thread.draft)
-                .map((thread) => (
-                  <li key={thread.id}>
-                    <a
-                      href={href(thread.id)}
-                      class="studio-thread"
-                      aria-label={thread.messages.length ? thread.title : `Draft · ${thread.draft}`}
-                      aria-current={activeId === thread.id ? 'true' : undefined}
-                      mix={on<HTMLAnchorElement, 'click'>('click', (event) => {
-                        if (
-                          event.button ||
-                          event.metaKey ||
-                          event.ctrlKey ||
-                          event.shiftKey ||
-                          event.altKey
-                        )
-                          return
-                        event.preventDefault()
-                        select(thread, 'link')
-                      })}
-                    >
-                      <Icon name="message-circle" size={16} />
-                      <span>{thread.messages.length ? thread.title : thread.draft}</span>
-                      {thread.draft && <small>Draft</small>}
-                    </a>
-                  </li>
-                ))}
+                .filter((thread) => thread.messages.length || thread.draft.trim())
+                .map((thread) => {
+                  const draft = thread.draft.trim()
+                  return (
+                    <li key={thread.id}>
+                      <a
+                        href={href(thread.id)}
+                        class="studio-thread"
+                        aria-label={thread.messages.length ? thread.title : `Draft · ${draft}`}
+                        aria-description={
+                          thread.messages.length && draft ? 'Unfinished draft' : undefined
+                        }
+                        aria-current={activeId === thread.id ? 'true' : undefined}
+                        mix={on<HTMLAnchorElement, 'click'>('click', (event) => {
+                          if (
+                            event.button ||
+                            event.metaKey ||
+                            event.ctrlKey ||
+                            event.shiftKey ||
+                            event.altKey
+                          )
+                            return
+                          event.preventDefault()
+                          select(thread, 'link')
+                        })}
+                      >
+                        <Icon name="message-circle" size={16} />
+                        <span>{thread.messages.length ? thread.title : draft}</span>
+                        {draft && <small>Draft</small>}
+                      </a>
+                    </li>
+                  )
+                })}
             </ul>
           </nav>
         </aside>
         {threads
           .filter((thread) => opened.has(thread.id))
           .map((thread) => (
-            <section
+            <ConversationPane
               key={thread.id}
-              class="studio-pane"
+              thread={thread}
               hidden={activeId !== thread.id}
-              aria-label={thread.title}
-            >
-              <ConversationPane thread={thread} onChange={() => void handle.update()} />
-            </section>
+              onChange={() => void handle.update()}
+            />
           ))}
       </div>
     )
   },
 )
 
-function ConversationPane(handle: Handle<{ thread: Thread; onChange: () => void }>) {
+function ConversationPane(
+  handle: Handle<{ thread: Thread; hidden: boolean; onChange: () => void }>,
+) {
   const { thread } = handle.props
 
+  let pane: HTMLElement | undefined
   let response: ChatEntry | undefined
   let timer: ReturnType<typeof setInterval> | undefined
   handle.signal.addEventListener('abort', () => clearInterval(timer), { once: true })
@@ -223,7 +259,7 @@ function ConversationPane(handle: Handle<{ thread: Thread; onChange: () => void 
   }
 
   function stop() {
-    const field = document.activeElement?.closest('form')?.querySelector('textarea')
+    const field = pane?.querySelector<HTMLTextAreaElement>('textarea')
     finish(true)
     handle.queueTask(() => field?.focus())
   }
@@ -231,7 +267,9 @@ function ConversationPane(handle: Handle<{ thread: Thread; onChange: () => void 
   function send(text: string) {
     // Sending a queued message immediately also ends the preceding reply.
     if (response) finish(true)
-    const subject = thread.messages.length ? thread.title : 'your story'
+    const subject = thread.messages.length
+      ? thread.title.replace(/^\/\S+\s*/, '').trim() || thread.title
+      : 'your story'
     const words = (skillReply(text, subject) ?? replyTo(text)).split(' ')
     if (!thread.messages.length) thread.title = text.length > 48 ? text.slice(0, 47) + '…' : text
     let shown = 2
@@ -247,99 +285,119 @@ function ConversationPane(handle: Handle<{ thread: Thread; onChange: () => void 
     changed()
   }
 
-  return () => (
-    <ChatLayout
-      label={thread.title}
-      composer={
-        <>
-          {!thread.messages.length && <h2 class="studio-welcome">Where should we begin?</h2>}
-          <InputMessage
-            key="composer"
-            attachments={false}
-            placeholder="Message or type / for skills"
-            triggers={skillTriggers}
-            status={response ? 'streaming' : 'idle'}
-            onStop={stop}
-            actions={
-              <>
-                <Button
-                  class="studio-skills-button"
-                  size="icon-compact"
-                  variant="ghost"
-                  aria-label="Choose a skill"
-                  title="Choose a skill"
-                  mix={on<HTMLButtonElement, 'click'>('click', (event) => {
-                    const field = event.currentTarget.form?.querySelector('textarea')
-                    if (!field) return
-                    if (!field.value.startsWith('/'))
-                      field.setRangeText(field.value ? '/ ' : '/', 0, 0)
-                    field.setSelectionRange(1, 1)
-                    field.focus()
-                    field.dispatchEvent(new Event('input', { bubbles: true }))
-                  })}
-                >
-                  /
-                </Button>
-                {response && thread.draft.trim() && (
-                  <Button
-                    size="icon-compact"
-                    variant="ghost"
-                    aria-label="Stop response"
-                    mix={on('click', stop)}
-                  >
-                    <Icon name="square-stop" size={14} />
-                  </Button>
-                )}
-              </>
-            }
-            value={thread.draft}
-            onValueChange={(draft) => {
-              thread.draft = draft
-              changed()
-            }}
-            onSend={({ text }) => send(text)}
-          />
-          {thread.messages.length > 0 && (
-            <p class="studio-status" role="status" mix={persistOnExit}>
-              {response ? 'Replying…' : 'Simulated replies'}
-            </p>
-          )}
-          {!thread.messages.length && !thread.draft && (
-            <div class="studio-starters" aria-label="Suggested prompts" role="group">
-              {starters.map(({ icon, label, prompt }) => (
-                <button
-                  key={label}
-                  type="button"
-                  mix={on<HTMLButtonElement, 'click'>('click', (event) => {
-                    const field = event.currentTarget
-                      .closest('.rf-chat-layout-composer')
-                      ?.querySelector('textarea')
-                    send(prompt)
-                    handle.queueTask(() => field?.focus())
-                  })}
-                >
-                  <Icon name={icon} size={16} />
-                  {label}
-                </button>
-              ))}
-            </div>
-          )}
-        </>
-      }
-    >
-      {thread.messages.map((message, index) => (
-        <ChatMessage key={index} role={message.role} animate={false}>
-          {message.role === 'assistant' && <strong class="studio-author">Reflow</strong>}
-          {message.role === 'assistant' ? (
-            <div aria-busy={message === response || undefined}>
-              <Markdown source={message.text} />
-            </div>
-          ) : (
-            <span>{message.text}</span>
-          )}
-          {message.stopped && <span class="studio-stopped">Response stopped</span>}
-        </ChatMessage>
-      ))}
-    </ChatLayout>
-  )
+  return () => {
+    const draft = thread.draft.trim()
+    return (
+      <section
+        class="studio-pane"
+        hidden={handle.props.hidden}
+        aria-label={thread.title}
+        mix={ref<HTMLElement>((node) => {
+          pane = node
+        })}
+      >
+        <ChatLayout
+          label={thread.title}
+          composer={
+            <>
+              {!thread.messages.length && <h2 class="studio-welcome">Where should we begin?</h2>}
+              <InputMessage
+                key="composer"
+                attachments={false}
+                placeholder="Message or type / for skills"
+                triggers={skillTriggers}
+                status={response ? 'streaming' : 'idle'}
+                onStop={stop}
+                actions={
+                  <>
+                    <Button
+                      class="studio-skills-button"
+                      size="icon-compact"
+                      variant="ghost"
+                      aria-label="Choose a skill"
+                      title="Choose a skill"
+                      mix={on<HTMLButtonElement, 'click'>('click', (event) => {
+                        const field = event.currentTarget.form?.querySelector('textarea')
+                        if (!field) return
+                        if (!field.value.startsWith('/'))
+                          field.setRangeText(field.value ? '/ ' : '/', 0, 0)
+                        field.focus()
+                        field.setSelectionRange(1, 1)
+                        field.dispatchEvent(new Event('input', { bubbles: true }))
+                      })}
+                    >
+                      /
+                    </Button>
+                    {response && draft && (
+                      <Button
+                        size="icon-compact"
+                        variant="ghost"
+                        aria-label="Stop response"
+                        mix={on('click', stop)}
+                      >
+                        <Icon name="square-stop" size={14} />
+                      </Button>
+                    )}
+                  </>
+                }
+                value={thread.draft}
+                onValueChange={(nextDraft) => {
+                  const prevTrimmed = thread.draft.trim()
+                  const nextTrimmed = nextDraft.trim()
+                  thread.draft = nextDraft
+                  saveThread(thread, response)
+                  if (
+                    (!thread.messages.length && prevTrimmed !== nextTrimmed) ||
+                    Boolean(prevTrimmed) !== Boolean(nextTrimmed)
+                  ) {
+                    handle.props.onChange()
+                  } else {
+                    void handle.update()
+                  }
+                }}
+                onSend={({ text }) => send(text)}
+              />
+              {thread.messages.length > 0 && (
+                <p class="studio-status" role="status" mix={persistOnExit}>
+                  {response ? 'Replying…' : 'Simulated replies'}
+                </p>
+              )}
+              {!thread.messages.length && !draft && (
+                <div class="studio-starters" aria-label="Suggested prompts" role="group">
+                  {starters.map(({ icon, label, prompt }) => (
+                    <button
+                      key={label}
+                      type="button"
+                      mix={on<HTMLButtonElement, 'click'>('click', () => {
+                        const field = pane?.querySelector<HTMLTextAreaElement>('textarea')
+                        send(prompt)
+                        handle.queueTask(() => field?.focus())
+                      })}
+                    >
+                      <Icon name={icon} size={16} />
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          }
+        >
+          {thread.messages.map((message, index) => (
+            <ChatMessage key={index} role={message.role} animate={false}>
+              {message.role === 'assistant' && <strong class="studio-author">Reflow</strong>}
+              {message.role === 'assistant' ? (
+                <div aria-busy={message === response || undefined}>
+                  <Markdown source={message.text} />
+                </div>
+              ) : (
+                <span>{message.text}</span>
+              )}
+              {message.stopped && <span class="studio-stopped">Response stopped</span>}
+            </ChatMessage>
+          ))}
+        </ChatLayout>
+      </section>
+    )
+  }
 }
