@@ -51,7 +51,6 @@ import {
   CardHeader,
   CardMedia,
   CardTitle,
-  Markdown,
   ChatMessage,
   Checkbox,
   CheckboxGroup,
@@ -85,6 +84,7 @@ import {
   type ButtonVariant,
   type ColorFormat,
 } from '@rtzll/reflow'
+import { Markdown } from '@rtzll/reflow/markdown'
 import { BannerExample, bannerDefaults, bannerStatuses } from './banner-example.tsx'
 
 export type PlaygroundValues = Record<string, string | boolean>
