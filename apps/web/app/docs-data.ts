@@ -10,6 +10,80 @@ export interface ApiSection {
   props: readonly ApiProperty[]
 }
 
+const menuItemApi: ApiSection = {
+  name: 'DropdownItem',
+  props: [
+    {
+      name: 'closeOnSelect',
+      type: 'boolean',
+      description:
+        'Whether selecting closes the menu. Defaults to false for checkbox items and true for other items.',
+      required: false,
+    },
+    {
+      name: 'group',
+      type: 'string',
+      description: 'Label used to group related items.',
+      required: false,
+    },
+    {
+      name: 'value',
+      type: 'string',
+      description: 'Identifier passed to onSelect when this row is activated.',
+      required: true,
+    },
+    {
+      name: 'label',
+      type: 'string',
+      description: 'Accessible name or visible label for the control.',
+      required: true,
+    },
+    {
+      name: 'icon',
+      type: 'RemixNode',
+      description: 'Decorative content displayed before the item label.',
+      required: false,
+    },
+    {
+      name: 'shortcut',
+      type: 'string',
+      description:
+        'Key hint displayed after the label. Set it to a shortcut your application handles.',
+      required: false,
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      description: 'Prevents interaction and conveys the disabled state.',
+      required: false,
+    },
+    {
+      name: 'separatorBefore',
+      type: 'boolean',
+      description: 'Draws a separator before this item.',
+      required: false,
+    },
+    {
+      name: 'type',
+      type: '"checkbox" | "radio"',
+      description: 'Renders a checkable or mutually exclusive menu item.',
+      required: false,
+    },
+    {
+      name: 'checked',
+      type: 'boolean',
+      description: 'Selected state for a checkbox or radio menu row.',
+      required: false,
+    },
+    {
+      name: 'children',
+      type: 'readonly DropdownItem[]',
+      description: 'Items in a nested submenu.',
+      required: false,
+    },
+  ],
+}
+
 export const componentApi: Record<string, readonly ApiSection[]> = {
   pagination: [
     {
@@ -260,7 +334,8 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           name: 'items',
           type: 'readonly DropdownItem[]',
           required: true,
-          description: 'Dropdown actions, including disabled items, checked items, and submenus.',
+          description:
+            'Use icon for a leading icon, shortcut for a trailing key hint, and children for a submenu. Supports separators, disabled actions, and checked items.',
         },
         {
           name: 'onSelect',
@@ -277,6 +352,7 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
         },
       ],
     },
+    menuItemApi,
   ],
   tree: [
     {
@@ -2535,78 +2611,7 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
         },
       ],
     },
-    {
-      name: 'DropdownItem',
-      props: [
-        {
-          name: 'closeOnSelect',
-          type: 'boolean',
-          description:
-            'Whether selecting closes the menu. Defaults to false for checkbox items and true for other items.',
-          required: false,
-        },
-        {
-          name: 'group',
-          type: 'string',
-          description: 'Label used to group related items.',
-          required: false,
-        },
-        {
-          name: 'value',
-          type: 'string',
-          description: 'Identifier passed to onSelect when this row is activated.',
-          required: true,
-        },
-        {
-          name: 'label',
-          type: 'string',
-          description: 'Accessible name or visible label for the control.',
-          required: true,
-        },
-        {
-          name: 'icon',
-          type: 'RemixNode',
-          description: 'Icon content.',
-          required: false,
-        },
-        {
-          name: 'shortcut',
-          type: 'string',
-          description: 'Keyboard hint or optional command-palette shortcut.',
-          required: false,
-        },
-        {
-          name: 'disabled',
-          type: 'boolean',
-          description: 'Prevents interaction and conveys the disabled state.',
-          required: false,
-        },
-        {
-          name: 'separatorBefore',
-          type: 'boolean',
-          description: 'Draws a separator before this item.',
-          required: false,
-        },
-        {
-          name: 'type',
-          type: '"checkbox" | "radio"',
-          description: 'Single or multiple expansion mode.',
-          required: false,
-        },
-        {
-          name: 'checked',
-          type: 'boolean',
-          description: 'Selected state for a checkbox or radio menu row.',
-          required: false,
-        },
-        {
-          name: 'children',
-          type: 'readonly DropdownItem[]',
-          description: 'Items in a nested submenu.',
-          required: false,
-        },
-      ],
-    },
+    menuItemApi,
   ],
   field: [
     {

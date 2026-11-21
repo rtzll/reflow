@@ -119,13 +119,14 @@ export function documentationCode(slug: string, fragment: string): string {
     ...new Set([...combined.matchAll(/<([A-Z]\w*)\b/g)].map((match) => match[1])),
   ].filter((name) => name !== 'Record' && name !== 'MainContent')
   if (/\bComposerMessage\b/.test(combined)) components.push('type ComposerMessage')
+  if (/\btoast[.(]/.test(combined)) components.push('toast')
   if (/\bAskUserAnswer\b/.test(combined)) components.push('type AskUserAnswer')
   const indentation = (value: string, spaces: number) =>
     value
       .split('\n')
       .map((line) => ' '.repeat(spaces) + line)
       .join('\n')
-  return `import { ${components.join(', ')} } from '@rtzll/reflow'\nimport { type Handle${combined.includes('on(') ? ', on' : ''} } from 'remix/component'\n\nexport function Example(handle: Handle) {\n${setup.length ? indentation(setup.join('\n\n'), 2) + '\n\n' : ''}  return () => (\n    <>\n${indentation(markup, 6)}\n    </>\n  )\n}`
+  return `import { ${components.join(', ')} } from '@rtzll/reflow'\nimport { type Handle${/\bon\(/.test(combined) ? ', on' : ''} } from 'remix/component'\n\nexport function Example(handle: Handle) {\n${setup.length ? indentation(setup.join('\n\n'), 2) + '\n\n' : ''}  return () => (\n    <>\n${indentation(markup, 6)}\n    </>\n  )\n}`
 }
 
 export function playgroundFragment(slug: string, values: PlaygroundValues): string {

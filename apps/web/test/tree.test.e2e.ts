@@ -91,7 +91,8 @@ it('anchors keyboard actions to the focused file and keeps them visible at the v
   const bounds = (await panel.boundingBox())!
   expect(Math.abs(bounds.x - file.x)).toBeLessThanOrEqual(2)
   expect(Math.abs(bounds.y + bounds.height - file.y + 2)).toBeLessThanOrEqual(2)
-  await expect(menu.getByRole('menuitem')).toBeInViewport({ ratio: 1 })
+  for (const item of await menu.getByRole('menuitem').all())
+    await expect(item).toBeInViewport({ ratio: 1 })
   await page.keyboard.press('Escape')
   await expect(row).toBeFocused()
   await expect(row).toHaveAttribute('aria-selected', 'false')
@@ -113,5 +114,5 @@ it('continues through the project tree in either direction when tabbing out of f
   await row.press('Shift+F10')
   await expect(menu).toBeFocused()
   await page.keyboard.press('Tab')
-  await expect(tile.getByRole('separator')).toBeFocused()
+  await expect(tile.getByRole('separator', { name: 'Resize project files' })).toBeFocused()
 })

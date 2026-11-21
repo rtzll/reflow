@@ -39,7 +39,8 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
     code: teamTableCode(),
   },
   'context-menu': {
-    description: 'Right-click a file or press Shift+F10 on its row to open file actions.',
+    description:
+      'Right-click a file or press Shift+F10 to open it or copy its name or relative path.',
     code: projectFileMenuCode(),
   },
   tree: {

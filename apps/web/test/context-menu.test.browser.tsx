@@ -16,6 +16,50 @@ async function untilFocused(element: Element) {
   equal(document.activeElement, element)
 }
 
+it('opens and leaves a submenu by keyboard and dispatches the chosen leaf to the invoking row', async (t) => {
+  const selected: string[] = []
+  const { $, act, cleanup } = render(
+    <ContextMenu
+      label="File actions"
+      target="button"
+      items={[
+        {
+          value: 'copy',
+          label: 'Copy',
+          children: [
+            { value: 'path', label: 'Relative path', icon: <span>→</span>, shortcut: 'Alt+P' },
+          ],
+        },
+      ]}
+      onSelect={(action, target) => selected.push(action + ':' + target.id)}
+    >
+      <button id="source">Source</button>
+      <button id="readme">README</button>
+    </ContextMenu>,
+  )
+  t.after(cleanup)
+  const row = $('#readme')!
+  await act(() => press(row, 'ContextMenu'))
+  const root = $('[role="menu"][aria-label="File actions"]')!
+  const parent = $('[role="menuitem"][aria-haspopup="menu"]')!
+  const path = $('[role="menu"][aria-label="Copy"] [role="menuitem"]')!
+  await untilFocused(root)
+  await act(() => press(root, 'ArrowDown'))
+  await untilFocused(parent)
+  await act(() => press(parent, 'ArrowRight'))
+  await untilFocused(path)
+  equal(path.querySelector('[aria-hidden="true"]')?.textContent, '→')
+  equal(Array.from(path.querySelectorAll('kbd'), (key) => key.textContent).join('+'), 'Alt+P')
+  await act(() => press(path, 'ArrowLeft'))
+  await untilFocused(parent)
+  equal(selected.length, 0)
+  await act(() => press(parent, 'ArrowRight'))
+  await untilFocused(path)
+  await act(() => press(path, 'Enter'))
+  await untilFocused(row)
+  equal(selected.join(), 'path:readme')
+})
+
 it('opens file actions from the focused row, restores focus on Escape and targets that file on selection', async (t) => {
   const actions: string[] = []
   const { $, act, cleanup } = render(
