@@ -354,13 +354,27 @@
   width: fit-content;
   max-width: 100%;
   margin: 12px auto 0;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
 }
-.issues-actions .rf-toolbar {
+.issues-actions .rf-toolbar,
+.issues-move-notice {
   padding: 6px;
   gap: 4px;
   border-radius: 12px;
   background: var(--rf-surface-4);
   box-shadow: var(--rf-elevation);
+}
+.issues-move-notice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-inline-start: 14px;
+  max-width: 100%;
+}
+.issues-move-notice > .rf-button {
+  flex: none;
 }
 .issues-actions strong {
   padding: 0 7px;
