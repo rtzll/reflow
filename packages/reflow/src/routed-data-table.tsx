@@ -18,16 +18,21 @@ export function RoutedDataTable<Row>(handle: Handle<RoutedDataTableProps<Row>>) 
   let requestSearch = handle.props.route.search
   let search = requestSearch
   const history = ref((_node, signal) => {
+    function readLocation() {
+      if (search === location.search) return
+      search = location.search
+      void handle.update()
+    }
     window.navigation?.addEventListener(
       'currententrychange',
       (event) => {
-        // Local edits replace the URL. Page links and Back receive state with their rendered response.
-        if (event.navigationType !== 'replace' || search === location.search) return
-        search = location.search
-        void handle.update()
+        if (event.navigationType === 'replace') readLocation()
       },
       { signal },
     )
+    // A link can return to the last server query after a local filter edit.
+    // Wait for the response so the current table stays usable while the link loads.
+    window.navigation?.addEventListener('navigatesuccess', readLocation, { signal })
   })
 
   return () => {

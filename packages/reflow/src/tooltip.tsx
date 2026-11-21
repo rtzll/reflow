@@ -118,9 +118,14 @@ export function Tooltip(handle: Handle<TooltipProps>) {
       'keydown',
       (event) => {
         if (event.key !== 'Escape' || event.defaultPrevented) return
+        const modal = event
+          .composedPath()
+          .find((node) => node instanceof HTMLDialogElement && node.matches(':modal'))
         dismissed = true
         hide()
-        event.preventDefault()
+        // A tooltip can linger briefly after focus enters a different modal.
+        // Let that modal receive its own native Escape cancellation.
+        if (!(modal instanceof HTMLDialogElement) || modal.contains(trigger)) event.preventDefault()
       },
       { capture: true, signal: openEvents.signal },
     )

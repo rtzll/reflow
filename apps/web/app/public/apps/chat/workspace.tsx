@@ -1,15 +1,19 @@
 import { Button, ChatLayout, ChatMessage, Icon, InputMessage, Markdown } from '@rtzll/reflow'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import { replyTo, type ChatEntry, type Conversation } from './fixtures.ts'
+import {
+  blankThread,
+  localThreadId,
+  restoreThreads,
+  saveThread,
+  type Thread,
+} from './local-threads.ts'
 import { skillReply, skillTriggers } from './skills.ts'
-
-interface Thread extends Conversation {
-  draft: string
-}
 
 interface ChatProps {
   conversations: Conversation[]
-  initialId?: string
+  initialId: string
+  search: string
 }
 
 const starters = [
@@ -34,51 +38,84 @@ export const ChatWorkspace = clientEntry(
       messages: [...thread.messages],
       draft: '',
     }))
-    let sequence = 0
-    function newThread() {
-      const thread: Thread = {
-        id: `conversation-${++sequence}`,
-        title: 'New chat',
-        messages: [],
-        draft: '',
-      }
-      threads.unshift(thread)
-      return thread
-    }
-
-    let activeId = handle.props.initialId ?? newThread().id
+    let activeId = handle.props.initialId
+    if (!threads.some(({ id }) => id === activeId)) threads.unshift(blankThread(activeId))
     // Keep each opened composer mounted so its queue and editing state follow the thread.
     const opened = new Set([activeId])
     let historyOpen = false
     let root: HTMLElement | undefined
 
-    function select(id: string) {
-      activeId = id
-      opened.add(id)
-      if (historyOpen) {
-        historyOpen = false
+    function href(id: string) {
+      const query = new URLSearchParams(root ? location.search : handle.props.search)
+      query.set('thread', id)
+      return '?' + query.toString() + (root ? location.hash : '')
+    }
+
+    function focusComposer() {
+      const field = root?.querySelector<HTMLTextAreaElement>('.studio-pane:not([hidden]) textarea')
+      if (!field) return
+      field.focus({ preventScroll: true })
+      field.setSelectionRange(field.value.length, field.value.length)
+    }
+
+    function select(thread: Thread, navigation: 'link' | 'new' | 'history') {
+      if (navigation !== 'history' && activeId !== thread.id)
+        history.pushState(history.state, '', href(thread.id))
+      activeId = thread.id
+      opened.add(activeId)
+      const fromMenu = historyOpen
+      historyOpen = false
+      void handle.update()
+      // Remix traversals can reset focus at the end of a Navigation API transition.
+      if (navigation === 'history') {
+        const focus = () => {
+          if (activeId !== thread.id || handle.signal.aborted) return
+          const focused = document.activeElement
+          if (focused === document.body || focused?.id === 'main') focusComposer()
+        }
+        const transition = window.navigation?.transition
+        if (transition) void transition.finished.then(focus, () => {})
+        else handle.queueTask(focus)
+      } else if (thread.draft || navigation === 'new') handle.queueTask(focusComposer)
+      else if (fromMenu)
         handle.queueTask(() =>
           root?.querySelector<HTMLButtonElement>('.studio-history-toggle')?.focus(),
         )
-      }
-      void handle.update()
     }
 
     function create() {
-      const blank = threads.find((thread) => !thread.messages.length && !thread.draft)
-      select((blank ?? newThread()).id)
-      handle.queueTask(() =>
-        root?.querySelector<HTMLTextAreaElement>('.studio-pane:not([hidden]) textarea')?.focus(),
-      )
+      let thread = threads.find((thread) => !thread.messages.length && !thread.draft)
+      if (!thread) {
+        thread = blankThread(`conversation-${crypto.randomUUID()}`)
+        threads.unshift(thread)
+      }
+      select(thread, 'new')
     }
 
+    const mount = ref((node, signal) => {
+      root = node as HTMLElement
+      restoreThreads(threads)
+      if (new URLSearchParams(location.search).get('thread') !== activeId)
+        history.replaceState(history.state, '', href(activeId))
+      void handle.update()
+      if (threads.find(({ id }) => id === activeId)?.draft) handle.queueTask(focusComposer)
+      window.addEventListener(
+        'popstate',
+        () => {
+          const id = new URLSearchParams(location.search).get('thread')
+          let thread = threads.find((thread) => thread.id === id)
+          if (!thread && id && localThreadId.test(id)) {
+            thread = blankThread(id)
+            threads.unshift(thread)
+          }
+          if (thread) select(thread, 'history')
+        },
+        { signal },
+      )
+    })
+
     return () => (
-      <div
-        class="studio-chat"
-        mix={ref((node) => {
-          root = node as HTMLElement
-        })}
-      >
+      <div class="studio-chat" mix={mount}>
         <aside
           class="studio-library"
           aria-label="Conversation library"
@@ -111,17 +148,28 @@ export const ChatWorkspace = clientEntry(
                 .filter((thread) => thread.messages.length || thread.draft)
                 .map((thread) => (
                   <li key={thread.id}>
-                    <button
-                      type="button"
+                    <a
+                      href={href(thread.id)}
                       class="studio-thread"
                       aria-label={thread.messages.length ? thread.title : `Draft · ${thread.draft}`}
                       aria-current={activeId === thread.id ? 'true' : undefined}
-                      mix={on('click', () => select(thread.id))}
+                      mix={on<HTMLAnchorElement, 'click'>('click', (event) => {
+                        if (
+                          event.button ||
+                          event.metaKey ||
+                          event.ctrlKey ||
+                          event.shiftKey ||
+                          event.altKey
+                        )
+                          return
+                        event.preventDefault()
+                        select(thread, 'link')
+                      })}
                     >
                       <Icon name="message-circle" size={16} />
                       <span>{thread.messages.length ? thread.title : thread.draft}</span>
                       {thread.draft && <small>Draft</small>}
-                    </button>
+                    </a>
                   </li>
                 ))}
             </ul>
@@ -151,11 +199,27 @@ function ConversationPane(handle: Handle<{ thread: Thread; onChange: () => void 
   let timer: ReturnType<typeof setInterval> | undefined
   handle.signal.addEventListener('abort', () => clearInterval(timer), { once: true })
 
+  function changed() {
+    saveThread(thread, response)
+    handle.props.onChange()
+  }
+
+  // A refresh can interrupt a stream between ticks. Keep the visible partial response.
+  const persistOnExit = ref((_node, signal) => {
+    window.addEventListener(
+      'pagehide',
+      () => {
+        if (response) saveThread(thread, response)
+      },
+      { signal },
+    )
+  })
+
   function finish(stopped: boolean) {
     clearInterval(timer)
     if (response) response.stopped = stopped
     response = undefined
-    handle.props.onChange()
+    changed()
   }
 
   function stop() {
@@ -180,7 +244,7 @@ function ConversationPane(handle: Handle<{ thread: Thread; onChange: () => void 
       if (shown === words.length) finish(false)
       else void handle.update()
     }, 140)
-    handle.props.onChange()
+    changed()
   }
 
   return () => (
@@ -228,15 +292,15 @@ function ConversationPane(handle: Handle<{ thread: Thread; onChange: () => void 
                 )}
               </>
             }
-            defaultValue={thread.draft}
+            value={thread.draft}
             onValueChange={(draft) => {
               thread.draft = draft
-              handle.props.onChange()
+              changed()
             }}
             onSend={({ text }) => send(text)}
           />
           {thread.messages.length > 0 && (
-            <p class="studio-status" role="status">
+            <p class="studio-status" role="status" mix={persistOnExit}>
               {response ? 'Replying…' : 'Simulated replies'}
             </p>
           )}

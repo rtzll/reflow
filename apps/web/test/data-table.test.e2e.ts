@@ -106,6 +106,21 @@ it('submits a team filter without JavaScript and preserves sort and gallery sear
   await expect(tile.locator('tbody tr').first()).toContainText('Lina')
 })
 
+it('reopens the original routed page after editing the filter in place', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await open(page, '/?teamPage=2')
+  const tile = page.locator('[data-component="data-table"]')
+  const filter = tile.getByRole('searchbox')
+  const secondPage = tile.getByRole('link', { name: 'Page 2', exact: true })
+  await expect(tile.getByRole('cell', { name: 'Emilia', exact: true })).toBeVisible()
+  await filter.fill('Alice')
+  await filter.fill('')
+  await expect(tile.getByRole('cell', { name: 'Alice', exact: true })).toBeVisible()
+  await secondPage.click()
+  await expect(secondPage).toHaveAttribute('aria-current', 'page')
+  await expect(tile.getByRole('cell', { name: 'Emilia', exact: true })).toBeVisible()
+})
+
 it('keeps the current team page usable until a page link finishes loading', async (t) => {
   const page = await t.serve(showcaseServer)
   await open(page, '/?q=table')

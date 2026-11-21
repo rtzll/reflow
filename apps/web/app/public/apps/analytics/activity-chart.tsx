@@ -1,10 +1,11 @@
 import { BarChart, Button } from '@rtzll/reflow'
-import { navigate, on, type Handle } from 'remix/component'
+import { navigate, on, type Handle, type RemixNode } from 'remix/component'
 import { activityBars, dayLabel, rangeLabel, type ActivityRange } from './activity.ts'
 
 interface ChartProps {
   range: ActivityRange
   href: (range: ActivityRange) => string
+  children: RemixNode
 }
 
 export function ActivityChart(handle: Handle<ChartProps>) {
@@ -74,6 +75,7 @@ export function ActivityChart(handle: Handle<ChartProps>) {
             void handle.update()
           }}
         />
+        {handle.props.children}
         <p id="chart-help" role="status" class="analytics-hint">
           {selecting
             ? firstDay

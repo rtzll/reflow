@@ -79,8 +79,30 @@
 .analytics-chart .rf-bar-chart {
   --rf-bar-chart-height: clamp(8rem, 19vw, 11rem);
 }
+.analytics-insight {
+  margin-block-start: 12px;
+  font-size: 0.875rem;
+}
+.analytics-insight strong {
+  font-weight: 550;
+}
+.analytics-insight a,
+.analytics-peak-link {
+  color: var(--rf-fg);
+  text-decoration-color: var(--rf-border-emphasis);
+  text-underline-offset: 3px;
+}
+.analytics-insight a:hover,
+.analytics-peak-link:hover {
+  text-decoration-color: currentColor;
+}
+.analytics-insight a:focus-visible,
+.analytics-peak-link:focus-visible {
+  outline: 2px solid var(--rf-accent);
+  outline-offset: 2px;
+}
 .analytics-hint {
-  margin-top: 18px;
+  margin-top: 4px;
   font-size: 0.8125rem;
 }
 .analytics-events {

@@ -21,6 +21,7 @@ export const IssueTracker = clientEntry(
     let selected = new Set<string>()
     const range = createRangeSelection<string>()
     let announcement = ''
+    let lastMove: { previous: Map<string, Status>; focus: string; message: string } | undefined
     let filter: IssueFilter | undefined
     let layout = 'board'
     let detailId: string | undefined
@@ -141,6 +142,40 @@ export const IssueTracker = clientEntry(
       if (!orderedIssues().some((issue) => issue.id === active)) active = orderedIssues()[0]?.id
       for (const id of ids) selected.delete(id)
       announcement = `Moved ${moved.length} ${moved.length === 1 ? 'issue' : 'issues'} to ${status}.`
+      lastMove = {
+        previous: new Map(moved.map((issue) => [issue.id, issue.status])),
+        focus: moved.find((issue) => issue.id === anchor)?.id ?? moved[0]!.id,
+        message: announcement,
+      }
+      await handle.update()
+      focusIssue(active)
+    }
+
+    async function undoMove() {
+      if (!lastMove) return
+      const { previous, focus } = lastMove
+      lastMove = undefined
+      range.reset()
+      issues = issues.map((issue) => {
+        const status = previous.get(issue.id)
+        return status === undefined ? issue : { ...issue, status }
+      })
+      const visible = orderedIssues()
+      const visibleIds = new Set(visible.map((issue) => issue.id))
+      for (const id of selected) {
+        if (!visibleIds.has(id)) selected.delete(id)
+      }
+      // A different filter may now hide the initiating ticket or every restored ticket.
+      const target =
+        visible.find((issue) => issue.id === focus) ??
+        visible.find((issue) => previous.has(issue.id)) ??
+        visible.find((issue) => issue.id === active) ??
+        visible[0]
+      active = target?.id
+      announcement =
+        previous.size === 1
+          ? 'Restored 1 issue to its previous status.'
+          : `Restored ${previous.size} issues to their previous statuses.`
       await handle.update()
       focusIssue(active)
     }
@@ -354,38 +389,48 @@ export const IssueTracker = clientEntry(
                   })}
               </div>
             </ContextMenu>
-            {selected.size > 0 && (
+            {(selected.size > 0 || lastMove) && (
               <div class="issues-actions">
-                <Toolbar label="Selected issue actions">
-                  <strong>{selected.size} selected</strong>
-                  <Dropdown
-                    label="Move to"
-                    size="compact"
-                    side="top"
-                    items={moveItems(selected)}
-                    onSelect={(value) => {
-                      const status = statuses.find((item) => item === value)
-                      if (status) void move(selected, status, active)
-                    }}
-                  />
-                  {selected.size === 1 && (
-                    <Button
+                {selected.size > 0 && (
+                  <Toolbar label="Selected issue actions">
+                    <strong>{selected.size} selected</strong>
+                    <Dropdown
+                      label="Move to"
                       size="compact"
+                      side="top"
+                      items={moveItems(selected)}
+                      onSelect={(value) => {
+                        const status = statuses.find((item) => item === value)
+                        if (status) void move(selected, status, active)
+                      }}
+                    />
+                    {selected.size === 1 && (
+                      <Button
+                        size="compact"
+                        variant="ghost"
+                        mix={on('click', () => openDetails([...selected][0]!))}
+                      >
+                        Open issue
+                      </Button>
+                    )}
+                    <Button
+                      size="icon-compact"
                       variant="ghost"
-                      mix={on('click', () => openDetails([...selected][0]!))}
+                      aria-label="Clear selection"
+                      mix={on('click', clear)}
                     >
-                      Open issue
+                      <Icon name="x" size={15} />
                     </Button>
-                  )}
-                  <Button
-                    size="icon-compact"
-                    variant="ghost"
-                    aria-label="Clear selection"
-                    mix={on('click', clear)}
-                  >
-                    <Icon name="x" size={15} />
-                  </Button>
-                </Toolbar>
+                  </Toolbar>
+                )}
+                {lastMove && (
+                  <div class="issues-move-notice">
+                    <span>{lastMove.message}</span>
+                    <Button variant="secondary" size="compact" mix={on('click', undoMove)}>
+                      Undo
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
             <p role="status" class="rf-basic-sr-only">

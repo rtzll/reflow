@@ -34,6 +34,8 @@ it('creates a timed event, moves and resizes it with the keyboard, and edits its
   await editor.getByRole('button', { name: 'Save changes' }).click()
   await expect(event).toHaveAccessibleName('Field notes, Thursday, 23:30–24:00 UTC')
   await expect(event).toBeFocused()
+  await open(page, '/apps/calendar')
+  await expect(event).toHaveAccessibleName('Field notes, Thursday, 23:30–24:00 UTC')
 })
 
 it('places overlapping events side by side and previews pointer moves and duration changes', async (t) => {
@@ -55,9 +57,14 @@ it('places overlapping events side by side and previews pointer moves and durati
   const y = original!.y + 8
   await page.mouse.move(x, y)
   await page.mouse.down()
+  const readout = page.locator('.rf-time-grid-readout')
+  await expect(readout).toBeHidden()
   await page.mouse.move(x + board.width / 7, y + board.height / 8, { steps: 5 })
+  await expect(readout).toHaveText('Tuesday · 10:00–11:00')
+  await expect(readout).toHaveCSS('pointer-events', 'none')
   await expect(event).toHaveAccessibleName('Weekly kickoff, Tuesday, 10:00–11:00 UTC')
   await page.mouse.up()
+  await expect(readout).toBeHidden()
   await expect(event).toHaveAttribute('aria-pressed', 'true')
   const moved = (await event.boundingBox())!
   expect(moved.width).toBeLessThan(original!.width / 2)
@@ -65,9 +72,25 @@ it('places overlapping events side by side and previews pointer moves and durati
   await page.mouse.move(edge.x + edge.width / 2, edge.y + edge.height / 2)
   await page.mouse.down()
   await page.mouse.move(edge.x + edge.width / 2, edge.y + edge.height / 2 + board.height / 16)
+  await expect(readout).toHaveText('Tuesday · 10:00–11:30')
   await page.mouse.up()
   await expect(event).toHaveAccessibleName('Weekly kickoff, Tuesday, 10:00–11:30 UTC')
   expect((await event.boundingBox())!.height).toBeGreaterThan(moved.height)
+  const undo = page.getByRole('button', { name: 'Undo', exact: true })
+  await undo.focus()
+  await page.keyboard.press('Enter')
+  await expect(event).toHaveAccessibleName('Weekly kickoff, Tuesday, 10:00–11:00 UTC')
+  await expect(event).toBeFocused()
+  await expect(undo).toBeHidden()
+  await open(page, '/apps/calendar')
+  await expect(event).toHaveAccessibleName('Weekly kickoff, Tuesday, 10:00–11:00 UTC')
+  await event.press('ArrowLeft')
+  await expect(event).toHaveAccessibleName('Weekly kickoff, Monday, 10:00–11:00 UTC')
+  await undo.click()
+  await expect(event).toHaveAccessibleName('Weekly kickoff, Tuesday, 10:00–11:00 UTC')
+  await event.press('Shift+ArrowUp')
+  await open(page, '/apps/calendar')
+  await expect(event).toHaveAccessibleName('Weekly kickoff, Tuesday, 10:00–10:45 UTC')
 })
 
 it('switches days and reschedules a selected event on a narrow screen', async (t) => {
@@ -165,4 +188,93 @@ it('describes events with the grid instructions once, without repeating the visi
   await expect(event).toHaveAccessibleDescription(/use arrows to move/)
   await expect(event).not.toHaveAccessibleDescription(/Drag down an empty time slot/)
   await expect(page.getByText('Drag down an empty time slot')).toBeVisible()
+})
+
+it('keeps a touch drag readable beside a short event and discards canceled or unchanged gestures', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 390, height: 844 })
+  await open(page, '/apps/calendar')
+  const event = page.getByRole('button', { name: /^Weekly kickoff,/ })
+  await event.press('Enter')
+  const editor = page.getByRole('dialog')
+  await editor.getByLabel('Duration (minutes)').fill('15')
+  await editor.getByRole('button', { name: 'Save changes' }).click()
+  const rect = (await event.boundingBox())!
+  const edge = (await event.locator('.rf-time-grid-resize').boundingBox())!
+  const x = edge.x + edge.width - 4
+  const y = edge.y + edge.height / 2
+  const client = await page.context().newCDPSession(page)
+  await client.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 })
+  await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] })
+  await client.send('Input.dispatchTouchEvent', {
+    type: 'touchMove',
+    touchPoints: [{ x, y: y + 56 }],
+  })
+  const readout = page.locator('.rf-time-grid-readout')
+  await expect(readout).toHaveText('Monday · 09:00–10:15')
+  const tip = (await readout.boundingBox())!
+  expect(tip.x).toBeGreaterThanOrEqual(0)
+  expect(tip.x + tip.width).toBeLessThanOrEqual(390)
+  expect(tip.height).toBeGreaterThan(rect.height)
+  await client.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] })
+  await expect(readout).toBeHidden()
+  await expect(event).toHaveAccessibleName('Weekly kickoff, Monday, 09:00–09:15 UTC')
+  const undo = page.getByRole('button', { name: 'Undo', exact: true })
+  await expect(undo).toBeHidden()
+  await page.mouse.move(x, y)
+  await page.mouse.down()
+  await page.mouse.move(x, y + 56)
+  await expect(readout).toBeVisible()
+  await page.keyboard.press('Escape')
+  await page.mouse.up()
+  await expect(readout).toBeHidden()
+  await expect(undo).toBeHidden()
+  await event.press('ArrowLeft')
+  await expect(undo).toBeHidden()
+  await event.press('ArrowDown')
+  await expect(undo).toBeVisible()
+  await undo.click()
+  await expect(event).toHaveAccessibleName('Weekly kickoff, Monday, 09:00–09:15 UTC')
+  await expect(event).toBeFocused()
+})
+
+it('skips damaged calendar records and allows scheduling when local storage is denied', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await open(page, '/apps/calendar')
+  await page.evaluate(() => {
+    localStorage.setItem('reflow.calendar.2026-11-16.v1.kickoff', '{')
+    localStorage.setItem(
+      'reflow.calendar.2026-11-16.v1.identity',
+      JSON.stringify({
+        id: 'identity',
+        title: 'Restored session',
+        calendar: 'Design',
+        day: 1,
+        start: 600,
+        duration: 30,
+      }),
+    )
+    localStorage.setItem(
+      'reflow.calendar.2026-11-16.v1.office',
+      JSON.stringify({ id: 'office', start: -30 }),
+    )
+  })
+  await open(page, '/apps/calendar')
+  const event = page.getByRole('button', { name: /^Weekly kickoff,/ })
+  await expect(event).toHaveAccessibleName('Weekly kickoff, Monday, 09:00–10:00 UTC')
+  await expect(
+    page.getByRole('button', { name: 'Restored session, Tuesday, 10:00–10:30 UTC' }),
+  ).toBeVisible()
+  await page.addInitScript(() =>
+    Object.defineProperty(window, 'localStorage', {
+      get() {
+        throw new DOMException('Storage denied', 'SecurityError')
+      },
+    }),
+  )
+  await open(page, '/apps/calendar')
+  await event.press('ArrowDown')
+  await expect(event).toHaveAccessibleName('Weekly kickoff, Monday, 09:15–10:15 UTC')
+  await page.getByRole('button', { name: 'Undo', exact: true }).click()
+  await expect(event).toHaveAccessibleName('Weekly kickoff, Monday, 09:00–10:00 UTC')
 })

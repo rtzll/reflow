@@ -5,9 +5,9 @@ The Apps section demonstrates a complete task with seeded data. Each workspace h
 | Workspace | First workflow |
 | --- | --- |
 | `/apps/issues` | Filter cycle issues by status or assignee, switch between board and list, and move a selection together. |
-| `/apps/chat` | Start a conversation, choose a slash skill, stop a simulated reply, then switch conversations and return to an unfinished draft. |
+| `/apps/chat` | Start a conversation, choose a slash skill, stop a simulated reply, and return to the draft using Back or a saved conversation URL. |
 | `/apps/calendar` | Create a timed event in a week, move it to another day, and change its duration using pointer or keyboard. Show overlapping events in one timezone. |
-| `/apps/analytics` | Find a spike in the daily activity chart, inspect an event’s JSON payload, and reopen the filtered log from its URL. |
+| `/apps/analytics` | Follow the busiest day to its chart, open the events behind the spike, inspect a payload, and reopen the filtered log from its URL. |
 
 Each app owns its entry, fixtures and stylesheet in `apps/web/app/public/apps/<slug>/`. Register the app in the directory with its name, description and workspace renderer. The server passes the request query string to `render(search)`. Use a Remix client entry for interactive content and pass serializable props across that boundary.
 
@@ -19,19 +19,19 @@ In board or list view, drag a ticket onto a visible status group. The whole grou
 
 The **Move to** menu uses the same operation. Tap a ticket to select it and open the menu, or press Space to select, Tab to reach the actions, and Enter to open the menu. Each move updates cycle progress and assignee workload, announces the destination, and continues keyboard navigation at the next stationary ticket.
 
+Use **Undo** after a move to return each affected ticket to its previous status. This works for a selection spanning several groups and for moves made from the context menu. On narrow screens, **Cycle overview** opens the progress and workload filters above the tickets.
+
 The Issue tracker registers Atlassian’s element adapter when its rows and groups mount and releases each registration on unmount. The adapter loads with the Issue tracker. Its production chunk measured 24.2 kB minified or 7.8 kB gzipped. The source-mode asset server bundles the same adapter into an ES module for the browser. [Pragmatic drag and drop](https://atlassian.design/components/pragmatic-drag-and-drop/core-package) · [Atlassian accessibility guidance](https://atlassian.design/components/pragmatic-drag-and-drop/accessibility-guidelines)
 
 Calendar uses TimeGrid with fifteen-minute increments. The app supplies the week, event data and editor. The grid handles overlap, pointer previews and keyboard changes. [TimeGrid design note](time-grid.md)
 
-## Next polish pass
-
-Start with Chat. Its drafts already survive switching conversations, which makes losing a draft on refresh particularly surprising. Then address the first screen of Issues on a phone, followed by direct manipulation in Calendar and the path from a spike to an explanation in Analytics.
+## App polish and acceptance checks
 
 | App | Change | How to judge it |
 | --- | --- | --- |
-| Chat | Give each conversation a working URL and save unfinished drafts locally. | Type in one conversation, open another, press Back, then refresh. The original conversation opens with the draft intact, ready to send. |
-| Issues | Collapse the cycle summary on narrow screens and offer Undo after a group move. At 390 × 844, the first ticket currently begins about 694 px down. | Open the board on a phone and find a ticket without scrolling past the dashboard. Move two tickets from different statuses together. Undo restores each to its own status. |
-| Calendar | Show the proposed day and time beside the event while it moves or resizes. Save edits locally and offer Undo after dropping. | Drag across a day boundary and read the destination time before releasing. Escape leaves the original event in place. Undo reverses a drop, and refreshing preserves an accepted edit. |
-| Analytics | Explain a spike using the event data and let the reader open the supporting rows in one action. Keep the chart range in the URL. | Select October 14. The chart explains that 19 of the 24 events were media imports. Open those 19 rows, inspect a payload, and close it with focus back on the same row. |
+| Chat | Each conversation has a `?thread=` URL. Drafts and local transcripts live in the browser profile where they were written. | Type in one conversation, open another, press Back, then refresh. The original conversation opens with the draft intact and the caret ready to type. |
+| Issues | The cycle summary starts collapsed on phones. Undo reverses the latest move in board or list view. | Open the board on a phone and find a ticket without scrolling. Move two tickets from different statuses together. Undo restores each to its own status. |
+| Calendar | Moving or resizing an event shows its proposed day and time range beside the pointer. Accepted changes are saved in this browser. Undo restores the previous slot. | Drag across a day boundary and read the destination time before releasing. Escape leaves the original event in place. Undo reverses a drop, and refreshing preserves an accepted edit. |
+| Analytics | The chart counts events by source for the selected dates. Each leading source links to its rows, keeping the date range and sort in the URL. | Select October 14 and follow **media imports** in the chart’s explanation. The log contains 19 of the day’s 24 events. Inspect a payload and close it with focus back on the same row. |
 
 Run each workflow with a keyboard and on a physical phone. Repeat with reduced motion enabled, and try Back, refresh, and cancellation halfway through the task.

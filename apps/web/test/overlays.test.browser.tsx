@@ -73,6 +73,48 @@ describe('Reflow overlays', () => {
     await waitFor(() => !tooltip.matches(':popover-open'))
     equal(document.activeElement, trigger)
   })
+  it('lets a modal handle Escape while an outside tooltip is leaving, and dismisses a tooltip inside it', async (t) => {
+    const { $, act, cleanup } = render(
+      <>
+        <Tooltip
+          content="Outside"
+          renderTrigger={(props) => (
+            <button type="button" id="outside" {...props}>
+              Inspect
+            </button>
+          )}
+        />
+        <dialog>
+          <input aria-label="Name" />
+          <Tooltip
+            content="Inside"
+            renderTrigger={(props) => (
+              <button type="button" id="inside" {...props}>
+                Help
+              </button>
+            )}
+          />
+        </dialog>
+      </>,
+    )
+    t.after(cleanup)
+    const dialog = $('dialog') as HTMLDialogElement
+    const tip = (name: string) =>
+      document.getElementById($(name)!.getAttribute('aria-describedby')!)!
+    const escape = () =>
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })
+    await act(() => $('#outside')!.focus())
+    await waitFor(() => tip('#outside').matches(':popover-open'))
+    dialog.showModal()
+    ok(tip('#outside').matches(':popover-open'))
+    equal($('input')!.dispatchEvent(escape()), true)
+    await act(() => $('#inside')!.focus())
+    await waitFor(() => tip('#inside').matches(':popover-open'))
+    equal($('#inside')!.dispatchEvent(escape()), false)
+    await waitFor(() => !tip('#inside').matches(':popover-open'))
+    ok(dialog.matches(':modal'))
+  })
+
   it('follows the pointer along the configured axis', async (t) => {
     const { $, act, cleanup } = render(
       <Tooltip
