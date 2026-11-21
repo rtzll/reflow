@@ -7,23 +7,22 @@ it('keeps the team table at the same height while loading', async (t) => {
   await open(page, '/')
   const tile = page.locator('[data-component="data-table"]')
   const table = tile.getByRole('table', { name: 'Team members' })
+  const frame = table.locator('xpath=..')
   const filter = tile.getByRole('searchbox')
   const toggle = tile.getByRole('switch', { name: 'Loading preview' })
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 900 })
-    // Layout can still be settling right after the resize on a loaded runner,
-    // so retry the measurement instead of reading the boxes once.
-    const alignment = async () => {
-      const search = (await filter.boundingBox())!
-      const control = (await toggle.boundingBox())!
-      const bounds = (await table.boundingBox())!
-      return {
-        afterSearch: control.x > search.x + search.width,
-        rightEdge: Math.abs(control.x + control.width - (bounds.x + bounds.width)) <= 1,
-        centered: Math.abs(control.y + control.height / 2 - (search.y + search.height / 2)) <= 1,
-      }
-    }
-    await expect.poll(alignment).toEqual({ afterSearch: true, rightEdge: true, centered: true })
+    const search = (await filter.boundingBox())!
+    const control = (await toggle.boundingBox())!
+    // Align with the scroll container, not the table: on narrow screens the
+    // table may be a few pixels wider and scroll sideways (Linux fonts are
+    // wider, so CI hit this at 390px).
+    const bounds = (await frame.boundingBox())!
+    expect(control.x).toBeGreaterThan(search.x + search.width)
+    expect(Math.abs(control.x + control.width - (bounds.x + bounds.width))).toBeLessThanOrEqual(1)
+    expect(
+      Math.abs(control.y + control.height / 2 - (search.y + search.height / 2)),
+    ).toBeLessThanOrEqual(1)
   }
   await filter.press('Tab')
   await expect(toggle).toBeFocused()
