@@ -31,12 +31,12 @@ it('keeps team filtering, sorting, and pagination in the URL across reload and B
   await filter.fill('Engineer')
   await expect(table.getByRole('cell', { name: 'Alice', exact: true })).toBeVisible()
   await expect(page).toHaveURL(/teamFilter=Engineer/)
-  await table.getByRole('link', { name: 'Name' }).click()
-  await table.getByRole('link', { name: 'Name' }).click()
-  await expect(table.getByRole('columnheader', { name: 'Name' })).toHaveAttribute(
-    'aria-sort',
-    'descending',
-  )
+  const sortByName = table.getByRole('link', { name: 'Name' })
+  const nameColumn = table.getByRole('columnheader', { name: 'Name' })
+  await sortByName.click()
+  await expect(nameColumn).toHaveAttribute('aria-sort', 'ascending')
+  await sortByName.click()
+  await expect(nameColumn).toHaveAttribute('aria-sort', 'descending')
   await expect(table.locator('tbody tr').first()).toContainText('Kai')
   const next = tile.getByRole('link', { name: 'Next page' })
   await next.click()
@@ -44,6 +44,8 @@ it('keeps team filtering, sorting, and pagination in the URL across reload and B
   await expect(table.getByRole('cell', { name: 'Alice', exact: true })).toBeVisible()
   const url = new URL(page.url())
   expect(url.searchParams.get('q')).toBe('table')
+  expect(url.searchParams.get('teamSort')).toBe('name')
+  expect(url.searchParams.get('teamDir')).toBe('desc')
   expect(url.searchParams.get('teamPage')).toBe('2')
   await open(page, url.pathname + url.search + url.hash)
   await expect(filter).toHaveValue('Engineer')
