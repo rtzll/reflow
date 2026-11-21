@@ -1,4 +1,5 @@
 import { TeamDirectory } from './team-table-example.tsx'
+import { TeamspacesExample } from './teamspaces-example.tsx'
 import { ProjectTreeExample } from './project-tree-example.tsx'
 import { SidebarPlaygroundExample } from './sidebar-demos.tsx'
 import { CarouselExample } from './carousel-example.tsx'
@@ -51,7 +52,6 @@ import {
   ColorPicker,
   CommandMenu,
   DatePicker,
-  Dialog,
   Dropdown,
   Field,
   Icon,
@@ -848,16 +848,12 @@ export function PlaygroundExample(
       }
       case 'dialog':
         return (
-          <Dialog
-            title="Create teamspace"
-            trigger="Open dialog"
+          <TeamspacesExample
             size={v.size === 'xl' ? 'xl' : v.size === 'lg' ? 'lg' : 'sm'}
             position={v.position === 'top' ? 'top' : 'center'}
             modal={Boolean(v.modal)}
             showCloseButton={Boolean(v.showCloseButton)}
             dismissOnBackdrop={Boolean(v.dismissOnBackdrop)}
-            description="Add a new teamspace to organize your projects and collaborate with your team."
-            footer={(close) => <Button mix={on('click', close)}>Create</Button>}
           />
         )
       case 'hover-card':

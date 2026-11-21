@@ -117,8 +117,7 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
     }),
   },
   'alert-dialog': {
-    description: 'A modal confirmation that gives the safer action initial focus.',
-    code: `<AlertDialog trigger="Delete draft" title="Delete this draft?" description="This permanently removes the draft." confirmLabel="Delete draft" onConfirm={() => console.log('Deleted')} />`,
+    description: 'Confirm deletion of a named teamspace, with Cancel focused first.',
   },
   resizable: {
     description: 'Split two panes and adjust their space with the pointer or keyboard.',
@@ -188,8 +187,7 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
     code: `<DatePicker label="Start date" name="start" min="2026-11-01" />`,
   },
   dialog: {
-    description: 'A native modal dialog with focus return and animated presentation.',
-    code: `<Dialog title="Edit profile" trigger="Open dialog">\n  <Input aria-label="Display name" />\n</Dialog>`,
+    description: 'Create a named teamspace and see it appear in the list.',
   },
   field: {
     description:

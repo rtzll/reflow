@@ -385,9 +385,20 @@ export const componentExamples: Record<string, readonly DocumentationExample[]> 
     demo(
       'Leave without saving',
       'leave',
-      `<AlertDialog trigger="Leave editor" title="Leave without saving?"
-  description="Your unsaved changes will be discarded." cancelLabel="Keep editing" confirmLabel="Leave"
-  onConfirm={() => console.log('Left')} />`,
+      `let editing = true
+function setEditing(open: boolean) {
+  editing = open
+  void handle.update()
+}
+
+<div>
+  {editing ? <>
+    <Textarea aria-label="Project notes" defaultValue="Review the release notes." />
+    <AlertDialog trigger="Leave editor" title="Leave without saving?"
+      description="Your unsaved changes will be discarded." cancelLabel="Keep editing"
+      confirmLabel="Leave" onConfirm={() => setEditing(false)} />
+  </> : <Button mix={on('click', () => setEditing(true))}>Reopen editor</Button>}
+</div>`,
       'Escape and Keep editing dismiss the dialog. Backdrop clicks keep it open.',
     ),
   ],
@@ -1670,11 +1681,10 @@ export function ComponentDemo(
   let streaming = true
   let lastQueuedId: string | undefined
   let timeout: ReturnType<typeof setTimeout> | undefined
-  let alertTimer: ReturnType<typeof setTimeout> | undefined
+  let editingNotes = true
   handle.signal.addEventListener('abort', () => clearTimeout(timeout), {
     once: true,
   })
-  handle.signal.addEventListener('abort', () => clearTimeout(alertTimer), { once: true })
   const say = (value: string) => {
     output = value
     handle.update()
@@ -2478,8 +2488,9 @@ export function ComponentDemo(
       case 'chat-layout':
         return <ChatLayoutDemo variant={variant} />
       case 'alert-dialog':
-        return (
+        return editingNotes ? (
           <div class="example-stack">
+            <Textarea aria-label="Project notes" defaultValue="Review the release notes." />
             <AlertDialog
               trigger="Leave editor"
               title="Leave without saving?"
@@ -2487,15 +2498,20 @@ export function ComponentDemo(
               cancelLabel="Keep editing"
               confirmLabel="Leave"
               onConfirm={() => {
-                clearTimeout(alertTimer)
-                say('Left editor')
-                alertTimer = setTimeout(() => say(''), 3000)
+                editingNotes = false
+                void handle.update()
               }}
             />
-            <span class="example-status" role="status">
-              {output}
-            </span>
           </div>
+        ) : (
+          <Button
+            mix={on('click', () => {
+              editingNotes = true
+              void handle.update()
+            })}
+          >
+            Reopen editor
+          </Button>
         )
       case 'resizable':
         return <ResizableDemo orientation="vertical" />

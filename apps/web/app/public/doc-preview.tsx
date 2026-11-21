@@ -12,6 +12,7 @@ const sharedPlaygroundDefaults = new Set([
   'color-picker',
   'combobox',
   'command-menu',
+  'dialog',
   'context-menu',
   'data-table',
   'date-picker',
@@ -136,12 +137,15 @@ export const DocPreview = clientEntry(
     let copied = false
     let copyFailed = false
     return () => {
-      const code =
-        handle.props.source ??
-        documentationCode(
-          handle.props.slug,
-          playground ? playgroundFragment(handle.props.slug, playground) : handle.props.code,
-        )
+      const fragment = playground
+        ? playgroundFragment(handle.props.slug, playground)
+        : handle.props.code
+      const code = handle.props.source
+        ? handle.props.source +
+          (playground
+            ? '\n\nexport function Example() {\n  return () => (\n    ' + fragment + '\n  )\n}'
+            : '')
+        : documentationCode(handle.props.slug, fragment)
       const playbackLabel =
         playback === 'playing'
           ? 'Pause example'

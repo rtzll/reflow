@@ -114,6 +114,8 @@ async function loadSamples(): Promise<CodeSamples> {
 const exampleFiles: Record<string, string> = {
   pagination: 'component-directory',
   toolbar: 'file-preview',
+  dialog: 'teamspaces-example',
+  'alert-dialog': 'teamspaces-example',
 }
 
 export async function exampleSource(slug: string) {

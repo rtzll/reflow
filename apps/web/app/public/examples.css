@@ -2109,3 +2109,30 @@
 .example-file-preview .rf-code-block {
   min-block-size: 0;
 }
+
+.example-teamspaces {
+  inline-size: min(100%, 21rem);
+}
+.example-space-heading,
+.example-teamspaces li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.example-teamspaces ul {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+}
+.example-teamspaces li {
+  padding-block: 4px;
+  border-top: 1px solid var(--rf-border);
+}
+.example-teamspaces li span {
+  overflow-wrap: anywhere;
+}
+.example-teamspaces form label {
+  display: grid;
+  gap: 6px;
+}

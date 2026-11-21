@@ -1,6 +1,7 @@
 import { ComponentDirectory } from './component-directory.tsx'
 import { components } from './catalog-entries.ts'
 import { ProjectTreeExample } from './project-tree-example.tsx'
+import { TeamspacesExample } from './teamspaces-example.tsx'
 import { TeamDirectory, TeamTableExample } from './team-table-example.tsx'
 import { BreadcrumbDemo } from './breadcrumb-example.tsx'
 import { SegmentedControlDemo } from './segmented-control-example.tsx'
@@ -37,7 +38,6 @@ import { playCopySuccess } from './showcase-sound.ts'
 import {
   Avatar,
   Accordion,
-  AlertDialog,
   AskUserQuestions,
   Badge,
   Button,
@@ -57,7 +57,6 @@ import {
   ColorPicker,
   CommandMenu,
   DatePicker,
-  Dialog,
   Dropdown,
   FileInput,
   Field,
@@ -228,8 +227,6 @@ export const Example = clientEntry(
       }, 900)
     }
     let lastAction = ''
-    let alertTimer: ReturnType<typeof setTimeout> | undefined
-    handle.signal.addEventListener('abort', () => clearTimeout(alertTimer), { once: true })
     let selectedFeature: string | undefined = 'Spring animations'
     let slide = 1
     let opacity = 35
@@ -688,51 +685,8 @@ export const Example = clientEntry(
             return <DatePicker label="Start date" defaultValue={datePickerToday()} clearable />
           return <DatePicker label="Start date" defaultMonth="2026-11-01" />
         case 'alert-dialog':
-          return (
-            <div class="example-stack">
-              <AlertDialog
-                trigger="Delete draft"
-                triggerVariant="secondary"
-                title="Delete this draft?"
-                description="This permanently removes the draft."
-                confirmLabel="Delete draft"
-                onConfirm={() => {
-                  clearTimeout(alertTimer)
-                  lastAction = 'Draft deleted'
-                  void handle.update()
-                  alertTimer = setTimeout(() => {
-                    lastAction = ''
-                    void handle.update()
-                  }, 3000)
-                }}
-              />
-              <span class="example-status" role="status">
-                {lastAction}
-              </span>
-            </div>
-          )
         case 'dialog':
-          return (
-            <Dialog
-              title="Create teamspace"
-              trigger={handle.props.gallery ? 'Open Dialog' : 'Open dialog'}
-              triggerVariant={handle.props.gallery ? 'secondary' : undefined}
-              triggerSize={handle.props.gallery ? 'compact' : undefined}
-              description={
-                handle.props.gallery
-                  ? 'Add a new teamspace to organize your projects.'
-                  : 'Add a new teamspace to organize your projects and collaborate with your team.'
-              }
-              footer={(close) => (
-                <>
-                  <Button variant="ghost" mix={on('click', close)}>
-                    Cancel
-                  </Button>
-                  <Button mix={on('click', close)}>Create</Button>
-                </>
-              )}
-            />
-          )
+          return <TeamspacesExample />
         case 'field':
           return <RequestFormExample />
         case 'input':

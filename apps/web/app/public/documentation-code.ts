@@ -391,7 +391,7 @@ ${opening} label="Components" placeholder="${values.multiple ? 'Add componentsâ€
     case 'command-menu':
       return `<CommandMenu items={commands}${values.modal ? ' trigger="Open command menu"' : ''}${values.filters ? " filters={['Actions', 'Go to', 'Help']}" : ''} suggestions={['calendar', 'new-file', 'settings']} />`
     case 'dialog':
-      return `${opening} modal={${values.modal}} title="Create teamspace" trigger="Open dialog" />`
+      return `<TeamspacesExample size="${values.size}" position="${values.position}" modal={${values.modal}} showCloseButton={${values.showCloseButton}} dismissOnBackdrop={${values.dismissOnBackdrop}} />`
     case 'breadcrumb': {
       const compact = values.size === 'compact' ? ' size="compact"' : ''
       const separator = values.separator === 'slash' ? ' separator={<span>/</span>}' : ''
