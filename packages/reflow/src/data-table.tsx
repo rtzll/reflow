@@ -44,6 +44,8 @@ export interface DataTableProps<Row> {
   /** Omit to show all matching rows. */
   pageSize?: number
   size?: ControlSize
+  /** Keep the first row-header column in view while scrolling horizontally. */
+  freezeRowHeader?: boolean
   state?: DataTableState
   defaultState?: Partial<DataTableState>
   onStateChange?: (state: DataTableState) => void
@@ -170,8 +172,17 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
     const visible = server ? rows : sorted.slice((page - 1) * limit, page * limit)
     const filterLabel = `Filter ${label}`
 
+    const frozenColumn = handle.props.freezeRowHeader
+      ? columns.find((column) => column.rowHeader)
+      : undefined
+
     function header(column: DataTableColumn<Row>) {
-      if (column.sortable === false) return <TableHead key={column.id}>{column.label}</TableHead>
+      if (column.sortable === false)
+        return (
+          <TableHead data-frozen={column === frozenColumn || undefined} key={column.id}>
+            {column.label}
+          </TableHead>
+        )
       const direction = sortedColumn === column ? state.sort?.direction : undefined
       const next: DataTableState = {
         ...state,
@@ -188,7 +199,11 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
         </>
       )
       return (
-        <TableHead key={column.id} aria-sort={direction}>
+        <TableHead
+          data-frozen={column === frozenColumn || undefined}
+          key={column.id}
+          aria-sort={direction}
+        >
           {href ? (
             <a class="rf-data-sort" href={href(next)} data-rmx-reset-scroll="manual">
               {content}
@@ -388,7 +403,11 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
                     column.value(row)
                   )
                   return column.rowHeader ? (
-                    <th key={column.id} scope="row">
+                    <th
+                      key={column.id}
+                      scope="row"
+                      data-frozen={column === frozenColumn || undefined}
+                    >
                       {content}
                     </th>
                   ) : (

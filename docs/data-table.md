@@ -14,6 +14,8 @@ Import `RoutedDataTable` from `@rtzll/reflow` to bind a table to the request URL
 
 The team directory uses `teamFilter`, `teamSort`, `teamDir`, and `teamPage`, preserving the gallery search and the `#team-table` anchor. Component API references with more than twelve primary props use the same controls with an `api` prefix. They retain row headers, the required marker, type, default, and description. The standalone example at `/docs/data-table` demonstrates local state and configurable page size.
 
+Set `freezeRowHeader` to keep the first column marked `rowHeader` visible as the table scrolls horizontally. The Analytics event log uses this for its Event column, which contains the button that opens the record.
+
 ## Selecting rows
 
 Pass `rowSelection` with a `label(row)` for each checkbox and an `actions(rows, clear)` renderer. The renderer receives selected records in displayed order and appears in a toolbar with the selection count and a clear button. Team members uses it to copy one name per line. A successful copy clears the selection and returns keyboard focus to the last focused row checkbox, or the first visible checkbox when the page header selected all rows. A failed copy leaves the selection available to retry.

@@ -97,3 +97,17 @@
   font-variant-numeric: tabular-nums;
   color: var(--rf-muted);
 }
+
+.rf-data-table th[data-frozen] {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+  background: var(--rf-surface-2);
+  border-inline-end: 1px solid var(--rf-border);
+}
+.rf-data-table tr[data-selected] > th[data-frozen] {
+  background: linear-gradient(var(--rf-active), var(--rf-active)), var(--rf-surface-2);
+}
+.rf-data-table tr[data-rf-hover-item]:hover > th[data-frozen] {
+  background: linear-gradient(var(--rf-hover), var(--rf-hover)), var(--rf-surface-2);
+}

@@ -241,6 +241,12 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           required: false,
         },
         {
+          name: 'freezeRowHeader',
+          type: 'boolean',
+          required: false,
+          description: 'Keeps the first row-header column visible during horizontal scrolling.',
+        },
+        {
           name: 'rowCount',
           type: 'number',
           description:

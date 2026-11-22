@@ -201,7 +201,7 @@ it('explains tied sources and regular editing days without losing the active ran
   await expect(chart.getByRole('link', { name: /media imports/i })).toHaveCount(0)
 })
 
-it('fetches filtered rows as the reader types', async (t) => {
+it('fetches filtered rows as the reader types and keeps the row header visible while scrolling', async (t) => {
   const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 360, height: 800 })
   await open(page, '/apps/analytics')
@@ -214,6 +214,20 @@ it('fetches filtered rows as the reader types', async (t) => {
   const table = page.getByRole('table', { name: 'Studio events' })
   await expect(table.getByRole('cell', { name: 'Media import', exact: true })).toHaveCount(6)
   await expect(filter).toBeFocused()
+  const first = table.getByRole('rowheader').first()
+  const before = (await first.boundingBox())!
+  const distance = await table.evaluate((node) => {
+    const scroller = node.parentElement!
+    scroller.scrollLeft = scroller.scrollWidth
+    return scroller.scrollLeft
+  })
+  expect(distance).toBeGreaterThan(20)
+  expect(Math.abs((await first.boundingBox())!.x - before.x)).toBeLessThan(1)
+  const link = first.getByRole('button', { name: /^Inspect/ })
+  await link.press('Enter')
+  await expect(page.getByRole('dialog')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(link).toBeFocused()
 })
 
 it('submits a complete server filter with Enter when the browser uses document navigation', async (t) => {

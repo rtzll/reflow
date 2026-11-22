@@ -238,6 +238,7 @@ export const AnalyticsExplorer = clientEntry(
             <RoutedDataTable
               rows={report.rows}
               rowCount={report.rowCount}
+              freezeRowHeader
               columns={columns}
               label="Studio events"
               rowKey={(row) => row.id}
