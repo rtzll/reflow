@@ -1,6 +1,6 @@
 # Scope
 
-Reflow is a native Remix 3 component library and showcase inspired by Fluid Functionalism. The goal is upstream's behavior, visual restraint, and motion quality, expressed through Remix APIs rather than React compatibility, across upstream's catalog and the components Reflow adds.
+Reflow is a native Remix 3 component library and showcase that started from Fluid Functionalism. It keeps that project's behavior, visual restraint, and motion quality as its baseline, expressed through Remix APIs rather than React compatibility, and grows its own components and decisions from there.
 
 Reflow started with the Fluid Functionalism catalog and adds components of its own. [Components](components.md) lists what ships, the criteria for new components, and the roadmap.
 
@@ -99,7 +99,17 @@ The workspace pins Remix 3.3.0 and Remix UI 0.14.0. Reflow wraps the independent
 
 ## Relationship to Fluid Functionalism
 
-Fluid Functionalism stays a source. New upstream components are adopted as they appear, as Breadcrumb was, and existing ones are kept close to upstream's look and motion. The pinned commits are listed under [references](#references). Components Reflow adds on its own follow its [definition of done](components.md#definition-of-done) instead.
+Fluid Functionalism is a reference, not a specification. Reflow checks it for new components and refinements and adopts what fits, as it did Breadcrumb, but it is not bound to it: with many components of its own and growing behavior, Reflow makes its own decisions and records the deliberate ones below. A difference from upstream is not a bug by default. The inspected commits are listed under [references](#references). Every component, shared or Reflow's own, follows the [definition of done](components.md#definition-of-done).
+
+### Last sync
+
+Checked against upstream `1f716642` on November 22, 2026. Three upstream components have no Reflow counterpart; they are candidates in the [roadmap](components.md#roadmap), not obligations:
+
+- **Confirmation** asks a yes or no question before something runs, such as an agent's tool call, built on Banner. It fits Reflow's conversation components.
+- **MessageScroller** follows a streamed reply while the reader is at the end, lets go on a manual scroll, glides a new user turn to the top, and offers a button back to the latest message. ChatLayout already keeps the transcript pinned; the rest would extend it rather than add a component.
+- **FileThumbnail** renders the first page of a PDF with pdf.js. It is the one known gap below, and it needs a decision about that dependency first.
+
+The rest of that commit refines upstream's DataTable frozen columns and selection bar, which Reflow does not have, and two hover details. Reflow's fluid hover keeps one visible state rather than per-entry sessions, so a pointer entering onto a lit item already glides on. Reflow's Combobox drives its fill from its own active row, which the pointer owns while it is over the list.
 
 ### Deliberate differences
 
@@ -129,7 +139,7 @@ The former `/docs/app-sidebar` and `/docs/settings-dialog` pages redirect to Sid
 ## References
 
 - The [ContextMenu design note](context-menu.md) follows the upstream catalog at `13fef6966428b5b16952f1609aa3814e9bdf115b`. [Pinned registry](https://github.com/mickadesign/fluid-functionalism/blob/13fef6966428b5b16952f1609aa3814e9bdf115b/registry.json) · [ContextMenu source](https://github.com/mickadesign/fluid-functionalism/blob/13fef6966428b5b16952f1609aa3814e9bdf115b/registry/default/context-menu.tsx)
-- [Fluid Functionalism source](https://github.com/mickadesign/fluid-functionalism), initial inspected commit `7e6ae290dd8f5a7657ae4a433a42e165bac3ece4`. Breadcrumb, Dropdown's `openOnHover`, and the demo deck follow `2bfb830023e46ea9bcf5d326e015d4511ab9ef38`. The showcase shape default follows `7f5601a` and the Button spinner follows `cc276ca`.
+- [Fluid Functionalism source](https://github.com/mickadesign/fluid-functionalism), initial inspected commit `7e6ae290dd8f5a7657ae4a433a42e165bac3ece4`. Breadcrumb, Dropdown's `openOnHover`, and the demo deck follow `2bfb830023e46ea9bcf5d326e015d4511ab9ef38`. The showcase shape default follows `7f5601a` and the Button spinner follows `cc276ca`. The last full sync checked `1f716642a455c7a66e4cc7087c917dbe109f7943`.
 - [Upstream showcase](https://www.fluidfunctionalism.com/) and [focused demo](https://www.fluidfunctionalism.com/demo).
 - [Upstream MIT license](https://github.com/mickadesign/fluid-functionalism/blob/main/LICENSE) is included in `packages/reflow/NOTICE`. The Inter font used by the website has a separate SIL Open Font License notice next to its asset.
 - [Remix rendering guide](https://docs.remix.run/rendering-ui/).
