@@ -1,5 +1,5 @@
 import { Avatar, AvatarGroup } from '@rtzll/reflow'
-import { equal, notEqual, ok } from 'remix/assert'
+import { deepEqual, equal, notEqual, ok } from 'remix/assert'
 import { render } from 'remix/component/test'
 import { describe, it } from 'remix/test'
 
@@ -36,6 +36,19 @@ describe('Avatar', () => {
     equal(avatars[0]!.dataset.color, avatars[2]!.dataset.color)
     ok(avatars[0]!.dataset.color)
     equal($('.rf-avatar-initials')?.getAttribute('aria-hidden'), 'true')
+  })
+
+  it('takes initials from the family name past a suffix', async (t) => {
+    const { $$, cleanup } = render(
+      <>
+        <Avatar name="Christopher Alexander Montgomery III" />
+        <Avatar name="Martin Luther King Jr." />
+        <Avatar name="Malcolm X" />
+      </>,
+    )
+    t.after(cleanup)
+    const text = Array.from($$('.rf-avatar'), (avatar) => avatar.textContent)
+    deepEqual(text, ['CM', 'MK', 'MX'])
   })
 
   it('shows an image, and falls back to initials when it fails', async (t) => {

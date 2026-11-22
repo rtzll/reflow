@@ -44,8 +44,13 @@ function pickColor(name: string): BadgeColor {
   return autoColors[hash % autoColors.length]!
 }
 
+// A generational or academic suffix is not the family name: "Montgomery III"
+// reads as CM, not CI.
+const suffix = /^(?:jr|sr|ii|iii|iv|phd|md|esq)\.?,?$/i
+
 function initials(name: string) {
   const words = name.trim().split(/\s+/)
+  while (words.length > 2 && suffix.test(words[words.length - 1]!)) words.pop()
   const first = (word: string | undefined) =>
     Array.from(word ?? '').find((char) => /[\p{L}\p{N}]/u.test(char)) ?? ''
   const letters = first(words[0]) + (words.length > 1 ? first(words[words.length - 1]) : '')
