@@ -69,6 +69,12 @@
   }
 }
 
+/* Handed over from a neighbouring tooltip: appear and leave at once. */
+.rf-tooltip[data-instant],
+.rf-tooltip[data-instant][data-open] {
+  transition: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .rf-tooltip {
     transition: none;

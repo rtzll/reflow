@@ -73,6 +73,38 @@ describe('Reflow overlays', () => {
     await waitFor(() => !tooltip.matches(':popover-open'))
     equal(document.activeElement, trigger)
   })
+  it('skips the delay and motion for a neighbouring tooltip once one has shown', async (t) => {
+    const { $$, act, cleanup } = render(
+      <>
+        <Tooltip content="Bold" renderTrigger={(props) => <Button {...props}>B</Button>} />
+        <Tooltip content="Italic" renderTrigger={(props) => <Button {...props}>I</Button>} />
+      </>,
+    )
+    t.after(cleanup)
+
+    const [first, second] = $$('button')
+    const [bold, italic] = $$('[role="tooltip"]')
+    ok(first instanceof HTMLButtonElement && second instanceof HTMLButtonElement)
+    ok(bold instanceof HTMLElement && italic instanceof HTMLElement)
+    // Outlast the warmth an earlier test's tooltip may have left behind.
+    await new Promise((resolve) => setTimeout(resolve, 350))
+    const pointer = (type: string) => new PointerEvent(type, { pointerType: 'mouse' })
+
+    await act(() => first.dispatchEvent(pointer('pointerenter')))
+    equal(bold.matches(':popover-open'), false, 'the first tooltip waits out its delay')
+    await waitFor(() => bold.matches(':popover-open'))
+    equal(bold.hasAttribute('data-instant'), false)
+
+    await act(() => {
+      first.dispatchEvent(pointer('pointerleave'))
+      second.dispatchEvent(pointer('pointerenter'))
+    })
+    await waitFor(() => italic.matches(':popover-open'))
+    equal(italic.hasAttribute('data-instant'), true)
+    equal(bold.matches(':popover-open'), false, 'the first leaves rather than overlap')
+    equal(getComputedStyle(italic).transitionDuration, '0s')
+  })
+
   it('lets a modal handle Escape while an outside tooltip is leaving, and dismisses a tooltip inside it', async (t) => {
     const { $, act, cleanup } = render(
       <>

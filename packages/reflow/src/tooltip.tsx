@@ -22,7 +22,28 @@ export interface TooltipProps {
   onOpenChange?: (open: boolean) => void
 }
 
+// Once one tooltip has shown, the next opens at once and without motion, so a
+// pointer moving along a toolbar does not wait out the delay on every button.
+// The warmth lasts while a tooltip is open and briefly after the last closes.
+const warmWindow = 300
+let shownTooltip: { dismiss(): void } | undefined
+let lastTooltipClosed = -Infinity
+
+function tooltipsWarm() {
+  return shownTooltip !== undefined || performance.now() - lastTooltipClosed < warmWindow
+}
+
 export function Tooltip(handle: Handle<TooltipProps>) {
+  const self = {
+    // Another tooltip took over: leave at once rather than overlap it.
+    dismiss() {
+      leaveInstantly = true
+      hide()
+      leaveInstantly = false
+    },
+  }
+  let enterInstantly = false
+  let leaveInstantly = false
   let trigger: HTMLElement | null = null
   let popup: HTMLElement | null = null
   let stopAnchor: (() => void) | undefined
@@ -99,8 +120,13 @@ export function Tooltip(handle: Handle<TooltipProps>) {
     openEvents?.abort()
     openEvents = undefined
     if (popup?.hasAttribute('data-open')) {
+      popup.toggleAttribute('data-instant', leaveInstantly)
       if (popup.isConnected) popup.hidePopover?.()
       popup.removeAttribute('data-open')
+      if (shownTooltip === self) {
+        shownTooltip = undefined
+        lastTooltipClosed = performance.now()
+      }
     }
     popupHovered = false
   }
@@ -108,6 +134,15 @@ export function Tooltip(handle: Handle<TooltipProps>) {
   function open() {
     if (!trigger?.isConnected || !popup?.isConnected || popup.hasAttribute('data-open')) return
     const { side = 'top', sideOffset = 8 } = handle.props
+    // A tooltip forced open stays out of the hand-off between hovered ones.
+    const managed = handle.props.open === undefined
+    const instant = managed && (enterInstantly || tooltipsWarm())
+    enterInstantly = false
+    if (managed) {
+      if (shownTooltip !== self) shownTooltip?.dismiss()
+      shownTooltip = self
+    }
+    popup.toggleAttribute('data-instant', instant)
     popup.setAttribute('data-open', '')
     popup.showPopover?.()
     // A forced-open tooltip has no pointer to follow: it rests on the trigger.
@@ -157,7 +192,8 @@ export function Tooltip(handle: Handle<TooltipProps>) {
         cursor = { x: event.clientX, y: event.clientY }
         triggerHovered = true
         dismissed = false
-        intent.enter(handle.props.delayDuration ?? 200)
+        enterInstantly = tooltipsWarm()
+        intent.enter(enterInstantly ? 0 : (handle.props.delayDuration ?? 200))
       },
       { signal },
     )
