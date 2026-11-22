@@ -24,7 +24,7 @@
     "./styles.css": "./dist/styles.css"
   },
   "scripts": {
-    "build": "rm -rf dist && tsc -p tsconfig.json && cp src/*.css dist/",
+    "build": "node scripts/build.ts",
     "check": "tsc -p tsconfig.json --noEmit"
   },
   "peerDependencies": {

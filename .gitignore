@@ -17,3 +17,5 @@ apps/web/worker/env.d.ts
 playwright-report/
 test-results/
 .claude/worktrees/
+dist.next/
+dist.previous/
