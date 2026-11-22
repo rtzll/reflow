@@ -340,3 +340,22 @@ it('shows rows from a server as given and selects every matching row by count', 
   await act(() => owner!.update())
   equal($('.rf-data-selection'), null)
 })
+
+it('writes large counts with thousands separators', async (t) => {
+  const { $, $$, act, cleanup } = render(
+    <DataTable
+      {...props}
+      rowCount={1284}
+      rowSelection={{ label: (row) => row.name, actions: () => null, selectAllMatching: true }}
+    />,
+  )
+  t.after(cleanup)
+  equal($('[role=status]')!.textContent, '1,284 results, page 1 of 642')
+  await act(() => ($('thead input[type=checkbox]') as HTMLInputElement).click())
+  const matching = Array.from($$('.rf-data-selection button')).find((node) =>
+    node.textContent?.startsWith('Select all'),
+  )
+  equal(matching?.textContent, 'Select all 1,284 matching')
+  await act(() => matching!.click())
+  ok($('.rf-data-selection')!.textContent!.includes('All 1,284 selected'))
+})

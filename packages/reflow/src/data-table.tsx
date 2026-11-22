@@ -96,6 +96,8 @@ export interface DataTableSelection {
 }
 
 const collator = new Intl.Collator('en', { numeric: true, sensitivity: 'base' })
+// Counts read as "1,284 selected", in the same English as the rest of the table.
+const count = new Intl.NumberFormat('en').format
 
 export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
   let local: DataTableState = { filter: '', sort: null, page: 1, ...handle.props.defaultState }
@@ -493,7 +495,9 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
         {rowSelection && selectedCount > 0 && (
           <Toolbar label="Selected row actions" class="rf-data-selection">
             <span>
-              {allMatching ? `All ${selectedCount} selected` : `${selectedCount} selected`}
+              {allMatching
+                ? `All ${count(selectedCount)} selected`
+                : `${count(selectedCount)} selected`}
             </span>
             {rowSelection.selectAllMatching &&
               (allMatching ? (
@@ -514,7 +518,7 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
                     class="rf-data-select-matching"
                     mix={on('click', () => selectMatching(true))}
                   >
-                    {`Select all ${total} matching`}
+                    {`Select all ${count(total)} matching`}
                   </Button>
                 )
               ))}
@@ -535,7 +539,7 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
         <span role="status" class="rf-basic-sr-only">
           {loading
             ? 'Loading'
-            : `${total} ${total === 1 ? 'result' : 'results'}, page ${page} of ${pageCount}${allMatching ? `, all ${total} selected` : ''}`}
+            : `${count(total)} ${total === 1 ? 'result' : 'results'}, page ${count(page)} of ${count(pageCount)}${allMatching ? `, all ${count(total)} selected` : ''}`}
         </span>
         <Pagination
           page={page}
