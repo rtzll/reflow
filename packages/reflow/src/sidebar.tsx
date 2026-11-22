@@ -1,4 +1,5 @@
 import { Icon } from './icon.tsx'
+import { cutTitle } from './behaviors/cut-title.ts'
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
 import { Button } from './button.tsx'
 import {
@@ -138,7 +139,11 @@ function SidebarNavigation(handle: Handle<NavigationProps>) {
           </div>
         )}
         <ScrollArea className="rf-sidebar-scroll" label={`${label} scroll area`} fade tabIndex={-1}>
-          <nav class="rf-sidebar-nav" aria-label={label}>
+          <nav
+            class="rf-sidebar-nav"
+            aria-label={label}
+            mix={cutTitle('.rf-sidebar-label, .rf-sidebar-group-label')}
+          >
             {sections.map((section) => {
               const items = section.items.filter((item) => matchesSidebarItem(item, term))
               if (!items.length) return null

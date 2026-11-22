@@ -1,4 +1,5 @@
 import { shortcutKeys } from './behaviors/shortcut.ts'
+import { cutTitle } from './behaviors/cut-title.ts'
 import { hoverIntent } from './behaviors/hover-intent.ts'
 import { fluidHover } from './systems/fluid-hover.ts'
 import { attrs, createMixin, on, ref } from 'remix/component'
@@ -363,6 +364,7 @@ export function DropdownSurface(
         class="rf-menu-surface rf-dropdown-surface"
         data-inline={handle.props.inline || undefined}
         mix={[
+          cutTitle('.rf-menu-label'),
           !handle.props.inline && [closeOnRemoval(), menu.popover()],
           // A hover-opened menu stays while the pointer is over it, submenus
           // included (they render inside this surface), and closes once the

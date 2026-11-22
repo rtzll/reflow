@@ -1,4 +1,5 @@
 import { Icon } from './icon.tsx'
+import { cutTitle } from './behaviors/cut-title.ts'
 import { createMixin, on, ref } from 'remix/component'
 import type { Handle, RemixNode } from 'remix/component'
 import {
@@ -359,7 +360,7 @@ export function Combobox(handle: Handle<ComboboxProps>) {
               <div
                 class="rf-picker-chips"
                 data-has-chips={selectedValues.length > 0 || undefined}
-                mix={trackChipRows}
+                mix={[trackChipRows, cutTitle('.rf-picker-chip > .rf-picker-label')]}
               >
                 {selectedValues.map((value, index) => {
                   const option = options.find((item) => item.value === value)

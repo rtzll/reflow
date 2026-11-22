@@ -1,4 +1,5 @@
 import { on, type Handle, type MixInput, type RemixNode } from 'remix/component'
+import { cutTitle } from './behaviors/cut-title.ts'
 import { fluidHover } from './systems/fluid-hover.ts'
 import { Tooltip } from './tooltip.tsx'
 
@@ -117,7 +118,7 @@ export function SegmentedControl(handle: Handle<SegmentedControlProps>) {
         disabled={disabled}
       >
         <legend class="rf-basic-sr-only">{label}</legend>
-        <div class="rf-segmented-track" mix={indicators}>
+        <div class="rf-segmented-track" mix={[indicators, cutTitle('.rf-segment-label')]}>
           <span
             class="rf-highlight rf-segmented-thumb"
             aria-hidden="true"
