@@ -210,6 +210,23 @@ it('groups and stacks series, names each value and shows a legend', (t) => {
   ])
 })
 
+it('gives each series its own hue in a fixed order and grays out a ninth', (t) => {
+  const series = Array.from({ length: 9 }, (_, index) => ({
+    id: `s${index}`,
+    label: `Series ${index + 1}`,
+  }))
+  const items = [{ id: 'mon', label: 'Monday', values: series.map(() => 1) }]
+  const { $$, cleanup } = render(
+    <BarChart label="Runs" items={items} series={series} showAxes={false} />,
+  )
+  t.after(cleanup)
+  const slots = (selector: string) =>
+    Array.from($$(selector), (node) => node.getAttribute('data-series'))
+  const expected = ['1', '2', '3', '4', '5', '6', '7', '8', 'other']
+  deepEqual(slots('.rf-bar-chart-legend .rf-bar-chart-swatch'), expected)
+  deepEqual(slots('.rf-bar-chart-fill'), expected)
+})
+
 it('moves between rows with Up and Down in a horizontal chart', async (t) => {
   const { $, $$, act, cleanup } = render(
     <BarChart label="Run times" items={bars} orientation="horizontal" onSelect={() => {}} />,

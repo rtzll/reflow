@@ -120,11 +120,24 @@
 /* Positioned bars: segments placed on the value scale by --start and
    --size, in percent, so bars can hang below zero, stack and group. The
    bar's width is shared by --count side-by-side segments. */
+/* Series hues, in a fixed order: the accent, then orange, teal, amber, pink,
+   green, violet and red. Checked with the data-viz palette validator on both
+   surfaces: each neighbour stays apart for colour-blind readers (OKLab ΔE ≥
+   8.8) and every hue clears 3:1 against the surface. The status colours are
+   left for states. A ninth series takes no new hue: it shows in neutral gray,
+   a cue to fold the rest into "Other". */
 .rf-bar-chart {
-  --rf-bar-chart-series-1: var(--rf-accent);
-  --rf-bar-chart-series-2: var(--rf-info);
-  --rf-bar-chart-series-3: var(--rf-success);
-  --rf-bar-chart-series-4: var(--rf-warning);
+  --rf-bar-chart-series-1: light-dark(
+    color-mix(in oklab, var(--rf-accent) 70%, #171717),
+    color-mix(in oklab, var(--rf-accent) 88%, #171717)
+  );
+  --rf-bar-chart-series-2: #ea580c;
+  --rf-bar-chart-series-3: #0d9488;
+  --rf-bar-chart-series-4: #d97706;
+  --rf-bar-chart-series-5: #ec4899;
+  --rf-bar-chart-series-6: #16a34a;
+  --rf-bar-chart-series-7: light-dark(#7c3aed, #8b5cf6);
+  --rf-bar-chart-series-8: light-dark(#dc2626, #ef4444);
 }
 .rf-bar-chart-plot {
   position: absolute;
@@ -156,6 +169,26 @@
 .rf-bar-chart-fill[data-series='4'],
 .rf-bar-chart-swatch[data-series='4'] {
   --rf-series-color: var(--rf-bar-chart-series-4);
+}
+.rf-bar-chart-fill[data-series='5'],
+.rf-bar-chart-swatch[data-series='5'] {
+  --rf-series-color: var(--rf-bar-chart-series-5);
+}
+.rf-bar-chart-fill[data-series='6'],
+.rf-bar-chart-swatch[data-series='6'] {
+  --rf-series-color: var(--rf-bar-chart-series-6);
+}
+.rf-bar-chart-fill[data-series='7'],
+.rf-bar-chart-swatch[data-series='7'] {
+  --rf-series-color: var(--rf-bar-chart-series-7);
+}
+.rf-bar-chart-fill[data-series='8'],
+.rf-bar-chart-swatch[data-series='8'] {
+  --rf-series-color: var(--rf-bar-chart-series-8);
+}
+.rf-bar-chart-fill[data-series='other'],
+.rf-bar-chart-swatch[data-series='other'] {
+  --rf-series-color: var(--rf-muted);
 }
 .rf-bar-chart-column[data-active] .rf-bar-chart-fill[data-series] {
   background: var(--rf-series-color);

@@ -47,6 +47,12 @@ export type BarChartProps<Item extends ChartItem = BarChartItem> = {
   ? { series?: readonly BarChartSeries[] }
   : { series: readonly BarChartSeries[] })
 
+// Eight hues in a fixed order; past them a series is gray rather than a
+// repeat of another series' hue.
+function seriesSlot(position: number) {
+  return position < 8 ? position + 1 : 'other'
+}
+
 const axisNumbers = new Intl.NumberFormat('en', {
   notation: 'compact',
   maximumSignificantDigits: 3,
@@ -231,7 +237,7 @@ export function BarChart<Item extends ChartItem>(handle: Handle<BarChartProps<It
                       <span
                         key={position}
                         class="rf-bar-chart-fill"
-                        data-series={multi ? (position % 4) + 1 : undefined}
+                        data-series={multi ? seriesSlot(position) : undefined}
                         data-negative={numbers[index]![position]! < 0 || undefined}
                         data-value={numbers[index]![position]}
                         style={{
@@ -339,7 +345,7 @@ export function BarChart<Item extends ChartItem>(handle: Handle<BarChartProps<It
                   <li key={entry.id}>
                     <span
                       class="rf-bar-chart-swatch"
-                      data-series={(position % 4) + 1}
+                      data-series={seriesSlot(position)}
                       aria-hidden="true"
                     />
                     {entry.label}
