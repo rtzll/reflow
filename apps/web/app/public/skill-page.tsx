@@ -330,7 +330,11 @@ export function SkillComparison(handle: Handle<{ kind: DemoKind }>) {
 }
 
 export const SkillPage = clientEntry(import.meta.url, function SkillPage() {
-  return () => (
+  return skillContent
+})
+
+export function skillContent() {
+  return (
     <div class="skill-page">
       <SystemInstallation skill />
       <section class="site-doc-section">
@@ -356,7 +360,14 @@ export const SkillPage = clientEntry(import.meta.url, function SkillPage() {
           The skill records the interaction rules, values, and edge cases behind the components. It
           covers stable label widths, fluid hover, fixed-pixel button presses, accessible form
           controls, theme tokens, and interruptible motion. Read it at{' '}
-          <code>skills/reflow/SKILL.md</code>.
+          <a href="https://github.com/rtzll/reflow/blob/main/skills/reflow/SKILL.md">
+            <code>skills/reflow/SKILL.md</code>
+          </a>
+          . Find component examples and API references in the{' '}
+          <a href="/llms.txt" data-rmx-document>
+            Markdown docs index
+          </a>
+          .
         </p>
       </section>
       <section class="site-doc-section">
@@ -379,4 +390,4 @@ export const SkillPage = clientEntry(import.meta.url, function SkillPage() {
       </section>
     </div>
   )
-})
+}

@@ -33,9 +33,10 @@ import { PreviewInspector } from './preview-inspector.tsx'
 import { MarkdownSpecimen } from './markdown-specimen.tsx'
 import { playCopyError } from './showcase-sound.ts'
 
-function SystemFrame(
+export function SystemFrame(
   handle: Handle<{
     code: string
+    language?: string
     children: RemixNode
     playback?: RemixNode
     onReplay?: () => void
@@ -137,7 +138,7 @@ function SystemFrame(
   )
 }
 
-function SystemSection(
+export function SystemSection(
   handle: Handle<{ title: string; description?: string; children?: RemixNode }>,
 ) {
   return () => (
@@ -149,18 +150,11 @@ function SystemSection(
   )
 }
 
-function HoverComparisonFrame(handle: Handle) {
+export function HoverComparisonFrame(handle: Handle<{ code: string }>) {
   let paused = false
   return () => (
     <SystemFrame
-      code={`import { fluidHover } from '@rtzll/reflow'
-
-<div mix={fluidHover({ nearest: true })}>
-  <span class="rf-highlight rf-hover-highlight" data-rf-hover-layer />
-  {folders.map(folder => (
-    <button key={folder} type="button" data-rf-hover-item>{folder}</button>
-  ))}
-</div>`}
+      code={handle.props.code}
       playback={
         <HoverPlayback
           paused={paused}
@@ -343,7 +337,7 @@ function SplitListDemo(handle: Handle) {
   )
 }
 
-const motionTiers = [
+export const motionTiers = [
   {
     speed: 'fast',
     timing: '0.08s · bounce 0',
@@ -370,19 +364,14 @@ const motionTiers = [
   },
 ] as const
 
-function MotionDemo(handle: Handle) {
+export function MotionDemo(handle: Handle<{ code: string }>) {
   let active = false
   function toggle() {
     active = !active
     handle.update()
   }
   return () => (
-    <SystemFrame
-      onReplay={toggle}
-      code={`import { motion } from '@rtzll/reflow'
-
-style={{ transition: \`left \${motion.moderate}\` }}`}
-    >
+    <SystemFrame onReplay={toggle} code={handle.props.code}>
       <div class="system-motion-demo">
         {motionTiers.map(({ speed, timing, usage }) => (
           <div class="system-motion-row" key={speed}>
@@ -409,7 +398,7 @@ style={{ transition: \`left \${motion.moderate}\` }}`}
   )
 }
 
-function MotionReference(handle: Handle) {
+export function MotionReference(handle: Handle) {
   const timers = new Map<string, ReturnType<typeof setTimeout>>()
   const active = new Set<string>()
   handle.signal.addEventListener(
@@ -794,7 +783,7 @@ function SurfaceDemo(handle: Handle) {
   }
 }
 
-function HeadingDemo(handle: Handle) {
+export function HeadingDemo(handle: Handle) {
   let font = 'inter'
   let custom: GoogleFont | undefined
   let weight = 'auto'
@@ -979,7 +968,7 @@ const typographyTweaks = [
   },
 ] as const
 
-function TypographyComparison(handle: Handle<{ tweak: (typeof typographyTweaks)[number] }>) {
+export function TypographyComparison(handle: Handle<{ tweak: (typeof typographyTweaks)[number] }>) {
   return () => (
     <div class="system-type-comparison" data-tweak={handle.props.tweak.kind}>
       {[handle.props.tweak.plain, handle.props.tweak.adjusted].map((label, index) => (
@@ -994,7 +983,7 @@ function TypographyComparison(handle: Handle<{ tweak: (typeof typographyTweaks)[
   )
 }
 
-function TokenTable(
+export function TokenTable(
   handle: Handle<{ rows: readonly (readonly string[])[]; headings?: readonly string[] }>,
 ) {
   return () => (
@@ -1026,679 +1015,672 @@ function TokenTable(
 export const SystemPage = clientEntry(
   import.meta.url,
   function SystemPage(handle: Handle<{ slug: string }>) {
-    return () => {
-      switch (handle.props.slug) {
-        case 'fluid-hover':
-          return (
-            <div class="system-page">
-              <SystemInstallation topic={handle.props.slug} />
-              <SystemSection
-                title="Blink or glide"
-                description="Watch both cursors. The highlight on the left blinks out in every gap. The highlight on the right stays visible and glides from one row to the next."
-              >
-                <HoverComparisonFrame />
-              </SystemSection>
-              <SystemSection
-                title="Show the math"
-                description="With nearest enabled, the closest row stays highlighted even in the gaps."
-              >
-                <SystemFrame
-                  code={
-                    '<div mix={fluidHover({ nearest: true })}>\n  <span class="rf-highlight" data-rf-hover-layer />\n  <button data-rf-hover-item>Inbox</button>\n</div>'
-                  }
-                >
-                  <HoverList nearest math defaultSelected="Inbox" />
-                </SystemFrame>
-              </SystemSection>
-              <SystemSection
-                title="3 axes"
-                description="Nearest hover follows the tab strip, runs down the list, or finds the closest card in the grid."
-              >
-                <SystemFrame
-                  code={
-                    'fluidHover({ axis: "x", nearest: true })\nfluidHover({ axis: "y", nearest: true })\nfluidHover({ axis: "both", nearest: true })'
-                  }
-                >
-                  <div class="system-axes">
-                    <AxisBlock axis="x" hint="Strips · tabs">
-                      <Tabs
-                        label="Folders"
-                        defaultValue="Library"
-                        items={['Library', 'Recents', 'Favorites', 'Settings'].map((label) => ({
-                          value: label,
-                          label,
-                        }))}
-                      />
-                    </AxisBlock>
-                    <AxisBlock axis="y" hint="Lists · menus, tables, radios">
-                      <HoverList nearest />
-                    </AxisBlock>
-                    <AxisBlock axis="both" hint="Grids · card groups">
-                      <GridDemo />
-                    </AxisBlock>
-                  </div>
-                </SystemFrame>
-              </SystemSection>
-              <SystemSection
-                title="When to split a list"
-                description="Keep related choices together. Separate workspace navigation from account actions."
-              >
-                <SystemFrame code={'<Sidebar sections={[workspace, account]} />'}>
-                  <SplitListDemo />
-                </SystemFrame>
-              </SystemSection>
-              <SystemSection
-                title="What it costs"
-                description="Two hundred rows share a single hover element. Move through the list to see the event count."
-              >
-                <SystemFrame
-                  code={'fluidHover({ nearest: true }) // one surface shared by 200 rows'}
-                >
-                  <HoverList nearest count={200} defaultSelected="Message 001" />
-                </SystemFrame>
-              </SystemSection>
-              <div class="system-hover-guidance">
-                <SystemSection title="Use when">
-                  <ul>
-                    <li>Every row or card can be clicked.</li>
-                    <li>Items are close together and remain in place.</li>
-                    <li>Menus, tabs, and grids present related choices.</li>
-                  </ul>
-                </SystemSection>
-                <SystemSection title="Skip when">
-                  <ul>
-                    <li>An accidental click has serious consequences.</li>
-                    <li>Only some items can be clicked.</li>
-                    <li>Large gaps separate the items, or rows shift during scrolling.</li>
-                  </ul>
-                </SystemSection>
-              </div>
-              <SystemSection
-                title="Reduced motion"
-                description="With reduced motion enabled, the highlight remains available without traveling between rows. The scripted comparison stops, and the lists still respond to your pointer."
-              />
-              <SystemSection
-                title="Reference"
-                description="Attach the fluidHover mix to a positioned list or grid. Keep focus, roles, and keyboard handling on its controls."
-              >
-                <h3>Options</h3>
-                <TokenTable
-                  headings={['Option', 'Type', 'Purpose']}
-                  rows={[
-                    [
-                      'axis',
-                      'x | y | both',
-                      'The dimension used to measure proximity. Defaults to y.',
-                    ],
-                    ['nearest', 'boolean', 'Keep the highlight active in gaps. Defaults to false.'],
-                    [
-                      'highlightedSelector',
-                      'string',
-                      'Read the highlighted row from a primitive or scripted demonstration.',
-                    ],
-                    ['selectedSelector', 'string', 'Track a separate selection surface.'],
-                  ]}
-                />
-                <h3>Returns</h3>
-                <p>
-                  The mix array can be assigned to the host element’s <code>mix</code> prop or
-                  combined with its other mixes.
-                </p>
-                <h3>Highlight layers</h3>
-                <TokenTable
-                  headings={['Attribute', 'Element', 'Purpose']}
-                  rows={[
-                    ['data-rf-hover-item', 'Interactive row', 'Marks a target inside the host.'],
-                    ['data-rf-hover-layer', 'Direct child', 'Draws the shared hover surface.'],
-                    [
-                      'data-rf-selection-layer',
-                      'Direct child',
-                      'Optionally draws the separate selection surface.',
-                    ],
-                  ]}
-                />
-                <p>
-                  Use <code>rf-highlight</code> for layer geometry and{' '}
-                  <code>rf-hover-highlight</code> for the standard hover color.
-                </p>
-              </SystemSection>
-            </div>
-          )
-        case 'motion':
-          return (
-            <div class="system-page">
-              <SystemInstallation topic={handle.props.slug} />
-              <SystemSection
-                title="Three speeds"
-                description="Small changes should feel quick. Use fast for hover and fades, moderate for dropdowns and tabs, and slow for larger transitions such as dialogs and drawers. The moderate spring settles without overshooting, so it works well for panels that need to land precisely."
-              >
-                <MotionDemo />
-              </SystemSection>
-              <SystemSection
-                title="Slow in, faster out"
-                description="Both panels open with the slow spring. Compare a panel that closes with the same spring against one that uses a shorter exit."
-              >
-                <SystemFrame
-                  code={
-                    'import { motion, motionExit } from "@rtzll/reflow"\nstyle={{ transition: `opacity ${open ? motion.slow : motionExit.slow}` }}'
-                  }
-                >
-                  <ExitDemo />
-                </SystemFrame>
-              </SystemSection>
-              <SystemSection
-                title="All tokens"
-                description="Click a track to see it enter on the spring and return on the exit curve."
-              >
-                <MotionReference />
-                <h3>Reduced motion</h3>
-                <p>
-                  Reflow reduces travel and decorative loops according to the operating system
-                  preference. Controls retain their state and focus feedback.
-                </p>
-              </SystemSection>
-            </div>
-          )
-        case 'reveal':
-          return (
-            <div class="system-page">
-              <SystemInstallation topic={handle.props.slug} />
-              <SystemSection
-                title="Landing"
-                description="Use a default or subtle entrance for a page people read from top to bottom. Each section arrives when it reaches the viewport."
-              >
-                <RevealPresetDemo />
-              </SystemSection>
-              <SystemSection
-                title="Product"
-                description="Give a frequently visited workspace a short entrance. The product presets keep vertical position and scale steady."
-              >
-                <RevealPresetDemo product />
-                <p>
-                  For slow data, keep the final rows’ footprint in the loading placeholders. Replace
-                  the placeholders when data arrives and stagger the real rows with the product
-                  preset.
-                </p>
-              </SystemSection>
-              <div class="system-hover-guidance">
-                <SystemSection title="Set it up">
-                  <ul>
-                    <li>
-                      Include the product screenshot in the hero when it appears on first paint.
-                    </li>
-                    <li>Keep the header, sidebar, and footer outside the reveal groups.</li>
-                    <li>
-                      Set <code>scroll: true</code> for content that should follow scroll progress.
-                    </li>
-                    <li>
-                      Use <code>overflow: clip</code> when you need clipping without a new scroll
-                      container.
-                    </li>
-                  </ul>
-                </SystemSection>
-                <SystemSection title="Built in">
-                  <ul>
-                    <li>Landing uses the slow spring, product uses the moderate spring.</li>
-                    <li>Indices apply the same stagger interval to related elements.</li>
-                    <li>Browsers without scroll timelines use the entrance animation.</li>
-                    <li>Reduced motion keeps the content still.</li>
-                  </ul>
-                </SystemSection>
-              </div>
-              <SystemSection title="Reference">
-                <h3>Presets</h3>
-                <TokenTable
-                  headings={['Preset', 'Travel / scale', 'Stagger']}
-                  rows={[
-                    ['landing', '12px / 0.94', '100ms'],
-                    ['landing-subtle', '8px / 0.98', '60ms'],
-                    ['product', '0px / 1', '60ms'],
-                    ['product-subtle', '0px / 1', '40ms'],
-                  ]}
-                />
-                <h3>Loading</h3>
-                <p>
-                  Mount the real rows as their data becomes available. Keep the placeholder and
-                  loaded rows at the same height to avoid shifting the layout.
-                </p>
-                <SystemFrame
-                  code={
-                    'import { reveal } from "@rtzll/reflow"\n\n<li mix={reveal({ preset: "product", index })}>{thread.subject}</li>'
-                  }
-                >
-                  <p>Apply the reveal mix to the loaded row and pass its index for the stagger.</p>
-                </SystemFrame>
-              </SystemSection>
-              <SystemSection
-                title="Scroll-linked sections"
-                description="Sections arrive as they enter the viewport and leave as they cross its top. Scroll in either direction to reverse the progress."
-              >
-                <SystemFrame
-                  code={'<section mix={reveal({ preset: "landing", scroll: true })}>…</section>'}
-                >
-                  <ScrollRevealDemo />
-                </SystemFrame>
-              </SystemSection>
-            </div>
-          )
-        case 'scrollbars':
-          return (
-            <div class="system-page">
-              <SystemInstallation topic={handle.props.slug} />
-              <SystemSection
-                title="The problem"
-                description="On platforms that hide native scrollbars until you scroll, a clipped list can look like it simply ends. Compare the same release notes with a custom thumb and a fade at the edge."
-              >
-                <SystemFrame
-                  code={
-                    '<div style={{ overflowY: "auto", height: "224px" }}><ReleaseRows /></div>\n<ScrollArea fade style={{ height: "224px" }}><ReleaseRows /></ScrollArea>'
-                  }
-                >
-                  <ScrollProblem />
-                </SystemFrame>
-              </SystemSection>
-              <SystemSection
-                title="The scrollbar"
-                description="The thumb rests narrow and low contrast, then widens when you reach for it. Scroll with a wheel or trackpad, drag the thumb, or use the keyboard. On touch-primary devices the component uses the platform’s native scrolling gestures."
-              />
-              <SystemSection
-                title="The fade"
-                description="A fade marks the edges with hidden content. At the true start or end, that edge clears."
-              >
-                <SystemFrame
-                  code={'<ScrollArea fade label="Release notes"><ReleaseRows /></ScrollArea>'}
-                >
-                  <ScrollDemo fade />
-                </SystemFrame>
-              </SystemSection>
-              <SystemSection title="Examples">
-                <h3>Horizontal</h3>
-                <p>
-                  A row of months is wider than its container. The fade marks the side with more
-                  content.
-                </p>
-                <SystemFrame
-                  code={'<ScrollArea orientation="horizontal" fade><MonthCards /></ScrollArea>'}
-                >
-                  <ScrollDemo horizontal fade />
-                </SystemFrame>
-                <h3>Double overflow</h3>
-                <p>
-                  A table is taller and wider than its viewport. Set <code>orientation="both"</code>{' '}
-                  to expose both axes.
-                </p>
-                <SystemFrame
-                  code={'<ScrollArea orientation="both"><CityMetricsTable /></ScrollArea>'}
-                >
-                  <ScrollDemo both />
-                </SystemFrame>
-              </SystemSection>
-              <SystemSection title="API reference">
-                <h3>ScrollArea</h3>
-                <TokenTable
-                  headings={['Property', 'Value', 'Purpose']}
-                  rows={[
-                    [
-                      'ScrollArea.orientation',
-                      'vertical | horizontal | both',
-                      'Visible scrollbar axes',
-                    ],
-                    ['ScrollArea.fade', 'boolean', 'Fade content edges'],
-                    [
-                      'ScrollArea.viewportClassName',
-                      'string',
-                      'Style the native scrolling viewport',
-                    ],
-                    ['.rf-scroll-area', 'CSS class', 'Native scroll container'],
-                    ['scrollFade.orientation', 'vertical | horizontal | both', 'Edges to fade'],
-                    ['scrollFade.distance', '20px', 'Maximum edge fade'],
-                    ['Coarse pointer', 'Native scrollbar', 'Retains platform gestures'],
-                  ]}
-                />
-              </SystemSection>
-            </div>
-          )
-        case 'sizes':
-          return (
-            <div class="system-page">
-              <SystemInstallation topic={handle.props.slug} />
-              <SystemSection title="The principle">
-                <p>
-                  A button next to a select next to a tab should land at the same height. Each size
-                  scales text, icons, and padding together.
-                </p>
-                <p>
-                  Use compact controls in dense, data-heavy regions. Default gives everyday controls
-                  more room.
-                </p>
-                <SystemFrame
-                  code={
-                    '<div data-density="default"><Toolbar /></div>\n<div data-density="compact"><Toolbar /></div>'
-                  }
-                >
-                  <SizeToolbar />
-                </SystemFrame>
-              </SystemSection>
-              <SystemSection
-                title="Typography scale"
-                description="Compact reduces type size and line height together, preserving the hierarchy at a smaller size."
-              >
-                <p>
-                  See the full scale in <a href="/docs/typography">Typography</a>. Press S outside a
-                  field to switch between densities.
-                </p>
-              </SystemSection>
-              <SystemSection
-                title="Compact regions"
-                description="Set density on a region to scale its controls together. The toolbar and its sort menu inherit the same row height."
-              >
-                <CompactRegionDemo />
-              </SystemSection>
-              <SystemSection
-                title="Token reference"
-                description="Inspect either toolbar row to measure the controls alongside the tokens below."
-              >
-                <TokenTable
-                  rows={[
-                    ['--rf-control-height', '36px', '28px'],
-                    ['--rf-control-padding', '12px', '10px'],
-                    ['--rf-text-display', '28px', '24px'],
-                    ['--rf-text-title', '16px', '15px'],
-                    ['--rf-text-body', '13px', '12px'],
-                    ['--rf-text-caption', '12px', '11px'],
-                    ['--rf-text-micro', '11px', '10px'],
-                    ['--rf-leading-body', '20px', '18px'],
-                    ['--rf-gap', '8px', '4px'],
-                    ['--rf-icon-size', '16px', '14px'],
-                  ]}
-                />
-              </SystemSection>
-              <SystemSection
-                title="Regional density reference"
-                description="Use data-density on an element to set the inherited CSS tokens. A nested region can override its ancestor’s density."
-              >
-                <TokenTable
-                  headings={['Attribute', 'Values', 'Scope']}
-                  rows={[['data-density', 'default | compact', 'Element and descendants']]}
-                />
-              </SystemSection>
-              <SystemSection
-                title="Component size prop"
-                description="Use the size prop to override density for one control."
-              >
-                <TokenTable
-                  headings={['Prop', 'Values', 'Components']}
-                  rows={[
-                    ['size', 'default | compact', 'Tabs, Select, and other controls'],
-                    ['size', 'default | compact | icon | icon-compact', 'Button'],
-                  ]}
-                />
-              </SystemSection>
-            </div>
-          )
-        case 'surfaces':
-          return (
-            <div class="system-page">
-              <SystemInstallation topic={handle.props.slug} />
-              <SystemSection title="The problem">
-                <p>
-                  In light mode, shadows distinguish white surfaces. In dark mode, raised surfaces
-                  are also lighter.
-                </p>
-                <p>
-                  A fixed background can make a dropdown blend into its dialog. In this example,
-                  both the invite panel and the menu use surface 5.
-                </p>
-                <SystemFrame
-                  code={
-                    '/* Both elements use the same fixed fill. */\n.invite-panel, .role-menu { background: var(--rf-surface-5); }'
-                  }
-                >
-                  <SurfaceInvite flat />
-                </SystemFrame>
-              </SystemSection>
-              <SystemSection
-                title="The solution"
-                description="Choose the background token for the substrate, then give nested panels a higher level."
-              >
-                <h3>Tokens</h3>
-                <p>
-                  Eight background levels work in both themes. In light mode, levels 3–8 share a
-                  white fill and elevation comes from the shadow.
-                </p>
-                <SystemFrame code={'style={{ background: "var(--rf-surface-3)" }}'}>
-                  <SurfaceTokens />
-                </SystemFrame>
-                <h3>Substrate</h3>
-                <p>
-                  A floating control sits above the surface that contains it. Compare a two-level
-                  elevation over a page, panel, and dialog.
-                </p>
-                <SystemFrame
-                  code={
-                    'const elevated = Math.min(substrate + 2, 8)\nstyle={{ background: `var(--rf-surface-${elevated})` }}'
-                  }
-                >
-                  <div class="system-substrates">
-                    {[1, 3, 5].map((level, index) => (
-                      <div key={level} style={{ background: `var(--rf-surface-${level})` }}>
-                        <strong>
-                          {['On the page', 'Inside a popover', 'Inside a dialog'][index]}
-                        </strong>
-                        <div style={{ background: `var(--rf-surface-${level + 2})` }}>
-                          <Checkbox label="Notifications" defaultChecked />
-                          <Checkbox label="Weekly digest" />
-                        </div>
-                        <code>
-                          surface-{level} → surface-{level + 2}
-                        </code>
-                      </div>
-                    ))}
-                  </div>
-                </SystemFrame>
-                <h3>Elevated</h3>
-                <p>
-                  Apply the chosen background and elevation shadow to the panel. Choose a stronger
-                  contrast between nested surfaces when the contents need a distinct boundary.
-                </p>
-                <SystemFrame
-                  code={
-                    'style={{ background: "var(--rf-surface-5)", boxShadow: "var(--rf-elevation)" }}'
-                  }
-                >
-                  <div class="system-surface-stack">
-                    <div>
-                      <strong>Workspace</strong>
-                      <div>
-                        <strong>Settings</strong>
-                        <Input aria-label="Workspace name" defaultValue="Studio" />
-                        <Switch label="Notifications" defaultChecked />
-                      </div>
-                    </div>
-                  </div>
-                </SystemFrame>
-                <h3>Move through levels</h3>
-                <p>
-                  Drag either thumb to choose which levels to nest. Each layer is one step above its
-                  parent.
-                </p>
-                <SystemFrame
-                  code={
-                    '<Slider min={1} max={8} value={range} onChange={setRange} />\n// Render each selected level with its --rf-surface-N token.'
-                  }
-                >
-                  <SurfaceDemo />
-                </SystemFrame>
-              </SystemSection>
-              <SystemSection title="Examples">
-                <h3>Invite dialog</h3>
-                <p>
-                  Give the role menu a separate surface so it is distinguishable from the
-                  surrounding panel.
-                </p>
-                <SystemFrame
-                  code={
-                    '.invite-panel { background: var(--rf-surface-5); }\n.role-menu { background: var(--rf-surface-7); }'
-                  }
-                >
-                  <SurfaceInvite />
-                </SystemFrame>
-                <h3>Color picker</h3>
-                <p>
-                  A color picker pairs a raised editing panel with a format control. Open the
-                  control and switch between color formats.
-                </p>
-                <SystemFrame
-                  code={'<ColorPicker variant="inline" defaultValue="#6B97FF" swatches={[]} />'}
-                >
-                  <div class="system-surface-color">
-                    <ColorPicker variant="inline" defaultValue="#6B97FF" swatches={[]} />
-                  </div>
-                </SystemFrame>
-              </SystemSection>
-              <SystemSection title="Reference">
-                <TokenTable
-                  headings={['Token', 'Light', 'Dark']}
-                  rows={[
-                    ['--rf-surface-1', '#fafafa', '#171717'],
-                    ['--rf-surface-2', '#fcfcfc', '#1e1e1e'],
-                    ['--rf-surface-3', '#ffffff', '#252525'],
-                    ['--rf-surface-4', '#ffffff', '#2c2c2c'],
-                    ['--rf-surface-5', '#ffffff', '#333333'],
-                    ['--rf-surface-6', '#ffffff', '#3a3a3a'],
-                    ['--rf-surface-7', '#ffffff', '#414141'],
-                    ['--rf-surface-8', '#ffffff', '#484848'],
-                  ]}
-                />
-              </SystemSection>
-            </div>
-          )
-        case 'typography':
-          return (
-            <div class="system-page">
-              <p class="system-intro">
-                A small set of type rules does most of the work. The same sizes, weights, and text
-                colors apply to page titles, controls, and Markdown, so each piece keeps its place
-                in the hierarchy.
-              </p>
-              <SystemInstallation topic={handle.props.slug} />
-              <SystemSection title="5 rules">
-                <ul class="system-type-rules">
-                  <li>
-                    Six shared type roles cover everything from page titles to the smallest
-                    annotation.
-                  </li>
-                  <li>
-                    Regular is for body text, semibold is for headings and selected items, and bold
-                    is for page titles.
-                  </li>
-                  <li>Use foreground and muted for text.</li>
-                  <li>
-                    Set body text in Inter Variable. Use Inter, Geist Serif, or a selected Google
-                    Fonts family for headings.
-                  </li>
-                  <li>Use one paragraph style across the site.</li>
-                </ul>
-              </SystemSection>
-              <SystemSection title="5 no-gos">
-                <ul class="system-type-rules">
-                  <li>Avoid uppercase for hierarchy. Use size and weight.</li>
-                  <li>Leave letter spacing to Inter’s optical sizing.</li>
-                  <li>Start a section with its title.</li>
-                  <li>
-                    Give Markdown the same type roles and text colors as the rest of the site.
-                  </li>
-                  <li>Use a text color token for hierarchy and leave opacity at full strength.</li>
-                </ul>
-              </SystemSection>
-              <SystemSection
-                title="The scale"
-                description="Each role pairs a font size with a line height. Press S outside a field to compare compact density."
-              >
-                <SystemFrame
-                  code={
-                    'style={{ fontSize: "var(--rf-text-title)", lineHeight: "var(--rf-leading-title)" }}'
-                  }
-                >
-                  <TypeScale />
-                </SystemFrame>
-              </SystemSection>
-              <SystemSection
-                title="Heading font"
-                description="Compare Inter and Geist Serif, or browse Google Fonts to try another family and weight in the specimen."
-              >
-                <HeadingDemo />
-              </SystemSection>
-              <SystemSection
-                title="Markdown"
-                description="Markdown uses the same type roles, including nested lists, to-dos, tables, and fenced code. Edit the source to see how the styles hold up."
-              >
-                <SystemFrame code={'<Markdown source={source} />'}>
-                  <MarkdownSpecimen />
-                </SystemFrame>
-              </SystemSection>
-              <SystemSection
-                title="Spacing"
-                description="Give a new block its space above. The Markdown specimen uses these gaps, and the comparison lets you vary the paragraph spacing while its line height stays constant."
-              >
-                <TokenTable
-                  headings={['Markdown gap', 'Value', 'Placement']}
-                  rows={[
-                    ['Heading section', '28px', 'Above a second-level heading'],
-                    ['Heading subsection', '20px', 'Above a lower-level heading'],
-                    ['Block gap', '12px', 'Between consecutive blocks'],
-                    ['List item', '4px', 'Between list items'],
-                    ['Divider', '24px', 'Around a rule'],
-                  ]}
-                />
-                <SystemFrame
-                  code={
-                    '<p style={{ marginTop: "16px", lineHeight: "var(--rf-leading-body)" }}>…</p>'
-                  }
-                >
-                  <SpacingDemo />
-                </SystemFrame>
-              </SystemSection>
-              <SystemSection
-                title="5 tweaks"
-                description="Small adjustments keep labels steady, padding visible, and wrapped text even."
-              >
-                <h3>Weight without reflow</h3>
-                <p>
-                  Reserve the heavier label width so selection keeps neighboring controls in place.
-                </p>
-                <SkillComparison kind="tabs" />
-                <h3>Steady numbers</h3>
-                <p>Tabular figures keep counters aligned as their digits change.</p>
-                <SystemFrame code={'style={{ fontVariantNumeric: "tabular-nums" }}'}>
-                  <NumberDemo />
-                </SystemFrame>
-                {typographyTweaks.map((tweak) => (
-                  <div class="system-type-tweak" key={tweak.kind}>
-                    <h3>{tweak.title}</h3>
-                    <p>
-                      <code>{tweak.property}</code>
-                    </p>
-                    <TypographyComparison tweak={tweak} />
-                  </div>
-                ))}
-              </SystemSection>
-              <SystemSection title="Reference">
-                <TokenTable
-                  headings={['Token', 'Value', 'Purpose']}
-                  rows={[
-                    ['--rf-font', 'Inter, system-ui, sans-serif', 'Body and controls'],
-                    ['--rf-heading-font', 'Selected heading family', 'Titles and headings'],
-                    ['--rf-weight-normal', 'wght 400 / opsz 14', 'Regular text'],
-                    ['--rf-weight-strong', 'wght 550 / opsz 18', 'Emphasized labels'],
-                    ['--rf-weight-bold', 'wght 700 / opsz 25', 'Page titles'],
-                  ]}
-                />
-              </SystemSection>
-            </div>
-          )
-      }
-      return null
-    }
+    return () => systemContent(handle.props.slug)
   },
 )
+
+export function systemContent(slug: string) {
+  switch (slug) {
+    case 'fluid-hover':
+      return (
+        <div class="system-page">
+          <SystemInstallation topic={slug} />
+          <SystemSection
+            title="Blink or glide"
+            description="Watch both cursors. The highlight on the left blinks out in every gap. The highlight on the right stays visible and glides from one row to the next."
+          >
+            <HoverComparisonFrame
+              code={`import { fluidHover } from '@rtzll/reflow'
+
+<div mix={fluidHover({ nearest: true })}>
+  <span class="rf-highlight rf-hover-highlight" data-rf-hover-layer />
+  {folders.map(folder => (
+    <button key={folder} type="button" data-rf-hover-item>{folder}</button>
+  ))}
+</div>`}
+            />
+          </SystemSection>
+          <SystemSection
+            title="Show the math"
+            description="With nearest enabled, the closest row stays highlighted even in the gaps."
+          >
+            <SystemFrame
+              code={
+                '<div mix={fluidHover({ nearest: true })}>\n  <span class="rf-highlight" data-rf-hover-layer />\n  <button data-rf-hover-item>Inbox</button>\n</div>'
+              }
+            >
+              <HoverList nearest math defaultSelected="Inbox" />
+            </SystemFrame>
+          </SystemSection>
+          <SystemSection
+            title="3 axes"
+            description="Nearest hover follows the tab strip, runs down the list, or finds the closest card in the grid."
+          >
+            <SystemFrame
+              code={
+                'fluidHover({ axis: "x", nearest: true })\nfluidHover({ axis: "y", nearest: true })\nfluidHover({ axis: "both", nearest: true })'
+              }
+            >
+              <div class="system-axes">
+                <AxisBlock axis="x" hint="Strips · tabs">
+                  <Tabs
+                    label="Folders"
+                    defaultValue="Library"
+                    items={['Library', 'Recents', 'Favorites', 'Settings'].map((label) => ({
+                      value: label,
+                      label,
+                    }))}
+                  />
+                </AxisBlock>
+                <AxisBlock axis="y" hint="Lists · menus, tables, radios">
+                  <HoverList nearest />
+                </AxisBlock>
+                <AxisBlock axis="both" hint="Grids · card groups">
+                  <GridDemo />
+                </AxisBlock>
+              </div>
+            </SystemFrame>
+          </SystemSection>
+          <SystemSection
+            title="When to split a list"
+            description="Keep related choices together. Separate workspace navigation from account actions."
+          >
+            <SystemFrame code={'<Sidebar sections={[workspace, account]} />'}>
+              <SplitListDemo />
+            </SystemFrame>
+          </SystemSection>
+          <SystemSection
+            title="What it costs"
+            description="Two hundred rows share a single hover element. Move through the list to see the event count."
+          >
+            <SystemFrame code={'fluidHover({ nearest: true }) // one surface shared by 200 rows'}>
+              <HoverList nearest count={200} defaultSelected="Message 001" />
+            </SystemFrame>
+          </SystemSection>
+          <div class="system-hover-guidance">
+            <SystemSection title="Use when">
+              <ul>
+                <li>Every row or card can be clicked.</li>
+                <li>Items are close together and remain in place.</li>
+                <li>Menus, tabs, and grids present related choices.</li>
+              </ul>
+            </SystemSection>
+            <SystemSection title="Skip when">
+              <ul>
+                <li>An accidental click has serious consequences.</li>
+                <li>Only some items can be clicked.</li>
+                <li>Large gaps separate the items, or rows shift during scrolling.</li>
+              </ul>
+            </SystemSection>
+          </div>
+          <SystemSection
+            title="Reduced motion"
+            description="With reduced motion enabled, the highlight remains available without traveling between rows. The scripted comparison stops, and the lists still respond to your pointer."
+          />
+          <SystemSection
+            title="Reference"
+            description="Attach the fluidHover mix to a positioned list or grid. Keep focus, roles, and keyboard handling on its controls."
+          >
+            <h3>Options</h3>
+            <TokenTable
+              headings={['Option', 'Type', 'Purpose']}
+              rows={[
+                ['axis', 'x | y | both', 'The dimension used to measure proximity. Defaults to y.'],
+                ['nearest', 'boolean', 'Keep the highlight active in gaps. Defaults to false.'],
+                [
+                  'highlightedSelector',
+                  'string',
+                  'Read the highlighted row from a primitive or scripted demonstration.',
+                ],
+                ['selectedSelector', 'string', 'Track a separate selection surface.'],
+              ]}
+            />
+            <h3>Returns</h3>
+            <p>
+              The mix array can be assigned to the host element’s <code>mix</code> prop or combined
+              with its other mixes.
+            </p>
+            <h3>Highlight layers</h3>
+            <TokenTable
+              headings={['Attribute', 'Element', 'Purpose']}
+              rows={[
+                ['data-rf-hover-item', 'Interactive row', 'Marks a target inside the host.'],
+                ['data-rf-hover-layer', 'Direct child', 'Draws the shared hover surface.'],
+                [
+                  'data-rf-selection-layer',
+                  'Direct child',
+                  'Optionally draws the separate selection surface.',
+                ],
+              ]}
+            />
+            <p>
+              Use <code>rf-highlight</code> for layer geometry and <code>rf-hover-highlight</code>{' '}
+              for the standard hover color.
+            </p>
+          </SystemSection>
+        </div>
+      )
+    case 'motion':
+      return (
+        <div class="system-page">
+          <SystemInstallation topic={slug} />
+          <SystemSection
+            title="Three speeds"
+            description="Small changes should feel quick. Use fast for hover and fades, moderate for dropdowns and tabs, and slow for larger transitions such as dialogs and drawers. The moderate spring settles without overshooting, so it works well for panels that need to land precisely."
+          >
+            <MotionDemo
+              code={`import { motion } from '@rtzll/reflow'
+
+style={{ transition: \`left \${motion.moderate}\` }}`}
+            />
+          </SystemSection>
+          <SystemSection
+            title="Slow in, faster out"
+            description="Both panels open with the slow spring. Compare a panel that closes with the same spring against one that uses a shorter exit."
+          >
+            <SystemFrame
+              code={
+                'import { motion, motionExit } from "@rtzll/reflow"\nstyle={{ transition: `opacity ${open ? motion.slow : motionExit.slow}` }}'
+              }
+            >
+              <ExitDemo />
+            </SystemFrame>
+          </SystemSection>
+          <SystemSection
+            title="All tokens"
+            description="Click a track to see it enter on the spring and return on the exit curve."
+          >
+            <MotionReference />
+            <h3>Reduced motion</h3>
+            <p>
+              Reflow reduces travel and decorative loops according to the operating system
+              preference. Controls retain their state and focus feedback.
+            </p>
+          </SystemSection>
+        </div>
+      )
+    case 'reveal':
+      return (
+        <div class="system-page">
+          <SystemInstallation topic={slug} />
+          <SystemSection
+            title="Landing"
+            description="Use a default or subtle entrance for a page people read from top to bottom. Each section arrives when it reaches the viewport."
+          >
+            <RevealPresetDemo />
+          </SystemSection>
+          <SystemSection
+            title="Product"
+            description="Give a frequently visited workspace a short entrance. The product presets keep vertical position and scale steady."
+          >
+            <RevealPresetDemo product />
+            <p>
+              For slow data, keep the final rows’ footprint in the loading placeholders. Replace the
+              placeholders when data arrives and stagger the real rows with the product preset.
+            </p>
+          </SystemSection>
+          <div class="system-hover-guidance">
+            <SystemSection title="Set it up">
+              <ul>
+                <li>Include the product screenshot in the hero when it appears on first paint.</li>
+                <li>Keep the header, sidebar, and footer outside the reveal groups.</li>
+                <li>
+                  Set <code>scroll: true</code> for content that should follow scroll progress.
+                </li>
+                <li>
+                  Use <code>overflow: clip</code> when you need clipping without a new scroll
+                  container.
+                </li>
+              </ul>
+            </SystemSection>
+            <SystemSection title="Built in">
+              <ul>
+                <li>Landing uses the slow spring, product uses the moderate spring.</li>
+                <li>Indices apply the same stagger interval to related elements.</li>
+                <li>Browsers without scroll timelines use the entrance animation.</li>
+                <li>Reduced motion keeps the content still.</li>
+              </ul>
+            </SystemSection>
+          </div>
+          <SystemSection title="Reference">
+            <h3>Presets</h3>
+            <TokenTable
+              headings={['Preset', 'Travel / scale', 'Stagger']}
+              rows={[
+                ['landing', '12px / 0.94', '100ms'],
+                ['landing-subtle', '8px / 0.98', '60ms'],
+                ['product', '0px / 1', '60ms'],
+                ['product-subtle', '0px / 1', '40ms'],
+              ]}
+            />
+            <h3>Loading</h3>
+            <p>
+              Mount the real rows as their data becomes available. Keep the placeholder and loaded
+              rows at the same height to avoid shifting the layout.
+            </p>
+            <SystemFrame
+              code={
+                'import { reveal } from "@rtzll/reflow"\n\n<li mix={reveal({ preset: "product", index })}>{thread.subject}</li>'
+              }
+            >
+              <p>Apply the reveal mix to the loaded row and pass its index for the stagger.</p>
+            </SystemFrame>
+          </SystemSection>
+          <SystemSection
+            title="Scroll-linked sections"
+            description="Sections arrive as they enter the viewport and leave as they cross its top. Scroll in either direction to reverse the progress."
+          >
+            <SystemFrame
+              code={'<section mix={reveal({ preset: "landing", scroll: true })}>…</section>'}
+            >
+              <ScrollRevealDemo />
+            </SystemFrame>
+          </SystemSection>
+        </div>
+      )
+    case 'scrollbars':
+      return (
+        <div class="system-page">
+          <SystemInstallation topic={slug} />
+          <SystemSection
+            title="The problem"
+            description="On platforms that hide native scrollbars until you scroll, a clipped list can look like it simply ends. Compare the same release notes with a custom thumb and a fade at the edge."
+          >
+            <SystemFrame
+              code={
+                '<div style={{ overflowY: "auto", height: "224px" }}><ReleaseRows /></div>\n<ScrollArea fade style={{ height: "224px" }}><ReleaseRows /></ScrollArea>'
+              }
+            >
+              <ScrollProblem />
+            </SystemFrame>
+          </SystemSection>
+          <SystemSection
+            title="The scrollbar"
+            description="The thumb rests narrow and low contrast, then widens when you reach for it. Scroll with a wheel or trackpad, drag the thumb, or use the keyboard. On touch-primary devices the component uses the platform’s native scrolling gestures."
+          />
+          <SystemSection
+            title="The fade"
+            description="A fade marks the edges with hidden content. At the true start or end, that edge clears."
+          >
+            <SystemFrame
+              code={'<ScrollArea fade label="Release notes"><ReleaseRows /></ScrollArea>'}
+            >
+              <ScrollDemo fade />
+            </SystemFrame>
+          </SystemSection>
+          <SystemSection title="Examples">
+            <h3>Horizontal</h3>
+            <p>
+              A row of months is wider than its container. The fade marks the side with more
+              content.
+            </p>
+            <SystemFrame
+              code={'<ScrollArea orientation="horizontal" fade><MonthCards /></ScrollArea>'}
+            >
+              <ScrollDemo horizontal fade />
+            </SystemFrame>
+            <h3>Double overflow</h3>
+            <p>
+              A table is taller and wider than its viewport. Set <code>orientation="both"</code> to
+              expose both axes.
+            </p>
+            <SystemFrame code={'<ScrollArea orientation="both"><CityMetricsTable /></ScrollArea>'}>
+              <ScrollDemo both />
+            </SystemFrame>
+          </SystemSection>
+          <SystemSection title="API reference">
+            <h3>ScrollArea</h3>
+            <TokenTable
+              headings={['Property', 'Value', 'Purpose']}
+              rows={[
+                [
+                  'ScrollArea.orientation',
+                  'vertical | horizontal | both',
+                  'Visible scrollbar axes',
+                ],
+                ['ScrollArea.fade', 'boolean', 'Fade content edges'],
+                ['ScrollArea.viewportClassName', 'string', 'Style the native scrolling viewport'],
+                ['.rf-scroll-area', 'CSS class', 'Native scroll container'],
+                ['scrollFade.orientation', 'vertical | horizontal | both', 'Edges to fade'],
+                ['scrollFade.distance', '20px', 'Maximum edge fade'],
+                ['Coarse pointer', 'Native scrollbar', 'Retains platform gestures'],
+              ]}
+            />
+          </SystemSection>
+        </div>
+      )
+    case 'sizes':
+      return (
+        <div class="system-page">
+          <SystemInstallation topic={slug} />
+          <SystemSection title="The principle">
+            <p>
+              A button next to a select next to a tab should land at the same height. Each size
+              scales text, icons, and padding together.
+            </p>
+            <p>
+              Use compact controls in dense, data-heavy regions. Default gives everyday controls
+              more room.
+            </p>
+            <SystemFrame
+              code={
+                '<div data-density="default"><Toolbar /></div>\n<div data-density="compact"><Toolbar /></div>'
+              }
+            >
+              <SizeToolbar />
+            </SystemFrame>
+          </SystemSection>
+          <SystemSection
+            title="Typography scale"
+            description="Compact reduces type size and line height together, preserving the hierarchy at a smaller size."
+          >
+            <p>
+              See the full scale in <a href="/docs/typography">Typography</a>. Press S outside a
+              field to switch between densities.
+            </p>
+          </SystemSection>
+          <SystemSection
+            title="Compact regions"
+            description="Set density on a region to scale its controls together. The toolbar and its sort menu inherit the same row height."
+          >
+            <CompactRegionDemo />
+          </SystemSection>
+          <SystemSection
+            title="Token reference"
+            description="Inspect either toolbar row to measure the controls alongside the tokens below."
+          >
+            <TokenTable
+              rows={[
+                ['--rf-control-height', '36px', '28px'],
+                ['--rf-control-padding', '12px', '10px'],
+                ['--rf-text-display', '28px', '24px'],
+                ['--rf-text-title', '16px', '15px'],
+                ['--rf-text-body', '13px', '12px'],
+                ['--rf-text-caption', '12px', '11px'],
+                ['--rf-text-micro', '11px', '10px'],
+                ['--rf-leading-body', '20px', '18px'],
+                ['--rf-gap', '8px', '4px'],
+                ['--rf-icon-size', '16px', '14px'],
+              ]}
+            />
+          </SystemSection>
+          <SystemSection
+            title="Regional density reference"
+            description="Use data-density on an element to set the inherited CSS tokens. A nested region can override its ancestor’s density."
+          >
+            <TokenTable
+              headings={['Attribute', 'Values', 'Scope']}
+              rows={[['data-density', 'default | compact', 'Element and descendants']]}
+            />
+          </SystemSection>
+          <SystemSection
+            title="Component size prop"
+            description="Use the size prop to override density for one control."
+          >
+            <TokenTable
+              headings={['Prop', 'Values', 'Components']}
+              rows={[
+                ['size', 'default | compact', 'Tabs, Select, and other controls'],
+                ['size', 'default | compact | icon | icon-compact', 'Button'],
+              ]}
+            />
+          </SystemSection>
+        </div>
+      )
+    case 'surfaces':
+      return (
+        <div class="system-page">
+          <SystemInstallation topic={slug} />
+          <SystemSection title="The problem">
+            <p>
+              In light mode, shadows distinguish white surfaces. In dark mode, raised surfaces are
+              also lighter.
+            </p>
+            <p>
+              A fixed background can make a dropdown blend into its dialog. In this example, both
+              the invite panel and the menu use surface 5.
+            </p>
+            <SystemFrame
+              language="css"
+              code={
+                '/* Both elements use the same fixed fill. */\n.invite-panel, .role-menu { background: var(--rf-surface-5); }'
+              }
+            >
+              <SurfaceInvite flat />
+            </SystemFrame>
+          </SystemSection>
+          <SystemSection
+            title="The solution"
+            description="Choose the background token for the substrate, then give nested panels a higher level."
+          >
+            <h3>Tokens</h3>
+            <p>
+              Eight background levels work in both themes. In light mode, levels 3–8 share a white
+              fill and elevation comes from the shadow.
+            </p>
+            <SystemFrame code={'style={{ background: "var(--rf-surface-3)" }}'}>
+              <SurfaceTokens />
+            </SystemFrame>
+            <h3>Substrate</h3>
+            <p>
+              A floating control sits above the surface that contains it. Compare a two-level
+              elevation over a page, panel, and dialog.
+            </p>
+            <SystemFrame
+              code={
+                'const elevated = Math.min(substrate + 2, 8)\nstyle={{ background: `var(--rf-surface-${elevated})` }}'
+              }
+            >
+              <div class="system-substrates">
+                {[1, 3, 5].map((level, index) => (
+                  <div key={level} style={{ background: `var(--rf-surface-${level})` }}>
+                    <strong>{['On the page', 'Inside a popover', 'Inside a dialog'][index]}</strong>
+                    <div style={{ background: `var(--rf-surface-${level + 2})` }}>
+                      <Checkbox label="Notifications" defaultChecked />
+                      <Checkbox label="Weekly digest" />
+                    </div>
+                    <code>
+                      surface-{level} → surface-{level + 2}
+                    </code>
+                  </div>
+                ))}
+              </div>
+            </SystemFrame>
+            <h3>Elevated</h3>
+            <p>
+              Apply the chosen background and elevation shadow to the panel. Choose a stronger
+              contrast between nested surfaces when the contents need a distinct boundary.
+            </p>
+            <SystemFrame
+              code={
+                'style={{ background: "var(--rf-surface-5)", boxShadow: "var(--rf-elevation)" }}'
+              }
+            >
+              <div class="system-surface-stack">
+                <div>
+                  <strong>Workspace</strong>
+                  <div>
+                    <strong>Settings</strong>
+                    <Input aria-label="Workspace name" defaultValue="Studio" />
+                    <Switch label="Notifications" defaultChecked />
+                  </div>
+                </div>
+              </div>
+            </SystemFrame>
+            <h3>Move through levels</h3>
+            <p>
+              Drag either thumb to choose which levels to nest. Each layer is one step above its
+              parent.
+            </p>
+            <SystemFrame
+              code={
+                '<Slider min={1} max={8} value={range} onChange={setRange} />\n// Render each selected level with its --rf-surface-N token.'
+              }
+            >
+              <SurfaceDemo />
+            </SystemFrame>
+          </SystemSection>
+          <SystemSection title="Examples">
+            <h3>Invite dialog</h3>
+            <p>
+              Give the role menu a separate surface so it is distinguishable from the surrounding
+              panel.
+            </p>
+            <SystemFrame
+              language="css"
+              code={
+                '.invite-panel { background: var(--rf-surface-5); }\n.role-menu { background: var(--rf-surface-7); }'
+              }
+            >
+              <SurfaceInvite />
+            </SystemFrame>
+            <h3>Color picker</h3>
+            <p>
+              A color picker pairs a raised editing panel with a format control. Open the control
+              and switch between color formats.
+            </p>
+            <SystemFrame
+              code={'<ColorPicker variant="inline" defaultValue="#6B97FF" swatches={[]} />'}
+            >
+              <div class="system-surface-color">
+                <ColorPicker variant="inline" defaultValue="#6B97FF" swatches={[]} />
+              </div>
+            </SystemFrame>
+          </SystemSection>
+          <SystemSection title="Reference">
+            <TokenTable
+              headings={['Token', 'Light', 'Dark']}
+              rows={[
+                ['--rf-surface-1', '#fafafa', '#171717'],
+                ['--rf-surface-2', '#fcfcfc', '#1e1e1e'],
+                ['--rf-surface-3', '#ffffff', '#252525'],
+                ['--rf-surface-4', '#ffffff', '#2c2c2c'],
+                ['--rf-surface-5', '#ffffff', '#333333'],
+                ['--rf-surface-6', '#ffffff', '#3a3a3a'],
+                ['--rf-surface-7', '#ffffff', '#414141'],
+                ['--rf-surface-8', '#ffffff', '#484848'],
+              ]}
+            />
+          </SystemSection>
+        </div>
+      )
+    case 'typography':
+      return (
+        <div class="system-page">
+          <p class="system-intro">
+            A small set of type rules does most of the work. The same sizes, weights, and text
+            colors apply to page titles, controls, and Markdown, so each piece keeps its place in
+            the hierarchy.
+          </p>
+          <SystemInstallation topic={slug} />
+          <SystemSection title="5 rules">
+            <ul class="system-type-rules">
+              <li>
+                Six shared type roles cover everything from page titles to the smallest annotation.
+              </li>
+              <li>
+                Regular is for body text, semibold is for headings and selected items, and bold is
+                for page titles.
+              </li>
+              <li>Use foreground and muted for text.</li>
+              <li>
+                Set body text in Inter Variable. Use Inter, Geist Serif, or a selected Google Fonts
+                family for headings.
+              </li>
+              <li>Use one paragraph style across the site.</li>
+            </ul>
+          </SystemSection>
+          <SystemSection title="5 no-gos">
+            <ul class="system-type-rules">
+              <li>Avoid uppercase for hierarchy. Use size and weight.</li>
+              <li>Leave letter spacing to Inter’s optical sizing.</li>
+              <li>Start a section with its title.</li>
+              <li>Give Markdown the same type roles and text colors as the rest of the site.</li>
+              <li>Use a text color token for hierarchy and leave opacity at full strength.</li>
+            </ul>
+          </SystemSection>
+          <SystemSection
+            title="The scale"
+            description="Each role pairs a font size with a line height. Press S outside a field to compare compact density."
+          >
+            <SystemFrame
+              code={
+                'style={{ fontSize: "var(--rf-text-title)", lineHeight: "var(--rf-leading-title)" }}'
+              }
+            >
+              <TypeScale />
+            </SystemFrame>
+          </SystemSection>
+          <SystemSection
+            title="Heading font"
+            description="Compare Inter and Geist Serif, or browse Google Fonts to try another family and weight in the specimen."
+          >
+            <HeadingDemo />
+          </SystemSection>
+          <SystemSection
+            title="Markdown"
+            description="Markdown uses the same type roles, including nested lists, to-dos, tables, and fenced code. Edit the source to see how the styles hold up."
+          >
+            <SystemFrame code={'<Markdown source={source} />'}>
+              <MarkdownSpecimen />
+            </SystemFrame>
+          </SystemSection>
+          <SystemSection
+            title="Spacing"
+            description="Give a new block its space above. The Markdown specimen uses these gaps, and the comparison lets you vary the paragraph spacing while its line height stays constant."
+          >
+            <TokenTable
+              headings={['Markdown gap', 'Value', 'Placement']}
+              rows={[
+                ['Heading section', '28px', 'Above a second-level heading'],
+                ['Heading subsection', '20px', 'Above a lower-level heading'],
+                ['Block gap', '12px', 'Between consecutive blocks'],
+                ['List item', '4px', 'Between list items'],
+                ['Divider', '24px', 'Around a rule'],
+              ]}
+            />
+            <SystemFrame
+              code={'<p style={{ marginTop: "16px", lineHeight: "var(--rf-leading-body)" }}>…</p>'}
+            >
+              <SpacingDemo />
+            </SystemFrame>
+          </SystemSection>
+          <SystemSection
+            title="5 tweaks"
+            description="Small adjustments keep labels steady, padding visible, and wrapped text even."
+          >
+            <h3>Weight without reflow</h3>
+            <p>Reserve the heavier label width so selection keeps neighboring controls in place.</p>
+            <SkillComparison kind="tabs" />
+            <h3>Steady numbers</h3>
+            <p>Tabular figures keep counters aligned as their digits change.</p>
+            <SystemFrame code={'style={{ fontVariantNumeric: "tabular-nums" }}'}>
+              <NumberDemo />
+            </SystemFrame>
+            {typographyTweaks.map((tweak) => (
+              <div class="system-type-tweak" key={tweak.kind}>
+                <h3>{tweak.title}</h3>
+                <p>
+                  <code>{tweak.property}</code>
+                </p>
+                <TypographyComparison tweak={tweak} />
+              </div>
+            ))}
+          </SystemSection>
+          <SystemSection title="Reference">
+            <TokenTable
+              headings={['Token', 'Value', 'Purpose']}
+              rows={[
+                ['--rf-font', 'Inter, system-ui, sans-serif', 'Body and controls'],
+                ['--rf-heading-font', 'Selected heading family', 'Titles and headings'],
+                ['--rf-weight-normal', 'wght 400 / opsz 14', 'Regular text'],
+                ['--rf-weight-strong', 'wght 550 / opsz 18', 'Emphasized labels'],
+                ['--rf-weight-bold', 'wght 700 / opsz 25', 'Page titles'],
+              ]}
+            />
+          </SystemSection>
+        </div>
+      )
+  }
+  return null
+}

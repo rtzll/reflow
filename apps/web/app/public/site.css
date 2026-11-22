@@ -1440,10 +1440,18 @@ html[data-font='geist-serif'] {
   font-size: 16px;
   font-weight: 550;
 }
+.doc-markdown-link {
+  display: inline-block;
+  margin-top: 8px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.doc-markdown-link,
 .doc-demo-link {
   color: var(--rf-muted);
   font-size: 12px;
 }
+.doc-markdown-link:hover,
 .doc-demo-link:hover {
   color: var(--rf-fg);
 }

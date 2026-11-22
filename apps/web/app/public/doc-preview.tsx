@@ -3,38 +3,10 @@ import { clientEntry, on, ref, updateUrl, type Handle, type RemixNode } from 're
 import { Icon, Switch } from '@rtzll/reflow'
 import { Example } from './examples.tsx'
 import { PreviewInspector } from './preview-inspector.tsx'
-import { documentationCode, playgroundFragment } from './documentation-code.ts'
+import { defaultPreviewValues, previewCode } from './documentation-code.ts'
 import { ComponentDemo } from './component-demos.tsx'
 import { playCopyError } from './showcase-sound.ts'
-import { initialPlayground, PlaygroundExample, type PlaygroundValues } from './doc-playground.tsx'
-
-const sharedPlaygroundDefaults = new Set([
-  'bar-chart',
-  'time-grid',
-  'color-picker',
-  'combobox',
-  'command-menu',
-  'dialog',
-  'tabs',
-  'context-menu',
-  'data-table',
-  'date-picker',
-  'dropdown',
-  'input-message',
-  'sidebar',
-  'slider',
-  'thinking-steps',
-  'toaster',
-  'drawer',
-  'markdown',
-  'code-block',
-  'citation',
-  'confirmation',
-  'avatar',
-  'chat-layout',
-  'progress',
-  'carousel',
-])
+import { PlaygroundExample, type PlaygroundValues } from './doc-playground.tsx'
 
 interface DocPreviewProps {
   slug: string
@@ -79,10 +51,7 @@ export const DocPreview = clientEntry(
   function DocPreview(handle: Handle<DocPreviewProps>) {
     let codeVisible = handle.props.initialCode ?? false
     let ready = false
-    let playground: PlaygroundValues | undefined =
-      !handle.props.variant && sharedPlaygroundDefaults.has(handle.props.slug)
-        ? initialPlayground(handle.props.slug)
-        : undefined
+    let playground = defaultPreviewValues(handle.props.slug, handle.props.variant)
     const listenPlayground = ref((_element, signal) => {
       ready = true
       handle.update()
@@ -142,19 +111,7 @@ export const DocPreview = clientEntry(
     let copied = false
     let copyFailed = false
     return () => {
-      const fragment = playground
-        ? playgroundFragment(handle.props.slug, playground)
-        : handle.props.code
-      const source =
-        handle.props.slug === 'command-menu' && !handle.props.variant
-          ? handle.props.source?.split('// The detailed examples')[0].trimEnd()
-          : handle.props.source
-      const code = source
-        ? source +
-          (playground || handle.props.variant
-            ? '\n\nexport function Example() {\n  return () => (\n    ' + fragment + '\n  )\n}'
-            : '')
-        : documentationCode(handle.props.slug, fragment)
+      const code = previewCode(handle.props, playground)
       const playbackLabel =
         playback === 'playing'
           ? 'Pause example'

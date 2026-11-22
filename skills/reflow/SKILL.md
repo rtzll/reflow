@@ -5,6 +5,8 @@ description: Build and refine Remix 3 interfaces with Reflow components, shared 
 
 # Build with Reflow
 
+On the Reflow showcase, read `/llms.txt` for the documentation index. Follow its Markdown links for component imports, examples, and the full props reference. Each docs page also has a **View as Markdown** link.
+
 Inspect the project's package manifest and existing UI before making changes. Use the installed Reflow exports and types as the API reference. In the Reflow workspace, read `packages/reflow/src/index.ts`, the relevant source module, and its examples in `apps/web/app/public/component-demos.tsx`. When changing the library itself, follow its code structure in `docs/scope.md`: each component in its own file, shared headless logic in `src/behaviors/`, shared look and motion in `src/systems/`.
 
 Reflow uses the Remix 3 component runtime. Component setup runs once and returns a render function. Read changing props through `handle.props`, update local state in events, and call `handle.update()`. Browser interactions require a hydrated client entry. Follow the installed Remix documentation for unfamiliar APIs.

@@ -21,7 +21,7 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Open the address printed in the terminal. The gallery is at `/`, component docs at `/docs`, focused demos at `/demo`, and example apps at `/apps`.
+Open the address printed in the terminal. The gallery is at `/`, component docs at `/docs`, focused demos at `/demo`, and example apps at `/apps`. Each docs page has a **View as Markdown** link. Start at `/llms.txt` for the index, or append `.md` to a docs URL, such as `/docs/drawer.md`.
 
 To test the production website locally on Cloudflare's runtime, run `pnpm preview:web` and open the address printed in the terminal. [Website build and deployment](docs/deployment.md)
 

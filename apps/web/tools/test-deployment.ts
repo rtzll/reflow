@@ -60,6 +60,15 @@ try {
     assert.equal(response.status, 301, path)
     assert.equal(response.headers.get('location'), origin + destination, path)
   }
+  const directory = await (await fetch(origin + '/llms.txt')).text()
+  const tabsHref = directory.match(/^- \[Tabs\]\(([^)]+)\)/m)?.[1]
+  assert.equal(tabsHref, origin + '/docs/tabs.md')
+  const tabsMarkdown = await fetch(tabsHref)
+  assert.equal(tabsMarkdown.headers.get('content-type'), 'text/markdown; charset=utf-8')
+  const tabsText = await tabsMarkdown.text()
+  assert.match(tabsText, /export function ProjectTabs/)
+  const motion = await (await fetch(origin + '/docs/motion.md')).text()
+  assert.ok(motion.includes('motionExit.slow') && motion.includes('## All tokens'))
   // Link previews need an absolute image URL that the built site serves.
   const home = await (await fetch(origin + '/docs/button')).text()
   const ogImage = home.match(/<meta property="og:image" content="([^"]+)"/)?.[1]
@@ -128,6 +137,18 @@ try {
   await expect(preview.getByRole('tabpanel', { name: 'Activity' })).toBeVisible()
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
   await expect(page.locator('html')).toHaveAttribute('data-density', 'compact')
+
+  const sample = await preview.locator('.doc-code-panel pre code').textContent()
+  assert.ok(
+    sample && tabsText.includes(sample),
+    'The Markdown page includes the full default Code tab example',
+  )
+  const markdownLink = page.getByRole('link', { name: 'View as Markdown' })
+  await expect(markdownLink).toHaveAttribute('href', '/docs/tabs.md')
+  await markdownLink.click()
+  await expect(page).toHaveURL(origin + '/docs/tabs.md')
+  await expect(page.locator('body')).toContainText('# Tabs')
+  await openShowcase('/docs/tabs')
 
   const docs = await page
     .locator('.site-left a[href^="/docs/"]')

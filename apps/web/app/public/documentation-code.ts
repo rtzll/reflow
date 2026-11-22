@@ -13,7 +13,56 @@ import { questionCode, questionPlayground } from './question-example-data.ts'
 import { requestFormCode } from './request-form-example.tsx'
 import { cardPlaygroundCode } from './card-example-code.ts'
 import { accordionItems } from './component-example-data.ts'
-import { questionSettings, type PlaygroundValues } from './doc-playground.tsx'
+import { initialPlayground, questionSettings, type PlaygroundValues } from './doc-playground.tsx'
+
+const sharedPlaygroundDefaults = new Set([
+  'bar-chart',
+  'time-grid',
+  'color-picker',
+  'combobox',
+  'command-menu',
+  'dialog',
+  'tabs',
+  'context-menu',
+  'data-table',
+  'date-picker',
+  'dropdown',
+  'input-message',
+  'sidebar',
+  'slider',
+  'thinking-steps',
+  'toaster',
+  'drawer',
+  'markdown',
+  'code-block',
+  'citation',
+  'confirmation',
+  'avatar',
+  'chat-layout',
+  'progress',
+  'carousel',
+])
+
+export function defaultPreviewValues(slug: string, variant?: string) {
+  if (!variant && sharedPlaygroundDefaults.has(slug)) return initialPlayground(slug)
+}
+
+export function previewCode(
+  props: { slug: string; variant?: string; code: string; source?: string },
+  playground: PlaygroundValues | undefined,
+) {
+  const fragment = playground ? playgroundFragment(props.slug, playground) : props.code
+  const source =
+    props.slug === 'command-menu' && !props.variant
+      ? props.source?.split('// The detailed examples')[0].trimEnd()
+      : props.source
+  return source
+    ? source +
+        (playground || props.variant
+          ? '\n\nexport function Example() {\n  return () => (\n    ' + fragment + '\n  )\n}'
+          : '')
+    : documentationCode(props.slug, fragment)
+}
 
 /** Expand documentation fragments into a complete native Remix component. */
 export function documentationCode(slug: string, fragment: string): string {

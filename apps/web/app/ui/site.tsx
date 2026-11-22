@@ -6,8 +6,7 @@ import { routes } from '../routes.ts'
 import { PlaygroundControls } from '../public/doc-playground.tsx'
 import { ApiPropTable } from '../public/api-prop-table.tsx'
 import { DocPreview } from '../public/doc-preview.tsx'
-import { componentExamples } from '../public/component-demos.tsx'
-import { componentApi, componentDefaults } from '../docs-data.ts'
+import { apiDescription, componentReference } from '../component-reference.ts'
 import { fontWeights } from '../public/google-fonts.ts'
 import { fontCatalog } from '../public/google-font-catalog.ts'
 import { SiteControls } from '../public/site-controls.tsx'
@@ -431,7 +430,7 @@ function SiteCredit() {
   )
 }
 
-function CopyCode(handle: Handle<{ code: string }>) {
+export function CopyCode(handle: Handle<{ code: string; language?: string }>) {
   return () => (
     <div class="site-code">
       <pre tabindex={0}>
@@ -644,6 +643,16 @@ function Gallery(
   }
 }
 
+export const introductionSummary = 'Why these components feel different.'
+
+function MarkdownLink(handle: Handle<{ href: string }>) {
+  return () => (
+    <a class="doc-markdown-link" href={handle.props.href} data-rmx-document>
+      View as Markdown
+    </a>
+  )
+}
+
 function Introduction(handle: Handle<{ settings: Settings; next?: ShowcaseComponent }>) {
   return () => {
     let { settings, next } = handle.props
@@ -665,93 +674,102 @@ function Introduction(handle: Handle<{ settings: Settings; next?: ShowcaseCompon
               }
             />
           </div>
-          <p>Why these components feel different.</p>
+          <p>{introductionSummary}</p>
+          <MarkdownLink href={routes.docsMarkdown.href()} />
         </header>
-        <section class="site-doc-prose">
-          <div>
-            <h2>Motion that communicates</h2>
-            <p>
-              A transition can show how two elements relate. When adjacent choices share a surface,
-              you can see that they belong to the same selection. When a tab indicator moves, it
-              shows where your attention should go. Reflow uses shared timing and surface treatments
-              so those cues feel familiar across components.
-            </p>
-          </div>
-          <div>
-            <h2>Hover as preview</h2>
-            <p>
-              Move through a list or menu and the highlight follows the pointer to the next target.
-              It gives you a chance to see what will respond before you click. Buttons use small
-              changes in weight and fill, and keyboard navigation keeps its own visible focus cue.
-            </p>
-          </div>
-          <div>
-            <h2>Spring motion</h2>
-            <p>
-              Fast, moderate, and slow spring curves cover short feedback, moving indicators, and
-              larger reveals. When you change direction quickly, the animation follows the latest
-              target. Reflow also respects the system preference for reduced motion.
-            </p>
-          </div>
-          <div>
-            <h2>Native to Remix</h2>
-            <p>
-              Components use the Remix component runtime, official UI primitives, and browser APIs.
-              The showcase renders the same components you can install from npm. Style them with the
-              shared tokens for surfaces, type, sizes, and radii, or supply your own content in
-              their slots.
-            </p>
-          </div>
-          <div>
-            <h2>Customize using the settings panel</h2>
-            <p>
-              Try a different theme, accent, heading font, radius, size, icon family, or hover
-              style. Changes update the examples as you make them. Use <kbd>T</kbd>, <kbd>A</kbd>,
-              and <kbd>R</kbd> to cycle theme, accent, and radius from the keyboard. Your settings
-              are remembered on this device. To share a particular look, copy a link with your
-              settings from the panel.
-            </p>
-          </div>
-        </section>
-        <section id="installation" class="site-doc-section site-intro-install">
-          <h2>Installation</h2>
-          <div>
-            <p>
-              <span aria-hidden="true">1</span> Install Reflow and Remix from your app's root.
-            </p>
-            <CopyCode code={reflowInstallCommand} />
-          </div>
-          <div>
-            <p>
-              <span aria-hidden="true">2</span> Import the components you need.
-            </p>
-            <CopyCode code="import { Button } from '@rtzll/reflow'" />
-          </div>
-          <p>
-            Serve <code>@rtzll/reflow/styles.css</code> through the Remix asset server and enable
-            Remix's browser runtime for interactive components. Follow the{' '}
-            <a href="https://github.com/rtzll/reflow/blob/main/docs/integration.md">
-              integration guide
-            </a>{' '}
-            for the full setup.
-          </p>
-          <p>
-            <a href="https://www.npmjs.com/package/@rtzll/reflow">View on npm</a> ·{' '}
-            <a href="https://github.com/rtzll/reflow/releases">Release notes</a>
-          </p>
-        </section>
-        <section class="site-doc-section">
-          <h2>Icons</h2>
-          <p>
-            The settings panel previews Lucide, Tabler, Phosphor, and HugeIcons. Reflow's built-in
-            icons render as SVG, and components with icon slots also accept your own SVG or Remix
-            nodes. Choose the icons that fit your application.
-          </p>
-          <CopyCode code={'<Button leadingIcon={<Icon name="plus" />}>New project</Button>'} />
-        </section>
+        {introductionContent()}
       </article>
     )
   }
+}
+
+export function introductionContent() {
+  return (
+    <>
+      <section class="site-doc-prose">
+        <div>
+          <h2>Motion that communicates</h2>
+          <p>
+            A transition can show how two elements relate. When adjacent choices share a surface,
+            you can see that they belong to the same selection. When a tab indicator moves, it shows
+            where your attention should go. Reflow uses shared timing and surface treatments so
+            those cues feel familiar across components.
+          </p>
+        </div>
+        <div>
+          <h2>Hover as preview</h2>
+          <p>
+            Move through a list or menu and the highlight follows the pointer to the next target. It
+            gives you a chance to see what will respond before you click. Buttons use small changes
+            in weight and fill, and keyboard navigation keeps its own visible focus cue.
+          </p>
+        </div>
+        <div>
+          <h2>Spring motion</h2>
+          <p>
+            Fast, moderate, and slow spring curves cover short feedback, moving indicators, and
+            larger reveals. When you change direction quickly, the animation follows the latest
+            target. Reflow also respects the system preference for reduced motion.
+          </p>
+        </div>
+        <div>
+          <h2>Native to Remix</h2>
+          <p>
+            Components use the Remix component runtime, official UI primitives, and browser APIs.
+            The showcase renders the same components you can install from npm. Style them with the
+            shared tokens for surfaces, type, sizes, and radii, or supply your own content in their
+            slots.
+          </p>
+        </div>
+        <div>
+          <h2>Customize using the settings panel</h2>
+          <p>
+            Try a different theme, accent, heading font, radius, size, icon family, or hover style.
+            Changes update the examples as you make them. Use <kbd>T</kbd>, <kbd>A</kbd>, and{' '}
+            <kbd>R</kbd> to cycle theme, accent, and radius from the keyboard. Your settings are
+            remembered on this device. To share a particular look, copy a link with your settings
+            from the panel.
+          </p>
+        </div>
+      </section>
+      <section id="installation" class="site-doc-section site-intro-install">
+        <h2>Installation</h2>
+        <div>
+          <p>
+            <span aria-hidden="true">1</span> Install Reflow and Remix from your app's root.
+          </p>
+          <CopyCode language="sh" code={reflowInstallCommand} />
+        </div>
+        <div>
+          <p>
+            <span aria-hidden="true">2</span> Import the components you need.
+          </p>
+          <CopyCode code="import { Button } from '@rtzll/reflow'" />
+        </div>
+        <p>
+          Serve <code>@rtzll/reflow/styles.css</code> through the Remix asset server and enable
+          Remix's browser runtime for interactive components. Follow the{' '}
+          <a href="https://github.com/rtzll/reflow/blob/main/docs/integration.md">
+            integration guide
+          </a>{' '}
+          for the full setup.
+        </p>
+        <p>
+          <a href="https://www.npmjs.com/package/@rtzll/reflow">View on npm</a> ·{' '}
+          <a href="https://github.com/rtzll/reflow/releases">Release notes</a>
+        </p>
+      </section>
+      <section class="site-doc-section">
+        <h2>Icons</h2>
+        <p>
+          The settings panel previews Lucide, Tabler, Phosphor, and HugeIcons. Reflow's built-in
+          icons render as SVG, and components with icon slots also accept your own SVG or Remix
+          nodes. Choose the icons that fit your application.
+        </p>
+        <CopyCode code={'<Button leadingIcon={<Icon name="plus" />}>New project</Button>'} />
+      </section>
+    </>
+  )
 }
 
 function ComponentDoc(
@@ -776,18 +794,7 @@ function ComponentDoc(
           <a href={pageHref(routes.docs.href())}>Back to documentation</a>
         </article>
       )
-    const examples = componentExamples[component.slug] ?? []
-    const api = componentApi[component.slug] ?? []
-    const firstTitle =
-      {
-        'chat-message': 'Conversation',
-        'color-picker': 'Default',
-        dialog: 'Basic',
-        'queued-stack': 'Basic',
-        field: 'Form',
-        slider: 'Compact',
-        'thinking-steps': 'Basic',
-      }[component.slug] ?? 'Playground'
+    const { module, importCode, examples, api, playground } = componentReference(component)
     const sectionId = (title: string) =>
       title
         .toLowerCase()
@@ -801,6 +808,7 @@ function ComponentDoc(
             <HeadingControls previous={previous} next={next} soundEnabled={settings.soundEnabled} />
           </div>
           <p>{component.description}</p>
+          <MarkdownLink href={routes.componentMarkdown.href({ slug: component.slug })} />
         </header>
         {component.category === 'system' ? (
           component.preview
@@ -810,22 +818,19 @@ function ComponentDoc(
               <section class="site-doc-install">
                 <div>
                   <h2>Installation</h2>
-                  <p>Import from the @rtzll/reflow package.</p>
+                  <p>Import from {module}.</p>
                 </div>
-                <CopyAction
-                  label="Copy import"
-                  text={`import { ${component.name} } from '@rtzll/reflow'`}
-                />
+                <CopyAction label="Copy import" text={importCode} />
               </section>
             )}
-            {component.preview != null && (
+            {playground && (
               <section
                 class="site-doc-section"
-                id={sectionId(firstTitle)}
+                id={sectionId(playground.title)}
                 data-rmx-key={`playground:${component.slug}`}
               >
                 <div class="doc-section-heading">
-                  <h2>{firstTitle}</h2>
+                  <h2>{playground.title}</h2>
                   <a
                     class="doc-demo-link"
                     href={pageHref(routes.demo.href(), { c: component.slug })}
@@ -834,10 +839,8 @@ function ComponentDoc(
                   </a>
                 </div>
                 <DocPreview
-                  slug={component.slug}
+                  {...playground}
                   query={component.slug === 'pagination' ? handle.props.query : undefined}
-                  source={component.source}
-                  code={component.code ?? `import { ${component.name} } from '@rtzll/reflow'`}
                   initialCode={showCode}
                   images={previewImages(images, undefined)}
                 />
@@ -853,24 +856,13 @@ function ComponentDoc(
               >
                 <h2>{example.title}</h2>
                 {example.description && <p>{example.description}</p>}
-                <DocPreview
-                  slug={component.slug}
-                  variant={example.variant}
-                  source={
-                    ['command-menu', 'tabs'].includes(component.slug) ? component.source : undefined
-                  }
-                  code={example.code}
-                  images={previewImages(images, example.variant)}
-                />
+                <DocPreview {...example} images={previewImages(images, example.variant)} />
               </section>
             ))}
             {api.length > 0 && (
               <section class="site-doc-section doc-api-section" id="api-reference">
                 <h2>API Reference</h2>
-                <p>
-                  Public props for the Reflow implementation. Native controls also accept their
-                  standard HTML attributes and Remix event mixes.
-                </p>
+                <p>{apiDescription}</p>
                 {api.map((section) => (
                   <section key={section.name} class="doc-api-component">
                     <h3>{section.name}</h3>
@@ -880,10 +872,7 @@ function ComponentDoc(
                           name={section.name}
                           path={routes.component.href({ slug: component.slug })}
                           search={handle.props.query ?? ''}
-                          rows={section.props.map((prop) => ({
-                            ...prop,
-                            defaultValue: componentDefaults[section.name]?.[prop.name] ?? '—',
-                          }))}
+                          rows={section.props}
                         />
                       </div>
                     ) : (
@@ -917,7 +906,7 @@ function ComponentDoc(
                                   <code>{prop.type}</code>
                                 </td>
                                 <td>
-                                  <code>{componentDefaults[section.name]?.[prop.name] ?? '—'}</code>
+                                  <code>{prop.defaultValue ?? '—'}</code>
                                 </td>
                                 <td>{prop.description}</td>
                               </tr>

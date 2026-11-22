@@ -3,6 +3,9 @@ import { get, route } from 'remix/routes'
 export const routes = route({
   gallery: get('/'),
   docs: get('/docs'),
+  docsMarkdown: get('/docs.md'),
+  componentMarkdown: get('/docs/:slug.md'),
+  docsIndex: get('/llms.txt'),
   component: get('/docs/:slug'),
   demo: get('/demo'),
   apps: get('/apps'),

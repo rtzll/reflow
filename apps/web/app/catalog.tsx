@@ -229,7 +229,8 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
     code: `import { highlight } from '@rtzll/reflow/highlight'\n\nconst code = await highlight(source, { lang: 'tsx' })\n\n<CodeBlock code={code} filename="Button.tsx" />`,
   },
   drawer: {
-    description: 'A panel that slides in from an edge and closes with a drag or a flick.',
+    description:
+      'A panel that slides in from an edge. Use snap points for a bottom sheet that opens partway.',
     code: `<Drawer trigger="Filters" title="Filters" footer={(close) => <Button mix={on('click', close)}>Apply</Button>}>\n  <Switch label="In stock only" />\n</Drawer>`,
   },
   'hover-card': {

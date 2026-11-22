@@ -2,7 +2,7 @@ import { RoutedDataTable, type DataTableColumn } from '@rtzll/reflow'
 import { clientEntry, type Handle } from 'remix/component'
 import type { ApiProperty } from '../docs-data.ts'
 
-type PropRow = ApiProperty & { defaultValue: string }
+type PropRow = ApiProperty & { defaultValue?: string }
 
 const columns: readonly DataTableColumn<PropRow>[] = [
   {
@@ -25,8 +25,8 @@ const columns: readonly DataTableColumn<PropRow>[] = [
   {
     id: 'default',
     label: 'Default',
-    value: (row) => row.defaultValue,
-    cell: (row) => <code>{row.defaultValue}</code>,
+    value: (row) => row.defaultValue ?? '—',
+    cell: (row) => <code>{row.defaultValue ?? '—'}</code>,
   },
   { id: 'description', label: 'Description', value: (row) => row.description, sortable: false },
 ]

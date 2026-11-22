@@ -5,6 +5,7 @@ import { accentCss, type readSettings } from './public/site-settings.ts'
 import { fontStylesheet, fontWeights } from './public/google-fonts.ts'
 import { fontCatalog } from './public/google-font-catalog.ts'
 import { ShowcaseIconSprite } from './public/icon-sprite.tsx'
+import { routes } from './routes.ts'
 import { SiteToaster } from './public/toaster-example.tsx'
 
 interface DocumentProps {
@@ -12,6 +13,7 @@ interface DocumentProps {
   assets: Awaited<ReturnType<typeof getPageAssets>>
   settings: ReturnType<typeof readSettings>
   title: string
+  markdownHref?: string
   /** The requested page; link previews need absolute URLs. */
   url: URL
 }
@@ -67,6 +69,12 @@ export function Document(handle: Handle<DocumentProps>) {
           />
           <meta name="twitter:card" content="summary_large_image" />
           <link rel="icon" href={assets.favicon} type="image/svg+xml" />
+          {handle.props.markdownHref && (
+            <>
+              <link rel="alternate" type="text/markdown" href={handle.props.markdownHref} />
+              <link rel="describedby" href={routes.docsIndex.href()} />
+            </>
+          )}
           <title>{title}</title>
           {customFont && (
             <link id="reflow-custom-font" rel="stylesheet" href={fontStylesheet(customFont)} />
