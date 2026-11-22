@@ -16,7 +16,17 @@ export interface BarChartSeries {
   label: string
 }
 
-export interface BarChartProps<Item extends BarChartItem = BarChartItem> {
+/** An item in a named series chart. No single value is required. */
+export interface BarChartSeriesItem {
+  id: string
+  label: string
+  values: readonly number[]
+  value?: number
+}
+
+type ChartItem = BarChartItem | BarChartSeriesItem
+
+export type BarChartProps<Item extends ChartItem = BarChartItem> = {
   label: string
   items: readonly Item[]
   /** Inclusive item IDs in either order. Omit to show all bars at full emphasis. */
@@ -29,13 +39,13 @@ export interface BarChartProps<Item extends BarChartItem = BarChartItem> {
   onSelect?: (item: Item, event: MouseEvent) => void
   describedBy?: string
   showAxes?: boolean
-  /** Several quantities per category, colored in order and named in a legend. */
-  series?: readonly BarChartSeries[]
   /** Series side by side, or piled into one bar. Default grouped. */
   layout?: 'grouped' | 'stacked'
   /** Categories as columns, or as rows with their labels beside them. Default vertical. */
   orientation?: 'vertical' | 'horizontal'
-}
+} & ([Item] extends [BarChartItem]
+  ? { series?: readonly BarChartSeries[] }
+  : { series: readonly BarChartSeries[] })
 
 const axisNumbers = new Intl.NumberFormat('en', {
   notation: 'compact',
@@ -66,7 +76,7 @@ function roundStep(span: number) {
 // Floating point would print 0.30000000000000004.
 const tidy = (value: number) => Number(value.toPrecision(12))
 
-export function BarChart<Item extends BarChartItem>(handle: Handle<BarChartProps<Item>>) {
+export function BarChart<Item extends ChartItem>(handle: Handle<BarChartProps<Item>>) {
   let mounted = false
   let focusId: string | undefined
   const mount = ref(() => {

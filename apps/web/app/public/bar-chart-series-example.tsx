@@ -8,10 +8,10 @@ const series = [
 
 // Lines changed per package this week: added lines up, removed lines down.
 const packages = [
-  { id: 'reflow', label: 'reflow', value: 0, values: [420, -180] },
-  { id: 'web', label: 'web', value: 0, values: [260, -310] },
-  { id: 'starter', label: 'starter', value: 0, values: [40, -12] },
-  { id: 'create', label: 'create-reflow', value: 0, values: [18, -26] },
+  { id: 'reflow', label: 'reflow', values: [420, -180] },
+  { id: 'web', label: 'web', values: [260, -310] },
+  { id: 'starter', label: 'starter', values: [40, -12] },
+  { id: 'create', label: 'create-reflow', values: [18, -26] },
 ]
 
 const balance = [

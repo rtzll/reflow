@@ -1165,7 +1165,8 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
         {
           name: 'items',
           type: 'readonly Item[]',
-          description: 'Categories in display order. Item extends BarChartItem.',
+          description:
+            'Categories in display order. Supply value for a single series or values for named series.',
           required: true,
         },
         {
@@ -1247,7 +1248,7 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           name: 'value',
           type: 'number',
           description:
-            'Finite quantity on a shared zero baseline; negative values hang below zero. Ignored with series.',
+            'Single value on the zero baseline. A negative value extends below zero. Use BarChartSeriesItem for values-only data.',
           required: true,
         },
         {
@@ -1255,6 +1256,24 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           type: 'readonly number[]',
           description: 'With series, one value per series in the same order.',
           required: false,
+        },
+      ],
+    },
+    {
+      name: 'BarChartSeriesItem',
+      props: [
+        { name: 'id', type: 'string', description: 'Stable category ID.', required: true },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Category name for the axis and tooltip.',
+          required: true,
+        },
+        {
+          name: 'values',
+          type: 'readonly number[]',
+          description: 'One quantity per named series in display order.',
+          required: true,
         },
       ],
     },

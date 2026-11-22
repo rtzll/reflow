@@ -164,8 +164,8 @@ it('groups and stacks series, names each value and shows a legend', (t) => {
     { id: 'tests', label: 'Tests' },
   ]
   const items = [
-    { id: 'mon', label: 'Monday', value: 0, values: [4, -2] },
-    { id: 'tue', label: 'Tuesday', value: 0, values: [2, 2] },
+    { id: 'mon', label: 'Monday', values: [4, -2] },
+    { id: 'tue', label: 'Tuesday', values: [2, 2] },
   ]
   const grouped = render(<BarChart label="Runs" items={items} series={series} showAxes={false} />)
   t.after(grouped.cleanup)
