@@ -6,6 +6,30 @@
    edge, and the backdrop lightens with --rf-drawer-progress. A strip of
    panel color past the edge covers the gap when a drag pulls it the other
    way. */
+/* The drag writes these on every pointer move. Registered as not
+   inheriting, a change restyles only the element that reads it rather than
+   everything inside: the panel's content, or the whole page behind. */
+@property --rf-drawer-drag {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+@property --rf-drawer-progress {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+@property --rf-drawer-behind {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 1;
+}
+@property --rf-drawer-scale {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 1;
+}
+
 .rf-drawer {
   --rf-drawer-bg: var(--rf-surface-5);
   --rf-drawer-drag: 0px;
@@ -125,6 +149,8 @@
   opacity: 1;
 }
 .rf-drawer[data-dragging]::backdrop {
+  /* Not inherited, so the backdrop asks its drawer for it. */
+  --rf-drawer-progress: inherit;
   opacity: calc(1 - var(--rf-drawer-progress, 0));
   transition: none;
 }
@@ -306,14 +332,13 @@ button.rf-drawer-handle:focus-visible {
   background: transparent;
 }
 :root[data-rf-drawer-scaled] [data-rf-drawer-background] {
-  --rf-drawer-scale-amount: var(--rf-drawer-scale, 1);
   min-block-size: 100dvh;
   overflow: hidden;
   background: var(--rf-bg, white);
-  border-start-start-radius: calc(var(--rf-panel-radius, 12px) * var(--rf-drawer-scale-amount));
-  border-start-end-radius: calc(var(--rf-panel-radius, 12px) * var(--rf-drawer-scale-amount));
-  scale: calc(1 - 0.06 * var(--rf-drawer-scale-amount));
-  translate: 0 calc(12px * var(--rf-drawer-scale-amount));
+  border-start-start-radius: calc(var(--rf-panel-radius, 12px) * var(--rf-drawer-scale));
+  border-start-end-radius: calc(var(--rf-panel-radius, 12px) * var(--rf-drawer-scale));
+  scale: calc(1 - 0.06 * var(--rf-drawer-scale));
+  translate: 0 calc(12px * var(--rf-drawer-scale));
 }
 :root[data-rf-drawer-dragging] [data-rf-drawer-background] {
   transition: none;

@@ -175,6 +175,15 @@ export function Drawer(handle: Handle<DrawerProps>) {
     setDrag(dialog, tallest - sizes[index]!)
   }
 
+  // The scale is written on the marked page itself, not the root: its
+  // property does not inherit, so a drag restyles only that element.
+  function setPageScale(scale: number | undefined) {
+    for (const page of document.querySelectorAll<HTMLElement>('[data-rf-drawer-background]')) {
+      if (scale === undefined) page.style.removeProperty('--rf-drawer-scale')
+      else page.style.setProperty('--rf-drawer-scale', String(scale))
+    }
+  }
+
   // Pushes the marked page back while a bottom drawer with scaleBackground is open.
   function syncScale() {
     const root = document.documentElement
@@ -184,7 +193,7 @@ export function Drawer(handle: Handle<DrawerProps>) {
     root.toggleAttribute('data-rf-drawer-scaled', next)
     if (!next) {
       root.removeAttribute('data-rf-drawer-dragging')
-      root.style.removeProperty('--rf-drawer-scale')
+      setPageScale(undefined)
     }
   }
 
@@ -194,7 +203,7 @@ export function Drawer(handle: Handle<DrawerProps>) {
     const root = document.documentElement
     root.removeAttribute('data-rf-drawer-scaled')
     root.removeAttribute('data-rf-drawer-dragging')
-    root.style.removeProperty('--rf-drawer-scale')
+    setPageScale(undefined)
   })
 
   // While dragged, the scaled page eases back toward its place.
@@ -202,8 +211,7 @@ export function Drawer(handle: Handle<DrawerProps>) {
     if (!scaled) return
     const root = document.documentElement
     root.toggleAttribute('data-rf-drawer-dragging', progress !== undefined)
-    if (progress === undefined) root.style.removeProperty('--rf-drawer-scale')
-    else root.style.setProperty('--rf-drawer-scale', String(1 - progress))
+    setPageScale(progress === undefined ? undefined : 1 - progress)
   }
 
   // The drawer behind comes forward as this one is dragged toward closing.

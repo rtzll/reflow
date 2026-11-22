@@ -34,6 +34,15 @@ it('slides a bottom drawer up to rest on the edge and closes it with a drag', as
   await expect(panel).toHaveAttribute('data-dragging', '')
   const dragged = await panel.evaluate((node) => getComputedStyle(node).translate)
   assert.match(dragged, /^0px \d+px$/)
+  // The drag stays on the panel: its content does not inherit it, so a move
+  // restyles the panel alone, while the backdrop still lightens in step.
+  const spread = await panel.evaluate((node) => ({
+    content: getComputedStyle(node.querySelector('.rf-drawer-header')!).getPropertyValue(
+      '--rf-drawer-drag',
+    ),
+    lighter: Number(getComputedStyle(node, '::backdrop').opacity) < 1,
+  }))
+  assert.deepEqual(spread, { content: '0px', lighter: true })
   await page.mouse.move(handle.x + handle.width / 2, handle.y + 2 + height * 0.45, { steps: 5 })
   await page.mouse.up()
   await expect(panel).toBeHidden()
