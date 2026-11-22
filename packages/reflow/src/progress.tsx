@@ -32,7 +32,7 @@ export function Progress(handle: Handle<ProgressProps>) {
         <div class="rf-progress-track" aria-hidden="true">
           <div
             class="rf-progress-fill"
-            style={percent === undefined ? undefined : { inlineSize: `${percent}%` }}
+            style={percent === undefined ? undefined : { '--rf-progress-value': `${percent}%` }}
           />
         </div>
       </div>

@@ -29,15 +29,19 @@
   block-size: 4px;
 }
 
+/* The fill spans the track and slides in from the start edge, so a change
+   moves it on the compositor and its rounded end keeps its shape. */
 .rf-progress-fill {
   block-size: 100%;
   border-radius: inherit;
   background: var(--rf-accent);
-  transition: inline-size var(--rf-medium) var(--rf-ease-out);
+  translate: calc((var(--rf-progress-value, 0%) - 100%) * var(--rf-progress-direction, 1)) 0;
+  transition: translate var(--rf-medium) var(--rf-ease-out);
 }
 
 .rf-progress[data-indeterminate] .rf-progress-fill {
   inline-size: 35%;
+  translate: none;
   animation: rf-progress-travel 1.4s ease-in-out infinite alternate;
 }
 
