@@ -135,7 +135,7 @@
   font: 600 var(--rf-text-caption)/1.2 var(--rf-font);
 }
 /* Use the space the slot actually has, including a clipped overnight part. */
-@container time-grid-event (max-height: 38px) {
+@container time-grid-event (height < 30px) {
   .rf-time-grid-caption {
     flex-direction: row;
     align-items: baseline;
@@ -147,23 +147,37 @@
     display: none;
   }
 }
-@container time-grid-event (max-width: 120px) and (height < 55px) {
-  .rf-time-grid-caption {
-    margin-block: auto;
-    padding: 0 4px;
-  }
+@container time-grid-event (max-width: 120px) and (height < 30px) {
   .rf-time-grid-time {
     display: none;
   }
 }
-/* A narrow lane can fit two lines of title in a half-hour slot. */
-@container time-grid-event (max-width: 120px) and (30px <= height < 55px) {
+/* Let the title wrap first. Show the range below it only if a whole line fits. */
+@container time-grid-event (30px <= height < 55px) {
+  .rf-time-grid-caption {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    padding-block: 1px;
+  }
   .rf-time-grid-caption strong {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
     overflow-wrap: anywhere;
     white-space: normal;
+  }
+  .rf-time-grid-time {
+    justify-self: start;
+    max-height: round(down, 100%, 1lh);
+    overflow: hidden;
+  }
+}
+@container time-grid-event (width < 80px) and (30px <= height < 55px) {
+  .rf-time-grid-time {
+    display: none;
   }
 }
 @container time-grid-event (min-height: 55px) {

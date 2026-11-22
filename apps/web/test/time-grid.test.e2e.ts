@@ -133,6 +133,23 @@ it('fits the title of a fifteen-minute event and a half-hour event inside their 
   }
 })
 
+it('fits the full time range below Release notes in its half-hour slot', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await open(page, '/docs/time-grid')
+  const card = page.getByRole('button', { name: 'Release notes, Wednesday, 10:00–10:30' })
+  const time = card.locator('.rf-time-grid-time')
+  await expect(time).toHaveText('10:00–10:30')
+  await expect(time.locator('.rf-time-grid-end')).toBeVisible()
+  const [slot, title, range] = await Promise.all(
+    [card, card.locator('strong'), time].map(async (locator) => (await locator.boundingBox())!),
+  )
+  expect(range.y).toBeGreaterThanOrEqual(title.y + title.height)
+  expect(range.height).toBeGreaterThanOrEqual(12)
+  expect(range.y + range.height).toBeLessThanOrEqual(slot.y + slot.height + 0.5)
+  expect(range.x + range.width).toBeLessThanOrEqual(slot.x + slot.width)
+})
+
 it('keeps the complete half-hour title readable in a narrow week column', async (t) => {
   const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 390, height: 844 })
@@ -147,4 +164,9 @@ it('keeps the complete half-hour title readable in a narrow week column', async 
   const text = (await title.boundingBox())!
   expect(text.y).toBeGreaterThanOrEqual(card.y)
   expect(text.y + text.height).toBeLessThanOrEqual(card.y + card.height + 0.5)
+  const range = await event.locator('.rf-time-grid-time').boundingBox()
+  if (range && range.height > 0) {
+    expect(range.height).toBeGreaterThanOrEqual(12)
+    expect(range.y + range.height).toBeLessThanOrEqual(card.y + card.height + 0.5)
+  }
 })
