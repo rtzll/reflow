@@ -4046,6 +4046,13 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           description: 'Overrides the surrounding type density.',
         },
         {
+          name: 'images',
+          type: 'boolean | ((src: string) => boolean)',
+          required: false,
+          description:
+            'Which images load inline. By default every image is a link, so rendering loads nothing. true loads same-site paths; a function decides for each safe source. Refused images stay links.',
+        },
+        {
           name: 'class',
           type: 'string',
           required: false,

@@ -213,3 +213,74 @@ describe('Markdown', () => {
     )
   })
 })
+
+describe('Markdown images', () => {
+  const source = [
+    'A map ![Ferry map](/maps/ferry.png "Ferry routes") in the line.',
+    '',
+    '![Harbor](https://cdn.example.com/harbor.jpg)',
+    '',
+    '![](https://tracker.example.net/pixel.gif)',
+    '',
+    '![Bad](javascript:alert(1)) ![Data](data:image/png;base64,AAAA)',
+    '',
+    '[![Logo](/logo.svg)](/about)',
+  ].join('\n')
+
+  it('keeps every image a link by default', (t) => {
+    const { $, $$, cleanup } = render(<Markdown source={source} />)
+    t.after(cleanup)
+    equal($$('img').length, 0)
+    equal($('a[href="/maps/ferry.png"]')?.textContent, 'Ferry map')
+  })
+
+  it('loads same-site images and keeps other hosts as links with images', (t) => {
+    const { $, $$, cleanup } = render(<Markdown source={source} images />)
+    t.after(cleanup)
+    deepEqual(
+      Array.from($$('img'), (img) => img.getAttribute('src')),
+      ['/maps/ferry.png', '/logo.svg'],
+    )
+    const map = $('img[src="/maps/ferry.png"]') as HTMLImageElement
+    equal(map.alt, 'Ferry map')
+    equal(map.title, 'Ferry routes')
+    equal(map.getAttribute('loading'), 'lazy')
+    equal(map.getAttribute('decoding'), 'async')
+    ok(!map.closest('p')!.hasAttribute('data-image'), 'an image in a line stays in the line')
+    // A refused remote image keeps its link, labelled by its URL without alt text.
+    equal($('a[href="https://cdn.example.com/harbor.jpg"]')?.textContent, 'Harbor')
+    equal(
+      $('a[href="https://tracker.example.net/pixel.gif"]')?.textContent,
+      'https://tracker.example.net/pixel.gif',
+    )
+    // Unsafe sources never render as links or images.
+    equal($('a[href^="javascript"], a[href^="data"], img[src^="data"]'), null)
+    // An image inside a link stays inside it.
+    equal($('a[href="/about"] > img')?.getAttribute('alt'), 'Logo')
+  })
+
+  it('asks a function about each safe source', (t) => {
+    const asked: string[] = []
+    const { $, $$, cleanup } = render(
+      <Markdown
+        source={source}
+        images={(src) => {
+          asked.push(src)
+          return src.startsWith('https://cdn.example.com/') || src.startsWith('https://tracker')
+        }}
+      />,
+    )
+    t.after(cleanup)
+    ok(!asked.some((src) => /^(javascript|data):/.test(src)), asked.join())
+    deepEqual(
+      Array.from($$('img'), (img) => img.getAttribute('src')),
+      ['https://cdn.example.com/harbor.jpg', 'https://tracker.example.net/pixel.gif'],
+    )
+    // An image alone in its paragraph is a block; one without alt text is decorative.
+    ok($('img[src*="harbor"]')!.closest('p')!.hasAttribute('data-image'))
+    const pixel = $('img[src*="pixel"]') as HTMLImageElement
+    equal(pixel.alt, '')
+    equal(pixel.getAttribute('aria-hidden'), 'true')
+    equal($('a[href="/maps/ferry.png"]')?.textContent, 'Ferry map')
+  })
+})

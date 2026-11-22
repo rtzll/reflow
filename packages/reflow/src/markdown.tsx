@@ -11,12 +11,23 @@ export interface MarkdownProps {
   size?: ControlSize
   /** Additional class on the rendered container. */
   class?: string
+  /**
+   * Which images load inline. By default every image is a link, so rendering
+   * loads nothing. `true` loads same-site paths; a function decides for each
+   * safe source. Refused images stay links.
+   */
+  images?: boolean | ((src: string) => boolean)
 }
 
 /** CommonMark and GitHub Flavored Markdown, with CodeBlock fences and Table for pipe tables. */
 export function Markdown(handle: Handle<MarkdownProps>) {
   return () => {
-    const context: Context = { size: handle.props.size, prefix: handle.id, tasks: 0 }
+    const context: Context = {
+      size: handle.props.size,
+      prefix: handle.id,
+      tasks: 0,
+      images: handle.props.images,
+    }
     return (
       <div
         class={classList('rf-markdown', handle.props.class)}
@@ -35,6 +46,14 @@ interface Context {
   size: ControlSize | undefined
   prefix: string
   tasks: number
+  images: MarkdownProps['images']
+}
+
+// Whether a safe, decoded image source may load: same-site paths for `true`,
+// the app's own rule for a function.
+function loads(src: string, images: MarkdownProps['images']) {
+  if (typeof images === 'function') return images(src)
+  return images === true && src.startsWith('/')
 }
 
 // Only web, mail, same-site path and fragment links. marked leaves character references
@@ -121,13 +140,25 @@ function block(token: Token, key: number, context: Context): RemixNode {
       ) : null
     case 'heading': {
       const Heading = (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const)[token.depth - 1]!
-      return <Heading key={key}>{inline(token.tokens ?? [])}</Heading>
+      return <Heading key={key}>{inline(token.tokens ?? [], context)}</Heading>
     }
-    case 'paragraph':
-      return <p key={key}>{inline(token.tokens ?? [])}</p>
+    case 'paragraph': {
+      const only = token.tokens?.length === 1 ? token.tokens[0] : undefined
+      // An image alone in its paragraph shows as a block.
+      const image =
+        only?.type === 'image' &&
+        !!context.images &&
+        !!href(only.href) &&
+        loads(href(only.href)!, context.images)
+      return (
+        <p key={key} data-image={image || undefined}>
+          {inline(token.tokens ?? [], context)}
+        </p>
+      )
+    }
     // Unwrapped text in a tight list item.
     case 'text':
-      return token.tokens ? inline(token.tokens) : decode(token.text)
+      return token.tokens ? inline(token.tokens, context) : decode(token.text)
     case 'code':
       return (
         <CodeBlock
@@ -172,11 +203,11 @@ function item(entry: Tokens.ListItem, key: number, context: Context): RemixNode 
   const label =
     first?.type === 'paragraph' ? (
       <p key={0} id={id}>
-        {inline(first.tokens ?? [])}
+        {inline(first.tokens ?? [], context)}
       </p>
     ) : first?.type === 'text' ? (
       <span key={0} id={id}>
-        {first.tokens ? inline(first.tokens) : decode(first.text)}
+        {first.tokens ? inline(first.tokens, context) : decode(first.text)}
       </span>
     ) : null
   return (
@@ -202,7 +233,7 @@ function table(token: Tokens.Table, key: number, context: Context): RemixNode {
         <TableRow hover={false}>
           {token.header.map((cell, column) => (
             <TableHead key={column} style={style(column)}>
-              {inline(cell.tokens)}
+              {inline(cell.tokens, context)}
             </TableHead>
           ))}
         </TableRow>
@@ -212,7 +243,7 @@ function table(token: Tokens.Table, key: number, context: Context): RemixNode {
           <TableRow key={index} hover={false}>
             {row.map((cell, column) => (
               <TableCell key={column} style={style(column)}>
-                {inline(cell.tokens)}
+                {inline(cell.tokens, context)}
               </TableCell>
             ))}
           </TableRow>
@@ -222,19 +253,19 @@ function table(token: Tokens.Table, key: number, context: Context): RemixNode {
   )
 }
 
-function inline(tokens: readonly Token[]): RemixNode[] {
+function inline(tokens: readonly Token[], context: Context): RemixNode[] {
   return tokens.map((token, key): RemixNode => {
     switch (token.type) {
       case 'text':
-        return token.tokens ? inline(token.tokens) : decode(token.text)
+        return token.tokens ? inline(token.tokens, context) : decode(token.text)
       case 'escape':
         return token.text
       case 'strong':
-        return <strong key={key}>{inline(token.tokens ?? [])}</strong>
+        return <strong key={key}>{inline(token.tokens ?? [], context)}</strong>
       case 'em':
-        return <em key={key}>{inline(token.tokens ?? [])}</em>
+        return <em key={key}>{inline(token.tokens ?? [], context)}</em>
       case 'del':
-        return <del key={key}>{inline(token.tokens ?? [])}</del>
+        return <del key={key}>{inline(token.tokens ?? [], context)}</del>
       // Code spans are literal, character references included.
       case 'codespan':
         return <code key={key}>{token.text}</code>
@@ -246,16 +277,30 @@ function inline(tokens: readonly Token[]): RemixNode[] {
         const url = href(token.href)
         return url ? (
           <a key={key} href={url} title={token.title ? decode(token.title) : undefined}>
-            {inline(token.tokens ?? [])}
+            {inline(token.tokens ?? [], context)}
           </a>
         ) : (
-          inline(token.tokens ?? [])
+          inline(token.tokens ?? [], context)
         )
       }
-      // Images show as links, so Markdown never loads remote images.
+      // Images show as links unless the app lets their source load, so by
+      // default Markdown loads nothing.
       case 'image': {
-        const label = decode(token.text) || token.href
+        const alt = decode(token.text)
+        const label = alt || token.href
         const url = href(token.href)
+        if (url && context.images && loads(url, context.images))
+          return (
+            <img
+              key={key}
+              src={url}
+              alt={alt}
+              title={token.title ? decode(token.title) : undefined}
+              aria-hidden={alt ? undefined : 'true'}
+              loading="lazy"
+              decoding="async"
+            />
+          )
         return url ? (
           <a key={key} href={url}>
             {label}

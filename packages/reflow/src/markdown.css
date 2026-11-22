@@ -111,3 +111,17 @@
     outline-color: Highlight;
   }
 }
+
+/* Inline images: never wider than the column nor taller than 480px, keeping
+   their shape. Alone in a paragraph, an image is a block. */
+.rf-markdown img {
+  max-inline-size: 100%;
+  max-block-size: 480px;
+  inline-size: auto;
+  block-size: auto;
+  vertical-align: middle;
+  border-radius: var(--rf-radius);
+}
+.rf-markdown p[data-image] img {
+  display: block;
+}

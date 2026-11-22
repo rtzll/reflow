@@ -12,6 +12,7 @@ import {
   datePickerToday,
   markdownTable,
   markdownFence,
+  markdownImages,
   accordionItems,
   multipleAccordionItems,
   rowHighlightAccordionItems,
@@ -1197,6 +1198,12 @@ function setEditing(open: boolean) {
       'table',
       `<Markdown source={${JSON.stringify(markdownTable)}} />`,
       'A delimiter row creates column headings. Colons in the delimiter control alignment.',
+    ),
+    demo(
+      'Images',
+      'images',
+      `<Markdown source={reply} images />\n\n// Or decide per source:\n<Markdown\n  source={reply}\n  images={(src) => src.startsWith('https://cdn.example.com/')}\n/>`,
+      'Images are links by default, so rendering loads nothing: an image URL in generated text could send data to whoever serves it. images loads same-site images; a function decides for each source. Refused images stay links.',
     ),
     demo(
       'Fenced code',
@@ -2420,6 +2427,8 @@ export function ComponentDemo(
       case 'drawer':
         return <DrawerDemo variant={variant} />
       case 'markdown':
+        if (variant === 'images')
+          return <Markdown source={markdownImages(images.thinkingPreview ?? '')} images />
         return <Markdown source={variant === 'table' ? markdownTable : markdownFence} />
       case 'code-block':
         return <CodeBlockDemo variant={variant} samples={images.code} />

@@ -10,6 +10,10 @@ export const markdownTable = `| Frame | Position |
 | First passenger | 1 |
 | Waiting room | 8 |`
 
+/** A Markdown reply with a same-site image, shown inline, and a remote one, kept as a link. */
+export const markdownImages = (preview: string) =>
+  `The release preview, from this site:\n\n![Reflow component preview](${preview} "Reflow preview")\n\nAn image from another host stays a link: ![Harbor at dawn](https://images.example.com/harbor.jpg).`
+
 export const markdownFence =
   'Save the departure time in `crossing.json`.\n\n```json\n{ "departure": "18:40" }\n```'
 
