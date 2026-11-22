@@ -153,12 +153,13 @@
   --rf-picker-chip-remove: 16px;
 }
 .rf-picker-chips {
+  --rf-picker-chip-gap: 4px;
   position: relative;
   display: flex;
   flex: 1;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px;
+  gap: var(--rf-picker-chip-gap);
   min-width: 0;
 }
 .rf-picker-field:not(:has(> .rf-combobox-leading)) > .rf-picker-chips[data-has-chips] {
@@ -174,6 +175,11 @@
   flex: 1 1 auto;
   width: max(24px, calc(var(--rf-picker-query-length, 1) * 1ch));
   min-block-size: 0;
+}
+.rf-picker-chips[data-has-chips] > .rf-picker-input:placeholder-shown {
+  /* Fit the empty caret in the gap before the toggle even when the chips fill the row. */
+  flex-basis: 1px;
+  margin-inline: -1px calc(-1 * var(--rf-picker-chip-gap));
 }
 .rf-picker-chip {
   display: inline-flex;

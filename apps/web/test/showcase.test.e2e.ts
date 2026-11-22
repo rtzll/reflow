@@ -441,6 +441,42 @@ it('advances the gallery carousel through its dots, pausing over the slides', as
   )
 })
 
+it('keeps an empty Combobox search on the last row of chips', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await open(page, '/')
+  const tile = page.locator('.site-gallery [data-component="combobox"]')
+  const field = tile.locator('.rf-picker-field')
+  const height = () => field.evaluate((node) => node.getBoundingClientRect().height)
+  const input = tile.getByRole('combobox', { name: 'Components' })
+  await tile.getByRole('button', { name: 'Remove Combobox' }).click()
+  await tile.getByRole('button', { name: 'Open options' }).click()
+  const option = (name: string) => tile.getByRole('option', { name, exact: true })
+  await option('Card').click()
+  const oneRow = await height()
+  await option('Button').click()
+  await option('Accordion').click()
+  await input.press('Escape')
+  await expect.poll(height).toBe(oneRow)
+
+  // At an exact fit the empty input still has room for a visible caret.
+  await tile.locator('.example-combobox').evaluate((example) => {
+    const rows = example.querySelector('.rf-picker-chips')!.getBoundingClientRect()
+    const last = example.querySelector('.rf-picker-chip:last-of-type')!.getBoundingClientRect()
+    example.style.width = `${example.getBoundingClientRect().width - (rows.right - last.right)}px`
+  })
+  await expect(input).toBeVisible()
+  await expect.poll(() => input.evaluate((node: HTMLInputElement) => node.offsetTop)).toBe(0)
+
+  await input.fill('checkbox')
+  await expect.poll(height).toBeGreaterThan(oneRow)
+  await option('CheckboxGroup').click()
+  await expect(input).toHaveValue('')
+  await expect.poll(height).toBeGreaterThan(oneRow)
+  await tile.getByRole('button', { name: 'Remove CheckboxGroup' }).click()
+  await expect.poll(height).toBe(oneRow)
+})
+
 it('keeps the gallery Combobox aligned and scrollable after a third choice wraps', async (t) => {
   const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1475, height: 1000 })
