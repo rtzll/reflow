@@ -202,8 +202,21 @@
   gap: inherit;
 }
 
+/* Loading cross-fades the label into the spinner. A light blur blends the
+   two, so the swap reads as one change rather than two overlapping states.
+   The label keeps its space, so the button holds its width. */
+.rf-button-content {
+  transition:
+    opacity var(--rf-spring-fast),
+    filter var(--rf-spring-fast);
+}
+
 .rf-button[aria-busy='true'] > .rf-button-content {
   opacity: 0;
+  filter: blur(2px);
+  transition:
+    opacity var(--rf-exit-fast),
+    filter var(--rf-exit-fast);
 }
 
 .rf-button-label {
@@ -248,4 +261,30 @@
   height: var(--rf-icon-size);
   transform: translate(-50%, -50%);
   pointer-events: none;
+  transition:
+    opacity var(--rf-spring-fast),
+    scale var(--rf-spring-fast),
+    filter var(--rf-spring-fast);
+}
+
+@starting-style {
+  .rf-button-spinner {
+    opacity: 0;
+    scale: 0.8;
+    filter: blur(2px);
+  }
+}
+
+/* Reduced motion keeps the fade and drops the growth and blur. */
+@media (prefers-reduced-motion: reduce) {
+  .rf-button[aria-busy='true'] > .rf-button-content {
+    filter: none;
+  }
+
+  @starting-style {
+    .rf-button-spinner {
+      scale: none;
+      filter: none;
+    }
+  }
 }

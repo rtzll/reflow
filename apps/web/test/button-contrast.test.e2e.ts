@@ -54,3 +54,34 @@ it('presses in slightly while held, and stays still in reduced motion', async (t
   await open(page, '/docs/button')
   assert.equal(await pressed(), 'none')
 })
+
+it('cross-fades its label into the spinner while loading, at the same width', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await open(page, '/docs/button', { motion: true })
+  const button = page.locator('main .rf-button', { hasText: 'Get started' }).first()
+  const width = (await button.boundingBox())?.width
+  await button.click()
+  const loading = await button.evaluate(async (element) => {
+    const spinner = element.querySelector('.rf-button-spinner')
+    const content = element.querySelector('.rf-button-content')
+    if (!spinner || !content) throw new Error('Missing loading parts')
+    // The spinner's own turn repeats forever; wait only for the transitions.
+    await Promise.all(
+      element
+        .getAnimations({ subtree: true })
+        .filter((animation) => animation instanceof CSSTransition)
+        .map((animation) => animation.finished.catch(() => {})),
+    )
+    return {
+      busy: element.getAttribute('aria-busy'),
+      label: [getComputedStyle(content).opacity, getComputedStyle(content).filter],
+      spinner: [getComputedStyle(spinner).opacity, getComputedStyle(spinner).scale],
+    }
+  })
+  assert.deepEqual(loading, {
+    busy: 'true',
+    label: ['0', 'blur(2px)'],
+    spinner: ['1', 'none'],
+  })
+  assert.equal((await button.boundingBox())?.width, width)
+})
