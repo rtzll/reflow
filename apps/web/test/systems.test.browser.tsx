@@ -51,10 +51,25 @@ it('applies the preset stagger through WAAPI and cancels reveal on removal', asy
   element.scrollIntoView()
   await waitFor(() => element.getAnimations().length > 0)
   const animation = element.getAnimations()[0]
-  equal(animation.effect?.getTiming().delay, 120)
+  // 60ms, then a gap a quarter shorter.
+  equal(animation.effect?.getTiming().delay, 105)
   equal((animation.effect as KeyframeEffect).getKeyframes()[0].opacity, '0')
   cleanup()
   equal(animation.playState, 'idle')
+})
+
+it('settles a long stagger instead of queueing every row', async (t) => {
+  const { $, cleanup } = render(
+    <div data-reveal-late mix={reveal({ preset: 'product', index: 20 })}>
+      Row 21
+    </div>,
+  )
+  t.after(cleanup)
+  const element = $('[data-reveal-late]') as HTMLElement
+  element.scrollIntoView()
+  await waitFor(() => element.getAnimations().length > 0)
+  const delay = Number(element.getAnimations()[0]!.effect?.getTiming().delay)
+  ok(delay > 200 && delay <= 240, `row 21 waits ${delay}ms`)
 })
 
 it('tracks the physically overflowing edges in a right-to-left scroll viewport', async (t) => {

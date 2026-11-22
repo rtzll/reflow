@@ -221,7 +221,7 @@ export function RevealPresetDemo(handle: Handle<{ product?: boolean }>) {
             ['Preset', preset],
             ['Travel', `${distance}px`],
             ['Scale', String(scale)],
-            ['Stagger', `${step}ms`],
+            ['First gap', `${step}ms`],
           ].map(([name, value]) => (
             <div key={name}>
               <dt>{name}</dt>

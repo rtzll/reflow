@@ -131,10 +131,11 @@ it('staggers the landing hero on both presets and on replay', async (t) => {
   const delays = () =>
     heroItems.evaluateAll((items) => items.map((item) => item.getAttribute('data-reveal-delay')))
   await frame.scrollIntoViewIfNeeded()
-  await expect.poll(delays).toEqual(['0', '100', '200', '300', '300'])
+  // Each gap a quarter shorter than the last.
+  await expect.poll(delays).toEqual(['0', '100', '175', '231', '231'])
 
   await frame.getByRole('tab', { name: 'Subtle' }).click()
-  await expect.poll(delays).toEqual(['0', '60', '120', '180', '180'])
+  await expect.poll(delays).toEqual(['0', '60', '105', '139', '139'])
 
   const viewport = frame.getByRole('region', { name: 'landing preset example' })
   await viewport.evaluate((node) => {
@@ -144,7 +145,7 @@ it('staggers the landing hero on both presets and on replay', async (t) => {
   })
   await frame.getByRole('button', { name: 'Replay' }).click()
   assert.equal(await viewport.evaluate((node) => node.scrollTop), 0)
-  await expect.poll(delays).toEqual(['0', '60', '120', '180', '180'])
+  await expect.poll(delays).toEqual(['0', '60', '105', '139', '139'])
 })
 
 it('uses the native viewport through the custom scrollbar', async (t) => {

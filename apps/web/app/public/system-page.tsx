@@ -1236,7 +1236,10 @@ style={{ transition: \`left \${motion.moderate}\` }}`}
             <SystemSection title="Built in">
               <ul>
                 <li>Landing uses the slow spring, product uses the moderate spring.</li>
-                <li>Indices apply the same stagger interval to related elements.</li>
+                <li>
+                  Indices stagger related elements, each gap a quarter shorter than the last, so a
+                  long list settles at four gaps instead of queueing.
+                </li>
                 <li>Browsers without scroll timelines use the entrance animation.</li>
                 <li>Reduced motion keeps the content still.</li>
               </ul>
@@ -1245,7 +1248,7 @@ style={{ transition: \`left \${motion.moderate}\` }}`}
           <SystemSection title="Reference">
             <h3>Presets</h3>
             <TokenTable
-              headings={['Preset', 'Travel / scale', 'Stagger']}
+              headings={['Preset', 'Travel / scale', 'First gap']}
               rows={[
                 ['landing', '12px / 0.94', '100ms'],
                 ['landing-subtle', '8px / 0.98', '60ms'],

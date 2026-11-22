@@ -36,10 +36,19 @@ export interface RevealOptions {
   /** Tie entrance and exit progress to the nearest scroll viewport. */
   scroll?: boolean
   preset?: keyof typeof revealPresets
-  /** Position among siblings. The preset determines the stagger interval. */
+  /** Position among siblings. The preset sets the first gap; later gaps shrink. */
   index?: number
   /** Override the delay in milliseconds. */
   delay?: number
+}
+
+// Each gap is a quarter shorter than the one before, so a group arrives as a
+// wave rather than a queue, and a long list never waits: the delays settle at
+// four steps, however far down a row sits.
+const staggerDecay = 0.75
+
+function staggerDelay(index: number, step: number) {
+  return Math.round((step * (1 - staggerDecay ** Math.max(0, index))) / (1 - staggerDecay))
 }
 
 /** Reveal an element once when it reaches the viewport. Server markup stays visible. */
@@ -66,7 +75,7 @@ export function reveal(options: RevealOptions = {}) {
       )
       return
     }
-    const delay = Math.max(0, options.delay ?? (options.index ?? 0) * (preset?.step ?? 0))
+    const delay = Math.max(0, options.delay ?? staggerDelay(options.index ?? 0, preset?.step ?? 0))
     let animation: Animation | undefined
     const observer = new IntersectionObserver((entries) => {
       if (!entries.some((entry) => entry.isIntersecting)) return
