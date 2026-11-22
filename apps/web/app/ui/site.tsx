@@ -476,8 +476,10 @@ function previewImages(images: ExampleImages, variant: string | undefined): Exam
 const galleryOrder = [
   'carousel',
   'queued-stack',
-  'toaster',
   'hover-card',
+  'toaster',
+  'time-grid',
+  'bar-chart',
   'code-block',
   'data-table',
   'avatar',
@@ -512,8 +514,6 @@ const galleryOrder = [
   'combobox',
   'markdown',
   'citation',
-  'time-grid',
-  'bar-chart',
 ]
 
 const wideCards = new Set([
