@@ -1,3 +1,4 @@
+import type { activityReport } from '../../../analytics-data.ts'
 import {
   RoutedDataTable,
   Button,
@@ -10,12 +11,12 @@ import {
 import { clientEntry, navigate, ref, type Handle } from 'remix/component'
 import { ActivityChart } from './activity-chart.tsx'
 import {
-  days,
+  eventFields,
+  pageSize,
+  sources,
   dayLabel,
-  fullRange,
   rangeHref,
   rangeLabel,
-  readRange,
   type ActivityEvent,
   type ActivityRange,
 } from './activity.ts'
@@ -24,7 +25,7 @@ const columns: readonly DataTableColumn<ActivityEvent>[] = [
   {
     id: 'action',
     label: 'Event',
-    value: (row) => row.action,
+    value: eventFields.action,
     rowHeader: true,
     cell: (row) => (
       <Drawer
@@ -51,12 +52,12 @@ const columns: readonly DataTableColumn<ActivityEvent>[] = [
       </Drawer>
     ),
   },
-  { id: 'item', label: 'Item', value: (row) => row.item },
-  { id: 'source', label: 'Source', value: (row) => row.source },
+  { id: 'item', label: 'Item', value: eventFields.item },
+  { id: 'source', label: 'Source', value: eventFields.source },
   {
     id: 'time',
     label: 'Time (UTC)',
-    value: (row) => row.day + ' ' + row.time,
+    value: eventFields.time,
     cell: (row) => (
       <time dateTime={row.day + 'T' + row.time + ':00Z'}>
         {dayLabel(row.day)} · {row.time}
@@ -68,18 +69,18 @@ const columns: readonly DataTableColumn<ActivityEvent>[] = [
 const sourceList = new Intl.ListFormat('en', { type: 'conjunction' })
 
 function SourceInsight(
-  handle: Handle<{ events: readonly ActivityEvent[]; path: string; search: string }>,
+  handle: Handle<{ total: number; counts: number[]; path: string; search: string }>,
 ) {
   return () => {
-    const { events, path, search } = handle.props
-    if (!events.length) return null
-
-    const counts = new Map<string, number>()
-    for (const { source } of events) counts.set(source, (counts.get(source) ?? 0) + 1)
-    const count = Math.max(...counts.values())
-    const sources = [...counts.keys()].filter((source) => counts.get(source) === count).sort()
-    const imports = sources.length === 1 && sources[0] === 'Media import'
-    const links = sourceList.formatToParts(sources).map(({ type, value }) => {
+    const { counts, total, path, search } = handle.props
+    if (!total) return null
+    const count = Math.max(...counts)
+    const leaders = sources
+      .filter((_, i) => counts[i] === count)
+      .map(({ label }) => label)
+      .sort()
+    const imports = leaders.length === 1 && leaders[0] === 'Media import'
+    const links = sourceList.formatToParts(leaders).map(({ type, value }) => {
       if (type === 'literal') return value
       const query = new URLSearchParams(search)
       query.set('eventFilter', value)
@@ -99,14 +100,14 @@ function SourceInsight(
         </a>
       )
     })
-    let quantity = `${count} of ${events.length} events`
-    if (count === events.length) {
+    let quantity = `${count} of ${total} events`
+    if (count === total) {
       quantity =
         count === 1 ? 'The only event' : count === 2 ? 'Both events' : `All ${count} events`
     }
     return (
       <p class="analytics-insight">
-        {sources.length > 1 ? (
+        {leaders.length > 1 ? (
           <>
             {links} each accounted for <strong>{quantity}</strong>.
           </>
@@ -123,7 +124,9 @@ function SourceInsight(
 
 export const AnalyticsExplorer = clientEntry(
   import.meta.url,
-  function AnalyticsExplorer(handle: Handle<{ path: string; search: string }>) {
+  function AnalyticsExplorer(
+    handle: Handle<{ path: string; search: string; report: ReturnType<typeof activityReport> }>,
+  ) {
     let draft: DateRange | undefined
     let previousRange: string | undefined
     const clearDraftOnClose = ref<HTMLDivElement>((node, signal) => {
@@ -139,19 +142,14 @@ export const AnalyticsExplorer = clientEntry(
       )
     })
     return () => {
-      const { path, search } = handle.props
-      const range = readRange(search)
+      const { path, search, report } = handle.props
+      const { range, fullRange, total, dayCount, peak } = report
       const rangeKey = range.start + '/' + range.end
       if (rangeKey !== previousRange) {
         previousRange = rangeKey
         draft = undefined
       }
-      const selected = days.filter(({ day }) => day >= range.start && day <= range.end)
-      const events = selected.flatMap(({ events }) => events).reverse()
-      const peak = selected.reduce((best, next) =>
-        next.events.length > best.events.length ? next : best,
-      )
-      const href = (next: ActivityRange) => rangeHref(path, search, next)
+      const href = (next: ActivityRange) => rangeHref(path, search, next, fullRange)
 
       return (
         <article class="analytics-explorer">
@@ -189,12 +187,12 @@ export const AnalyticsExplorer = clientEntry(
           <dl class="analytics-metrics">
             <div>
               <dt>Total events</dt>
-              <dd>{events.length}</dd>
+              <dd>{total}</dd>
             </div>
             <div>
               <dt>Daily average</dt>
               <dd>
-                {(events.length / selected.length).toLocaleString('en-US', {
+                {(total / dayCount).toLocaleString('en-US', {
                   maximumFractionDigits: 1,
                 })}
                 <small>events/day</small>
@@ -203,14 +201,14 @@ export const AnalyticsExplorer = clientEntry(
             <div>
               <dt>Busiest day</dt>
               <dd>
-                {peak.events.length}
+                {peak.count}
                 <small>
                   on{' '}
-                  {selected.length > 1 ? (
+                  {dayCount > 1 ? (
                     <a
                       class="analytics-peak-link"
                       href={href({ start: peak.day, end: peak.day })}
-                      aria-label={`View ${peak.events.length} events on ${dayLabel(peak.day)}`}
+                      aria-label={`View ${peak.count} events on ${dayLabel(peak.day)}`}
                       data-rmx-reset-scroll="manual"
                     >
                       {dayLabel(peak.day)}
@@ -222,8 +220,8 @@ export const AnalyticsExplorer = clientEntry(
               </dd>
             </div>
           </dl>
-          <ActivityChart range={range} href={href}>
-            <SourceInsight events={events} path={path} search={search} />
+          <ActivityChart range={range} href={href} bars={report.bars}>
+            <SourceInsight total={total} counts={report.counts} path={path} search={search} />
           </ActivityChart>
           <section
             class="analytics-events"
@@ -234,15 +232,16 @@ export const AnalyticsExplorer = clientEntry(
             <div class="analytics-section-heading">
               <h2 id="events-heading">Event log</h2>
               <p>
-                {rangeLabel(range)} · {events.length} events
+                {rangeLabel(range)} · {total} events
               </p>
             </div>
             <RoutedDataTable
-              rows={events}
+              rows={report.rows}
+              rowCount={report.rowCount}
               columns={columns}
               label="Studio events"
               rowKey={(row) => row.id}
-              pageSize={6}
+              pageSize={pageSize}
               route={{ path, search, prefix: 'event', anchor: 'events' }}
             />
           </section>

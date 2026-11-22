@@ -200,3 +200,32 @@ it('explains tied sources and regular editing days without losing the active ran
   await expect(chart.getByText('Both events came from Studio editor.')).toBeVisible()
   await expect(chart.getByRole('link', { name: /media imports/i })).toHaveCount(0)
 })
+
+it('fetches filtered rows as the reader types', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 360, height: 800 })
+  await open(page, '/apps/analytics')
+  const filter = page.getByRole('searchbox', { name: 'Filter Studio events' })
+  const response = page.waitForResponse(
+    (res) => new URL(res.url()).searchParams.get('eventFilter') === 'media import' && res.ok(),
+  )
+  await filter.pressSequentially('media import')
+  await response
+  const table = page.getByRole('table', { name: 'Studio events' })
+  await expect(table.getByRole('cell', { name: 'Media import', exact: true })).toHaveCount(6)
+  await expect(filter).toBeFocused()
+})
+
+it('submits a complete server filter with Enter when the browser uses document navigation', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.addInitScript(() => Object.defineProperty(window, 'navigation', { value: undefined }))
+  await open(page, '/apps/analytics?eventSort=item')
+  const field = page.getByRole('searchbox', { name: 'Filter Studio events' })
+  await field.pressSequentially('media import')
+  await expect(field).toBeFocused()
+  await field.press('Enter')
+  await expect(
+    page.getByRole('status').filter({ hasText: '19 results, page 1 of 4' }),
+  ).toBeVisible()
+  expect(new URL(page.url()).searchParams.get('eventSort')).toBe('item')
+})

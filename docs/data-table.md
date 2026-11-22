@@ -40,6 +40,8 @@ A table over thousands of records, or one the server must filter for permissions
 
 Selection works on the page as it does now. With `selectAllMatching`, the offer counts `rowCount`, and since the table never holds the other pages, `actions(rows, clear, selection)` receives the loaded rows together with `selection.allMatching` and `selection.count`. An app acts on `{ filter, allMatching: true }` on its server instead of on the row list. Without `rowCount` the third argument still arrives, with `count` equal to the rows passed.
 
+The Analytics workspace serves a six-row page and its matching count with each request. The native search form and page links work before hydration. In a hydrated RoutedDataTable with `rowCount`, typing a filter requests fresh rows while keeping focus in the search field.
+
 An all-matching selection over server rows belongs to the filter and the count: a different filter or a different `rowCount` clears it, because the set it promised may have changed.
 
 ## Interaction and verification

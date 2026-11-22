@@ -1,5 +1,6 @@
 import { BarChart, Icon } from '@rtzll/reflow'
-import { activityBars, dayLabel, fullRange } from '../public/apps/analytics/activity.ts'
+import { activityBars, fullRange } from '../analytics-data.ts'
+import { dayLabel } from '../public/apps/analytics/activity.ts'
 import { seedEvents, timeLabel } from '../public/apps/calendar/events.ts'
 import { issues } from '../public/apps/issues/fixtures.ts'
 
