@@ -31,7 +31,7 @@ export const IssueTracker = clientEntry(
     let active: string | undefined = issues[0]?.id
     let selected = new Set<string>()
     const range = createRangeSelection<string>()
-    let pointerFrom: string | undefined
+    let selectionEnd: string | undefined
     let announcement = ''
     let lastMove: LastMove | undefined
     let filter: IssueFilter | undefined
@@ -55,22 +55,17 @@ export const IssueTracker = clientEntry(
 
     const mountDraggable = ref<HTMLDivElement>(async (element, signal) => {
       try {
-        const { draggable, setCustomNativeDragPreview } = await import('./drag-adapter.ts')
+        const { draggable, setIssueDragPreview } = await import('./drag-adapter.ts')
         if (signal.aborted) return
         const cleanup = draggable({
           element,
-          onGenerateDragPreview: ({ nativeSetDragImage }) => {
-            const count = movingIds(element.dataset.issueId!).size
-            if (count < 2) return
-            setCustomNativeDragPreview({
-              nativeSetDragImage,
-              render: ({ container }) => {
-                const badge = document.createElement('div')
-                badge.className = 'issues-drag-count'
-                badge.textContent = `${count} issues`
-                container.append(badge)
-              },
-            })
+          onGenerateDragPreview: (event) => {
+            const id = element.dataset.issueId!
+            if (selected.size < 2 || !selected.has(id)) return
+            const companions = orderedIssues().filter(
+              (issue) => issue.id !== id && selected.has(issue.id),
+            )
+            setIssueDragPreview(event, companions, layout)
           },
           onDragStart: () => {
             if (!list) return
@@ -182,6 +177,19 @@ export const IssueTracker = clientEntry(
       range.reset()
       if (selected.has(id)) selected.delete(id)
       else selected.add(id)
+      selectionEnd = selected.has(id) ? id : [...selected].at(-1)
+      announcement = ''
+      void handle.update()
+    }
+
+    function extendSelection(from: string, to: string) {
+      selected = range.extend(
+        orderedIssues().map((issue) => issue.id),
+        selected,
+        from,
+        to,
+      )
+      selectionEnd = to
       announcement = ''
       void handle.update()
     }
@@ -270,6 +278,7 @@ export const IssueTracker = clientEntry(
           event.preventDefault()
           range.reset()
           selected = new Set(orderedIssues().map((issue) => issue.id))
+          selectionEnd = id
           announcement = `${selected.size} selected.`
           void handle.update()
         }
@@ -288,14 +297,7 @@ export const IssueTracker = clientEntry(
           const next = Math.max(0, Math.min(index + step, rows.length - 1))
           if (!event.shiftKey) range.reset()
           else if (next !== index) {
-            selected = range.extend(
-              rows.map((issue) => issue.id),
-              selected,
-              id,
-              rows[next]!.id,
-            )
-            announcement = ''
-            void handle.update()
+            extendSelection(id, rows[next]!.id)
           }
           focusIssue(rows[next]?.id)
           break
@@ -399,10 +401,11 @@ export const IssueTracker = clientEntry(
               </div>
             )}
             <p id={handle.id + '-keys'} class="rf-basic-sr-only">
-              Use the arrows to navigate. Click, press X, or press Space to toggle an issue.
-              Shift-click or use Shift and the vertical arrows to select a range. Use Control or
-              Command with A to select all visible issues. Drag any selected issue to move the
-              selection, or Tab to the actions. Press Enter for details.
+              Click an issue or press Enter to open it. Use its checkbox, Command-click,
+              Control-click, X, or Space to toggle selection. After selecting one issue, hold Shift
+              and hover, click, or use the vertical arrows to extend a range. Control or Command
+              with A selects all visible issues. Drag a selected issue to move the group, or Tab to
+              the actions.
             </p>
             <ContextMenu
               label="Issue actions"
@@ -488,24 +491,35 @@ export const IssueTracker = clientEntry(
                                   active = issue.id
                                   void handle.update()
                                 }),
-                                // Native pointer focus reaches the new row before its click fires.
-                                on('pointerdown', () => {
-                                  pointerFrom = active
+                                on('pointerenter', (event) => {
+                                  if (
+                                    event.pointerType === 'mouse' &&
+                                    event.shiftKey &&
+                                    !event.buttons &&
+                                    !dragging.size &&
+                                    selectionEnd &&
+                                    selected.has(selectionEnd)
+                                  ) {
+                                    extendSelection(selectionEnd, issue.id)
+                                  }
                                 }),
                                 on('click', (event) => {
-                                  const from = event.detail ? pointerFrom : active
                                   focusIssue(issue.id)
-                                  if (event.shiftKey && from) {
-                                    selected = range.extend(
-                                      visible.map((item) => item.id),
-                                      selected,
-                                      from,
-                                      issue.id,
-                                    )
-                                    announcement = ''
-                                    void handle.update()
-                                  } else {
+                                  if (event.shiftKey) {
+                                    const from =
+                                      selectionEnd && selected.has(selectionEnd)
+                                        ? selectionEnd
+                                        : issue.id
+                                    extendSelection(from, issue.id)
+                                  } else if (
+                                    event.metaKey ||
+                                    event.ctrlKey ||
+                                    (event.target instanceof Element &&
+                                      event.target.closest('.issues-check'))
+                                  ) {
                                     toggle(issue.id)
+                                  } else {
+                                    openDetails(issue.id)
                                   }
                                 }),
                                 on('keydown', (event) => navigate(event, issue.id)),
@@ -515,7 +529,7 @@ export const IssueTracker = clientEntry(
                               <span
                                 class="issues-check"
                                 aria-hidden="true"
-                                title="Click to select an issue. Shift-click to select a range."
+                                title={selected.has(issue.id) ? 'Deselect issue' : 'Select issue'}
                               >
                                 {selected.has(issue.id) && <Icon name="check" size={12} />}
                               </span>
