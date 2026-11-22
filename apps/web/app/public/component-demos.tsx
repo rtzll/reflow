@@ -50,6 +50,8 @@ import { ToasterDemo } from './toaster-example.tsx'
 import { DrawerDemo } from './drawer-example.tsx'
 import { ConfirmationDemo } from './confirmation-example.tsx'
 import { ReleaseWeek } from './time-grid-week-example.tsx'
+import { BarChartVariants } from './bar-chart-series-example.tsx'
+import { BuildTimings } from './build-timings.tsx'
 import { StudioBookings } from './studio-bookings.tsx'
 import { CodeBlockDemo } from './code-block-example.tsx'
 import { CitationDemo } from './citation-example.tsx'
@@ -1292,6 +1294,26 @@ function setEditing(open: boolean) {
       'Plain code needs nothing but Reflow.',
     ),
   ],
+  'bar-chart': [
+    demo(
+      'Build timings',
+      'timings',
+      `<BarChart\n  label="Build timings"\n  items={stages}\n  formatValue={(seconds) => seconds + ' s'}\n  onSelect={inspect}\n/>`,
+      'Hover or focus a bar to read its value; arrow keys move between bars.',
+    ),
+    demo(
+      'Negative values',
+      'negative',
+      `<BarChart label="Daily balance" items={balance} formatValue={(value) => value + ' h'} />`,
+      'The axis spans the data with zero on a round step, and bars below zero hang from the zero line.',
+    ),
+    demo(
+      'Stacked, horizontal',
+      'stacked',
+      `<BarChart\n  label="Lines changed by package"\n  items={packages}\n  series={[\n    { id: 'added', label: 'Added' },\n    { id: 'removed', label: 'Removed' },\n  ]}\n  layout="stacked"\n  orientation="horizontal"\n/>`,
+      'Each item gives values, one per series. Stacked, positive values pile one way and negative ones the other; grouped, they sit side by side. Rows suit long labels, and Up and Down move between them.',
+    ),
+  ],
   'time-grid': [
     demo(
       'Bookings',
@@ -2477,6 +2499,8 @@ export function ComponentDemo(
         return <DrawerDemo variant={variant} />
       case 'time-grid':
         return variant === 'week' ? <ReleaseWeek /> : <StudioBookings />
+      case 'bar-chart':
+        return variant === 'timings' ? <BuildTimings /> : <BarChartVariants variant={variant} />
       case 'markdown':
         if (variant === 'images')
           return <Markdown source={markdownImages(images.thinkingPreview ?? '')} images />

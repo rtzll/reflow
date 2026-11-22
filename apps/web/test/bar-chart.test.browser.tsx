@@ -118,3 +118,116 @@ it('handles extreme finite peaks without NaN or Infinity, marks static current b
   equal(firstButton.getAttribute('aria-describedby'), null)
   ok(firstButton.getAttribute('aria-label'))
 })
+
+// Where each segment sits on the value scale, as percentages: [start, size].
+function segments(chart: ParentNode) {
+  return Array.from(chart.querySelectorAll<HTMLElement>('.rf-bar-chart-column'), (column) =>
+    Array.from(column.querySelectorAll<HTMLElement>('.rf-bar-chart-fill'), (fill) => [
+      Number.parseFloat(fill.style.getPropertyValue('--start')),
+      Number.parseFloat(fill.style.getPropertyValue('--size')),
+    ]),
+  )
+}
+
+it('draws negative values below a zero line on round steps', (t) => {
+  const { $, $$, cleanup } = render(
+    <BarChart
+      label="Balance"
+      items={[
+        { id: 'jan', label: 'Jan', value: 30 },
+        { id: 'feb', label: 'Feb', value: -15 },
+      ]}
+    />,
+  )
+  t.after(cleanup)
+  // The axis runs from −15 to 30 in steps of 15: −15, 0, 15, 30.
+  deepEqual(
+    Array.from($$('.rf-bar-chart-grid > span > span'), (label) => label.textContent),
+    ['30', '15', '0', '-15'],
+  )
+  const zero = $('.rf-bar-chart-grid > span[data-zero]') as HTMLElement
+  equal(Number.parseFloat(zero.style.bottom).toFixed(2), '33.33')
+  // Jan rises from the zero line to the top; Feb hangs from it to the bottom.
+  deepEqual(
+    segments($('.rf-bar-chart')!).map((bar) =>
+      bar.map(([start, size]) => [Math.round(start!), Math.round(size!)]),
+    ),
+    [[[33, 67]], [[0, 33]]],
+  )
+  ok($('[aria-label="Feb, -15"]'))
+  equal($('[data-peak]')?.getAttribute('aria-label'), 'Jan, 30')
+})
+
+it('groups and stacks series, names each value and shows a legend', (t) => {
+  const series = [
+    { id: 'builds', label: 'Builds' },
+    { id: 'tests', label: 'Tests' },
+  ]
+  const items = [
+    { id: 'mon', label: 'Monday', value: 0, values: [4, -2] },
+    { id: 'tue', label: 'Tuesday', value: 0, values: [2, 2] },
+  ]
+  const grouped = render(<BarChart label="Runs" items={items} series={series} showAxes={false} />)
+  t.after(grouped.cleanup)
+  ok(grouped.$('[aria-label="Monday: Builds 4, Tests -2"]'))
+  deepEqual(
+    Array.from(grouped.$$('.rf-bar-chart-legend li'), (entry) => entry.textContent),
+    ['Builds', 'Tests'],
+  )
+  equal(grouped.$('[data-peak]'), null, 'series have no single peak')
+  // Scale −2 to 4: zero at a third. Grouped bars start at zero.
+  const groupedSegments = segments(grouped.$('.rf-bar-chart')!).map((bar) =>
+    bar.map(([start, size]) => [Math.round(start!), Math.round(size!)]),
+  )
+  deepEqual(groupedSegments, [
+    [
+      [33, 67],
+      [0, 33],
+    ],
+    [
+      [33, 33],
+      [33, 33],
+    ],
+  ])
+
+  const stacked = render(
+    <BarChart label="Runs" items={items} series={series} layout="stacked" showAxes={false} />,
+  )
+  t.after(stacked.cleanup)
+  // Stacked: scale −2 to 4 (Tuesday sums to 4). Positive values pile upward.
+  const stackedSegments = segments(stacked.$('.rf-bar-chart')!).map((bar) =>
+    bar.map(([start, size]) => [Math.round(start!), Math.round(size!)]),
+  )
+  deepEqual(stackedSegments, [
+    [
+      [33, 67],
+      [0, 33],
+    ],
+    [
+      [33, 33],
+      [67, 33],
+    ],
+  ])
+})
+
+it('moves between rows with Up and Down in a horizontal chart', async (t) => {
+  const { $, $$, act, cleanup } = render(
+    <BarChart label="Run times" items={bars} orientation="horizontal" onSelect={() => {}} />,
+  )
+  t.after(cleanup)
+  equal($('.rf-bar-chart')?.getAttribute('data-orientation'), 'horizontal')
+  const columns = Array.from($$('.rf-bar-chart-column')) as HTMLElement[]
+  columns[0]!.focus()
+  await act(() =>
+    columns[0]!.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
+    ),
+  )
+  equal(document.activeElement, columns[1])
+  await act(() =>
+    columns[1]!.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    ),
+  )
+  equal(document.activeElement, columns[1], 'Left and Right do not move between rows')
+})

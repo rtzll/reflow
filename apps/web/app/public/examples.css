@@ -2139,3 +2139,7 @@
   color: var(--rf-muted);
   font: var(--rf-text-caption) / 1.4 var(--rf-font-mono, ui-monospace, monospace);
 }
+
+.doc-bar-chart {
+  width: min(100%, 34rem);
+}

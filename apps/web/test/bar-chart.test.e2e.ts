@@ -1,4 +1,5 @@
 import { expect } from 'playwright/test'
+import * as assert from 'remix/assert'
 import { it } from 'remix/test'
 import { open, showcaseServer } from './showcase-router.ts'
 
@@ -43,4 +44,31 @@ it('shows static bars within the Analytics directory link before hydration', asy
   const spike = page.getByRole('link', { name: 'Oct 14, 24 events' })
   await expect(spike).toHaveAttribute('href', /from=2026-10-14&to=2026-10-14/)
   await expect(spike).toHaveAttribute('tabindex', '0')
+})
+
+it('lays out a stacked horizontal chart with rows, a zero line and a legend', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await open(page, '/docs/bar-chart')
+  const chart = page.locator('#stacked-horizontal').getByRole('group', {
+    name: 'Lines changed by package',
+  })
+  const web = chart.getByRole('img', { name: 'web: Added 260, Removed -310' })
+  await expect(web).toBeVisible()
+  const [added, removed] = await web.locator('.rf-bar-chart-fill').all()
+  const zero = (await chart.locator('.rf-bar-chart-grid > span[data-zero]').boundingBox())!
+  const [a, r] = [(await added!.boundingBox())!, (await removed!.boundingBox())!]
+  // Added runs right from the zero line, removed runs left from it, on one row.
+  assert.ok(Math.abs(a.x - zero.x) <= 1.5, `${a.x} ${zero.x}`)
+  assert.ok(Math.abs(r.x + r.width - zero.x) <= 1.5, `${r.x + r.width} ${zero.x}`)
+  assert.ok(Math.abs(a.y - r.y) <= 0.5)
+  assert.ok(r.width > a.width, 'more removed than added')
+  // Rows stack top to bottom, labels beside them.
+  const rows = await chart
+    .locator('.rf-bar-chart-column')
+    .evaluateAll((nodes) => nodes.map((node) => Math.round(node.getBoundingClientRect().top)))
+  assert.ok(rows.every((top, index) => index === 0 || top > rows[index - 1]!))
+  await expect(chart.getByRole('list', { name: 'Lines changed by package series' })).toHaveText(
+    'AddedRemoved',
+  )
 })

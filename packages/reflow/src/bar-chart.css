@@ -26,8 +26,12 @@
 .rf-bar-chart[data-axes] .rf-bar-chart-grid > span {
   inset-inline-start: var(--rf-bar-chart-axis-width, 2.5rem);
 }
-.rf-bar-chart-grid > span:last-child {
+.rf-bar-chart-grid > span:last-child,
+.rf-bar-chart[data-positioned] .rf-bar-chart-grid > span[data-zero] {
   border-block-start-style: solid;
+}
+.rf-bar-chart[data-positioned] .rf-bar-chart-grid > span:last-child:not([data-zero]) {
+  border-block-start-style: dashed;
 }
 .rf-bar-chart-grid > span > span {
   position: absolute;
@@ -109,6 +113,145 @@
 }
 .rf-bar-chart-empty {
   color: var(--rf-muted);
+}
+
+/* Positioned bars: segments placed on the value scale by --start and
+   --size, in percent, so bars can hang below zero, stack and group. The
+   bar's width is shared by --count side-by-side segments. */
+.rf-bar-chart {
+  --rf-bar-chart-series-1: var(--rf-accent);
+  --rf-bar-chart-series-2: var(--rf-info);
+  --rf-bar-chart-series-3: var(--rf-success);
+  --rf-bar-chart-series-4: var(--rf-warning);
+}
+.rf-bar-chart-plot {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.rf-bar-chart[data-positioned] .rf-bar-chart-fill {
+  --bar: min(68%, 36px);
+  position: absolute;
+  inset-block-end: calc(var(--start) * 1%);
+  inset-inline-start: calc(50% - var(--bar) / 2 + var(--index) * var(--bar) / var(--count));
+  width: calc(var(--bar) / var(--count));
+  height: calc(var(--size) * 1%);
+  max-width: none;
+  border-radius: 2px;
+}
+.rf-bar-chart-fill[data-series='1'],
+.rf-bar-chart-swatch[data-series='1'] {
+  --rf-series-color: var(--rf-bar-chart-series-1);
+}
+.rf-bar-chart-fill[data-series='2'],
+.rf-bar-chart-swatch[data-series='2'] {
+  --rf-series-color: var(--rf-bar-chart-series-2);
+}
+.rf-bar-chart-fill[data-series='3'],
+.rf-bar-chart-swatch[data-series='3'] {
+  --rf-series-color: var(--rf-bar-chart-series-3);
+}
+.rf-bar-chart-fill[data-series='4'],
+.rf-bar-chart-swatch[data-series='4'] {
+  --rf-series-color: var(--rf-bar-chart-series-4);
+}
+.rf-bar-chart-column[data-active] .rf-bar-chart-fill[data-series] {
+  background: var(--rf-series-color);
+}
+.rf-bar-chart-column:not([data-active]) .rf-bar-chart-fill[data-series] {
+  background: color-mix(in oklab, var(--rf-series-color) 30%, var(--rf-neutral-fill));
+}
+.rf-bar-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--rf-muted);
+}
+.rf-bar-chart-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.rf-bar-chart-swatch {
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: 2px;
+  background: var(--rf-series-color);
+}
+
+/* Horizontal: categories as rows with their labels beside the bars, the
+   value axis below. */
+.rf-bar-chart[data-orientation='horizontal'] {
+  --label-width: var(--rf-bar-chart-label-width, 6rem);
+  /* The rows and the gridlines share one cell, with room below the rows for
+     the value labels, and the legend takes the next row. */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  padding: 0;
+}
+.rf-bar-chart[data-orientation='horizontal'] .rf-bar-chart-columns {
+  grid-area: 1 / 1;
+  grid-auto-flow: row;
+  grid-auto-rows: var(--rf-bar-chart-row-height, 28px);
+  height: auto;
+  margin-block-end: 1.6em;
+}
+.rf-bar-chart[data-orientation='horizontal'] .rf-bar-chart-column {
+  display: grid;
+  grid-template-columns: var(--label-width) minmax(0, 1fr);
+  align-items: center;
+}
+.rf-bar-chart-row-label {
+  overflow: hidden;
+  padding-inline-end: 8px;
+  color: var(--rf-muted);
+  text-align: end;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rf-bar-chart[data-orientation='horizontal'] .rf-bar-chart-plot {
+  position: relative;
+  inset: auto;
+  height: 100%;
+}
+.rf-bar-chart[data-orientation='horizontal'] .rf-bar-chart-fill {
+  --bar: min(68%, 18px);
+  inset-block-end: auto;
+  inset-block-start: calc(50% - var(--bar) / 2 + var(--index) * var(--bar) / var(--count));
+  inset-inline-start: calc(var(--start) * 1%);
+  width: calc(var(--size) * 1%);
+  height: calc(var(--bar) / var(--count));
+}
+.rf-bar-chart[data-orientation='horizontal'] .rf-bar-chart-grid {
+  grid-area: 1 / 1;
+  position: relative;
+  inset: auto;
+  height: auto;
+  margin-inline: var(--label-width) 0;
+}
+.rf-bar-chart[data-orientation='horizontal'] .rf-bar-chart-grid > span {
+  inset-block: 0 1.6em;
+  inset-inline: auto;
+  border-block-start: 0;
+  border-inline-start: 1px dashed var(--rf-border);
+}
+.rf-bar-chart[data-orientation='horizontal'] .rf-bar-chart-grid > span[data-zero] {
+  border-inline-start-style: solid;
+}
+.rf-bar-chart[data-orientation='horizontal'] .rf-bar-chart-grid > span > span {
+  inset-block-start: calc(100% + 2px);
+  inset-inline-end: auto;
+  transform: translateX(-50%);
+}
+/* The labels at either end stay inside the plot. */
+.rf-bar-chart[data-orientation='horizontal'] .rf-bar-chart-grid > span:first-child > span {
+  transform: translateX(-100%);
+}
+.rf-bar-chart[data-orientation='horizontal'] .rf-bar-chart-grid > span:last-child > span {
+  transform: none;
 }
 
 @media (forced-colors: active) {

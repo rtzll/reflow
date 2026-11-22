@@ -1201,6 +1201,26 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           required: false,
         },
         {
+          name: 'series',
+          type: 'readonly { id: string; label: string }[]',
+          description:
+            'Several quantities per category: give each item values, one per series in order. Colored with --rf-bar-chart-series-1 to -4 and named in a legend.',
+          required: false,
+        },
+        {
+          name: 'layout',
+          type: '"grouped" | "stacked"',
+          description: 'Series side by side, or piled into one bar. Default grouped.',
+          required: false,
+        },
+        {
+          name: 'orientation',
+          type: '"vertical" | "horizontal"',
+          description:
+            'Categories as columns, or as rows with their labels beside the bars; rows move with Up and Down. Default vertical.',
+          required: false,
+        },
+        {
           name: 'showAxes',
           type: 'boolean',
           description: 'Show numeric and category labels along the axes.',
@@ -1226,8 +1246,15 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
         {
           name: 'value',
           type: 'number',
-          description: 'Finite nonnegative magnitude. Zero sits on the baseline.',
+          description:
+            'Finite quantity on a shared zero baseline; negative values hang below zero. Ignored with series.',
           required: true,
+        },
+        {
+          name: 'values',
+          type: 'readonly number[]',
+          description: 'With series, one value per series in the same order.',
+          required: false,
         },
       ],
     },
