@@ -64,13 +64,18 @@
   height: calc(var(--rf-icon-size) / 2);
   width: calc(var(--rf-icon-size) / 2);
   background: currentColor;
-  scale: 0;
-  transition: scale var(--rf-fast) var(--rf-ease-out);
+  /* The dot grows from half size rather than from nothing. */
+  opacity: 0;
+  scale: 0.5;
+  transition:
+    opacity var(--rf-fast) var(--rf-ease-out),
+    scale var(--rf-fast) var(--rf-ease-out);
 }
 .rf-radio input:checked + .rf-radio-mark {
   border-color: transparent;
 }
 .rf-radio input:checked + .rf-radio-mark::after {
+  opacity: 1;
   scale: 1;
 }
 .rf-radio:has(input:focus-visible) {
