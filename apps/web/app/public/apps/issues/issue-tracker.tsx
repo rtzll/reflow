@@ -220,17 +220,21 @@ export const IssueTracker = clientEntry(
         : issues.map((issue) => (ids.has(issue.id) ? { ...issue, status } : issue))
       if (issues === previous) return
       range.reset()
-      // Continue at the next stationary issue in the old reading order. At the end,
-      // step back. If every row moved, follow the original issue to its new group.
-      const index = before.findIndex((issue) => issue.id === anchor)
-      const start = index === -1 ? 0 : index
-      const stationary = (issue: Issue) => !moved.includes(issue)
-      active =
-        before.slice(start).find(stationary)?.id ??
-        before.slice(0, start).reverse().find(stationary)?.id ??
-        anchor
+      if (placed && anchor && selected.has(anchor)) {
+        // Keep the grabbed issue focused so the same selection can move again.
+        active = anchor
+        selectionEnd = anchor
+      } else {
+        const index = before.findIndex((issue) => issue.id === anchor)
+        const start = Math.max(0, index)
+        const stationary = (issue: Issue) => !moved.includes(issue)
+        active =
+          before.slice(start).find(stationary)?.id ??
+          before.slice(0, start).reverse().find(stationary)?.id ??
+          anchor
+        for (const id of ids) selected.delete(id)
+      }
       if (!orderedIssues().some((issue) => issue.id === active)) active = orderedIssues()[0]?.id
-      for (const id of ids) selected.delete(id)
       announcement = moved.every((issue) => issue.status === status)
         ? `Reordered ${moved.length} ${moved.length === 1 ? 'issue' : 'issues'} in ${status}.`
         : `Moved ${moved.length} ${moved.length === 1 ? 'issue' : 'issues'} to ${status}.`
@@ -402,10 +406,10 @@ export const IssueTracker = clientEntry(
             )}
             <p id={handle.id + '-keys'} class="rf-basic-sr-only">
               Click an issue or press Enter to open it. Use its checkbox, Command-click,
-              Control-click, X, or Space to toggle selection. After selecting one issue, hold Shift
-              and hover, click, or use the vertical arrows to extend a range. Control or Command
-              with A selects all visible issues. Drag a selected issue to move the group, or Tab to
-              the actions.
+              Control-click, X, or Space to toggle selection. After selecting one issue, Shift-click
+              another issue or use Shift with the vertical arrows to extend the range. Control or
+              Command with A selects all visible issues. Drag a selected issue to move the group, or
+              Tab to the actions.
             </p>
             <ContextMenu
               label="Issue actions"
@@ -490,18 +494,6 @@ export const IssueTracker = clientEntry(
                                 on('focus', () => {
                                   active = issue.id
                                   void handle.update()
-                                }),
-                                on('pointerenter', (event) => {
-                                  if (
-                                    event.pointerType === 'mouse' &&
-                                    event.shiftKey &&
-                                    !event.buttons &&
-                                    !dragging.size &&
-                                    selectionEnd &&
-                                    selected.has(selectionEnd)
-                                  ) {
-                                    extendSelection(selectionEnd, issue.id)
-                                  }
                                 }),
                                 on('click', (event) => {
                                   focusIssue(issue.id)

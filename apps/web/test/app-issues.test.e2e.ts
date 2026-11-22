@@ -331,7 +331,7 @@ it('extends and contracts a Shift-click range and drags the selection together i
 })
 
 for (const layout of ['Board', 'List']) {
-  it(`opens issues on click and selects a reversible range by hovering with Shift in ${layout}`, async (t) => {
+  it(`opens issues on click and selects a range only on Shift-click in ${layout}`, async (t) => {
     const page = await t.serve(showcaseServer)
     await open(page, '/apps/issues')
     if (layout === 'List') await page.getByRole('radio', { name: 'Board' }).press('ArrowRight')
@@ -341,18 +341,22 @@ for (const layout of ['Board', 'List']) {
     await expect(page.getByRole('dialog')).toContainText('Restore an unfinished field note')
     await page.keyboard.press('Escape')
     await expect(selected).toHaveCount(0)
-    await rows.nth(1).click({ modifiers: ['Shift'] })
-    await expect(selected).toHaveText([/AT-139/])
+    await rows.first().press('Space')
+    await expect(rows.first()).toBeFocused()
     await page.keyboard.down('Shift')
+    await rows.nth(1).hover()
     await rows.last().hover()
-    await expect(selected).toHaveText([/AT-139/, /AT-138/, /AT-137/])
-    await rows.nth(2).hover()
-    await expect(selected).toHaveText([/AT-139/, /AT-138/])
+    await expect(selected).toHaveText([/AT-142/])
+    await expect(rows.first()).toBeFocused()
+    await rows.last().click()
+    await expect(selected).toHaveText([/AT-142/, /AT-139/, /AT-138/, /AT-137/])
+    await rows.nth(1).hover()
+    await expect(selected).toHaveCount(4)
+    await rows.nth(1).click()
+    await expect(selected).toHaveText([/AT-142/, /AT-139/])
     await page.keyboard.up('Shift')
-    await rows.first().hover()
-    await expect(selected).toHaveCount(2)
-    await rows.nth(1).click({ modifiers: ['ControlOrMeta'] })
-    await expect(selected).toHaveText([/AT-138/])
+    await rows.first().click({ modifiers: ['ControlOrMeta'] })
+    await expect(selected).toHaveText([/AT-139/])
   })
 
   it(`lifts the grabbed issue under the pointer with the selected titles stacked below in ${layout}`, async (t) => {
@@ -502,7 +506,9 @@ for (const layout of ['Board', 'List']) {
     await dragIssue(page, done.getByRole('option').first(), started)
     await expect(done).toContainText('No issues in Done.')
     await expect(page.getByRole('status')).toHaveText('Moved 3 issues to In progress.')
-    await expect(issues.getByRole('option', { selected: true })).toHaveCount(0)
+    const moved = [/AT-128/, /AT-127/, /AT-125/]
+    await expect(started.getByRole('option', { selected: true })).toHaveText(moved)
+    await expect(started.getByRole('option', { name: /AT-128/ })).toBeFocused()
     await expect(page.getByRole('region', { name: 'Cycle progress' })).toContainText('0%')
 
     await dragIssue(
@@ -519,6 +525,18 @@ for (const layout of ['Board', 'List']) {
     await expect(started.getByRole('option', { name: /AT-142/ })).toBeFocused()
     await expect(page.getByRole('region', { name: 'Cycle progress' })).toContainText('0%')
     await expect(undo).toHaveCount(0)
+
+    // Pick up a different member of the same selection for the return trip.
+    await dragIssue(
+      page,
+      started.getByRole('option', { name: /AT-127/ }),
+      done.getByText('No issues in Done.'),
+    )
+    await expect(done.getByRole('option', { selected: true })).toHaveText(moved)
+    await expect(done.getByRole('option', { name: /AT-127/ })).toBeFocused()
+    await page.getByRole('button', { name: 'Move to', exact: true }).click()
+    await page.getByRole('menuitem', { name: 'Move to Todo' }).click()
+    for (const name of moved) await expect(todo.getByRole('option', { name })).toBeVisible()
   })
 }
 
