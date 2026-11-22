@@ -476,8 +476,10 @@ function previewImages(images: ExampleImages, variant: string | undefined): Exam
 const galleryOrder = [
   'carousel',
   'queued-stack',
-  'toaster',
   'hover-card',
+  'toaster',
+  'time-grid',
+  'bar-chart',
   'code-block',
   'data-table',
   'avatar',
@@ -509,10 +511,9 @@ const galleryOrder = [
   'drawer',
   'color-picker',
   'switch',
-  'markdown',
   'combobox',
-  'time-grid',
-  'bar-chart',
+  'markdown',
+  'citation',
 ]
 
 const wideCards = new Set([
@@ -603,6 +604,13 @@ function Gallery(
             >
               See demo
             </a>
+            <a
+              class="site-button site-button-ghost"
+              href={routes.docsIndex.href()}
+              data-rmx-document
+            >
+              Markdown index
+            </a>
           </div>
         </header>
         {entries.length ? (
@@ -613,6 +621,9 @@ function Gallery(
                 class="site-preview-card"
                 data-component={entry.slug}
                 data-full-width={entry.slug === 'code-block' ? '' : undefined}
+                data-half-width={
+                  entry.slug === 'time-grid' || entry.slug === 'bar-chart' ? '' : undefined
+                }
                 data-wide={wideCards.has(entry.slug) ? '' : undefined}
                 data-tall={tallCards.has(entry.slug) ? '' : undefined}
                 data-right={rightCards.has(entry.slug) ? '' : undefined}

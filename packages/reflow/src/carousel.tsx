@@ -63,7 +63,7 @@ export function Carousel(handle: Handle<CarouselProps>) {
   let shownIndex = -1
   let hovered = false
   let focused = false
-  let userPaused = false
+  let playback: 'auto' | 'pause' | 'play' = 'auto'
   let drag: Drag | undefined
   let suppressClick = false
   // While a scroll we started is in flight, its scroll events do not move the index.
@@ -87,6 +87,13 @@ export function Carousel(handle: Handle<CarouselProps>) {
   const stops = () => Math.min(count(), reachable || count())
   const current = () =>
     Math.min(Math.max(0, handle.props.index ?? localIndex), Math.max(0, stops() - 1))
+
+  function pausesForInteraction(target: EventTarget | null) {
+    // After an explicit Play, the button can stay under the pointer or keep focus.
+    return (
+      playback !== 'play' || !(target instanceof Element && target.closest('.rf-carousel-play'))
+    )
+  }
 
   function slideAt(index: number) {
     return viewport?.querySelectorAll<HTMLElement>(':scope > .rf-carousel-slide')[index]
@@ -321,6 +328,7 @@ export function Carousel(handle: Handle<CarouselProps>) {
       handle.queueTask(() => scrollToSlide(index))
     if (shownIndex === -1 && index > 0) handle.queueTask(() => scrollToSlide(index, false))
     shownIndex = index
+    const userPaused = playback === 'pause'
     const paused = userPaused || hovered || focused
     const rotating = Boolean(autoplay) && !paused
     const showDots = handle.props.dots ?? true
@@ -335,18 +343,21 @@ export function Carousel(handle: Handle<CarouselProps>) {
         data-density={size}
         data-align={align}
         mix={[
-          on('pointerenter', (event) => {
+          on('pointerover', (event) => {
             if (event.pointerType === 'touch') return
-            hovered = true
+            const next = pausesForInteraction(event.target)
+            if (hovered === next) return
+            hovered = next
             void handle.update()
           }),
           on('pointerleave', () => {
             hovered = false
             void handle.update()
           }),
-          on('focusin', () => {
-            if (focused) return
-            focused = true
+          on('focusin', (event) => {
+            const next = pausesForInteraction(event.target)
+            if (focused === next) return
+            focused = next
             void handle.update()
           }),
           on('focusout', (event) => {
@@ -423,7 +434,11 @@ export function Carousel(handle: Handle<CarouselProps>) {
                 class="rf-carousel-play"
                 aria-label={userPaused ? 'Play slides' : 'Pause slides'}
                 mix={on('click', () => {
-                  userPaused = !userPaused
+                  playback = playback === 'pause' ? 'play' : 'pause'
+                  if (playback === 'play') {
+                    hovered = false
+                    focused = false
+                  }
                   void handle.update()
                 })}
               >

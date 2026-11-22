@@ -22,7 +22,7 @@ const description = 'Fluid components for Remix.'
 
 export function Document(handle: Handle<DocumentProps>) {
   return () => {
-    const { assets, children, settings, title, url } = handle.props
+    const { assets, children, settings, title, url, markdownHref } = handle.props
     // Preference parameters only change the look, so the shared link drops them.
     const pageUrl = new URL(url.pathname, url.origin).href
     const customFont = settings.font.startsWith('google:')
@@ -69,11 +69,9 @@ export function Document(handle: Handle<DocumentProps>) {
           />
           <meta name="twitter:card" content="summary_large_image" />
           <link rel="icon" href={assets.favicon} type="image/svg+xml" />
-          {handle.props.markdownHref && (
-            <>
-              <link rel="alternate" type="text/markdown" href={handle.props.markdownHref} />
-              <link rel="describedby" href={routes.docsIndex.href()} />
-            </>
+          {markdownHref && <link rel="alternate" type="text/markdown" href={markdownHref} />}
+          {(markdownHref || url.pathname === routes.gallery.href()) && (
+            <link rel="describedby" href={routes.docsIndex.href()} />
           )}
           <title>{title}</title>
           {customFont && (

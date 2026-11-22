@@ -12,8 +12,10 @@ it('preserves the gallery order and keeps previews above their footers', async (
   const expected = [
     'carousel',
     'queued-stack',
-    'toaster',
     'hover-card',
+    'toaster',
+    'time-grid',
+    'bar-chart',
     'code-block',
     'data-table',
     'avatar',
@@ -45,13 +47,12 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'drawer',
     'color-picker',
     'switch',
-    'markdown',
     'combobox',
-    'time-grid',
-    'bar-chart',
+    'markdown',
+    'citation',
   ]
   const gallery = page.locator('.site-gallery')
-  for (const width of [1440, 1280, 768, 390]) {
+  for (const width of [1440, 1280, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 900 })
     await open(page, '/?theme=dark')
     await gallery.getByRole('link', { name: 'View DatePicker documentation' }).waitFor()
@@ -106,25 +107,43 @@ it('preserves the gallery order and keeps previews above their footers', async (
       assert.deepEqual(spills, [], `Preview overflow at ${width}px`)
     }
     await checkContainment()
-    if (width === 768) {
-      // Two columns, and as many small cards as fill them: the last row is full.
-      const rows = await gallery.evaluate((node) => {
-        const tiles = Array.from(node.querySelectorAll<HTMLElement>(':scope > article'))
-        const bottom = Math.max(...tiles.map((tile) => tile.getBoundingClientRect().bottom))
-        const last = tiles.filter(
-          (tile) => Math.abs(tile.getBoundingClientRect().bottom - bottom) < 2,
-        )
-        const width = last.reduce((sum, tile) => sum + tile.getBoundingClientRect().width, 0)
-        return width / node.getBoundingClientRect().width
-      })
-      assert.ok(rows > 0.9, `the last row fills the gallery (${rows})`)
+    const tile = (slug: string) =>
+      gallery.locator(`article[data-component="${slug}"]`).boundingBox()
+    const [markdown, citation, toaster, timeGrid, chart, codeBlock] = await Promise.all(
+      ['markdown', 'citation', 'toaster', 'time-grid', 'bar-chart', 'code-block'].map(tile),
+    )
+    const rowGap = await gallery.evaluate((node) => parseFloat(getComputedStyle(node).rowGap))
+    assert.equal(timeGrid!.y, toaster!.y + toaster!.height + rowGap)
+    assert.equal(codeBlock!.y, chart!.y + chart!.height + rowGap)
+    if (width >= 768) {
+      assert.equal(citation!.y, markdown!.y)
+      assert.equal(timeGrid!.y, chart!.y)
+      assert.equal(timeGrid!.x, codeBlock!.x)
+      assert.equal(chart!.x + chart!.width, codeBlock!.x + codeBlock!.width)
+      assert.ok(Math.abs(timeGrid!.width - chart!.width) < 1)
+    } else {
+      assert.equal(timeGrid!.x, chart!.x)
+      assert.equal(chart!.y, timeGrid!.y + timeGrid!.height + rowGap)
     }
+    const ticks = gallery.locator('[data-component="bar-chart"] .rf-bar-chart-ticks span')
+    await expect(ticks).toHaveText(['Compile', 'Test', 'Bundle', 'Pack'])
+    const { gap, horizontal } = await ticks.evaluateAll((nodes) => {
+      const labels = nodes.map((tick) => {
+        const range = document.createRange()
+        range.selectNodeContents(tick)
+        return range.getBoundingClientRect()
+      })
+      return {
+        gap: Math.min(...labels.slice(1).map((label, i) => label.left - labels[i]!.right)),
+        horizontal: labels.every((label) => label.width > label.height),
+      }
+    })
+    assert.ok(horizontal, `chart labels stay horizontal at ${width}px`)
+    assert.ok(gap >= 6, `chart label gap at ${width}px is ${gap}px`)
     if (width === 1440) {
       await expect(
         gallery.locator('[data-component="ask-user-questions"]').getByText('Question 1 of 8'),
       ).toBeVisible()
-      const tile = (slug: string) =>
-        gallery.locator(`article[data-component="${slug}"]`).boundingBox()
       const [card, dialog, datePicker, wideCalendar, segmented, thinking] = await Promise.all(
         [
           'card',
@@ -151,8 +170,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
       assert.ok(drawer!.y > popover!.y)
       assert.equal(Math.round(chat!.y + chat!.height), Math.round(drawer!.y + drawer!.height))
       // Wide cards alternate sides down the gallery: the tall Carousel on the
-      // right of the first band and Toaster on the left of the next row. The file
-      // browser gets the row after, then DataTable appears on the left.
+      // right of the first band and Toaster on the left of the next row.
       const sides = await gallery.evaluate((node) => {
         const left = node.getBoundingClientRect().left
         return Array.from(
@@ -162,8 +180,8 @@ it('preserves the gallery order and keeps previews above their footers', async (
       })
       assert.equal(sides, 'RLLRLRLRLRLRLRL')
       // The first band: QueuedStack and HoverCard stacked beside the Carousel.
-      const [carousel, queue, hover, toaster, avatar] = await Promise.all(
-        ['carousel', 'queued-stack', 'hover-card', 'toaster', 'avatar'].map(tile),
+      const [carousel, queue, hover, avatar] = await Promise.all(
+        ['carousel', 'queued-stack', 'hover-card', 'avatar'].map(tile),
       )
       assert.equal(queue!.y, carousel!.y)
       assert.ok(queue!.x < carousel!.x)

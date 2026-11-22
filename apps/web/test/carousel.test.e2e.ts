@@ -128,6 +128,34 @@ it('autoplays through its dots, pauses while pointed at, and stops with its butt
   await expect(example.locator('.rf-carousel-dots[data-rf-paused]')).toHaveCount(1)
 })
 
+it('resumes the homepage carousel while the pointer or focus stays on Play', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await open(page, '/', { motion: true })
+  const carousel = page.getByRole('region', { name: 'Reflow highlights' })
+  const pause = carousel.getByRole('button', { name: 'Pause slides' })
+  const play = carousel.getByRole('button', { name: 'Play slides' })
+  const viewport = carousel.locator('.rf-carousel-viewport')
+  const fill = carousel.locator('.rf-carousel-dot > span')
+
+  await pause.hover()
+  await expect(fill).toHaveCSS('animation-play-state', 'paused')
+  await pause.click()
+  const currentSlide = await carousel.locator('[data-current]').getAttribute('aria-label')
+  await play.click()
+  await expect(fill).toHaveCSS('animation-play-state', 'running')
+  await expect(viewport).toHaveAttribute('aria-live', 'off')
+  await expect(carousel.locator('[data-current]')).not.toHaveAttribute('aria-label', currentSlide!)
+
+  await viewport.hover()
+  await expect(fill).toHaveCSS('animation-play-state', 'paused')
+  await pause.press('Space')
+  await play.press('Enter')
+  await expect(pause).toBeFocused()
+  await expect(fill).toHaveCSS('animation-play-state', 'running')
+  await viewport.focus()
+  await expect(fill).toHaveCSS('animation-play-state', 'paused')
+})
+
 it('counts only the stops it can reach when several slides are in view', async (t) => {
   const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })

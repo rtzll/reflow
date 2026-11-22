@@ -1368,7 +1368,7 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           name: 'onCreateAllDay',
           type: '(range: { day: number; span: number }) => void',
           description:
-            'Receive the days covered by a drag across empty space in the all-day strip, which then shows an empty row to drag in. A click without a drag creates nothing.',
+            'Receive the days covered by a drag across empty space in the all-day strip. The strip stays available when empty.',
           required: false,
         },
         {
