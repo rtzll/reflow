@@ -11,3 +11,21 @@ The grid previews a pointer gesture locally. Releasing an event or using its arr
 Tab to the schedule and use arrows to position a new slot. Shift with Up or Down changes its duration. Enter requests creation. On an event, Space selects, arrows move, Shift with Up or Down resizes, and Enter activates. Pass `compactDay` to show one day at widths up to 800px and provide a day picker in the owner.
 
 Set `--rf-time-grid-hour-size` and `--rf-time-grid-gutter` to align a custom header. An event class returned by `getEventClass` can set `--rf-time-grid-event-color` and `--rf-time-grid-event-fill` for its category.
+
+## All-day events
+
+A calendar also holds events with no time of day: a holiday, a deadline, a trip. Mark an event `allDay: true` and TimeGrid ignores its `start` and `duration` and shows it in a strip above the hours, in its day's column. `span` makes it cover several consecutive days, such as a three-day trip; it is cut off at the last column. Events that share a day stack in rows, and the strip grows to fit them. The strip is labelled "All day" in the time gutter and appears only when there is an all-day event.
+
+All-day events take the same callbacks as timed ones: a click or Space selects, Enter activates, and `getEventLabel` and `getEventClass` apply. With `onEventChange`, Left and Right Arrow move one by a day and a horizontal drag moves it by whole days; the request keeps `allDay`, `span` and every other field. They cannot be resized, and dragging on the strip creates nothing. The default label reads "Title, Monday, all day", or "Title, Monday to Wednesday, all day" for a span. With `compactDay`, the strip shows only the events that cover the chosen day.
+
+## Overnight events
+
+A timed event may run past midnight: `start + duration` greater than 1440, such as a night shift from 22:00 lasting 8 hours. It shows in its own day's column until 24:00 and continues in the next column from 00:00, with the continuation marked as such. Durations are limited to 24 hours, so an event touches at most two columns. On the last column the event is cut off at midnight.
+
+The event's button stays the one in its first column; the continuation is a visual part of the same event that a pointer can press or drag, and that assistive technology does not reach separately. The default label names both days: "Night shift, Monday, 22:00–Tuesday, 06:00". When the window fits itself to the events, a continuation counts too, so a grid with an overnight event shows the early hours.
+
+Moving and resizing keep working across midnight wherever a next column exists: the end may move past 24:00, up to 24 hours after the start, and the request carries the new `start` and `duration` on the event's first day. Creating a new event from the board stays within one day.
+
+## Verification
+
+Browser tests cover the all-day strip's columns, spans and stacking, its keyboard and drag moves and labels, an overnight event's two parts and label, moving and resizing across midnight, the fitted window, and the cut-off on the last column. An end-to-end test checks the strip's layout and an overnight event in the Calendar workspace.
