@@ -52,7 +52,7 @@
 .rf-checkbox-check {
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
-  transition: stroke-dashoffset calc(var(--rf-fast) / 2) ease-in;
+  transition: stroke-dashoffset calc(var(--rf-fast) / 2) var(--rf-ease-out);
 }
 
 .rf-checkbox-dash {

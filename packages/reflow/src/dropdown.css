@@ -137,7 +137,7 @@
 .rf-menu-check path {
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
-  transition: stroke-dashoffset 40ms ease-in;
+  transition: stroke-dashoffset 40ms var(--rf-ease-out);
 }
 
 .rf-menu-item[aria-checked='true'] .rf-menu-check {
