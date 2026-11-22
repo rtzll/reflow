@@ -32,6 +32,7 @@ export type ConfirmationProps = Omit<
 export function Confirmation(handle: Handle<ConfirmationProps>) {
   let answered: ConfirmationState = 'requested'
   // Set when the pressed button had focus, so focus follows it to the answer.
+  let pressed: EventTarget | null = null
   let focusAnswer = false
   const titleId = `${handle.id}-title`
   const descriptionId = `${handle.id}-description`
@@ -42,13 +43,13 @@ export function Confirmation(handle: Handle<ConfirmationProps>) {
   })
 
   function answer(next: 'approved' | 'denied', event: Event) {
-    focusAnswer = event.currentTarget === document.activeElement
+    pressed = event.currentTarget
     if (next === 'approved') handle.props.onApprove?.()
     else handle.props.onDeny?.()
     if (handle.props.state === undefined) {
       answered = next
       void handle.update()
-    } else focusAnswer = false
+    }
   }
 
   return () => {
@@ -67,6 +68,10 @@ export function Confirmation(handle: Handle<ConfirmationProps>) {
       ...banner
     } = handle.props
     const state = controlled ?? answered
+    if (state !== 'requested' && pressed) {
+      focusAnswer = pressed === document.activeElement
+      pressed = null
+    }
     return (
       <Banner
         {...banner}
