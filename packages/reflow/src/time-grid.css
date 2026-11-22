@@ -152,17 +152,19 @@
     display: none;
   }
 }
-/* Let the title wrap first. Show the range below it only if a whole line fits. */
+/* Center the visible lines together. A wrapped title gets the available lines first. */
 @container time-grid-event (30px <= height < 55px) {
   .rf-time-grid-caption {
-    flex: 1;
-    min-height: 0;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1fr);
-    padding-block: 1px;
+    margin-block: auto;
+    padding-block: 0;
+    gap: 0;
+    font-size: var(--rf-text-caption);
+    line-height: 1.25;
+    max-block-size: round(down, 100cqh, 1lh);
   }
   .rf-time-grid-caption strong {
+    flex: none;
+    line-height: 1lh;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
@@ -170,8 +172,8 @@
     white-space: normal;
   }
   .rf-time-grid-time {
-    justify-self: start;
-    max-height: round(down, 100%, 1lh);
+    min-height: 0;
+    line-height: 1lh;
     overflow: hidden;
   }
 }
