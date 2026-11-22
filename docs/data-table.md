@@ -34,6 +34,14 @@ An all-matching selection belongs to the filter, not to the page: going to anoth
 
 The option is off by default. A page selection stays the safe choice for actions that are expensive or hard to undo.
 
+## Rows from a server
+
+A table over thousands of records, or one the server must filter for permissions, cannot send every row to the browser. Pass `rowCount`, the number of rows the current filter matches, and DataTable treats `rows` as the current page exactly as the server sent it: it no longer filters, sorts or slices them, and the page count and the results status come from `rowCount` and `pageSize`. The owner applies the state it receives through `onStateChange` or `href`, as a RoutedDataTable already does through the URL, and sends the next page. Column headers still sort and the filter still filters; they only ask.
+
+Selection works on the page as it does now. With `selectAllMatching`, the offer counts `rowCount`, and since the table never holds the other pages, `actions(rows, clear, selection)` receives the loaded rows together with `selection.allMatching` and `selection.count`. An app acts on `{ filter, allMatching: true }` on its server instead of on the row list. Without `rowCount` the third argument still arrives, with `count` equal to the rows passed.
+
+An all-matching selection over server rows belongs to the filter and the count: a different filter or a different `rowCount` clears it, because the set it promised may have changed.
+
 ## Interaction and verification
 
 Use native column headers with `aria-sort` on the active column. Sorting controls, search, and pagination work from the keyboard. When row actions are supplied, a visible menu button and ContextMenu both act on the same record after filtering or sorting. Present the loaded row count to assistive technology, use Table’s density and surface styles, and keep skeleton rows aligned while loading.
