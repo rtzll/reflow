@@ -1,3 +1,4 @@
+import { animateLayout, prefersReducedMotion } from '@remix-run/ui/animation'
 import {
   Avatar,
   Button,
@@ -12,6 +13,16 @@ import {
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import { CycleOverview, type IssueFilter } from './cycle-overview.tsx'
 import { statuses, type Issue, type Status } from './fixtures.ts'
+import { issueAfterPointer, placeIssues } from './issue-placement.ts'
+
+type Placement = { status: Status; beforeId: string | null }
+interface LastMove {
+  previous: Issue[]
+  ids: Set<string>
+  placed: boolean
+  focus: string
+  message: string
+}
 
 export const IssueTracker = clientEntry(
   import.meta.url,
@@ -21,7 +32,7 @@ export const IssueTracker = clientEntry(
     let selected = new Set<string>()
     const range = createRangeSelection<string>()
     let announcement = ''
-    let lastMove: { previous: Map<string, Status>; focus: string; message: string } | undefined
+    let lastMove: LastMove | undefined
     let filter: IssueFilter | undefined
     let layout = 'board'
     let detailId: string | undefined
@@ -31,7 +42,14 @@ export const IssueTracker = clientEntry(
       list = element
     })
 
-    let dragging = new Set<string>()
+    const dragging = new Map<string, number>()
+    let placement: Placement | undefined
+
+    function preview(next: Placement | undefined) {
+      if (placement?.status === next?.status && placement?.beforeId === next?.beforeId) return
+      placement = next
+      void handle.update()
+    }
 
     const mountDraggable = ref<HTMLDivElement>(async (element, signal) => {
       try {
@@ -40,13 +58,20 @@ export const IssueTracker = clientEntry(
         const cleanup = draggable({
           element,
           onDragStart: () => {
-            const id = element.dataset.issueId
-            dragging = id ? new Set(movingIds(id)) : new Set()
+            if (!list) return
+            const ids = movingIds(element.dataset.issueId!)
+            // Keep the bottom of a short destination column reachable as the source closes.
+            if (layout === 'board') list.style.minHeight = `${list.offsetHeight}px`
+            for (const row of list.querySelectorAll<HTMLElement>('[data-issue-id]')) {
+              if (ids.has(row.dataset.issueId!))
+                dragging.set(row.dataset.issueId!, row.offsetHeight)
+            }
             void handle.update()
           },
           onDrop: () => {
-            if (!dragging.size) return
-            dragging = new Set()
+            dragging.clear()
+            list?.style.removeProperty('min-height')
+            placement = undefined
             void handle.update()
           },
         })
@@ -61,21 +86,41 @@ export const IssueTracker = clientEntry(
         const { dropTargetForElements } = await import('./drag-adapter.ts')
         if (signal.aborted) return
         const status = statuses.find((item) => item === element.dataset.status)!
-        const leave = () => element.removeAttribute('data-drag-over')
+        const cards = element.querySelector<HTMLElement>('.issues-cards')!
+        const show = (data: Record<string | symbol, unknown>) => {
+          if (layout === 'board') preview({ status, beforeId: data.beforeId as string | null })
+        }
         const cleanup = dropTargetForElements({
           element,
           canDrop: ({ source }) => {
             const id = source.element.dataset.issueId
             if (!id || !list?.contains(source.element)) return false
             const ids = movingIds(id)
-            return issues.some((issue) => ids.has(issue.id) && issue.status !== status)
+            return (
+              layout === 'board' ||
+              issues.some((issue) => ids.has(issue.id) && issue.status !== status)
+            )
           },
-          onDragEnter: () => element.setAttribute('data-drag-over', ''),
-          onDragLeave: leave,
-          onDrop: ({ source }) => {
-            leave()
+          getData: ({ input, source }) => ({
+            beforeId:
+              layout === 'board'
+                ? issueAfterPointer(cards, movingIds(source.element.dataset.issueId!), input)
+                : undefined,
+          }),
+          onDragStart: ({ self }) => show(self.data),
+          onDragEnter: ({ self }) => {
+            element.setAttribute('data-drag-over', '')
+            show(self.data)
+          },
+          onDrag: ({ self }) => show(self.data),
+          onDragLeave: () => {
+            element.removeAttribute('data-drag-over')
+            if (placement?.status === status) preview(undefined)
+          },
+          onDrop: ({ source, self }) => {
+            element.removeAttribute('data-drag-over')
             const id = source.element.dataset.issueId!
-            void move(movingIds(id), status, id)
+            void move(movingIds(id), status, id, self.data.beforeId as string | null | undefined)
           },
         })
         signal.addEventListener('abort', cleanup, { once: true })
@@ -103,12 +148,12 @@ export const IssueTracker = clientEntry(
       return statuses.flatMap((status) => visible.filter((issue) => issue.status === status))
     }
 
-    function focusIssue(id: string | undefined) {
+    function focusIssue(id: string | undefined, options?: FocusOptions) {
       if (!id) {
-        reset?.focus()
+        reset?.focus(options)
         return
       }
-      list?.querySelector<HTMLElement>(`[data-issue-id="${CSS.escape(id)}"]`)?.focus()
+      list?.querySelector<HTMLElement>(`[data-issue-id="${CSS.escape(id)}"]`)?.focus(options)
     }
 
     async function setFilter(next?: IssueFilter) {
@@ -143,10 +188,23 @@ export const IssueTracker = clientEntry(
       focusIssue(active)
     }
 
-    async function move(ids: Set<string>, status: Status, anchor: string | undefined) {
+    async function move(
+      ids: Set<string>,
+      status: Status,
+      anchor: string | undefined,
+      beforeId?: string | null,
+    ) {
       const before = orderedIssues()
-      const moved = before.filter((issue) => ids.has(issue.id) && issue.status !== status)
+      const placed = beforeId !== undefined
+      const moved = before.filter(
+        (issue) => ids.has(issue.id) && (placed || issue.status !== status),
+      )
       if (!moved.length) return
+      const previous = issues
+      issues = placed
+        ? placeIssues(issues, moved, status, beforeId)
+        : issues.map((issue) => (ids.has(issue.id) ? { ...issue, status } : issue))
+      if (issues === previous) return
       range.reset()
       // Continue at the next stationary issue in the old reading order. At the end,
       // step back. If every row moved, follow the original issue to its new group.
@@ -157,28 +215,28 @@ export const IssueTracker = clientEntry(
         before.slice(start).find(stationary)?.id ??
         before.slice(0, start).reverse().find(stationary)?.id ??
         anchor
-      issues = issues.map((issue) => (ids.has(issue.id) ? { ...issue, status } : issue))
       if (!orderedIssues().some((issue) => issue.id === active)) active = orderedIssues()[0]?.id
       for (const id of ids) selected.delete(id)
-      announcement = `Moved ${moved.length} ${moved.length === 1 ? 'issue' : 'issues'} to ${status}.`
+      announcement = moved.every((issue) => issue.status === status)
+        ? `Reordered ${moved.length} ${moved.length === 1 ? 'issue' : 'issues'} in ${status}.`
+        : `Moved ${moved.length} ${moved.length === 1 ? 'issue' : 'issues'} to ${status}.`
       lastMove = {
-        previous: new Map(moved.map((issue) => [issue.id, issue.status])),
+        previous,
+        ids: new Set(moved.map((issue) => issue.id)),
+        placed,
         focus: moved.find((issue) => issue.id === anchor)?.id ?? moved[0]!.id,
         message: announcement,
       }
       await handle.update()
-      focusIssue(active)
+      focusIssue(active, { preventScroll: placed })
     }
 
     async function undoMove() {
       if (!lastMove) return
-      const { previous, focus } = lastMove
+      const { previous, ids, placed, focus } = lastMove
       lastMove = undefined
       range.reset()
-      issues = issues.map((issue) => {
-        const status = previous.get(issue.id)
-        return status === undefined ? issue : { ...issue, status }
-      })
+      issues = previous
       const visible = orderedIssues()
       const visibleIds = new Set(visible.map((issue) => issue.id))
       for (const id of selected) {
@@ -187,14 +245,14 @@ export const IssueTracker = clientEntry(
       // A different filter may now hide the initiating ticket or every restored ticket.
       const target =
         visible.find((issue) => issue.id === focus) ??
-        visible.find((issue) => previous.has(issue.id)) ??
+        visible.find((issue) => ids.has(issue.id)) ??
         visible.find((issue) => issue.id === active) ??
         visible[0]
       active = target?.id
       announcement =
-        previous.size === 1
-          ? 'Restored 1 issue to its previous status.'
-          : `Restored ${previous.size} issues to their previous statuses.`
+        ids.size === 1
+          ? `Restored 1 issue to its previous ${placed ? 'position' : 'status'}.`
+          : `Restored ${ids.size} issues to their previous ${placed ? 'positions' : 'statuses'}.`
       await handle.update()
       focusIssue(active)
     }
@@ -267,6 +325,7 @@ export const IssueTracker = clientEntry(
 
     return () => {
       const visible = orderedIssues()
+      const animateCards = dragging.size > 0 && layout === 'board' && !prefersReducedMotion()
       const detail = issues.find((issue) => issue.id === detailId)
       return (
         <article class="issue-tracker">
@@ -364,6 +423,10 @@ export const IssueTracker = clientEntry(
                   .filter((status) => filter?.field !== 'status' || filter.value === status)
                   .map((status) => {
                     const group = visible.filter((issue) => issue.status === status)
+                    const destination = placement?.status === status ? placement : undefined
+                    const slot = destination?.beforeId
+                      ? group.findIndex((issue) => issue.id === destination.beforeId)
+                      : group.length
                     return (
                       <div
                         role="group"
@@ -378,18 +441,28 @@ export const IssueTracker = clientEntry(
                           <strong>{status}</strong>
                           <span class="issues-count">{group.length}</span>
                         </div>
-                        <div class="issues-cards" role="none">
-                          {group.map((issue) => (
+                        <div
+                          class="issues-cards"
+                          role="none"
+                          data-previewing={placement ? '' : undefined}
+                        >
+                          {group.map((issue, index) => (
                             <div
                               key={issue.id}
                               role="option"
                               data-issue-id={issue.id}
                               data-dragging={dragging.has(issue.id) ? '' : undefined}
                               class="issues-row"
+                              style={destination ? { order: index < slot ? 0 : 2 } : undefined}
                               aria-selected={selected.has(issue.id)}
                               tabIndex={active === issue.id ? 0 : -1}
                               mix={[
                                 mountDraggable,
+                                animateLayout(
+                                  animateCards && !dragging.has(issue.id)
+                                    ? { duration: 150, easing: 'ease-out', size: false }
+                                    : false,
+                                ),
                                 on('focus', () => {
                                   active = issue.id
                                   void handle.update()
@@ -422,7 +495,16 @@ export const IssueTracker = clientEntry(
                               <Avatar name={issue.owner} size={22} />
                             </div>
                           ))}
-                          {!group.length && (
+                          {destination &&
+                            Array.from(dragging, ([id, height]) => (
+                              <div
+                                class="issues-drop-slot"
+                                aria-hidden="true"
+                                key={'slot-' + id}
+                                style={{ height, order: 1 }}
+                              />
+                            ))}
+                          {!group.length && !destination && (
                             <p class="issues-empty" role="none">
                               No issues in {status}.
                             </p>

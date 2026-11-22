@@ -1,6 +1,7 @@
 import type { Locator, Page } from 'playwright'
 import { expect } from 'playwright/test'
 import { it } from 'remix/test'
+import { holdMotion, releaseMotion, seekMotion } from './motion.ts'
 import { open, showcaseServer } from './showcase-router.ts'
 
 it('moves two Todo issues by keyboard and continues from the next stationary issue', async (t) => {
@@ -174,12 +175,16 @@ it('drills into live cycle and assignee summaries and clears an empty status fil
 
 // Begin the native drag before scrolling to the destination. Scrolling the
 // page between pointerdown and dragstart can put another row under the pointer.
-async function dragIssue(page: Page, source: Locator, destination: Locator) {
+async function startDrag(page: Page, source: Locator) {
   await source.hover()
   const start = (await source.boundingBox())!
   await page.mouse.down()
   await page.mouse.move(start.x + start.width / 2 + 10, start.y + start.height / 2, { steps: 4 })
   await expect(source).toHaveAttribute('data-dragging', '')
+}
+
+async function dragIssue(page: Page, source: Locator, destination: Locator) {
+  await startDrag(page, source)
   await destination.scrollIntoViewIfNeeded()
   const end = (await destination.boundingBox())!
   const x = end.x + end.width / 2
@@ -188,6 +193,145 @@ async function dragIssue(page: Page, source: Locator, destination: Locator) {
   await page.mouse.move(x + 1, y)
   await page.mouse.up()
 }
+
+// Stop with the mouse held so the test can inspect the proposed order before dropping.
+async function hoverAbove(page: Page, row: Locator) {
+  const box = (await row.boundingBox())!
+  const x = box.x + box.width / 2
+  const y = box.y + box.height / 4
+  await page.mouse.move(x, y)
+  await page.mouse.move(x + 1, y)
+}
+
+for (const withinColumn of [true, false]) {
+  it(
+    'opens a gap between cards ' + (withinColumn ? 'within a column' : 'across columns'),
+    async (t) => {
+      const page = await t.serve(showcaseServer)
+      await page.setViewportSize({ width: 1440, height: 1250 })
+      await open(page, '/apps/issues')
+      const todo = page.getByRole('group', { name: 'Todo', exact: true })
+      const destination = withinColumn
+        ? todo
+        : page.getByRole('group', { name: 'In progress', exact: true })
+      const rows = destination.getByRole('option')
+      const original = await rows.allTextContents()
+      const source = todo.getByRole('option', { name: /AT-137/ })
+      const moving = await source.textContent()
+      const above = rows.nth(0)
+      const below = rows.nth(1)
+      const originalY = (await below.boundingBox())!.y
+      await startDrag(page, source)
+      await hoverAbove(page, below)
+      const slot = destination.locator('.issues-drop-slot')
+      await expect.poll(async () => (await below.boundingBox())!.y).toBeGreaterThan(originalY + 25)
+      const gap = (await slot.boundingBox())!
+      expect(gap.y).toBeGreaterThan((await above.boundingBox())!.y)
+      expect(gap.y + gap.height).toBeLessThanOrEqual((await below.boundingBox())!.y + 1)
+      await page.mouse.move(gap.x + gap.width / 2, gap.y + gap.height / 2)
+      await page.mouse.up()
+      const expected = original.filter((text) => text !== moving)
+      expected.splice(1, 0, moving!)
+      await expect(rows).toHaveText(expected)
+      await expect(slot).toHaveCount(0)
+      await page.getByRole('button', { name: 'Undo', exact: true }).click()
+      await expect(rows).toHaveText(original)
+      await expect(todo.getByRole('option').last()).toContainText('AT-137')
+    },
+  )
+}
+
+it('slides neighbors during hover and accepts a reversal before the animation finishes', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1440, height: 1250 })
+  await open(page, '/apps/issues', { motion: true })
+  const todo = page.getByRole('group', { name: 'Todo', exact: true })
+  const rows = todo.getByRole('option')
+  const original = await rows.allTextContents()
+  const second = rows.nth(1)
+  const rest = (await second.boundingBox())!
+  const origin = (await rows.last().boundingBox())!
+  await startDrag(page, rows.last())
+  await holdMotion(page)
+  await hoverAbove(page, second)
+  await seekMotion(second, 0.4)
+  const midway = (await second.boundingBox())!.y
+  expect(midway).toBeGreaterThan(rest.y + 1)
+  await seekMotion(second, 0.8)
+  expect((await second.boundingBox())!.y).toBeGreaterThan(midway + 1)
+  await page.mouse.move(origin.x + origin.width / 2, origin.y + origin.height - 3)
+  await page.mouse.move(origin.x + origin.width / 2 + 1, origin.y + origin.height - 3)
+  await expect
+    .poll(async () => (await todo.locator('.issues-drop-slot').boundingBox())!.y)
+    .toBeCloseTo(origin.y, 0)
+  await page.mouse.up()
+  await releaseMotion(page)
+  await expect(rows).toHaveText(original)
+  await expect(page.getByRole('button', { name: 'Undo', exact: true })).toHaveCount(0)
+})
+
+it('inserts a mixed selection together in board order and undoes both positions', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1440, height: 1250 })
+  await open(page, '/apps/issues')
+  const todo = page.getByRole('group', { name: 'Todo', exact: true }).getByRole('option')
+  const started = page.getByRole('group', { name: 'In progress', exact: true })
+  const rows = started.getByRole('option')
+  const original = await rows.allTextContents()
+  await rows.last().click()
+  await todo.last().click()
+  await startDrag(page, todo.last())
+  await hoverAbove(page, rows.nth(1))
+  await expect(started.locator('.issues-drop-slot')).toHaveCount(2)
+  await page.mouse.up()
+  await expect(rows).toHaveText([/AT-136/, /AT-137/, /AT-130/, /AT-131/])
+  await page.getByRole('button', { name: 'Undo', exact: true }).click()
+  await expect(rows).toHaveText(original)
+  await expect(todo.last()).toContainText('AT-137')
+})
+
+it('places a card between neighbors in a filtered board that wraps across rows', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1440, height: 1250 })
+  await open(page, '/apps/issues')
+  await page.getByRole('button', { name: 'Show Todo issues' }).click()
+  const todo = page.getByRole('group', { name: 'Todo', exact: true })
+  const rows = todo.getByRole('option')
+  const second = (await rows.nth(1).boundingBox())!
+  const x = second.x + second.width / 4
+  const y = second.y + second.height / 2
+  await startDrag(page, rows.last())
+  await page.mouse.move(x, y)
+  await page.mouse.move(x + 1, y)
+  await expect
+    .poll(async () => (await todo.locator('.issues-drop-slot').boundingBox())?.x)
+    .toBeCloseTo(second.x, 0)
+  await page.mouse.up()
+  await expect(rows).toHaveText([/AT-142/, /AT-137/, /AT-139/, /AT-138/])
+  await page.getByRole('radio', { name: 'Board' }).press('ArrowRight')
+  await expect(rows).toHaveText([/AT-142/, /AT-137/, /AT-139/, /AT-138/])
+})
+
+it('closes the board gap and restores positions when a drag leaves the board', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1440, height: 1250 })
+  await open(page, '/apps/issues')
+  const todo = page.getByRole('group', { name: 'Todo', exact: true })
+  const rows = todo.getByRole('option')
+  const original = await rows.allTextContents()
+  const below = rows.nth(1)
+  const initialY = (await below.boundingBox())!.y
+  await startDrag(page, rows.last())
+  await hoverAbove(page, below)
+  await expect.poll(async () => (await below.boundingBox())!.y).toBeGreaterThan(initialY + 25)
+  await page.mouse.move(10, 10)
+  await page.mouse.move(11, 10)
+  await page.mouse.up()
+  await expect(page.locator('.issues-drop-slot')).toHaveCount(0)
+  await expect(rows).toHaveText(original)
+  expect((await below.boundingBox())!.y).toBeCloseTo(initialY, 0)
+  await expect(page.getByRole('button', { name: 'Undo', exact: true })).toHaveCount(0)
+})
 
 for (const layout of ['Board', 'List']) {
   it('drags issues between populated and empty groups in ' + layout, async (t) => {

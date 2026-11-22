@@ -247,6 +247,7 @@
   font-weight: 560;
 }
 .issues-cards {
+  position: relative;
   display: grid;
   gap: 8px;
 }
@@ -477,7 +478,19 @@
 .issues-row[data-dragging] {
   opacity: 0.55;
 }
-.issues-group[data-drag-over] {
+/* Keep the native drag source mounted while the slot takes its place in the grid. */
+.issues-cards[data-previewing] > .issues-row[data-dragging] {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+}
+.issues-drop-slot {
+  pointer-events: none;
+  border: 1px dashed color-mix(in oklab, var(--issue-done) 55%, var(--rf-border));
+  border-radius: 10px;
+  background: color-mix(in oklab, var(--issue-done) 8%, var(--issue-panel));
+}
+.issues-collection[data-layout='list'] .issues-group[data-drag-over] {
   outline: 2px solid var(--issue-done);
   outline-offset: 3px;
   border-radius: 10px;

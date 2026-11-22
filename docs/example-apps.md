@@ -19,11 +19,11 @@ Analytics shows daily activity as a stacked chart of studio edits and media impo
 
 ## Moving issues between statuses
 
-In board or list view, drag a ticket onto a visible status group. The whole group accepts a drop, including its empty state. Dragging a selected ticket moves the selection together. Dragging an unselected ticket moves that ticket and preserves any other selection. Releasing outside a valid target cancels the move.
+On the board, drag a ticket between two cards to open a gap at that position. Drop there to reorder within the column or move to another status. Board and list show the same issue order. In list view, drag onto a status group to change status. Empty groups accept drops in either view. Dragging a selected ticket moves the selection together. Dragging an unselected ticket moves that ticket and preserves any other selection. Releasing outside a valid target cancels the move.
 
 The **Move to** menu uses the same operation. Tap a ticket to select it and open the menu, or press Space to select, Tab to reach the actions, and Enter to open the menu. Each move updates cycle progress and assignee workload, announces the destination, and continues keyboard navigation at the next stationary ticket.
 
-Use **Undo** after a move to return each affected ticket to its previous status. This works for a selection spanning several groups and for moves made from the context menu. On narrow screens, **Cycle overview** opens the progress and workload filters above the tickets.
+Use **Undo** after a move to restore each affected ticket’s previous status and position. This works for a selection spanning several groups and for moves made from the context menu. On narrow screens, **Cycle overview** opens the progress and workload filters above the tickets.
 
 The Issue tracker registers Atlassian’s element adapter when its rows and groups mount and releases each registration on unmount. The adapter loads with the Issue tracker. Its production chunk measured 24.2 kB minified or 7.8 kB gzipped. The source-mode asset server bundles the same adapter into an ES module for the browser. [Pragmatic drag and drop](https://atlassian.design/components/pragmatic-drag-and-drop/core-package) · [Atlassian accessibility guidance](https://atlassian.design/components/pragmatic-drag-and-drop/accessibility-guidelines)
 
