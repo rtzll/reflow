@@ -509,8 +509,9 @@ const galleryOrder = [
   'drawer',
   'color-picker',
   'switch',
-  'markdown',
   'combobox',
+  'markdown',
+  'citation',
   'time-grid',
   'bar-chart',
 ]
@@ -620,6 +621,9 @@ function Gallery(
                 class="site-preview-card"
                 data-component={entry.slug}
                 data-full-width={entry.slug === 'code-block' ? '' : undefined}
+                data-half-width={
+                  entry.slug === 'time-grid' || entry.slug === 'bar-chart' ? '' : undefined
+                }
                 data-wide={wideCards.has(entry.slug) ? '' : undefined}
                 data-tall={tallCards.has(entry.slug) ? '' : undefined}
                 data-right={rightCards.has(entry.slug) ? '' : undefined}

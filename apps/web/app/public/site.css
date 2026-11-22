@@ -514,7 +514,7 @@ html[data-density='compact'] .site-nav a {
 }
 .site-gallery {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   grid-auto-flow: dense;
   grid-auto-rows: minmax(300px, auto);
   gap: 12px;
@@ -522,22 +522,50 @@ html[data-density='compact'] .site-nav a {
   margin-inline: auto;
   padding: 0 var(--site-gutter) 64px;
 }
-.site-gallery [data-full-width] {
-  grid-column: 1 / -1;
+@media (width >= 768px) {
+  .site-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .site-gallery :is([data-full-width], [data-wide]) {
+    grid-column: 1 / -1;
+  }
+  .site-gallery [data-tall] {
+    grid-row: span 2;
+  }
 }
-.site-gallery [data-wide] {
-  grid-column: 1 / span 2;
+@media (768px <= width < 1280px) {
+  .site-gallery [data-component='breadcrumb'] {
+    grid-column: span 2;
+  }
+  .site-gallery [data-component='markdown'] {
+    grid-column: auto;
+  }
 }
-.site-gallery [data-tall] {
-  grid-row: span 2;
-}
-.site-gallery [data-right] {
-  grid-column: 2 / span 2;
+@media (width >= 1280px) {
+  /* Six tracks let thirds and halves share the same gallery gutters. */
+  .site-gallery {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .site-gallery > article {
+    grid-column: span 2;
+  }
+  .site-gallery [data-half-width] {
+    grid-column: span 3;
+  }
+  .site-gallery [data-wide] {
+    grid-column: 1 / span 4;
+  }
+  .site-gallery [data-right] {
+    grid-column: span 4 / -1;
+  }
 }
 .site-gallery .site-preview-stage {
   grid-template-columns: minmax(0, 1fr);
   flex: 1 0 auto;
   padding: 16px 24px;
+}
+.site-gallery [data-half-width] .site-preview-stage {
+  padding-inline: min(24px, 3%);
 }
 .site-gallery .site-preview-footer {
   flex: none;
@@ -1057,24 +1085,11 @@ body:has(.site-demo) {
   .site-mobile-content .site-search {
     min-height: 36px;
   }
-  .site-gallery {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .site-gallery :is([data-right], [data-component='breadcrumb']) {
-    grid-column: span 2;
-  }
 }
 
 @media (max-width: 767px) {
   .site-gallery {
-    grid-template-columns: minmax(0, 1fr);
     grid-auto-rows: minmax(200px, auto);
-  }
-  .site-gallery :is([data-wide], [data-right], [data-component='breadcrumb']) {
-    grid-column: auto;
-  }
-  .site-gallery [data-tall] {
-    grid-row: auto;
   }
   .example-gallery-sidebar .rf-sidebar-panel {
     display: block;

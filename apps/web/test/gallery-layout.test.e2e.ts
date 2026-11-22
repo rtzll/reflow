@@ -45,13 +45,14 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'drawer',
     'color-picker',
     'switch',
-    'markdown',
     'combobox',
+    'markdown',
+    'citation',
     'time-grid',
     'bar-chart',
   ]
   const gallery = page.locator('.site-gallery')
-  for (const width of [1440, 1280, 768, 390]) {
+  for (const width of [1440, 1280, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 900 })
     await open(page, '/?theme=dark')
     await gallery.getByRole('link', { name: 'View DatePicker documentation' }).waitFor()
@@ -106,25 +107,41 @@ it('preserves the gallery order and keeps previews above their footers', async (
       assert.deepEqual(spills, [], `Preview overflow at ${width}px`)
     }
     await checkContainment()
-    if (width === 768) {
-      // Two columns, and as many small cards as fill them: the last row is full.
-      const rows = await gallery.evaluate((node) => {
-        const tiles = Array.from(node.querySelectorAll<HTMLElement>(':scope > article'))
-        const bottom = Math.max(...tiles.map((tile) => tile.getBoundingClientRect().bottom))
-        const last = tiles.filter(
-          (tile) => Math.abs(tile.getBoundingClientRect().bottom - bottom) < 2,
-        )
-        const width = last.reduce((sum, tile) => sum + tile.getBoundingClientRect().width, 0)
-        return width / node.getBoundingClientRect().width
-      })
-      assert.ok(rows > 0.9, `the last row fills the gallery (${rows})`)
+    const tile = (slug: string) =>
+      gallery.locator(`article[data-component="${slug}"]`).boundingBox()
+    const [markdown, citation, timeGrid, chart] = await Promise.all(
+      ['markdown', 'citation', 'time-grid', 'bar-chart'].map(tile),
+    )
+    if (width >= 768) {
+      assert.equal(citation!.y, markdown!.y)
+      assert.ok(timeGrid!.y >= citation!.y + citation!.height)
+      assert.equal(timeGrid!.y, chart!.y)
+      assert.equal(timeGrid!.x, markdown!.x)
+      assert.equal(chart!.x + chart!.width, citation!.x + citation!.width)
+      assert.ok(Math.abs(timeGrid!.width - chart!.width) < 1)
+    } else {
+      assert.equal(timeGrid!.x, chart!.x)
+      assert.ok(chart!.y >= timeGrid!.y + timeGrid!.height)
     }
+    const ticks = gallery.locator('[data-component="bar-chart"] .rf-bar-chart-ticks span')
+    await expect(ticks).toHaveText(['Compile', 'Test', 'Bundle', 'Pack'])
+    const { gap, horizontal } = await ticks.evaluateAll((nodes) => {
+      const labels = nodes.map((tick) => {
+        const range = document.createRange()
+        range.selectNodeContents(tick)
+        return range.getBoundingClientRect()
+      })
+      return {
+        gap: Math.min(...labels.slice(1).map((label, i) => label.left - labels[i]!.right)),
+        horizontal: labels.every((label) => label.width > label.height),
+      }
+    })
+    assert.ok(horizontal, `chart labels stay horizontal at ${width}px`)
+    assert.ok(gap >= 6, `chart label gap at ${width}px is ${gap}px`)
     if (width === 1440) {
       await expect(
         gallery.locator('[data-component="ask-user-questions"]').getByText('Question 1 of 8'),
       ).toBeVisible()
-      const tile = (slug: string) =>
-        gallery.locator(`article[data-component="${slug}"]`).boundingBox()
       const [card, dialog, datePicker, wideCalendar, segmented, thinking] = await Promise.all(
         [
           'card',
