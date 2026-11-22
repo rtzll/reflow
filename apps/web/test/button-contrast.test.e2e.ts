@@ -31,3 +31,26 @@ it('keeps the primary banner action label distinct from its fill in both themes'
     assert.ok(color !== fill, `${theme}: ${color} on ${fill}`)
   }
 })
+
+it('presses in slightly while held, and stays still in reduced motion', async (t) => {
+  const page = await t.serve(showcaseServer)
+  const pressed = async () => {
+    const button = page.locator('main .rf-button:not(:disabled):visible').first()
+    const box = await button.boundingBox()
+    assert.ok(box)
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await page.mouse.down()
+    const scale = await button.evaluate(async (element) => {
+      await Promise.all(
+        element.getAnimations().map((animation) => animation.finished.catch(() => {})),
+      )
+      return getComputedStyle(element).scale
+    })
+    await page.mouse.up()
+    return scale
+  }
+  await open(page, '/docs/button', { motion: true })
+  assert.equal(await pressed(), '0.97')
+  await open(page, '/docs/button')
+  assert.equal(await pressed(), 'none')
+})

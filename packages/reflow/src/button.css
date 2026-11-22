@@ -29,7 +29,9 @@
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  transition: color var(--rf-fast);
+  transition:
+    color var(--rf-fast),
+    scale 160ms var(--rf-ease-out);
 }
 
 .rf-button::before {
@@ -123,6 +125,17 @@
   .rf-button:not(:disabled, [aria-disabled='true']):hover
     :is(.rf-button-icon > svg, .rf-button-label > svg) {
     stroke-width: 2;
+  }
+}
+
+/* A slight press-in confirms the button heard the pointer. */
+.rf-button:not(:disabled, [aria-disabled='true']):active {
+  scale: 0.97;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-button:not(:disabled, [aria-disabled='true']):active {
+    scale: none;
   }
 }
 

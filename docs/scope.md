@@ -116,6 +116,7 @@ The rest of that commit refines upstream's DataTable frozen columns and selectio
 - **Keyboard and touch.** Carousel autoplay pauses on keyboard focus. InputMessage can expose a visible attach button, and clickable cards require an accessible label.
 - **Sidebar.** Parent rows can be links with separate expanders. On mobile the rail opens as a viewport-height modal drawer with Escape and focus return. The workspace and profile menus mark keyboard focus with a row highlight rather than the moving ring.
 - **Forms and surfaces.** AskUserQuestions can submit through a surrounding form and optionally show a completion screen. Field choice cards keep the stronger checked border. CommandMenu's shortcut footer is opt-in.
+- **Motion.** Buttons press in to 97% while held. A tooltip opens at once and without motion while another is showing or has just closed, so moving along a toolbar does not wait on every button.
 - **CommandMenu.** The header line strengthens once rows scroll under it, as upstream's code intends; upstream's own line never strengthens because its scroll root clips it. Its dialog opens and closes without motion, since a shortcut summons it many times a day.
 
 ### Known gap
