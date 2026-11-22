@@ -87,9 +87,12 @@
   outline-offset: -2px;
 }
 @media (min-width: 801px) {
+  .week-app:dir(rtl) {
+    --week-gradient-direction: to left;
+  }
   .week-app .rf-time-grid {
     background: linear-gradient(
-      to right,
+      var(--week-gradient-direction, to right),
       var(--rf-surface-2)
         calc(var(--rf-time-grid-gutter) + (100% - var(--rf-time-grid-gutter)) * 5 / 7),
       var(--rf-muted-bg) 0

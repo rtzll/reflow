@@ -200,6 +200,64 @@ it('lays out all-day events above the hours and an overnight event across two co
   expect((await strip.boundingBox())!.height).toBeCloseTo(stripBox.height, 1)
 })
 
+it('keeps timed and all-day events under the same dates in a right-to-left week', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await open(page, '/docs/time-grid')
+  const week = page.locator('.release-week')
+  await week.evaluate((node) => node.setAttribute('dir', 'rtl'))
+  const strip = week.getByRole('group', { name: 'Release week, all day' })
+  const board = week.getByRole('group', { name: 'Release week', exact: true })
+  const release = strip.getByRole('button', { name: /^Release day,/ })
+  const notes = board.getByRole('button', { name: /^Release notes,/ })
+  await week.locator('.release-week-scroll').scrollIntoViewIfNeeded()
+  const stripBox = (await strip.boundingBox())!
+  const column = stripBox.width / 3
+  const wednesday = stripBox.x + column / 2
+  const monday = wednesday + 2 * column
+  const center = async (event: typeof release) => {
+    const box = (await event.boundingBox())!
+    return box.x + box.width / 2
+  }
+  expect(Math.abs((await center(release)) - wednesday)).toBeLessThan(2)
+  expect(Math.abs((await center(notes)) - wednesday)).toBeLessThan(2)
+
+  await notes.press('ArrowRight')
+  await expect(notes).toHaveAccessibleName(/^Release notes, Tuesday,/)
+  const noteBox = (await notes.boundingBox())!
+  const y = noteBox.y + noteBox.height / 2
+  await page.mouse.move(wednesday + column, y)
+  await page.mouse.down()
+  await page.mouse.move(monday, y, { steps: 4 })
+  await page.mouse.up()
+  await expect(notes).toHaveAccessibleName(/^Release notes, Monday,/)
+
+  const boardBox = (await board.boundingBox())!
+  const ten = boardBox.y + (10 * boardBox.height) / 24
+  await page.mouse.move(wednesday, ten + 2)
+  const marker = board.locator('.rf-time-grid-hover')
+  await expect(marker).toHaveText('10:00')
+  expect(Math.abs((await center(marker)) - wednesday)).toBeLessThan(2)
+  await page.mouse.down()
+  await page.mouse.move(wednesday, ten + boardBox.height / 48)
+  await page.mouse.up()
+  await expect(
+    board.getByRole('button', { name: 'New event, Wednesday, 10:00–10:30' }),
+  ).toBeVisible()
+
+  await strip.scrollIntoViewIfNeeded()
+  const box = (await strip.boundingBox())!
+  const stripY = box.y + box.height - 3
+  await page.mouse.move(monday, stripY)
+  await page.mouse.down()
+  await page.mouse.move(monday - column, stripY, { steps: 4 })
+  await page.mouse.up()
+  const created = strip.getByRole('button', { name: /^New all-day event,/ })
+  await expect(created).toHaveAccessibleName('New all-day event, Monday to Tuesday, all day')
+  await created.press('Shift+ArrowLeft')
+  await expect(created).toHaveAccessibleName('New all-day event, Monday to Wednesday, all day')
+})
+
 it('can drag below a full all-day row to create an overlapping event', async (t) => {
   const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })

@@ -380,6 +380,19 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
       }
     }
 
+    function dayDirection() {
+      return getComputedStyle(board).direction === 'rtl' ? -1 : 1
+    }
+
+    function arrowDayDelta(key: string) {
+      return (key === 'ArrowRight' ? 1 : -1) * dayDirection()
+    }
+
+    function columnAt(clientX: number, rect: DOMRect, dayWidth: number) {
+      const offset = dayDirection() === 1 ? clientX - rect.left : rect.right - clientX
+      return clamp(Math.floor(offset / dayWidth), 0, days.length - 1)
+    }
+
     function slotAt({ clientX, clientY }: Pick<PointerEvent, 'clientX' | 'clientY'>) {
       const rect = board.getBoundingClientRect()
       if (!days.length || rect.width <= 0 || rect.height <= 0) return
@@ -387,9 +400,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
       const dayWidth = rect.width / (singleDay ? 1 : days.length)
       const offset = clamp(((clientY - rect.top) / rect.height) * span, 0, span - 1)
       const start = first + step * Math.floor(offset / step)
-      const day = singleDay
-        ? compactDay
-        : clamp(Math.floor((clientX - rect.left) / dayWidth), 0, days.length - 1)
+      const day = singleDay ? compactDay : columnAt(clientX, rect, dayWidth)
       return { range: { day, start, duration: Math.min(step, last - start) }, dayWidth, singleDay }
     }
 
@@ -505,7 +516,8 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
         const day = gesture.singleDay
           ? anchor.day
           : clamp(
-              anchor.day + Math.round((e.clientX - gesture.x) / gesture.dayWidth),
+              anchor.day +
+                Math.round(((e.clientX - gesture.x) * dayDirection()) / gesture.dayWidth),
               0,
               days.length - 1,
             )
@@ -593,7 +605,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
             ? event
               ? event.day
               : compactDay
-            : clamp(next.day + (e.key === 'ArrowRight' ? 1 : -1), 0, days.length - 1)
+            : clamp(next.day + arrowDayDelta(e.key), 0, days.length - 1)
           break
         case 'ArrowDown':
         case 'ArrowUp': {
@@ -663,7 +675,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
         if (!onEventChange || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return
         e.preventDefault()
         const span = clamp(
-          spanOf(event) + (e.key === 'ArrowRight' ? 1 : -1),
+          spanOf(event) + arrowDayDelta(e.key),
           1,
           Math.max(1, days.length - event.day),
         )
@@ -685,7 +697,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
       if (!onEventChange || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return
       e.preventDefault()
       if (showsSingleDay(board)) return
-      const day = clamp(event.day + (e.key === 'ArrowRight' ? 1 : -1), 0, days.length - 1)
+      const day = clamp(event.day + arrowDayDelta(e.key), 0, days.length - 1)
       if (day === event.day) return
       const updated = { ...event, day }
       statusMessage = describe(updated)
@@ -721,7 +733,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
 
     function dragDay(e: PointerEvent) {
       if (!dayDrag || e.pointerId !== dayDrag.pointer) return false
-      const moved = Math.round((e.clientX - dayDrag.x) / dayDrag.dayWidth)
+      const moved = Math.round(((e.clientX - dayDrag.x) * dayDirection()) / dayDrag.dayWidth)
       if (dayDrag.mode === 'span')
         dayDrag.span = clamp(
           spanOf(dayDrag.event) + moved,
@@ -733,19 +745,13 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
       return true
     }
 
-    // The column under the pointer, for creating across the strip.
-    function columnAt(clientX: number, dayWidth: number) {
-      const rect = strip!.getBoundingClientRect()
-      return clamp(Math.floor((clientX - rect.left) / dayWidth), 0, days.length - 1)
-    }
-
     function beginCreateDay(e: PointerEvent) {
       if (!onCreateAllDay || !strip || e.target !== strip || dayDrag || dayCreate) return
       if (!e.isPrimary || e.button !== 0) return
       const rect = strip.getBoundingClientRect()
       if (rect.width <= 0 || showsSingleDay(board)) return
       const dayWidth = rect.width / days.length
-      const from = columnAt(e.clientX, dayWidth)
+      const from = columnAt(e.clientX, rect, dayWidth)
       dayCreate = { pointer: e.pointerId, x: e.clientX, dayWidth, from, to: from }
       try {
         strip.setPointerCapture(e.pointerId)
@@ -756,7 +762,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
 
     function moveDay(e: PointerEvent) {
       if (dayCreate && e.pointerId === dayCreate.pointer) {
-        dayCreate.to = columnAt(e.clientX, dayCreate.dayWidth)
+        dayCreate.to = columnAt(e.clientX, strip!.getBoundingClientRect(), dayCreate.dayWidth)
         handle.update()
         return
       }
@@ -766,7 +772,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
     function finishDay(e: PointerEvent) {
       if (dayCreate && e.pointerId === dayCreate.pointer) {
         const { from, x, dayWidth } = dayCreate
-        const to = columnAt(e.clientX, dayWidth)
+        const to = columnAt(e.clientX, strip!.getBoundingClientRect(), dayWidth)
         dayCreate = undefined
         handle.update()
         // A click alone creates nothing.
