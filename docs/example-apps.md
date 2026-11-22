@@ -23,7 +23,7 @@ Use **Undo** after a move to return each affected ticket to its previous status.
 
 The Issue tracker registers Atlassian’s element adapter when its rows and groups mount and releases each registration on unmount. The adapter loads with the Issue tracker. Its production chunk measured 24.2 kB minified or 7.8 kB gzipped. The source-mode asset server bundles the same adapter into an ES module for the browser. [Pragmatic drag and drop](https://atlassian.design/components/pragmatic-drag-and-drop/core-package) · [Atlassian accessibility guidance](https://atlassian.design/components/pragmatic-drag-and-drop/accessibility-guidelines)
 
-Calendar uses TimeGrid with fifteen-minute increments. The app supplies the week, event data and editor. The grid handles overlap, pointer previews and keyboard changes. [TimeGrid design note](time-grid.md)
+Calendar uses TimeGrid with fifteen-minute increments. The app supplies the week, event data and editor. The grid handles overlap, pointer previews and keyboard changes. The editor's **All day** option replaces the times with a number of days, and a timed event may run up to 24 hours, continuing past midnight into the next day. [TimeGrid design note](time-grid.md)
 
 ## App polish and acceptance checks
 

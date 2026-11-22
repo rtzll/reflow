@@ -623,6 +623,10 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
       <div
         class="rf-time-grid"
         data-compact={handle.props.compactDay !== undefined || undefined}
+        data-compact-all-day={
+          allDayStack.some(({ day, span }) => compactDay >= day && compactDay < day + span) ||
+          undefined
+        }
         style={{ '--day-count': Math.max(1, days.length), '--hours': span / 60 }}
       >
         {allDayStack.length > 0 && [

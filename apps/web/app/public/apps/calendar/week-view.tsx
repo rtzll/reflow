@@ -2,7 +2,15 @@ import { Button, Icon, TimeGrid } from '@rtzll/reflow'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import { persistWeekEvent, restoreWeekEvents } from './local-events.ts'
 import { EventEditor } from './event-editor.tsx'
-import { calendars, days, eventLabel, seedEvents, timeLabel, type WeekEvent } from './events.ts'
+import {
+  calendars,
+  days,
+  eventLabel,
+  eventWhen,
+  seedEvents,
+  timeLabel,
+  type WeekEvent,
+} from './events.ts'
 
 export const WeekView = clientEntry(import.meta.url, function WeekView(handle: Handle) {
   let events = [...seedEvents]
@@ -163,8 +171,11 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
                 <span class="week-dot" />
                 <strong>{selected.title}</strong>
                 <span>
-                  {days[selected.day]} · {timeLabel(selected.start)}–
-                  {timeLabel(selected.start + selected.duration)} UTC
+                  {selected.allDay
+                    ? `${eventWhen(selected)} · All day`
+                    : selected.start + selected.duration > 1440
+                      ? eventWhen(selected, ' ')
+                      : `${days[selected.day]} · ${timeLabel(selected.start)}–${timeLabel(selected.start + selected.duration)} UTC`}
                 </span>
               </div>
               <Button

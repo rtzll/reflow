@@ -214,6 +214,11 @@
   .rf-time-grid[data-compact] .rf-time-grid-all-day .rf-time-grid-event {
     --span: 1 !important;
   }
+  /* Showing one day, the strip goes when no all-day event covers it. */
+  .rf-time-grid[data-compact]:not([data-compact-all-day])
+    :is(.rf-time-grid-all-day, .rf-time-grid-all-day-label) {
+    display: none;
+  }
   .rf-time-grid[data-compact] .rf-time-grid-event[data-visible='false'] {
     display: none;
   }

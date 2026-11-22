@@ -16,25 +16,51 @@ export function EventEditor(handle: Handle<EditorProps>) {
     const form = e.currentTarget
     const data = new FormData(form)
     const title = String(data.get('title')).trim()
-    const [hour, minute] = String(data.get('start')).split(':').map(Number)
-    const start = hour! * 60 + minute!
-    const duration = Number(data.get('duration'))
     const day = Number(data.get('day'))
     const calendar = calendars.find((name) => name === data.get('calendar'))
-    if (!title || start + duration > 1440) {
-      const field = form.elements.namedItem(!title ? 'title' : 'duration') as HTMLInputElement
-      field.setCustomValidity(
-        !title ? 'Enter an event title.' : 'Choose a duration that ends by midnight.',
-      )
+    if (!title) {
+      const field = form.elements.namedItem('title') as HTMLInputElement
+      field.setCustomValidity('Enter an event title.')
       field.reportValidity()
       return
     }
     if (!calendar || !form.reportValidity()) return
-    handle.props.save({ ...draft, title, start, duration, day, calendar })
+    if (allDay) {
+      const { start: _start, duration: _duration, ...rest } = draft
+      handle.props.save({
+        ...rest,
+        title,
+        day,
+        calendar,
+        start: 0,
+        duration: 0,
+        allDay: true,
+        span: Number(data.get('span')),
+      })
+      return
+    }
+    const [hour, minute] = String(data.get('start')).split(':').map(Number)
+    // A timed event may run past midnight into the next day, up to 24 hours.
+    const { allDay: _allDay, span: _span, ...timed } = draft
+    handle.props.save({
+      ...timed,
+      title,
+      day,
+      calendar,
+      start: hour! * 60 + minute!,
+      duration: Number(data.get('duration')),
+    })
   }
+  // Whether the form edits an all-day event; set when it opens and by its checkbox.
+  let allDay = false
+  let editing: WeekEvent | undefined
 
   return () => {
     const { draft, close } = handle.props
+    if (draft !== editing) {
+      editing = draft
+      allDay = !!draft?.allDay
+    }
     return (
       <Dialog
         open={!!draft}
@@ -50,8 +76,6 @@ export function EventEditor(handle: Handle<EditorProps>) {
               on('submit', submit),
               on('input', (e) => {
                 if (e.target instanceof HTMLInputElement) e.target.setCustomValidity('')
-                const duration = e.currentTarget.elements.namedItem('duration') as HTMLInputElement
-                duration.setCustomValidity('')
               }),
             ]}
           >
@@ -69,30 +93,57 @@ export function EventEditor(handle: Handle<EditorProps>) {
                 ))}
               </select>
             </div>
-            <div class="week-form-pair">
+            <label class="week-form-check">
+              <input
+                type="checkbox"
+                name="allDay"
+                checked={allDay}
+                mix={on<HTMLInputElement, 'change'>('change', (e) => {
+                  allDay = e.currentTarget.checked
+                  void handle.update()
+                })}
+              />
+              All day
+            </label>
+            {allDay ? (
               <label>
-                Start (UTC)
+                Days
                 <input
-                  name="start"
-                  type="time"
-                  required
-                  step={900}
-                  defaultValue={timeLabel(draft.start)}
-                />
-              </label>
-              <label>
-                Duration (minutes)
-                <input
-                  name="duration"
+                  name="span"
                   type="number"
                   required
-                  min={15}
-                  max={1440}
-                  step={15}
-                  defaultValue={draft.duration}
+                  min={1}
+                  max={7}
+                  step={1}
+                  defaultValue={draft.span ?? 1}
                 />
               </label>
-            </div>
+            ) : (
+              <div class="week-form-pair">
+                <label>
+                  Start (UTC)
+                  <input
+                    name="start"
+                    type="time"
+                    required
+                    step={900}
+                    defaultValue={timeLabel(draft.allDay ? 540 : draft.start)}
+                  />
+                </label>
+                <label>
+                  Duration (minutes)
+                  <input
+                    name="duration"
+                    type="number"
+                    required
+                    min={15}
+                    max={1440}
+                    step={15}
+                    defaultValue={draft.duration || 60}
+                  />
+                </label>
+              </div>
+            )}
             <div class="week-form-field">
               <label for="week-calendar">Calendar</label>
               <select id="week-calendar" name="calendar" defaultValue={draft.calendar}>

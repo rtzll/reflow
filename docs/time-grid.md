@@ -28,4 +28,4 @@ Moving and resizing keep working across midnight wherever a next column exists: 
 
 ## Verification
 
-Browser tests cover the all-day strip's columns, spans and stacking, its keyboard and drag moves and labels, an overnight event's two parts and label, moving and resizing across midnight, the fitted window, and the cut-off on the last column. An end-to-end test checks the strip's layout and an overnight event in the TimeGrid docs' release week example. The Calendar workspace keeps its same-day events for now: its editor would need an all-day option and overnight validation first.
+Browser tests cover the all-day strip's columns, spans and stacking, its keyboard and drag moves and labels, an overnight event's two parts and label, moving and resizing across midnight, the fitted window, and the cut-off on the last column. An end-to-end test checks the strip's layout and an overnight event in the TimeGrid docs' release week example. The Calendar workspace uses both: its seeded studio offsite is all-day, and its editor creates all-day events and timed ones up to 24 hours long. On a narrow screen the strip shows only when an all-day event covers the chosen day.

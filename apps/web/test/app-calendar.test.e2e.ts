@@ -25,17 +25,19 @@ it('creates a timed event, moves and resizes it with the keyboard, and edits its
   await expect(editor.getByLabel('Day', { exact: true })).toHaveValue('3')
   await expect(editor.getByLabel('Duration (minutes)')).toHaveValue('60')
   await editor.getByLabel('Start (UTC)').fill('23:30')
+  // Past midnight it continues into Friday; more than 24 hours is refused.
+  await editor.getByLabel('Duration (minutes)').fill('1455')
   await editor.getByRole('button', { name: 'Save changes' }).click()
   await expect(editor.getByLabel('Duration (minutes)')).toHaveJSProperty(
-    'validationMessage',
-    'Choose a duration that ends by midnight.',
+    'validity.rangeOverflow',
+    true,
   )
-  await editor.getByLabel('Duration (minutes)').fill('30')
+  await editor.getByLabel('Duration (minutes)').fill('60')
   await editor.getByRole('button', { name: 'Save changes' }).click()
-  await expect(event).toHaveAccessibleName('Field notes, Thursday, 23:30–24:00 UTC')
+  await expect(event).toHaveAccessibleName('Field notes, Thursday, 23:30–Friday, 00:30 UTC')
   await expect(event).toBeFocused()
   await open(page, '/apps/calendar')
-  await expect(event).toHaveAccessibleName('Field notes, Thursday, 23:30–24:00 UTC')
+  await expect(event).toHaveAccessibleName('Field notes, Thursday, 23:30–Friday, 00:30 UTC')
 })
 
 it('places overlapping events side by side and previews pointer moves and duration changes', async (t) => {
@@ -52,7 +54,9 @@ it('places overlapping events side by side and previews pointer moves and durati
   ])
   expect(first!.x + first!.width).toBeLessThanOrEqual(second!.x)
   expect(first!.y + first!.height).toBeGreaterThan(second!.y)
-  const board = (await page.getByRole('group', { name: 'Timed events' }).boundingBox())!
+  const board = (await page
+    .getByRole('group', { name: 'Timed events', exact: true })
+    .boundingBox())!
   const x = original!.x + original!.width / 2
   const y = original!.y + 8
   await page.mouse.move(x, y)
@@ -123,7 +127,7 @@ it('previews a dragged time range and opens a new event with its day, start, and
   const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   await open(page, '/apps/calendar')
-  const board = page.getByRole('group', { name: 'Timed events' })
+  const board = page.getByRole('group', { name: 'Timed events', exact: true })
   const rect = (await board.boundingBox())!
   const hour = rect.height / 8
   const sunday = rect.x + (rect.width * 6.5) / 7
@@ -155,7 +159,7 @@ it('cancels range selection and clamps it at the end of the displayed day', asyn
     .getByRole('group', { name: 'Day to display' })
     .getByRole('button', { name: 'Saturday' })
     .click()
-  const board = page.getByRole('group', { name: 'Timed events' })
+  const board = page.getByRole('group', { name: 'Timed events', exact: true })
   const rect = (await board.boundingBox())!
   const x = rect.x + rect.width / 2
   await page.mouse.move(x, rect.y + 1)
@@ -184,7 +188,10 @@ it('describes events with the grid instructions once, without repeating the visi
   const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
   await open(page, '/apps/calendar')
-  const event = page.getByRole('group', { name: 'Timed events' }).getByRole('button').first()
+  const event = page
+    .getByRole('group', { name: 'Timed events', exact: true })
+    .getByRole('button')
+    .first()
   await expect(event).toHaveAccessibleDescription(/use arrows to move/)
   await expect(event).not.toHaveAccessibleDescription(/Drag down an empty time slot/)
   await expect(page.getByText('Drag down an empty time slot')).toBeVisible()
@@ -277,4 +284,67 @@ it('skips damaged calendar records and allows scheduling when local storage is d
   await expect(event).toHaveAccessibleName('Weekly kickoff, Monday, 09:15–10:15 UTC')
   await page.getByRole('button', { name: 'Undo', exact: true }).click()
   await expect(event).toHaveAccessibleName('Weekly kickoff, Monday, 09:00–10:00 UTC')
+})
+
+it('shows all-day events above the hours and saves all-day and overnight events from the editor', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await open(page, '/apps/calendar')
+  const allDay = page.getByRole('group', { name: 'Timed events, all day' })
+  const offsite = allDay.getByRole('button', {
+    name: 'Studio offsite, Thursday to Friday, all day',
+  })
+  await expect(offsite).toBeVisible()
+
+  // The editor opens an all-day event with its days instead of times.
+  await offsite.click()
+  await expect(page.locator('.week-detail')).toContainText('Thursday–Friday · All day')
+  await page.getByRole('button', { name: 'Edit event' }).click()
+  const editor = page.getByRole('dialog')
+  await expect(editor.getByLabel('All day')).toBeChecked()
+  await expect(editor.getByLabel('Days')).toHaveValue('2')
+  await expect(editor.getByLabel('Start (UTC)')).toHaveCount(0)
+  await editor.getByRole('button', { name: 'Cancel' }).click()
+
+  // An overnight event continues in the next column.
+  await page.getByRole('button', { name: 'New event' }).click()
+  await editor.getByLabel('Event title').fill('Overnight render')
+  await editor.getByLabel('Day', { exact: true }).selectOption('4')
+  await editor.getByLabel('Start (UTC)').fill('22:00')
+  await editor.getByLabel('Duration (minutes)').fill('300')
+  await editor.getByRole('button', { name: 'Create event' }).click()
+  const render = page.getByRole('button', {
+    name: 'Overnight render, Friday, 22:00–Saturday, 03:00 UTC',
+  })
+  await expect(render).toBeFocused()
+  await expect(page.locator('[data-continues]')).toHaveCount(1)
+  await expect(page.locator('.week-detail')).toContainText('Friday 22:00–Saturday 03:00 UTC')
+
+  // A new all-day event, from the same editor.
+  await page.getByRole('button', { name: 'New event' }).click()
+  await editor.getByLabel('Event title').fill('Holiday')
+  await editor.getByLabel('Day', { exact: true }).selectOption('0')
+  await editor.getByLabel('All day').check()
+  await editor.getByRole('button', { name: 'Create event' }).click()
+  await expect(allDay.getByRole('button', { name: 'Holiday, Monday, all day' })).toBeFocused()
+
+  // Both survive a refresh.
+  await open(page, '/apps/calendar')
+  await expect(allDay.getByRole('button', { name: 'Holiday, Monday, all day' })).toBeVisible()
+  await expect(render).toBeVisible()
+})
+
+it('shows the all-day strip on a narrow screen only for days it covers', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 390, height: 844 })
+  await open(page, '/apps/calendar')
+  const strip = page.getByRole('group', { name: 'Timed events, all day' })
+  await expect(strip).toBeHidden()
+  await page
+    .getByRole('group', { name: 'Day to display' })
+    .getByRole('button', { name: 'Thursday' })
+    .click()
+  await expect(
+    strip.getByRole('button', { name: 'Studio offsite, Thursday to Friday, all day' }),
+  ).toBeVisible()
 })

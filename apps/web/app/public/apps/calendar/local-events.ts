@@ -16,13 +16,18 @@ function isWeekEvent(value: unknown, id: string): value is WeekEvent {
     Number.isInteger(event.day) &&
     event.day >= 0 &&
     event.day < days.length &&
-    typeof event.start === 'number' &&
-    event.start >= 0 &&
-    event.start % 15 === 0 &&
-    typeof event.duration === 'number' &&
-    event.duration >= 15 &&
-    event.duration % 15 === 0 &&
-    event.start + event.duration <= 1440
+    (event.allDay === true
+      ? event.span === undefined ||
+        (Number.isInteger(event.span) && event.span >= 1 && event.span <= days.length)
+      : event.allDay === undefined &&
+        typeof event.start === 'number' &&
+        event.start >= 0 &&
+        event.start < 1440 &&
+        event.start % 15 === 0 &&
+        typeof event.duration === 'number' &&
+        event.duration >= 15 &&
+        event.duration <= 1440 &&
+        event.duration % 15 === 0)
   )
 }
 
