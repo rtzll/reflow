@@ -123,4 +123,16 @@ describe('AvatarGroup', () => {
     ok(!$('.rf-avatar-more'))
     equal(($('.rf-avatar') as HTMLElement).style.getPropertyValue('--rf-avatar-size'), '24px')
   })
+
+  it('shortens a large count and names only the first few of the rest', async (t) => {
+    const crowd = Array.from({ length: 1284 }, (_, index) => ({ name: `Member ${index + 1}` }))
+    const { $, cleanup } = render(<AvatarGroup avatars={crowd} max={4} />)
+    t.after(cleanup)
+    equal($('ul.rf-avatar-group')?.getAttribute('aria-label'), '1,284 people')
+    const more = $('.rf-avatar-more') as HTMLElement
+    equal(more.textContent, '+1.3K')
+    const label = more.getAttribute('aria-label')!
+    ok(label.startsWith('1,281 more: Member 4, Member 5,'), label)
+    ok(label.endsWith('Member 13 and 1,271 others'), label)
+  })
 })

@@ -17,6 +17,12 @@ export interface AvatarGroupProps {
  * names itself in a tooltip; past `max`, a count stands in for the rest and
  * names them. Pointing at the row spreads it apart.
  */
+const namedLimit = 10
+const count = new Intl.NumberFormat('en').format
+// The badge stays a few characters wide: 1,281 reads as +1.3K.
+const compact = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 })
+  .format
+
 export function AvatarGroup(handle: Handle<AvatarGroupProps>) {
   return () => {
     const { avatars, size = 32, shape } = handle.props
@@ -25,8 +31,11 @@ export function AvatarGroup(handle: Handle<AvatarGroupProps>) {
     const shown = overflow ? avatars.slice(0, max - 1) : avatars
     const rest = overflow ? avatars.slice(max - 1) : []
     const label =
-      handle.props.label ?? `${avatars.length} ${avatars.length === 1 ? 'person' : 'people'}`
-    const names = rest.map((avatar) => avatar.name).join(', ')
+      handle.props.label ?? `${count(avatars.length)} ${avatars.length === 1 ? 'person' : 'people'}`
+    // Name the first few of the rest; a list of hundreds helps no one.
+    const named = rest.slice(0, namedLimit).map((avatar) => avatar.name)
+    const unnamed = rest.length - named.length
+    const names = named.join(', ') + (unnamed ? ` and ${count(unnamed)} others` : '')
     return (
       <ul class="rf-avatar-group" aria-label={label} style={{ '--rf-avatar-size': `${size}px` }}>
         {shown.map((avatar, index) => (
@@ -51,11 +60,11 @@ export function AvatarGroup(handle: Handle<AvatarGroupProps>) {
                   <span
                     class="rf-avatar rf-avatar-more"
                     role="img"
-                    aria-label={`${rest.length} more: ${names}`}
+                    aria-label={`${count(rest.length)} more: ${names}`}
                     data-shape={shape ?? 'circle'}
                     style={{ '--rf-avatar-size': `${size}px` }}
                   >
-                    +{rest.length}
+                    +{compact(rest.length)}
                   </span>
                 </span>
               )}

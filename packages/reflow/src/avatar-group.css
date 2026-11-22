@@ -30,6 +30,10 @@
 }
 .rf-avatar-more {
   --rf-avatar-color: var(--rf-muted);
+  /* A count too wide for the circle stretches it into a pill. */
+  inline-size: auto;
+  min-inline-size: var(--rf-avatar-size);
+  padding-inline: calc(var(--rf-avatar-size) * 0.18);
   background: var(--rf-neutral-fill);
   color: var(--rf-fg);
   font-size: calc(var(--rf-avatar-size) * 0.34);
