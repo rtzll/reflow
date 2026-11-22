@@ -171,9 +171,11 @@ it('cancels range selection and clamps it at the end of the displayed day', asyn
   await page.mouse.up()
   await expect(range).toHaveCount(0)
   await expect(page.getByRole('dialog')).toBeHidden()
-  await page.mouse.move(x, rect.y + rect.height - 2)
+  await board.evaluate((node) => node.scrollIntoView({ block: 'center' }))
+  const bottom = (await board.boundingBox())!
+  await page.mouse.move(x, bottom.y + bottom.height - 2)
   await page.mouse.down()
-  await page.mouse.move(x, rect.y + rect.height + 12)
+  await page.mouse.move(x, bottom.y + bottom.height + 12)
   await expect(range).toHaveText('16:45–17:00')
   await page.mouse.up()
   const editor = page.getByRole('dialog', { name: 'New event' })
@@ -208,6 +210,10 @@ it('keeps a touch drag readable beside a short event and discards canceled or un
   await editor.getByRole('button', { name: 'Save changes' }).click()
   const rect = (await event.boundingBox())!
   const edge = (await event.locator('.rf-time-grid-resize').boundingBox())!
+  const hour = await page
+    .locator('.rf-time-grid-times span')
+    .first()
+    .evaluate((node) => node.getBoundingClientRect().height)
   const x = edge.x + edge.width - 4
   const y = edge.y + edge.height / 2
   const client = await page.context().newCDPSession(page)
@@ -215,7 +221,7 @@ it('keeps a touch drag readable beside a short event and discards canceled or un
   await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] })
   await client.send('Input.dispatchTouchEvent', {
     type: 'touchMove',
-    touchPoints: [{ x, y: y + 56 }],
+    touchPoints: [{ x, y: y + hour }],
   })
   const readout = page.locator('.rf-time-grid-readout')
   await expect(readout).toHaveText('Monday · 09:00–10:15')
@@ -230,7 +236,7 @@ it('keeps a touch drag readable beside a short event and discards canceled or un
   await expect(undo).toBeHidden()
   await page.mouse.move(x, y)
   await page.mouse.down()
-  await page.mouse.move(x, y + 56)
+  await page.mouse.move(x, y + hour)
   await expect(readout).toBeVisible()
   await page.keyboard.press('Escape')
   await page.mouse.up()

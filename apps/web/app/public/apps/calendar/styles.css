@@ -1,6 +1,5 @@
 .week-app {
   --rf-time-grid-gutter: 60px;
-  --rf-time-grid-hour-size: 64px;
   width: min(100%, 1440px);
   margin: 0 auto;
   padding: clamp(22px, 3vw, 48px);
@@ -91,7 +90,7 @@
   .week-app .rf-time-grid {
     background: linear-gradient(
       to right,
-      var(--rf-surface-3)
+      var(--rf-surface-2)
         calc(var(--rf-time-grid-gutter) + (100% - var(--rf-time-grid-gutter)) * 5 / 7),
       var(--rf-muted-bg) 0
     );
@@ -225,7 +224,6 @@
 @media (max-width: 800px) {
   .week-app {
     --rf-time-grid-gutter: 45px;
-    --rf-time-grid-hour-size: 56px;
     padding: 22px 12px;
   }
   .week-header {

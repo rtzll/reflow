@@ -834,8 +834,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
             days.length,
           ).map(({ event: piece, lane, lanes }) => {
             const { event } = piece
-            const visibleDuration =
-              Math.min(last, piece.start + piece.duration) - Math.max(first, piece.start)
+            const end = event.start + event.duration
             // The part after midnight belongs to the event's button: a pointer
             // can press or drag it, and assistive technology reads the button.
             if (piece.continues)
@@ -845,7 +844,6 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
                   class={classList('rf-time-grid-event', getEventClass?.(event))}
                   data-continues={event.id}
                   data-visible={piece.day === compactDay}
-                  data-short={visibleDuration <= 30}
                   data-editable={!!onEventChange || undefined}
                   data-pressed={event.id === selectedId || undefined}
                   aria-hidden="true"
@@ -861,7 +859,9 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
                     }),
                   ]}
                 >
-                  <strong>{event.title}</strong>
+                  <span class="rf-time-grid-caption">
+                    <strong>{event.title}</strong>
+                  </span>
                 </div>
               )
             const label = describe(event)
@@ -872,7 +872,6 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
                 class={classList('rf-time-grid-event', getEventClass?.(event))}
                 data-event={event.id}
                 data-visible={event.day === compactDay}
-                data-short={visibleDuration <= 30}
                 data-editable={!!onEventChange || undefined}
                 aria-label={label}
                 title={label}
@@ -895,8 +894,13 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
                   }),
                 ]}
               >
-                <span class="rf-time-grid-time">{clock(event.start)}</span>
-                <strong>{event.title}</strong>
+                <span class="rf-time-grid-caption">
+                  <strong>{event.title}</strong>
+                  <span class="rf-time-grid-time">
+                    {clock(event.start)}
+                    <span class="rf-time-grid-end">–{clock(end > 1440 ? end % 1440 : end)}</span>
+                  </span>
+                </span>
                 {onEventChange && (
                   <span
                     class="rf-time-grid-resize"

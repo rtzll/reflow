@@ -11,33 +11,29 @@
   height: 0;
   min-height: 100%;
   display: grid;
-  grid-auto-rows: var(--rf-time-grid-hour-size, 64px);
+  grid-auto-rows: var(--rf-time-grid-hour-size, 80px);
   color: var(--rf-muted);
-  text-align: center;
+  text-align: end;
+  padding-inline-end: 9px;
   font: 500 10px/1.5 var(--rf-font);
   font-variant-numeric: tabular-nums;
 }
 .rf-time-grid-times span {
-  padding-top: 4px;
+  padding-top: 1px;
 }
 .rf-time-grid-board {
   --visible-days: var(--day-count);
   user-select: none;
   position: relative;
-  height: calc(var(--hours) * var(--rf-time-grid-hour-size, 64px));
-  background-color: var(--rf-surface-3);
+  height: calc(var(--hours) * var(--rf-time-grid-hour-size, 80px));
+  --grid-line: color-mix(in srgb, var(--rf-border) 44%, transparent);
+  background-color: var(--rf-surface-2);
   background-image:
-    linear-gradient(to right, var(--rf-border) 1px, transparent 1px),
-    linear-gradient(to bottom, transparent calc(100% - 1px), var(--rf-border) 1px),
-    linear-gradient(
-      to bottom,
-      transparent calc(100% - 1px),
-      color-mix(in srgb, var(--rf-border) 44%, transparent) 1px
-    );
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
   background-size:
     calc(100% / var(--visible-days)) 100%,
-    100% var(--rf-time-grid-hour-size, 64px),
-    100% calc(var(--rf-time-grid-hour-size, 64px) / 2);
+    100% var(--rf-time-grid-hour-size, 80px);
 }
 .rf-time-grid-event {
   position: absolute;
@@ -48,11 +44,10 @@
   gap: 1px;
   align-items: stretch;
   overflow: hidden;
-  padding: 4px 6px;
-  border: 1px solid
-    color-mix(in srgb, var(--rf-time-grid-event-color, var(--rf-info)) 24%, transparent);
+  padding: 0;
+  border: 0;
   border-inline-start: 3px solid var(--rf-time-grid-event-color, var(--rf-info));
-  border-radius: var(--rf-item-radius);
+  border-radius: min(5px, var(--rf-item-radius));
   background: var(
     --rf-time-grid-event-fill,
     color-mix(in srgb, var(--rf-time-grid-event-color, var(--rf-info)) 12%, var(--rf-surface-3))
@@ -114,21 +109,70 @@
 .rf-time-grid-event[data-editable]:active {
   cursor: grabbing;
 }
+.rf-time-grid-board .rf-time-grid-event:not(.rf-time-grid-range) {
+  container: time-grid-event / size;
+}
+.rf-time-grid-caption {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  padding: 4px clamp(4px, 4cqw, 6px);
+  gap: 2px;
+  min-width: 0;
+}
 .rf-time-grid-time {
-  font-size: 10px;
-  color: var(--rf-time-grid-event-color, var(--rf-info));
+  color: color-mix(in srgb, var(--rf-muted) 80%, var(--rf-fg));
+  font: 500 11px/1.2 var(--rf-font);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .rf-time-grid-event strong {
-  font-size: var(--rf-text-caption);
-  font-weight: 600;
-  overflow-wrap: anywhere;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font: 600 var(--rf-text-caption)/1.2 var(--rf-font);
 }
-.rf-time-grid-event[data-short='true'] {
-  flex-direction: row;
-  align-items: baseline;
-  gap: 4px;
-  padding-block: 0;
+/* Use the space the slot actually has, including a clipped overnight part. */
+@container time-grid-event (max-height: 38px) {
+  .rf-time-grid-caption {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 4px;
+    margin-block: auto;
+    padding-block: 0;
+  }
+  .rf-time-grid-end {
+    display: none;
+  }
+}
+@container time-grid-event (max-width: 120px) and (height < 55px) {
+  .rf-time-grid-caption {
+    margin-block: auto;
+    padding: 0 4px;
+  }
+  .rf-time-grid-time {
+    display: none;
+  }
+}
+/* A narrow lane can fit two lines of title in a half-hour slot. */
+@container time-grid-event (max-width: 120px) and (30px <= height < 55px) {
+  .rf-time-grid-caption strong {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+}
+@container time-grid-event (min-height: 55px) {
+  .rf-time-grid-caption strong {
+    display: block;
+    max-block-size: round(down, calc(100cqh - 26px), 1lh);
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
 }
 .rf-time-grid-resize {
   position: absolute;
@@ -136,7 +180,7 @@
   height: min(8px, 35%);
   cursor: ns-resize;
 }
-.rf-time-grid-event:is(:hover, :focus-visible, [aria-pressed='true']) .rf-time-grid-resize::after {
+.rf-time-grid-resize:hover::after {
   content: '';
   position: absolute;
   inset: auto calc(50% - 7px) 2px;
@@ -176,7 +220,7 @@
   height: 24px;
   flex-direction: row;
   align-items: center;
-  padding-block: 0;
+  padding: 0 6px;
 }
 .rf-time-grid-all-day .rf-time-grid-event strong {
   overflow: hidden;
@@ -245,7 +289,7 @@
 }
 @media (forced-colors: active) {
   .rf-time-grid-event {
-    border-color: ButtonText;
+    border: 1px solid ButtonText;
   }
   .rf-time-grid-event[aria-pressed='true'],
   .rf-time-grid-range {

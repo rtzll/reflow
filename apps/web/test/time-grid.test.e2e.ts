@@ -43,6 +43,10 @@ it('lays out all-day events above the hours and an overnight event across two co
   const board = section.getByRole('group', { name: 'Release week', exact: true })
   const freeze = strip.getByRole('button', { name: 'Code freeze, Monday to Tuesday, all day' })
   const release = strip.getByRole('button', { name: 'Release day, Wednesday, all day' })
+  // Inspect midnight, then move focus into the pinned all-day strip.
+  await section.locator('.release-week-scroll').evaluate((node) => {
+    node.scrollTop = 0
+  })
   const [stripBox, boardBox, freezeBox, releaseBox] = await Promise.all(
     [strip, board, freeze, release].map(async (locator) => (await locator.boundingBox())!),
   )
@@ -69,4 +73,36 @@ it('lays out all-day events above the hours and an overnight event across two co
   await expect(
     strip.getByRole('button', { name: 'Code freeze, Tuesday to Wednesday, all day' }),
   ).toBeFocused()
+})
+
+it('fits the title of a fifteen-minute event and a half-hour event inside their time slots', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await open(page, '/docs/time-grid')
+  const board = page.getByRole('group', { name: 'Release week', exact: true })
+  const event = board.getByRole('button', { name: /^Standup,/ })
+  for (const duration of [15, 30]) {
+    if (duration === 30) await event.press('Shift+ArrowDown')
+    const slot = (await event.boundingBox())!
+    const title = (await event.locator('strong').boundingBox())!
+    expect(title.y).toBeGreaterThanOrEqual(slot.y)
+    expect(title.y + title.height).toBeLessThanOrEqual(slot.y + slot.height + 0.5)
+    expect(title.height).toBeGreaterThanOrEqual(12)
+    expect(slot.height).toBeLessThanOrEqual(((await board.boundingBox())!.height * duration) / 1440)
+  }
+})
+
+it('keeps the complete half-hour title readable in a narrow week column', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 390, height: 844 })
+  await open(page, '/docs/time-grid')
+  const event = page.getByRole('button', { name: 'Release notes, Wednesday, 10:00–10:30' })
+  const title = event.locator('strong')
+  const fits = await title.evaluate(
+    (node) => node.scrollHeight <= node.clientHeight && node.scrollWidth <= node.clientWidth,
+  )
+  expect(fits).toBe(true)
+  const card = (await event.boundingBox())!
+  const text = (await title.boundingBox())!
+  expect(text.y).toBeGreaterThanOrEqual(card.y)
+  expect(text.y + text.height).toBeLessThanOrEqual(card.y + card.height + 0.5)
 })

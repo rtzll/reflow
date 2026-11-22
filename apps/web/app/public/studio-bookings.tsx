@@ -47,6 +47,14 @@ export function StudioBookings(handle: Handle<{ stepMinutes?: number }>) {
     <section
       class="booking-example"
       aria-label="Friday studio"
+      style={{
+        '--rf-time-grid-hour-size':
+          Math.max(
+            48,
+            (18 * 60) /
+              Math.min(handle.props.stepMinutes ?? 30, ...events.map((event) => event.duration)),
+          ) + 'px',
+      }}
       mix={ref<HTMLElement>((node) => {
         section = node
       })}
