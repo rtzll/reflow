@@ -106,7 +106,7 @@ Fluid Functionalism is a reference, not a specification. Reflow checks it for ne
 Checked against upstream `1f716642` on November 22, 2026. Three upstream components have no Reflow counterpart; they are candidates in the [roadmap](components.md#roadmap), not obligations:
 
 - **Confirmation** asks a yes or no question before something runs, such as an agent's tool call, built on Banner. It fits Reflow's conversation components.
-- **MessageScroller** follows a streamed reply while the reader is at the end, lets go on a manual scroll, glides a new user turn to the top, and offers a button back to the latest message. ChatLayout already keeps the transcript pinned; the rest would extend it rather than add a component.
+- **MessageScroller** follows a streamed reply while the reader is at the end, lets go on a manual scroll, glides a new user turn to the top, and offers a button back to the latest message. ChatLayout already follows, lets go and offers that button; anchoring the new turn and quiet streaming announcements extend it rather than add a component.
 - **FileThumbnail** renders the first page of a PDF with pdf.js. It is the one known gap below, and it needs a decision about that dependency first.
 
 The rest of that commit refines upstream's DataTable frozen columns and selection bar, which Reflow does not have, and two hover details. Reflow's fluid hover keeps one visible state rather than per-entry sessions, so a pointer entering onto a lit item already glides on. Reflow's Combobox drives its fill from its own active row, which the pointer owns while it is over the list.
