@@ -516,6 +516,19 @@ it('keeps the gallery Combobox aligned and scrollable after a third choice wraps
       parseFloat(getComputedStyle(viewport).getPropertyValue('--rf-scroll-fade-bottom')) > 0
     )
   }, viewportSelector)
+  // The mask reads the edge on the viewport; the rows inside do not inherit
+  // it, so a scrolled frame restyles the viewport alone.
+  assert.deepEqual(
+    await page.evaluate((selector) => {
+      const viewport = document.querySelector(selector)!
+      const row = viewport.querySelector('[role="option"]')!
+      return {
+        masked: getComputedStyle(viewport).maskImage.startsWith('linear-gradient'),
+        row: getComputedStyle(row).getPropertyValue('--rf-scroll-fade-bottom'),
+      }
+    }, viewportSelector),
+    { masked: true, row: '0px' },
+  )
   const input = tile.getByRole('combobox', { name: 'Components' })
   await input.press('End')
   await page.waitForFunction((selector) => {

@@ -1,16 +1,38 @@
-[data-rf-scroll-fade] {
-  --rf-scroll-fade-top: 0px;
-  --rf-scroll-fade-bottom: 0px;
-  --rf-scroll-fade-left: 0px;
-  --rf-scroll-fade-right: 0px;
-  --rf-fade-y: linear-gradient(
+/* Scrolling writes the four edge distances every frame. Registered as not
+   inheriting, and read straight into the mask rather than through an
+   inherited gradient variable, a scroll restyles the scroller alone, not
+   every row inside it. */
+@property --rf-scroll-fade-top {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+@property --rf-scroll-fade-bottom {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+@property --rf-scroll-fade-left {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+@property --rf-scroll-fade-right {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+[data-rf-scroll-fade='vertical'] {
+  mask-image: linear-gradient(
     to bottom,
     transparent,
     #000 var(--rf-scroll-fade-top),
     #000 calc(100% - var(--rf-scroll-fade-bottom)),
     transparent
   );
-  --rf-fade-x: linear-gradient(
+}
+[data-rf-scroll-fade='horizontal'] {
+  mask-image: linear-gradient(
     to right,
     transparent,
     #000 var(--rf-scroll-fade-left),
@@ -18,14 +40,22 @@
     transparent
   );
 }
-[data-rf-scroll-fade='vertical'] {
-  mask-image: var(--rf-fade-y);
-}
-[data-rf-scroll-fade='horizontal'] {
-  mask-image: var(--rf-fade-x);
-}
 [data-rf-scroll-fade='both'] {
-  mask-image: var(--rf-fade-y), var(--rf-fade-x);
+  mask-image:
+    linear-gradient(
+      to bottom,
+      transparent,
+      #000 var(--rf-scroll-fade-top),
+      #000 calc(100% - var(--rf-scroll-fade-bottom)),
+      transparent
+    ),
+    linear-gradient(
+      to right,
+      transparent,
+      #000 var(--rf-scroll-fade-left),
+      #000 calc(100% - var(--rf-scroll-fade-right)),
+      transparent
+    );
   mask-composite: intersect;
 }
 
