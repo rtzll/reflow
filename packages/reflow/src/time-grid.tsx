@@ -91,9 +91,8 @@ function pieces<E extends TimeGridEvent>(events: readonly E[], dayCount: number)
   return out
 }
 
-// Rows for the all-day strip: each event takes the first row free across its days.
-function stackAllDay<E extends TimeGridEvent>(events: readonly E[], dayCount: number) {
-  const rows: boolean[][] = []
+// Place longer spans first when several all-day events start on the same day.
+function orderAllDay<E extends TimeGridEvent>(events: readonly E[], dayCount: number) {
   return events
     .map((event) => ({ event, day: clamp(event.day, 0, Math.max(0, dayCount - 1)) }))
     .map(({ event, day }) => ({
@@ -102,13 +101,6 @@ function stackAllDay<E extends TimeGridEvent>(events: readonly E[], dayCount: nu
       span: clamp(Math.trunc(event.span ?? 1) || 1, 1, dayCount - day),
     }))
     .sort((a, b) => a.day - b.day || b.span - a.span)
-    .map((entry) => {
-      let row = 0
-      while (rows[row]?.slice(entry.day, entry.day + entry.span).some(Boolean)) row++
-      rows[row] ??= []
-      for (let day = entry.day; day < entry.day + entry.span; day++) rows[row]![day] = true
-      return { ...entry, row }
-    })
 }
 
 // Events that overlap transitively share a width. Reuse a lane as soon as its
@@ -555,7 +547,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
     }
 
     // The all-day strip, with a dragged event shown at its new day or span.
-    const allDayStack = stackAllDay(
+    const allDayEntries = orderAllDay(
       allDayEvents.map((event) =>
         dayDrag && dayDrag.event.id === event.id
           ? { ...event, day: dayDrag.day, span: dayDrag.span }
@@ -563,10 +555,6 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
       ),
       days.length,
     )
-    // With onCreateAllDay, one more row is left empty to drag across.
-    const allDayRows =
-      allDayStack.reduce((rows, entry) => Math.max(rows, entry.row + 1), 0) +
-      (onCreateAllDay ? 1 : 0)
     const spanOf = (event: E) =>
       clamp(Math.trunc(event.span ?? 1) || 1, 1, Math.max(1, days.length - event.day))
 
@@ -729,12 +717,12 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
         class="rf-time-grid"
         data-compact={handle.props.compactDay !== undefined || undefined}
         data-compact-all-day={
-          allDayStack.some(({ day, span }) => compactDay >= day && compactDay < day + span) ||
+          allDayEntries.some(({ day, span }) => compactDay >= day && compactDay < day + span) ||
           undefined
         }
         style={{ '--day-count': Math.max(1, days.length), '--hours': span / 60 }}
       >
-        {(allDayStack.length > 0 || !!onCreateAllDay) && [
+        {(allDayEntries.length > 0 || !!onCreateAllDay) && [
           <span key="all-day-label" class="rf-time-grid-all-day-label" aria-hidden="true">
             All day
           </span>,
@@ -745,7 +733,6 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
             aria-label={`${handle.props.label}, all day`}
             aria-describedby={onCreateAllDay ? allDayHelpId : undefined}
             data-create={!!onCreateAllDay || undefined}
-            style={{ '--rows': allDayRows }}
             mix={[
               stripRef,
               on<HTMLDivElement, 'pointerdown'>('pointerdown', beginCreateDay),
@@ -754,7 +741,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
               on<HTMLDivElement, 'pointercancel'>('pointercancel', cancelDay),
             ]}
           >
-            {allDayStack.map(({ event, day, span: days_, row }) => {
+            {allDayEntries.map(({ event, day, span: days_ }) => {
               const label = describe(event)
               return (
                 <button
@@ -771,7 +758,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
                   }
                   aria-describedby={eventDescribed}
                   disabled={!onSelect && !onActivate && !onEventChange}
-                  style={{ '--day': day, '--span': days_, '--row': row }}
+                  style={{ '--day': day, '--span': days_ }}
                   mix={[
                     on('pointerdown', (e) => beginDay(e, event)),
                     on('keydown', (e) => allDayKey(e, event)),
@@ -801,7 +788,6 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
                 style={{
                   '--day': Math.min(dayCreate.from, dayCreate.to),
                   '--span': Math.abs(dayCreate.to - dayCreate.from) + 1,
-                  '--row': allDayRows - 1,
                 }}
               />
             )}

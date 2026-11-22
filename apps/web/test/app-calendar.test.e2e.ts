@@ -362,8 +362,8 @@ it('creates an all-day event by dragging across the strip and stretches it from 
   const strip = page.getByRole('group', { name: 'Timed events, all day' })
   const box = (await strip.boundingBox())!
   const column = box.width / 7
-  // The empty bottom row, from Monday across Tuesday.
-  const y = box.y + box.height - 8
+  // Start in Monday’s empty column and drag across Tuesday.
+  const y = box.y + box.height / 2
   await page.mouse.move(box.x + column / 2, y)
   await page.mouse.down()
   await page.mouse.move(box.x + column * 1.5, y, { steps: 6 })

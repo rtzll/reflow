@@ -250,7 +250,7 @@ function keydown(target: Element, key: string, shiftKey = false) {
   )
 }
 
-it('shows all-day events in a strip that spans, stacks and moves by whole days', async (t) => {
+it('shows all-day events in a strip that spans and moves by whole days', async (t) => {
   const changes: TimeGridEvent[] = []
   const events = [
     { id: 'holiday', title: 'Holiday', day: 0, start: 0, duration: 0, allDay: true },
@@ -286,18 +286,14 @@ it('shows all-day events in a strip that spans, stacks and moves by whole days',
   deepEqual(
     ['holiday', 'trip', 'deadline'].map((id) => {
       const style = button(id).style
-      return [
-        style.getPropertyValue('--day'),
-        style.getPropertyValue('--span'),
-        style.getPropertyValue('--row'),
-      ]
+      return [style.getPropertyValue('--day'), style.getPropertyValue('--span')]
     }),
     [
-      ['0', '1', '0'],
-      ['1', '2', '0'],
-      ['1', '1', '1'],
+      ['0', '1'],
+      ['1', '2'],
+      ['1', '1'],
     ],
-    'spans are cut at the last column and events sharing a day stack',
+    'spans are cut at the last column',
   )
 
   // Arrows move by a day and keep every field; nothing moves past the edges or in time.

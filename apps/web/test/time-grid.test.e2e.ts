@@ -43,8 +43,16 @@ it('lays out all-day events above the hours and an overnight event across two co
   const board = section.getByRole('group', { name: 'Release week', exact: true })
   const freeze = strip.getByRole('button', { name: 'Code freeze, Monday to Tuesday, all day' })
   const release = strip.getByRole('button', { name: 'Release day, Wednesday, all day' })
-  // Inspect midnight, then move focus into the pinned all-day strip.
-  await section.locator('.release-week-scroll').evaluate((node) => {
+  const gutter = section.locator('.rf-time-grid-all-day-label')
+  const viewport = section.locator('.release-week-scroll')
+  // The gutter and strip share a divider even when pinned over the morning hours.
+  const bottom = async (locator: typeof strip) => {
+    const box = (await locator.boundingBox())!
+    return box.y + box.height
+  }
+  await expect.poll(() => viewport.evaluate((node) => node.scrollTop)).toBeGreaterThan(0)
+  expect(await bottom(gutter)).toBeCloseTo(await bottom(strip), 1)
+  await viewport.evaluate((node) => {
     node.scrollTop = 0
   })
   const [stripBox, boardBox, freezeBox, releaseBox] = await Promise.all(
@@ -52,7 +60,10 @@ it('lays out all-day events above the hours and an overnight event across two co
   )
   const column = boardBox.width / 3
   // The strip sits above the board in the same columns.
-  assert.ok(stripBox.y + stripBox.height <= boardBox.y)
+  expect(stripBox.y + stripBox.height).toBeCloseTo(boardBox.y, 1)
+  expect(await bottom(gutter)).toBeCloseTo(boardBox.y, 1)
+  expect(freezeBox.y).toBeCloseTo(releaseBox.y, 1)
+  expect(stripBox.height - freezeBox.height).toBeLessThan(12)
   assert.ok(Math.abs(stripBox.x - boardBox.x) < 1)
   assert.ok(Math.abs(freezeBox.width - (2 * column - 5)) < 1.5, `${freezeBox.width}`)
   assert.ok(Math.abs(releaseBox.x - (boardBox.x + 2 * column + 3)) < 1.5)
@@ -70,9 +81,40 @@ it('lays out all-day events above the hours and an overnight event across two co
   // Arrow keys move an all-day event by a day and keep its span.
   await freeze.focus()
   await page.keyboard.press('ArrowRight')
-  await expect(
-    strip.getByRole('button', { name: 'Code freeze, Tuesday to Wednesday, all day' }),
-  ).toBeFocused()
+  const movedFreeze = strip.getByRole('button', {
+    name: 'Code freeze, Tuesday to Wednesday, all day',
+  })
+  await expect(movedFreeze).toBeFocused()
+  const stacked = (await release.boundingBox())!
+  const moved = (await movedFreeze.boundingBox())!
+  expect(stacked.y).toBeGreaterThanOrEqual(moved.y + moved.height)
+  expect(await bottom(gutter)).toBeCloseTo(await bottom(strip), 1)
+  await movedFreeze.press('ArrowLeft')
+  expect((await strip.boundingBox())!.height).toBeCloseTo(stripBox.height, 1)
+})
+
+it('can drag below a full all-day row to create an overlapping event', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await open(page, '/docs/time-grid')
+  const strip = page.getByRole('group', { name: 'Release week, all day' })
+  await strip.scrollIntoViewIfNeeded()
+  const box = (await strip.boundingBox())!
+  const y = box.y + box.height - 3
+  await page.mouse.move(box.x + box.width / 6, y)
+  await page.mouse.down()
+  await page.mouse.move(box.x + box.width / 2, y, { steps: 4 })
+  const preview = strip.locator('.rf-time-grid-range')
+  await expect(preview).toBeVisible()
+  const row = (await preview.boundingBox())!
+  const freeze = (await strip.getByRole('button', { name: /^Code freeze,/ }).boundingBox())!
+  expect(row.y).toBeGreaterThanOrEqual(freeze.y + freeze.height)
+  await page.mouse.up()
+  const created = strip.getByRole('button', {
+    name: 'New all-day event, Monday to Tuesday, all day',
+  })
+  await expect(created).toBeVisible()
+  expect((await created.boundingBox())!.y).toBeCloseTo(row.y, 1)
 })
 
 it('fits the title of a fifteen-minute event and a half-hour event inside their time slots', async (t) => {
