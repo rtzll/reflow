@@ -137,8 +137,11 @@
 .rf-slider[data-show-steps] .rf-slider-tick {
   display: block;
 }
-.rf-slider:not([data-disabled]) .rf-slider-track:hover .rf-slider-tick {
-  scale: 1.25;
+/* Only for a real pointer hover: a tap would leave the ticks enlarged. */
+@media (hover: hover) {
+  .rf-slider:not([data-disabled]) .rf-slider-track:hover .rf-slider-tick {
+    scale: 1.25;
+  }
 }
 .rf-slider-tick[data-behind-fill] {
   opacity: 0;
