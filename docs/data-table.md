@@ -24,6 +24,16 @@ Selection lasts for the current filter, sort, page and page size. Changing any o
 
 Custom collections can use `createRangeSelection<Key>()` from `@rtzll/reflow`. Call `extend(orderedKeys, selectedKeys, fromKey, toKey)` on each adjacent Shift move and use its returned set. Call `reset()` when the gesture ends or the order changes. Issues uses the same helper for the board and list.
 
+## Selecting every matching row
+
+A page holds only some of the rows a filter matches, and a bulk action often means all of them. Set `rowSelection.selectAllMatching` to offer it. Once the header checkbox has selected every row on the page and more rows match, the selection toolbar adds **Select all 214 matching**. Choosing it selects every row the filter matches, on every page, and the button becomes **Select this page only**, which goes back. Keyboard focus stays on the button as its label changes, and the results status announces the selection.
+
+An all-matching selection belongs to the filter, not to the page: going to another page, sorting, or changing the page size keeps it, and every row checkbox shows checked. Typing a different filter clears it, and so does a change to which rows match, such as new rows loading, so an action never reaches rows the person has not seen counted. Unchecking one row, or the header checkbox, leaves the all-matching selection: unchecking a row keeps the rest of the current page selected, and unchecking the header clears everything.
+
+`actions(rows, clear)` receives every matching row in the current sort order while all are selected, and the selected rows of the page otherwise. Apps that act on rows elsewhere, such as a server, can compare `rows.length` with the total to tell the two apart.
+
+The option is off by default. A page selection stays the safe choice for actions that are expensive or hard to undo.
+
 ## Interaction and verification
 
 Use native column headers with `aria-sort` on the active column. Sorting controls, search, and pagination work from the keyboard. When row actions are supplied, a visible menu button and ContextMenu both act on the same record after filtering or sorting. Present the loaded row count to assistive technology, use Table’s density and surface styles, and keep skeleton rows aligned while loading.
