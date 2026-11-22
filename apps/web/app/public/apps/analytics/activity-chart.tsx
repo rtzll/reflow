@@ -1,7 +1,7 @@
 import { BarChart, Button } from '@rtzll/reflow'
 import { navigate, on, type Handle, type RemixNode } from 'remix/component'
 import type { activityBars } from '../../../analytics-data.ts'
-import { dayLabel, rangeLabel, type ActivityRange } from './activity.ts'
+import { sources, dayLabel, rangeLabel, type ActivityRange } from './activity.ts'
 
 interface ChartProps {
   range: ActivityRange
@@ -62,6 +62,8 @@ export function ActivityChart(handle: Handle<ChartProps>) {
         <BarChart
           label="Daily event counts"
           items={handle.props.bars}
+          series={sources}
+          layout="stacked"
           formatValue={(count) => count + ' events'}
           range={firstDay ? { start: firstDay, end: firstDay } : range}
           describedBy="chart-help"

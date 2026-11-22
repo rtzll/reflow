@@ -41,7 +41,9 @@ it('shows static bars within the Analytics directory link before hydration', asy
   await expect(card.locator('.rf-bar-chart-column')).toHaveCount(14)
   await expect(card.locator('a, button, [tabindex]')).toHaveCount(0)
   await card.click()
-  const spike = page.getByRole('link', { name: 'Oct 14, 24 events' })
+  const spike = page.getByRole('link', {
+    name: 'Oct 14: Studio editor 5 events, Media import 19 events',
+  })
   await expect(spike).toHaveAttribute('href', /from=2026-10-14&to=2026-10-14/)
   await expect(spike).toHaveAttribute('tabindex', '0')
 })

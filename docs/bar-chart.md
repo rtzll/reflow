@@ -4,7 +4,7 @@ BarChart displays positive and negative quantities on a shared zero baseline. Gi
 
 Pass `href` to render native links to detailed views. Before hydration, all bars participate in normal tab order. Hydrated charts use a single tab stop and support Left, Right, Home, and End. Focus or hover reveals the category and formatted quantity. Passing only `onSelect` renders buttons for local actions. A chart with neither prop renders static, individually named bars and can sit inside a link.
 
-Use `range` to highlight the inclusive interval between two IDs. Identical endpoints mark one current bar. Analytics builds dates from its activity records, stages the first endpoint, handles Escape, and navigates to a URL once the second endpoint is chosen. Its app directory preview reuses the same data and chart with axis labels hidden. [Analytics workspace](../apps/web/app/public/apps/analytics/index.tsx) (`/apps/analytics`)
+Use `range` to highlight the inclusive interval between two IDs. Identical endpoints mark one current bar. Analytics stacks studio edits and media imports by day. Select a day to open its event log, or choose both ends of a date range. Escape cancels an unfinished range. Its app directory preview reuses the same data and chart with axis labels hidden. [Analytics workspace](../apps/web/app/public/apps/analytics/index.tsx) (`/apps/analytics`)
 
 Set `--rf-bar-chart-height` to fit the plot to its container, and `--rf-bar-chart-axis-width` to adjust the value-axis gutter. Override `--rf-bar-chart-color` and `--rf-bar-chart-peak` to change the active bar and peak colors.
 

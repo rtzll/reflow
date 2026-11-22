@@ -13,6 +13,8 @@ Each app owns its entry, fixtures and stylesheet in `apps/web/app/public/apps/<s
 
 Cover each workflow in `apps/web/test/app-<slug>.test.e2e.ts`. Put app-specific controls beside their first use. Coordinate public Reflow API changes with the other apps and give each shared change one owner, a design note, and focused tests.
 
+Analytics shows daily activity as a stacked chart of studio edits and media imports. The event log keeps the Event column visible on narrow screens. Its request URL controls server filtering, sorting and pagination, with six records per page.
+
 ## Moving issues between statuses
 
 In board or list view, drag a ticket onto a visible status group. The whole group accepts a drop, including its empty state. Dragging a selected ticket moves the selection together. Dragging an unselected ticket moves that ticket and preserves any other selection. Releasing outside a valid target cancels the move.

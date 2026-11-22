@@ -27,13 +27,21 @@ it('inspects the spike by keyboard and opens its underlying events', async (t) =
   const page = await t.serve(showcaseServer)
   await open(page, '/apps/analytics')
   const chart = page.getByRole('region', { name: 'Daily activity' })
-  const first = chart.getByRole('link', { name: 'Oct 5, 4 events' })
-  const spike = chart.getByRole('link', { name: 'Oct 14, 24 events' })
+  const first = chart.getByRole('link', {
+    name: 'Oct 5: Studio editor 4 events, Media import 0 events',
+  })
+  const spike = chart.getByRole('link', {
+    name: 'Oct 14: Studio editor 5 events, Media import 19 events',
+  })
   await first.press('End')
-  await expect(chart.getByRole('link', { name: 'Oct 18, 3 events' })).toBeFocused()
+  await expect(
+    chart.getByRole('link', { name: 'Oct 18: Studio editor 3 events, Media import 0 events' }),
+  ).toBeFocused()
   for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowLeft')
   await expect(spike).toBeFocused()
-  await expect(chart.getByRole('tooltip', { name: 'Oct 14, 24 events' })).toBeVisible()
+  await expect(
+    chart.getByRole('tooltip', { name: 'Oct 14: Studio editor 5 events, Media import 19 events' }),
+  ).toBeVisible()
   await spike.press('Enter')
   await expect(page.getByText('Oct 14 · 24 events')).toBeVisible()
   await expect(spike).toBeFocused()
@@ -83,9 +91,13 @@ it('selects either order of chart endpoints and changes the window in the date p
   await open(page, '/apps/analytics')
   const chart = page.getByRole('region', { name: 'Daily activity' })
   await chart.getByRole('button', { name: 'Select range' }).click()
-  await chart.getByRole('link', { name: 'Oct 15, 7 events' }).click()
+  await chart
+    .getByRole('link', { name: 'Oct 15: Studio editor 7 events, Media import 0 events' })
+    .click()
   await expect(chart.getByRole('status')).toContainText('Choose the other end')
-  await chart.getByRole('link', { name: 'Oct 13, 8 events' }).click()
+  await chart
+    .getByRole('link', { name: 'Oct 13: Studio editor 8 events, Media import 0 events' })
+    .click()
   await expect(page.getByText('Oct 13 – Oct 15 · 39 events')).toBeVisible()
   await page.getByRole('button', { name: /Activity date range/ }).click()
   const picker = page.getByRole('dialog', { name: 'Activity date range' })
@@ -118,7 +130,9 @@ it('renders shareable table and chart filters before hydration and handles malfo
   const table = page.getByRole('table', { name: 'Studio events' })
   await expect(table.locator('tbody tr')).toHaveCount(1)
   await expect(table.getByRole('cell', { name: 'Autumn lookbook / 01' })).toBeVisible()
-  await page.getByRole('link', { name: 'Oct 10, 2 events' }).click()
+  await page
+    .getByRole('link', { name: 'Oct 10: Studio editor 2 events, Media import 0 events' })
+    .click()
   await expect(page.getByText('Oct 10 · 2 events')).toBeVisible()
   await expect(table.locator('tbody tr')).toHaveCount(2)
   await open(page, '/apps/analytics?from=bad&to=2026-10-01', { hydrate: false })
@@ -129,7 +143,9 @@ it('cancels a pending endpoint with Escape and when the date picker commits a ne
   const page = await t.serve(showcaseServer)
   await open(page, '/apps/analytics')
   const chart = page.getByRole('region', { name: 'Daily activity' })
-  const spike = chart.getByRole('link', { name: 'Oct 14, 24 events' })
+  const spike = chart.getByRole('link', {
+    name: 'Oct 14: Studio editor 5 events, Media import 19 events',
+  })
   const select = chart.getByRole('button', { name: 'Select range' })
   await select.click()
   await spike.press('Enter')
@@ -196,7 +212,9 @@ it('explains tied sources and regular editing days without losing the active ran
   await expect(
     page.getByRole('status').filter({ hasText: '19 results, page 1 of 4' }),
   ).toBeVisible()
-  await chart.getByRole('link', { name: 'Oct 10, 2 events' }).click()
+  await chart
+    .getByRole('link', { name: 'Oct 10: Studio editor 2 events, Media import 0 events' })
+    .click()
   await expect(chart.getByText('Both events came from Studio editor.')).toBeVisible()
   await expect(chart.getByRole('link', { name: /media imports/i })).toHaveCount(0)
 })

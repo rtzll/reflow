@@ -59,6 +59,7 @@ export const activityBars = days.map(({ day, events }) => ({
   id: day,
   label: dayLabel(day),
   value: events.length,
+  values: sources.map(({ label }) => events.filter((event) => event.source === label).length),
 }))
 
 const collator = new Intl.Collator('en', { numeric: true, sensitivity: 'base' })
