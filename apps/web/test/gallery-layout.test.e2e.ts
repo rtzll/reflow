@@ -125,21 +125,34 @@ it('preserves the gallery order and keeps previews above their footers', async (
       assert.equal(timeGrid!.x, chart!.x)
       assert.equal(chart!.y, timeGrid!.y + timeGrid!.height + rowGap)
     }
-    const ticks = gallery.locator('[data-component="bar-chart"] .rf-bar-chart-ticks span')
-    await expect(ticks).toHaveText(['Compile', 'Test', 'Bundle', 'Pack'])
-    const { gap, horizontal } = await ticks.evaluateAll((nodes) => {
-      const labels = nodes.map((tick) => {
+    const buildChart = gallery.getByRole('group', { name: 'Seconds by build stage' })
+    await expect(buildChart.locator('.rf-bar-chart-ticks span')).toHaveText([
+      'Compile',
+      'Test',
+      'Bundle',
+      'Pack',
+    ])
+    const { gap, horizontal, offset } = await buildChart.evaluate((chart) => {
+      const bars = chart.querySelectorAll('.rf-bar-chart-fill')
+      const labels = Array.from(chart.querySelectorAll('.rf-bar-chart-ticks span'), (tick) => {
         const range = document.createRange()
         range.selectNodeContents(tick)
         return range.getBoundingClientRect()
       })
+      const center = (rect: DOMRect) => rect.left + rect.width / 2
       return {
         gap: Math.min(...labels.slice(1).map((label, i) => label.left - labels[i]!.right)),
         horizontal: labels.every((label) => label.width > label.height),
+        offset: Math.max(
+          ...labels.map((label, i) =>
+            Math.abs(center(label) - center(bars[i]!.getBoundingClientRect())),
+          ),
+        ),
       }
     })
     assert.ok(horizontal, `chart labels stay horizontal at ${width}px`)
     assert.ok(gap >= 6, `chart label gap at ${width}px is ${gap}px`)
+    assert.ok(offset < 1, `chart label is ${offset}px off its bar center at ${width}px`)
     if (width === 1440) {
       await expect(
         gallery.locator('[data-component="ask-user-questions"]').getByText('Question 1 of 8'),

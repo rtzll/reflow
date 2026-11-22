@@ -100,7 +100,9 @@
 }
 .rf-bar-chart-ticks span {
   justify-self: center;
-  min-inline-size: 0;
+  /* Center each label across its column and let wide endpoint labels grow into the plot. */
+  min-inline-size: 100%;
+  inline-size: max-content;
 }
 .rf-bar-chart-ticks span:first-child {
   justify-self: start;
