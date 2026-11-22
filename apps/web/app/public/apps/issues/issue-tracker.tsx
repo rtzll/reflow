@@ -31,6 +31,7 @@ export const IssueTracker = clientEntry(
     let active: string | undefined = issues[0]?.id
     let selected = new Set<string>()
     const range = createRangeSelection<string>()
+    let pointerFrom: string | undefined
     let announcement = ''
     let lastMove: LastMove | undefined
     let filter: IssueFilter | undefined
@@ -43,6 +44,7 @@ export const IssueTracker = clientEntry(
     })
 
     const dragging = new Map<string, number>()
+    const groupHeights = new Map<string, number>()
     let placement: Placement | undefined
 
     function preview(next: Placement | undefined) {
@@ -53,15 +55,34 @@ export const IssueTracker = clientEntry(
 
     const mountDraggable = ref<HTMLDivElement>(async (element, signal) => {
       try {
-        const { draggable } = await import('./drag-adapter.ts')
+        const { draggable, setCustomNativeDragPreview } = await import('./drag-adapter.ts')
         if (signal.aborted) return
         const cleanup = draggable({
           element,
+          onGenerateDragPreview: ({ nativeSetDragImage }) => {
+            const count = movingIds(element.dataset.issueId!).size
+            if (count < 2) return
+            setCustomNativeDragPreview({
+              nativeSetDragImage,
+              render: ({ container }) => {
+                const badge = document.createElement('div')
+                badge.className = 'issues-drag-count'
+                badge.textContent = `${count} issues`
+                container.append(badge)
+              },
+            })
+          },
           onDragStart: () => {
             if (!list) return
             const ids = movingIds(element.dataset.issueId!)
-            // Keep the bottom of a short destination column reachable as the source closes.
+            // Keep destinations reachable while the dragged items leave the flow. In List,
+            // collapsing a source group would shift every group below it away from the pointer.
             if (layout === 'board') list.style.minHeight = `${list.offsetHeight}px`
+            else {
+              for (const group of list.querySelectorAll<HTMLElement>('.issues-group')) {
+                groupHeights.set(group.dataset.status!, group.offsetHeight)
+              }
+            }
             for (const row of list.querySelectorAll<HTMLElement>('[data-issue-id]')) {
               if (ids.has(row.dataset.issueId!))
                 dragging.set(row.dataset.issueId!, row.offsetHeight)
@@ -71,6 +92,7 @@ export const IssueTracker = clientEntry(
           onDrop: () => {
             dragging.clear()
             list?.style.removeProperty('min-height')
+            groupHeights.clear()
             placement = undefined
             void handle.update()
           },
@@ -87,40 +109,24 @@ export const IssueTracker = clientEntry(
         if (signal.aborted) return
         const status = statuses.find((item) => item === element.dataset.status)!
         const cards = element.querySelector<HTMLElement>('.issues-cards')!
-        const show = (data: Record<string | symbol, unknown>) => {
-          if (layout === 'board') preview({ status, beforeId: data.beforeId as string | null })
-        }
+        const show = (data: Record<string | symbol, unknown>) =>
+          preview({ status, beforeId: data.beforeId as string | null })
         const cleanup = dropTargetForElements({
           element,
-          canDrop: ({ source }) => {
-            const id = source.element.dataset.issueId
-            if (!id || !list?.contains(source.element)) return false
-            const ids = movingIds(id)
-            return (
-              layout === 'board' ||
-              issues.some((issue) => ids.has(issue.id) && issue.status !== status)
-            )
-          },
+          canDrop: ({ source }) =>
+            !!source.element.dataset.issueId && !!list?.contains(source.element),
           getData: ({ input, source }) => ({
-            beforeId:
-              layout === 'board'
-                ? issueAfterPointer(cards, movingIds(source.element.dataset.issueId!), input)
-                : undefined,
+            beforeId: issueAfterPointer(cards, movingIds(source.element.dataset.issueId!), input),
           }),
           onDragStart: ({ self }) => show(self.data),
-          onDragEnter: ({ self }) => {
-            element.setAttribute('data-drag-over', '')
-            show(self.data)
-          },
+          onDragEnter: ({ self }) => show(self.data),
           onDrag: ({ self }) => show(self.data),
           onDragLeave: () => {
-            element.removeAttribute('data-drag-over')
             if (placement?.status === status) preview(undefined)
           },
           onDrop: ({ source, self }) => {
-            element.removeAttribute('data-drag-over')
             const id = source.element.dataset.issueId!
-            void move(movingIds(id), status, id, self.data.beforeId as string | null | undefined)
+            void move(movingIds(id), status, id, self.data.beforeId as string | null)
           },
         })
         signal.addEventListener('abort', cleanup, { once: true })
@@ -258,7 +264,17 @@ export const IssueTracker = clientEntry(
     }
 
     function navigate(event: KeyboardEvent, id: string) {
-      if (event.altKey || event.ctrlKey || event.metaKey || event.isComposing) return
+      if (event.isComposing || event.altKey) return
+      if (event.ctrlKey || event.metaKey) {
+        if (event.key.toLowerCase() === 'a' && !event.shiftKey) {
+          event.preventDefault()
+          range.reset()
+          selected = new Set(orderedIssues().map((issue) => issue.id))
+          announcement = `${selected.size} selected.`
+          void handle.update()
+        }
+        return
+      }
       const arrow = event.key === 'ArrowDown' || event.key === 'ArrowUp'
       if (event.shiftKey && !arrow) return
       const rows = orderedIssues()
@@ -310,6 +326,7 @@ export const IssueTracker = clientEntry(
           range.reset()
           focusIssue(rows.at(-1)?.id)
           break
+        case 'x':
         case ' ':
           if (!event.repeat) toggle(id)
           break
@@ -325,7 +342,7 @@ export const IssueTracker = clientEntry(
 
     return () => {
       const visible = orderedIssues()
-      const animateCards = dragging.size > 0 && layout === 'board' && !prefersReducedMotion()
+      const animateCards = dragging.size > 0 && !prefersReducedMotion()
       const detail = issues.find((issue) => issue.id === detailId)
       return (
         <article class="issue-tracker">
@@ -382,8 +399,10 @@ export const IssueTracker = clientEntry(
               </div>
             )}
             <p id={handle.id + '-keys'} class="rf-basic-sr-only">
-              Use the arrows to navigate, Space to select, Shift and vertical arrows to select a
-              range, Enter for details, and Tab for selected issue actions.
+              Use the arrows to navigate. Click, press X, or press Space to toggle an issue.
+              Shift-click or use Shift and the vertical arrows to select a range. Use Control or
+              Command with A to select all visible issues. Drag any selected issue to move the
+              selection, or Tab to the actions. Press Enter for details.
             </p>
             <ContextMenu
               label="Issue actions"
@@ -403,6 +422,7 @@ export const IssueTracker = clientEntry(
               <div
                 class="issues-collection"
                 data-layout={layout}
+                data-selecting={selected.size > 0 ? '' : undefined}
                 data-single-status={filter?.field === 'status' || undefined}
                 role="listbox"
                 aria-multiselectable="true"
@@ -434,6 +454,7 @@ export const IssueTracker = clientEntry(
                         aria-label={status}
                         data-status={status}
                         class="issues-group"
+                        style={{ minHeight: groupHeights.get(status) }}
                         mix={mountDropTarget}
                       >
                         <div class="issues-group-heading" aria-hidden="true">
@@ -467,10 +488,14 @@ export const IssueTracker = clientEntry(
                                   active = issue.id
                                   void handle.update()
                                 }),
+                                // Native pointer focus reaches the new row before its click fires.
+                                on('pointerdown', () => {
+                                  pointerFrom = active
+                                }),
                                 on('click', (event) => {
-                                  const from = active
+                                  const from = event.detail ? pointerFrom : active
                                   focusIssue(issue.id)
-                                  if (event.shiftKey && from && from !== issue.id) {
+                                  if (event.shiftKey && from) {
                                     selected = range.extend(
                                       visible.map((item) => item.id),
                                       selected,
@@ -487,7 +512,11 @@ export const IssueTracker = clientEntry(
                               ]}
                             >
                               <span class="issues-id">{issue.id}</span>
-                              <span class="issues-check" aria-hidden="true">
+                              <span
+                                class="issues-check"
+                                aria-hidden="true"
+                                title="Click to select an issue. Shift-click to select a range."
+                              >
                                 {selected.has(issue.id) && <Icon name="check" size={12} />}
                               </span>
                               <strong class="issues-title">{issue.title}</strong>

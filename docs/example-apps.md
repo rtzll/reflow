@@ -19,13 +19,15 @@ Analytics shows daily activity as a stacked chart of studio edits and media impo
 
 ## Moving issues between statuses
 
-On the board, drag a ticket between two cards to open a gap at that position. Drop there to reorder within the column or move to another status. Board and list show the same issue order. In list view, drag onto a status group to change status. Empty groups accept drops in either view. Dragging a selected ticket moves the selection together. Dragging an unselected ticket moves that ticket and preserves any other selection. Releasing outside a valid target cancels the move.
+In Board or List, drag a ticket between two others to open a gap. Drop there to reorder within a status or move to another group. Both layouts share the same issue order, including after a move into an empty group. Releasing outside a valid target cancels the move.
+
+Click or tap issues to select them individually. Shift-click extends a range. With a row focused, X or Space toggles it and Ctrl+A (⌘A on Mac) selects all visible issues. Drag any selected issue to move the set together in reading order. The drag preview shows how many issues will move. Dragging an unselected issue moves that issue alone and preserves the selection.
 
 The **Move to** menu uses the same operation. Tap a ticket to select it and open the menu, or press Space to select, Tab to reach the actions, and Enter to open the menu. Each move updates cycle progress and assignee workload, announces the destination, and continues keyboard navigation at the next stationary ticket.
 
 Use **Undo** after a move to restore each affected ticket’s previous status and position. This works for a selection spanning several groups and for moves made from the context menu. On narrow screens, **Cycle overview** opens the progress and workload filters above the tickets.
 
-The Issue tracker registers Atlassian’s element adapter when its rows and groups mount and releases each registration on unmount. The adapter loads with the Issue tracker. Its production chunk measured 24.2 kB minified or 7.8 kB gzipped. The source-mode asset server bundles the same adapter into an ES module for the browser. [Pragmatic drag and drop](https://atlassian.design/components/pragmatic-drag-and-drop/core-package) · [Atlassian accessibility guidance](https://atlassian.design/components/pragmatic-drag-and-drop/accessibility-guidelines)
+The Issue tracker registers Atlassian’s element adapter when its rows and groups mount and releases each registration on unmount. The adapter loads with the Issue tracker. Its production chunk measured 25.6 kB minified or 8.0 kB gzipped. The source-mode asset server bundles the same adapter into an ES module for the browser. [Pragmatic drag and drop](https://atlassian.design/components/pragmatic-drag-and-drop/core-package) · [Atlassian accessibility guidance](https://atlassian.design/components/pragmatic-drag-and-drop/accessibility-guidelines)
 
 Calendar uses TimeGrid with fifteen-minute increments. The app supplies the week, event data and editor. The grid handles overlap, pointer previews and keyboard changes. The editor's **All day** option replaces the times with a number of days, and a timed event may run up to 24 hours, continuing past midnight into the next day. [TimeGrid design note](time-grid.md)
 

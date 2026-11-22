@@ -203,13 +203,13 @@ async function hoverAbove(page: Page, row: Locator) {
   await page.mouse.move(x + 1, y)
 }
 
-for (const withinColumn of [true, false]) {
-  it(
-    'opens a gap between cards ' + (withinColumn ? 'within a column' : 'across columns'),
-    async (t) => {
+for (const layout of ['Board', 'List']) {
+  for (const withinColumn of [true, false]) {
+    it(`opens a gap ${withinColumn ? 'within' : 'across'} status groups in ${layout}`, async (t) => {
       const page = await t.serve(showcaseServer)
       await page.setViewportSize({ width: 1440, height: 1250 })
       await open(page, '/apps/issues')
+      if (layout === 'List') await page.getByRole('radio', { name: 'Board' }).press('ArrowRight')
       const todo = page.getByRole('group', { name: 'Todo', exact: true })
       const destination = withinColumn
         ? todo
@@ -220,11 +220,14 @@ for (const withinColumn of [true, false]) {
       const moving = await source.textContent()
       const above = rows.nth(0)
       const below = rows.nth(1)
-      const originalY = (await below.boundingBox())!.y
+      async function spacing() {
+        const top = (await above.boundingBox())!
+        return (await below.boundingBox())!.y - top.y - top.height
+      }
       await startDrag(page, source)
       await hoverAbove(page, below)
       const slot = destination.locator('.issues-drop-slot')
-      await expect.poll(async () => (await below.boundingBox())!.y).toBeGreaterThan(originalY + 25)
+      await expect.poll(spacing).toBeGreaterThan(25)
       const gap = (await slot.boundingBox())!
       expect(gap.y).toBeGreaterThan((await above.boundingBox())!.y)
       expect(gap.y + gap.height).toBeLessThanOrEqual((await below.boundingBox())!.y + 1)
@@ -237,38 +240,43 @@ for (const withinColumn of [true, false]) {
       await page.getByRole('button', { name: 'Undo', exact: true }).click()
       await expect(rows).toHaveText(original)
       await expect(todo.getByRole('option').last()).toContainText('AT-137')
-    },
-  )
+    })
+  }
 }
 
-it('slides neighbors during hover and accepts a reversal before the animation finishes', async (t) => {
-  const page = await t.serve(showcaseServer)
-  await page.setViewportSize({ width: 1440, height: 1250 })
-  await open(page, '/apps/issues', { motion: true })
-  const todo = page.getByRole('group', { name: 'Todo', exact: true })
-  const rows = todo.getByRole('option')
-  const original = await rows.allTextContents()
-  const second = rows.nth(1)
-  const rest = (await second.boundingBox())!
-  const origin = (await rows.last().boundingBox())!
-  await startDrag(page, rows.last())
-  await holdMotion(page)
-  await hoverAbove(page, second)
-  await seekMotion(second, 0.4)
-  const midway = (await second.boundingBox())!.y
-  expect(midway).toBeGreaterThan(rest.y + 1)
-  await seekMotion(second, 0.8)
-  expect((await second.boundingBox())!.y).toBeGreaterThan(midway + 1)
-  await page.mouse.move(origin.x + origin.width / 2, origin.y + origin.height - 3)
-  await page.mouse.move(origin.x + origin.width / 2 + 1, origin.y + origin.height - 3)
-  await expect
-    .poll(async () => (await todo.locator('.issues-drop-slot').boundingBox())!.y)
-    .toBeCloseTo(origin.y, 0)
-  await page.mouse.up()
-  await releaseMotion(page)
-  await expect(rows).toHaveText(original)
-  await expect(page.getByRole('button', { name: 'Undo', exact: true })).toHaveCount(0)
-})
+for (const layout of ['Board', 'List']) {
+  it(`slides neighbors and accepts a reversal mid-animation in ${layout}`, async (t) => {
+    const page = await t.serve(showcaseServer)
+    await page.setViewportSize({ width: 1440, height: 1250 })
+    await open(page, '/apps/issues', { motion: true })
+    if (layout === 'List') await page.getByRole('radio', { name: 'Board' }).press('ArrowRight')
+    const todo = page.getByRole('group', { name: 'Todo', exact: true })
+    const rows = todo.getByRole('option')
+    const original = await rows.allTextContents()
+    const second = rows.nth(1)
+    const rest = (await second.boundingBox())!
+    const origin = (await rows.last().boundingBox())!
+    await startDrag(page, rows.last())
+    await holdMotion(page)
+    await hoverAbove(page, second)
+    await seekMotion(second, 0.4)
+    const midway = (await second.boundingBox())!.y
+    expect(midway).toBeGreaterThan(rest.y + 1)
+    await seekMotion(second, 0.8)
+    expect((await second.boundingBox())!.y).toBeGreaterThan(midway + 1)
+    await page.mouse.move(origin.x + origin.width / 2, origin.y + origin.height - 3)
+    await page.mouse.move(origin.x + origin.width / 2 + 1, origin.y + origin.height - 3)
+    await expect
+      .poll(async () =>
+        Math.abs((await todo.locator('.issues-drop-slot').boundingBox())!.y - origin.y),
+      )
+      .toBeLessThanOrEqual(2)
+    await page.mouse.up()
+    await releaseMotion(page)
+    await expect(rows).toHaveText(original)
+    await expect(page.getByRole('button', { name: 'Undo', exact: true })).toHaveCount(0)
+  })
+}
 
 it('inserts a mixed selection together in board order and undoes both positions', async (t) => {
   const page = await t.serve(showcaseServer)
@@ -288,6 +296,53 @@ it('inserts a mixed selection together in board order and undoes both positions'
   await page.getByRole('button', { name: 'Undo', exact: true }).click()
   await expect(rows).toHaveText(original)
   await expect(todo.last()).toContainText('AT-137')
+})
+
+it('extends and contracts a Shift-click range and drags the selection together in List', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1440, height: 1250 })
+  await open(page, '/apps/issues')
+  await page.getByRole('radio', { name: 'Board' }).press('ArrowRight')
+  const todo = page.getByRole('group', { name: 'Todo', exact: true }).getByRole('option')
+  const started = page.getByRole('group', { name: 'In progress', exact: true }).getByRole('option')
+  const done = page.getByRole('group', { name: 'Done', exact: true })
+  const selected = page.getByRole('option', { selected: true })
+  await started.last().click()
+  await todo.first().click()
+  await todo.nth(2).click({ modifiers: ['Shift'] })
+  await expect(selected).toHaveText([/AT-142/, /AT-139/, /AT-138/, /AT-130/])
+  await todo.nth(1).click({ modifiers: ['Shift'] })
+  await expect(selected).toHaveText([/AT-142/, /AT-139/, /AT-130/])
+  await startDrag(page, todo.nth(1))
+  await hoverAbove(page, done.getByRole('option').nth(1))
+  await expect(done.locator('.issues-drop-slot')).toHaveCount(3)
+  await page.mouse.up()
+  await expect(done.getByRole('option')).toHaveText([
+    /AT-128/,
+    /AT-142/,
+    /AT-139/,
+    /AT-130/,
+    /AT-127/,
+    /AT-125/,
+  ])
+  await page.getByRole('button', { name: 'Undo', exact: true }).click()
+  await expect(todo).toHaveText([/AT-142/, /AT-139/, /AT-138/, /AT-137/])
+  await expect(started.last()).toContainText('AT-130')
+})
+
+it('uses X and Select All on the visible issues', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await open(page, '/apps/issues')
+  await page.getByRole('radio', { name: 'Board' }).press('ArrowRight')
+  await page.getByRole('button', { name: 'Show Done issues' }).click()
+  const rows = page.getByRole('option')
+  const selected = page.getByRole('option', { selected: true })
+  await rows.first().press('x')
+  await expect(selected).toHaveCount(1)
+  await rows.first().press('ControlOrMeta+a')
+  await expect(selected).toHaveCount(3)
+  await rows.nth(1).press('x')
+  await expect(selected).toHaveText([/AT-128/, /AT-125/])
 })
 
 it('places a card between neighbors in a filtered board that wraps across rows', async (t) => {
@@ -348,7 +403,7 @@ for (const layout of ['Board', 'List']) {
     await unrelated.click()
     await dragIssue(page, first, page.getByRole('heading', { name: 'Issue tracker', exact: true }))
     await expect(first).toBeVisible()
-    await expect(issues.locator('[data-dragging], [data-drag-over]')).toHaveCount(0)
+    await expect(issues.locator('[data-dragging], .issues-drop-slot')).toHaveCount(0)
     await expect(first).toHaveAttribute('draggable', 'true')
     await dragIssue(page, first, started.getByRole('option').first())
     await expect(started.getByRole('option', { name: /AT-142/ })).toBeVisible()

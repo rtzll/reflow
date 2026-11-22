@@ -310,7 +310,9 @@
   border-color: var(--rf-fg);
 }
 @media (hover: hover) {
-  .issues-row[aria-selected='false']:not(:hover, :focus-visible) .issues-check {
+  .issues-collection[data-layout='board']:not([data-selecting])
+    .issues-row[aria-selected='false']:not(:hover, :focus-visible)
+    .issues-check {
     opacity: 0;
   }
 }
@@ -324,6 +326,14 @@
 }
 .issues-collection[data-single-status][data-layout='board'] .issues-cards {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.issues-collection[data-layout='list'] .issues-group {
+  min-height: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .issues-collection[data-layout='list']:not(:has([data-dragging])) .issues-group {
+    transition: min-height 150ms ease-out;
+  }
 }
 .issues-collection[data-layout='list'] .issues-group + .issues-group {
   margin-top: 16px;
@@ -490,11 +500,18 @@
   border-radius: 10px;
   background: color-mix(in oklab, var(--issue-done) 8%, var(--issue-panel));
 }
-.issues-collection[data-layout='list'] .issues-group[data-drag-over] {
-  outline: 2px solid var(--issue-done);
-  outline-offset: 3px;
-  border-radius: 10px;
-  background: color-mix(in oklab, var(--issue-done) 9%, transparent);
+.issues-collection[data-layout='list'] .issues-drop-slot {
+  border-radius: 4px;
+}
+.issues-drag-count {
+  border: 1px solid var(--rf-border-emphasis);
+  border-radius: 8px;
+  padding: 5px 10px;
+  background: var(--rf-surface-4);
+  color: var(--rf-fg);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 .issues-collection[data-layout='board'] .issues-group {
   align-self: stretch;
