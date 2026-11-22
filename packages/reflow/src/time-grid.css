@@ -60,6 +60,29 @@
   user-select: none;
   box-sizing: border-box;
 }
+.rf-time-grid-hover {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  left: calc(var(--day) * 100% / var(--visible-days) + 3px);
+  width: calc(100% / var(--visible-days) - 5px);
+  border-block-start: 1px solid var(--rf-muted);
+}
+.rf-time-grid-hover span {
+  position: absolute;
+  right: 0;
+  bottom: 2px;
+  padding-inline: 3px;
+  border-radius: 2px;
+  background: var(--rf-surface-2);
+  color: var(--rf-fg);
+  font: 600 10px/1.4 var(--rf-font);
+  font-variant-numeric: tabular-nums;
+}
+.rf-time-grid-hover[data-first] span {
+  top: 1px;
+  bottom: auto;
+}
 .rf-time-grid-readout {
   position: absolute;
   z-index: 3;
@@ -297,7 +320,7 @@
   .rf-time-grid[data-compact] :is(.rf-time-grid-board, .rf-time-grid-all-day) {
     --visible-days: 1;
   }
-  .rf-time-grid[data-compact] .rf-time-grid-event {
+  .rf-time-grid[data-compact] :is(.rf-time-grid-event, .rf-time-grid-hover) {
     --day: 0 !important;
   }
   .rf-time-grid[data-compact] .rf-time-grid-all-day .rf-time-grid-event {

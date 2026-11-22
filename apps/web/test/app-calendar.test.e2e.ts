@@ -1,5 +1,6 @@
 import { expect } from 'playwright/test'
 import { it } from 'remix/test'
+import { pauseClock } from './clock.ts'
 import { open, showcaseServer } from './showcase-router.ts'
 
 it('creates a timed event, moves and resizes it with the keyboard, and edits its details', async (t) => {
@@ -123,6 +124,42 @@ it('switches days and reschedules a selected event on a narrow screen', async (t
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
 })
 
+it('limits the hover line to pointer input on the displayed compact day', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.clock.install()
+  await open(page, '/apps/calendar')
+  await page
+    .getByRole('group', { name: 'Day to display' })
+    .getByRole('button', { name: 'Saturday' })
+    .click()
+  const board = page.getByRole('group', { name: 'Timed events', exact: true })
+  const rect = (await board.boundingBox())!
+  const x = rect.x + rect.width / 2
+  const y = rect.y + rect.height / 8 + 4
+  const line = board.locator('.rf-time-grid-hover')
+  await pauseClock(page)
+  await board.dispatchEvent('pointermove', {
+    pointerType: 'touch',
+    isPrimary: true,
+    clientX: x,
+    clientY: y,
+  })
+  await page.clock.runFor(300)
+  await expect(line).toHaveCount(0)
+
+  await page.mouse.move(x, y)
+  await page.clock.runFor(300)
+  await expect(line).toHaveText('10:00')
+  const marker = (await line.boundingBox())!
+  expect(marker.x).toBeGreaterThanOrEqual(rect.x)
+  expect(marker.x + marker.width).toBeLessThanOrEqual(rect.x + rect.width)
+  expect(marker.width).toBeGreaterThan(rect.width * 0.9)
+  await page.keyboard.press('Escape')
+  await expect(line).toHaveCount(0)
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+})
+
 it('previews a dragged time range and opens a new event with its day, start, and duration', async (t) => {
   const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 900 })
@@ -132,6 +169,8 @@ it('previews a dragged time range and opens a new event with its day, start, and
   const hour = rect.height / 8
   const sunday = rect.x + (rect.width * 6.5) / 7
   await page.mouse.move(sunday, rect.y + hour * 1.28)
+  const hover = board.locator('.rf-time-grid-hover')
+  await expect(hover).toHaveText('10:15')
   await page.mouse.down()
   const range = board.locator('.rf-time-grid-range')
   await expect(range).toHaveText('10:15–10:30')

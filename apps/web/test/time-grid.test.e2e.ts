@@ -1,6 +1,7 @@
 import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { it } from 'remix/test'
+import { pauseClock } from './clock.ts'
 import { open, showcaseServer } from './showcase-router.ts'
 
 it('books a room in a single day with half-hour range selection', async (t) => {
@@ -12,6 +13,7 @@ it('books a room in a single day with half-hour range selection', async (t) => {
   const rect = (await board.boundingBox())!
   const x = rect.x + rect.width / 2
   await page.mouse.move(x, rect.y + rect.height * 0.52)
+  await expect(board.locator('.rf-time-grid-hover')).toHaveText('11:00')
   await page.mouse.down()
   await page.mouse.move(x, rect.y + rect.height * 0.875)
   await expect(board.locator('.rf-time-grid-range')).toHaveText('11:00–12:30')
@@ -19,6 +21,68 @@ it('books a room in a single day with half-hour range selection', async (t) => {
   await expect(
     board.getByRole('button', { name: 'Studio booking, Friday, 11:00–12:30' }),
   ).toBeVisible()
+})
+
+it('shows the snapped start after the pointer rests in an empty day column', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await page.clock.install()
+  await open(page, '/docs/time-grid')
+  const viewport = page.locator('.release-week-scroll')
+  await viewport.scrollIntoViewIfNeeded()
+  const board = viewport.getByRole('group', { name: 'Release week', exact: true })
+  const notes = board.getByRole('button', { name: /^Release notes,/ })
+  const rect = (await board.boundingBox())!
+  const column = rect.width / 3
+  const hour = rect.height / 24
+  const startY = rect.y + 10.25 * hour
+  const x = rect.x + 1.5 * column
+  const line = board.locator('.rf-time-grid-hover')
+  await pauseClock(page)
+
+  await page.mouse.move(rect.x + 2.5 * column, startY + hour / 2)
+  await page.clock.runFor(150)
+  await page.mouse.move(x, startY + 4)
+  await page.clock.runFor(150)
+  await expect(line).toHaveCount(0)
+  await page.clock.runFor(150)
+  await expect(line).toHaveText('10:15')
+  const marker = (await line.boundingBox())!
+  expect(marker.y).toBeCloseTo(startY, 0)
+  expect(marker.x).toBeGreaterThanOrEqual(rect.x + column)
+  expect(marker.x + marker.width).toBeLessThanOrEqual(rect.x + 2 * column)
+  await expect(board.locator('.rf-time-grid-range')).toHaveCount(0)
+
+  await page.mouse.down()
+  await expect(line).toHaveCount(0)
+  await page.mouse.move(x, startY + hour / 2)
+  await page.mouse.up()
+  await expect(board.getByRole('button', { name: 'New event, Tuesday, 10:15–10:45' })).toBeVisible()
+
+  // Moving onto an appointment or away from the board cancels a pending preview.
+  await page.mouse.move(x, startY + hour)
+  const chip = (await notes.boundingBox())!
+  await page.mouse.move(chip.x + chip.width / 2, chip.y + chip.height / 2)
+  await page.clock.runFor(300)
+  await expect(line).toHaveCount(0)
+  await page.mouse.move(x, startY + hour)
+  await page.mouse.move(rect.x - 5, startY + hour)
+  await page.clock.runFor(300)
+  await expect(line).toHaveCount(0)
+
+  // With the pointer at rest, scrolling by an hour gives the new snap time.
+  await page.mouse.move(x, startY + hour)
+  await page.clock.runFor(300)
+  await expect(line).toHaveText('11:15')
+  await viewport.evaluate(async (node, distance) => {
+    const scrolled = new Promise<void>((resolve) =>
+      node.addEventListener('scroll', () => resolve(), { once: true }),
+    )
+    node.scrollTop += distance
+    await scrolled
+  }, hour)
+  await page.clock.runFor(400)
+  await expect(line).toHaveText('12:15')
 })
 
 it('does not create an event from a click on open time', async (t) => {

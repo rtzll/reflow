@@ -1,4 +1,5 @@
 import { on, ref, type Handle } from 'remix/component'
+import { hoverIntent } from './behaviors/hover-intent.ts'
 import { classList } from './systems/styling.ts'
 
 /** One column index and a same-day interval in whole wall-clock minutes. */
@@ -168,6 +169,38 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
     | { pointer: number; x: number; dayWidth: number; from: number; to: number }
     | undefined
   let cursor: TimeGridRange | undefined
+  let hoverPoint: Pick<PointerEvent, 'clientX' | 'clientY'> | undefined
+  let pointerAtRest = false
+  const hover = hoverIntent(handle.signal, {
+    open() {
+      // Scrolling can move an appointment or the sticky header under a stationary pointer.
+      const root = board.getRootNode() as Document | ShadowRoot
+      if (
+        !hoverPoint ||
+        !board.isConnected ||
+        root.elementFromPoint(hoverPoint.clientX, hoverPoint.clientY) !== board
+      ) {
+        clearHover()
+        return
+      }
+      pointerAtRest = true
+      handle.update()
+    },
+    close: clearHover,
+  })
+  function restartHover() {
+    if (hoverPoint) hover.enter(250)
+    else hover.cancel()
+    if (pointerAtRest) {
+      pointerAtRest = false
+      handle.update()
+    }
+  }
+  function clearHover() {
+    if (!hoverPoint) return
+    hoverPoint = undefined
+    restartHover()
+  }
   let statusMessage = ''
   let suppressClick = false
   const boardHelpId = handle.id + '-board-help'
@@ -175,9 +208,17 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
   const eventHelpId = handle.id + '-event-help'
   const boardRef = ref((node, signal) => {
     board = node as HTMLDivElement
+    const view = board.ownerDocument.defaultView
+    const onLayoutChange = () => {
+      if (hoverPoint) restartHover()
+    }
+    board.ownerDocument.addEventListener('scroll', onLayoutChange, { capture: true, signal })
+    view?.addEventListener('resize', onLayoutChange, { signal })
+    view?.addEventListener('blur', clearHover, { signal })
     board.ownerDocument.addEventListener(
       'keydown',
       (e) => {
+        clearHover()
         if (
           e.defaultPrevented ||
           e.key !== 'Escape' ||
@@ -321,25 +362,35 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
       }
     }
 
-    function begin(e: PointerEvent, event?: E) {
-      suppressClick = false
-      if (gesture || !days.length || !e.isPrimary || e.button !== 0) return
-      if (event ? !onEventChange : !onCreate || e.target !== board) return
+    function slotAt({ clientX, clientY }: Pick<PointerEvent, 'clientX' | 'clientY'>) {
       const rect = board.getBoundingClientRect()
-      if (rect.width <= 0 || rect.height <= 0) return
+      if (!days.length || rect.width <= 0 || rect.height <= 0) return
       const singleDay = showsSingleDay(board)
       const dayWidth = rect.width / (singleDay ? 1 : days.length)
-      const offset = clamp(((e.clientY - rect.top) / rect.height) * span, 0, span - 1)
-      const slot = first + step * Math.floor(offset / step)
-      const anchor: TimeGridRange = event
+      const offset = clamp(((clientY - rect.top) / rect.height) * span, 0, span - 1)
+      const start = first + step * Math.floor(offset / step)
+      const day = singleDay
+        ? compactDay
+        : clamp(Math.floor((clientX - rect.left) / dayWidth), 0, days.length - 1)
+      return { range: { day, start, duration: Math.min(step, last - start) }, dayWidth, singleDay }
+    }
+
+    const hoverRange =
+      pointerAtRest && hoverPoint && onCreate && !selectedRange
+        ? slotAt(hoverPoint)?.range
+        : undefined
+
+    function begin(e: PointerEvent, event?: E) {
+      clearHover()
+      suppressClick = false
+      if (gesture || !e.isPrimary || e.button !== 0) return
+      if (event ? !onEventChange : !onCreate || e.target !== board) return
+      const slot = slotAt(e)
+      if (!slot) return
+      const { dayWidth, singleDay } = slot
+      const anchor = event
         ? { day: event.day, start: event.start, duration: event.duration }
-        : {
-            day: singleDay
-              ? compactDay
-              : clamp(Math.floor((e.clientX - rect.left) / dayWidth), 0, days.length - 1),
-            start: slot,
-            duration: Math.min(step, last - slot),
-          }
+        : slot.range
       const resize = e.target instanceof Element && e.target.closest('.rf-time-grid-resize')
       gesture = {
         pointer: e.pointerId,
@@ -364,7 +415,23 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
     }
 
     function move(e: PointerEvent) {
-      if (track(e)) handle.update()
+      if (gesture) {
+        if (track(e)) handle.update()
+        return
+      }
+      if (
+        !onCreate ||
+        cursor ||
+        e.target !== board ||
+        !e.isPrimary ||
+        e.buttons ||
+        e.pointerType === 'touch'
+      ) {
+        clearHover()
+        return
+      }
+      hoverPoint = { clientX: e.clientX, clientY: e.clientY }
+      restartHover()
     }
 
     // Update the gesture preview from the pointer; reports whether it applied.
@@ -466,6 +533,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
     }
 
     function cancel(e: PointerEvent) {
+      clearHover()
       if (gesture?.pointer !== e.pointerId) return
       gesture = undefined
       handle.update()
@@ -814,6 +882,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
             boardRef,
             on('pointerdown', (e) => begin(e)),
             on<HTMLDivElement, 'pointermove'>('pointermove', move),
+            on('pointerout', clearHover),
             on<HTMLDivElement, 'pointerup'>('pointerup', finish),
             on<HTMLDivElement, 'pointercancel'>('pointercancel', cancel),
             on<HTMLDivElement, 'lostpointercapture'>('lostpointercapture', cancel),
@@ -920,6 +989,16 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
               </button>
             )
           })}
+          {hoverRange && (
+            <div
+              class="rf-time-grid-hover"
+              aria-hidden="true"
+              data-first={hoverRange.start === first || undefined}
+              style={{ '--day': hoverRange.day, top: placement(hoverRange).top }}
+            >
+              <span>{clock(hoverRange.start)}</span>
+            </div>
+          )}
           {point && gesture && (
             <span class="rf-time-grid-readout" aria-hidden="true">
               {days[gesture.preview.day]} · {clock(gesture.preview.start)}–
