@@ -25,7 +25,7 @@ Use FileInput for uploads in a form. Set accept and any count or size limits, an
 
 Use BarChart for one series of nonnegative values. Supply stable item IDs and short category labels. Give drill-down bars an href for server-rendered links or onSelect for local actions. Omit both in a static preview inside a card link. Keep range gestures, URLs, and data filtering in the owner.
 
-Use TimeGrid for appointments in one or more day columns. Supply stable event IDs, day indexes, and wall-clock minutes. Set stepMinutes to the booking increment. Apply onEventChange to accept a move or resize and use onCreate to open an editor or reserve the selected interval. Keep dates, timezones, availability checks, and persistence in the owner.
+Use TimeGrid for appointments in one or more day columns. Supply stable event IDs, day indexes, and wall-clock minutes. Set stepMinutes to the booking increment. Apply onEventChange to accept a move or resize and use onCreate to open an editor or reserve the selected interval. Keep dates, timezones, availability checks, and persistence in the owner. Mark holidays, deadlines and trips `allDay` (with `span` for several days) instead of giving them a 24-hour slot; an event whose duration runs past midnight continues in the next column on its own.
 
 Use Resizable for two panes that share space. Name its separator and supply an initial percentage and bounds for the first pane. Use onValueCommit to save a layout after resizing.
 

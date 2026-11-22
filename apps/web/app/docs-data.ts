@@ -1350,8 +1350,22 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
         {
           name: 'duration',
           type: 'number',
-          description: 'Positive duration in whole minutes, ending by midnight.',
+          description:
+            'Positive duration in whole minutes, up to 24 hours. Past midnight, the event continues in the next column.',
           required: true,
+        },
+        {
+          name: 'allDay',
+          type: 'boolean',
+          description:
+            'Shows the event in the all-day strip above the hours; start and duration are ignored.',
+          required: false,
+        },
+        {
+          name: 'span',
+          type: 'number',
+          description: 'Consecutive days an all-day event covers. Default 1.',
+          required: false,
         },
       ],
     },

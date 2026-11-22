@@ -152,12 +152,67 @@
   cursor: grab;
   touch-action: none;
 }
+/* All-day strip: a row above the hours, in the same columns, stacking the
+   events that share a day. */
+.rf-time-grid-all-day-label {
+  align-self: center;
+  color: var(--rf-muted);
+  text-align: center;
+  font: 500 10px/1.5 var(--rf-font);
+}
+.rf-time-grid-all-day {
+  --visible-days: var(--day-count);
+  position: relative;
+  height: calc(var(--rows) * 26px + 4px);
+  margin-block-end: 4px;
+  border-radius: var(--rf-item-radius);
+  background: var(--rf-surface-3);
+  user-select: none;
+}
+.rf-time-grid-all-day .rf-time-grid-event {
+  top: calc(var(--row) * 26px + 2px);
+  left: calc(var(--day) * 100% / var(--visible-days) + 3px);
+  width: calc(var(--span) * 100% / var(--visible-days) - 5px);
+  height: 24px;
+  flex-direction: row;
+  align-items: center;
+  padding-block: 0;
+}
+.rf-time-grid-all-day .rf-time-grid-event strong {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.rf-time-grid-all-day .rf-time-grid-event[data-editable] {
+  cursor: grab;
+  touch-action: none;
+}
+
+/* An overnight event: its button ends square at midnight, and the part in the
+   next column starts square at 00:00, so the two read as one. */
+.rf-time-grid-event[data-overnight] {
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+}
+.rf-time-grid-event[data-continues] {
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+  border-block-start-style: dashed;
+}
+.rf-time-grid-event[data-continues][data-pressed] {
+  box-shadow: inset 0 0 0 1px var(--rf-time-grid-event-color, var(--rf-info));
+  border-color: var(--rf-time-grid-event-color, var(--rf-info));
+}
+
 @media (max-width: 800px) {
-  .rf-time-grid[data-compact] .rf-time-grid-board {
+  .rf-time-grid[data-compact] :is(.rf-time-grid-board, .rf-time-grid-all-day) {
     --visible-days: 1;
   }
   .rf-time-grid[data-compact] .rf-time-grid-event {
     --day: 0 !important;
+  }
+  .rf-time-grid[data-compact] .rf-time-grid-all-day .rf-time-grid-event {
+    --span: 1 !important;
   }
   .rf-time-grid[data-compact] .rf-time-grid-event[data-visible='false'] {
     display: none;

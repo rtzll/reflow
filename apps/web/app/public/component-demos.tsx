@@ -48,6 +48,8 @@ import { SegmentedControlDemo } from './segmented-control-example.tsx'
 import { PopoverDemo } from './popover-example.tsx'
 import { ToasterDemo } from './toaster-example.tsx'
 import { DrawerDemo } from './drawer-example.tsx'
+import { ReleaseWeek } from './time-grid-week-example.tsx'
+import { StudioBookings } from './studio-bookings.tsx'
 import { CodeBlockDemo } from './code-block-example.tsx'
 import { CitationDemo } from './citation-example.tsx'
 import { AvatarDemo } from './avatar-example.tsx'
@@ -1263,6 +1265,20 @@ function setEditing(open: boolean) {
       'Plain code needs nothing but Reflow.',
     ),
   ],
+  'time-grid': [
+    demo(
+      'Bookings',
+      'bookings',
+      `<TimeGrid\n  label="Studio bookings"\n  days={['Friday']}\n  events={bookings}\n  startMinute={540}\n  endMinute={780}\n  stepMinutes={30}\n  onCreate={book}\n  onEventChange={move}\n/>`,
+      'Drag across open time to book it, drag an event to move it, or drag its bottom edge to change its length.',
+    ),
+    demo(
+      'All-day and overnight',
+      'week',
+      `const events = [\n  { id: 'freeze', title: 'Code freeze', day: 0, start: 0, duration: 0, allDay: true, span: 2 },\n  { id: 'release', title: 'Release day', day: 2, start: 0, duration: 0, allDay: true },\n  { id: 'migration', title: 'Database migration', day: 0, start: 1320, duration: 300 },\n]\n\n<TimeGrid label="Release week" days={days} events={events} onEventChange={update} />`,
+      'All-day events sit in a strip above the hours and can span days; arrows or a sideways drag move them by a day. The migration starts at 22:00 and continues in Tuesday’s column until 03:00.',
+    ),
+  ],
   drawer: [
     demo(
       'Basic',
@@ -2426,6 +2442,8 @@ export function ComponentDemo(
         return <ToasterDemo variant={variant} />
       case 'drawer':
         return <DrawerDemo variant={variant} />
+      case 'time-grid':
+        return variant === 'week' ? <ReleaseWeek /> : <StudioBookings />
       case 'markdown':
         if (variant === 'images')
           return <Markdown source={markdownImages(images.thinkingPreview ?? '')} images />

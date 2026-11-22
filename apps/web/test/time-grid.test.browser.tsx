@@ -243,3 +243,144 @@ it('does not activate after an Escape-canceled drag, skips boundary no-ops, and 
   await act(() => button.click())
   equal(activated, 0)
 })
+
+function keydown(target: Element, key: string, shiftKey = false) {
+  return target.dispatchEvent(
+    new KeyboardEvent('keydown', { key, shiftKey, bubbles: true, cancelable: true }),
+  )
+}
+
+it('shows all-day events in a strip that spans, stacks and moves by whole days', async (t) => {
+  const changes: TimeGridEvent[] = []
+  const events = [
+    { id: 'holiday', title: 'Holiday', day: 0, start: 0, duration: 0, allDay: true },
+    {
+      id: 'trip',
+      title: 'Trip',
+      day: 1,
+      start: 0,
+      duration: 0,
+      allDay: true,
+      span: 5,
+      place: 'Porto',
+    },
+    { id: 'deadline', title: 'Deadline', day: 1, start: 0, duration: 0, allDay: true },
+    { id: 'standup', title: 'Standup', day: 1, start: 600, duration: 15 },
+  ]
+  const { $, $$, act, cleanup } = render(
+    <TimeGrid
+      label="Week"
+      days={['Monday', 'Tuesday', 'Wednesday']}
+      events={events}
+      onEventChange={(next) => changes.push(next)}
+      onSelect={() => {}}
+    />,
+  )
+  t.after(cleanup)
+  const strip = $('.rf-time-grid-all-day') as HTMLElement
+  equal($('.rf-time-grid-all-day-label')?.textContent, 'All day')
+  const button = (id: string) => $('[data-event="' + id + '"]') as HTMLButtonElement
+  equal($$('.rf-time-grid-board [data-event]').length, 1, 'only timed events sit on the board')
+  equal(button('trip').getAttribute('aria-label'), 'Trip, Tuesday to Wednesday, all day')
+  equal(button('holiday').getAttribute('aria-label'), 'Holiday, Monday, all day')
+  deepEqual(
+    ['holiday', 'trip', 'deadline'].map((id) => {
+      const style = button(id).style
+      return [
+        style.getPropertyValue('--day'),
+        style.getPropertyValue('--span'),
+        style.getPropertyValue('--row'),
+      ]
+    }),
+    [
+      ['0', '1', '0'],
+      ['1', '2', '0'],
+      ['1', '1', '1'],
+    ],
+    'spans are cut at the last column and events sharing a day stack',
+  )
+
+  // Arrows move by a day and keep every field; nothing moves past the edges or in time.
+  await act(() => keydown(button('trip'), 'ArrowRight'))
+  await act(() => keydown(button('holiday'), 'ArrowLeft'))
+  await act(() => keydown(button('holiday'), 'ArrowDown'))
+  deepEqual(changes, [{ ...events[1], day: 2 }])
+
+  // A horizontal drag moves by whole days.
+  strip.getBoundingClientRect = () => new DOMRect(0, 0, 300, 40)
+  strip.setPointerCapture = () => {}
+  for (const [type, clientX] of [
+    ['pointerdown', 150],
+    ['pointermove', 210],
+    ['pointerup', 250],
+  ] as const) {
+    await act(() =>
+      button('deadline').dispatchEvent(
+        new PointerEvent(type, {
+          pointerId: 2,
+          isPrimary: true,
+          clientX,
+          clientY: 30,
+          bubbles: true,
+        }),
+      ),
+    )
+  }
+  deepEqual(changes[1], { ...events[2], day: 2 })
+})
+
+it('continues an overnight event in the next column and edits it across midnight', async (t) => {
+  let shift = { id: 'night', title: 'Night shift', day: 0, start: 1320, duration: 480 }
+  const changes: TimeGridEvent[] = []
+  let owner: Handle
+  function Rota(handle: Handle) {
+    owner = handle
+    return () => (
+      <TimeGrid
+        label="Rota"
+        days={['Monday', 'Tuesday']}
+        events={[shift]}
+        onEventChange={(next) => {
+          changes.push(next)
+          shift = { ...shift, ...next }
+          void handle.update()
+        }}
+      />
+    )
+  }
+  const { $, act, cleanup } = render(<Rota />)
+  t.after(cleanup)
+  const button = () => $('button[data-event="night"]') as HTMLButtonElement
+  equal(button().getAttribute('aria-label'), 'Night shift, Monday, 22:00–Tuesday, 06:00')
+  equal(
+    $('.rf-time-grid-times span')?.textContent,
+    '00:00',
+    'the fitted window shows the early hours',
+  )
+  const next = $('[data-continues="night"]') as HTMLElement
+  equal(next.getAttribute('aria-hidden'), 'true')
+  equal(next.style.getPropertyValue('--day'), '1')
+  equal(next.style.top, '0%')
+  equal(next.style.height, 'calc(25% - 2px)')
+
+  await act(() => keydown(button(), 'ArrowDown'))
+  await act(() => keydown(button(), 'ArrowDown', true))
+  deepEqual(
+    changes.map(({ start, duration }) => [start, duration]),
+    [
+      [1335, 480],
+      [1335, 495],
+    ],
+  )
+  // At most 24 hours long.
+  shift = { ...shift, duration: 1440 }
+  await act(() => owner!.update())
+  await act(() => keydown(button(), 'ArrowDown', true))
+  equal(changes.length, 2)
+
+  // On the last column it stops at midnight.
+  shift = { ...shift, day: 1, duration: 480 }
+  await act(() => owner!.update())
+  equal($('[data-continues="night"]'), null)
+  equal(button().getAttribute('aria-label'), 'Night shift, Tuesday, 22:15–24:00')
+})

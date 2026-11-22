@@ -2106,3 +2106,17 @@
 .build-timings p strong {
   color: var(--rf-fg);
 }
+
+.release-week {
+  --rf-time-grid-hour-size: 32px;
+  width: min(100%, 40rem);
+}
+.release-week-days {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-inline-start: var(--rf-time-grid-gutter, 60px);
+  margin-block-end: 6px;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption);
+  text-align: center;
+}

@@ -10,6 +10,10 @@ export interface TimeGridRange {
 export interface TimeGridEvent extends TimeGridRange {
   id: string
   title: string
+  /** Shows the event in the all-day strip; `start` and `duration` are ignored. */
+  allDay?: boolean
+  /** Consecutive days an all-day event covers. Default 1. */
+  span?: number
 }
 
 export interface TimeGridProps<Event extends TimeGridEvent = TimeGridEvent> {
@@ -59,10 +63,56 @@ function validMinute(value: number | undefined): number | undefined {
   return typeof value === 'number' && Number.isFinite(value) ? Math.trunc(value) : undefined
 }
 
+// One column's part of a timed event: the whole event, or for an overnight event
+// its part before midnight and the part that continues in the next column.
+interface Piece<E> extends TimeGridRange {
+  event: E
+  continues: boolean
+}
+
+// Splits overnight events at midnight. The part after midnight goes to the next
+// column, when there is one; on the last column the event stops at midnight.
+function pieces<E extends TimeGridEvent>(events: readonly E[], dayCount: number) {
+  const out: Piece<E>[] = []
+  for (const event of events) {
+    const end = event.start + event.duration
+    out.push({
+      event,
+      day: event.day,
+      start: event.start,
+      duration: Math.min(end, 1440) - event.start,
+      continues: false,
+    })
+    if (end > 1440 && event.day + 1 < dayCount)
+      out.push({ event, day: event.day + 1, start: 0, duration: end - 1440, continues: true })
+  }
+  return out
+}
+
+// Rows for the all-day strip: each event takes the first row free across its days.
+function stackAllDay<E extends TimeGridEvent>(events: readonly E[], dayCount: number) {
+  const rows: boolean[][] = []
+  return events
+    .map((event) => ({ event, day: clamp(event.day, 0, Math.max(0, dayCount - 1)) }))
+    .map(({ event, day }) => ({
+      event,
+      day,
+      span: clamp(Math.trunc(event.span ?? 1) || 1, 1, dayCount - day),
+    }))
+    .sort((a, b) => a.day - b.day || b.span - a.span)
+    .map((entry) => {
+      let row = 0
+      while (rows[row]?.slice(entry.day, entry.day + entry.span).some(Boolean)) row++
+      rows[row] ??= []
+      for (let day = entry.day; day < entry.day + entry.span; day++) rows[row]![day] = true
+      return { ...entry, row }
+    })
+}
+
 // Events that overlap transitively share a width. Reuse a lane as soon as its
 // previous event ends, including when an event starts at that exact minute.
-function positionEvents<E extends TimeGridEvent>(events: readonly E[], dayCount: number) {
-  const positioned: { event: E; lane: number; lanes: number }[] = []
+function positionEvents<P extends TimeGridRange>(events: readonly P[], dayCount: number) {
+  const positioned: { event: P; lane: number; lanes: number }[] = []
   for (let day = 0; day < dayCount; day++) {
     const sorted = events.filter((event) => event.day === day).sort((a, b) => a.start - b.start)
     let groupStart = positioned.length
@@ -105,7 +155,10 @@ interface Gesture<E> {
 
 export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E>>) {
   let board: HTMLDivElement
+  let strip: HTMLDivElement | undefined
   let gesture: Gesture<E> | undefined
+  // A pointer moving an all-day event by whole days.
+  let dayDrag: { pointer: number; event: E; x: number; dayWidth: number; day: number } | undefined
   let cursor: TimeGridRange | undefined
   let statusMessage = ''
   let suppressClick = false
@@ -116,12 +169,14 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
     board.ownerDocument.addEventListener(
       'keydown',
       (e) => {
-        if (e.defaultPrevented || e.key !== 'Escape' || (!gesture && !cursor)) return
+        if (e.defaultPrevented || e.key !== 'Escape' || (!gesture && !cursor && !dayDrag)) return
         e.preventDefault()
         if (gesture) {
           if (gesture.event) suppressClick = true
           if (board.hasPointerCapture(gesture.pointer)) board.releasePointerCapture(gesture.pointer)
         }
+        if (dayDrag) suppressClick = true
+        dayDrag = undefined
         gesture = undefined
         cursor = undefined
         handle.update()
@@ -130,9 +185,13 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
     )
   })
 
+  const stripRef = ref((node) => {
+    strip = node as HTMLDivElement
+  })
+
   return () => {
     const {
-      events,
+      events: allEvents,
       days,
       selectedId,
       onEventChange,
@@ -143,18 +202,31 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
       getEventClass,
       describedBy,
     } = handle.props
+    const events = allEvents.filter((event) => !event.allDay)
+    const allDayEvents = allEvents.filter((event) => event.allDay)
+    // An overnight event continues in the next column, when there is one.
+    const overnight = (event: TimeGridRange) =>
+      event.start + event.duration > 1440 && event.day + 1 < days.length
     const explicitStart = validMinute(handle.props.startMinute)
     const explicitEnd = validMinute(handle.props.endMinute)
     const first = clamp(
       explicitStart ??
-        Math.floor(Math.min(540, (explicitEnd ?? 1440) - 1, ...events.map((e) => e.start)) / 60) *
-          60,
+        Math.floor(
+          Math.min(
+            540,
+            (explicitEnd ?? 1440) - 1,
+            ...events.map((e) => (overnight(e) ? 0 : e.start)),
+          ) / 60,
+        ) * 60,
       0,
       1439,
     )
     const last = clamp(
       explicitEnd ??
-        Math.ceil(Math.max(1020, first + 1, ...events.map((e) => e.start + e.duration)) / 60) * 60,
+        Math.ceil(
+          Math.max(1020, first + 1, ...events.map((e) => Math.min(1440, e.start + e.duration))) /
+            60,
+        ) * 60,
       first + 1,
       1440,
     )
@@ -166,6 +238,27 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
     )
     const hours = Array.from({ length: Math.ceil(span / 60) }, (_, i) => first + 60 * i)
     const compactDay = clamp(handle.props.compactDay ?? 0, 0, Math.max(0, days.length - 1))
+    // How far an event on this day may end: past midnight into the next column
+    // when the window reaches midnight and that column exists.
+    const limit = (day: number, end = last) => (end === 1440 && day + 1 < days.length ? 2880 : end)
+    function describe(event: E) {
+      const custom = getEventLabel?.(event)
+      if (custom) return custom
+      if (event.allDay) {
+        const span = clamp(
+          Math.trunc(event.span ?? 1) || 1,
+          1,
+          Math.max(1, days.length - event.day),
+        )
+        return span > 1
+          ? `${event.title}, ${days[event.day]} to ${days[event.day + span - 1]}, all day`
+          : `${event.title}, ${days[event.day]}, all day`
+      }
+      const end = event.start + event.duration
+      return overnight(event)
+        ? `${event.title}, ${days[event.day]}, ${clock(event.start)}–${days[event.day + 1]}, ${clock(end - 1440)}`
+        : `${event.title}, ${days[event.day]}, ${clock(event.start)}–${clock(Math.min(end, 1440))}`
+    }
     if (cursor && (!onCreate || !days.length || cursor.day >= days.length)) cursor = undefined
     const hasBoardHelp = !!onCreate
     const hasEventHelp = !!onEventChange || !!onActivate
@@ -287,7 +380,8 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
           gesture.readoutPoint = { x: e.clientX, y: e.clientY }
         }
         const delta = step * Math.round((((e.clientY - gesture.y) / rect.height) * span) / step)
-        const maxDuration = Math.max(anchor.duration, last - anchor.start)
+        const reach = limit(anchor.day)
+        const maxDuration = Math.min(1440, Math.max(anchor.duration, reach - anchor.start))
         const minDuration = Math.min(
           maxDuration,
           Math.max(
@@ -295,6 +389,13 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
             Math.max(0, first - anchor.start) + 1,
           ),
         )
+        const day = gesture.singleDay
+          ? anchor.day
+          : clamp(
+              anchor.day + Math.round((e.clientX - gesture.x) / gesture.dayWidth),
+              0,
+              days.length - 1,
+            )
         gesture.preview =
           mode === 'resize'
             ? {
@@ -302,27 +403,25 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
                 duration:
                   delta === 0
                     ? anchor.duration
-                    : delta > 0 && anchor.start + anchor.duration >= last
+                    : delta > 0 && anchor.start + anchor.duration >= reach
                       ? anchor.duration
                       : clamp(
                           anchor.duration + delta,
                           minDuration,
-                          Math.min(maxDuration, last - anchor.start),
+                          Math.min(maxDuration, reach - anchor.start),
                         ),
               }
             : {
                 ...anchor,
-                day: gesture.singleDay
-                  ? anchor.day
-                  : clamp(
-                      anchor.day + Math.round((e.clientX - gesture.x) / gesture.dayWidth),
-                      0,
-                      days.length - 1,
-                    ),
+                day,
                 start:
-                  delta === 0 || anchor.duration > span
+                  delta === 0 || anchor.duration > limit(day) - first
                     ? anchor.start
-                    : clamp(anchor.start + delta, first, last - anchor.duration),
+                    : clamp(
+                        anchor.start + delta,
+                        first,
+                        Math.min(1439, limit(day) - anchor.duration),
+                      ),
               }
       }
       return true
@@ -372,7 +471,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
       }
       // A keyboard edit in an automatically fitted window may reveal another hour.
       const min = event && explicitStart === undefined ? 0 : first
-      const max = event && explicitEnd === undefined ? 1440 : last
+      const max = event ? limit(next.day, explicitEnd === undefined ? 1440 : last) : last
       switch (e.key) {
         case 'ArrowLeft':
         case 'ArrowRight':
@@ -387,7 +486,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
           const delta = e.key === 'ArrowDown' ? step : -step
           if (e.shiftKey) {
             if (delta > 0 && next.start + next.duration >= max) break
-            const maxDuration = Math.max(1, max - next.start)
+            const maxDuration = Math.min(event ? 1440 : Infinity, Math.max(1, max - next.start))
             const minDuration = Math.min(
               maxDuration,
               Math.max(Math.min(step, maxDuration), Math.max(0, first - next.start) + 1),
@@ -397,7 +496,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
             next.start = clamp(next.start + delta, min, first + (Math.ceil(span / step) - 1) * step)
             next.duration = Math.min(Math.max(step, next.duration), last - next.start)
           } else if (next.duration <= max - min)
-            next.start = clamp(next.start + delta, min, max - next.duration)
+            next.start = clamp(next.start + delta, min, Math.min(1439, max - next.duration))
           break
         }
         case 'Enter':
@@ -419,9 +518,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
         )
           return
         const updated = { ...event, ...next }
-        statusMessage =
-          getEventLabel?.(updated) ??
-          `${updated.title}, ${days[updated.day]}, ${clock(updated.start)}–${clock(updated.start + updated.duration)}`
+        statusMessage = describe(updated)
         onEventChange?.(updated)
         handle.queueTask(() =>
           board.querySelector<HTMLButtonElement>(`[data-event="${CSS.escape(event.id)}"]`)?.focus(),
@@ -430,6 +527,91 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
         statusMessage = ''
         cursor = next
       }
+      handle.update()
+    }
+
+    // The all-day strip, with a dragged event shown at its new day.
+    const allDayStack = stackAllDay(
+      allDayEvents.map((event) =>
+        dayDrag && dayDrag.event.id === event.id ? { ...event, day: dayDrag.day } : event,
+      ),
+      days.length,
+    )
+    const allDayRows = allDayStack.reduce((rows, entry) => Math.max(rows, entry.row + 1), 0)
+
+    function allDayKey(e: KeyboardEvent, event: E) {
+      if (e.altKey || e.metaKey || e.ctrlKey || e.shiftKey) return
+      if (e.key === 'Enter') {
+        if (onActivate) {
+          e.preventDefault()
+          onSelect?.(event)
+          onActivate(event)
+        }
+        return
+      }
+      if (!onEventChange || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return
+      e.preventDefault()
+      if (showsSingleDay(board)) return
+      const day = clamp(event.day + (e.key === 'ArrowRight' ? 1 : -1), 0, days.length - 1)
+      if (day === event.day) return
+      const updated = { ...event, day }
+      statusMessage = describe(updated)
+      onEventChange(updated)
+      handle.queueTask(() =>
+        strip?.querySelector<HTMLButtonElement>(`[data-event="${CSS.escape(event.id)}"]`)?.focus(),
+      )
+      handle.update()
+    }
+
+    function beginDay(e: PointerEvent, event: E) {
+      suppressClick = false
+      if (!onEventChange || !strip || dayDrag || !e.isPrimary || e.button !== 0) return
+      const rect = strip.getBoundingClientRect()
+      if (rect.width <= 0 || showsSingleDay(board)) return
+      onSelect?.(event)
+      dayDrag = {
+        pointer: e.pointerId,
+        event,
+        x: e.clientX,
+        dayWidth: rect.width / days.length,
+        day: event.day,
+      }
+      try {
+        strip.setPointerCapture(e.pointerId)
+      } catch {
+        // Ignore synthetic or ended pointers that cannot be captured.
+      }
+    }
+
+    function dragDay(e: PointerEvent) {
+      if (!dayDrag || e.pointerId !== dayDrag.pointer) return false
+      // A span that runs past the last column is cut off there, as it is shown.
+      dayDrag.day = clamp(
+        dayDrag.event.day + Math.round((e.clientX - dayDrag.x) / dayDrag.dayWidth),
+        0,
+        days.length - 1,
+      )
+      return true
+    }
+
+    function moveDay(e: PointerEvent) {
+      if (dragDay(e)) handle.update()
+    }
+
+    function finishDay(e: PointerEvent) {
+      if (!dragDay(e) || !dayDrag) return
+      const { event, day } = dayDrag
+      dayDrag = undefined
+      handle.update()
+      if (day === event.day) return
+      suppressClick = true
+      const current = allEvents.find((item) => item.id === event.id)
+      if (current) onEventChange?.({ ...current, day })
+    }
+
+    function cancelDay(e: PointerEvent) {
+      if (dayDrag?.pointer !== e.pointerId) return
+      dayDrag = undefined
       handle.update()
     }
 
@@ -443,6 +625,59 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
         data-compact={handle.props.compactDay !== undefined || undefined}
         style={{ '--day-count': Math.max(1, days.length), '--hours': span / 60 }}
       >
+        {allDayStack.length > 0 && [
+          <span key="all-day-label" class="rf-time-grid-all-day-label" aria-hidden="true">
+            All day
+          </span>,
+          <div
+            key="all-day"
+            class="rf-time-grid-all-day"
+            role="group"
+            aria-label={`${handle.props.label}, all day`}
+            style={{ '--rows': allDayRows }}
+            mix={[
+              stripRef,
+              on<HTMLDivElement, 'pointermove'>('pointermove', moveDay),
+              on<HTMLDivElement, 'pointerup'>('pointerup', finishDay),
+              on<HTMLDivElement, 'pointercancel'>('pointercancel', cancelDay),
+            ]}
+          >
+            {allDayStack.map(({ event, day, span: days_, row }) => {
+              const label = describe(event)
+              return (
+                <button
+                  key={event.id}
+                  type="button"
+                  class={classList('rf-time-grid-event', getEventClass?.(event))}
+                  data-event={event.id}
+                  data-visible={compactDay >= day && compactDay < day + days_}
+                  data-editable={!!onEventChange || undefined}
+                  aria-label={label}
+                  title={label}
+                  aria-pressed={
+                    onSelect || selectedId !== undefined ? event.id === selectedId : undefined
+                  }
+                  aria-describedby={eventDescribed}
+                  disabled={!onSelect && !onActivate && !onEventChange}
+                  style={{ '--day': day, '--span': days_, '--row': row }}
+                  mix={[
+                    on('pointerdown', (e) => beginDay(e, event)),
+                    on('keydown', (e) => allDayKey(e, event)),
+                    on('click', () => {
+                      if (suppressClick) {
+                        suppressClick = false
+                        return
+                      }
+                      ;(onSelect ?? onActivate)?.(event)
+                    }),
+                  ]}
+                >
+                  <strong>{event.title}</strong>
+                </button>
+              )
+            })}
+          </div>,
+        ]}
         <div class="rf-time-grid-times" aria-hidden="true">
           {hours.map((hour) => (
             <span key={hour}>{clock(hour)}</span>
@@ -472,16 +707,44 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
           ]}
         >
           {positionEvents(
-            displayed.filter(
-              (e) => e.duration > 0 && e.start < last && e.start + e.duration > first,
+            pieces(displayed, days.length).filter(
+              (piece) =>
+                piece.duration > 0 && piece.start < last && piece.start + piece.duration > first,
             ),
             days.length,
-          ).map(({ event, lane, lanes }) => {
-            const label =
-              getEventLabel?.(event) ??
-              `${event.title}, ${days[event.day]}, ${clock(event.start)}–${clock(event.start + event.duration)}`
+          ).map(({ event: piece, lane, lanes }) => {
+            const { event } = piece
             const visibleDuration =
-              Math.min(last, event.start + event.duration) - Math.max(first, event.start)
+              Math.min(last, piece.start + piece.duration) - Math.max(first, piece.start)
+            // The part after midnight belongs to the event's button: a pointer
+            // can press or drag it, and assistive technology reads the button.
+            if (piece.continues)
+              return (
+                <div
+                  key={event.id + '-next'}
+                  class={classList('rf-time-grid-event', getEventClass?.(event))}
+                  data-continues={event.id}
+                  data-visible={piece.day === compactDay}
+                  data-short={visibleDuration <= 30}
+                  data-editable={!!onEventChange || undefined}
+                  data-pressed={event.id === selectedId || undefined}
+                  aria-hidden="true"
+                  style={placement(piece, lane, lanes)}
+                  mix={[
+                    on('pointerdown', (e) => begin(e, event)),
+                    on('click', () => {
+                      if (suppressClick) {
+                        suppressClick = false
+                        return
+                      }
+                      ;(onSelect ?? onActivate)?.(event)
+                    }),
+                  ]}
+                >
+                  <strong>{event.title}</strong>
+                </div>
+              )
+            const label = describe(event)
             return (
               <button
                 key={event.id}
@@ -498,7 +761,8 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
                 }
                 aria-describedby={eventDescribed}
                 disabled={!onSelect && !onActivate && !onEventChange}
-                style={placement(event, lane, lanes)}
+                data-overnight={overnight(event) || undefined}
+                style={placement(piece, lane, lanes)}
                 mix={[
                   on('pointerdown', (e) => begin(e, event)),
                   on('keydown', (e) => keydown(e, event)),
@@ -526,7 +790,9 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
           {point && gesture && (
             <span class="rf-time-grid-readout" aria-hidden="true">
               {days[gesture.preview.day]} · {clock(gesture.preview.start)}–
-              {clock(gesture.preview.start + gesture.preview.duration)}
+              {overnight(gesture.preview)
+                ? `${days[gesture.preview.day + 1]} ${clock(gesture.preview.start + gesture.preview.duration - 1440)}`
+                : clock(Math.min(1440, gesture.preview.start + gesture.preview.duration))}
             </span>
           )}
           {selectedRange && (
