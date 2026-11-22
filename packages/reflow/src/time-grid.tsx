@@ -159,7 +159,6 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
   let board: HTMLDivElement
   let strip: HTMLDivElement | undefined
   let gesture: Gesture<E> | undefined
-  // A pointer moving an all-day event by whole days.
   // A pointer moving an all-day event by whole days, or changing its span.
   let dayDrag:
     | {
@@ -706,6 +705,21 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
       handle.update()
     }
 
+    const timedPieces = positionEvents(
+      pieces(displayed, days.length).filter(
+        (piece) => piece.duration > 0 && piece.start < last && piece.start + piece.duration > first,
+      ),
+      days.length,
+    )
+    const compactContinuations = new Map(
+      timedPieces
+        .filter(
+          ({ event }) =>
+            handle.props.compactDay !== undefined && event.continues && event.day === compactDay,
+        )
+        .map((position) => [position.event.event.id, position]),
+    )
+
     const rangeAnnouncement = cursor
       ? `${days[cursor.day]}, ${clock(cursor.start)}–${clock(cursor.start + cursor.duration)}`
       : statusMessage
@@ -826,18 +840,11 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
             }),
           ]}
         >
-          {positionEvents(
-            pieces(displayed, days.length).filter(
-              (piece) =>
-                piece.duration > 0 && piece.start < last && piece.start + piece.duration > first,
-            ),
-            days.length,
-          ).map(({ event: piece, lane, lanes }) => {
+          {timedPieces.map(({ event: piece, lane, lanes }) => {
             const { event } = piece
-            const end = event.start + event.duration
-            // The part after midnight belongs to the event's button: a pointer
-            // can press or drag it, and assistive technology reads the button.
-            if (piece.continues)
+            const primaryVisible =
+              event.start < last && Math.min(event.start + event.duration, 1440) > first
+            if (piece.continues && primaryVisible)
               return (
                 <div
                   key={event.id + '-next'}
@@ -864,6 +871,12 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
                   </span>
                 </div>
               )
+            // Keep the same button and focus on a narrow screen. Its position
+            // and overlap lane can differ on the second day.
+            const end = event.start + event.duration
+            const continuation = compactContinuations.get(event.id)
+            const second =
+              continuation && placement(continuation.event, continuation.lane, continuation.lanes)
             const label = describe(event)
             return (
               <button
@@ -871,7 +884,9 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
                 type="button"
                 class={classList('rf-time-grid-event', getEventClass?.(event))}
                 data-event={event.id}
-                data-visible={event.day === compactDay}
+                data-visible={piece.day === compactDay || !!second}
+                data-compact-continuation={second ? true : undefined}
+                data-continues={piece.continues ? event.id : undefined}
                 data-editable={!!onEventChange || undefined}
                 aria-label={label}
                 title={label}
@@ -880,8 +895,16 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
                 }
                 aria-describedby={eventDescribed}
                 disabled={!onSelect && !onActivate && !onEventChange}
-                data-overnight={overnight(event) || undefined}
-                style={placement(piece, lane, lanes)}
+                data-overnight={(!piece.continues && overnight(event)) || undefined}
+                style={{
+                  ...placement(piece, lane, lanes),
+                  ...(second && {
+                    '--next-top': second.top,
+                    '--next-height': second.height,
+                    '--next-lane': second['--lane'],
+                    '--next-lanes': second['--lanes'],
+                  }),
+                }}
                 mix={[
                   on('pointerdown', (e) => begin(e, event)),
                   on('keydown', (e) => keydown(e, event)),

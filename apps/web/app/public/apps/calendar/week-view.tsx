@@ -4,6 +4,7 @@ import { persistWeekEvent, restoreWeekEvents } from './local-events.ts'
 import { EventEditor } from './event-editor.tsx'
 import {
   calendars,
+  coversDay,
   days,
   eventLabel,
   eventWhen,
@@ -47,7 +48,7 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
 
   function select(event: WeekEvent) {
     selectedId = event.id
-    activeDay = event.day
+    if (!coversDay(event, activeDay)) activeDay = event.day
     handle.update()
   }
 
@@ -128,12 +129,11 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
                 aria-label={name}
                 aria-pressed={day === activeDay}
                 mix={on('click', () => {
-                  const keep =
-                    day === activeDay && events.some((e) => e.id === selectedId && e.day === day)
+                  const keep = events.some((e) => e.id === selectedId && coversDay(e, day))
                   activeDay = day
                   if (!keep) {
                     selectedId = events
-                      .filter((event) => event.day === day)
+                      .filter((event) => coversDay(event, day))
                       .sort((a, b) => a.start - b.start)[0]?.id
                   }
                   handle.update()

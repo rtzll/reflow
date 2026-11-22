@@ -61,6 +61,11 @@ export function lastDay(event: WeekEvent) {
   return Math.min(days.length - 1, event.day + Math.max(1, event.span ?? 1) - 1)
 }
 
+export function coversDay(event: WeekEvent, day: number) {
+  if (event.allDay) return day >= event.day && day <= lastDay(event)
+  return day === event.day || (day === event.day + 1 && event.start + event.duration > 1440)
+}
+
 export function timeLabel(minutes: number) {
   return [Math.floor(minutes / 60), minutes % 60].map((n) => String(n).padStart(2, '0')).join(':')
 }

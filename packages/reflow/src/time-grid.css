@@ -278,6 +278,16 @@
   .rf-time-grid[data-compact] .rf-time-grid-all-day .rf-time-grid-event {
     --span: 1 !important;
   }
+  .rf-time-grid[data-compact] div[data-continues] {
+    display: none;
+  }
+  .rf-time-grid[data-compact] [data-compact-continuation] {
+    top: var(--next-top) !important;
+    height: var(--next-height) !important;
+    --lane: var(--next-lane) !important;
+    --lanes: var(--next-lanes) !important;
+    border-radius: 0 0 var(--rf-item-radius) var(--rf-item-radius);
+  }
   /* Showing one day, the strip goes when no all-day event covers it. */
   .rf-time-grid[data-compact]:not([data-compact-all-day])
     :is(.rf-time-grid-all-day, .rf-time-grid-all-day-label) {

@@ -28,7 +28,7 @@ With `onEventChange`, an all-day event has a handle on its trailing edge: draggi
 
 A timed event may run past midnight: `start + duration` greater than 1440, such as a night shift from 22:00 lasting 8 hours. It shows in its own day's column until 24:00 and continues in the next column from 00:00, with the continuation marked as such. Durations are limited to 24 hours, so an event touches at most two columns. On the last column the event is cut off at midnight.
 
-The event's button stays the one in its first column; the continuation is a visual part of the same event that a pointer can press or drag, and that assistive technology does not reach separately. The default label names both days: "Night shift, Monday, 22:00–Tuesday, 06:00". When the window fits itself to the events, a continuation counts too, so a grid with an overnight event shows the early hours.
+In a week view the two segments share one keyboard stop. A pointer can select either segment. In a compact single-day view the event button follows the displayed day, so the continuation can be opened, moved or resized from the keyboard. The default label names both days: "Night shift, Monday, 22:00–Tuesday, 06:00". When the window fits itself to the events, a continuation counts too, so a grid with an overnight event shows the early hours.
 
 Moving and resizing keep working across midnight wherever a next column exists: the end may move past 24:00, up to 24 hours after the start, and the request carries the new `start` and `duration` on the event's first day. Creating a new event from the board stays within one day.
 
