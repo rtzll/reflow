@@ -116,3 +116,26 @@ it('continues through the project tree in either direction when tabbing out of f
   await page.keyboard.press('Tab')
   await expect(tile.getByRole('separator', { name: 'Resize project files' })).toBeFocused()
 })
+
+it('copies a file path from its menu shortcut without opening the menu', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+  await open(page, '/')
+  const tile = page.locator('[data-component="code-block"]')
+  const readme = tile
+    .getByRole('tree', { name: 'Project files' })
+    .getByRole('treeitem', { name: 'README.md' })
+  await readme.focus()
+  await page.keyboard.press('Alt+Shift+C')
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe('README.md')
+  await expect(
+    page
+      .getByRole('region', { name: 'Notifications' })
+      .getByText('Copied README.md', { exact: true }),
+  ).toBeVisible()
+  await expect(tile.getByRole('menu', { name: 'File actions' })).toHaveCount(0)
+  await expect(readme).toBeFocused()
+  // Enter stays Tree's own: it opens the file once.
+  await readme.press('Enter')
+  await expect(readme).toHaveAttribute('aria-selected', 'true')
+})

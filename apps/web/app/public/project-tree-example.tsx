@@ -36,8 +36,13 @@ const fileActions: ContextMenuProps['items'] = [
     icon: <Icon name="copy" />,
     separatorBefore: true,
     children: [
-      { value: 'copy-name', label: 'File name', icon: <Icon name="file" /> },
-      { value: 'copy-path', label: 'Relative path', icon: <Icon name="folder" /> },
+      { value: 'copy-name', label: 'File name', icon: <Icon name="file" />, shortcut: '⌥C' },
+      {
+        value: 'copy-path',
+        label: 'Relative path',
+        icon: <Icon name="folder" />,
+        shortcut: '⌥⇧C',
+      },
     ],
   },
 ]
@@ -67,13 +72,13 @@ async function selectAction(action: string, row: HTMLElement) {
 const fileActions = [
   { value: 'open', label: 'Open file', icon: <Icon name="file" />, shortcut: 'Enter' },
   { value: 'copy', label: 'Copy', icon: <Icon name="copy" />, separatorBefore: true, children: [
-    { value: 'copy-name', label: 'File name', icon: <Icon name="file" /> },
-    { value: 'copy-path', label: 'Relative path', icon: <Icon name="folder" /> },
+    { value: 'copy-name', label: 'File name', icon: <Icon name="file" />, shortcut: '⌥C' },
+    { value: 'copy-path', label: 'Relative path', icon: <Icon name="folder" />, shortcut: '⌥⇧C' },
   ] },
 ]
 
 <ContextMenu label="File actions" target={fileRows} size="${size}"
-  items={fileActions} onSelect={selectAction}>
+  items={fileActions} onSelect={selectAction} shortcuts>
   <Tree label="Project files" items={files} value={file} defaultExpanded={['app']}
     size="${size}" onValueChange={openFile} />
 </ContextMenu>
@@ -117,6 +122,7 @@ export function ProjectTreeExample(
           size={handle.props.size ?? 'compact'}
           items={fileActions}
           onSelect={selectAction}
+          shortcuts
         >
           <Tree
             label="Project files"

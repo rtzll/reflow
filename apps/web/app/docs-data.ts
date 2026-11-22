@@ -228,10 +228,10 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
         },
         {
           name: 'rowActions',
-          type: '{ items: readonly DropdownItem[] | ((row: Row) => readonly DropdownItem[]); label: (row: Row) => string; onSelect: (action: string, row: Row, checked?: boolean) => void }',
+          type: '{ items: readonly DropdownItem[] | ((row: Row) => readonly DropdownItem[]); label: (row: Row) => string; onSelect: (action: string, row: Row, checked?: boolean) => void; shortcuts?: boolean }',
           required: false,
           description:
-            'Shows the same actions in a named button menu and a context menu for each record. items can be a function of the row to tailor or disable actions.',
+            'Shows the same actions in a named button menu and a context menu for each record. items can be a function of the row to tailor or disable actions. With shortcuts, an action runs from its shortcut while focus is in its row.',
         },
         {
           name: 'rowSelection',
@@ -375,6 +375,13 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           type: "'default' | 'compact'",
           required: false,
           description: 'Menu row density.',
+        },
+        {
+          name: 'shortcuts',
+          type: 'boolean',
+          required: false,
+          description:
+            'Runs an item from its shortcut while focus is on a target row, without opening the menu. Hints such as ⌘C, ⌥⇧C or ⌫ are read as written; ⌘ is Command on a Mac and Ctrl elsewhere. Off by default.',
         },
       ],
     },

@@ -2,6 +2,7 @@ import { ContextMenu, Tree } from '@rtzll/reflow'
 import { equal, ok } from 'remix/assert'
 import { render } from 'remix/component/test'
 import { it } from 'remix/test'
+import type { Handle } from 'remix/component'
 
 function press(node: Element, key: string, shiftKey = false) {
   return node.dispatchEvent(
@@ -281,4 +282,77 @@ it('unmounts closed menus, leaves empty item lists to the browser, and ignores s
     await new Promise<void>((resolve) => setTimeout(resolve, 10))
   }
   equal($('[role="menu"]'), null)
+})
+
+it('runs an item from its shortcut on the focused row only when shortcuts are on', async (t) => {
+  const selected: string[] = []
+  function key(node: Element, init: KeyboardEventInit) {
+    return node.dispatchEvent(
+      new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init }),
+    )
+  }
+  const items = (row: HTMLElement) => [
+    { value: 'copy', label: 'Copy path', shortcut: '⌘C' },
+    { value: 'delete', label: 'Delete', shortcut: '⌫', disabled: row.id === 'readme' },
+    {
+      value: 'share',
+      label: 'Share',
+      shortcut: 'S',
+      children: [{ value: 'link', label: 'Copy link', shortcut: '⇧⌘L' }],
+    },
+    { value: 'pin', label: 'Pin', type: 'checkbox' as const, checked: false, shortcut: 'mod+p' },
+  ]
+  function Files(handle: Handle<{ shortcuts?: boolean }>) {
+    return () => (
+      <ContextMenu
+        label="File actions"
+        target="[data-file]"
+        items={items}
+        shortcuts={handle.props.shortcuts}
+        onSelect={(action, target, checked) =>
+          selected.push(action + ':' + target.id + (checked === undefined ? '' : ':' + checked))
+        }
+      >
+        <div id="source" data-file tabIndex={0}>
+          Source <input aria-label="Rename source" />
+        </div>
+        <div id="readme" data-file tabIndex={0}>
+          README
+        </div>
+      </ContextMenu>
+    )
+  }
+  const { $, act, cleanup } = render(<Files shortcuts />)
+  t.after(cleanup)
+  const source = $('#source') as HTMLElement
+  const readme = $('#readme') as HTMLElement
+
+  // ⌘ means Command on a Mac and Ctrl elsewhere.
+  await act(() => key(source, { key: 'c', code: 'KeyC', metaKey: true }))
+  await act(() => key(source, { key: 'c', code: 'KeyC', ctrlKey: true }))
+  equal(key(source, { key: 'Backspace' }), false, 'a handled shortcut prevents the default')
+  await act(() => key(readme, { key: 'Backspace' }))
+  // Submenu leaves run; the submenu's own row does not.
+  await act(() => key(readme, { key: 'l', code: 'KeyL', metaKey: true, shiftKey: true }))
+  await act(() => key(readme, { key: 's', code: 'KeyS' }))
+  await act(() => key(readme, { key: 'p', code: 'KeyP', metaKey: true }))
+  // Typing in a field inside a row is left alone, as is an already handled key.
+  await act(() => key($('input') as HTMLElement, { key: 'Backspace' }))
+  const handled = new KeyboardEvent('keydown', {
+    key: 'Backspace',
+    bubbles: true,
+    cancelable: true,
+  })
+  handled.preventDefault()
+  source.dispatchEvent(handled)
+  equal(selected.join(' '), 'copy:source copy:source delete:source link:readme pin:readme:true')
+  equal($('[role="menu"]'), null, 'shortcuts run without opening the menu')
+
+  selected.length = 0
+  const off = render(<Files />)
+  t.after(off.cleanup)
+  await off.act(() =>
+    key(off.$('#source') as HTMLElement, { key: 'c', code: 'KeyC', metaKey: true }),
+  )
+  equal(selected.length, 0)
 })

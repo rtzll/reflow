@@ -94,6 +94,23 @@ export interface ParsedShortcut {
   key: string
 }
 
+// Glyphs as hints write them. ⌘ is Command on a Mac and Ctrl elsewhere, like `mod`,
+// so one hint serves every platform.
+const glyphs: Record<string, string> = {
+  '⌘': 'mod',
+  '⌥': 'alt',
+  '⇧': 'shift',
+  '⌃': 'ctrl',
+  '↵': 'enter',
+  '⌫': 'backspace',
+  '⌦': 'delete',
+  '⇥': 'tab',
+  '↑': 'up',
+  '↓': 'down',
+  '←': 'left',
+  '→': 'right',
+}
+
 export function parseShortcut(shortcut: string): ParsedShortcut {
   const parsed: ParsedShortcut = {
     mod: false,
@@ -103,7 +120,10 @@ export function parseShortcut(shortcut: string): ParsedShortcut {
     shift: false,
     key: '',
   }
-  for (const token of tokens(shortcut)) {
+  const expanded = tokens(shortcut).flatMap((token) =>
+    preformatted.test(token) ? Array.from(token, (char) => glyphs[char] ?? char) : [token],
+  )
+  for (const token of expanded) {
     const lower = token.toLowerCase()
     const modifier = modifiers[lower]
     if (modifier) parsed[modifier as 'mod' | 'meta' | 'ctrl' | 'alt' | 'shift'] = true

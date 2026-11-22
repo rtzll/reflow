@@ -59,6 +59,8 @@ export interface DataTableProps<Row> {
     label: (row: Row) => string
     items: readonly DropdownItem[] | ((row: Row) => readonly DropdownItem[])
     onSelect: (action: string, row: Row, checked?: boolean) => void
+    /** Run an action from its shortcut while focus is in its row, as ContextMenu does. */
+    shortcuts?: boolean
   }
   /** Select rows on the current page. A changed view clears the selection. */
   rowSelection?: {
@@ -436,6 +438,7 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
                 : rowActions.items
             }
             size={size}
+            shortcuts={rowActions.shortcuts}
             onSelect={(action, target, checked) => {
               const row = visible.find((item) => rowKey(item) === target.dataset.rfDataRow)
               if (!loading && row !== undefined && target.isConnected)

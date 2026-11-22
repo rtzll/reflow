@@ -3,6 +3,7 @@ import * as popover from '@remix-run/ui/popover'
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
 import { DropdownSurface, type DropdownItem } from './dropdown.tsx'
 import type { ControlSize } from './systems/styling.ts'
+import { matchesShortcut, parseShortcut } from './behaviors/shortcut.ts'
 
 export interface ContextMenuProps {
   /** Accessible name of the menu. */
@@ -15,6 +16,25 @@ export interface ContextMenuProps {
   size?: ControlSize
   /** The target is the matched element that opened the menu. */
   onSelect?: (value: string, target: HTMLElement, checked?: boolean) => void
+  /**
+   * Run an item from its `shortcut` while focus is on a target row, without
+   * opening the menu. Off by default.
+   */
+  shortcuts?: boolean
+}
+
+// The items a shortcut can run: enabled leaves, submenus included.
+function leaves(items: readonly DropdownItem[]): DropdownItem[] {
+  return items.flatMap((item) =>
+    item.disabled ? [] : item.children?.length ? leaves(item.children) : [item],
+  )
+}
+
+function isEditable(target: Element) {
+  return (
+    !!target.closest('input, textarea, select') ||
+    !!target.closest<HTMLElement>('[contenteditable]')?.isContentEditable
+  )
 }
 
 interface Invocation {
@@ -40,6 +60,29 @@ export function ContextMenu(handle: Handle<ContextMenuProps>) {
       return false
     const pointerType = 'pointerType' in event ? (event as PointerEvent).pointerType : ''
     return pointerType === '' || (event.button === 0 && event.clientX === 0 && event.clientY === 0)
+  }
+
+  // Runs the focused row's item for a shortcut, as a click on it would.
+  function runShortcut(event: KeyboardEvent) {
+    if (!handle.props.shortcuts || event.defaultPrevented || event.isComposing) return
+    if (!(event.target instanceof Element) || isEditable(event.target)) return
+    const row = event.target.closest(handle.props.target)
+    if (
+      !(row instanceof HTMLElement) ||
+      !(event.currentTarget instanceof HTMLElement) ||
+      row === event.currentTarget ||
+      !event.currentTarget.contains(row)
+    )
+      return
+    const { items } = handle.props
+    const item = leaves(typeof items === 'function' ? items(row) : items).find(
+      (entry) => entry.shortcut && matchesShortcut(event, parseShortcut(entry.shortcut)),
+    )
+    if (!item) return
+    event.preventDefault()
+    const checked =
+      item.type === 'checkbox' ? !item.checked : item.type === 'radio' ? true : undefined
+    handle.props.onSelect?.(item.value, row, checked)
   }
 
   function open(event: MouseEvent | KeyboardEvent) {
@@ -101,6 +144,7 @@ export function ContextMenu(handle: Handle<ContextMenuProps>) {
           mix={[
             on<HTMLElement, 'contextmenu'>('contextmenu', open),
             on<HTMLElement, 'keydown'>('keydown', open),
+            on<HTMLElement, 'keydown'>('keydown', runShortcut),
           ]}
         >
           {handle.props.children}
