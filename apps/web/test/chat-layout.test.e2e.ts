@@ -93,3 +93,45 @@ it('leaves a reader who scrolled back where they are while a reply streams', asy
   assert.ok((await reply()) > before, 'the reply kept streaming')
   assert.equal(await viewport.evaluate((node) => node.scrollTop), held)
 })
+
+it('anchors a sent message at the top while its reply grows below it', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await open(page, '/docs/chat-layout')
+  const example = page.locator('#anchored-replies')
+  await example.scrollIntoViewIfNeeded()
+  const viewport = example.locator('.rf-chat-layout-viewport')
+  const log = example.getByRole('log')
+  const composer = example.getByRole('textbox')
+  // History present on load does not anchor: it opens at the end.
+  await expect.poll(() => fromEnd(viewport)).toBe(0)
+
+  await composer.fill('How should motion feel?')
+  await composer.press('Enter')
+  const sent = example.locator('.rf-chat-message[data-role="user"]').last()
+  await expect(sent).toHaveText('How should motion feel?')
+  // The message sits 16px below the top of the view, with the previous one peeking above.
+  const offset = () =>
+    sent.evaluate((node) => {
+      const view = node.closest('.rf-chat-layout-viewport')!.getBoundingClientRect()
+      return Math.round(node.getBoundingClientRect().top - view.top)
+    })
+  await expect.poll(offset).toBe(16)
+
+  // While the reply streams, the log is busy and the message does not move.
+  await expect(log).toHaveAttribute('aria-busy', 'true')
+  const spacer = example.locator('.rf-chat-anchor-space')
+  const before = (await spacer.boundingBox())!.height
+  const tops: number[] = []
+  for (let i = 0; i < 8; i++) {
+    tops.push(await offset())
+    await page.waitForTimeout(80)
+  }
+  assert.ok(
+    tops.every((top) => Math.abs(top - 16) <= 1),
+    `the message stays put: ${tops.join(',')}`,
+  )
+  await expect(log).not.toHaveAttribute('aria-busy', 'true')
+  assert.ok((await spacer.boundingBox())!.height < before, 'the space shrinks as the reply grows')
+  assert.equal(await fromEnd(viewport), 0, 'the anchored position is the end')
+})

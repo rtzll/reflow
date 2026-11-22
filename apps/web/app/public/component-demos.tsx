@@ -496,6 +496,12 @@ function setEditing(open: boolean) {
       'The transcript opens at the newest message. Scroll back and it leaves you there, with a button back to the latest; it reads New messages once something arrives.',
     ),
     demo(
+      'Anchored replies',
+      'anchor',
+      `<ChatLayout scroll="anchor" busy={streaming} composer={composer}>\n  {messages}\n</ChatLayout>`,
+      'Send a message: it glides to the top of the view with the previous one peeking above, and the reply grows below it without moving it. busy keeps screen readers from announcing the reply in pieces.',
+    ),
+    demo(
       'Empty state',
       'empty',
       `<ChatLayout\n  empty={<p>Start a conversation</p>}\n  composer={composer}\n>\n  {messages}\n</ChatLayout>`,

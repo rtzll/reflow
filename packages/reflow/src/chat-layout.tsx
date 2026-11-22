@@ -14,11 +14,30 @@ export interface ChatLayoutProps {
   empty?: RemixNode
   /** Names the transcript. Default "Conversation". */
   label?: string
+  /**
+   * `follow` keeps the newest message in view. `anchor` glides a message the
+   * reader sends to the top of the view and grows its reply below it, then
+   * follows once the reply fills the view. Default `follow`.
+   */
+  scroll?: 'follow' | 'anchor'
+  /** While a reply streams, so assistive technology reads it once it is complete. */
+  busy?: boolean
   class?: string
 }
 
 // Within this many pixels of the end, the transcript counts as at the newest message.
 const pinSlack = 24
+// How much of the previous message shows above an anchored one.
+const anchorPeek = 16
+
+// The distance from the top of the document, from layout alone: transforms,
+// such as a message's entrance glide, do not move it.
+function layoutTop(element: HTMLElement) {
+  let top = 0
+  for (let node: HTMLElement | null = element; node; node = node.offsetParent as HTMLElement | null)
+    top += node.offsetTop
+  return top
+}
 
 function isEmpty(node: RemixNode): boolean {
   if (node == null || node === false || node === '') return true
@@ -40,6 +59,32 @@ export function ChatLayout(handle: Handle<ChatLayoutProps>) {
   let unseen = false
   // While a jump scrolls smoothly, its own scroll events must not unpin it.
   let jumping = false
+  // The reader's newest message while it is held at the top, and the space
+  // after the transcript that makes that position the end.
+  let anchor: HTMLElement | null = null
+  let space: HTMLElement | null = null
+  const spaceRef = ref((node) => {
+    space = node instanceof HTMLElement ? node : null
+  })
+
+  // Sizes the space so the anchored message, 16px below the top of the view,
+  // is the end. It only shrinks as the reply grows; at 0 the anchor lets go.
+  function sizeSpace(log: HTMLElement, fresh = false) {
+    if (!space || !viewport) return
+    const content = viewport.firstElementChild as HTMLElement | null
+    if (!anchor?.isConnected || !content) {
+      anchor = null
+      space.style.height = '0px'
+      return
+    }
+    const origin = layoutTop(content)
+    const below = layoutTop(log) - origin + log.offsetHeight - (layoutTop(anchor) - origin)
+    const needed = Math.max(0, viewport.clientHeight - anchorPeek - below)
+    const current = parseFloat(space.style.height) || 0
+    const next = fresh ? needed : Math.min(current, needed)
+    space.style.height = `${Math.round(next)}px`
+    if (next === 0) anchor = null
+  }
 
   function setState(nextPinned: boolean, nextUnseen: boolean) {
     if (nextPinned === pinned && nextUnseen === unseen) return
@@ -79,6 +124,7 @@ export function ChatLayout(handle: Handle<ChatLayoutProps>) {
     const observer = new ResizeObserver(() => {
       const grew = node.offsetHeight > lastHeight
       lastHeight = node.offsetHeight
+      if (anchor) sizeSpace(node)
       if (pinned) scrollToEnd()
       else if (grew) setState(false, true)
     })
@@ -86,13 +132,23 @@ export function ChatLayout(handle: Handle<ChatLayoutProps>) {
     observer.observe(scroller)
     // The reader's own message always brings them to the newest one.
     const added = new MutationObserver((records) => {
-      const sent = records.some((record) =>
-        Array.from(record.addedNodes).some(
-          (child) => child instanceof Element && child.matches('[data-role="user"]'),
-        ),
-      )
+      const sent = records
+        .flatMap((record) => Array.from(record.addedNodes))
+        .filter(
+          (child): child is HTMLElement =>
+            child instanceof HTMLElement && child.matches('[data-role="user"]'),
+        )
+        .at(-1)
       if (!sent) return
       setState(true, false)
+      if (handle.props.scroll === 'anchor') {
+        // Glide the new message up; the space makes its place the end.
+        anchor = sent
+        sizeSpace(node, true)
+        jumping = true
+        scrollToEnd(true)
+        return
+      }
       scrollToEnd()
     })
     added.observe(node, { childList: true })
@@ -120,7 +176,7 @@ export function ChatLayout(handle: Handle<ChatLayoutProps>) {
   })
 
   return () => {
-    const { children, composer, header, empty, label = 'Conversation' } = handle.props
+    const { children, composer, header, empty, label = 'Conversation', scroll, busy } = handle.props
     const blank = isEmpty(children)
     return (
       <div
@@ -134,9 +190,18 @@ export function ChatLayout(handle: Handle<ChatLayoutProps>) {
             className="rf-chat-layout-scroll"
             viewportClassName="rf-chat-layout-viewport"
           >
-            <div class="rf-chat-transcript" role="log" aria-label={label} mix={logMix}>
+            <div
+              class="rf-chat-transcript"
+              role="log"
+              aria-label={label}
+              aria-busy={busy || undefined}
+              mix={logMix}
+            >
               {children}
             </div>
+            {scroll === 'anchor' && (
+              <div class="rf-chat-anchor-space" aria-hidden="true" mix={spaceRef} />
+            )}
             {blank && empty != null && <div class="rf-chat-layout-empty">{empty}</div>}
           </ScrollArea>
           <button

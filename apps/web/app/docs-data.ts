@@ -3866,6 +3866,20 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           required: false,
         },
         {
+          name: 'scroll',
+          type: '"follow" | "anchor"',
+          description:
+            'follow keeps the newest message in view. anchor glides a message the reader sends to the top of the view and grows its reply below it, then follows once the reply fills the view. Default follow.',
+          required: false,
+        },
+        {
+          name: 'busy',
+          type: 'boolean',
+          description:
+            'Set while a reply streams: the log is aria-busy, so assistive technology reads the reply once it is complete.',
+          required: false,
+        },
+        {
           name: 'class',
           type: 'string',
           description:

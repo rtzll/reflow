@@ -33,7 +33,7 @@ export interface ChatLayoutDemoProps {
 export function ChatLayoutDemo(handle: Handle<ChatLayoutDemoProps>) {
   const variant = handle.props.variant
   let messages: Message[] =
-    variant === 'history'
+    variant === 'history' || variant === 'anchor'
       ? history.map((message) => ({ ...message, animate: false }))
       : variant === 'empty' || handle.props.empty
         ? []
@@ -42,6 +42,7 @@ export function ChatLayoutDemo(handle: Handle<ChatLayoutDemoProps>) {
             { role: 'assistant', text: replies[0]!, animate: false },
           ]
   let replyIndex = 1
+  let streaming = false
   let timer: ReturnType<typeof setInterval> | undefined
   handle.signal.addEventListener('abort', () => clearInterval(timer), { once: true })
 
@@ -51,6 +52,7 @@ export function ChatLayoutDemo(handle: Handle<ChatLayoutDemoProps>) {
     const words = replies[replyIndex++ % replies.length]!.split(' ')
     const message: Message = { role: 'assistant', text: '' }
     messages = [...messages, message]
+    streaming = true
     let shown = 0
     timer = setInterval(() => {
       shown = Math.min(words.length, shown + 2)
@@ -58,6 +60,8 @@ export function ChatLayoutDemo(handle: Handle<ChatLayoutDemoProps>) {
       void handle.update()
       if (shown === words.length) {
         clearInterval(timer)
+        streaming = false
+        void handle.update()
         play('ready', { emphasis: 'subtle' })
       }
     }, 60)
@@ -70,6 +74,8 @@ export function ChatLayoutDemo(handle: Handle<ChatLayoutDemoProps>) {
       <div class="doc-chat-layout" data-density={size}>
         <ChatLayout
           label="Design chat"
+          scroll={variant === 'anchor' ? 'anchor' : undefined}
+          busy={streaming}
           header={
             showHeader ? (
               <div class="doc-chat-header">
