@@ -475,7 +475,7 @@ function setEditing(open: boolean) {
       'Autoplay',
       'autoplay',
       `<Carousel label="Highlights" autoplay={{ duration: 3000 }}>{slides}</Carousel>`,
-      'The dots time it and show its progress. It pauses while pointed at or focused, and its button stops it, as the carousel pattern asks.',
+      'The active dot shows progress through the slide. Hover the slides or move keyboard focus into the carousel to pause. Play resumes from the same spot, even while the button has focus.',
     ),
     demo(
       'Linked slides',
