@@ -2078,6 +2078,7 @@
 
 .build-timings {
   --rf-bar-chart-height: 7rem;
+  --rf-bar-chart-axis-width: calc(2ch + 6px);
   display: grid;
   gap: 16px;
   width: min(100%, 32rem);
