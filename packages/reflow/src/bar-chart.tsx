@@ -163,7 +163,10 @@ export function BarChart<Item extends ChartItem>(handle: Handle<BarChartProps<It
             from = down += value
           }
         }
-        return { start: at(from), size: (Math.abs(to - from) / (span || 1)) * 100 }
+        // A segment that starts on zero sits on the baseline; one piled on
+        // another, or beside another in a group, keeps a gap from it.
+        const base = !stacked || from === 0 || to === 0
+        return { start: at(from), size: (Math.abs(to - from) / (span || 1)) * 100, base }
       })
     }
     const start = items.findIndex(({ id }) => id === range?.start)
@@ -239,6 +242,13 @@ export function BarChart<Item extends ChartItem>(handle: Handle<BarChartProps<It
                         class="rf-bar-chart-fill"
                         data-series={multi ? seriesSlot(position) : undefined}
                         data-negative={numbers[index]![position]! < 0 || undefined}
+                        data-after={
+                          segment.size > 0 && (stacked ? !segment.base : position > 0)
+                            ? stacked
+                              ? 'stacked'
+                              : 'grouped'
+                            : undefined
+                        }
                         data-value={numbers[index]![position]}
                         style={{
                           '--start': segment.start,

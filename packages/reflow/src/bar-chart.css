@@ -154,6 +154,39 @@
   max-width: none;
   border-radius: 2px;
 }
+/* A 2px surface gap between neighbouring segments, on the side facing the
+   one before: below a piled segment (above it under zero), and before each
+   bar of a group after the first. The fill clips inside the transparent
+   border, so a bar's base stays on the baseline. */
+.rf-bar-chart-column .rf-bar-chart-fill[data-after] {
+  box-sizing: border-box;
+  border: 0 solid transparent;
+  background-clip: padding-box;
+}
+.rf-bar-chart-fill[data-after='stacked']:not([data-negative]) {
+  border-block-end-width: 2px;
+}
+.rf-bar-chart-fill[data-after='stacked'][data-negative] {
+  border-block-start-width: 2px;
+}
+.rf-bar-chart-fill[data-after='grouped'] {
+  border-inline-start-width: 2px;
+}
+.rf-bar-chart[data-orientation='horizontal'] .rf-bar-chart-fill[data-after] {
+  border-width: 0;
+}
+.rf-bar-chart[data-orientation='horizontal']
+  .rf-bar-chart-fill[data-after='stacked']:not([data-negative]) {
+  border-inline-start-width: 2px;
+}
+.rf-bar-chart[data-orientation='horizontal']
+  .rf-bar-chart-fill[data-after='stacked'][data-negative] {
+  border-inline-end-width: 2px;
+}
+.rf-bar-chart[data-orientation='horizontal'] .rf-bar-chart-fill[data-after='grouped'] {
+  border-block-start-width: 2px;
+}
+
 .rf-bar-chart-fill[data-series='1'],
 .rf-bar-chart-swatch[data-series='1'] {
   --rf-series-color: var(--rf-bar-chart-series-1);
@@ -191,10 +224,10 @@
   --rf-series-color: var(--rf-muted);
 }
 .rf-bar-chart-column[data-active] .rf-bar-chart-fill[data-series] {
-  background: var(--rf-series-color);
+  background-color: var(--rf-series-color);
 }
 .rf-bar-chart-column:not([data-active]) .rf-bar-chart-fill[data-series] {
-  background: color-mix(in oklab, var(--rf-series-color) 30%, var(--rf-neutral-fill));
+  background-color: color-mix(in oklab, var(--rf-series-color) 30%, var(--rf-neutral-fill));
 }
 .rf-bar-chart-legend {
   display: flex;

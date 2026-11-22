@@ -74,3 +74,22 @@ it('lays out a stacked horizontal chart with rows, a zero line and a legend', as
     'AddedRemoved',
   )
 })
+
+it('keeps a 2px surface gap between piled segments while each bar sits on zero', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await open(page, '/apps/analytics')
+  const column = page.locator('.rf-bar-chart-column:has(.rf-bar-chart-fill[data-after])').first()
+  const parts = await column.evaluate((node) => {
+    const [base, piled] = Array.from(
+      node.querySelectorAll<HTMLElement>('.rf-bar-chart-fill:not([data-value="0"])'),
+    )
+    const style = getComputedStyle(piled!)
+    const fill = (element: HTMLElement) => element.getBoundingClientRect()
+    return {
+      gap: Math.round(fill(base!).top - fill(piled!).bottom + parseFloat(style.borderBottomWidth)),
+      clip: style.backgroundClip,
+      baseBorder: getComputedStyle(base!).borderBottomWidth,
+    }
+  })
+  assert.deepEqual(parts, { gap: 2, clip: 'padding-box', baseBorder: '0px' })
+})
