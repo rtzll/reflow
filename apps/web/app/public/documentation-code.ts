@@ -298,6 +298,16 @@ ${opening} label="Options" options={options} defaultValue="0" />`
       ].join('')
       return `<Avatar name="Ada Lovelace"${props} />`
     }
+    case 'confirmation': {
+      const props = [
+        values.status === 'warning' ? '\n  status="warning"' : '',
+        values.state === 'approved' || values.state === 'denied'
+          ? `\n  state="${values.state}"`
+          : '',
+        values.size === 'compact' ? '\n  size="compact"' : '',
+      ].join('')
+      return `<Confirmation${props}\n  icon={<Icon name="cpu" />}\n  title="Run pnpm build?"\n  description="Builds the library and the showcase into dist/."\n  onApprove={run}\n  onDeny={skip}\n/>`
+    }
     case 'citation': {
       const count = Number(values.count ?? 1)
       const sources =

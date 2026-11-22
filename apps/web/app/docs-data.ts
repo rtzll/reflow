@@ -3961,6 +3961,93 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  confirmation: [
+    {
+      name: 'Confirmation',
+      props: [
+        {
+          name: 'title',
+          type: 'RemixNode',
+          description: 'The question, phrased so Approve and Deny answer it.',
+          required: true,
+        },
+        {
+          name: 'description',
+          type: 'RemixNode',
+          description: 'What approving does, or why it is asked.',
+          required: false,
+        },
+        {
+          name: 'state',
+          type: '"requested" | "approved" | "denied"',
+          description:
+            'The answer, when the app keeps it. Without it, Confirmation keeps the answer itself after calling onApprove or onDeny.',
+          required: false,
+        },
+        {
+          name: 'onApprove',
+          type: '() => void',
+          description: 'Called when Approve is pressed.',
+          required: false,
+        },
+        {
+          name: 'onDeny',
+          type: '() => void',
+          description: 'Called when Deny is pressed.',
+          required: false,
+        },
+        {
+          name: 'approveLabel',
+          type: 'string',
+          description: 'The approve button. Default Approve.',
+          required: false,
+        },
+        {
+          name: 'denyLabel',
+          type: 'string',
+          description: 'The deny button. Default Deny.',
+          required: false,
+        },
+        {
+          name: 'approvedLabel',
+          type: 'string',
+          description: 'Shown once approved. Default Approved.',
+          required: false,
+        },
+        {
+          name: 'deniedLabel',
+          type: 'string',
+          description: 'Shown once denied. Default Denied.',
+          required: false,
+        },
+        {
+          name: 'name',
+          type: 'string',
+          description:
+            'Submits approved or denied with a surrounding form once answered; unanswered, the field is absent.',
+          required: false,
+        },
+        {
+          name: 'icon',
+          type: 'RemixNode',
+          description: 'Replaces the status icon, to name the action.',
+          required: false,
+        },
+        {
+          name: 'status',
+          type: '"default" | "info" | "success" | "warning" | "error"',
+          description: 'Banner status, such as warning for a risky action. Default default.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: '"default" | "compact"',
+          description: 'Overrides the surrounding density.',
+          required: false,
+        },
+      ],
+    },
+  ],
   citation: [
     {
       name: 'Citation',

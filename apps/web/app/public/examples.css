@@ -2120,3 +2120,22 @@
   font-size: var(--rf-text-caption);
   text-align: center;
 }
+
+.doc-confirmation {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  width: min(100%, 34rem);
+}
+.doc-confirmation > .rf-banner-collapse {
+  justify-self: stretch;
+}
+.doc-confirmation-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.doc-confirmation-row output {
+  color: var(--rf-muted);
+  font: var(--rf-text-caption) / 1.4 var(--rf-font-mono, ui-monospace, monospace);
+}

@@ -16,6 +16,7 @@ import { ToasterDemo, toasterPositions } from './toaster-example.tsx'
 import { DrawerDemo } from './drawer-example.tsx'
 import { CodeBlockDemo, codeLanguages, type CodeSamples } from './code-block-example.tsx'
 import { CitationDemo } from './citation-example.tsx'
+import { ConfirmationDemo } from './confirmation-example.tsx'
 import { AvatarDemo } from './avatar-example.tsx'
 import { ChatLayoutDemo } from './chat-layout-example.tsx'
 import { CarouselDemo } from './carousel-demo.tsx'
@@ -316,6 +317,11 @@ export const playgroundControls: Record<string, readonly Control[]> = {
     choice('shape', 'Shape', ['circle', 'square']),
     choice('status', 'Status', ['none', 'online', 'away', 'busy', 'offline']),
     toggle('image', 'Image'),
+  ],
+  confirmation: [
+    choice('state', 'State', ['requested', 'approved', 'denied']),
+    choice('status', 'Status', ['default', 'warning']),
+    size,
   ],
   citation: [
     choice('style', 'Variant', ['number', 'site']),
@@ -900,6 +906,15 @@ export function PlaygroundExample(
             shape={v.shape === 'square' ? 'square' : 'circle'}
             status={String(v.status) as 'none'}
             withImage={Boolean(v.image)}
+          />
+        )
+      case 'confirmation':
+        return (
+          <ConfirmationDemo
+            variant="playground"
+            size={density}
+            status={v.status === 'warning' ? 'warning' : 'default'}
+            state={v.state === 'approved' || v.state === 'denied' ? v.state : 'requested'}
           />
         )
       case 'citation':

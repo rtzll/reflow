@@ -208,6 +208,11 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       'A label, form control, help text, and error with associated accessible descriptions.',
     code: requestFormCode(),
   },
+  confirmation: {
+    description:
+      'A yes or no question before something runs, such as an agent’s tool call, answered in place.',
+    code: `<Confirmation\n  title="Run pnpm build?"\n  description="Builds the library and the showcase into dist/."\n  onApprove={run}\n  onDeny={skip}\n/>`,
+  },
   citation: {
     description:
       'An inline source chip in generated text that links to the source and previews it.',

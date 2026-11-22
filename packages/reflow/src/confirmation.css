@@ -1,0 +1,39 @@
+/* Confirmation: the answer takes the buttons' place at their height, so the
+   banner keeps its size when it lands. It fades and grows in from 96% on the
+   fast spring; reduced motion keeps the fade. */
+.rf-confirmation-status {
+  display: flex;
+  align-items: center;
+  /* Banner lays its actions out as a 28px row. */
+  block-size: 28px;
+}
+.rf-confirmation-answer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--rf-fg);
+  outline: none;
+  animation: rf-confirmation-answer var(--rf-spring-fast) both;
+}
+.rf-confirmation-answer:focus-visible {
+  border-radius: var(--rf-item-radius);
+  outline: 2px solid var(--rf-accent);
+  outline-offset: 2px;
+}
+.rf-confirmation-answer svg {
+  flex: none;
+  stroke-width: 1.5;
+}
+@keyframes rf-confirmation-answer {
+  from {
+    opacity: 0;
+    scale: 0.96;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  @keyframes rf-confirmation-answer {
+    from {
+      opacity: 0;
+    }
+  }
+}

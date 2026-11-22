@@ -9,7 +9,7 @@ Reflow started as a native Remix port of the [Fluid Functionalism](https://githu
 - **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `Pagination`, `Resizable`, `Sidebar`, `Tabs`, `Toolbar`, `Tree`
 - **Menus and overlays** · `AlertDialog`, `CommandMenu`, `ContextMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
 - **Display and feedback** · `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `BarChart`, `Card`, `CodeBlock`, `DataTable`, `RoutedDataTable`, `Markdown`, `Progress`, `Skeleton`, `Spinner`, `Table`, `Toaster`
-- **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `Citation`, `InputMessage`, `QueuedStack`, `ThinkingIndicator`, `ThinkingSteps`, `TriggerMenu`
+- **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `Citation`, `Confirmation`, `InputMessage`, `QueuedStack`, `ThinkingIndicator`, `ThinkingSteps`, `TriggerMenu`
 
 Every component has a docs page with a live preview, highlighted code and an API table; most also have a playground. Run the showcase and open `/docs`, or read the [usage examples](../apps/web/app/public/examples.tsx).
 
@@ -71,7 +71,7 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 8 | `Markdown` (shipped) | — | CodeBlock and Table, used in Typography and the Chat workspace |
 | 8 | [`TimeGrid` (shipped)](time-grid.md) | — | Controlled timed layout, pointer/keyboard moves and resizes, used in the Calendar workspace |
 | 8 | [`BarChart` (shipped)](bar-chart.md) | — | Tooltip and roving list navigation, used in Build timings and the Analytics workspace |
-| 9 | `Confirmation` (candidate) | [Fluid Functionalism Confirmation](https://github.com/mickadesign/fluid-functionalism/blob/1f716642a455c7a66e4cc7087c917dbe109f7943/registry/default/confirmation.tsx) | Banner's fill and actions, AskUserQuestions, ChatMessage |
+| 9 | [`Confirmation` (implemented, awaiting release)](confirmation.md) | [Fluid Functionalism Confirmation](https://github.com/mickadesign/fluid-functionalism/blob/1f716642a455c7a66e4cc7087c917dbe109f7943/registry/default/confirmation.tsx) | Banner's fill and actions, AskUserQuestions, ChatMessage |
 | 9 | ChatLayout scrolling: let go on a manual scroll, a button back to the latest message (candidate) | [Fluid Functionalism MessageScroller](https://github.com/mickadesign/fluid-functionalism/blob/1f716642a455c7a66e4cc7087c917dbe109f7943/registry/default/message-scroller.tsx) | ChatLayout's pinned transcript, Button |
 
 ### Decisions so far

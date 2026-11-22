@@ -48,6 +48,7 @@ import { SegmentedControlDemo } from './segmented-control-example.tsx'
 import { PopoverDemo } from './popover-example.tsx'
 import { ToasterDemo } from './toaster-example.tsx'
 import { DrawerDemo } from './drawer-example.tsx'
+import { ConfirmationDemo } from './confirmation-example.tsx'
 import { ReleaseWeek } from './time-grid-week-example.tsx'
 import { StudioBookings } from './studio-bookings.tsx'
 import { CodeBlockDemo } from './code-block-example.tsx'
@@ -1161,6 +1162,26 @@ function setEditing(open: boolean) {
       'Group sizes',
       'group-sizes',
       `<AvatarGroup avatars={editors} max={3} size={24} />\n<AvatarGroup avatars={editors} size={40} shape="square" />`,
+    ),
+  ],
+  confirmation: [
+    demo(
+      'Basic',
+      'basic',
+      `<Confirmation\n  icon={<Icon name="cpu" />}\n  title="Run pnpm build?"\n  description="Builds the library and the showcase into dist/."\n  onApprove={run}\n  onDeny={skip}\n/>`,
+      'Approve or Deny gives way to the answer in the same place, at the same height. Keyboard focus moves to the answer, and the answer is announced; the question itself is not.',
+    ),
+    demo(
+      'A risky action',
+      'warning',
+      `<Confirmation\n  status="warning"\n  title="Delete 3 branches?"\n  description="…will be removed from origin."\n  approveLabel="Delete"\n  denyLabel="Keep"\n  approvedLabel="Deleted"\n  deniedLabel="Kept"\n/>`,
+      'Banner’s status, contrast and size pass through. Name the buttons after the action.',
+    ),
+    demo(
+      'In a form',
+      'form',
+      `<form>\n  <Confirmation name="send" title="Send the weekly summary to the team?" />\n  <Button type="submit">Submit</Button>\n</form>`,
+      'With name, the answer submits as approved or denied. Unanswered, the field is absent.',
     ),
   ],
   citation: [
@@ -2452,6 +2473,8 @@ export function ComponentDemo(
         return <CodeBlockDemo variant={variant} samples={images.code} />
       case 'citation':
         return <CitationDemo variant={variant} />
+      case 'confirmation':
+        return <ConfirmationDemo variant={variant} />
       case 'chat-layout':
         return <ChatLayoutDemo variant={variant} />
       case 'alert-dialog':

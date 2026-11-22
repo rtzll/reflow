@@ -29,6 +29,7 @@ const sharedPlaygroundDefaults = new Set([
   'markdown',
   'code-block',
   'citation',
+  'confirmation',
   'avatar',
   'chat-layout',
   'progress',
