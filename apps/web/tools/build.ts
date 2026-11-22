@@ -176,7 +176,7 @@ const worker = await build({
           if (path === resolve(root, 'app/public/apps/issues/drag-adapter.ts')) {
             return {
               contents:
-                'export const draggable = () => () => {}\nexport const dropTargetForElements = () => () => {}\n',
+                'export const draggable = () => () => {}\nexport const dropTargetForElements = () => () => {}\nexport const setIssueDragPreview = () => {}\n',
               loader: 'ts',
             }
           }

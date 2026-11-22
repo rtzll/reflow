@@ -1,3 +1,4 @@
+import { animateLayout, prefersReducedMotion } from '@remix-run/ui/animation'
 import {
   Avatar,
   Button,
@@ -12,6 +13,16 @@ import {
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import { CycleOverview, type IssueFilter } from './cycle-overview.tsx'
 import { statuses, type Issue, type Status } from './fixtures.ts'
+import { issueAfterPointer, placeIssues } from './issue-placement.ts'
+
+type Placement = { status: Status; beforeId: string | null }
+interface LastMove {
+  previous: Issue[]
+  ids: Set<string>
+  placed: boolean
+  focus: string
+  message: string
+}
 
 export const IssueTracker = clientEntry(
   import.meta.url,
@@ -20,8 +31,9 @@ export const IssueTracker = clientEntry(
     let active: string | undefined = issues[0]?.id
     let selected = new Set<string>()
     const range = createRangeSelection<string>()
+    let selectionEnd: string | undefined
     let announcement = ''
-    let lastMove: { previous: Map<string, Status>; focus: string; message: string } | undefined
+    let lastMove: LastMove | undefined
     let filter: IssueFilter | undefined
     let layout = 'board'
     let detailId: string | undefined
@@ -31,22 +43,52 @@ export const IssueTracker = clientEntry(
       list = element
     })
 
-    let dragging = new Set<string>()
+    const dragging = new Map<string, number>()
+    const groupHeights = new Map<string, number>()
+    let placement: Placement | undefined
+
+    function preview(next: Placement | undefined) {
+      if (placement?.status === next?.status && placement?.beforeId === next?.beforeId) return
+      placement = next
+      void handle.update()
+    }
 
     const mountDraggable = ref<HTMLDivElement>(async (element, signal) => {
       try {
-        const { draggable } = await import('./drag-adapter.ts')
+        const { draggable, setIssueDragPreview } = await import('./drag-adapter.ts')
         if (signal.aborted) return
         const cleanup = draggable({
           element,
+          onGenerateDragPreview: (event) => {
+            const id = element.dataset.issueId!
+            if (selected.size < 2 || !selected.has(id)) return
+            const companions = orderedIssues().filter(
+              (issue) => issue.id !== id && selected.has(issue.id),
+            )
+            setIssueDragPreview(event, companions, layout)
+          },
           onDragStart: () => {
-            const id = element.dataset.issueId
-            dragging = id ? new Set(movingIds(id)) : new Set()
+            if (!list) return
+            const ids = movingIds(element.dataset.issueId!)
+            // Keep destinations reachable while the dragged items leave the flow. In List,
+            // collapsing a source group would shift every group below it away from the pointer.
+            if (layout === 'board') list.style.minHeight = `${list.offsetHeight}px`
+            else {
+              for (const group of list.querySelectorAll<HTMLElement>('.issues-group')) {
+                groupHeights.set(group.dataset.status!, group.offsetHeight)
+              }
+            }
+            for (const row of list.querySelectorAll<HTMLElement>('[data-issue-id]')) {
+              if (ids.has(row.dataset.issueId!))
+                dragging.set(row.dataset.issueId!, row.offsetHeight)
+            }
             void handle.update()
           },
           onDrop: () => {
-            if (!dragging.size) return
-            dragging = new Set()
+            dragging.clear()
+            list?.style.removeProperty('min-height')
+            groupHeights.clear()
+            placement = undefined
             void handle.update()
           },
         })
@@ -61,21 +103,25 @@ export const IssueTracker = clientEntry(
         const { dropTargetForElements } = await import('./drag-adapter.ts')
         if (signal.aborted) return
         const status = statuses.find((item) => item === element.dataset.status)!
-        const leave = () => element.removeAttribute('data-drag-over')
+        const cards = element.querySelector<HTMLElement>('.issues-cards')!
+        const show = (data: Record<string | symbol, unknown>) =>
+          preview({ status, beforeId: data.beforeId as string | null })
         const cleanup = dropTargetForElements({
           element,
-          canDrop: ({ source }) => {
-            const id = source.element.dataset.issueId
-            if (!id || !list?.contains(source.element)) return false
-            const ids = movingIds(id)
-            return issues.some((issue) => ids.has(issue.id) && issue.status !== status)
+          canDrop: ({ source }) =>
+            !!source.element.dataset.issueId && !!list?.contains(source.element),
+          getData: ({ input, source }) => ({
+            beforeId: issueAfterPointer(cards, movingIds(source.element.dataset.issueId!), input),
+          }),
+          onDragStart: ({ self }) => show(self.data),
+          onDragEnter: ({ self }) => show(self.data),
+          onDrag: ({ self }) => show(self.data),
+          onDragLeave: () => {
+            if (placement?.status === status) preview(undefined)
           },
-          onDragEnter: () => element.setAttribute('data-drag-over', ''),
-          onDragLeave: leave,
-          onDrop: ({ source }) => {
-            leave()
+          onDrop: ({ source, self }) => {
             const id = source.element.dataset.issueId!
-            void move(movingIds(id), status, id)
+            void move(movingIds(id), status, id, self.data.beforeId as string | null)
           },
         })
         signal.addEventListener('abort', cleanup, { once: true })
@@ -103,12 +149,12 @@ export const IssueTracker = clientEntry(
       return statuses.flatMap((status) => visible.filter((issue) => issue.status === status))
     }
 
-    function focusIssue(id: string | undefined) {
+    function focusIssue(id: string | undefined, options?: FocusOptions) {
       if (!id) {
-        reset?.focus()
+        reset?.focus(options)
         return
       }
-      list?.querySelector<HTMLElement>(`[data-issue-id="${CSS.escape(id)}"]`)?.focus()
+      list?.querySelector<HTMLElement>(`[data-issue-id="${CSS.escape(id)}"]`)?.focus(options)
     }
 
     async function setFilter(next?: IssueFilter) {
@@ -131,6 +177,19 @@ export const IssueTracker = clientEntry(
       range.reset()
       if (selected.has(id)) selected.delete(id)
       else selected.add(id)
+      selectionEnd = selected.has(id) ? id : [...selected].at(-1)
+      announcement = ''
+      void handle.update()
+    }
+
+    function extendSelection(from: string, to: string) {
+      selected = range.extend(
+        orderedIssues().map((issue) => issue.id),
+        selected,
+        from,
+        to,
+      )
+      selectionEnd = to
       announcement = ''
       void handle.update()
     }
@@ -143,42 +202,59 @@ export const IssueTracker = clientEntry(
       focusIssue(active)
     }
 
-    async function move(ids: Set<string>, status: Status, anchor: string | undefined) {
+    async function move(
+      ids: Set<string>,
+      status: Status,
+      anchor: string | undefined,
+      beforeId?: string | null,
+    ) {
       const before = orderedIssues()
-      const moved = before.filter((issue) => ids.has(issue.id) && issue.status !== status)
+      const placed = beforeId !== undefined
+      const moved = before.filter(
+        (issue) => ids.has(issue.id) && (placed || issue.status !== status),
+      )
       if (!moved.length) return
+      const previous = issues
+      issues = placed
+        ? placeIssues(issues, moved, status, beforeId)
+        : issues.map((issue) => (ids.has(issue.id) ? { ...issue, status } : issue))
+      if (issues === previous) return
       range.reset()
-      // Continue at the next stationary issue in the old reading order. At the end,
-      // step back. If every row moved, follow the original issue to its new group.
-      const index = before.findIndex((issue) => issue.id === anchor)
-      const start = index === -1 ? 0 : index
-      const stationary = (issue: Issue) => !moved.includes(issue)
-      active =
-        before.slice(start).find(stationary)?.id ??
-        before.slice(0, start).reverse().find(stationary)?.id ??
-        anchor
-      issues = issues.map((issue) => (ids.has(issue.id) ? { ...issue, status } : issue))
+      if (placed && anchor && selected.has(anchor)) {
+        // Keep the grabbed issue focused so the same selection can move again.
+        active = anchor
+        selectionEnd = anchor
+      } else {
+        const index = before.findIndex((issue) => issue.id === anchor)
+        const start = Math.max(0, index)
+        const stationary = (issue: Issue) => !moved.includes(issue)
+        active =
+          before.slice(start).find(stationary)?.id ??
+          before.slice(0, start).reverse().find(stationary)?.id ??
+          anchor
+        for (const id of ids) selected.delete(id)
+      }
       if (!orderedIssues().some((issue) => issue.id === active)) active = orderedIssues()[0]?.id
-      for (const id of ids) selected.delete(id)
-      announcement = `Moved ${moved.length} ${moved.length === 1 ? 'issue' : 'issues'} to ${status}.`
+      announcement = moved.every((issue) => issue.status === status)
+        ? `Reordered ${moved.length} ${moved.length === 1 ? 'issue' : 'issues'} in ${status}.`
+        : `Moved ${moved.length} ${moved.length === 1 ? 'issue' : 'issues'} to ${status}.`
       lastMove = {
-        previous: new Map(moved.map((issue) => [issue.id, issue.status])),
+        previous,
+        ids: new Set(moved.map((issue) => issue.id)),
+        placed,
         focus: moved.find((issue) => issue.id === anchor)?.id ?? moved[0]!.id,
         message: announcement,
       }
       await handle.update()
-      focusIssue(active)
+      focusIssue(active, { preventScroll: placed })
     }
 
     async function undoMove() {
       if (!lastMove) return
-      const { previous, focus } = lastMove
+      const { previous, ids, placed, focus } = lastMove
       lastMove = undefined
       range.reset()
-      issues = issues.map((issue) => {
-        const status = previous.get(issue.id)
-        return status === undefined ? issue : { ...issue, status }
-      })
+      issues = previous
       const visible = orderedIssues()
       const visibleIds = new Set(visible.map((issue) => issue.id))
       for (const id of selected) {
@@ -187,20 +263,31 @@ export const IssueTracker = clientEntry(
       // A different filter may now hide the initiating ticket or every restored ticket.
       const target =
         visible.find((issue) => issue.id === focus) ??
-        visible.find((issue) => previous.has(issue.id)) ??
+        visible.find((issue) => ids.has(issue.id)) ??
         visible.find((issue) => issue.id === active) ??
         visible[0]
       active = target?.id
       announcement =
-        previous.size === 1
-          ? 'Restored 1 issue to its previous status.'
-          : `Restored ${previous.size} issues to their previous statuses.`
+        ids.size === 1
+          ? `Restored 1 issue to its previous ${placed ? 'position' : 'status'}.`
+          : `Restored ${ids.size} issues to their previous ${placed ? 'positions' : 'statuses'}.`
       await handle.update()
       focusIssue(active)
     }
 
     function navigate(event: KeyboardEvent, id: string) {
-      if (event.altKey || event.ctrlKey || event.metaKey || event.isComposing) return
+      if (event.isComposing || event.altKey) return
+      if (event.ctrlKey || event.metaKey) {
+        if (event.key.toLowerCase() === 'a' && !event.shiftKey) {
+          event.preventDefault()
+          range.reset()
+          selected = new Set(orderedIssues().map((issue) => issue.id))
+          selectionEnd = id
+          announcement = `${selected.size} selected.`
+          void handle.update()
+        }
+        return
+      }
       const arrow = event.key === 'ArrowDown' || event.key === 'ArrowUp'
       if (event.shiftKey && !arrow) return
       const rows = orderedIssues()
@@ -214,14 +301,7 @@ export const IssueTracker = clientEntry(
           const next = Math.max(0, Math.min(index + step, rows.length - 1))
           if (!event.shiftKey) range.reset()
           else if (next !== index) {
-            selected = range.extend(
-              rows.map((issue) => issue.id),
-              selected,
-              id,
-              rows[next]!.id,
-            )
-            announcement = ''
-            void handle.update()
+            extendSelection(id, rows[next]!.id)
           }
           focusIssue(rows[next]?.id)
           break
@@ -252,6 +332,7 @@ export const IssueTracker = clientEntry(
           range.reset()
           focusIssue(rows.at(-1)?.id)
           break
+        case 'x':
         case ' ':
           if (!event.repeat) toggle(id)
           break
@@ -267,6 +348,7 @@ export const IssueTracker = clientEntry(
 
     return () => {
       const visible = orderedIssues()
+      const animateCards = dragging.size > 0 && !prefersReducedMotion()
       const detail = issues.find((issue) => issue.id === detailId)
       return (
         <article class="issue-tracker">
@@ -323,8 +405,11 @@ export const IssueTracker = clientEntry(
               </div>
             )}
             <p id={handle.id + '-keys'} class="rf-basic-sr-only">
-              Use the arrows to navigate, Space to select, Shift and vertical arrows to select a
-              range, Enter for details, and Tab for selected issue actions.
+              Click an issue or press Enter to open it. Use its checkbox, Command-click,
+              Control-click, X, or Space to toggle selection. After selecting one issue, Shift-click
+              another issue or use Shift with the vertical arrows to extend the range. Control or
+              Command with A selects all visible issues. Drag a selected issue to move the group, or
+              Tab to the actions.
             </p>
             <ContextMenu
               label="Issue actions"
@@ -344,6 +429,7 @@ export const IssueTracker = clientEntry(
               <div
                 class="issues-collection"
                 data-layout={layout}
+                data-selecting={selected.size > 0 ? '' : undefined}
                 data-single-status={filter?.field === 'status' || undefined}
                 role="listbox"
                 aria-multiselectable="true"
@@ -364,6 +450,10 @@ export const IssueTracker = clientEntry(
                   .filter((status) => filter?.field !== 'status' || filter.value === status)
                   .map((status) => {
                     const group = visible.filter((issue) => issue.status === status)
+                    const destination = placement?.status === status ? placement : undefined
+                    const slot = destination?.beforeId
+                      ? group.findIndex((issue) => issue.id === destination.beforeId)
+                      : group.length
                     return (
                       <div
                         role="group"
@@ -371,6 +461,7 @@ export const IssueTracker = clientEntry(
                         aria-label={status}
                         data-status={status}
                         class="issues-group"
+                        style={{ minHeight: groupHeights.get(status) }}
                         mix={mountDropTarget}
                       >
                         <div class="issues-group-heading" aria-hidden="true">
@@ -378,43 +469,60 @@ export const IssueTracker = clientEntry(
                           <strong>{status}</strong>
                           <span class="issues-count">{group.length}</span>
                         </div>
-                        <div class="issues-cards" role="none">
-                          {group.map((issue) => (
+                        <div
+                          class="issues-cards"
+                          role="none"
+                          data-previewing={placement ? '' : undefined}
+                        >
+                          {group.map((issue, index) => (
                             <div
                               key={issue.id}
                               role="option"
                               data-issue-id={issue.id}
                               data-dragging={dragging.has(issue.id) ? '' : undefined}
                               class="issues-row"
+                              style={destination ? { order: index < slot ? 0 : 2 } : undefined}
                               aria-selected={selected.has(issue.id)}
                               tabIndex={active === issue.id ? 0 : -1}
                               mix={[
                                 mountDraggable,
+                                animateLayout(
+                                  animateCards && !dragging.has(issue.id)
+                                    ? { duration: 150, easing: 'ease-out', size: false }
+                                    : false,
+                                ),
                                 on('focus', () => {
                                   active = issue.id
                                   void handle.update()
                                 }),
                                 on('click', (event) => {
-                                  const from = active
                                   focusIssue(issue.id)
-                                  if (event.shiftKey && from && from !== issue.id) {
-                                    selected = range.extend(
-                                      visible.map((item) => item.id),
-                                      selected,
-                                      from,
-                                      issue.id,
-                                    )
-                                    announcement = ''
-                                    void handle.update()
-                                  } else {
+                                  if (event.shiftKey) {
+                                    const from =
+                                      selectionEnd && selected.has(selectionEnd)
+                                        ? selectionEnd
+                                        : issue.id
+                                    extendSelection(from, issue.id)
+                                  } else if (
+                                    event.metaKey ||
+                                    event.ctrlKey ||
+                                    (event.target instanceof Element &&
+                                      event.target.closest('.issues-check'))
+                                  ) {
                                     toggle(issue.id)
+                                  } else {
+                                    openDetails(issue.id)
                                   }
                                 }),
                                 on('keydown', (event) => navigate(event, issue.id)),
                               ]}
                             >
                               <span class="issues-id">{issue.id}</span>
-                              <span class="issues-check" aria-hidden="true">
+                              <span
+                                class="issues-check"
+                                aria-hidden="true"
+                                title={selected.has(issue.id) ? 'Deselect issue' : 'Select issue'}
+                              >
                                 {selected.has(issue.id) && <Icon name="check" size={12} />}
                               </span>
                               <strong class="issues-title">{issue.title}</strong>
@@ -422,7 +530,16 @@ export const IssueTracker = clientEntry(
                               <Avatar name={issue.owner} size={22} />
                             </div>
                           ))}
-                          {!group.length && (
+                          {destination &&
+                            Array.from(dragging, ([id, height]) => (
+                              <div
+                                class="issues-drop-slot"
+                                aria-hidden="true"
+                                key={'slot-' + id}
+                                style={{ height, order: 1 }}
+                              />
+                            ))}
+                          {!group.length && !destination && (
                             <p class="issues-empty" role="none">
                               No issues in {status}.
                             </p>
