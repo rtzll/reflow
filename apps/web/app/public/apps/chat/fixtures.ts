@@ -1,7 +1,10 @@
+import type { ConfirmationState } from '@rtzll/reflow'
+
 export interface ChatEntry {
   role: 'user' | 'assistant'
   text: string
   stopped?: boolean
+  proofChecklist?: ConfirmationState
 }
 
 export interface Conversation {

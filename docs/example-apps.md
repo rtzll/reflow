@@ -13,6 +13,8 @@ Each app owns its entry, fixtures and stylesheet in `apps/web/app/public/apps/<s
 
 Cover each workflow in `apps/web/test/app-<slug>.test.e2e.ts`. Put app-specific controls beside their first use. Coordinate public Reflow API changes with the other apps and give each shared change one owner, a design note, and focused tests.
 
+In Chat, a new message anchors near the top of the transcript as its reply streams. The `/proof` skill offers to append its completed checklist to the current draft. Approving preserves existing draft text. Skipping keeps the draft as written. Both answers are saved with the conversation.
+
 Analytics shows daily activity as a stacked chart of studio edits and media imports. The event log keeps the Event column visible on narrow screens. Its request URL controls server filtering, sorting and pagination, with six records per page.
 
 ## Moving issues between statuses

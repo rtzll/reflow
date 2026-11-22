@@ -229,6 +229,33 @@ it('keeps navigation and in-page drafts working when local storage is blocked', 
   await expect(field).toBeFocused()
 })
 
+it('adds or skips a proof checklist and restores the decision with the conversation', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await open(page, '/apps/chat')
+  await page.clock.install()
+  const field = page.getByRole('textbox', { name: 'Message' })
+  const log = page.getByRole('log')
+  for (const approve of [true, false]) {
+    await field.fill('/proof the ferry story')
+    await field.press('Enter')
+    await expect(log).toHaveAttribute('aria-busy', 'true')
+    await page.clock.runFor(7000)
+    await expect(log).not.toHaveAttribute('aria-busy', 'true')
+    await field.fill('Opening note')
+    const choice = log.getByRole('group', { name: 'Add this checklist to your draft?' }).last()
+    await choice.getByRole('button', { name: approve ? 'Add to draft' : 'Skip' }).press('Enter')
+    await expect(choice.getByText(approve ? 'Added to draft' : 'Skipped')).toBeFocused()
+    const saved = await field.inputValue()
+    if (approve) expect(saved).toMatch(/^Opening note\n\nPrint proof checklist for the ferry story/)
+    else expect(saved).toBe('Opening note')
+    await open(page, new URL(page.url()).pathname + new URL(page.url()).search)
+    await expect(
+      log.getByRole('status').filter({ hasText: approve ? 'Added to draft' : 'Skipped' }),
+    ).toBeVisible()
+    await expect(field).toHaveValue(saved)
+  }
+})
+
 it('anchors a new question, lets the reader scroll back and stops the reply in the workspace', async (t) => {
   const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 390, height: 680 })

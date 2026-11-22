@@ -52,7 +52,7 @@ export function skillReply(text: string, defaultSubject: string) {
       const subject = (
         text.slice(0, match.index) + text.slice(match.index + match[0].length)
       ).trim()
-      return skill.reply(subject || defaultSubject)
+      return { command: skill.command, text: skill.reply(subject || defaultSubject) }
     }
   }
 }

@@ -1,4 +1,4 @@
-import { Button, ChatLayout, ChatMessage, Icon, InputMessage } from '@rtzll/reflow'
+import { Button, ChatLayout, ChatMessage, Confirmation, Icon, InputMessage } from '@rtzll/reflow'
 import { Markdown } from '@rtzll/reflow/markdown'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import { replyTo, type ChatEntry, type Conversation } from './fixtures.ts'
@@ -273,7 +273,8 @@ function ConversationPane(
     const subject = thread.messages.length
       ? thread.title.replace(/^\/\S+\s*/, '').trim() || thread.title
       : 'your story'
-    const words = (skillReply(text, subject) ?? replyTo(text)).split(' ')
+    const skill = skillReply(text, subject)
+    const words = (skill?.text ?? replyTo(text)).split(' ')
     if (!thread.messages.length) thread.title = text.length > 48 ? text.slice(0, 47) + '…' : text
     let shown = 2
     response = { role: 'assistant', text: words.slice(0, shown).join(' ') }
@@ -282,9 +283,20 @@ function ConversationPane(
       if (!response) return
       shown = Math.min(shown + 2, words.length)
       response.text = words.slice(0, shown).join(' ')
-      if (shown === words.length) finish(false)
-      else void handle.update()
+      if (shown === words.length) {
+        if (skill?.command === '/proof') response.proofChecklist = 'requested'
+        finish(false)
+      } else void handle.update()
     }, 140)
+    changed()
+  }
+
+  function answerChecklist(message: ChatEntry, answer: 'approved' | 'denied') {
+    if (message.proofChecklist !== 'requested') return
+    message.proofChecklist = answer
+    if (answer === 'approved') {
+      thread.draft = thread.draft ? thread.draft + '\n\n' + message.text : message.text
+    }
     changed()
   }
 
@@ -395,6 +407,19 @@ function ConversationPane(
                 <Markdown source={message.text} />
               ) : (
                 <span>{message.text}</span>
+              )}
+              {message.proofChecklist && (
+                <Confirmation
+                  title="Add this checklist to your draft?"
+                  description="Appends the checklist to the message you’re writing in this conversation."
+                  approveLabel="Add to draft"
+                  denyLabel="Skip"
+                  approvedLabel="Added to draft"
+                  deniedLabel="Skipped"
+                  state={message.proofChecklist}
+                  onApprove={() => answerChecklist(message, 'approved')}
+                  onDeny={() => answerChecklist(message, 'denied')}
+                />
               )}
               {message.stopped && <span class="studio-stopped">Response stopped</span>}
             </ChatMessage>

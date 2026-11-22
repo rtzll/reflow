@@ -19,7 +19,12 @@ function isMessage(value: unknown): value is ChatEntry {
     (value.role === 'user' || value.role === 'assistant') &&
     'text' in value &&
     typeof value.text === 'string' &&
-    (!('stopped' in value) || typeof value.stopped === 'boolean')
+    (!('stopped' in value) || typeof value.stopped === 'boolean') &&
+    (!('proofChecklist' in value) ||
+      (value.role === 'assistant' &&
+        (value.proofChecklist === 'requested' ||
+          value.proofChecklist === 'approved' ||
+          value.proofChecklist === 'denied')))
   )
 }
 
