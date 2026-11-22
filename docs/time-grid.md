@@ -18,6 +18,12 @@ A calendar also holds events with no time of day: a holiday, a deadline, a trip.
 
 All-day events take the same callbacks as timed ones: a click or Space selects, Enter activates, and `getEventLabel` and `getEventClass` apply. With `onEventChange`, Left and Right Arrow move one by a day and a horizontal drag moves it by whole days; the request keeps `allDay`, `span` and every other field. They cannot be resized, and dragging on the strip creates nothing. The default label reads "Title, Monday, all day", or "Title, Monday to Wednesday, all day" for a span. With `compactDay`, the strip shows only the events that cover the chosen day.
 
+### Creating and resizing all-day events
+
+Pass `onCreateAllDay` to let a drag across empty space in the strip create one: it receives `{ day, span }` for the days covered, and a click alone creates nothing, as on the board. The strip then always shows, with one empty row to drag in, and describes the gesture to assistive technology; keyboard users create all-day events through the app's own editor, as Calendar's New event does.
+
+With `onEventChange`, an all-day event has a handle on its trailing edge: dragging it covers more or fewer days, and Shift with Right or Left Arrow does the same one day at a time. A span stays at least one day and stops at the last column. The request carries the new `span` and every other field.
+
 ## Overnight events
 
 A timed event may run past midnight: `start + duration` greater than 1440, such as a night shift from 22:00 lasting 8 hours. It shows in its own day's column until 24:00 and continues in the next column from 00:00, with the continuation marked as such. Durations are limited to 24 hours, so an event touches at most two columns. On the last column the event is cut off at midnight.
