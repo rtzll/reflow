@@ -198,6 +198,9 @@
   --rf-exit-fast: 60ms ease-out;
   --rf-exit-moderate: 120ms ease-out;
   --rf-exit-slow: 160ms ease-out;
+  /* Drawer: a long iOS-like ease that starts fast and settles without
+     overshoot. On the root, so the page a drawer scales back can share it. */
+  --rf-drawer-motion: 500ms cubic-bezier(0.32, 0.72, 0, 1);
   /* Piles: QueuedStack and the Toaster share these. Each card behind the
      front one peeks out by the peek and narrows by the scale step; spread
      out, cards sit a gap apart. */

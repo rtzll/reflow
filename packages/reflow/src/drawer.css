@@ -7,7 +7,6 @@
    panel color past the edge covers the gap when a drag pulls it the other
    way. */
 .rf-drawer {
-  --rf-drawer-motion: 500ms cubic-bezier(0.32, 0.72, 0, 1);
   --rf-drawer-bg: var(--rf-surface-5);
   --rf-drawer-drag: 0px;
   --rf-drawer-closed: 0 100%;
@@ -115,9 +114,9 @@
   background: rgb(0 0 0 / 40%);
   opacity: 0;
   transition:
-    opacity 500ms cubic-bezier(0.32, 0.72, 0, 1),
-    overlay 500ms cubic-bezier(0.32, 0.72, 0, 1) allow-discrete,
-    display 500ms cubic-bezier(0.32, 0.72, 0, 1) allow-discrete;
+    opacity var(--rf-drawer-motion),
+    overlay var(--rf-drawer-motion) allow-discrete,
+    display var(--rf-drawer-motion) allow-discrete;
 }
 [data-theme='dark'] .rf-drawer::backdrop {
   background: rgb(0 0 0 / 70%);
@@ -296,9 +295,9 @@ button.rf-drawer-handle:focus-visible {
 [data-rf-drawer-background] {
   transform-origin: 50% 0;
   transition:
-    scale 500ms cubic-bezier(0.32, 0.72, 0, 1),
-    translate 500ms cubic-bezier(0.32, 0.72, 0, 1),
-    border-radius 500ms cubic-bezier(0.32, 0.72, 0, 1);
+    scale var(--rf-drawer-motion),
+    translate var(--rf-drawer-motion),
+    border-radius var(--rf-drawer-motion);
 }
 :root[data-rf-drawer-scaled] {
   background: var(--rf-drawer-page-background, black);
