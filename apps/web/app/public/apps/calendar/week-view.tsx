@@ -74,12 +74,13 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
       !before ||
       (before.day === event.day &&
         before.start === event.start &&
-        before.duration === event.duration)
+        before.duration === event.duration &&
+        before.span === event.span)
     )
       return
     lastAdjustment = {
       event: before,
-      verb: before.duration === event.duration ? 'Moved' : 'Resized',
+      verb: before.duration === event.duration && before.span === event.span ? 'Moved' : 'Resized',
     }
     save(event)
   }
@@ -162,6 +163,18 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
             onActivate={showEditor}
             onEventChange={reschedule}
             onCreate={(range) => showEditor({ ...range, id: '', title: '', calendar: 'Studio' })}
+            onCreateAllDay={({ day, span }) =>
+              showEditor({
+                id: '',
+                title: '',
+                calendar: 'Studio',
+                day,
+                span,
+                start: 0,
+                duration: 0,
+                allDay: true,
+              })
+            }
             getEventClass={(event) => 'week-' + event.calendar}
             getEventLabel={eventLabel}
           />

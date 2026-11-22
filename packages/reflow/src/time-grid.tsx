@@ -40,6 +40,8 @@ export interface TimeGridProps<Event extends TimeGridEvent = TimeGridEvent> {
   onEventChange?: (event: Event) => void
   /** A drag across open time, or Enter on the keyboard slot. A click alone creates nothing. */
   onCreate?: (range: TimeGridRange) => void
+  /** A drag across empty space in the all-day strip, with the days it covered. */
+  onCreateAllDay?: (range: { day: number; span: number }) => void
   getEventLabel?: (event: Event) => string
   getEventClass?: (event: Event) => string
   describedBy?: string
@@ -158,18 +160,39 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
   let strip: HTMLDivElement | undefined
   let gesture: Gesture<E> | undefined
   // A pointer moving an all-day event by whole days.
-  let dayDrag: { pointer: number; event: E; x: number; dayWidth: number; day: number } | undefined
+  // A pointer moving an all-day event by whole days, or changing its span.
+  let dayDrag:
+    | {
+        pointer: number
+        event: E
+        mode: 'move' | 'span'
+        x: number
+        dayWidth: number
+        day: number
+        span: number
+      }
+    | undefined
+  // A pointer creating an all-day event across the strip's empty space.
+  let dayCreate:
+    | { pointer: number; x: number; dayWidth: number; from: number; to: number }
+    | undefined
   let cursor: TimeGridRange | undefined
   let statusMessage = ''
   let suppressClick = false
   const boardHelpId = handle.id + '-board-help'
+  const allDayHelpId = handle.id + '-all-day-help'
   const eventHelpId = handle.id + '-event-help'
   const boardRef = ref((node, signal) => {
     board = node as HTMLDivElement
     board.ownerDocument.addEventListener(
       'keydown',
       (e) => {
-        if (e.defaultPrevented || e.key !== 'Escape' || (!gesture && !cursor && !dayDrag)) return
+        if (
+          e.defaultPrevented ||
+          e.key !== 'Escape' ||
+          (!gesture && !cursor && !dayDrag && !dayCreate)
+        )
+          return
         e.preventDefault()
         if (gesture) {
           if (gesture.event) suppressClick = true
@@ -177,6 +200,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
         }
         if (dayDrag) suppressClick = true
         dayDrag = undefined
+        dayCreate = undefined
         gesture = undefined
         cursor = undefined
         handle.update()
@@ -198,6 +222,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
       onSelect,
       onActivate,
       onCreate,
+      onCreateAllDay,
       getEventLabel,
       getEventClass,
       describedBy,
@@ -530,17 +555,40 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
       handle.update()
     }
 
-    // The all-day strip, with a dragged event shown at its new day.
+    // The all-day strip, with a dragged event shown at its new day or span.
     const allDayStack = stackAllDay(
       allDayEvents.map((event) =>
-        dayDrag && dayDrag.event.id === event.id ? { ...event, day: dayDrag.day } : event,
+        dayDrag && dayDrag.event.id === event.id
+          ? { ...event, day: dayDrag.day, span: dayDrag.span }
+          : event,
       ),
       days.length,
     )
-    const allDayRows = allDayStack.reduce((rows, entry) => Math.max(rows, entry.row + 1), 0)
+    // With onCreateAllDay, one more row is left empty to drag across.
+    const allDayRows =
+      allDayStack.reduce((rows, entry) => Math.max(rows, entry.row + 1), 0) +
+      (onCreateAllDay ? 1 : 0)
+    const spanOf = (event: E) =>
+      clamp(Math.trunc(event.span ?? 1) || 1, 1, Math.max(1, days.length - event.day))
 
     function allDayKey(e: KeyboardEvent, event: E) {
-      if (e.altKey || e.metaKey || e.ctrlKey || e.shiftKey) return
+      if (e.altKey || e.metaKey || e.ctrlKey) return
+      if (e.shiftKey) {
+        // Shift with an arrow covers a day more or less.
+        if (!onEventChange || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return
+        e.preventDefault()
+        const span = clamp(
+          spanOf(event) + (e.key === 'ArrowRight' ? 1 : -1),
+          1,
+          Math.max(1, days.length - event.day),
+        )
+        if (span === spanOf(event)) return
+        const updated = { ...event, span }
+        statusMessage = describe(updated)
+        onEventChange(updated)
+        handle.update()
+        return
+      }
       if (e.key === 'Enter') {
         if (onActivate) {
           e.preventDefault()
@@ -569,12 +617,15 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
       const rect = strip.getBoundingClientRect()
       if (rect.width <= 0 || showsSingleDay(board)) return
       onSelect?.(event)
+      const span = e.target instanceof Element && !!e.target.closest('.rf-time-grid-span')
       dayDrag = {
         pointer: e.pointerId,
         event,
+        mode: span ? 'span' : 'move',
         x: e.clientX,
         dayWidth: rect.width / days.length,
         day: event.day,
+        span: spanOf(event),
       }
       try {
         strip.setPointerCapture(e.pointerId)
@@ -585,33 +636,73 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
 
     function dragDay(e: PointerEvent) {
       if (!dayDrag || e.pointerId !== dayDrag.pointer) return false
+      const moved = Math.round((e.clientX - dayDrag.x) / dayDrag.dayWidth)
+      if (dayDrag.mode === 'span')
+        dayDrag.span = clamp(
+          spanOf(dayDrag.event) + moved,
+          1,
+          Math.max(1, days.length - dayDrag.event.day),
+        )
       // A span that runs past the last column is cut off there, as it is shown.
-      dayDrag.day = clamp(
-        dayDrag.event.day + Math.round((e.clientX - dayDrag.x) / dayDrag.dayWidth),
-        0,
-        days.length - 1,
-      )
+      else dayDrag.day = clamp(dayDrag.event.day + moved, 0, days.length - 1)
       return true
     }
 
+    // The column under the pointer, for creating across the strip.
+    function columnAt(clientX: number, dayWidth: number) {
+      const rect = strip!.getBoundingClientRect()
+      return clamp(Math.floor((clientX - rect.left) / dayWidth), 0, days.length - 1)
+    }
+
+    function beginCreateDay(e: PointerEvent) {
+      if (!onCreateAllDay || !strip || e.target !== strip || dayDrag || dayCreate) return
+      if (!e.isPrimary || e.button !== 0) return
+      const rect = strip.getBoundingClientRect()
+      if (rect.width <= 0 || showsSingleDay(board)) return
+      const dayWidth = rect.width / days.length
+      const from = columnAt(e.clientX, dayWidth)
+      dayCreate = { pointer: e.pointerId, x: e.clientX, dayWidth, from, to: from }
+      try {
+        strip.setPointerCapture(e.pointerId)
+      } catch {
+        // Ignore synthetic or ended pointers that cannot be captured.
+      }
+    }
+
     function moveDay(e: PointerEvent) {
+      if (dayCreate && e.pointerId === dayCreate.pointer) {
+        dayCreate.to = columnAt(e.clientX, dayCreate.dayWidth)
+        handle.update()
+        return
+      }
       if (dragDay(e)) handle.update()
     }
 
     function finishDay(e: PointerEvent) {
+      if (dayCreate && e.pointerId === dayCreate.pointer) {
+        const { from, x, dayWidth } = dayCreate
+        const to = columnAt(e.clientX, dayWidth)
+        dayCreate = undefined
+        handle.update()
+        // A click alone creates nothing.
+        if (Math.abs(e.clientX - x) >= dragThreshold)
+          onCreateAllDay?.({ day: Math.min(from, to), span: Math.abs(to - from) + 1 })
+        return
+      }
       if (!dragDay(e) || !dayDrag) return
-      const { event, day } = dayDrag
+      const { event, day, span, mode } = dayDrag
       dayDrag = undefined
       handle.update()
-      if (day === event.day) return
+      if (mode === 'move' ? day === event.day : span === spanOf(event)) return
       suppressClick = true
       const current = allEvents.find((item) => item.id === event.id)
-      if (current) onEventChange?.({ ...current, day })
+      if (current) onEventChange?.(mode === 'move' ? { ...current, day } : { ...current, span })
     }
 
     function cancelDay(e: PointerEvent) {
-      if (dayDrag?.pointer !== e.pointerId) return
-      dayDrag = undefined
+      if (dayCreate?.pointer === e.pointerId) dayCreate = undefined
+      else if (dayDrag?.pointer === e.pointerId) dayDrag = undefined
+      else return
       handle.update()
     }
 
@@ -629,7 +720,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
         }
         style={{ '--day-count': Math.max(1, days.length), '--hours': span / 60 }}
       >
-        {allDayStack.length > 0 && [
+        {(allDayStack.length > 0 || !!onCreateAllDay) && [
           <span key="all-day-label" class="rf-time-grid-all-day-label" aria-hidden="true">
             All day
           </span>,
@@ -638,9 +729,12 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
             class="rf-time-grid-all-day"
             role="group"
             aria-label={`${handle.props.label}, all day`}
+            aria-describedby={onCreateAllDay ? allDayHelpId : undefined}
+            data-create={!!onCreateAllDay || undefined}
             style={{ '--rows': allDayRows }}
             mix={[
               stripRef,
+              on<HTMLDivElement, 'pointerdown'>('pointerdown', beginCreateDay),
               on<HTMLDivElement, 'pointermove'>('pointermove', moveDay),
               on<HTMLDivElement, 'pointerup'>('pointerup', finishDay),
               on<HTMLDivElement, 'pointercancel'>('pointercancel', cancelDay),
@@ -677,9 +771,31 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
                   ]}
                 >
                   <strong>{event.title}</strong>
+                  {onEventChange && (
+                    <span
+                      class="rf-time-grid-span"
+                      aria-hidden="true"
+                      title="Drag to change the days"
+                    />
+                  )}
                 </button>
               )
             })}
+            {dayCreate && (
+              <div
+                class="rf-time-grid-event rf-time-grid-range"
+                style={{
+                  '--day': Math.min(dayCreate.from, dayCreate.to),
+                  '--span': Math.abs(dayCreate.to - dayCreate.from) + 1,
+                  '--row': allDayRows - 1,
+                }}
+              />
+            )}
+            {onCreateAllDay && (
+              <span id={allDayHelpId} class="rf-basic-sr-only">
+                Drag across empty days to create an all-day event.
+              </span>
+            )}
           </div>,
         ]}
         <div class="rf-time-grid-times" aria-hidden="true">

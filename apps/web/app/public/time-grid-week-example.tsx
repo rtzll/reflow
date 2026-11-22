@@ -33,6 +33,20 @@ export function ReleaseWeek(handle: Handle) {
           selectedId = event.id
           void handle.update()
         }}
+        onCreateAllDay={({ day, span }) => {
+          const event = {
+            id: `all-day-${events.length}`,
+            title: 'New all-day event',
+            day,
+            span,
+            start: 0,
+            duration: 0,
+            allDay: true,
+          }
+          events = [...events, event]
+          selectedId = event.id
+          void handle.update()
+        }}
         onEventChange={(next) => {
           events = events.map((event) => (event.id === next.id ? next : event))
           selectedId = next.id

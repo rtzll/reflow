@@ -384,3 +384,63 @@ it('continues an overnight event in the next column and edits it across midnight
   equal($('[data-continues="night"]'), null)
   equal(button().getAttribute('aria-label'), 'Night shift, Tuesday, 22:15–24:00')
 })
+
+it('creates all-day events by dragging across the strip and resizes their span', async (t) => {
+  const created: { day: number; span: number }[] = []
+  const changes: TimeGridEvent[] = []
+  const trip = { id: 'trip', title: 'Trip', day: 0, start: 0, duration: 0, allDay: true }
+  const { $, act, cleanup } = render(
+    <TimeGrid
+      label="Week"
+      days={['Monday', 'Tuesday', 'Wednesday', 'Thursday']}
+      events={[trip]}
+      onEventChange={(next) => changes.push(next)}
+      onCreateAllDay={(range) => created.push(range)}
+    />,
+  )
+  t.after(cleanup)
+  const strip = $('.rf-time-grid-all-day') as HTMLElement
+  strip.getBoundingClientRect = () => new DOMRect(0, 0, 400, 30)
+  strip.setPointerCapture = () => {}
+  const drag = async (target: Element, points: [string, number][]) => {
+    for (const [type, clientX] of points)
+      await act(() =>
+        target.dispatchEvent(
+          new PointerEvent(type, {
+            pointerId: 4,
+            isPrimary: true,
+            clientX,
+            clientY: 26,
+            bubbles: true,
+          }),
+        ),
+      )
+  }
+  // Empty space below the events: Tuesday to Thursday.
+  await drag(strip, [
+    ['pointerdown', 150],
+    ['pointermove', 260],
+    ['pointerup', 350],
+  ])
+  deepEqual(created, [{ day: 1, span: 3 }])
+  // A click alone creates nothing.
+  await drag(strip, [
+    ['pointerdown', 150],
+    ['pointerup', 151],
+  ])
+  equal(created.length, 1)
+
+  // The trailing handle and Shift+Arrow change the span.
+  const handle = $('[data-event="trip"] .rf-time-grid-span') as HTMLElement
+  await drag(handle, [
+    ['pointerdown', 95],
+    ['pointermove', 160],
+    ['pointerup', 195],
+  ])
+  deepEqual(changes.at(-1), { ...trip, span: 2 })
+  const button = $('[data-event="trip"]') as HTMLButtonElement
+  await act(() => keydown(button, 'ArrowRight', true))
+  deepEqual(changes.at(-1), { ...trip, span: 2 })
+  await act(() => keydown(button, 'ArrowLeft', true))
+  equal(changes.length, 2, 'a span stays at least one day')
+})

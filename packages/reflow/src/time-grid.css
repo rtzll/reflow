@@ -187,6 +187,26 @@
   cursor: grab;
   touch-action: none;
 }
+.rf-time-grid-all-day[data-create] {
+  cursor: crosshair;
+  touch-action: none;
+}
+/* The trailing edge of an all-day event changes how many days it covers. */
+.rf-time-grid-span {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  width: min(10px, 30%);
+  cursor: ew-resize;
+}
+.rf-time-grid-event:is(:hover, :focus-visible, [aria-pressed='true']) .rf-time-grid-span::after {
+  content: '';
+  position: absolute;
+  inset: calc(50% - 6px) 3px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--rf-time-grid-event-color, var(--rf-info));
+}
 
 /* An overnight event: its button ends square at midnight, and the part in the
    next column starts square at 00:00, so the two read as one. */

@@ -1313,6 +1313,13 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           required: false,
         },
         {
+          name: 'onCreateAllDay',
+          type: '(range: { day: number; span: number }) => void',
+          description:
+            'Receive the days covered by a drag across empty space in the all-day strip, which then shows an empty row to drag in. A click without a drag creates nothing.',
+          required: false,
+        },
+        {
           name: 'getEventLabel',
           type: '(event: E) => string',
           description: 'Customize the accessible event name, for example to include a timezone.',

@@ -20,7 +20,7 @@ All-day events take the same callbacks as timed ones: a click or Space selects, 
 
 ### Creating and resizing all-day events
 
-Pass `onCreateAllDay` to let a drag across empty space in the strip create one: it receives `{ day, span }` for the days covered, and a click alone creates nothing, as on the board. The strip then always shows, with one empty row to drag in, and describes the gesture to assistive technology; keyboard users create all-day events through the app's own editor, as Calendar's New event does.
+Pass `onCreateAllDay` to let a drag across empty space in the strip create one: it receives `{ day, span }` for the days covered, and a click alone creates nothing, as on the board. The strip then shows even without all-day events, with one empty row to drag in, and describes the gesture to assistive technology. A narrow single-day view creates nothing this way and keeps hiding an empty strip; keyboard users create all-day events through the app's own editor, as Calendar's New event does.
 
 With `onEventChange`, an all-day event has a handle on its trailing edge: dragging it covers more or fewer days, and Shift with Right or Left Arrow does the same one day at a time. A span stays at least one day and stops at the last column. The request carries the new `span` and every other field.
 

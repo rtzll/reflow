@@ -348,3 +348,38 @@ it('shows the all-day strip on a narrow screen only for days it covers', async (
     strip.getByRole('button', { name: 'Studio offsite, Thursday to Friday, all day' }),
   ).toBeVisible()
 })
+
+it('creates an all-day event by dragging across the strip and stretches it from its edge', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await open(page, '/apps/calendar')
+  const strip = page.getByRole('group', { name: 'Timed events, all day' })
+  const box = (await strip.boundingBox())!
+  const column = box.width / 7
+  // The empty bottom row, from Monday across Tuesday.
+  const y = box.y + box.height - 8
+  await page.mouse.move(box.x + column / 2, y)
+  await page.mouse.down()
+  await page.mouse.move(box.x + column * 1.5, y, { steps: 6 })
+  await page.mouse.up()
+  const editor = page.getByRole('dialog')
+  await expect(editor.getByLabel('All day')).toBeChecked()
+  await expect(editor.getByLabel('Days')).toHaveValue('2')
+  await expect(editor.getByLabel('Day', { exact: true })).toHaveValue('0')
+  await editor.getByLabel('Event title').fill('Planning days')
+  await editor.getByRole('button', { name: 'Create event' }).click()
+  const planning = strip.getByRole('button', { name: 'Planning days, Monday to Tuesday, all day' })
+  await expect(planning).toBeFocused()
+
+  // Its trailing edge covers one more day; Undo restores it.
+  const edge = (await planning.locator('.rf-time-grid-span').boundingBox())!
+  await page.mouse.move(edge.x + edge.width / 2, edge.y + edge.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(edge.x + edge.width / 2 + column, edge.y + edge.height / 2, { steps: 6 })
+  await page.mouse.up()
+  await expect(
+    strip.getByRole('button', { name: 'Planning days, Monday to Wednesday, all day' }),
+  ).toBeVisible()
+  await page.getByRole('button', { name: 'Undo', exact: true }).click()
+  await expect(planning).toBeVisible()
+})
