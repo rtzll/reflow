@@ -23,6 +23,17 @@
   overflow: hidden;
   background: light-dark(white, #303030);
 }
+/* A command menu opens from a shortcut many times a day, so it appears and
+   leaves at once instead of on the dialog's spring. */
+.rf-command-dialog > .rf-dialog,
+.rf-command-dialog > .rf-dialog[open],
+.rf-command-dialog > .rf-dialog::backdrop,
+.rf-command-dialog > .rf-dialog[open]::backdrop {
+  transition: none;
+}
+.rf-command-dialog > .rf-dialog[open] {
+  transform: none;
+}
 .rf-command-dialog > .rf-dialog > .rf-dialog-header {
   position: absolute;
   width: 1px;
