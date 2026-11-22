@@ -42,9 +42,11 @@ Reflow marks the document with `data-rf-drawer-scaled` while such a drawer is op
 - The existing drag: its threshold, axis lock, resistance, flick speed and the check for scrolled content.
 - The drawer's 500ms ease for every move between points.
 
-## Not included
+## Nested drawers
 
-Nested drawers, where opening a drawer from inside another scales the first one back. Add them once an app needs them.
+A drawer can open another, such as a filter drawer opening a picker for one filter. The open drawer then steps back: it scales to 96% and moves 12 pixels away from the one in front, toward the inside of the screen, so the two read as a stack. Dragging the front drawer toward its edge brings the one behind forward in step, and closing it returns it to its place. Each drawer is its own modal dialog, so Escape and a click on the backdrop close only the front one, and focus returns to the control inside the drawer behind that opened it.
+
+Any number of drawers can stack; only the one directly behind the front drawer steps back, and the ones behind it stay where they were. Reduced motion keeps the drawer behind in place.
 
 ## Verification
 
