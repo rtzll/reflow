@@ -46,3 +46,20 @@ it('centres a system event between hairlines, muted, with its actions in view', 
   await expect(event.getByRole('button', { name: 'Undo' })).toBeVisible()
   await expect(event.locator('.rf-chat-actions')).toHaveCSS('opacity', '1')
 })
+
+it('wraps a long link or address inside the bubble on a phone', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 320, height: 800 })
+  await open(page, '/docs/chat-message')
+  const body = page.locator('.rf-chat-message[data-role="user"] .rf-chat-body').first()
+  await body.scrollIntoViewIfNeeded()
+  const fits = await body.evaluate((node) => {
+    // A pasted address has nowhere to break but between its characters.
+    node.textContent =
+      'Please email bartholomew.fitzgerald@northwind-industries-holdings.example.com about https://example.com/workspaces/acme/projects/q3-launch/docs/9f8e7d6c5b4a?tab=comments'
+    const message = node.closest('.rf-chat-message')!.getBoundingClientRect()
+    const bubble = node.getBoundingClientRect()
+    return bubble.right <= message.right + 0.5 && bubble.left >= message.left - 0.5
+  })
+  assert.equal(fits, true)
+})

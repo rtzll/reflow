@@ -22,7 +22,10 @@
 }
 .rf-chat-body {
   white-space: pre-wrap;
-  overflow-wrap: break-word;
+  /* anywhere, not break-word: a link or address with no spaces must also
+     narrow the bubble's minimum width, or it pushes the bubble past the
+     column. As in Markdown. */
+  overflow-wrap: anywhere;
   padding-block: 8px;
   font: var(--rf-text-subtitle) / var(--rf-leading-subtitle) var(--rf-font);
 }
