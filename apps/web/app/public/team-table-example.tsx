@@ -95,6 +95,7 @@ const memberActions = [
         clear,
       ))}>Copy names</Button>
     ),
+    selectAllMatching: true,
   }} rowActions={{
     label: (member) => 'Actions for ' + member.name,
     items: memberActions,
@@ -159,6 +160,7 @@ export function TeamDirectory(handle: Handle<{ query?: string; pageSize?: number
             Copy names
           </Button>
         ),
+        selectAllMatching: true,
       },
       rowActions: {
         items: memberActions,

@@ -63,7 +63,14 @@ export interface DataTableProps<Row> {
   /** Select rows on the current page. A changed view clears the selection. */
   rowSelection?: {
     label: (row: Row) => string
+    /** Receives the selected rows in displayed order: every matching row while all are selected. */
     actions: (rows: readonly Row[], clear: () => void) => RemixNode
+    /**
+     * Once a full page is checked and more rows match, offer to select every
+     * matching row. That selection lasts across pages, sorting and page size,
+     * and clears when the filter or the matching rows change.
+     */
+    selectAllMatching?: boolean
   }
   paginationLabel?: string
   id?: string
@@ -76,7 +83,12 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
 
   const range = createRangeSelection<string>()
   let selected = new Set<string>()
+  // Every row the filter matches, on every page, rather than `selected`.
+  let allMatching = false
   let selectionView: string | undefined
+  // Switching between a page and an all-matching selection changes the view
+  // on purpose; the next render adopts it instead of clearing.
+  let adoptView = false
   let lastFocused: string | undefined
   let root: HTMLDivElement
   const mount = ref<HTMLDivElement>((node) => {
@@ -169,17 +181,20 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
 
     const { rowActions, rowSelection, loading } = handle.props
     const keys = visible.map(rowKey)
+    // A page selection belongs to the view; an all-matching one to the filter
+    // and the rows it matches.
     const view =
       rowSelection && !loading
-        ? JSON.stringify([
-            state.filter,
-            state.sort?.column,
-            state.sort?.direction,
-            page,
-            limit,
-            keys,
-          ])
+        ? JSON.stringify(
+            allMatching
+              ? ['all', state.filter, matches.map(rowKey)]
+              : [state.filter, state.sort?.column, state.sort?.direction, page, limit, keys],
+          )
         : undefined
+    if (adoptView && view !== undefined) {
+      adoptView = false
+      selectionView = view
+    }
     if (selectionView !== view) {
       const hadSelection = selected.size > 0
       const focusInToolbar =
@@ -187,6 +202,7 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
         !!root?.querySelector('.rf-data-selection')?.contains(root.ownerDocument.activeElement)
       selectionView = view
       selected = new Set()
+      allMatching = false
       lastFocused = undefined
       range.reset()
       if (focusInToolbar) {
@@ -205,6 +221,8 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
         .querySelector('.rf-data-selection')
         ?.contains(root.ownerDocument.activeElement)
       selected = new Set()
+      if (allMatching) adoptView = true
+      allMatching = false
       range.reset()
       await handle.update()
       if (returnFocus && !handle.signal.aborted) {
@@ -213,6 +231,26 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
         )?.focus()
       }
     }
+    // Swaps between this page and every matching row, keeping focus on the
+    // toolbar button whose label changes.
+    async function selectMatching(all: boolean) {
+      allMatching = all
+      selected = new Set(keys)
+      adoptView = true
+      range.reset()
+      await handle.update()
+      if (!handle.signal.aborted)
+        root.querySelector<HTMLButtonElement>('.rf-data-select-matching')?.focus()
+    }
+    // Leaving an all-matching selection from a row keeps the rest of the page.
+    function leaveAllMatching() {
+      if (!allMatching) return
+      allMatching = false
+      selected = new Set(keys)
+      adoptView = true
+    }
+    const selectedCount = allMatching ? sorted.length : selected.size
+    const pageSelected = !!keys.length && keys.every((key) => selected.has(key))
     function navigateSelection(event: KeyboardEvent, index: number) {
       if (event.key === 'Tab') range.reset()
       if (
@@ -230,6 +268,7 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
       if (next === undefined) return
       checkbox(next)?.focus()
       if (event.shiftKey) {
+        leaveAllMatching()
         selected = range.extend(keys, selected, keys[index]!, next)
         void handle.update()
       }
@@ -250,10 +289,12 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
                   aria-label="Select all rows on this page"
                   size={size}
                   disabled={loading || !keys.length}
-                  checked={!!keys.length && selected.size === keys.length}
-                  indeterminate={selected.size > 0 && selected.size < keys.length}
+                  checked={!!keys.length && (allMatching || selected.size === keys.length)}
+                  indeterminate={!allMatching && selected.size > 0 && selected.size < keys.length}
                   onCheckedChange={(checked) => {
                     range.reset()
+                    if (allMatching) adoptView = true
+                    allMatching = false
                     selected = new Set(checked ? keys : [])
                     void handle.update()
                   }}
@@ -274,7 +315,7 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
             return (
               <TableRow
                 key={key}
-                selected={!!rowSelection && selected.has(key)}
+                selected={!!rowSelection && (allMatching || selected.has(key))}
                 hover={!!rowActions && !loading}
                 data-rf-data-row={rowActions && !loading ? key : undefined}
                 tabIndex={rowActions && !loading ? -1 : undefined}
@@ -288,9 +329,10 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
                         size={size}
                         aria-label={rowSelection.label(row)}
                         data-rf-select-row={key}
-                        checked={selected.has(key)}
+                        checked={allMatching || selected.has(key)}
                         onCheckedChange={(checked) => {
                           range.reset()
+                          leaveAllMatching()
                           selected = new Set(selected)
                           if (checked) selected.add(key)
                           else selected.delete(key)
@@ -405,11 +447,36 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
         ) : (
           table
         )}
-        {rowSelection && selected.size > 0 && (
+        {rowSelection && selectedCount > 0 && (
           <Toolbar label="Selected row actions" class="rf-data-selection">
-            <span>{selected.size} selected</span>
+            <span>
+              {allMatching ? `All ${selectedCount} selected` : `${selectedCount} selected`}
+            </span>
+            {rowSelection.selectAllMatching &&
+              (allMatching ? (
+                <Button
+                  size="compact"
+                  variant="ghost"
+                  class="rf-data-select-matching"
+                  mix={on('click', () => selectMatching(false))}
+                >
+                  Select this page only
+                </Button>
+              ) : (
+                pageSelected &&
+                sorted.length > keys.length && (
+                  <Button
+                    size="compact"
+                    variant="ghost"
+                    class="rf-data-select-matching"
+                    mix={on('click', () => selectMatching(true))}
+                  >
+                    {`Select all ${sorted.length} matching`}
+                  </Button>
+                )
+              ))}
             {rowSelection.actions(
-              visible.filter((_, index) => selected.has(keys[index]!)),
+              allMatching ? sorted : visible.filter((_, index) => selected.has(keys[index]!)),
               clearSelection,
             )}
             <Button size="compact" variant="ghost" mix={on('click', clearSelection)}>
@@ -420,7 +487,7 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
         <span role="status" class="rf-basic-sr-only">
           {loading
             ? 'Loading'
-            : `${sorted.length} ${sorted.length === 1 ? 'result' : 'results'}, page ${page} of ${pageCount}`}
+            : `${sorted.length} ${sorted.length === 1 ? 'result' : 'results'}, page ${page} of ${pageCount}${allMatching ? `, all ${sorted.length} selected` : ''}`}
         </span>
         <Pagination
           page={page}

@@ -1,5 +1,5 @@
 import { DataTable, createRangeSelection, type DataTableState } from '@rtzll/reflow'
-import { deepEqual, equal } from 'remix/assert'
+import { deepEqual, equal, ok } from 'remix/assert'
 import type { Handle } from 'remix/component'
 import { render } from 'remix/component/test'
 import { it } from 'remix/test'
@@ -206,4 +206,72 @@ it('moves focus to the current page button when Next or Previous reaches a bound
   })
   equal(document.activeElement, $('button[aria-current="page"]'))
   equal(document.activeElement?.textContent, '1')
+})
+
+it('selects every matching row across pages and clears it when the matching rows change', async (t) => {
+  let current = rows
+  let owner: Handle
+  function Directory(handle: Handle) {
+    owner = handle
+    return () => (
+      <DataTable
+        {...props}
+        rows={current}
+        rowSelection={{
+          label: (row) => 'Select ' + row.name,
+          actions: (selected) => <output>{selected.map((row) => row.name).join(', ')}</output>,
+          selectAllMatching: true,
+        }}
+      />
+    )
+  }
+  const { $, $$, act, cleanup } = render(<Directory />)
+  t.after(cleanup)
+  const box = (name: string) => $('input[aria-label="Select ' + name + '"]') as HTMLInputElement
+  const all = () => $('thead input[type=checkbox]') as HTMLInputElement
+  const checked = () =>
+    Array.from($$('tbody input:checked'), (node) => node.getAttribute('aria-label'))
+  const toolbar = () => $('.rf-data-selection') as HTMLElement | null
+  const button = (name: string) =>
+    Array.from($$('.rf-data-selection button')).find((node) => node.textContent === name) as
+      | HTMLButtonElement
+      | undefined
+  const acted = () => $('.rf-data-selection output')?.textContent
+  const status = () => $('[role=status]')!.textContent
+
+  // Part of a page offers nothing more.
+  await act(() => box('Zoe').click())
+  equal(button('Select all 4 matching'), undefined)
+  // A full page with more matching rows offers every row.
+  await act(() => all().click())
+  ok(button('Select all 4 matching'))
+  await act(() => button('Select all 4 matching')!.click())
+  ok(toolbar()!.textContent!.includes('All 4 selected'))
+  equal(acted(), 'Zoe, Amy, Ben, Cal')
+  equal(document.activeElement, button('Select this page only'))
+  ok(status().includes('all 4 selected'), status())
+
+  // Paging and sorting keep it; actions follow the sort.
+  await act(() => ($('button[aria-label="Next page"]') as HTMLButtonElement).click())
+  deepEqual(checked(), ['Select Ben', 'Select Cal'])
+  equal(all().checked, true)
+  await act(() => $('thead th:nth-child(2) button')!.click())
+  equal(acted(), 'Amy, Ben, Cal, Zoe')
+
+  // Back to the page, then unchecking a row keeps the rest of the page.
+  await act(() => button('Select this page only')!.click())
+  ok(toolbar()!.textContent!.includes('2 selected'))
+  equal(document.activeElement, button('Select all 4 matching'))
+  await act(() => button('Select all 4 matching')!.click())
+  await act(() => box('Amy').click())
+  deepEqual(checked(), ['Select Ben'])
+  equal(acted(), 'Ben')
+
+  // A change to which rows match clears an all-matching selection.
+  await act(() => all().click())
+  await act(() => button('Select all 4 matching')!.click())
+  current = [...rows, { name: 'Dee', role: 'Engineer', count: 4 }]
+  await owner!.update()
+  equal(toolbar(), null)
+  deepEqual(checked(), [])
 })

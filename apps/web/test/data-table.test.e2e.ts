@@ -1,4 +1,5 @@
 import { expect } from 'playwright/test'
+import * as assert from 'remix/assert'
 import { it } from 'remix/test'
 import { open, showcaseServer } from './showcase-router.ts'
 
@@ -231,4 +232,38 @@ it('clears a locally typed gallery filter when navigating back to the initial UR
     .click()
   await expect(filter).toHaveValue('')
   await expect(tile.locator('tbody tr')).toHaveCount(4)
+})
+
+it('selects every matching team member across pages and copies them in order', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+  await open(page, '/docs/data-table')
+  const table = page.getByRole('table', { name: 'Team members', exact: true })
+  const actions = page.getByRole('toolbar', { name: 'Selected row actions' })
+  await page.getByRole('searchbox', { name: 'Filter Team members' }).fill('Engineer')
+  await table.getByRole('checkbox', { name: 'Select all rows on this page' }).check()
+  const offer = actions.getByRole('button', { name: /^Select all \d+ matching$/ })
+  const total = Number((await offer.textContent())!.match(/\d+/)![0])
+  const names = await table.getByRole('rowheader').allTextContents()
+  await offer.click()
+  await expect(actions).toContainText(`All ${total} selected`)
+  await expect(actions.getByRole('button', { name: 'Select this page only' })).toBeFocused()
+
+  // A page link keeps the selection and checks every row there.
+  await page
+    .getByRole('navigation', { name: 'Team pages' })
+    .getByRole('button', { name: 'Next page' })
+    .click()
+  await expect(actions).toContainText(`All ${total} selected`)
+  for (const box of await table.getByRole('checkbox').all()) await expect(box).toBeChecked()
+  names.push(...(await table.getByRole('rowheader').allTextContents()))
+
+  await actions.getByRole('button', { name: 'Copy names' }).click()
+  const copied = await page.evaluate(() => navigator.clipboard.readText())
+  assert.equal(copied.split('\n').length, total)
+  assert.deepEqual(
+    copied.split('\n').slice(0, names.length),
+    names.map((name) => name.trim()),
+  )
+  await expect(actions).toHaveCount(0)
 })
