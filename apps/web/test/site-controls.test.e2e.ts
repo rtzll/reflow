@@ -156,7 +156,7 @@ it('opens a full-height mobile drawer and keeps page interaction behind it', asy
   await open(page, '/docs?theme=dark')
   const mobile = page.locator('.site-mobile[data-enhanced]')
   const trigger = mobile.locator(':scope > summary')
-  const drawer = page.getByRole('dialog', { name: 'Navigation and settings' })
+  const drawer = page.getByRole('dialog', { name: 'Navigation and appearance' })
   await trigger.waitFor()
   assert.deepEqual(await trigger.boundingBox(), { x: 16, y: 16, width: 32, height: 32 })
 
@@ -175,7 +175,7 @@ it('opens a full-height mobile drawer and keeps page interaction behind it', asy
   assert.equal(await drawer.locator('.doc-playground-controls').count(), 0)
   const title = (await drawer.locator('.site-sheet-heading h2').boundingBox())!
   const github = (await drawer.getByRole('link', { name: 'Reflow on GitHub' }).boundingBox())!
-  assert.equal(await drawer.locator('.site-sheet-heading h2').innerText(), 'Make them yours')
+  assert.equal(await drawer.locator('.site-sheet-heading h2').innerText(), 'Appearance')
   assert.ok(title.height < 24)
   assert.ok(Math.abs(title.y + title.height / 2 - (github.y + github.height / 2)) < 4)
   assert.deepEqual(
@@ -189,7 +189,7 @@ it('opens a full-height mobile drawer and keeps page interaction behind it', asy
     ['dark'],
   )
   assert.equal(await theme.evaluate((summary) => getComputedStyle(summary).display), 'flex')
-  const settings = (await drawer.getByRole('region', { name: 'Customize Reflow' }).boundingBox())!
+  const settings = (await drawer.getByRole('region', { name: 'Appearance' }).boundingBox())!
   const search = (await drawer.getByRole('button', { name: 'Search Reflow' }).boundingBox())!
   assert.ok(search.y > settings.y + settings.height)
   assert.equal(await page.locator('.site-left').isVisible(), false)
@@ -265,7 +265,7 @@ it('server-renders native settings disclosures before client enhancement', async
     await unenhanced.setViewportSize({ width: 390, height: 844 })
     const mobile = unenhanced.locator('.site-mobile')
     await mobile.locator(':scope > summary').click()
-    const drawer = mobile.getByRole('dialog', { name: 'Navigation and settings' })
+    const drawer = mobile.getByRole('dialog', { name: 'Navigation and appearance' })
     await drawer.waitFor()
     assert.deepEqual(await drawer.boundingBox(), { x: 0, y: 0, width: 288, height: 844 })
     await drawer.getByRole('link', { name: 'Showcase', exact: true }).waitFor()

@@ -266,7 +266,7 @@ function SettingIcon(handle: Handle<{ setting: string; value: string }>) {
   )
 }
 
-function SettingsPanel(handle: Handle<{ settings: Settings; variant?: 'rail' | 'sheet' }>) {
+function AppearancePanel(handle: Handle<{ settings: Settings; variant?: 'rail' | 'sheet' }>) {
   return () => {
     let { settings, variant = 'rail' } = handle.props
     const customFont = fontCatalog.find((font) => `google:${font.n}` === settings.font)
@@ -282,9 +282,9 @@ function SettingsPanel(handle: Handle<{ settings: Settings; variant?: 'rail' | '
       </a>
     )
     return (
-      <section class="site-settings" aria-label="Customize Reflow">
+      <section class="site-settings" aria-label="Appearance">
         <div class={variant === 'sheet' ? 'site-sheet-heading' : 'site-settings-heading'}>
-          <h2>Make them yours</h2>
+          <h2>Appearance</h2>
           {variant === 'rail' ? (
             <>
               <ResetSettingsButton settings={settings} />
@@ -733,7 +733,7 @@ export function introductionContent() {
           </p>
         </div>
         <div>
-          <h2>Customize using the settings panel</h2>
+          <h2>Customize with the Appearance panel</h2>
           <p>
             Try a different theme, accent, heading font, radius, size, icon family, or hover style.
             Changes update the examples as you make them. Use <kbd>T</kbd>, <kbd>A</kbd>, and{' '}
@@ -773,7 +773,7 @@ export function introductionContent() {
       <section class="site-doc-section">
         <h2>Icons</h2>
         <p>
-          The settings panel previews Lucide, Tabler, Phosphor, and HugeIcons. Reflow's built-in
+          The Appearance panel previews Lucide, Tabler, Phosphor, and HugeIcons. Reflow's built-in
           icons render as SVG, and components with icon slots also accept your own SVG or Remix
           nodes. Choose the icons that fit your application.
         </p>
@@ -1195,11 +1195,11 @@ export function Showcase(handle: Handle<ShowcaseProps>) {
             open
             id="site-mobile-panel"
             class="site-mobile-panel"
-            aria-label="Navigation and settings"
+            aria-label="Navigation and appearance"
             tabindex={-1}
           >
             <div class="site-mobile-content">
-              <SettingsPanel settings={settings} variant="sheet" />
+              <AppearancePanel settings={settings} variant="sheet" />
               <SiteCredit />
               <Sidebar
                 components={components}
@@ -1253,7 +1253,7 @@ export function Showcase(handle: Handle<ShowcaseProps>) {
           ) : null}
         </main>
         <aside class="site-right">
-          <SettingsPanel settings={settings} />
+          <AppearancePanel settings={settings} />
           {page === 'component' &&
             components[currentIndex] &&
             !components[currentIndex].category && (

@@ -210,7 +210,7 @@ it('customizes the focused Button demo and keeps the reference slide order', asy
   await page.keyboard.press('Escape')
   assert.ok(await trigger.evaluate((element) => document.activeElement === element))
   assert.equal(await panel.isVisible(), false)
-  await expect(page.getByRole('link', { name: 'Go to Make them yours' })).toHaveCount(0)
+  await expect(page.getByRole('link', { name: 'Go to Appearance' })).toHaveCount(0)
   const last = page.getByRole('link', { name: 'Go to BarChart' })
   await last.hover()
   await expect(last).toHaveAttribute('data-rf-hovered', '')
