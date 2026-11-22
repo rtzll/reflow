@@ -58,11 +58,15 @@ export function Breadcrumb(handle: Handle<BreadcrumbProps>) {
 
   function naturalWidth(item: HTMLElement) {
     let width = item.getBoundingClientRect().width
-    // The current page shrinks to fit; add back what its label hides.
-    if (item.querySelector('[aria-current="page"]')) {
-      for (const label of item.querySelectorAll<HTMLElement>('.rf-breadcrumb-label')) {
-        width += label.scrollWidth - label.clientWidth
-      }
+    // Steps shrink when room runs out; add back what each label hides, up to
+    // its step's cap. The current page has no cap.
+    for (const crumb of item.querySelectorAll<HTMLElement>('.rf-breadcrumb-crumb')) {
+      const label = crumb.querySelector<HTMLElement>('.rf-breadcrumb-label')
+      if (!label) continue
+      const shown = crumb.getBoundingClientRect().width
+      const full = shown + label.scrollWidth - label.clientWidth
+      const cap = parseFloat(getComputedStyle(crumb).maxInlineSize)
+      width += (Number.isFinite(cap) ? Math.min(full, Math.max(cap, shown)) : full) - shown
     }
     return width
   }

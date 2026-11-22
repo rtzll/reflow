@@ -44,15 +44,19 @@
   inline-size: max-content;
 }
 
-/* Steps keep their width; only the current page gives way and truncates. */
+/* Short of room, the current page gives way and truncates first. Once it is
+   down to a few characters, the steps truncate too, so a trail that cannot
+   fold (or has folded all it can) never runs past its container. The page is
+   the last step, so any room its floor leaves over sits unseen at the end. */
 .rf-breadcrumb-item {
   display: inline-flex;
-  flex-shrink: 0;
+  flex-shrink: 1;
   align-items: center;
   min-inline-size: 0;
 }
 .rf-breadcrumb-item:has(> [aria-current='page']) {
-  flex-shrink: 1;
+  flex-shrink: 1000;
+  min-inline-size: 5em;
 }
 .rf-breadcrumb-item > .rf-dropdown {
   display: inline-flex;
@@ -63,7 +67,7 @@
   appearance: none;
   position: relative;
   display: inline-flex;
-  flex-shrink: 0;
+  flex-shrink: 1;
   align-items: center;
   gap: var(--rf-crumb-gap);
   box-sizing: border-box;
