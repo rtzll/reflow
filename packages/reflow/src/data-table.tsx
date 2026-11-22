@@ -47,8 +47,8 @@ export interface DataTableProps<Row> {
   state?: DataTableState
   defaultState?: Partial<DataTableState>
   onStateChange?: (state: DataTableState) => void
-  /** Associate search with a native form for server-rendered filtering. */
-  filterInput?: Pick<InputProps, 'name' | 'form'>
+  /** Associate search with a native form, optionally displaying a draft while the server applies it. */
+  filterInput?: Pick<InputProps, 'name' | 'form' | 'value'>
   /** Optional control at the trailing edge of the filter row. */
   filterAction?: RemixNode
   /** Render native sort and page links. The destination supplies the new state. */
@@ -434,12 +434,12 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
       <div class="rf-data-table" data-size={size} mix={mount}>
         <div class="rf-data-filter">
           <Input
-            {...handle.props.filterInput}
             type="search"
             size={size}
             aria-label={filterLabel}
             placeholder={filterLabel}
             value={state.filter}
+            {...handle.props.filterInput}
             mix={on<HTMLInputElement, 'input'>('input', (event) =>
               change({ ...state, filter: event.currentTarget.value, page: 1 }),
             )}

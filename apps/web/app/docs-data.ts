@@ -209,10 +209,10 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
         },
         {
           name: 'filterInput',
-          type: '{ name?: string; form?: string }',
+          type: '{ name?: string; form?: string; value?: string }',
           required: false,
           description:
-            'Connect the search input to an application-owned GET form for submission before hydration.',
+            'Connect the search input to a GET form. Supply a draft value while the server applies the filter.',
         },
         {
           name: 'filterAction',

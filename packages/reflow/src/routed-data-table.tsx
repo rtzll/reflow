@@ -1,5 +1,5 @@
 import { DataTable, type DataTableProps, type DataTableState } from './data-table.tsx'
-import { on, ref, updateUrl, type Handle } from 'remix/component'
+import { navigate, on, ref, updateUrl, type Handle } from 'remix/component'
 
 export interface DataTableRoute {
   path: string
@@ -21,9 +21,10 @@ function normalizeSearch(value: string) {
 export function RoutedDataTable<Row>(handle: Handle<RoutedDataTableProps<Row>>) {
   let requestSearch = normalizeSearch(handle.props.route.search)
   let search = requestSearch
+  let draftFilter: string | undefined
   const history = ref((_node, signal) => {
     function readLocation() {
-      if (search === location.search) return
+      if (handle.props.rowCount !== undefined || search === location.search) return
       search = location.search
       requestSearch = normalizeSearch(handle.props.route.search)
       void handle.update()
@@ -50,8 +51,11 @@ export function RoutedDataTable<Row>(handle: Handle<RoutedDataTableProps<Row>>) 
     if (normalizedRouteSearch !== requestSearch) {
       requestSearch = normalizedRouteSearch
       search = requestSearch
+      draftFilter = undefined
     }
-    const params = new URLSearchParams(search)
+    const params = new URLSearchParams(
+      props.rowCount === undefined ? search : normalizedRouteSearch,
+    )
     const name = (field: string) => route.prefix + field
     const formId = handle.id + '-filter'
     const hash = route.anchor ? '#' + route.anchor : ''
@@ -89,7 +93,12 @@ export function RoutedDataTable<Row>(handle: Handle<RoutedDataTableProps<Row>>) 
           action={route.path + hash}
           method="get"
           data-rmx-reset-scroll="manual"
-          mix={on('submit', (event) => event.preventDefault())}
+          mix={
+            props.rowCount === undefined
+              ? on('submit', (event) => event.preventDefault())
+              : undefined
+          }
+          data-rmx-reset-focus="manual"
         >
           {filterFields.map(([key, value], index) => (
             <input key={`${key}-${index}`} type="hidden" name={key} value={value} />
@@ -97,13 +106,38 @@ export function RoutedDataTable<Row>(handle: Handle<RoutedDataTableProps<Row>>) 
         </form>
         <DataTable
           {...props}
-          filterInput={{ name: name('Filter'), form: formId }}
+          filterInput={{
+            name: name('Filter'),
+            form: formId,
+            value: props.rowCount === undefined ? state.filter : (draftFilter ?? state.filter),
+          }}
           state={state}
           href={destination}
           onStateChange={(next) => {
             // Keep independent controls such as the docs Code tab in the current URL.
             search = location.search
             const href = destination(next)
+            if (props.rowCount !== undefined) {
+              // Keep editing the draft while the request is in flight. Selection and
+              // row actions still describe the filter that produced the loaded rows.
+              draftFilter = next.filter
+              void handle.update()
+              // Without frame navigation the native GET form submits the complete filter on Enter.
+              if (
+                !window.navigation ||
+                typeof NavigateEvent === 'undefined' ||
+                !('sourceElement' in NavigateEvent.prototype)
+              )
+                return
+              void navigate(href, {
+                history: 'replace',
+                resetScroll: 'manual',
+                resetFocus: 'manual',
+              }).catch((error: unknown) => {
+                if (!(error instanceof DOMException && error.name === 'AbortError')) throw error
+              })
+              return
+            }
             search = new URL(href, location.href).search
             void updateUrl(href, { signal: handle.signal })
             void handle.update()
