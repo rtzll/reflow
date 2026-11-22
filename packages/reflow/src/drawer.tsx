@@ -66,6 +66,26 @@ const flickVelocity = 0.4
 const interactive =
   'button, a, input, select, textarea, label, pre, code, [contenteditable], [role="slider"]'
 
+// Open drawers, oldest first. The one under the newest steps back.
+const openDrawers: HTMLDialogElement[] = []
+
+function stepBack(dialog: HTMLDialogElement | undefined, behind: boolean) {
+  if (!dialog) return
+  dialog.toggleAttribute('data-behind', behind)
+  if (behind) dialog.style.setProperty('--rf-drawer-behind', '1')
+  else dialog.style.removeProperty('--rf-drawer-behind')
+  dialog.removeAttribute('data-following')
+}
+
+// Leaves the stack, and lets the drawer it covered come forward again.
+function leaveStack(dialog: HTMLDialogElement) {
+  const index = openDrawers.indexOf(dialog)
+  if (index === -1) return
+  openDrawers.splice(index, 1)
+  stepBack(dialog, false)
+  if (index === openDrawers.length) stepBack(openDrawers.at(-1), false)
+}
+
 interface Drag {
   pointer: number
   // Where the panel rested when the drag began, and at which snap point.
@@ -186,6 +206,15 @@ export function Drawer(handle: Handle<DrawerProps>) {
     else root.style.setProperty('--rf-drawer-scale', String(1 - progress))
   }
 
+  // The drawer behind comes forward as this one is dragged toward closing.
+  function followBehind(dialog: HTMLDialogElement, progress: number | undefined) {
+    const index = openDrawers.indexOf(dialog)
+    if (index < 1 || index !== openDrawers.length - 1) return
+    const behind = openDrawers[index - 1]!
+    behind.toggleAttribute('data-following', progress !== undefined)
+    behind.style.setProperty('--rf-drawer-behind', String(1 - (progress ?? 0)))
+  }
+
   // Arrow keys on the handle: toward the open side expands.
   function snapKey(event: KeyboardEvent) {
     const expand = side() === 'bottom' ? 'ArrowUp' : 'ArrowDown'
@@ -210,6 +239,10 @@ export function Drawer(handle: Handle<DrawerProps>) {
     beforeOpen: (dialog) => {
       setDrag(dialog, 0)
       applySnap(dialog)
+      // Opened over another drawer, that one steps back.
+      leaveStack(dialog)
+      stepBack(openDrawers.at(-1), true)
+      openDrawers.push(dialog)
     },
   })
 
@@ -266,6 +299,7 @@ export function Drawer(handle: Handle<DrawerProps>) {
     if (!current.started) return
     element.removeAttribute('data-dragging')
     scaleProgress(undefined)
+    followBehind(element, undefined)
     const now = performance.now()
     // Held still before letting go, the throw has no speed left.
     const velocity =
@@ -326,6 +360,8 @@ export function Drawer(handle: Handle<DrawerProps>) {
   function attachDrag(element: Element, signal: AbortSignal) {
     if (!(element instanceof HTMLDialogElement)) return
     const options = { signal }
+    element.addEventListener('close', () => leaveStack(element), options)
+    signal.addEventListener('abort', () => leaveStack(element), { once: true })
     addEventListener(
       'resize',
       () => {
@@ -340,6 +376,8 @@ export function Drawer(handle: Handle<DrawerProps>) {
         if (!dismissible() && !snapping()) return
         const target = event.target
         if (!(target instanceof Element)) return
+        // A drawer opened inside this one handles its own drags.
+        if (target.closest('dialog') !== element) return
         if (target.closest(interactive) && !target.closest('.rf-drawer-handle')) return
         if (scrollsFirst(target, element)) return
         const rect = element.getBoundingClientRect()
@@ -403,6 +441,7 @@ export function Drawer(handle: Handle<DrawerProps>) {
         element.style.setProperty('--rf-drawer-drag', `${Math.round(offset)}px`)
         element.style.setProperty('--rf-drawer-progress', String(progress))
         scaleProgress(progress)
+        followBehind(element, progress)
       },
       options,
     )

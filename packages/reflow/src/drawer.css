@@ -36,6 +36,7 @@
   translate: var(--rf-drawer-closed);
   transition:
     translate var(--rf-drawer-motion),
+    scale var(--rf-drawer-motion),
     overlay var(--rf-drawer-motion) allow-discrete,
     display var(--rf-drawer-motion) allow-discrete;
 }
@@ -80,6 +81,29 @@
 }
 .rf-drawer[data-side='left'][open] {
   translate: calc(-1 * var(--rf-drawer-drag)) 0;
+}
+/* Nested: a drawer with another open in front of it steps back, scaling to
+   96% and moving 12px inward, and follows the front drawer's drag forward
+   with --rf-drawer-behind, from 1 behind to 0 in place. */
+@media (prefers-reduced-motion: no-preference) {
+  .rf-drawer[open][data-behind] {
+    scale: calc(1 - 0.04 * var(--rf-drawer-behind, 1));
+  }
+  .rf-drawer[data-side='bottom'][open][data-behind] {
+    translate: 0 calc(var(--rf-drawer-drag) - 12px * var(--rf-drawer-behind, 1));
+  }
+  .rf-drawer[data-side='top'][open][data-behind] {
+    translate: 0 calc(12px * var(--rf-drawer-behind, 1) - var(--rf-drawer-drag));
+  }
+  .rf-drawer[data-side='right'][open][data-behind] {
+    translate: calc(var(--rf-drawer-drag) - 12px * var(--rf-drawer-behind, 1)) 0;
+  }
+  .rf-drawer[data-side='left'][open][data-behind] {
+    translate: calc(12px * var(--rf-drawer-behind, 1) - var(--rf-drawer-drag)) 0;
+  }
+  .rf-drawer[data-following] {
+    transition: none;
+  }
 }
 .rf-drawer[data-dragging] {
   cursor: grabbing;

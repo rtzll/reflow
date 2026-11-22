@@ -359,3 +359,47 @@ describe('Drawer snap points', () => {
     await waitFor(() => !panel.open && !root.hasAttribute('data-rf-drawer-scaled'))
   })
 })
+
+describe('Nested drawers', () => {
+  it('steps the open drawer back while another opens in front of it', async (t) => {
+    const { $, $$, act, cleanup } = render(
+      <Drawer trigger="Filters" title="Filters" defaultOpen>
+        <Drawer trigger="Pick a color" title="Color">
+          <div style="height: 300px">Colors</div>
+        </Drawer>
+      </Drawer>,
+    )
+    t.after(cleanup)
+    const [outer, inner] = Array.from($$('dialog.rf-drawer')) as HTMLDialogElement[]
+    await waitFor(() => outer!.open)
+    ok(!outer!.hasAttribute('data-behind'))
+
+    const open = Array.from($$('button')).find(
+      (button) => button.textContent === 'Pick a color',
+    ) as HTMLButtonElement
+    open.focus()
+    await act(() => open.click())
+    await waitFor(() => inner!.open)
+    ok(outer!.hasAttribute('data-behind'), 'the drawer behind steps back')
+    ok(!inner!.hasAttribute('data-behind'))
+
+    // Dragging the front drawer brings the one behind forward in step.
+    const height = inner!.getBoundingClientRect().height
+    const start = center(inner!)
+    pointer(inner!, 'pointerdown', start)
+    pointer(inner!, 'pointermove', { clientX: start.clientX, clientY: start.clientY + 10 })
+    pointer(inner!, 'pointermove', { clientX: start.clientX, clientY: start.clientY + height / 2 })
+    const behind = parseFloat(outer!.style.getPropertyValue('--rf-drawer-behind'))
+    ok(behind > 0.4 && behind < 0.6, `halfway closed, halfway back: ${behind}`)
+    pointer(inner!, 'pointerup', { clientX: start.clientX, clientY: start.clientY + 10 })
+    await waitFor(() => outer!.style.getPropertyValue('--rf-drawer-behind') === '1')
+
+    // Escape closes only the front drawer and returns focus inside the one behind.
+    inner!.dispatchEvent(new Event('cancel', { cancelable: true }))
+    await waitFor(() => !inner!.open)
+    ok(outer!.open, 'the drawer behind stays open')
+    // The dialog's close event, a task later, brings it back.
+    await waitFor(() => !outer!.hasAttribute('data-behind'))
+    await waitFor(() => document.activeElement === open)
+  })
+})

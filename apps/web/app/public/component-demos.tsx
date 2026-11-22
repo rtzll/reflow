@@ -1331,6 +1331,12 @@ function setEditing(open: boolean) {
       'Long content scrolls inside the panel; a drag only takes over once the content is back at its start.',
     ),
     demo(
+      'Nested',
+      'nested',
+      `<Drawer trigger="Filters" title="Filters">\n  <Drawer trigger="Choose a color" title="Color">…</Drawer>\n</Drawer>`,
+      'A drawer can open another: the one behind steps back and comes forward again as the front one is dragged away or closed. Escape closes only the front drawer.',
+    ),
+    demo(
       'Snap points',
       'snap',
       `<Drawer\n  trigger="Route"\n  title="Lisbon to Porto"\n  snapPoints={[0.4, 0.9]}\n  scaleBackground\n>\n  <ol>…</ol>\n</Drawer>`,

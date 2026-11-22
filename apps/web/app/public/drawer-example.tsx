@@ -158,6 +158,38 @@ export function DrawerDemo(handle: Handle<DrawerDemoProps>) {
             </ol>
           </Drawer>
         )
+      case 'nested':
+        return (
+          <Drawer
+            trigger="Filters"
+            triggerVariant="secondary"
+            triggerSize={size}
+            title="Filters"
+            description="Narrow the results."
+          >
+            <div class="doc-drawer-filters">
+              <Filters size={size} />
+              <Drawer
+                trigger="Choose a color"
+                triggerVariant="secondary"
+                triggerSize={size}
+                title="Color"
+                description="The drawer behind steps back while this one is open."
+              >
+                <SegmentedControl
+                  label="Color"
+                  size={size}
+                  fill
+                  options={[
+                    { value: 'any', label: 'Any' },
+                    { value: 'light', label: 'Light' },
+                    { value: 'dark', label: 'Dark' },
+                  ]}
+                />
+              </Drawer>
+            </div>
+          </Drawer>
+        )
       case 'snap':
         return (
           <Drawer
