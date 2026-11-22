@@ -3,6 +3,19 @@
    QueuedStack's stacking values. Pointed at or focused, the pile spreads
    out a gap apart. The script writes each toast's depth, height and spread
    offset; the lift turns offsets upward for the bottom positions. */
+/* A swipe writes these on every pointer move. Registered as not inheriting,
+   a change restyles the toast alone rather than its contents too. */
+@property --rf-swipe-x {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+@property --rf-swipe-y {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
 .rf-toaster-region {
   display: block;
   outline: none;
