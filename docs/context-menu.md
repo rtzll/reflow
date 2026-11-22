@@ -38,7 +38,7 @@ Wrap the tree in one `ContextMenu` and identify the rows that can open it. In th
 ## Interaction
 
 - A context click opens the menu at the pointer. Shift+F10 or the Menu key opens it below the focused file row. The surface flips or shifts at viewport edges. Opening gives focus to the named menu list and preserves the tree selection.
-- Arrow keys, typeahead, disabled items, submenus, and activation follow Dropdown. Escape from the root menu returns focus to the invoking row. Tab dismisses and continues through the page. An outside click dismisses and lets the clicked control receive focus.
+- Arrow keys, typeahead, disabled items, submenus, and activation follow Dropdown. Left Arrow closes a submenu; Escape closes the whole menu, submenus included, and returns focus to the invoking row. Tab dismisses and continues through the page. An outside click dismisses and lets the clicked control receive focus.
 - An item’s `icon` accepts a decorative Remix node. Its `shortcut` displays a key hint on the right, including a glyph such as `⌫`. The application supplies the shortcut behavior. Here, Tree already opens a focused file on Enter. Hover over **Copy** or use Right Arrow to enter its submenu. Left Arrow returns to **Copy**.
 - Folders, blank space, inputs, textareas, selects, and editable content keep the browser menu. A descendant that already handled the event takes precedence. On touch, use the platform's context-menu event where available. Tapping a file opens it directly.
 

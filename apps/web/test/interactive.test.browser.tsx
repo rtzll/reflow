@@ -223,8 +223,10 @@ it('flips a dropdown above the trigger and keeps its submenu inside the viewport
       bounds.top >= 0 &&
       bounds.bottom <= innerHeight,
   )
+  // Escape closes the whole menu, submenus included, as Remix UI's menu does.
   await act(() => press(document.activeElement!, 'Escape'))
   await waitFor(() => document.activeElement === trigger)
+  ok(!child.matches(':popover-open') && !popup.matches(':popover-open'))
 })
 
 describe('Dropdown openOnHover', () => {

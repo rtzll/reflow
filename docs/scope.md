@@ -64,6 +64,8 @@ Primitives Reflow checked and does not use, and why:
 - **`listbox` for CommandMenu.** The primitive marks the committed value as selected and clears the highlight when the pointer leaves. CommandMenu runs commands, so it has no committed value, and it keeps the highlighted command marked selected for the input's `aria-activedescendant`.
 - **`form` for Field.** The module is a validation layer, not markup, and it is marked experimental: its API may change in patch releases. Field stays presentational, so its controls can take the module's mixins.
 
+Dropdown and ContextMenu keep the `menu` primitive's Escape: it closes the whole menu, submenus included, and returns focus to the trigger. Left Arrow closes one submenu. The ARIA menu pattern closes one level on Escape; Reflow keeps the primitive's choice on purpose.
+
 Tabs uses the `tabs` primitive but handles its arrow keys first: the primitive selects the tab an arrow moves to, and Reflow's Tabs moves focus only, selecting on Enter, Space or a click.
 
 Toaster uses the `toast` primitive for the region, the dialog semantics of each toast, announcements, F6 and Tab movement, focus recovery and the close timers. Its `toast()` store stays the source of truth: each Toaster mirrors the open toasts into a manager and keeps closed ones rendered until their exit ends. It handles Escape first, so a toast that cannot be dismissed stays and the close reaches `onDismiss`; a toast the primitive closes on its own has timed out and reaches `onAutoClose`. Swipes, the pile and the hotkey stay Reflow's.
