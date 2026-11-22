@@ -235,9 +235,16 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
         },
         {
           name: 'rowSelection',
-          type: '{ label: (row: Row) => string; actions: (rows: readonly Row[], clear: () => void) => RemixNode; selectAllMatching?: boolean }',
+          type: '{ label: (row: Row) => string; actions: (rows: readonly Row[], clear: () => void, selection: DataTableSelection) => RemixNode; selectAllMatching?: boolean }',
           description:
             'Adds native checkboxes for the current page. Render bulk actions for the selected rows in display order. Call clear after success to restore focus. Changing the view or entering loading clears the checks. With selectAllMatching, a full page offers every matching row; that selection lasts across pages and sorting and clears when the filter or matching rows change.',
+          required: false,
+        },
+        {
+          name: 'rowCount',
+          type: 'number',
+          description:
+            'Rows the filter matches when the owner filters, sorts and pages on a server. rows is then the current page as sent; headers, the filter and pagination report state for the owner to apply.',
           required: false,
         },
         {

@@ -65,8 +65,11 @@ export interface DataTableProps<Row> {
   /** Select rows on the current page. A changed view clears the selection. */
   rowSelection?: {
     label: (row: Row) => string
-    /** Receives the selected rows in displayed order: every matching row while all are selected. */
-    actions: (rows: readonly Row[], clear: () => void) => RemixNode
+    /**
+     * Receives the selected rows in displayed order: every matching row while
+     * all are selected, or with rowCount, the loaded rows and `allMatching`.
+     */
+    actions: (rows: readonly Row[], clear: () => void, selection: DataTableSelection) => RemixNode
     /**
      * Once a full page is checked and more rows match, offer to select every
      * matching row. That selection lasts across pages, sorting and page size,
@@ -76,6 +79,18 @@ export interface DataTableProps<Row> {
   }
   paginationLabel?: string
   id?: string
+  /**
+   * Rows the filter matches when the owner filters, sorts and pages on a
+   * server. `rows` is then the current page as sent.
+   */
+  rowCount?: number
+}
+
+export interface DataTableSelection {
+  /** Every row the filter matches is selected, on every page. */
+  allMatching: boolean
+  /** How many rows are selected. */
+  count: number
 }
 
 const collator = new Intl.Collator('en', { numeric: true, sensitivity: 'base' })
@@ -114,39 +129,45 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
   return () => {
     const { label, rows, columns, rowKey, pageSize, size, href, paginationLabel } = handle.props
     const state = handle.props.state ?? local
+    // With rowCount the owner filters, sorts and pages; rows are the page it sent.
+    const server = handle.props.rowCount !== undefined
     const query = state.filter.trim().toLowerCase()
-    const matches = query
-      ? rows.filter((row) =>
-          columns.some((column) => String(column.value(row)).toLowerCase().includes(query)),
-        )
-      : rows
+    const matches = server
+      ? rows
+      : query
+        ? rows.filter((row) =>
+            columns.some((column) => String(column.value(row)).toLowerCase().includes(query)),
+          )
+        : rows
     const sortedColumn = columns.find(
       (column) => column.sortable !== false && column.id === state.sort?.column,
     )
-    const sorted = sortedColumn
-      ? matches.toSorted((a, b) => {
-          const left = sortedColumn.value(a)
-          const right = sortedColumn.value(b)
-          const difference =
-            typeof left === 'number' && typeof right === 'number'
-              ? left === right
-                ? 0
-                : Number.isNaN(left)
-                  ? 1
-                  : Number.isNaN(right)
-                    ? -1
-                    : left - right
-              : collator.compare(String(left), String(right))
-          return state.sort?.direction === 'descending' ? -difference : difference
-        })
-      : matches
+    const sorted =
+      !server && sortedColumn
+        ? matches.toSorted((a, b) => {
+            const left = sortedColumn.value(a)
+            const right = sortedColumn.value(b)
+            const difference =
+              typeof left === 'number' && typeof right === 'number'
+                ? left === right
+                  ? 0
+                  : Number.isNaN(left)
+                    ? 1
+                    : Number.isNaN(right)
+                      ? -1
+                      : left - right
+                : collator.compare(String(left), String(right))
+            return state.sort?.direction === 'descending' ? -difference : difference
+          })
+        : matches
+    const total = server ? Math.max(0, Math.trunc(handle.props.rowCount!) || 0) : sorted.length
     const limit =
       pageSize && Number.isSafeInteger(pageSize) && pageSize > 0
         ? pageSize
-        : Math.max(1, sorted.length)
-    const pageCount = Math.max(1, Math.ceil(sorted.length / limit))
+        : Math.max(1, server ? rows.length : sorted.length)
+    const pageCount = Math.max(1, Math.ceil(total / limit))
     const page = Number.isSafeInteger(state.page) ? Math.min(Math.max(1, state.page), pageCount) : 1
-    const visible = sorted.slice((page - 1) * limit, page * limit)
+    const visible = server ? rows : sorted.slice((page - 1) * limit, page * limit)
     const filterLabel = `Filter ${label}`
 
     function header(column: DataTableColumn<Row>) {
@@ -189,7 +210,7 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
       rowSelection && !loading
         ? JSON.stringify(
             allMatching
-              ? ['all', state.filter, matches.map(rowKey)]
+              ? ['all', state.filter, server ? total : matches.map(rowKey)]
               : [state.filter, state.sort?.column, state.sort?.direction, page, limit, keys],
           )
         : undefined
@@ -251,7 +272,7 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
       selected = new Set(keys)
       adoptView = true
     }
-    const selectedCount = allMatching ? sorted.length : selected.size
+    const selectedCount = allMatching ? total : selected.size
     const pageSelected = !!keys.length && keys.every((key) => selected.has(key))
     function navigateSelection(event: KeyboardEvent, index: number) {
       if (event.key === 'Tab') range.reset()
@@ -467,20 +488,25 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
                 </Button>
               ) : (
                 pageSelected &&
-                sorted.length > keys.length && (
+                total > keys.length && (
                   <Button
                     size="compact"
                     variant="ghost"
                     class="rf-data-select-matching"
                     mix={on('click', () => selectMatching(true))}
                   >
-                    {`Select all ${sorted.length} matching`}
+                    {`Select all ${total} matching`}
                   </Button>
                 )
               ))}
             {rowSelection.actions(
-              allMatching ? sorted : visible.filter((_, index) => selected.has(keys[index]!)),
+              allMatching
+                ? server
+                  ? visible
+                  : sorted
+                : visible.filter((_, index) => selected.has(keys[index]!)),
               clearSelection,
+              { allMatching, count: selectedCount },
             )}
             <Button size="compact" variant="ghost" mix={on('click', clearSelection)}>
               Clear selection
@@ -490,7 +516,7 @@ export function DataTable<Row>(handle: Handle<DataTableProps<Row>>) {
         <span role="status" class="rf-basic-sr-only">
           {loading
             ? 'Loading'
-            : `${sorted.length} ${sorted.length === 1 ? 'result' : 'results'}, page ${page} of ${pageCount}${allMatching ? `, all ${sorted.length} selected` : ''}`}
+            : `${total} ${total === 1 ? 'result' : 'results'}, page ${page} of ${pageCount}${allMatching ? `, all ${total} selected` : ''}`}
         </span>
         <Pagination
           page={page}

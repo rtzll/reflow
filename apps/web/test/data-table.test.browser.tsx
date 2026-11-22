@@ -275,3 +275,68 @@ it('selects every matching row across pages and clears it when the matching rows
   equal(toolbar(), null)
   deepEqual(checked(), [])
 })
+
+it('shows rows from a server as given and selects every matching row by count', async (t) => {
+  // A server with 5 matching people; the table receives one page of 2.
+  const all = [...rows, { name: 'Dee', role: 'Engineer', count: 4 }]
+  let state: DataTableState = { filter: '', sort: null, page: 1 }
+  const requests: DataTableState[] = []
+  const acted: string[] = []
+  let owner: Handle
+  function Server(handle: Handle) {
+    owner = handle
+    return () => {
+      const page = all.slice((state.page - 1) * 2, state.page * 2)
+      return (
+        <DataTable
+          {...props}
+          rows={page}
+          rowCount={all.length}
+          state={state}
+          onStateChange={(next) => {
+            requests.push(next)
+            state = next
+            void handle.update()
+          }}
+          rowSelection={{
+            label: (row) => 'Select ' + row.name,
+            selectAllMatching: true,
+            actions: (selected, _clear, selection) => {
+              acted.push(
+                selected.map((row) => row.name).join('+') +
+                  (selection.allMatching ? ` all ${selection.count}` : ` ${selection.count}`),
+              )
+              return null
+            },
+          }}
+        />
+      )
+    }
+  }
+  const { $, $$, act, cleanup } = render(<Server />)
+  t.after(cleanup)
+  const names = () => Array.from($$('tbody tr td:nth-child(2)'), (cell) => cell.textContent)
+  // Shown as given: Zoe before Amy, no client-side sort or slice.
+  deepEqual(names(), ['Zoe', 'Amy'])
+  ok($('[role=status]')!.textContent!.includes('5 results, page 1 of 3'))
+
+  // Headers and filters ask the owner.
+  await act(() => $('thead th:nth-child(2) button')!.click())
+  deepEqual(requests.at(-1)!.sort, { column: 'name', direction: 'ascending' })
+  deepEqual(names(), ['Zoe', 'Amy'], 'the owner decides the order')
+
+  const all_ = () => $('thead input[type=checkbox]') as HTMLInputElement
+  await act(() => all_().click())
+  equal(acted.at(-1), 'Zoe+Amy 2')
+  const offer = Array.from($$('.rf-data-selection button')).find(
+    (node) => node.textContent === 'Select all 5 matching',
+  ) as HTMLButtonElement
+  ok(offer, 'the offer counts rowCount')
+  await act(() => offer.click())
+  equal(acted.at(-1), 'Zoe+Amy all 5')
+
+  // A different count clears it.
+  all.push({ name: 'Eve', role: 'Designer', count: 1 })
+  await act(() => owner!.update())
+  equal($('.rf-data-selection'), null)
+})
