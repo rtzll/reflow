@@ -2129,14 +2129,10 @@
 .release-week-scroll :is(.rf-time-grid-all-day, .rf-time-grid-all-day-label) {
   position: sticky;
   inset-block-start: 0;
-  align-self: stretch;
   z-index: 3;
   background: var(--rf-surface-2);
   border-block-end: 1px solid var(--rf-border);
   border-radius: 0;
-}
-.release-week-scroll .rf-time-grid-all-day-label {
-  align-content: center;
 }
 .release-week-days {
   display: grid;
