@@ -39,8 +39,26 @@ Wrap the tree in one `ContextMenu` and identify the rows that can open it. In th
 
 - A context click opens the menu at the pointer. Shift+F10 or the Menu key opens it below the focused file row. The surface flips or shifts at viewport edges. Opening gives focus to the named menu list and preserves the tree selection.
 - Arrow keys, typeahead, disabled items, submenus, and activation follow Dropdown. Left Arrow closes a submenu; Escape closes the whole menu, submenus included, and returns focus to the invoking row. Tab dismisses and continues through the page. An outside click dismisses and lets the clicked control receive focus.
-- An item’s `icon` accepts a decorative Remix node. Its `shortcut` displays a key hint on the right, including a glyph such as `⌫`. The application supplies the shortcut behavior. Here, Tree already opens a focused file on Enter. Hover over **Copy** or use Right Arrow to enter its submenu. Left Arrow returns to **Copy**.
+- An item’s `icon` accepts a decorative Remix node. Its `shortcut` displays a key hint on the right, including a glyph such as `⌫`. With `shortcuts` the key runs the item for the focused row; see [Shortcuts](#shortcuts). Here, Tree already opens a focused file on Enter. Hover over **Copy** or use Right Arrow to enter its submenu. Left Arrow returns to **Copy**.
 - Folders, blank space, inputs, textareas, selects, and editable content keep the browser menu. A descendant that already handled the event takes precedence. On touch, use the platform's context-menu event where available. Tapping a file opens it directly.
+
+## Shortcuts
+
+A shortcut hint on an item promises that the key works. With `shortcuts`, ContextMenu keeps that promise for the focused row: pressing an item's shortcut while keyboard focus is on a target row, or inside one, runs that item for the row without opening the menu.
+
+```tsx
+<ContextMenu label="File actions" target="[data-file]" items={fileItems} onSelect={act} shortcuts>
+  …
+</ContextMenu>
+```
+
+- The items are resolved for the focused row, so an item disabled for that row does not run. Items inside submenus run too. An item that opens a submenu has no action of its own and is skipped.
+- `onSelect(value, row, checked?)` receives what a click would send: the value, the row, and for a checkbox or radio item the state it would change to.
+- The shortcut is ignored while focus is in an input, textarea, select or editable content, while composing text, and when a handler inside the row has already handled the key, so a row that acts on Enter itself, as Tree does, keeps doing that alone.
+- A shortcut is written as the hint shows it: glyphs such as `⌘C`, `⇧⌘D` or `⌫`, or names such as `mod+c` or `Delete`. `⌘` matches Command on a Mac and Ctrl elsewhere, the way `mod` does, so one hint serves both.
+- Shortcuts are off by default. A shortcut without modifiers, such as a letter, fires from any focused row, so turn them on only where rows are not also used for typing.
+
+DataTable passes `rowActions.shortcuts` through to its ContextMenu.
 
 ## Reuse and verification
 
