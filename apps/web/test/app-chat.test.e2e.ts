@@ -228,3 +228,36 @@ it('keeps navigation and in-page drafts working when local storage is blocked', 
   await expect(field).toHaveValue('Keep this in the current tab.')
   await expect(field).toBeFocused()
 })
+
+it('anchors a new question, lets the reader scroll back and stops the reply in the workspace', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 390, height: 680 })
+  await open(page, '/apps/chat?thread=photo-sequence')
+  await page.clock.install()
+  const field = page.getByRole('textbox', { name: 'Message' })
+  await field.fill('Help me sequence the photos')
+  await field.press('Enter')
+  const log = page.getByRole('log')
+  const sent = log.getByRole('article', { name: 'You' }).last()
+  await expect
+    .poll(() =>
+      sent.evaluate((node) =>
+        Math.round(
+          node.getBoundingClientRect().top -
+            node.closest('.rf-chat-layout-viewport')!.getBoundingClientRect().top,
+        ),
+      ),
+    )
+    .toBe(16)
+  await page.clock.runFor(400)
+  const view = page.locator('.studio-pane:not([hidden]) .rf-chat-layout-viewport')
+  const held = await view.evaluate((node) => {
+    node.scrollBy(0, -120)
+    return node.scrollTop
+  })
+  await page.clock.runFor(600)
+  expect(await view.evaluate((node) => node.scrollTop)).toBe(held)
+  await page.getByRole('button', { name: 'Stop response' }).click()
+  await expect(log).not.toHaveAttribute('aria-busy', 'true')
+  await expect(log).toContainText('Response stopped')
+})

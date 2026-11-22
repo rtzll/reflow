@@ -232,6 +232,7 @@ function ConversationPane(
   const { thread } = handle.props
 
   let pane: HTMLElement | undefined
+  let hasSent = false
   let response: ChatEntry | undefined
   let timer: ReturnType<typeof setInterval> | undefined
   handle.signal.addEventListener('abort', () => clearInterval(timer), { once: true })
@@ -266,6 +267,7 @@ function ConversationPane(
   }
 
   function send(text: string) {
+    hasSent = true
     // Sending a queued message immediately also ends the preceding reply.
     if (response) finish(true)
     const subject = thread.messages.length
@@ -299,6 +301,8 @@ function ConversationPane(
       >
         <ChatLayout
           label={thread.title}
+          scroll={hasSent ? 'anchor' : 'follow'}
+          busy={!!response}
           composer={
             <>
               {!thread.messages.length && <h2 class="studio-welcome">Where should we begin?</h2>}
@@ -388,9 +392,7 @@ function ConversationPane(
             <ChatMessage key={index} role={message.role} animate={false}>
               {message.role === 'assistant' && <strong class="studio-author">Reflow</strong>}
               {message.role === 'assistant' ? (
-                <div aria-busy={message === response || undefined}>
-                  <Markdown source={message.text} />
-                </div>
+                <Markdown source={message.text} />
               ) : (
                 <span>{message.text}</span>
               )}
