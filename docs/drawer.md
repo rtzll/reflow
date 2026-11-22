@@ -1,6 +1,6 @@
 # Drawer
 
-Drawer is a modal panel attached to one edge of the screen, built on the native `<dialog>` like Dialog. It follows a drag toward its edge and closes past a quarter of its size or on a quick flick. This note covers the two additions on top of that: snap points and background scaling.
+Drawer is a modal panel attached to one edge of the screen, built on the native `<dialog>` like Dialog. It follows a drag toward its edge and closes past a quarter of its size or on a quick flick. Top and bottom drawers support snap points. A bottom drawer can scale the page behind it, and a nested drawer can step its parent back.
 
 ## Snap points
 

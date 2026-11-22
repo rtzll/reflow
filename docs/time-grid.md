@@ -14,9 +14,9 @@ Set `--rf-time-grid-hour-size` and `--rf-time-grid-gutter` to align a custom hea
 
 ## All-day events
 
-A calendar also holds events with no time of day: a holiday, a deadline, a trip. Mark an event `allDay: true` and TimeGrid ignores its `start` and `duration` and shows it in a strip above the hours, in its day's column. `span` makes it cover several consecutive days, such as a three-day trip; it is cut off at the last column. Events that share a day stack in rows, and the strip grows to fit them. The strip is labelled "All day" in the time gutter and appears only when there is an all-day event.
+A calendar also holds events with no time of day: a holiday, a deadline, a trip. Mark an event `allDay: true` and TimeGrid ignores its `start` and `duration` and shows it in a strip above the hours, in its day's column. `span` makes it cover several consecutive days, such as a three-day trip; it is cut off at the last column. Events that share a day stack in rows, and the strip grows to fit them. The strip is labelled "All day" in the time gutter and appears when it has an event or accepts new ones.
 
-All-day events take the same callbacks as timed ones: a click or Space selects, Enter activates, and `getEventLabel` and `getEventClass` apply. With `onEventChange`, Left and Right Arrow move one by a day and a horizontal drag moves it by whole days; the request keeps `allDay`, `span` and every other field. They cannot be resized, and dragging on the strip creates nothing. The default label reads "Title, Monday, all day", or "Title, Monday to Wednesday, all day" for a span. With `compactDay`, the strip shows only the events that cover the chosen day.
+All-day events take the same callbacks as timed ones: a click or Space selects, Enter activates, and `getEventLabel` and `getEventClass` apply. With `onEventChange`, Left and Right Arrow move one by a day and a horizontal drag moves it by whole days; the request keeps `allDay`, `span` and every other field. The trailing handle and Shift with Left or Right Arrow adjust its span. The default label reads "Title, Monday, all day", or "Title, Monday to Wednesday, all day" for a span. With `compactDay`, the strip shows only the events that cover the chosen day.
 
 ### Creating and resizing all-day events
 
