@@ -295,6 +295,9 @@
 .rf-color-field[data-scrub] .rf-color-field-body {
   padding-inline: 8px;
   cursor: ew-resize;
+  /* A finger scrubs sideways and still scrolls the page up and down, as on
+     NumberField; without this the browser can take a sideways pan for itself. */
+  touch-action: pan-y;
 }
 
 /* The drawn cursor of a locked-pointer scrub. */
