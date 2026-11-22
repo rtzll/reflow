@@ -171,15 +171,18 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
   let cursor: TimeGridRange | undefined
   let hoverPoint: Pick<PointerEvent, 'clientX' | 'clientY'> | undefined
   let pointerAtRest = false
+  let refreshHoverLayout: () => void
+  function pointerOverOpenTime() {
+    const root = board.getRootNode() as Document | ShadowRoot
+    return (
+      hoverPoint &&
+      board.isConnected &&
+      root.elementFromPoint(hoverPoint.clientX, hoverPoint.clientY) === board
+    )
+  }
   const hover = hoverIntent(handle.signal, {
     open() {
-      // Scrolling can move an appointment or the sticky header under a stationary pointer.
-      const root = board.getRootNode() as Document | ShadowRoot
-      if (
-        !hoverPoint ||
-        !board.isConnected ||
-        root.elementFromPoint(hoverPoint.clientX, hoverPoint.clientY) !== board
-      ) {
+      if (!pointerOverOpenTime()) {
         clearHover()
         return
       }
@@ -201,6 +204,21 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
     hoverPoint = undefined
     restartHover()
   }
+  function positionHoverLabel() {
+    const marker = board.querySelector<HTMLElement>('.rf-time-grid-hover')
+    const label = marker?.firstElementChild
+    if (!marker || !(label instanceof HTMLElement)) return
+    const edge = marker.getBoundingClientRect().bottom
+    const visibleTop = Math.max(
+      0,
+      board.getBoundingClientRect().top,
+      strip?.getBoundingClientRect().bottom ?? 0,
+    )
+    const above = -label.getBoundingClientRect().height - 2
+    // When the snapped line is partly behind the pinned strip, clear its lower edge too.
+    label.style.top =
+      (edge + above >= visibleTop ? above : Math.max(0, visibleTop - edge) + 2) + 'px'
+  }
   let statusMessage = ''
   let suppressClick = false
   const boardHelpId = handle.id + '-board-help'
@@ -210,7 +228,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
     board = node as HTMLDivElement
     const view = board.ownerDocument.defaultView
     const onLayoutChange = () => {
-      if (hoverPoint) restartHover()
+      if (hoverPoint) refreshHoverLayout()
     }
     board.ownerDocument.addEventListener('scroll', onLayoutChange, { capture: true, signal })
     view?.addEventListener('resize', onLayoutChange, { signal })
@@ -380,6 +398,18 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
         ? slotAt(hoverPoint)?.range
         : undefined
 
+    function inVisibleHoverSlot() {
+      if (!hoverRange || !hoverPoint) return false
+      const next = slotAt(hoverPoint)?.range
+      return next?.day === hoverRange.day && next.start === hoverRange.start
+    }
+    refreshHoverLayout = () => {
+      if (!pointerOverOpenTime()) clearHover()
+      else if (inVisibleHoverSlot()) positionHoverLabel()
+      else restartHover()
+    }
+    if (hoverRange) handle.queueTask(positionHoverLabel)
+
     function begin(e: PointerEvent, event?: E) {
       clearHover()
       suppressClick = false
@@ -431,7 +461,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
         return
       }
       hoverPoint = { clientX: e.clientX, clientY: e.clientY }
-      restartHover()
+      if (!inVisibleHoverSlot()) restartHover()
     }
 
     // Update the gesture preview from the pointer; reports whether it applied.
@@ -993,7 +1023,6 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
             <div
               class="rf-time-grid-hover"
               aria-hidden="true"
-              data-first={hoverRange.start === first || undefined}
               style={{ '--day': hoverRange.day, top: placement(hoverRange).top }}
             >
               <span>{clock(hoverRange.start)}</span>

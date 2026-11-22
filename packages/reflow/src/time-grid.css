@@ -71,17 +71,12 @@
 .rf-time-grid-hover span {
   position: absolute;
   right: 0;
-  bottom: 2px;
   padding-inline: 3px;
   border-radius: 2px;
   background: var(--rf-surface-2);
   color: var(--rf-fg);
   font: 600 10px/1.4 var(--rf-font);
   font-variant-numeric: tabular-nums;
-}
-.rf-time-grid-hover[data-first] span {
-  top: 1px;
-  bottom: auto;
 }
 .rf-time-grid-readout {
   position: absolute;

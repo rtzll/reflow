@@ -155,6 +155,9 @@ it('limits the hover line to pointer input on the displayed compact day', async 
   expect(marker.x).toBeGreaterThanOrEqual(rect.x)
   expect(marker.x + marker.width).toBeLessThanOrEqual(rect.x + rect.width)
   expect(marker.width).toBeGreaterThan(rect.width * 0.9)
+  await page.mouse.move(x + 3, y + 2)
+  await page.clock.runFor(32)
+  expect(await line.allTextContents()).toEqual(['10:00'])
   await page.keyboard.press('Escape')
   await expect(line).toHaveCount(0)
   await expect(page.getByRole('dialog')).toHaveCount(0)
@@ -168,9 +171,18 @@ it('previews a dragged time range and opens a new event with its day, start, and
   const rect = (await board.boundingBox())!
   const hour = rect.height / 8
   const sunday = rect.x + (rect.width * 6.5) / 7
-  await page.mouse.move(sunday, rect.y + hour * 1.28)
   const hover = board.locator('.rf-time-grid-hover')
+  const strip = page.getByRole('group', { name: 'Timed events, all day' })
+  const header = (await strip.boundingBox())!
+  await page.mouse.move(sunday, rect.y + 4)
+  await expect(hover).toHaveText('09:00')
+  const firstLabel = (await hover.locator('span').boundingBox())!
+  expect(firstLabel.y).toBeGreaterThanOrEqual(header.y + header.height)
+  expect(firstLabel.y).toBeGreaterThan((await hover.boundingBox())!.y)
+  await page.mouse.move(sunday, rect.y + hour * 1.28)
   await expect(hover).toHaveText('10:15')
+  const secondLabel = (await hover.locator('span').boundingBox())!
+  expect(secondLabel.y + secondLabel.height).toBeLessThanOrEqual((await hover.boundingBox())!.y)
   await page.mouse.down()
   const range = board.locator('.rf-time-grid-range')
   await expect(range).toHaveText('10:15–10:30')

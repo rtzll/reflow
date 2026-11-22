@@ -13,7 +13,10 @@ it('books a room in a single day with half-hour range selection', async (t) => {
   const rect = (await board.boundingBox())!
   const x = rect.x + rect.width / 2
   await page.mouse.move(x, rect.y + rect.height * 0.52)
-  await expect(board.locator('.rf-time-grid-hover')).toHaveText('11:00')
+  const preview = board.locator('.rf-time-grid-hover')
+  await expect(preview).toHaveText('11:00')
+  await page.mouse.move(x + 2, rect.y + rect.height * 0.53)
+  expect(await preview.count()).toBe(1)
   await page.mouse.down()
   await page.mouse.move(x, rect.y + rect.height * 0.875)
   await expect(board.locator('.rf-time-grid-range')).toHaveText('11:00–12:30')
@@ -51,6 +54,11 @@ it('shows the snapped start after the pointer rests in an empty day column', asy
   expect(marker.y).toBeCloseTo(startY, 0)
   expect(marker.x).toBeGreaterThanOrEqual(rect.x + column)
   expect(marker.x + marker.width).toBeLessThanOrEqual(rect.x + 2 * column)
+  const time = (await line.locator('span').boundingBox())!
+  expect(time.y + time.height).toBeLessThanOrEqual(marker.y)
+  await page.mouse.move(x + 1, startY + 5)
+  await page.clock.runFor(32)
+  expect(await line.allTextContents()).toEqual(['10:15'])
   await expect(board.locator('.rf-time-grid-range')).toHaveCount(0)
 
   await page.mouse.down()
@@ -74,6 +82,12 @@ it('shows the snapped start after the pointer rests in an empty day column', asy
   await page.mouse.move(x, startY + hour)
   await page.clock.runFor(300)
   await expect(line).toHaveText('11:15')
+  // The same clock time in another column is a different slot.
+  await page.mouse.move(x + column, startY + hour)
+  await page.clock.runFor(32)
+  expect(await line.count()).toBe(0)
+  await page.clock.runFor(300)
+  await expect(line).toHaveText('11:15')
   await viewport.evaluate(async (node, distance) => {
     const scrolled = new Promise<void>((resolve) =>
       node.addEventListener('scroll', () => resolve(), { once: true }),
@@ -83,6 +97,35 @@ it('shows the snapped start after the pointer rests in an empty day column', asy
   }, hour)
   await page.clock.runFor(400)
   await expect(line).toHaveText('12:15')
+})
+
+it('keeps the hover time below the pinned all-day row when it covers the top of a slot', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await open(page, '/docs/time-grid')
+  const viewport = page.locator('.release-week-scroll')
+  await viewport.scrollIntoViewIfNeeded()
+  const board = viewport.getByRole('group', { name: 'Release week', exact: true })
+  const strip = viewport.getByRole('group', { name: 'Release week, all day' })
+  const hour = (await board.boundingBox())!.height / 24
+  await viewport.evaluate((node, hour) => {
+    node.scrollTop = 8 * hour + 5
+  }, hour)
+  const header = (await strip.boundingBox())!
+  const visibleTop = header.y + header.height
+  const x = header.x + (header.width * 5) / 6
+  await page.mouse.move(x, visibleTop + 5)
+  const line = board.locator('.rf-time-grid-hover')
+  await expect(line).toHaveText('08:00')
+  const rule = (await line.boundingBox())!
+  const label = (await line.locator('span').boundingBox())!
+  expect(rule.y).toBeLessThan(visibleTop)
+  expect(label.y).toBeGreaterThanOrEqual(visibleTop)
+  expect(label.y).toBeLessThan(visibleTop + 5)
+  await page.mouse.move(x, visibleTop + hour + 3)
+  await expect(line).toHaveText('09:00')
+  const nextLabel = (await line.locator('span').boundingBox())!
+  expect(nextLabel.y + nextLabel.height).toBeLessThanOrEqual((await line.boundingBox())!.y)
 })
 
 it('does not create an event from a click on open time', async (t) => {
