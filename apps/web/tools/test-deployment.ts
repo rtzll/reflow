@@ -165,6 +165,11 @@ try {
   await expect(start).toBeEnabled()
   await expect(buttonExample.locator('.example-status')).toHaveCount(0)
 
+  await expect(page.locator('head link[rel="describedby"]')).toHaveAttribute('href', '/llms.txt')
+  await page.getByRole('link', { name: 'Markdown index', exact: true }).click()
+  await expect(page).toHaveURL(origin + '/llms.txt')
+  await expect(page.locator('body')).toContainText('# Reflow')
+
   await openShowcase('/docs/button')
   await page
     .locator('.site-right .doc-playground-controls')

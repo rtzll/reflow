@@ -603,6 +603,13 @@ function Gallery(
             >
               See demo
             </a>
+            <a
+              class="site-button site-button-ghost"
+              href={routes.docsIndex.href()}
+              data-rmx-document
+            >
+              Markdown index
+            </a>
           </div>
         </header>
         {entries.length ? (
