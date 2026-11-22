@@ -20,6 +20,10 @@ function pointer(node: Element, type: string, init: PointerEventInit = {}) {
   )
 }
 
+function press(node: Element, key: string) {
+  node.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }))
+}
+
 // Drags from the middle of the panel by dx, dy in a few steps.
 function center(panel: HTMLElement) {
   const rect = panel.getBoundingClientRect()
@@ -203,5 +207,155 @@ describe('Drawer', () => {
     open = false
     await view!.update()
     await waitFor(() => !panel.open)
+  })
+})
+
+describe('Drawer snap points', () => {
+  const offset = (panel: HTMLElement) =>
+    parseFloat(panel.style.getPropertyValue('--rf-drawer-drag'))
+
+  it('opens at the first point and settles at the nearest one after a drag', async (t) => {
+    const changes: number[] = []
+    const { $, cleanup } = render(
+      <Drawer
+        trigger="Open"
+        title="Route"
+        defaultOpen
+        snapPoints={['100px', '300px']}
+        onSnapChange={(index) => changes.push(index)}
+      >
+        <div style="height: 600px">Body</div>
+      </Drawer>,
+    )
+    t.after(cleanup)
+    const panel = $('dialog.rf-drawer') as HTMLDialogElement
+    await waitFor(() => panel.open)
+    equal(offset(panel), 200, 'rests at the first point, the rest below the edge')
+    equal(panel.dataset.snap, '0')
+
+    // A slow drag up most of the way settles at the larger point.
+    await drag(panel, 0, -150, 600)
+    await waitFor(() => offset(panel) === 0)
+    equal(panel.dataset.snap, '1')
+    equal(changes.join(), '1')
+
+    // Past the largest point it resists.
+    const { clientX, clientY } = center(panel)
+    pointer(panel, 'pointerdown', { clientX, clientY })
+    pointer(panel, 'pointermove', { clientX, clientY: clientY - 50 })
+    pointer(panel, 'pointermove', { clientX, clientY: clientY - 100 })
+    ok(offset(panel) < 0 && offset(panel) > -30, `resisted to ${offset(panel)}px`)
+    pointer(panel, 'pointerup', { clientX, clientY: clientY - 100 })
+    await waitFor(() => offset(panel) === 0)
+
+    // A quick flick down moves one point, not straight to closed.
+    await drag(panel, 0, 40, 30)
+    await waitFor(() => offset(panel) === 200)
+    ok(panel.open)
+    equal(changes.join(), '1,0')
+
+    // From the smallest point, a drag past a quarter of its height closes it.
+    await drag(panel, 0, 80, 600)
+    await waitFor(() => !panel.open)
+  })
+
+  it('lets a drawer that is not dismissible move between points but not close', async (t) => {
+    const { $, cleanup } = render(
+      <Drawer
+        trigger="Open"
+        title="Required"
+        defaultOpen
+        dismissible={false}
+        snapPoints={['100px', '300px']}
+      >
+        <div style="height: 600px">Body</div>
+      </Drawer>,
+    )
+    t.after(cleanup)
+    const panel = $('dialog.rf-drawer') as HTMLDialogElement
+    await waitFor(() => panel.open)
+    await drag(panel, 0, -180, 600)
+    await waitFor(() => offset(panel) === 0)
+    await drag(panel, 0, 380, 60)
+    await waitFor(() => offset(panel) === 200)
+    await pause(40)
+    ok(panel.open)
+  })
+
+  it('steps between points from the handle with clicks and arrow keys', async (t) => {
+    const { $, act, cleanup } = render(
+      <Drawer trigger="Open" title="Route" defaultOpen snapPoints={['100px', '200px', '300px']}>
+        <div style="height: 600px">Body</div>
+      </Drawer>,
+    )
+    t.after(cleanup)
+    const panel = $('dialog.rf-drawer') as HTMLDialogElement
+    await waitFor(() => panel.open)
+    const handle = $('button.rf-drawer-handle') as HTMLButtonElement
+    equal(handle.getAttribute('aria-label'), 'Expand drawer')
+    equal(handle.getAttribute('aria-expanded'), 'false')
+    equal(handle.getAttribute('aria-controls'), panel.id)
+
+    await act(() => handle.click())
+    await waitFor(() => offset(panel) === 100)
+    await act(() => press(handle, 'ArrowUp'))
+    await waitFor(() => offset(panel) === 0)
+    equal(handle.getAttribute('aria-label'), 'Collapse drawer')
+    equal(handle.getAttribute('aria-expanded'), 'true')
+    // Up at the largest point stays; a click wraps to the first.
+    await act(() => press(handle, 'ArrowUp'))
+    equal(offset(panel), 0)
+    await act(() => handle.click())
+    await waitFor(() => offset(panel) === 200)
+    await act(() => press(handle, 'ArrowDown'))
+    equal(offset(panel), 200, 'Down at the smallest point does not close')
+    ok(panel.open)
+  })
+
+  it('follows a controlled snap index', async (t) => {
+    let snap = 1
+    let view: Handle | undefined
+    function Controlled(handle: Handle) {
+      view = handle
+      return () => (
+        <Drawer
+          title="Controlled"
+          defaultOpen
+          snapPoints={['100px', '300px']}
+          snap={snap}
+          onSnapChange={(next) => {
+            snap = next
+            void handle.update()
+          }}
+        >
+          <div style="height: 600px">Body</div>
+        </Drawer>
+      )
+    }
+    const { $, act, cleanup } = render(<Controlled />)
+    t.after(cleanup)
+    const panel = $('dialog.rf-drawer') as HTMLDialogElement
+    await waitFor(() => panel.open && offset(panel) === 0)
+    snap = 0
+    await act(() => view!.update())
+    await waitFor(() => offset(panel) === 200)
+  })
+
+  it('scales a marked page back while a bottom drawer is open', async (t) => {
+    const { $, act, cleanup } = render(
+      <div data-rf-drawer-background>
+        <Drawer trigger="Open" title="Sheet" scaleBackground>
+          <p>Body</p>
+        </Drawer>
+      </div>,
+    )
+    t.after(cleanup)
+    const root = document.documentElement
+    ok(!root.hasAttribute('data-rf-drawer-scaled'))
+    await act(() => ($('button[aria-haspopup]') as HTMLButtonElement).click())
+    const panel = $('dialog.rf-drawer') as HTMLDialogElement
+    await waitFor(() => panel.open && root.hasAttribute('data-rf-drawer-scaled'))
+    panel.dispatchEvent(new Event('cancel', { cancelable: true }))
+    await waitFor(() => !panel.open && !root.hasAttribute('data-rf-drawer-scaled'))
   })
 })

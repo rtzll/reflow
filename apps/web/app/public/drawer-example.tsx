@@ -46,6 +46,16 @@ function Navigation() {
   )
 }
 
+const routeSteps = [
+  'Walk to Santa Apolónia, 6 min',
+  'Alfa Pendular to Coimbra-B, 1 h 40 min',
+  'Change platforms, 9 min',
+  'Intercidades to Porto Campanhã, 1 h 4 min',
+  'Metro line F to Trindade, 8 min',
+  'Walk to Rua de Cedofeita, 5 min',
+  'Arrive at 14:52',
+]
+
 const sideTitles: Record<DrawerSide, string> = {
   bottom: 'Filters',
   top: 'Announcement',
@@ -144,6 +154,24 @@ export function DrawerDemo(handle: Handle<DrawerDemoProps>) {
             <ol class="doc-drawer-notes">
               {Array.from({ length: 24 }, (_, index) => (
                 <li key={index}>Change {24 - index}: a small fix with its tests.</li>
+              ))}
+            </ol>
+          </Drawer>
+        )
+      case 'snap':
+        return (
+          <Drawer
+            trigger="Route"
+            triggerVariant="secondary"
+            triggerSize={size}
+            title="Lisbon to Porto"
+            description="3 h 12 min by train, 2 changes."
+            snapPoints={[0.4, 0.9]}
+            scaleBackground
+          >
+            <ol class="doc-drawer-notes">
+              {routeSteps.map((step) => (
+                <li key={step}>{step}</li>
               ))}
             </ol>
           </Drawer>

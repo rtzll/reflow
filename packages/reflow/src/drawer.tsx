@@ -38,7 +38,26 @@ export interface DrawerProps {
   open?: boolean
   defaultOpen?: boolean
   onOpenChange?: (open: boolean) => void
+  /**
+   * Resting heights for a top or bottom drawer, smallest first: a share of the
+   * viewport height such as `0.4`, or pixels such as `'320px'`. The panel is
+   * as tall as the largest and rests at the current one.
+   */
+  snapPoints?: readonly DrawerSnapPoint[]
+  /** The index of the current snap point, when controlled by the parent. */
+  snap?: number
+  /** The snap point it opens at when uncontrolled. Default 0. */
+  defaultSnap?: number
+  /** Called when a drag, the handle or its arrow keys move to another snap point. */
+  onSnapChange?: (index: number) => void
+  /**
+   * Scales the element marked `data-rf-drawer-background` back while a bottom
+   * drawer is open, as iOS sheets do.
+   */
+  scaleBackground?: boolean
 }
+
+export type DrawerSnapPoint = number | `${number}px`
 
 // A release past this share of the panel's size, or faster than this many
 // pixels per millisecond, closes it; anything less springs back.
@@ -49,6 +68,9 @@ const interactive =
 
 interface Drag {
   pointer: number
+  // Where the panel rested when the drag began, and at which snap point.
+  start: number
+  snap: number
   x: number
   y: number
   started: boolean
@@ -70,7 +92,10 @@ interface Drag {
  */
 export function Drawer(handle: Handle<DrawerProps>) {
   let internalOpen = handle.props.defaultOpen ?? false
+  let internalSnap = handle.props.defaultSnap ?? 0
   let drag: Drag | undefined
+  let element: HTMLDialogElement | null = null
+  let scaled = false
   const id = handle.id
   const titleId = `${id}-title`
   const descriptionId = `${id}-description`
@@ -89,12 +114,103 @@ export function Drawer(handle: Handle<DrawerProps>) {
     requestOpen(false)
   }
 
+  const snapping = () =>
+    (side() === 'bottom' || side() === 'top') && (handle.props.snapPoints?.length ?? 0) > 0
+
+  // Each snap point's height in pixels, never taller than the drawer may be.
+  function heights() {
+    const room = Math.max(0, innerHeight - 48)
+    return (handle.props.snapPoints ?? []).map((point) =>
+      Math.min(room, typeof point === 'number' ? point * innerHeight : parseFloat(point)),
+    )
+  }
+
+  function currentSnap() {
+    const last = (handle.props.snapPoints?.length ?? 1) - 1
+    return Math.min(last, Math.max(0, handle.props.snap ?? internalSnap))
+  }
+
+  function requestSnap(index: number) {
+    if (index === currentSnap()) return
+    internalSnap = index
+    handle.props.onSnapChange?.(index)
+    void handle.update()
+  }
+
+  // Sizes the panel for its largest point and rests it at the current one.
+  function applySnap(dialog: HTMLDialogElement) {
+    if (!snapping()) {
+      dialog.style.removeProperty('--rf-drawer-height')
+      delete dialog.dataset.snap
+      dialog.removeAttribute('data-snap-full')
+      return
+    }
+    if (drag?.started) return
+    const sizes = heights()
+    const tallest = sizes[sizes.length - 1]!
+    const index = currentSnap()
+    dialog.style.setProperty('--rf-drawer-height', `${Math.round(tallest)}px`)
+    dialog.dataset.snap = String(index)
+    dialog.toggleAttribute('data-snap-full', index === sizes.length - 1)
+    setDrag(dialog, tallest - sizes[index]!)
+  }
+
+  // Pushes the marked page back while a bottom drawer with scaleBackground is open.
+  function syncScale() {
+    const root = document.documentElement
+    const next = open() && !!handle.props.scaleBackground && side() === 'bottom'
+    if (next === scaled) return
+    scaled = next
+    root.toggleAttribute('data-rf-drawer-scaled', next)
+    if (!next) {
+      root.removeAttribute('data-rf-drawer-dragging')
+      root.style.removeProperty('--rf-drawer-scale')
+    }
+  }
+
+  handle.signal.addEventListener('abort', () => {
+    if (!scaled) return
+    scaled = false
+    const root = document.documentElement
+    root.removeAttribute('data-rf-drawer-scaled')
+    root.removeAttribute('data-rf-drawer-dragging')
+    root.style.removeProperty('--rf-drawer-scale')
+  })
+
+  // While dragged, the scaled page eases back toward its place.
+  function scaleProgress(progress: number | undefined) {
+    if (!scaled) return
+    const root = document.documentElement
+    root.toggleAttribute('data-rf-drawer-dragging', progress !== undefined)
+    if (progress === undefined) root.style.removeProperty('--rf-drawer-scale')
+    else root.style.setProperty('--rf-drawer-scale', String(1 - progress))
+  }
+
+  // Arrow keys on the handle: toward the open side expands.
+  function snapKey(event: KeyboardEvent) {
+    const expand = side() === 'bottom' ? 'ArrowUp' : 'ArrowDown'
+    const collapse = side() === 'bottom' ? 'ArrowDown' : 'ArrowUp'
+    if (event.key !== expand && event.key !== collapse) return
+    event.preventDefault()
+    const last = (handle.props.snapPoints?.length ?? 1) - 1
+    const index = currentSnap() + (event.key === expand ? 1 : -1)
+    requestSnap(Math.min(last, Math.max(0, index)))
+  }
+
+  function cycleSnap() {
+    const count = handle.props.snapPoints?.length ?? 1
+    requestSnap((currentSnap() + 1) % count)
+  }
+
   const panel = modal({
     open,
     onClose: close,
     closeOnEscape: dismissible,
     closeOnBackdrop: dismissible,
-    beforeOpen: (dialog) => setDrag(dialog, 0),
+    beforeOpen: (dialog) => {
+      setDrag(dialog, 0)
+      applySnap(dialog)
+    },
   })
 
   function setDrag(element: HTMLElement, offset: number, size = 1) {
@@ -149,6 +265,7 @@ export function Drawer(handle: Handle<DrawerProps>) {
     drag = undefined
     if (!current.started) return
     element.removeAttribute('data-dragging')
+    scaleProgress(undefined)
     const now = performance.now()
     // Held still before letting go, the throw has no speed left.
     const velocity =
@@ -156,6 +273,10 @@ export function Drawer(handle: Handle<DrawerProps>) {
         ? 0
         : (current.offset - current.previousOffset) /
           Math.max(1, current.time - current.previousTime)
+    if (snapping()) {
+      settleSnap(element, current, velocity)
+      return
+    }
     if (
       current.offset > 0 &&
       (current.offset > current.size * closeShare || velocity > flickVelocity)
@@ -166,29 +287,76 @@ export function Drawer(handle: Handle<DrawerProps>) {
     setDrag(element, 0)
   }
 
+  // A flick moves one point; otherwise the nearest point wins. Past a quarter
+  // of the smallest point, or flicked down from it, the drawer closes.
+  function settleSnap(element: HTMLDialogElement, current: Drag, velocity: number) {
+    const sizes = heights()
+    const tallest = sizes[sizes.length - 1]!
+    const rests = sizes.map((size) => tallest - size)
+    let target: number
+    if (Math.abs(velocity) > flickVelocity) {
+      target = current.snap + (velocity > 0 ? -1 : 1)
+    } else if (current.offset > rests[0]! + sizes[0]! * closeShare) {
+      target = -1
+    } else {
+      target = 0
+      rests.forEach((rest, index) => {
+        if (Math.abs(current.offset - rest) < Math.abs(current.offset - rests[target]!))
+          target = index
+      })
+    }
+    if (target < 0 && dismissible()) {
+      close()
+      return
+    }
+    target = Math.min(sizes.length - 1, Math.max(0, target))
+    if (target === currentSnap()) applySnap(element)
+    else requestSnap(target)
+  }
+
   // Follows a drag toward the drawer's edge. The modal behavior handles the rest.
-  const dragMix = ref((element, signal) => {
+  const dragMix = ref((node, signal) => {
+    element = node instanceof HTMLDialogElement ? node : null
+    signal.addEventListener('abort', () => {
+      if (element === node) element = null
+    })
+    attachDrag(node, signal)
+  })
+
+  function attachDrag(element: Element, signal: AbortSignal) {
     if (!(element instanceof HTMLDialogElement)) return
     const options = { signal }
+    addEventListener(
+      'resize',
+      () => {
+        if (element.open && snapping()) applySnap(element)
+      },
+      options,
+    )
     element.addEventListener(
       'pointerdown',
       (event) => {
-        if (onBackdrop(event, element) || !dismissible() || event.button !== 0) return
+        if (onBackdrop(event, element) || event.button !== 0) return
+        if (!dismissible() && !snapping()) return
         const target = event.target
-        if (!(target instanceof Element) || target.closest(interactive)) return
+        if (!(target instanceof Element)) return
+        if (target.closest(interactive) && !target.closest('.rf-drawer-handle')) return
         if (scrollsFirst(target, element)) return
         const rect = element.getBoundingClientRect()
         const now = performance.now()
+        const start = parseFloat(element.style.getPropertyValue('--rf-drawer-drag')) || 0
         drag = {
           pointer: event.pointerId,
+          start,
+          snap: currentSnap(),
           x: event.clientX,
           y: event.clientY,
           started: false,
-          offset: 0,
+          offset: start,
           size: side() === 'bottom' || side() === 'top' ? rect.height : rect.width,
           time: now,
           previousTime: now,
-          previousOffset: 0,
+          previousOffset: start,
         }
       },
       options,
@@ -214,25 +382,46 @@ export function Drawer(handle: Handle<DrawerProps>) {
           }
         }
         // Toward the edge it follows the pointer; away from it, it resists.
-        const offset = along >= 0 ? along : along / (1 + Math.abs(along) / 24)
+        const resist = (distance: number) => distance / (1 + Math.abs(distance) / 24)
+        let offset = drag.start + along
+        let progress: number
+        if (snapping()) {
+          const sizes = heights()
+          const lowest = sizes[sizes.length - 1]! - sizes[0]!
+          if (offset < 0) offset = resist(offset)
+          // A drawer that cannot close resists past its smallest point too.
+          else if (!dismissible() && offset > lowest) offset = lowest + resist(offset - lowest)
+          progress = Math.min(1, Math.max(0, (offset - lowest) / sizes[0]!))
+        } else {
+          offset = along >= 0 ? along : resist(along)
+          progress = Math.min(1, Math.max(0, offset / drag.size))
+        }
         drag.previousOffset = drag.offset
         drag.previousTime = drag.time
         drag.offset = offset
         drag.time = performance.now()
-        setDrag(element, offset, drag.size)
+        element.style.setProperty('--rf-drawer-drag', `${Math.round(offset)}px`)
+        element.style.setProperty('--rf-drawer-progress', String(progress))
+        scaleProgress(progress)
       },
       options,
     )
     element.addEventListener('pointerup', (event) => endDrag(event, element), options)
     element.addEventListener('pointercancel', (event) => endDrag(event, element), options)
-  })
+  }
 
   return () => {
     const props = handle.props
-    handle.queueTask(panel.sync)
+    handle.queueTask(() => {
+      panel.sync()
+      if (element?.open) applySnap(element)
+      syncScale()
+    })
     const footer = typeof props.footer === 'function' ? props.footer(close) : props.footer
     const vertical = side() === 'bottom' || side() === 'top'
-    const showHandle = props.handle ?? (vertical && dismissible())
+    const snaps = snapping()
+    const showHandle = props.handle ?? (vertical && (dismissible() || snaps))
+    const expanded = snaps && currentSnap() === (props.snapPoints?.length ?? 1) - 1
     const showClose = props.showCloseButton ?? (!vertical && !props.flush)
     const triggerProps: DrawerTriggerProps = {
       'aria-haspopup': 'dialog',
@@ -263,7 +452,19 @@ export function Drawer(handle: Handle<DrawerProps>) {
           aria-describedby={props.description ? descriptionId : undefined}
           mix={[panel.dialog, dragMix]}
         >
-          {showHandle && <div class="rf-drawer-handle" aria-hidden="true" />}
+          {showHandle &&
+            (snaps ? (
+              <button
+                type="button"
+                class="rf-drawer-handle"
+                aria-label={expanded ? 'Collapse drawer' : 'Expand drawer'}
+                aria-expanded={expanded}
+                aria-controls={id}
+                mix={[on('click', cycleSnap), on<HTMLButtonElement, 'keydown'>('keydown', snapKey)]}
+              />
+            ) : (
+              <div class="rf-drawer-handle" aria-hidden="true" />
+            ))}
           <header class="rf-drawer-header">
             <h2 id={titleId}>{props.title}</h2>
             {props.description && <p id={descriptionId}>{props.description}</p>}

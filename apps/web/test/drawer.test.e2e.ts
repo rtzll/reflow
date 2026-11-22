@@ -139,3 +139,34 @@ for (const [side, button, title] of [
     await releaseMotion(page)
   })
 }
+
+it('rests a drawer at its snap points and scales the page back while it is open', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1280, height: 800 })
+  // Scaling the page back is motion, so reduced motion would turn it off.
+  await open(page, '/docs/drawer', { motion: true })
+  await page.locator('#snap-points').getByRole('button', { name: 'Route', exact: true }).click()
+  const panel = page.getByRole('dialog', { name: 'Lisbon to Porto' })
+  await expect(panel).toBeVisible()
+  const top = () => panel.evaluate((node) => Math.round(node.getBoundingClientRect().top))
+  // As tall as 90% of the screen, resting with 40% of it showing.
+  assert.equal(Math.round((await panel.boundingBox())!.height), 720)
+  await expect.poll(top).toBe(480)
+  const background = page.locator('[data-rf-drawer-background]')
+  await expect.poll(() => background.evaluate((node) => getComputedStyle(node).scale)).toBe('0.94')
+  // Below the top point the content does not scroll.
+  assert.equal(await panel.evaluate((node) => getComputedStyle(node).overflowY), 'hidden')
+
+  const handle = panel.getByRole('button', { name: 'Expand drawer' })
+  await handle.click()
+  await expect.poll(top).toBe(80)
+  await expect(panel.getByRole('button', { name: 'Collapse drawer' })).toBeFocused()
+  assert.equal(await panel.evaluate((node) => getComputedStyle(node).overflowY), 'auto')
+
+  await page.keyboard.press('ArrowDown')
+  await expect.poll(top).toBe(480)
+  await page.keyboard.press('Escape')
+  await expect(panel).toBeHidden()
+  await expect.poll(() => background.evaluate((node) => getComputedStyle(node).scale)).toBe('none')
+  await expect(page.getByRole('button', { name: 'Route', exact: true })).toBeFocused()
+})

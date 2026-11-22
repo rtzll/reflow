@@ -1281,6 +1281,12 @@ function setEditing(open: boolean) {
       'Long content scrolls inside the panel; a drag only takes over once the content is back at its start.',
     ),
     demo(
+      'Snap points',
+      'snap',
+      `<Drawer\n  trigger="Route"\n  title="Lisbon to Porto"\n  snapPoints={[0.4, 0.9]}\n  scaleBackground\n>\n  <ol>…</ol>\n</Drawer>`,
+      'Opens at 40% of the screen and expands to 90%: drag the panel, flick it, or press the handle or its arrow keys. Below the top point a drag resizes it instead of scrolling. scaleBackground pushes the element marked data-rf-drawer-background back.',
+    ),
+    demo(
       'Not dismissible',
       'required',
       `<Drawer\n  trigger="Accept terms"\n  title="Terms of service"\n  dismissible={false}\n  footer={(close) => <Button mix={on('click', close)}>Accept</Button>}\n>…</Drawer>`,

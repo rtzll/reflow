@@ -4265,6 +4265,38 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           required: false,
         },
         {
+          name: 'snapPoints',
+          type: 'readonly (number | `${number}px`)[]',
+          description:
+            'Resting heights for a top or bottom drawer, smallest first: a share of the viewport such as 0.4, or pixels such as "320px". The panel is as tall as the largest.',
+          required: false,
+        },
+        {
+          name: 'snap',
+          type: 'number',
+          description: 'The index of the current snap point, when controlled by the parent.',
+          required: false,
+        },
+        {
+          name: 'defaultSnap',
+          type: 'number',
+          description: 'The snap point it opens at when uncontrolled. Default 0.',
+          required: false,
+        },
+        {
+          name: 'onSnapChange',
+          type: '((index: number) => void)',
+          description: 'Called when a drag, the handle or its arrow keys move to another point.',
+          required: false,
+        },
+        {
+          name: 'scaleBackground',
+          type: 'boolean',
+          description:
+            'Scales the element marked data-rf-drawer-background back while a bottom drawer is open, as iOS sheets do.',
+          required: false,
+        },
+        {
           name: 'open',
           type: 'boolean',
           description: 'Whether the drawer is open, when controlled by the parent.',

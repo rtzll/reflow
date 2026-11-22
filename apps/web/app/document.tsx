@@ -82,7 +82,7 @@ export function Document(handle: Handle<DocumentProps>) {
         </head>
         <body>
           <ShowcaseIconSprite />
-          {children}
+          <div data-rf-drawer-background>{children}</div>
           <SiteToaster />
         </body>
       </html>
