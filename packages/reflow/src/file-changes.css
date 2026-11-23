@@ -1,0 +1,140 @@
+.rf-file-changes {
+  overflow: hidden;
+  border-radius: var(--rf-panel-radius);
+  background: var(--rf-bg);
+  box-shadow: 0 0 0 1px var(--rf-border);
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+}
+.rf-file-changes-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+}
+.rf-file-changes-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 32px;
+  block-size: 32px;
+  border-radius: var(--rf-radius);
+  background: var(--rf-neutral-fill);
+  color: var(--rf-muted);
+}
+.rf-file-changes-heading {
+  display: grid;
+  min-inline-size: 0;
+}
+.rf-file-changes-title {
+  color: var(--rf-fg);
+  font-weight: 500;
+}
+.rf-file-changes-heading .rf-file-changes-counts {
+  font-size: var(--rf-text-caption);
+}
+.rf-file-changes-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-inline-start: auto;
+}
+.rf-file-changes-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rf-file-changes-list li {
+  border-block-start: 1px solid var(--rf-border);
+}
+.rf-file-changes-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-block-size: 36px;
+  padding: 0 12px;
+  color: var(--rf-fg);
+  text-decoration: none;
+}
+a.rf-file-changes-row:hover {
+  background: var(--rf-hover);
+}
+a.rf-file-changes-row:focus-visible {
+  outline: 1px solid var(--rf-accent);
+  outline-offset: -1px;
+}
+/* Right-to-left direction cuts a long path from its start, so the file name
+   stays in view; the bdi keeps the path itself reading left to right. */
+.rf-file-changes-path {
+  flex: 1;
+  min-inline-size: 0;
+  overflow: hidden;
+  direction: rtl;
+  text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rf-file-changes-path bdi {
+  direction: ltr;
+}
+.rf-file-changes-folder {
+  color: var(--rf-muted);
+}
+.rf-file-changes-counts {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+.rf-file-changes-added {
+  color: var(--rf-success);
+}
+.rf-file-changes-removed {
+  color: var(--rf-danger);
+}
+/* Rows past the visible count grow in, as ToolCalls' list does. */
+.rf-file-changes-more {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--rf-spring-moderate);
+}
+.rf-file-changes-more[data-open] {
+  grid-template-rows: 1fr;
+}
+.rf-file-changes-more > .rf-file-changes-list {
+  min-block-size: 0;
+  overflow: hidden;
+}
+.rf-file-changes-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  inline-size: 100%;
+  min-block-size: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-block-start: 1px solid var(--rf-border);
+  background: none;
+  color: var(--rf-muted);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.rf-file-changes-toggle:hover {
+  color: var(--rf-fg);
+}
+.rf-file-changes-toggle:focus-visible {
+  outline: 1px solid var(--rf-accent);
+  outline-offset: -1px;
+}
+.rf-file-changes-toggle svg {
+  inline-size: 14px;
+  block-size: 14px;
+  transition: rotate var(--rf-spring-fast);
+}
+.rf-file-changes-toggle[aria-expanded='true'] svg {
+  rotate: 180deg;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-file-changes-more,
+  .rf-file-changes-toggle svg {
+    transition: none;
+  }
+}
