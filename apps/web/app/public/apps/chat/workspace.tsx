@@ -22,6 +22,7 @@ import {
   saveThread,
   type Thread,
 } from './local-threads.ts'
+import { ModelPicker } from '../../model-picker.tsx'
 import { skillReply, skillTriggers } from './skills.ts'
 
 interface ChatProps {
@@ -279,7 +280,16 @@ function ConversationPane(
   let hasSent = false
   let response: ChatEntry | undefined
   let timer: ReturnType<typeof setInterval> | undefined
-  handle.signal.addEventListener('abort', () => clearInterval(timer), { once: true })
+  // Previews of images sent in this session, released with the pane.
+  const previews: string[] = []
+  handle.signal.addEventListener(
+    'abort',
+    () => {
+      clearInterval(timer)
+      for (const url of previews) URL.revokeObjectURL(url)
+    },
+    { once: true },
+  )
 
   function changed() {
     saveThread(thread, response)
@@ -310,7 +320,7 @@ function ConversationPane(
     handle.queueTask(() => field?.focus())
   }
 
-  function send(text: string) {
+  function send(text: string, files: readonly File[] = []) {
     hasSent = true
     // Sending a queued message immediately also ends the preceding reply.
     if (response) finish(true)
@@ -318,11 +328,22 @@ function ConversationPane(
       ? thread.title.replace(/^\/\S+\s*/, '').trim() || thread.title
       : 'your story'
     const skill = skillReply(text, subject)
-    const words = (skill?.text ?? replyTo(text)).split(' ')
-    if (!thread.messages.length) thread.title = text.length > 48 ? text.slice(0, 47) + '…' : text
+    const words = (skill?.text ?? replyTo(text, files)).split(' ')
+    const title = text || files[0]?.name || 'Files'
+    if (!thread.messages.length) thread.title = title.length > 48 ? title.slice(0, 47) + '…' : title
+    const attachments = files.map((file) => {
+      const previewUrl = /^image\/(png|jpeg|gif|webp|avif|svg\+xml)$/.test(file.type)
+        ? URL.createObjectURL(file)
+        : undefined
+      if (previewUrl) previews.push(previewUrl)
+      return { name: file.name, type: file.type, previewUrl }
+    })
     let shown = 2
     response = { role: 'assistant', text: words.slice(0, shown).join(' ') }
-    thread.messages.push({ role: 'user', text }, response)
+    thread.messages.push(
+      { role: 'user', text, attachments: attachments.length ? attachments : undefined },
+      response,
+    )
     timer = setInterval(() => {
       if (!response) return
       shown = Math.min(shown + 2, words.length)
@@ -364,7 +385,9 @@ function ConversationPane(
               {!thread.messages.length && <h2 class="studio-welcome">Where should we begin?</h2>}
               <InputMessage
                 key="composer"
-                attachments={false}
+                pasteAsFile={2000}
+                voice
+                maxFiles={4}
                 placeholder="Message or type / for skills"
                 triggers={skillTriggers}
                 status={response ? 'streaming' : 'idle'}
@@ -416,13 +439,14 @@ function ConversationPane(
                     void handle.update()
                   }
                 }}
-                onSend={({ text }) => send(text)}
+                onSend={({ text, files }) => send(text, files)}
               />
-              {thread.messages.length > 0 && (
+              <div class="studio-composer-footer">
                 <p class="studio-status" role="status" mix={persistOnExit}>
-                  {response ? 'Replying…' : 'Simulated replies'}
+                  {thread.messages.length ? (response ? 'Replying…' : 'Simulated replies') : ''}
                 </p>
-              )}
+                <ModelPicker />
+              </div>
               {!thread.messages.length && !draft && (
                 <div class="studio-starters" aria-label="Suggested prompts" role="group">
                   {starters.map(({ icon, label, prompt }) => (
@@ -449,14 +473,15 @@ function ConversationPane(
               key={index}
               id={messageId(thread, index)}
               role={message.role}
+              attachments={message.attachments}
               animate={false}
             >
               {message.role === 'assistant' && <strong class="studio-author">Reflow</strong>}
               {message.role === 'assistant' ? (
                 <Markdown source={message.text} />
-              ) : (
+              ) : message.text ? (
                 <span>{message.text}</span>
-              )}
+              ) : null}
               {message.proofChecklist && (
                 <Confirmation
                   title="Add this checklist to your draft?"

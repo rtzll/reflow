@@ -3,6 +3,8 @@ import type { ConfirmationState } from '@rtzll/reflow'
 export interface ChatEntry {
   role: 'user' | 'assistant'
   text: string
+  /** Files sent with a message. Previews last for the session; names and types are kept. */
+  attachments?: { name: string; type?: string; previewUrl?: string }[]
   stopped?: boolean
   proofChecklist?: ConfirmationState
 }
@@ -118,7 +120,11 @@ North landing · Last departure, 18:40
   },
 ]
 
-export function replyTo(text: string) {
+export function replyTo(text: string, files: readonly { name: string }[] = []) {
+  if (files.length && !text.trim())
+    return files.length === 1
+      ? `Thanks, I have **${files[0].name}**. What would you like to do with it?`
+      : `Thanks, I have **${files.length} files**. What would you like to do with them?`
   if (/\b(cover|masthead|type|layout)\b/i.test(text))
     return '**Print the two versions** at the size your reader will hold. Set them side by side and step back. Which one makes the subject clear first? Keep that version, then adjust the spacing around the title in small increments.'
   if (/\b(photo|photograph|sequence|essay)\b/i.test(text))

@@ -125,9 +125,22 @@
   color: var(--rf-muted);
   font-size: var(--rf-text-caption);
 }
+.studio-composer-footer {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding-block-start: 6px;
+}
+.studio-pane .rf-chat-layout[data-empty] .studio-composer-footer {
+  margin-block-start: -16px;
+}
 .studio-status {
-  padding-block-start: 8px;
+  grid-column: 2;
   text-align: center;
+}
+.studio-composer-footer > :last-child {
+  grid-column: 3;
+  justify-self: end;
 }
 .studio-pane .rf-chat-transcript {
   row-gap: 24px;
@@ -179,7 +192,8 @@
 }
 .studio-pane .rf-chat-layout[data-empty] .rf-chat-layout-composer {
   display: grid;
-  grid-template-rows: minmax(min-content, 1fr) auto minmax(min-content, 1fr);
+  /* Welcome, composer, its footer, then the starters. */
+  grid-template-rows: minmax(min-content, 1fr) auto auto minmax(min-content, 1fr);
   row-gap: 22px;
   min-block-size: 100%;
   padding-block: 24px;
@@ -247,10 +261,8 @@
 .studio-pane .rf-trigger-menu {
   min-inline-size: min(15rem, calc(100vw - 32px));
 }
-.studio-pane .rf-composer-files-region {
-  display: none;
-}
 .studio-pane .rf-queue-wrap,
+.studio-pane .rf-composer-files-region,
 .studio-pane .rf-composer-error {
   grid-column: 1 / -1;
 }

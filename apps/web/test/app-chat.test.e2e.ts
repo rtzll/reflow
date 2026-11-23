@@ -317,3 +317,31 @@ it('lists the questions in the header outline and jumps back to one', async (t) 
   await expect(first).toBeFocused()
   await expect(first).toBeInViewport()
 })
+
+it('sends dropped files with a message and keeps their names after a reload', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1280, height: 800 })
+  await open(page, '/apps/chat?thread=interview-notes')
+  const field = page.getByRole('textbox', { name: 'Message' })
+  await page.evaluate(() => {
+    const transfer = new DataTransfer()
+    transfer.items.add(new File(['# Questions'], 'questions.md', { type: 'text/markdown' }))
+    document
+      .querySelector('.studio-pane:not([hidden]) form')!
+      .dispatchEvent(
+        new DragEvent('drop', { dataTransfer: transfer, bubbles: true, cancelable: true }),
+      )
+  })
+  await expect(
+    page.getByRole('list', { name: 'Files to send' }).getByText('questions'),
+  ).toBeVisible()
+  await field.fill('Here are my questions.')
+  await field.press('Enter')
+  const sent = page.getByRole('log').getByRole('article', { name: 'You' }).last()
+  await expect(sent.getByRole('list', { name: 'Attachments' })).toContainText('questions')
+  await expect(sent.locator('.rf-badge')).toHaveText('MD')
+  await page.reload()
+  await waitForShowcase(page)
+  const restored = page.getByRole('log').getByRole('article', { name: 'You' }).last()
+  await expect(restored.getByRole('list', { name: 'Attachments' })).toContainText('questions')
+})

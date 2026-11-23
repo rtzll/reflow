@@ -21,6 +21,12 @@ function isMessage(value: unknown): value is ChatEntry {
     'text' in value &&
     typeof value.text === 'string' &&
     (!('stopped' in value) || typeof value.stopped === 'boolean') &&
+    (!('attachments' in value) ||
+      (Array.isArray(value.attachments) &&
+        value.attachments.every(
+          (file: unknown) =>
+            !!file && typeof file === 'object' && 'name' in file && typeof file.name === 'string',
+        ))) &&
     (!('proofChecklist' in value) ||
       (value.role === 'assistant' &&
         (value.proofChecklist === 'requested' ||
@@ -77,11 +83,13 @@ export function saveThread(thread: Thread, streaming?: ChatEntry) {
         title: thread.title,
         draft: thread.draft,
         pinned: thread.pinned || undefined,
-        messages: streaming
-          ? thread.messages.map((message) =>
-              message === streaming ? { ...message, stopped: true } : message,
-            )
-          : thread.messages,
+        // Object URLs end with the page, so only names and types are kept.
+        messages: thread.messages.map((message) => {
+          const saved = message === streaming ? { ...message, stopped: true } : { ...message }
+          if (saved.attachments)
+            saved.attachments = saved.attachments.map(({ name, type }) => ({ name, type }))
+          return saved
+        }),
       }),
     )
   } catch {
