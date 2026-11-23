@@ -1047,13 +1047,15 @@ function setEditing(open: boolean) {
       'right',
       `<InputMessage attachments={false} rightActions={
   <Dropdown label="Model one, Balanced" variant="ghost" items={[
-    ...models.map((name) => ({ group: 'Model', value: name, label: name, type: 'radio', checked: model === name })),
-    { value: 'effort', label: 'Effort', separatorBefore: true, children: efforts.map((level) => (
-      { value: level, label: level, type: 'radio', checked: effort === level }
-    )) },
+    { value: 'one', label: 'Model one', type: 'radio', checked: true, badge: <Badge size="compact">Default</Badge> },
+    { value: 'two', label: 'Model two', type: 'radio' },
+    { value: 'effort', label: 'Effort', hint: effort, separatorBefore: true,
+      note: 'More effort answers more thoroughly, but takes longer.',
+      children: efforts.map((level) => ({ value: level, label: level, type: 'radio', checked: effort === level })) },
+    { value: 'quick', label: 'Quick replies', type: 'switch', checked: quick, separatorBefore: true },
   ]} onSelect={choose} />
 } onSend={sendMessage} />`,
-      'The right slot holds a Dropdown that picks a model, with the effort level in a submenu.',
+      'The right slot holds a Dropdown: models with badges, the effort level in a submenu that explains it, and a switch row.',
     ),
     demo(
       'Suggested messages',
