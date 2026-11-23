@@ -19,6 +19,7 @@ it('keeps editable controls at least 16px on touch screens without disabling zoo
   for (const [path, selector] of [
     ['/docs/input', '#playground input.rf-input'],
     ['/docs/textarea', '#playground textarea.rf-input'],
+    ['/docs/input-group', '.rf-input-field-control > .rf-input'],
     ['/docs/input-message', '#playground .rf-composer textarea'],
     ['/docs/combobox', '#playground .rf-picker-input'],
     ['/docs/command-menu', '#playground .rf-command-search input'],

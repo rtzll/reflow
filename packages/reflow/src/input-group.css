@@ -72,6 +72,14 @@
   font-variation-settings: var(--rf-weight-normal);
 }
 
+/* As on Input: under 16px, iOS zooms the page into the field on focus. */
+@media (pointer: coarse) {
+  .rf-input-field-control > .rf-input,
+  .rf-input-field-control > [data-slot='input-number'] {
+    font-size: max(16px, var(--rf-text-body));
+  }
+}
+
 .rf-input-field-control > .rf-input:disabled {
   opacity: 1;
 }
