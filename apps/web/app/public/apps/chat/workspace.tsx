@@ -2,6 +2,7 @@ import {
   Button,
   ChatLayout,
   ChatMessage,
+  ChatOutline,
   Confirmation,
   Dropdown,
   Icon,
@@ -37,6 +38,11 @@ function randomId() {
   bytes[8] = (bytes[8]! & 0x3f) | 0x80
   const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
+}
+
+// The element id of a message, so the outline can jump to it.
+function messageId(thread: Thread, index: number) {
+  return `${thread.id}-message-${index}`
 }
 
 const starters = [
@@ -218,7 +224,33 @@ export const ChatWorkspace = clientEntry(
               </nav>
             }
             toolbar={
-              <h2 class="studio-title">{active?.messages.length ? active.title : 'New chat'}</h2>
+              <div class="studio-toolbar">
+                <h2 class="studio-title">{active?.messages.length ? active.title : 'New chat'}</h2>
+                {active && active.messages.length > 0 && (
+                  <div class="studio-toolbar-actions">
+                    <ChatOutline
+                      items={active.messages.flatMap((message, index) =>
+                        message.role === 'user'
+                          ? [{ id: messageId(active, index), label: message.text }]
+                          : [],
+                      )}
+                    />
+                    <Dropdown
+                      label="Conversation options"
+                      variant="ghost"
+                      size="compact"
+                      align="end"
+                      chevron={false}
+                      triggerContent={<Icon name="more-horizontal" />}
+                      items={[
+                        { value: 'pin', label: active.pinned ? 'Unpin' : 'Pin' },
+                        { value: 'delete', label: 'Delete', separatorBefore: true },
+                      ]}
+                      onSelect={(value) => (value === 'pin' ? togglePin(active) : remove(active))}
+                    />
+                  </div>
+                )}
+              </div>
             }
           >
             {threads
@@ -413,7 +445,12 @@ function ConversationPane(
           }
         >
           {thread.messages.map((message, index) => (
-            <ChatMessage key={index} role={message.role} animate={false}>
+            <ChatMessage
+              key={index}
+              id={messageId(thread, index)}
+              role={message.role}
+              animate={false}
+            >
               {message.role === 'assistant' && <strong class="studio-author">Reflow</strong>}
               {message.role === 'assistant' ? (
                 <Markdown source={message.text} />

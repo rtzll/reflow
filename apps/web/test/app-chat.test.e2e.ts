@@ -303,3 +303,17 @@ it('anchors a new question, lets the reader scroll back and stops the reply in t
   await expect(log).not.toHaveAttribute('aria-busy', 'true')
   await expect(log).toContainText('Response stopped')
 })
+
+it('lists the questions in the header outline and jumps back to one', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1280, height: 500 })
+  await open(page, '/apps/chat?thread=fieldnotes-cover')
+  await page.getByRole('button', { name: 'Conversation outline' }).click()
+  const rows = page.getByRole('menuitemradio')
+  await expect(rows).toHaveCount(2)
+  await expect(rows.nth(1)).toHaveText('Where would you put the masthead?')
+  await rows.nth(0).click()
+  const first = page.getByRole('log').getByRole('article', { name: 'You' }).first()
+  await expect(first).toBeFocused()
+  await expect(first).toBeInViewport()
+})
