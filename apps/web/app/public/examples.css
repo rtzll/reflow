@@ -2167,3 +2167,13 @@
 .doc-bar-chart {
   width: min(100%, 34rem);
 }
+
+/* ModelPicker: the model, then its effort level in a quieter tone. */
+.model-picker-trigger {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.model-picker-effort {
+  color: var(--rf-muted);
+}

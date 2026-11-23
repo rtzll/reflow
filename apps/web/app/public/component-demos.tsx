@@ -147,6 +147,7 @@ function demo(
   return { title, variant, code, description }
 }
 
+import { ModelPicker } from './model-picker.tsx'
 import { CommandVariants } from './project-commands.tsx'
 import { setShowcaseTheme } from './site-settings.ts'
 
@@ -1042,9 +1043,17 @@ function setEditing(open: boolean) {
       `<InputMessage attachments={false} actions={<Button variant="ghost">Attach context</Button>} onSend={sendMessage} />`,
     ),
     demo(
-      'Right Slot Only',
+      'Model picker',
       'right',
-      `<InputMessage attachments={false} rightActions={<Dropdown label="Sonnet 4.6" items={models} />} onSend={sendMessage} />`,
+      `<InputMessage attachments={false} rightActions={
+  <Dropdown label="Model one, Balanced" variant="ghost" items={[
+    ...models.map((name) => ({ group: 'Model', value: name, label: name, type: 'radio', checked: model === name })),
+    { value: 'effort', label: 'Effort', separatorBefore: true, children: efforts.map((level) => (
+      { value: level, label: level, type: 'radio', checked: effort === level }
+    )) },
+  ]} onSelect={choose} />
+} onSend={sendMessage} />`,
+      'The right slot holds a Dropdown that picks a model, with the effort level in a submenu.',
     ),
     demo(
       'Suggested messages',
@@ -2886,11 +2895,8 @@ export function ComponentDemo(
                 attachments={!['basic', 'left', 'right'].includes(variant)}
                 rightActions={
                   variant === 'right' ? (
-                    <Dropdown
-                      label={selection === 'free' ? 'Sonnet 4.6' : selection}
-                      variant="ghost"
-                      items={['Sonnet 4.6', 'Opus 4.6'].map((label) => ({ value: label, label }))}
-                      onSelect={select}
+                    <ModelPicker
+                      onChange={({ model, effort }) => say(`Switched to ${model}, ${effort}.`)}
                     />
                   ) : undefined
                 }
