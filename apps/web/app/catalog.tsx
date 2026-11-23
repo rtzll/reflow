@@ -185,6 +185,11 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
     description: "A plan's steps, each done, in progress with a spinner, or not started.",
     code: `<TaskList\n  label="Plan"\n  progress\n  tasks={[\n    { id: 'outline', label: 'Outline the story', status: 'done' },\n    { id: 'draft', label: 'Draft the opening', status: 'active' },\n    { id: 'proof', label: 'Proof the captions' },\n  ]}\n/>`,
   },
+  'file-changes': {
+    description:
+      'A card that sums up an edit: the files changed, lines added and removed, and actions.',
+    code: `<FileChanges\n  files={[\n    { path: 'src/cover.ts', added: 48, removed: 6, href: '/diff/cover' },\n    { path: 'src/captions.ts', added: 12, removed: 9 },\n  ]}\n  actions={<Button size="compact" variant="secondary">View changes</Button>}\n/>`,
+  },
   'chat-message': {
     description: 'A chat message with user or assistant alignment and optional attachments.',
     code: conversationCode,

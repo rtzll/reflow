@@ -651,6 +651,37 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  'file-changes': [
+    {
+      name: 'FileChanges',
+      props: [
+        {
+          name: 'files',
+          type: 'readonly { path: string; added: number; removed: number; href?: string }[]',
+          required: true,
+          description: 'The changed files. href makes a row a link, such as to its diff.',
+        },
+        {
+          name: 'title',
+          type: 'string',
+          required: false,
+          description: 'Replaces the heading, which reads "Edited 2 files" by default.',
+        },
+        {
+          name: 'actions',
+          type: 'RemixNode',
+          required: false,
+          description: 'At the end of the header, such as Undo and View changes.',
+        },
+        {
+          name: 'visible',
+          type: 'number',
+          required: false,
+          description: 'Rows shown before the rest fold behind "Show N more files". Defaults to 3.',
+        },
+      ],
+    },
+  ],
   spinner: [
     {
       name: 'Spinner',

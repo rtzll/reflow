@@ -9,7 +9,7 @@ Reflow started as a native Remix port of the [Fluid Functionalism](https://githu
 - **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `Pagination`, `Resizable`, `Sidebar`, `Tabs`, `Toolbar`, `Tree`
 - **Menus and overlays** · `AlertDialog`, `CommandMenu`, `ContextMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
 - **Display and feedback** · `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `BarChart`, `Card`, `CodeBlock`, `DataTable`, `RoutedDataTable`, `Markdown`, `Progress`, `Skeleton`, `Spinner`, `Table`, `Toaster`
-- **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `ChatOutline`, `Citation`, `Confirmation`, `FileThumbnail`, `InputMessage`, `QueuedStack`, `TaskList`, `ThinkingIndicator`, `ThinkingSteps`, `ToolCalls`, `TriggerMenu`
+- **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `ChatOutline`, `Citation`, `Confirmation`, `FileChanges`, `FileThumbnail`, `InputMessage`, `QueuedStack`, `TaskList`, `ThinkingIndicator`, `ThinkingSteps`, `ToolCalls`, `TriggerMenu`
 
 Every component has a docs page with a live preview, highlighted code and an API table; most also have a playground. Run the showcase and open `/docs`, or read the [usage examples](../apps/web/app/public/examples.tsx).
 
@@ -77,6 +77,7 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 10 | [`ChatOutline` (implemented, awaiting release)](chat-outline.md) | — | Dropdown's radio rows and search, ChatLayout's scroll container |
 | 10 | [`ToolCalls` (implemented, awaiting release)](tool-calls.md) | — | Spinner, the attachment row's grid reveal |
 | 10 | [`TaskList` (implemented, awaiting release)](task-list.md) | — | Spinner, Dropdown's check draw |
+| 10 | [`FileChanges` (implemented, awaiting release)](file-changes.md) | — | The grid-row reveal from ToolCalls, Button |
 
 ### Decisions so far
 

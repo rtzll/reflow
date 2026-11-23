@@ -30,6 +30,7 @@ export const components = [
   ['drawer', 'Drawer'],
   ['dropdown', 'Dropdown'],
   ['field', 'Field'],
+  ['file-changes', 'FileChanges'],
   ['file-input', 'FileInput'],
   ['file-thumbnail', 'FileThumbnail'],
   ['hover-card', 'HoverCard'],
