@@ -1,11 +1,14 @@
-import { ref, type Handle } from 'remix/component'
+import { on, ref, type Handle } from 'remix/component'
 import { Dropdown } from './dropdown.tsx'
 import { Icon } from './icon.tsx'
+import { Tooltip } from './tooltip.tsx'
 
 export interface ChatOutlineItem {
   /** The `id` of the message element, such as a ChatMessage's `id`. */
   id: string
   label: string
+  /** A line shown under the label in the rail's preview, such as the start of the reply. */
+  preview?: string
 }
 
 export interface ChatOutlineProps {
@@ -15,6 +18,12 @@ export interface ChatOutlineProps {
   label?: string
   size?: 'default' | 'compact'
   align?: 'start' | 'end'
+  /**
+   * `menu` lists the turns behind an icon button. `rail` draws a tick per
+   * turn beside the transcript, the one in view longer, with a preview on
+   * hover or focus. Default `menu`.
+   */
+  variant?: 'menu' | 'rail'
 }
 
 // The turn in view is the last one whose top has passed this fraction of the
@@ -136,12 +145,15 @@ export function ChatOutline(handle: Handle<ChatOutlineProps>) {
       const offset = target.getBoundingClientRect().top - box().top
       scroller.scrollTo({ top: scroller.scrollTop + offset - peek, behavior })
     } else target.scrollIntoView({ block: 'start', behavior })
-    if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1')
-    // The menu hands focus back to its trigger once it has closed; move it on
-    // to the message then, or after a moment if focus never comes back.
-    pendingFocus = target
-    clearTimeout(focusTimer)
-    focusTimer = setTimeout(focusPending, 400)
+    // The rail keeps focus, so its ticks can be stepped through.
+    if (handle.props.variant !== 'rail') {
+      if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1')
+      // The menu hands focus back to its trigger once it has closed; move it
+      // on to the message then, or after a moment if focus never comes back.
+      pendingFocus = target
+      clearTimeout(focusTimer)
+      focusTimer = setTimeout(focusPending, 400)
+    }
     current = id
     handle.update()
   }
@@ -152,6 +164,55 @@ export function ChatOutline(handle: Handle<ChatOutlineProps>) {
     // A new turn can arrive without a scroll; check again after it renders.
     handle.queueTask(schedule)
     const checked = current ?? items[0].id
+    if (handle.props.variant === 'rail')
+      return (
+        <nav class="rf-chat-outline-rail" aria-label={label} mix={watch}>
+          <ol
+            mix={on<HTMLOListElement, 'keydown'>('keydown', (event) => {
+              // Up and Down step between ticks; Home and End reach the ends.
+              const ticks = [...event.currentTarget.querySelectorAll<HTMLButtonElement>('button')]
+              const index = ticks.indexOf(document.activeElement as HTMLButtonElement)
+              if (index < 0) return
+              const next =
+                event.key === 'ArrowDown'
+                  ? index + 1
+                  : event.key === 'ArrowUp'
+                    ? index - 1
+                    : event.key === 'Home'
+                      ? 0
+                      : event.key === 'End'
+                        ? ticks.length - 1
+                        : -1
+              if (next < 0 || next >= ticks.length) return
+              event.preventDefault()
+              ticks[next].focus()
+            })}
+          >
+            {items.map((item) => (
+              <li key={item.id}>
+                <Tooltip
+                  side="right"
+                  content={
+                    <span class="rf-chat-outline-preview">
+                      <strong>{item.label}</strong>
+                      {item.preview && <span>{item.preview}</span>}
+                    </span>
+                  }
+                  renderTrigger={(trigger) => (
+                    <button
+                      type="button"
+                      class="rf-chat-outline-tick"
+                      aria-label={item.label}
+                      aria-current={item.id === checked ? 'location' : undefined}
+                      mix={[trigger.mix, on('click', () => jump(item.id))]}
+                    />
+                  )}
+                />
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )
     return (
       <span class="rf-chat-outline" mix={watch}>
         <Dropdown

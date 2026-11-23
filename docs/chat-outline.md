@@ -36,6 +36,12 @@ The scroll is smooth, and instant with reduced motion. The menu keeps Dropdown's
 
 Dropdown for the menu, its radio rows and search; the `list` icon; ChatLayout's scroll container and its letting go on a manual scroll.
 
+## Rail
+
+`variant="rail"` draws the outline beside the transcript instead of behind a button: a short tick per turn in a labelled navigation list, with the turn in view longer and in the foreground colour. Hovering or focusing a tick shows a preview to its right, the turn's label and, when the item has one, a `preview` line such as the start of the reply. Each tick is a 24 by 12 pixel target. The tick in view carries `aria-current="location"`.
+
+Choosing a tick scrolls as the menu does but keeps focus on the rail, so a reader can step through turns: Up and Down move between ticks, Home and End reach the ends. The rail suits wide layouts with room beside the transcript; the menu suits narrow ones, and an app can show one or the other by width.
+
 ## Verification
 
-Browser tests cover rendering nothing without items, the rows and the checked turn, the checked turn following the scroll, choosing a turn scrolling its message into place and focusing it, and the search field past eight turns.
+Browser tests cover the rail's ticks, its marked turn, jumping without moving focus and its arrow keys; and for the menu, rendering nothing without items, the rows and the checked turn, the checked turn following the scroll, choosing a turn scrolling its message into place and focusing it, and the search field past eight turns.

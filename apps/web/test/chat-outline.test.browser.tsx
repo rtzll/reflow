@@ -139,3 +139,45 @@ it('follows its turns into another transcript', async (t) => {
   await open($, act)
   equal(rows()[2].getAttribute('aria-checked'), 'true')
 })
+
+it('draws a rail of ticks that marks the turn in view and jumps without taking focus', async (t) => {
+  const { $, act, cleanup } = render(
+    <div>
+      <ChatOutline
+        variant="rail"
+        items={turns.map((label, index) => ({
+          id: `r-${index}`,
+          label,
+          preview: `Reply ${index + 1}`,
+        }))}
+      />
+      <div class="scroller" style={{ height: '300px', overflowY: 'auto' }}>
+        {turns.map((label, index) => (
+          <ChatMessage id={`r-${index}`} role="user" animate={false}>
+            <div style={{ height: '600px' }}>{label}</div>
+          </ChatMessage>
+        ))}
+      </div>
+    </div>,
+  )
+  t.after(cleanup)
+  await frames()
+  const rail = $('nav[aria-label="Conversation outline"]') as HTMLElement
+  const ticks = [...rail.querySelectorAll('button')] as HTMLButtonElement[]
+  equal(ticks.map((tick) => tick.getAttribute('aria-label')).join('|'), turns.join('|'))
+  equal(ticks[0].getAttribute('aria-current'), 'location')
+  ok(document.querySelector('.rf-chat-outline-preview span')?.textContent === 'Reply 1')
+  ticks[2].focus()
+  await act(() => ticks[2].click())
+  for (let frame = 0; frame < 60; frame++) await frames(1)
+  const scroller = $('.scroller') as HTMLElement
+  const offset =
+    ($('#r-2') as HTMLElement).getBoundingClientRect().top - scroller.getBoundingClientRect().top
+  ok(Math.abs(offset - 16) <= 1, `the turn sits 16px below the top, not ${offset}px`)
+  equal(document.activeElement, ticks[2], 'focus stays on the rail')
+  equal(ticks[2].getAttribute('aria-current'), 'location')
+  ticks[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }))
+  equal(document.activeElement, ticks[1])
+  ticks[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))
+  equal(document.activeElement, ticks[2])
+})

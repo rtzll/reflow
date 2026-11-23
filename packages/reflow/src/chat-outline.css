@@ -1,0 +1,74 @@
+/* ChatOutline as a rail: a tick per turn, the one in view longer and
+   brighter. Each tick is a 24 by 12 pixel target around a short line. */
+.rf-chat-outline-rail ol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rf-chat-outline-tick {
+  position: relative;
+  display: block;
+  inline-size: 24px;
+  block-size: 12px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+}
+.rf-chat-outline-tick::before {
+  content: '';
+  position: absolute;
+  inset-block-start: 5px;
+  inset-inline-start: 4px;
+  inline-size: 10px;
+  block-size: 2px;
+  border-radius: 1px;
+  background: var(--rf-muted);
+  opacity: 0.5;
+  transition:
+    inline-size var(--rf-spring-fast),
+    opacity var(--rf-fast),
+    background-color var(--rf-fast);
+}
+.rf-chat-outline-tick[aria-current]::before {
+  inline-size: 16px;
+  background: var(--rf-fg);
+  opacity: 1;
+}
+@media (hover: hover) {
+  .rf-chat-outline-tick:hover::before {
+    opacity: 1;
+  }
+}
+.rf-chat-outline-tick:focus-visible {
+  outline: 1px solid var(--rf-accent);
+  outline-offset: -1px;
+}
+.rf-chat-outline-preview {
+  display: grid;
+  gap: 2px;
+  max-inline-size: 18rem;
+}
+.rf-chat-outline-preview strong {
+  overflow: hidden;
+  font-weight: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rf-chat-outline-preview span {
+  display: -webkit-box;
+  overflow: hidden;
+  opacity: 0.7;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-chat-outline-tick::before {
+    transition: none;
+  }
+}

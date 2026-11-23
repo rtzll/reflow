@@ -31,6 +31,7 @@
 @import './carousel-dots.css' layer(reflow);
 @import './file-thumbnail.css' layer(reflow);
 @import './chat-message.css' layer(reflow);
+@import './chat-outline.css' layer(reflow);
 @import './input-message.css' layer(reflow);
 @import './thinking-indicator.css' layer(reflow);
 @import './thinking-steps.css' layer(reflow);

@@ -559,10 +559,17 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       props: [
         {
           name: 'items',
-          type: 'readonly { id: string; label: string }[]',
+          type: 'readonly { id: string; label: string; preview?: string }[]',
           required: true,
           description:
-            'The turns to list, oldest first, each with the id of its message element. With none, nothing renders.',
+            "The turns to list, oldest first, each with the id of its message element. preview adds a line to the rail's hover preview. With none, nothing renders.",
+        },
+        {
+          name: 'variant',
+          type: '"menu" | "rail"',
+          required: false,
+          description:
+            'menu lists the turns behind an icon button; rail draws a tick per turn beside the transcript, with a preview on hover or focus. Defaults to menu.',
         },
         {
           name: 'label',
