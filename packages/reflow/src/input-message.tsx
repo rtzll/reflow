@@ -1,5 +1,11 @@
 import { partitionFiles } from './behaviors/file-selection.ts'
 import {
+  formatShortcut,
+  isMacPlatform,
+  matchesShortcut,
+  parseShortcut,
+} from './behaviors/shortcut.ts'
+import {
   createVoiceRecording,
   voiceRecordingSupported,
   type VoiceRecording,
@@ -67,8 +73,31 @@ export interface InputMessageProps {
    * an audio file. Needs `attachments`.
    */
   voice?: boolean
+  /**
+   * Starts and attaches a voice note from the keyboard while focus is in the
+   * composer. Default `alt+shift+v`; `null` turns it off.
+   */
+  voiceShortcut?: string | null
   actions?: RemixNode
   rightActions?: RemixNode
+}
+
+// Ctrl+Shift+V pastes plain text in Chrome on Windows and Linux, so the
+// default leaves it alone.
+const defaultVoiceShortcut = 'alt+shift+v'
+
+// The shortcut as aria-keyshortcuts writes it, such as `Alt+Shift+V`.
+function ariaKeys(shortcut: string) {
+  const { mod, meta, ctrl, alt, shift, key } = parseShortcut(shortcut)
+  const parts = [
+    mod && 'Control',
+    meta && 'Meta',
+    ctrl && 'Control',
+    alt && 'Alt',
+    shift && 'Shift',
+    key.length === 1 ? key.toUpperCase() : key,
+  ]
+  return parts.filter(Boolean).join('+')
 }
 
 export function InputMessage(handle: Handle<InputMessageProps>) {
@@ -88,6 +117,14 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
   let recordingSince = 0
   let recordingTimer: ReturnType<typeof setInterval> | undefined
   let levelMeter: HTMLElement | undefined
+  // Keycaps follow the platform once the composer is in the browser, so the
+  // server render and hydration agree.
+  let mac = false
+  const platformRef = ref(() => {
+    if (mac === isMacPlatform()) return
+    mac = !mac
+    handle.update()
+  })
   const meterRef = ref((node) => {
     levelMeter = node instanceof HTMLElement ? node : undefined
   })
@@ -320,6 +357,18 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
       suggestions = [],
       status,
     } = handle.props
+    const maxFiles = Math.max(1, handle.props.maxFiles ?? 5)
+    const voiceOn = attachments && Boolean(handle.props.voice)
+    const recording = voiceOn && voice !== undefined
+    const voiceReady =
+      voiceOn && !recording && status !== 'streaming' && !draft.trim() && files.length === 0
+    const voiceShortcut = !voiceOn
+      ? null
+      : handle.props.voiceShortcut === undefined
+        ? defaultVoiceShortcut
+        : handle.props.voiceShortcut
+    const voiceCaps = voiceShortcut ? formatShortcut(voiceShortcut, mac) : []
+    const voiceKeys = voiceShortcut ? ariaKeys(voiceShortcut) : undefined
     const showSuggestion =
       !draft &&
       Boolean(placeholderSuggestion) &&
@@ -425,6 +474,18 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
         }}
         mix={[
           on<HTMLFormElement, 'submit'>('submit', submit),
+          voiceShortcut && platformRef,
+          voiceShortcut &&
+            on<HTMLFormElement, 'keydown'>('keydown', (event) => {
+              if (!matchesShortcut(event, parseShortcut(voiceShortcut))) return
+              if (voice) {
+                event.preventDefault()
+                void finishRecording(true)
+              } else if (voiceReady) {
+                event.preventDefault()
+                void startRecording()
+              }
+            }),
           // Pressing the composer's own surface focuses the field, like the reference; controls keep their behavior.
           on<HTMLFormElement, 'mousedown'>('mousedown', (event) => {
             const target = event.target
@@ -605,7 +666,7 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
           )}
           {actions}
           {rightActions != null && <div class="rf-composer-right-actions">{rightActions}</div>}
-          {attachments && handle.props.voice && voice && (
+          {recording && (
             <div class="rf-composer-voice" role="status">
               <span class="rf-composer-voice-meter" aria-hidden="true" mix={meterRef}>
                 <span />
@@ -626,35 +687,57 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
               >
                 <Icon name="x" />
               </Button>
-              <Button
-                variant="ghost"
-                size="icon-compact"
-                aria-label="Attach recording"
-                mix={on('click', () => void finishRecording(true))}
-              >
-                <Icon name="check" />
-              </Button>
             </div>
           )}
-          {attachments && handle.props.voice && !voice && (
+          {recording ? (
             <Button
-              class="rf-composer-voice-start"
-              variant="ghost"
+              key="attach"
+              class="rf-composer-send"
               size="icon-compact"
-              aria-label="Record a voice note"
-              disabled={
-                disabled || sending || files.length >= Math.max(1, handle.props.maxFiles ?? 5)
-              }
-              mix={on('click', () => void startRecording())}
+              aria-label="Attach recording"
+              aria-keyshortcuts={voiceKeys}
+              mix={on('click', () => void finishRecording(true))}
             >
-              <Icon name="mic" />
+              <Icon name="check" />
             </Button>
-          )}
-          {status === 'streaming' && !draft.trim() && !files.length ? (
+          ) : voiceReady ? (
+            // With nothing to send, the main button records a voice note.
+            <Tooltip
+              key="record"
+              content={
+                <span class="rf-composer-voice-hint">
+                  Record a voice note
+                  {voiceCaps.length > 0 && (
+                    <span class="rf-composer-voice-keys">
+                      {voiceCaps.map((cap) => (
+                        <kbd>{cap}</kbd>
+                      ))}
+                    </span>
+                  )}
+                </span>
+              }
+              side="top"
+              renderTrigger={(trigger) => (
+                <Button
+                  class="rf-composer-send"
+                  size="icon-compact"
+                  aria-label="Record a voice note"
+                  aria-keyshortcuts={voiceKeys}
+                  aria-describedby={trigger['aria-describedby']}
+                  disabled={disabled || sending || files.length >= maxFiles}
+                  mix={[trigger.mix, on('click', () => void startRecording())]}
+                >
+                  <Icon name="mic" />
+                </Button>
+              )}
+            />
+          ) : status === 'streaming' && !draft.trim() && !files.length ? (
             <Button
+              key="stop"
               class="rf-composer-send"
               size="icon-compact"
               aria-label="Stop response"
+              data-stop=""
               disabled={disabled}
               mix={on('click', () => handle.props.onStop?.())}
             >
@@ -662,6 +745,7 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
             </Button>
           ) : (
             <Button
+              key="send"
               class="rf-composer-send"
               size="icon-compact"
               type="submit"

@@ -3417,7 +3417,14 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           name: 'voice',
           type: 'boolean',
           description:
-            'Shows a microphone button that records a voice note, with a level meter and timer, and attaches it as an audio file.',
+            'While there is nothing to send, the main button records a voice note, with a level meter and timer, and attaches it as an audio file.',
+          required: false,
+        },
+        {
+          name: 'voiceShortcut',
+          type: 'string | null',
+          description:
+            'Starts and attaches a voice note from the keyboard while focus is in the composer. Defaults to alt+shift+v; null turns it off.',
           required: false,
         },
         {

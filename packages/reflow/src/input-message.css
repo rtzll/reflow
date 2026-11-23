@@ -118,18 +118,44 @@
 .rf-composer-right-actions {
   margin-inline-start: auto;
 }
-.rf-composer-right-actions + .rf-composer-send,
-.rf-composer-right-actions + :is(.rf-composer-voice, .rf-composer-voice-start) {
+.rf-composer-right-actions + :is(.rf-composer-send, .rf-composer-voice),
+.rf-composer-voice + .rf-composer-send {
   margin-inline-start: 0;
 }
-/* The voice controls sit at the end, before send, unless right actions
-   already pushed the row there. */
-.rf-composer-voice,
-.rf-composer-voice-start {
+/* The recording controls sit at the end, before the main button, unless
+   right actions already pushed the row there. */
+.rf-composer-voice {
   margin-inline-start: auto;
 }
-:is(.rf-composer-voice, .rf-composer-voice-start) + .rf-composer-send {
-  margin-inline-start: 0;
+/* Stop is a small filled square, unlike the outlined square icon. */
+.rf-composer [data-stop] svg {
+  width: 12px;
+  height: 12px;
+}
+/* Each icon set draws inside its own group, which sets the fill. */
+.rf-composer [data-stop] svg g {
+  fill: currentColor;
+}
+.rf-composer[data-size='compact'] [data-stop] svg {
+  width: 10px;
+  height: 10px;
+}
+.rf-composer-voice-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.rf-composer-voice-keys {
+  display: inline-flex;
+  gap: 2px;
+}
+.rf-composer-voice-keys kbd {
+  min-width: 1.5em;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: color-mix(in srgb, currentColor 15%, transparent);
+  font: inherit;
+  text-align: center;
 }
 .rf-composer-voice {
   display: flex;

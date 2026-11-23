@@ -52,7 +52,66 @@ it('records a voice note and attaches it as an audio file', async (t) => {
   ok(attached[0].type.startsWith('audio/'))
   ok(attached[0].size > 0)
   equal($('.rf-composer-voice'), null)
-  ok($('button[aria-label="Record a voice note"]'))
+  // With a file to send, the main button sends again.
+  ok($('button[aria-label="Send message"]'))
+  equal($('button[aria-label="Record a voice note"]'), null)
+})
+
+it('records from the main button only while there is nothing to send', async (t) => {
+  const { $, act, cleanup } = render(<InputMessage voice onSend={() => {}} />)
+  t.after(cleanup)
+  const record = $('button[aria-label="Record a voice note"]') as HTMLButtonElement
+  ok(record.classList.contains('rf-composer-send'))
+  equal(record.getAttribute('aria-keyshortcuts'), 'Alt+Shift+V')
+  equal($('button[aria-label="Send message"]'), null)
+  const field = $('textarea') as HTMLTextAreaElement
+  await act(() => {
+    field.value = 'Hello'
+    field.dispatchEvent(new Event('input', { bubbles: true }))
+  })
+  ok($('button[aria-label="Send message"]'))
+  equal($('button[aria-label="Record a voice note"]'), null)
+})
+
+it('starts and attaches a recording with the keyboard shortcut', async (t) => {
+  fakeMicrophone(t)
+  let attached: File[] = []
+  const { $, act, cleanup } = render(
+    <InputMessage voice onFilesChange={(files) => (attached = files)} onSend={() => {}} />,
+  )
+  t.after(cleanup)
+  const field = $('textarea') as HTMLTextAreaElement
+  const press = () =>
+    field.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'V',
+        code: 'KeyV',
+        altKey: true,
+        shiftKey: true,
+        bubbles: true,
+        cancelable: true,
+      }),
+    )
+  await act(press)
+  await wait(50)
+  await act(() => {})
+  ok($('.rf-composer-voice'), 'the shortcut starts a recording')
+  await wait(200)
+  await act(press)
+  for (let tries = 0; tries < 40 && !attached.length; tries++) await wait(25)
+  equal(attached.length, 1)
+})
+
+it('turns the shortcut off with null', async (t) => {
+  const { $, cleanup } = render(<InputMessage voice voiceShortcut={null} onSend={() => {}} />)
+  t.after(cleanup)
+  equal($('button[aria-label="Record a voice note"]')?.getAttribute('aria-keyshortcuts'), null)
+})
+
+it('draws stop as a filled square', async (t) => {
+  const { $, cleanup } = render(<InputMessage status="streaming" onSend={() => {}} />)
+  t.after(cleanup)
+  ok($('button[aria-label="Stop response"]')?.hasAttribute('data-stop'))
 })
 
 it('throws a cancelled recording away', async (t) => {
