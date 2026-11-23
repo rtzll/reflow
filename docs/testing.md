@@ -59,6 +59,8 @@ pnpm test:e2e             # end-to-end tests on the built showcase, after pnpm b
 
 Before pushing, run the suites your change touches. CI runs everything on Linux and is the gate. End-to-end tests run three at a time, and nothing is retried: a test that fails once has failed.
 
+`test:browser` and `test:e2e` hide Node's DEP0205 warning, and only that one. `@remix-run/node-tsx` 1.0.0 loads each test file with `module.register()`, which Node 26 deprecates in favour of `module.registerHooks()`, so every test worker printed it. Nothing in Reflow calls it. Remove `--disable-warning=DEP0205` from both scripts once a node-tsx release loads files with `registerHooks()`. Running a single file directly, as in the last command above, still shows the warning.
+
 ## When a test flakes
 
 1. Reproduce it: `pnpm test:stress apps/web/test/<file>.test.e2e.ts --runs 10` runs the file ten times, five at once, which loads the machine like a CI runner.

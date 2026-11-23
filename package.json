@@ -25,8 +25,8 @@
     "test:stress": "node tools/test-stress.ts",
     "test:run": "pnpm test:unit && pnpm test:browser && pnpm test:e2e",
     "test:unit": "node --test tools/*.test.ts packages/create-reflow/test/*.test.ts",
-    "test:browser": "./apps/web/node_modules/.bin/remix test --type server --type browser",
-    "test:e2e": "./apps/web/node_modules/.bin/remix test --type e2e --concurrency 3 --setup apps/web/test/showcase-server.ts"
+    "test:browser": "NODE_OPTIONS=\"$NODE_OPTIONS --disable-warning=DEP0205\" ./apps/web/node_modules/.bin/remix test --type server --type browser",
+    "test:e2e": "NODE_OPTIONS=\"$NODE_OPTIONS --disable-warning=DEP0205\" ./apps/web/node_modules/.bin/remix test --type e2e --concurrency 3 --setup apps/web/test/showcase-server.ts"
   },
   "devDependencies": {
     "@types/node": "26.6.6",
