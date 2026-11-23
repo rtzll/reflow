@@ -45,6 +45,13 @@ it('names other files with their extension on a card', async (t) => {
     ['file', 'Makefile', null],
   ])
   equal($('img'), null)
+  // Each card is named by its full file name.
+  equal(
+    [...document.querySelectorAll('.rf-file-thumbnail-card')]
+      .map((card) => card.getAttribute('aria-label'))
+      .join('|'),
+    'release notes.txt|Makefile',
+  )
 })
 
 it('shows message attachments as the same thumbnails as the composer', async (t) => {

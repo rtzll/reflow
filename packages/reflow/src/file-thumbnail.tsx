@@ -93,9 +93,16 @@ export function FileThumbnail(handle: Handle<FileThumbnailProps>) {
             <img alt={file.name} src={previewUrl} />
           )
         ) : (
-          <div class="rf-file-thumbnail-card">
-            <span class="rf-file-thumbnail-name">{base}</span>
-            {extension && <Badge size="compact">{extension}</Badge>}
+          // Named by the full file name, as an image preview is by its alt text.
+          <div class="rf-file-thumbnail-card" role="img" aria-label={file.name}>
+            <span class="rf-file-thumbnail-name" aria-hidden="true">
+              {base}
+            </span>
+            {extension && (
+              <Badge size="compact" aria-hidden="true">
+                {extension}
+              </Badge>
+            )}
           </div>
         )}
       </div>
