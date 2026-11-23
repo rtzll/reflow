@@ -82,7 +82,19 @@ export function ChatOutline(handle: Handle<ChatOutlineProps>) {
   }
 
   const watch = ref((node, signal) => {
-    node.addEventListener('focusin', () => pendingFocus && focusPending(), { signal })
+    // Focus also passes through the menu's rows, which sit inside this
+    // wrapper; only the trigger getting it back means the menu has closed.
+    node.addEventListener(
+      'focusin',
+      (event) => {
+        // Move on after the menu has finished handing focus back.
+        if (pendingFocus && (event.target as Element).closest('.rf-dropdown-trigger')) {
+          clearTimeout(focusTimer)
+          focusTimer = setTimeout(focusPending)
+        }
+      },
+      { signal },
+    )
     signal.addEventListener('abort', () => clearTimeout(focusTimer), { once: true })
     const targets = elements()
     scroller = targets.length ? scrollParent(targets[0]) : null
