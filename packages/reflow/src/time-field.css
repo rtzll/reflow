@@ -77,6 +77,8 @@
   min-inline-size: 112px;
   max-block-size: min(240px, var(--popover-available-height, 240px));
   overflow-y: auto;
+  /* Reaching the end scrolls nothing behind it. */
+  overscroll-behavior: contain;
   padding: 4px;
 }
 .rf-time-surface[data-duration] {

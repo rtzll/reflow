@@ -21,6 +21,8 @@
   min-inline-size: 0;
   min-block-size: 0;
   overflow: auto;
+  /* Reaching the end scrolls nothing behind it. */
+  overscroll-behavior: contain;
 }
 
 .rf-resizable-grip {

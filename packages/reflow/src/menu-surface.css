@@ -28,6 +28,8 @@
     display var(--rf-exit-fast) allow-discrete,
     overlay var(--rf-exit-fast) allow-discrete;
   overflow: auto;
+  /* Reaching the end scrolls nothing behind it. */
+  overscroll-behavior: contain;
   scrollbar-width: thin;
 }
 

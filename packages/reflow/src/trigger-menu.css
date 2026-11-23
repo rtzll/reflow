@@ -14,6 +14,8 @@
   min-inline-size: 160px;
   max-block-size: min(240px, 50dvh);
   overflow: auto;
+  /* Reaching the end scrolls nothing behind it. */
+  overscroll-behavior: contain;
   padding: 4px;
   border: 1px solid var(--rf-border);
   border-radius: var(--rf-panel-radius);
