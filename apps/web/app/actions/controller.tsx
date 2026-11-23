@@ -69,18 +69,14 @@ async function show(
   const component = page === 'component' ? catalog.find((entry) => entry.slug === slug) : undefined
   if (page === 'component' && !component)
     return new Response('Component not found', { status: 404 })
-  const title =
-    page === 'gallery'
-      ? 'Reflow'
-      : `${component?.name ?? (page === 'docs' ? 'Documentation' : 'Demo')} · Reflow`
+  const title = page === 'gallery' ? 'Reflow' : `${component?.name ?? 'Documentation'} · Reflow`
   const pageAssets = await getPageAssets()
   // CodeBlock's samples are highlighted on the server, for the pages that show them.
-  const samples =
-    page === 'gallery' || page === 'demo' || slug === 'code-block' ? await codeSamples() : undefined
+  const samples = page === 'gallery' || slug === 'code-block' ? await codeSamples() : undefined
   const images = slug === 'code-block' ? { ...pageAssets.images, code: samples } : pageAssets.images
   const source = page === 'component' && slug ? await exampleSource(slug) : undefined
   const components =
-    page === 'gallery' || page === 'demo'
+    page === 'gallery'
       ? galleryCatalog(
           pageAssets.images.sidebarAvatar,
           page === 'gallery',
@@ -136,8 +132,6 @@ export default createController(routes, {
     apps: (context) => show(context, 'apps'),
     app: (context) => show(context, 'app', context.params.slug),
     component: (context) => show(context, 'component', context.params.slug),
-    demo: (context) =>
-      show(context, 'demo', new URL(context.request.url).searchParams.get('c') ?? undefined),
     async assets(context) {
       return (await assets.fetch(context.request)) ?? new Response('Not found', { status: 404 })
     },

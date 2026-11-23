@@ -7,7 +7,6 @@ export const routes = route({
   componentMarkdown: get('/docs/:slug.md'),
   docsIndex: get('/llms.txt'),
   component: get('/docs/:slug'),
-  demo: get('/demo'),
   apps: get('/apps'),
   app: get('/apps/:slug'),
   assets: get('/assets/*path'),

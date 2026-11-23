@@ -43,7 +43,6 @@ const palette =
 const icons = {
   home: 'M3 10 12 3l9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z',
   docs: 'M3 3h18v18H3zM7 7v10m4-10v10m4-10 2 10',
-  play: 'M6 4v16l14-8Z',
   page: 'M14 2H5v20h14V7l-5-5Zm0 0v6h5M8 12h8m-8 4h6',
   theme: 'M20 15A9 9 0 0 1 9 4a9 9 0 1 0 11 11Z',
   shape: 'M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4Z',
@@ -61,7 +60,6 @@ const icons = {
 const componentIcons: Record<string, string> = {
   '': icons.home,
   docs: icons.docs,
-  demo: icons.play,
   accordion: 'M4 4h16M4 12h16M4 20h16m5-13 3 3 3-3',
   button: 'M5 6h14v12H5zM9 12h6',
   calendar: 'M4 5h16v16H4zM8 3v4m8-4v4M4 10h16M8 14h2m4 0h2',
@@ -284,12 +282,6 @@ export const SiteControls = clientEntry(
           href: routes.docs.href(),
         },
         {
-          name: 'Demo',
-          slug: 'demo',
-          description: 'Explore interactive slides',
-          href: routes.demo.href(),
-        },
-        {
           name: 'Apps',
           slug: 'apps',
           description: 'Full example workspaces built with Reflow',
@@ -473,14 +465,6 @@ export const SiteControls = clientEntry(
                 <Icon name="panel-left" />
                 <span>Toggle properties</span>
                 <kbd class="site-keycap">]</kbd>
-              </div>
-              <div>
-                <Icon name="arrow-right" />
-                <span>Previous / next demo slide</span>
-                <span class="site-keycaps">
-                  <kbd class="site-keycap">←</kbd>
-                  <kbd class="site-keycap">→</kbd>
-                </span>
               </div>
               <div>
                 {icon(icons.keyboard)}

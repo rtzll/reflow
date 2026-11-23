@@ -17,7 +17,6 @@ import {
   ShareSettingsButton,
 } from '../public/install-prompt.tsx'
 import { AccentPicker } from '../public/accent-picker.tsx'
-import { DemoCustomize, DemoPagination, DemoPlayground } from '../public/demo-playground.tsx'
 
 import { settingRows, settingLabel, readSettings, type Settings } from '../public/site-settings.ts'
 export { readSettings } from '../public/site-settings.ts'
@@ -35,7 +34,7 @@ export interface ShowcaseComponent {
 }
 
 export interface ShowcaseProps {
-  page: 'gallery' | 'docs' | 'component' | 'demo'
+  page: 'gallery' | 'docs' | 'component'
   components: readonly ShowcaseComponent[]
   slug?: string
   query?: string
@@ -56,7 +55,7 @@ function pageHref(path: string, query: Record<string, string> = {}) {
 }
 
 function Icon(
-  handle: Handle<{ name: 'arrow' | 'search' | 'menu' | 'chevron' | 'copy' | 'github' | 'scale' }>,
+  handle: Handle<{ name: 'arrow' | 'search' | 'menu' | 'chevron' | 'copy' | 'github' }>,
 ) {
   return () => {
     const names = {
@@ -67,11 +66,10 @@ function Icon(
       copy: 'copy',
     } satisfies Record<string, IconName>
     const { name } = handle.props
-    if (name !== 'github' && name !== 'scale') return <ReflowIcon name={names[name]} />
+    if (name !== 'github') return <ReflowIcon name={names[name]} />
     const paths = {
       github:
         'M9 19c-4 1.3-4-2-6-2m12 4v-3.4c0-1 .1-1.4-.5-2 3-.3 6.2-1.5 6.2-6.7A5.2 5.2 0 0 0 19.3 5a5 5 0 0 0-.1-3.6s-1.2-.4-3.9 1.4a13 13 0 0 0-7 0C5.6 1 4.4 1.4 4.4 1.4A5 5 0 0 0 4.3 5 5.2 5.2 0 0 0 3 8.9c0 5.2 3.2 6.4 6.2 6.7-.4.4-.5 1-.5 2V21',
-      scale: 'M14 4h6v6M4 14v6h6m10-16-5 5M4 20l5-5',
     }
     return (
       <svg
@@ -92,10 +90,10 @@ function Icon(
 }
 
 function HeadingControls(
-  handle: Handle<{ previous?: PageLink; next?: PageLink; slides?: boolean; soundEnabled: boolean }>,
+  handle: Handle<{ previous?: PageLink; next?: PageLink; soundEnabled: boolean }>,
 ) {
   return () => {
-    let { previous, next, slides, soundEnabled } = handle.props
+    let { previous, next, soundEnabled } = handle.props
     return (
       <div class="site-heading-controls">
         <button
@@ -123,15 +121,11 @@ function HeadingControls(
             <path class="site-sound-muted" d="m16 9 5 6m0-6-5 6" />
           </svg>
         </button>
-        <nav class="site-page-arrows" aria-label={slides ? 'Slides' : 'Adjacent pages'}>
+        <nav class="site-page-arrows" aria-label="Adjacent pages">
           {(['previous', 'next'] as const).map((direction) => {
             let link = direction === 'previous' ? previous : next
             let name = direction === 'previous' ? 'Previous' : 'Next'
-            let label = slides
-              ? `${name} slide`
-              : link
-                ? `${name}: ${link.name}`
-                : `No ${direction} page`
+            let label = link ? `${name}: ${link.name}` : `No ${direction} page`
             return link ? (
               <a
                 key={direction}
@@ -139,8 +133,6 @@ function HeadingControls(
                 href={link.href}
                 aria-label={label}
                 title={link.name}
-                data-site-arrow={slides ? direction : undefined}
-                data-rmx-reset-focus={slides ? 'manual' : undefined}
               >
                 <Icon name="arrow" />
               </a>
@@ -228,9 +220,6 @@ function Sidebar(handle: Handle<SidebarProps>) {
             >
               Introduction
             </a>
-          </li>
-          <li>
-            <a href={pageHref(routes.demo.href())}>Demo</a>
           </li>
           <li>
             <a href={routes.apps.href()} data-rmx-document="">
@@ -599,12 +588,6 @@ function Gallery(
               Learn more
             </a>
             <a
-              class="site-button site-button-ghost site-gallery-demo"
-              href={pageHref(routes.demo.href())}
-            >
-              See demo
-            </a>
-            <a
               class="site-button site-button-ghost"
               href={routes.docsIndex.href()}
               data-rmx-document
@@ -840,15 +823,7 @@ function ComponentDoc(
                 id={sectionId(playground.title)}
                 data-rmx-key={`playground:${component.slug}`}
               >
-                <div class="doc-section-heading">
-                  <h2>{playground.title}</h2>
-                  <a
-                    class="doc-demo-link"
-                    href={pageHref(routes.demo.href(), { c: component.slug })}
-                  >
-                    Open demo <span aria-hidden="true">↗</span>
-                  </a>
-                </div>
+                <h2>{playground.title}</h2>
                 <DocPreview
                   {...playground}
                   query={component.slug === 'pagination' ? handle.props.query : undefined}
@@ -951,200 +926,12 @@ function ComponentDoc(
   }
 }
 
-const demoOrder = [
-  'checkbox-group',
-  'accordion',
-  'radio-group',
-  'slider',
-  'ask-user-questions',
-  'input-message',
-  'sidebar',
-  'button',
-  'dropdown',
-  'combobox',
-  'calendar',
-  'date-picker',
-  'command-menu',
-  'color-picker',
-  'input-group',
-  'switch',
-  'table',
-  'card',
-  'tabs',
-  'thinking-indicator',
-  'thinking-steps',
-  'banner',
-  'input-copy',
-  'carousel',
-  'breadcrumb',
-  'segmented-control',
-  'popover',
-  'hover-card',
-  'toaster',
-  'drawer',
-  'code-block',
-  'chat-layout',
-  'context-menu',
-  'data-table',
-  'markdown',
-  'time-grid',
-  'bar-chart',
-]
-
-const customizableSlides = new Set([
-  'time-grid',
-  'bar-chart',
-  'markdown',
-  'data-table',
-  'context-menu',
-  'accordion',
-  'ask-user-questions',
-  'banner',
-  'breadcrumb',
-  'button',
-  'calendar',
-  'card',
-  'combobox',
-  'command-menu',
-  'date-picker',
-  'drawer',
-  'dropdown',
-  'hover-card',
-  'input-message',
-  'popover',
-  'segmented-control',
-  'sidebar',
-])
-
-function Demo(
-  handle: Handle<{
-    components: readonly ShowcaseComponent[]
-    settings: Settings
-    slug?: string
-    fit: boolean
-    avatar: string
-  }>,
-) {
-  return () => {
-    let { components, settings, slug, fit, avatar } = handle.props
-    const available = new Map(
-      components
-        .filter((component) => component.preview != null && component.category !== 'system')
-        .map((component) => [component.slug, component]),
-    )
-    const slides = demoOrder.flatMap((slug) => available.get(slug) ?? [])
-    const selectedIndex = slides.findIndex((slide) => slide.slug === slug)
-    const current = available.get(slug ?? '') ?? slides[0]
-    const position = Math.max(0, selectedIndex)
-    const slideLabel =
-      selectedIndex >= 0 || !available.has(slug ?? '')
-        ? `Slide ${position + 1} of ${slides.length}: ${current?.name}`
-        : current?.name
-    const customizable = current && customizableSlides.has(current.slug)
-    let slideHref = (slide: ShowcaseComponent, scale = fit) =>
-      pageHref(routes.demo.href(), { c: slide.slug, ...(scale ? { fit: '1' } : {}) })
-    let prev = slides[position - 1]
-    let next = slides[position + 1]
-    return (
-      <main id="main" class="site-demo">
-        <header class="site-demo-heading">
-          <div class="site-title-row">
-            <h1>Reflow</h1>
-            <HeadingControls
-              slides
-              soundEnabled={settings.soundEnabled}
-              previous={prev ? { href: slideHref(prev), name: prev.name } : undefined}
-              next={next ? { href: slideHref(next), name: next.name } : undefined}
-            />
-          </div>
-          <p>Fluid components for Remix.</p>
-          <div class="site-actions">
-            <a class="site-button site-button-primary" href={pageHref(routes.docs.href())}>
-              Learn more
-            </a>
-            <a class="site-button site-button-tertiary" href={pageHref(routes.gallery.href())}>
-              Showcase
-            </a>
-          </div>
-        </header>
-        {current ? (
-          <>
-            <article
-              class="site-preview-card site-demo-card"
-              aria-label={slideLabel}
-              data-rmx-key={current.slug}
-            >
-              <div class="site-preview-stage site-demo-stage">
-                {customizable ? (
-                  <DemoPlayground slug={current.slug} fit={fit} avatar={avatar} />
-                ) : (
-                  <div class="site-demo-example" data-fit={fit ? '' : undefined}>
-                    {current.preview}
-                  </div>
-                )}
-              </div>
-              <footer class="site-preview-footer">
-                <a
-                  href={pageHref(routes.component.href({ slug: current.slug }))}
-                  aria-label={`View ${current.name} documentation`}
-                >
-                  {current.name}
-                </a>
-                <div class="site-demo-footer-actions">
-                  <a
-                    class="site-icon-button site-demo-fit"
-                    href={slideHref(current, !fit)}
-                    aria-label={
-                      fit ? 'Show preview at actual size' : 'Scale preview to fit the card'
-                    }
-                    title={fit ? 'Actual size' : 'Scale to fit'}
-                  >
-                    <Icon name="scale" />
-                  </a>
-                  {customizable && <DemoCustomize slug={current.slug} name={current.name} />}
-                </div>
-              </footer>
-            </article>
-            <DemoPagination
-              currentHref={slideHref(current)}
-              links={slides.map((slide) => ({ href: slideHref(slide), name: slide.name }))}
-            />
-          </>
-        ) : (
-          <p class="site-empty">No component previews are available yet.</p>
-        )}
-      </main>
-    )
-  }
-}
-
 export function Showcase(handle: Handle<ShowcaseProps>) {
   return () => {
     let { components, page, slug, images, query = '' } = handle.props
     let settings = handle.props.settings ?? readSettings(query)
     let params = new URLSearchParams(query)
     let search = params.get('q')?.trim().slice(0, 80) ?? ''
-    if (page === 'demo')
-      return (
-        <>
-          <SiteControls
-            pages={components.map(({ name, slug, description, category }) => ({
-              name,
-              slug,
-              description,
-              category,
-            }))}
-          />
-          <Demo
-            components={components}
-            settings={settings}
-            slug={slug ?? params.get('c') ?? undefined}
-            avatar={images.sidebarAvatar}
-            fit={params.get('fit') === '1'}
-          />
-        </>
-      )
-
     let currentIndex = components.findIndex((entry) => entry.slug === slug)
     let previous = components[currentIndex - 1]
     let next = currentIndex >= 0 ? components[currentIndex + 1] : undefined

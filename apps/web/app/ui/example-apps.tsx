@@ -28,9 +28,6 @@ export function AppsIndex() {
         <a href={routes.gallery.href()} data-rmx-document="">
           Showcase
         </a>
-        <a href={routes.demo.href()} data-rmx-document="">
-          Demo
-        </a>
         <a href={routes.docs.href()} data-rmx-document="">
           Docs
         </a>

@@ -51,8 +51,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.site-layout,
-.site-demo {
+.site-layout {
   --site-body-size: 13px;
   --site-body-line: 20px;
   --site-title-size: 28px;
@@ -62,7 +61,7 @@ body {
   min-width: 0;
 }
 
-html[data-density='compact'] :is(.site-layout, .site-demo) {
+html[data-density='compact'] .site-layout {
   --site-body-size: 12px;
   --site-body-line: 18px;
   --site-title-size: 24px;
@@ -71,26 +70,21 @@ html[data-density='compact'] :is(.site-layout, .site-demo) {
 /* The page's resets sit in the base layer, which document.tsx orders before
    Reflow's layer, so component styles keep winning over them. */
 @layer base {
-  .site-layout *,
-  .site-demo * {
+  .site-layout * {
     box-sizing: border-box;
   }
-  .site-layout [hidden],
-  .site-demo [hidden] {
+  .site-layout [hidden] {
     display: none !important;
   }
-  .site-layout :where(h1, h2, p, ul, pre),
-  .site-demo :where(h1, p) {
+  .site-layout :where(h1, h2, p, ul, pre) {
     margin: 0;
   }
 
-  .site-layout :where(a:not(.rf-button)),
-  .site-demo :where(a:not(.rf-button)) {
+  .site-layout :where(a:not(.rf-button)) {
     color: inherit;
     text-decoration: none;
   }
-  .site-layout :where(:focus-visible),
-  .site-demo :where(:focus-visible) {
+  .site-layout :where(:focus-visible) {
     outline: 1px solid var(--rf-accent);
     outline-offset: 2px;
   }
@@ -98,7 +92,6 @@ html[data-density='compact'] :is(.site-layout, .site-demo) {
 
 /* Unlayered on purpose: controls take the page font over Reflow's. */
 .site-layout button,
-.site-demo button,
 .site-layout select,
 .site-layout input {
   font-family: inherit;
@@ -432,15 +425,13 @@ html[data-density='compact'] .site-nav a {
   background: var(--rf-hover);
 }
 .site-button-primary,
-.site-layout a.site-button-primary,
-.site-demo a.site-button-primary {
+.site-layout a.site-button-primary {
   background: var(--rf-fg);
   color: var(--rf-bg);
   font-weight: 550;
 }
 .site-button-primary:hover,
-.site-layout a.site-button-primary:hover,
-.site-demo a.site-button-primary:hover {
+.site-layout a.site-button-primary:hover {
   background: color-mix(in oklab, var(--rf-fg) 88%, var(--rf-bg));
   color: var(--rf-bg);
 }
@@ -490,12 +481,10 @@ html[data-density='compact'] .site-nav a {
 .site-arrow-previous svg {
   transform: rotate(180deg);
 }
-.site-layout a.site-icon-button,
-.site-demo a.site-icon-button {
+.site-layout a.site-icon-button {
   color: var(--rf-muted);
 }
-.site-layout a.site-icon-button:hover,
-.site-demo a.site-icon-button:hover {
+.site-layout a.site-icon-button:hover {
   color: var(--rf-fg);
 }
 
@@ -853,131 +842,6 @@ html[data-density='compact'] .site-nav a {
   white-space: nowrap;
 }
 
-.site-demo {
-  --site-demo-gutter: 48px;
-  box-sizing: border-box;
-  width: 100vw;
-  min-height: 100svh;
-  padding: 96px var(--site-demo-gutter) 48px;
-}
-body:has(.site-demo) {
-  overflow-x: clip;
-}
-.site-demo > * {
-  width: min(100%, 1200px);
-  margin-inline: auto;
-}
-.site-demo .site-title-row h1 {
-  line-height: 1;
-}
-.site-demo-heading {
-  padding-bottom: 32px;
-}
-.site-demo-card {
-  aspect-ratio: 680 / 420;
-  min-height: 290px;
-  border-color: color-mix(in oklab, var(--rf-border) 60%, transparent);
-}
-.site-demo-stage {
-  container-type: inline-size;
-  padding-inline: 24px;
-}
-.site-demo-example {
-  display: grid;
-  place-items: center;
-  width: min(100%, 680px);
-  transform-origin: center;
-  transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-.site-demo-card .site-preview-footer > a:first-child {
-  padding-right: 88px;
-}
-.site-demo-footer-actions {
-  position: absolute;
-  inset: 0 8px 0 auto;
-  display: flex;
-  align-items: center;
-}
-.site-demo-customize summary {
-  list-style: none;
-  cursor: pointer;
-}
-.site-demo-customize summary::marker {
-  content: '';
-}
-.site-demo-customize summary::-webkit-details-marker {
-  display: none;
-}
-.site-demo-settings {
-  position: absolute;
-  z-index: 10;
-  right: 10px;
-  bottom: calc(100% + 10px);
-  width: min(300px, 80vw);
-  max-height: min(460px, 75dvh);
-  overflow: auto;
-  padding: 8px;
-  border: 1px solid color-mix(in oklab, var(--rf-border) 60%, transparent);
-  border-radius: var(--rf-panel-radius);
-  background: var(--rf-surface-3);
-  box-shadow: var(--rf-elevation);
-}
-.site-demo-settings .doc-playground-controls {
-  margin-top: 20px;
-}
-.site-demo-pagination {
-  position: relative;
-  isolation: isolate;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 0;
-  margin-top: 32px;
-}
-.site-demo-pagination > .rf-highlight {
-  border-radius: var(--rf-radius);
-  background: var(--rf-hover);
-}
-.site-demo-pagination a {
-  position: relative;
-  display: grid;
-  min-width: 16px;
-  height: 26px;
-  place-items: center;
-  padding-inline: 6px;
-  border-radius: var(--rf-radius);
-}
-.site-demo-pagination a::after {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: min(12px, var(--rf-radius));
-  background: var(--rf-muted);
-  opacity: 0.75;
-  transition:
-    width 150ms,
-    opacity 150ms;
-}
-.site-demo-pagination a[aria-current='page']::after {
-  width: 24px;
-  opacity: 1;
-}
-.site-demo-pagination a:hover::after {
-  opacity: 1;
-}
-
-@container (min-width: 800px) {
-  .site-demo-example[data-fit] {
-    transform: scale(1.2);
-  }
-}
-@container (min-width: 1000px) {
-  .site-demo-example[data-fit] {
-    transform: scale(1.45);
-  }
-}
-
 @media (width < 1280px) {
   .site-layout {
     display: block;
@@ -1120,30 +984,16 @@ body:has(.site-demo) {
   .site-gallery [data-component='thinking-indicator'] {
     min-height: 210px;
   }
-  .site-gallery-demo {
-    display: none;
-  }
-  .site-layout,
-  .site-demo {
+  .site-layout {
     --site-title-size: 22px;
   }
-  html[data-density='compact'] :is(.site-layout, .site-demo) {
+  html[data-density='compact'] .site-layout {
     --site-title-size: 20px;
-  }
-  .site-demo {
-    --site-demo-gutter: 24px;
-    padding-top: 64px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :is(
-    .site-button,
-    .site-icon-button,
-    .site-preview-card,
-    .site-demo-example,
-    .site-demo-pagination a::after
-  ) {
+  :is(.site-button, .site-icon-button, .site-preview-card) {
     transition: none;
   }
 }
@@ -1445,29 +1295,17 @@ html[data-font='geist-serif'] {
 .site-doc-section {
   scroll-margin-top: 32px;
 }
-.doc-section-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-.doc-section-heading h2 {
-  font-size: 16px;
-  font-weight: 550;
-}
 .doc-markdown-link {
   display: inline-block;
   margin-top: 8px;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-.doc-markdown-link,
-.doc-demo-link {
+.doc-markdown-link {
   color: var(--rf-muted);
   font-size: 12px;
 }
-.doc-markdown-link:hover,
-.doc-demo-link:hover {
+.doc-markdown-link:hover {
   color: var(--rf-fg);
 }
 .doc-preview {
@@ -2064,10 +1902,6 @@ html[data-font='geist-serif'] {
   > .doc-example-content {
   align-items: flex-start;
 }
-.doc-section-heading + .doc-preview {
-  margin-top: -8px;
-}
-.doc-section-heading h2,
 .site-doc .site-doc-section > h2,
 .site-doc .site-doc-install h2 {
   line-height: 1;
@@ -2186,12 +2020,12 @@ html[data-font='geist-serif'] {
   font-size: 11px;
   color: var(--rf-muted);
 }
-html[data-font^='google:'] :is(.site-main h1, .site-main h2, .site-main h3, .site-demo h1) {
+html[data-font^='google:'] :is(.site-main h1, .site-main h2, .site-main h3) {
   font-family: var(--rf-heading-font);
   font-weight: var(--rf-heading-weight, 550);
   font-variation-settings: normal;
 }
-html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
+html[data-font^='google:'] .site-main h1 {
   font-weight: var(--rf-heading-weight, 700);
 }
 .site-setting-icon[data-setting-icon='fontWeight'] {
@@ -2546,18 +2380,6 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
 .doc-composer-preview .rf-chat-layout-composer {
   padding-block: 0;
 }
-.site-demo-stage .doc-composer-preview {
-  width: min(100%, 420px);
-  height: 480px;
-}
-/* Scaled up to fill the card, a shorter conversation lands at the same size. */
-.site-demo-example[data-fit] .doc-composer-preview {
-  height: 320px;
-}
-/* The card grows to hold the conversation where its aspect ratio would not. */
-.site-demo-card:has(.doc-composer-preview) {
-  min-height: 568px;
-}
 /* As in the reference: the conversation fills the playground from the top and
    the composer rests at the bottom, so the transcript has the whole stage to
    grow into before it scrolls. */
@@ -2588,32 +2410,6 @@ html[data-font^='google:'] :is(.site-main h1, .site-demo h1) {
 }
 .sidebar-playground-action.rf-sidebar-row:is(:hover, :focus-visible) kbd {
   opacity: 1;
-}
-.site-demo-stage .example-sidebar-playground {
-  width: min(100%, 600px);
-}
-.site-demo-stage .example-sidebar-playground > .rf-sidebar-layout {
-  height: 560px;
-}
-.site-demo-stage .example-sidebar-playground > .rf-sidebar-layout[data-variant] {
-  border-radius: calc(var(--rf-panel-radius) + 8px);
-}
-.site-demo-card:has(.example-sidebar-playground) {
-  min-height: 644px;
-}
-.site-demo-example[data-fit]:has(.example-sidebar-playground) {
-  transform: none;
-}
-@container (min-width: 800px) {
-  .site-demo-example[data-fit] .example-sidebar-playground {
-    width: min(100%, 660px);
-  }
-  .site-demo-example[data-fit] .example-sidebar-playground > .rf-sidebar-layout {
-    height: 600px;
-  }
-}
-.site-demo-card:has(.site-demo-example[data-fit] .example-sidebar-playground) {
-  min-height: 684px;
 }
 
 .doc-command-palette {

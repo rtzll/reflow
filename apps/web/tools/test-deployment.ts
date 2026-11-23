@@ -39,7 +39,7 @@ try {
     '/',
     '/docs',
     '/docs/button',
-    '/demo?c=dropdown&theme=dark',
+    '/docs/dropdown?theme=dark',
     '/apps',
     '/apps/issues',
     '/apps/chat',
@@ -177,11 +177,12 @@ try {
     .fill('Try Reflow')
   await expect(preview.getByRole('button', { name: 'Try Reflow', exact: true })).toBeVisible()
 
-  await openShowcase('/demo?c=dropdown&theme=dark')
-  await page.getByRole('button', { name: 'Email', exact: true }).click()
+  await openShowcase('/docs/dropdown?theme=dark')
+  const dropdown = page.locator('#playground .doc-preview-stage')
+  await dropdown.getByRole('button', { name: 'Email', exact: true }).click()
   await page.getByRole('menuitemradio', { name: 'Notifications' }).click()
   await expect(
-    page.locator('button[aria-haspopup="menu"]', { hasText: 'Notifications' }),
+    dropdown.locator('button[aria-haspopup="menu"]', { hasText: 'Notifications' }),
   ).toBeVisible()
 
   await openShowcase('/apps')

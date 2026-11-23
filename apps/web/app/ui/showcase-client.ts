@@ -289,24 +289,6 @@ export function enhanceShowcase() {
     if (target instanceof Element && target.closest(keyboardWidgets)) return
     if (target instanceof HTMLElement && target.isContentEditable) return
 
-    const direction =
-      event.key === 'ArrowRight' || event.key === 'ArrowDown'
-        ? 'next'
-        : event.key === 'ArrowLeft' || event.key === 'ArrowUp'
-          ? 'previous'
-          : null
-    if (direction) {
-      // Native inputs need their arrows for editing or selection. Checkboxes
-      // use Space, and a group can still claim arrows via preventDefault().
-      if (target instanceof HTMLInputElement && target.type !== 'checkbox') return
-      if (document.querySelector('dialog[open]')) return
-      const arrow = document.querySelector<HTMLAnchorElement>(`[data-site-arrow="${direction}"]`)
-      if (!arrow) return
-      event.preventDefault()
-      arrow.click()
-      return
-    }
-
     if (target instanceof HTMLInputElement) return
     if (document.querySelector('dialog[open]:not(.site-mobile-panel)')) return
     const setting = settingRows.find(
