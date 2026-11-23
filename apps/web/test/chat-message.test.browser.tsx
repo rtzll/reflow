@@ -13,7 +13,7 @@ describe('ChatMessage system role', () => {
         actions={<button type="button">Undo</button>}
         attachments={[{ name: 'ignored.png' }]}
       >
-        Model switched to Opus
+        Model switched to Model two
       </ChatMessage>,
     )
     t.after(cleanup)
@@ -24,7 +24,7 @@ describe('ChatMessage system role', () => {
     ok(line, 'the event sits on one line')
     equal(line.querySelector('.rf-chat-system-icon')?.getAttribute('aria-hidden'), 'true')
     ok(line.querySelector('.rf-chat-system-icon .model-icon'))
-    equal(line.querySelector('.rf-chat-system-text')?.textContent, 'Model switched to Opus')
+    equal(line.querySelector('.rf-chat-system-text')?.textContent, 'Model switched to Model two')
     equal(line.querySelector('.rf-chat-time')?.textContent, '14:02')
     ok(line.querySelector('.rf-chat-actions button'))
     // A system line has no bubble, no attachments and no hover row.
