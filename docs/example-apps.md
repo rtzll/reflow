@@ -5,7 +5,7 @@ The Apps section demonstrates a complete task with seeded data. Each workspace h
 | Workspace | First workflow |
 | --- | --- |
 | `/apps/issues` | Filter cycle issues by status or assignee, switch between board and list, and move a selection together. |
-| `/apps/chat` | Start a conversation, choose a slash skill, stop a simulated reply, and return to the draft using Back or a saved conversation URL. |
+| `/apps/chat` | Start a conversation, choose a slash skill, stop a simulated reply, and return to the draft using Back or a saved conversation URL. Attach files or a voice note, pin or delete conversations from the sidebar, jump between questions with the outline, and copy or retry a reply. |
 | `/apps/calendar` | Create a timed event in a week, move it to another day, and change its duration using pointer or keyboard. Show overlapping events in one timezone. |
 | `/apps/analytics` | Follow the busiest day to its chart, open the events behind the spike, inspect a payload, and reopen the filtered log from its URL. |
 
