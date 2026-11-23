@@ -386,3 +386,43 @@ describe('Breadcrumb', () => {
     await waitFor(() => chosen === 'systems')
   })
 })
+
+it('shows badges, hints, a submenu note and a switch row that stays open', async (t) => {
+  const changes: Array<[string, boolean | undefined]> = []
+  const { $, act, cleanup } = render(
+    <Dropdown
+      label="Model"
+      items={[
+        { value: 'one', label: 'Model one', type: 'radio', checked: true, badge: 'Default' },
+        {
+          value: 'effort',
+          label: 'Effort',
+          hint: 'Balanced',
+          note: 'More effort answers more thoroughly but takes longer.',
+          children: [{ value: 'light', label: 'Light', type: 'radio' }],
+        },
+        { value: 'quick', label: 'Quick replies', type: 'switch' },
+      ]}
+      onSelect={(value, checked) => {
+        changes.push([value, checked])
+      }}
+    />,
+  )
+  t.after(cleanup)
+  const trigger = $('button[aria-haspopup="menu"]') as HTMLButtonElement
+  await act(() => trigger.click())
+  equal($('.rf-menu-badge')?.textContent, 'Default')
+  equal($('.rf-menu-hint')?.textContent, 'Balanced')
+  equal(
+    $('[role="menu"][aria-label="Effort"] .rf-menu-note')?.textContent,
+    'More effort answers more thoroughly but takes longer.',
+  )
+  const quick = $('[data-persistent-menu-item="quick"]') as HTMLElement
+  equal(quick.getAttribute('role'), 'menuitemcheckbox')
+  ok(quick.querySelector('.rf-menu-switch'))
+  equal(quick.querySelector('.rf-menu-check'), null)
+  await act(() => quick.click())
+  equal(quick.getAttribute('aria-checked'), 'true')
+  equal(trigger.getAttribute('aria-expanded'), 'true', 'a switch row keeps the menu open')
+  equal(JSON.stringify(changes), JSON.stringify([['quick', true]]))
+})

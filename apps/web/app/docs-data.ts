@@ -65,8 +65,9 @@ const menuItemApi: ApiSection = {
     },
     {
       name: 'type',
-      type: '"checkbox" | "radio"',
-      description: 'Renders a checkable or mutually exclusive menu item.',
+      type: '"checkbox" | "radio" | "switch"',
+      description:
+        'Renders a checkable or mutually exclusive menu item. A switch row is a checkbox drawn as a switch; like a checkbox it keeps the menu open.',
       required: false,
     },
     {
@@ -79,6 +80,24 @@ const menuItemApi: ApiSection = {
       name: 'children',
       type: 'readonly DropdownItem[]',
       description: 'Items in a nested submenu.',
+      required: false,
+    },
+    {
+      name: 'badge',
+      type: 'RemixNode',
+      description: 'A small tag after the label, such as a Badge.',
+      required: false,
+    },
+    {
+      name: 'hint',
+      type: 'string',
+      description: 'Quiet text at the end of the row; on a row with a submenu, its current choice.',
+      required: false,
+    },
+    {
+      name: 'note',
+      type: 'string',
+      description: "A short explanation at the top of this row's submenu.",
       required: false,
     },
   ],

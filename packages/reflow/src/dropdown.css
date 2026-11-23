@@ -278,3 +278,38 @@
   color: var(--rf-muted);
   font: 11px / 1 var(--rf-font);
 }
+
+/* A short explanation above a menu's rows, such as what a submenu's choice
+   changes. It is not a row: the pointer and the arrow keys pass over it. */
+.rf-menu-note {
+  max-inline-size: 18rem;
+  margin: 0;
+  padding: 6px 8px 8px;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption);
+  line-height: var(--rf-leading-caption);
+}
+
+.rf-menu-badge {
+  display: inline-flex;
+  flex: none;
+  margin-inline-start: -2px;
+}
+
+/* A row's quiet trailing text, such as a submenu's current choice. */
+.rf-menu-hint {
+  flex: none;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption);
+}
+
+/* A switch row: Switch's track and thumb, following the row's checked state. */
+.rf-menu-switch {
+  margin-inline-start: 8px;
+}
+.rf-menu-item[aria-checked='true'] .rf-menu-switch {
+  background: var(--rf-accent);
+}
+.rf-menu-item[aria-checked='true'] .rf-menu-switch .rf-switch-thumb {
+  --rf-switch-x: calc(var(--rf-switch-width) - var(--rf-switch-thumb) - 4px);
+}

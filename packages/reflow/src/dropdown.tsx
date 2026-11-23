@@ -17,9 +17,16 @@ export interface DropdownItem {
   shortcut?: string
   disabled?: boolean
   separatorBefore?: boolean
-  type?: 'checkbox' | 'radio'
+  /** `switch` is a checkbox row drawn as a switch; like a checkbox it stays open. */
+  type?: 'checkbox' | 'radio' | 'switch'
   checked?: boolean
   children?: readonly DropdownItem[]
+  /** A small tag after the label, such as a Badge. */
+  badge?: RemixNode
+  /** Quiet text at the end of the row; on a row with a submenu, its current choice. */
+  hint?: string
+  /** A short explanation at the top of this row's submenu. */
+  note?: string
 }
 
 export interface DropdownProps {
@@ -292,9 +299,16 @@ const closeOnRemoval = createMixin<HTMLElement, []>(
   { ssr: false },
 )
 
+// Checkbox and switch rows toggle in place, so the menu stays open for them.
+function toggles(item: DropdownItem) {
+  return item.type === 'checkbox' || item.type === 'switch'
+}
+
 export function DropdownSurface(
   handle: Handle<{
     items: readonly DropdownItem[]
+    /** A short explanation above the rows. */
+    note?: string
     search?: MenuSearch
     inline?: boolean
     emptyMessage?: string
@@ -321,12 +335,11 @@ export function DropdownSurface(
     if (!item || item.disabled) return
     event.preventDefault()
     event.stopPropagation()
-    const next =
-      item.type === 'checkbox'
-        ? !(item.checked ?? checked.get(item.value) ?? false)
-        : item.type === 'radio'
-          ? true
-          : undefined
+    const next = toggles(item)
+      ? !(item.checked ?? checked.get(item.value) ?? false)
+      : item.type === 'radio'
+        ? true
+        : undefined
     if (next !== undefined) checked.set(item.value, next)
     node.focus()
     context.highlight(node.id)
@@ -336,7 +349,7 @@ export function DropdownSurface(
         name: item.value,
         value: item.value,
         label: item.label,
-        type: item.type ?? 'item',
+        type: item.type === 'switch' ? 'checkbox' : (item.type ?? 'item'),
         checked: next,
       }),
     )
@@ -481,6 +494,11 @@ export function DropdownSurface(
               {handle.props.emptyMessage ?? 'No results'}
             </div>
           )}
+          {handle.props.note && (
+            <p class="rf-menu-note" role="none">
+              {handle.props.note}
+            </p>
+          )}
           {items.map((item, index) => (
             <div key={item.value} role="none" class="rf-menu-entry">
               {item.separatorBefore && (index > 0 || !normalized) && (
@@ -502,20 +520,20 @@ export function DropdownSurface(
                   >
                     <DropdownItemContent item={item} submenu />
                   </div>
-                  <DropdownSurface items={item.children} />
+                  <DropdownSurface items={item.children} note={item.note} />
                 </menu.Context>
               ) : (
                 <div
                   class="rf-menu-item"
                   data-rf-hover-item
                   data-persistent-menu-item={
-                    (item.closeOnSelect ?? item.type !== 'checkbox') ? undefined : item.value
+                    (item.closeOnSelect ?? !toggles(item)) ? undefined : item.value
                   }
                   mix={menu.item({
                     name: item.value,
                     value: item.value,
                     label: item.label,
-                    type: item.type,
+                    type: item.type === 'switch' ? 'checkbox' : item.type,
                     checked: item.checked ?? checked.get(item.value),
                     disabled: item.disabled,
                   })}
@@ -544,6 +562,8 @@ function DropdownItemContent(handle: Handle<{ item: DropdownItem; submenu?: bool
         <span class="rf-menu-label" data-label={item.label}>
           <span>{item.label}</span>
         </span>
+        {item.badge != null && <span class="rf-menu-badge">{item.badge}</span>}
+        {item.hint && <span class="rf-menu-hint">{item.hint}</span>}
         {item.shortcut && (
           <span class="rf-menu-shortcut">
             {shortcutKeys(item.shortcut).map((key, index) => (
@@ -551,7 +571,12 @@ function DropdownItemContent(handle: Handle<{ item: DropdownItem; submenu?: bool
             ))}
           </span>
         )}
-        {item.type && !submenu && (
+        {item.type === 'switch' && !submenu && (
+          <span class="rf-switch-track rf-menu-switch" aria-hidden="true">
+            <span class="rf-switch-thumb" />
+          </span>
+        )}
+        {item.type && item.type !== 'switch' && !submenu && (
           <span class="rf-menu-check" aria-hidden="true">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path
