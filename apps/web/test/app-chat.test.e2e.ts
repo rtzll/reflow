@@ -364,3 +364,14 @@ it('copies a reply and tries the last one again', async (t) => {
   await expect(reply).toContainText('Another way in:')
   await expect(page.getByRole('log').getByRole('article', { name: 'Assistant' })).toHaveCount(1)
 })
+
+it('opens a recent conversation from the welcome screen', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1280, height: 800 })
+  await open(page, '/apps/chat')
+  const recent = page.getByRole('region', { name: 'Recent' })
+  await expect(recent.getByRole('button')).toHaveCount(3)
+  await recent.getByRole('button', { name: 'Open Photo essay sequence' }).click()
+  await expect(page.getByRole('log', { name: 'Photo essay sequence' })).toBeVisible()
+  await expect(page).toHaveURL(/thread=photo-sequence/)
+})

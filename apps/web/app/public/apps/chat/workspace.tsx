@@ -1,5 +1,10 @@
 import {
   Button,
+  Card,
+  CardDescription,
+  CardGroup,
+  CardHeader,
+  CardTitle,
   ChatLayout,
   ChatMessage,
   ChatOutline,
@@ -261,6 +266,8 @@ export const ChatWorkspace = clientEntry(
                   key={thread.id}
                   thread={thread}
                   hidden={activeId !== thread.id}
+                  recent={listed.filter((other) => other.messages.length).slice(0, 3)}
+                  onOpen={(other) => select(other, 'link')}
                   onChange={() => void handle.update()}
                 />
               ))}
@@ -271,8 +278,25 @@ export const ChatWorkspace = clientEntry(
   },
 )
 
+// The first line of a reply as plain text, for a card's summary.
+function summary(thread: Thread) {
+  const reply = thread.messages.find((message) => message.role === 'assistant')?.text ?? ''
+  return reply
+    .split('\n')
+    .find((line) => line.trim() && !line.startsWith('#') && !line.startsWith('|'))
+    ?.replace(/[*_`#>-]/g, '')
+    .trim()
+}
+
 function ConversationPane(
-  handle: Handle<{ thread: Thread; hidden: boolean; onChange: () => void }>,
+  handle: Handle<{
+    thread: Thread
+    hidden: boolean
+    /** Recent conversations offered on a new chat's welcome screen. */
+    recent: Thread[]
+    onOpen: (thread: Thread) => void
+    onChange: () => void
+  }>,
 ) {
   const { thread } = handle.props
 
@@ -501,6 +525,25 @@ function ConversationPane(
                     </button>
                   ))}
                 </div>
+              )}
+              {!thread.messages.length && !draft && handle.props.recent.length > 0 && (
+                <section class="studio-recent" aria-labelledby={`${handle.id}-recent`}>
+                  <h3 id={`${handle.id}-recent`}>Recent</h3>
+                  <CardGroup columns={handle.props.recent.length} border="outlined">
+                    {handle.props.recent.map((other) => (
+                      <Card
+                        key={other.id}
+                        label={`Open ${other.title}`}
+                        onClick={() => handle.props.onOpen(other)}
+                      >
+                        <CardHeader>
+                          <CardTitle>{other.title}</CardTitle>
+                          <CardDescription>{summary(other)}</CardDescription>
+                        </CardHeader>
+                      </Card>
+                    ))}
+                  </CardGroup>
+                </section>
               )}
             </>
           }

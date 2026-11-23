@@ -192,8 +192,8 @@
 }
 .studio-pane .rf-chat-layout[data-empty] .rf-chat-layout-composer {
   display: grid;
-  /* Welcome, composer, its footer, then the starters. */
-  grid-template-rows: minmax(min-content, 1fr) auto auto minmax(min-content, 1fr);
+  /* Welcome, composer, its footer, the starters, then recent chats. */
+  grid-template-rows: minmax(min-content, 1fr) auto auto auto minmax(min-content, 1fr);
   row-gap: 22px;
   min-block-size: 100%;
   padding-block: 24px;
@@ -210,6 +210,29 @@
   display: grid;
   align-self: start;
   justify-items: start;
+}
+.studio-recent {
+  display: grid;
+  align-self: start;
+  gap: 8px;
+}
+.studio-recent h3 {
+  margin: 0;
+  padding-inline: 4px;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption);
+  font-weight: 500;
+}
+.studio-recent .rf-card-description {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+@media (max-width: 650px) {
+  .studio-recent .rf-card-group {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 .studio-starters button {
   gap: 14px;
