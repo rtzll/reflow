@@ -19,6 +19,7 @@ export { CheckboxGroup, type CheckboxGroupProps, type GroupOption } from './chec
 export * from './radio-group.tsx'
 export * from './carousel-dots.tsx'
 export * from './chat-message.tsx'
+export * from './chat-outline.tsx'
 export { FileThumbnail, type FileThumbnailProps, type RemoteFile } from './file-thumbnail.tsx'
 export * from './input-message.tsx'
 export * from './thinking-indicator.tsx'

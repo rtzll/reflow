@@ -14,6 +14,8 @@ export interface ChatAttachment {
 }
 
 export interface ChatMessageProps {
+  /** Put on the message element, so a ChatOutline or a link can find it. */
+  id?: string
   transitionId?: string
   /** `system` shows an event in the conversation, such as a model switch, as a quiet centred line. */
   role: 'user' | 'assistant' | 'system'
@@ -129,6 +131,7 @@ export function ChatMessage(handle: Handle<ChatMessageProps>) {
       )
     return (
       <article
+        id={handle.props.id}
         class="rf-chat-message"
         data-role={role}
         data-size={size}
