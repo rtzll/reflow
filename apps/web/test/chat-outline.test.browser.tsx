@@ -1,5 +1,6 @@
 import { ChatMessage, ChatOutline } from '@rtzll/reflow'
 import { equal, ok } from 'remix/assert'
+import type { Handle } from 'remix/component'
 import { render } from 'remix/component/test'
 import { it } from 'remix/test'
 
@@ -101,7 +102,7 @@ it('adds a search field past eight turns', async (t) => {
 
 it('follows its turns into another transcript', async (t) => {
   let show: (index: number) => void = () => {}
-  function Swap(handle: import('remix/component').Handle) {
+  function Swap(handle: Handle) {
     let active = 0
     show = (index) => {
       active = index
