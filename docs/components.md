@@ -9,7 +9,7 @@ Reflow started as a native Remix port of the [Fluid Functionalism](https://githu
 - **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `Pagination`, `Resizable`, `Sidebar`, `Tabs`, `Toolbar`, `Tree`
 - **Menus and overlays** · `AlertDialog`, `CommandMenu`, `ContextMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
 - **Display and feedback** · `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `BarChart`, `Card`, `CodeBlock`, `DataTable`, `RoutedDataTable`, `Markdown`, `Progress`, `Skeleton`, `Spinner`, `Table`, `Toaster`
-- **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `ChatOutline`, `Citation`, `Confirmation`, `FileThumbnail`, `InputMessage`, `QueuedStack`, `ThinkingIndicator`, `ThinkingSteps`, `ToolCalls`, `TriggerMenu`
+- **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `ChatOutline`, `Citation`, `Confirmation`, `FileThumbnail`, `InputMessage`, `QueuedStack`, `TaskList`, `ThinkingIndicator`, `ThinkingSteps`, `ToolCalls`, `TriggerMenu`
 
 Every component has a docs page with a live preview, highlighted code and an API table; most also have a playground. Run the showcase and open `/docs`, or read the [usage examples](../apps/web/app/public/examples.tsx).
 
@@ -76,6 +76,7 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 10 | `FileThumbnail` (implemented, awaiting release) | [Fluid Functionalism FileThumbnail](https://github.com/mickadesign/fluid-functionalism/blob/1f716642a455c7a66e4cc7087c917dbe109f7943/registry/default/file-thumbnail.tsx), without the PDF page | InputMessage's previews, Badge; shared with ChatMessage |
 | 10 | [`ChatOutline` (implemented, awaiting release)](chat-outline.md) | — | Dropdown's radio rows and search, ChatLayout's scroll container |
 | 10 | [`ToolCalls` (implemented, awaiting release)](tool-calls.md) | — | Spinner, the attachment row's grid reveal |
+| 10 | [`TaskList` (implemented, awaiting release)](task-list.md) | — | Spinner, Dropdown's check draw |
 
 ### Decisions so far
 

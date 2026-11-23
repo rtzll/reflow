@@ -181,6 +181,10 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       "One quiet line for an assistant's tool calls that opens to each call, and shows the one running.",
     code: `<ToolCalls\n  calls={[\n    { id: '1', label: 'Read the brief' },\n    { id: '2', label: 'Ran a command', detail: <code>pnpm test</code> },\n  ]}\n  startedAt={started}\n  endedAt={ended}\n/>`,
   },
+  'task-list': {
+    description: "A plan's steps, each done, in progress with a spinner, or not started.",
+    code: `<TaskList\n  label="Plan"\n  progress\n  tasks={[\n    { id: 'outline', label: 'Outline the story', status: 'done' },\n    { id: 'draft', label: 'Draft the opening', status: 'active' },\n    { id: 'proof', label: 'Proof the captions' },\n  ]}\n/>`,
+  },
   'chat-message': {
     description: 'A chat message with user or assistant alignment and optional attachments.',
     code: conversationCode,

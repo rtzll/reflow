@@ -626,6 +626,31 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  'task-list': [
+    {
+      name: 'TaskList',
+      props: [
+        {
+          name: 'tasks',
+          type: "readonly { id: string; label: string; status?: 'pending' | 'active' | 'done' }[]",
+          required: true,
+          description: 'The steps in order. Pending by default; the active step shows a spinner.',
+        },
+        {
+          name: 'label',
+          type: 'string',
+          required: false,
+          description: 'Names the list. Defaults to "Tasks".',
+        },
+        {
+          name: 'progress',
+          type: 'boolean',
+          required: false,
+          description: 'Shows a count of finished steps above the list.',
+        },
+      ],
+    },
+  ],
   spinner: [
     {
       name: 'Spinner',

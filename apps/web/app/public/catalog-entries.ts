@@ -54,6 +54,7 @@ export const components = [
   ['switch', 'Switch'],
   ['table', 'Table'],
   ['tabs', 'Tabs'],
+  ['task-list', 'TaskList'],
   ['textarea', 'Textarea'],
   ['thinking-indicator', 'ThinkingIndicator'],
   ['thinking-steps', 'ThinkingSteps'],
