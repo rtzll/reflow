@@ -71,8 +71,8 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 8 | `Markdown` (shipped) | — | CodeBlock and Table, used in Typography and the Chat workspace |
 | 8 | [`TimeGrid` (shipped)](time-grid.md) | — | Controlled timed layout, pointer/keyboard moves and resizes, used in the Calendar workspace |
 | 8 | [`BarChart` (shipped)](bar-chart.md) | — | Tooltip and roving list navigation, used in Build timings and the Analytics workspace |
-| 9 | [`Confirmation` (implemented, awaiting release)](confirmation.md) | [Fluid Functionalism Confirmation](https://github.com/mickadesign/fluid-functionalism/blob/1f716642a455c7a66e4cc7087c917dbe109f7943/registry/default/confirmation.tsx) | Banner's fill and actions, AskUserQuestions, ChatMessage |
-| 9 | [ChatLayout scrolling: anchor a sent message at the top while its reply grows, quiet streaming announcements (implemented, awaiting release)](chat-layout.md) | [Fluid Functionalism MessageScroller](https://github.com/mickadesign/fluid-functionalism/blob/1f716642a455c7a66e4cc7087c917dbe109f7943/registry/default/message-scroller.tsx) | ChatLayout's pinned transcript, Button |
+| 9 | [`Confirmation` (shipped)](confirmation.md) | [Fluid Functionalism Confirmation](https://github.com/mickadesign/fluid-functionalism/blob/1f716642a455c7a66e4cc7087c917dbe109f7943/registry/default/confirmation.tsx) | Banner's fill and actions, AskUserQuestions, ChatMessage |
+| 9 | [ChatLayout scrolling: anchor a sent message at the top while its reply grows, quiet streaming announcements (shipped)](chat-layout.md) | [Fluid Functionalism MessageScroller](https://github.com/mickadesign/fluid-functionalism/blob/1f716642a455c7a66e4cc7087c917dbe109f7943/registry/default/message-scroller.tsx) | ChatLayout's pinned transcript, Button |
 
 ### Decisions so far
 

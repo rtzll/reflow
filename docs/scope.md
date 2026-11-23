@@ -103,7 +103,7 @@ Fluid Functionalism is a reference, not a specification. Reflow checks it for ne
 
 ### Last sync
 
-Checked against upstream `1f716642` on November 22, 2026. That comparison identified three additions. The first two are now implemented on main.
+Checked against upstream `1f716642` on November 22, 2026. That comparison identified three additions. The first two shipped in 0.13.0.
 
 - **Confirmation** asks a yes or no question before something runs, such as an agent's tool call, built on Banner. It fits Reflow's conversation components.
 - **MessageScroller** follows a streamed reply while the reader is at the end, lets go on a manual scroll, glides a new user turn to the top, and offers a button back to the latest message. ChatLayout already follows, lets go and offers that button; anchoring the new turn and quiet streaming announcements extend it rather than add a component.
