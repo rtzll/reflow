@@ -2,6 +2,7 @@ import type { ChatEntry, Conversation } from './fixtures.ts'
 
 export interface Thread extends Conversation {
   draft: string
+  pinned?: boolean
 }
 
 // One key per thread keeps edits in separate tabs from overwriting unrelated drafts.
@@ -37,6 +38,11 @@ export function restoreThreads(threads: Thread[]) {
       if (!existing && !localThreadId.test(id)) continue
       try {
         const saved = JSON.parse(localStorage.getItem(key) ?? 'null')
+        // A deleted seed conversation stays deleted.
+        if (saved?.deleted === true) {
+          if (existing) threads.splice(threads.indexOf(existing), 1)
+          continue
+        }
         if (
           !saved ||
           typeof saved.title !== 'string' ||
@@ -50,6 +56,7 @@ export function restoreThreads(threads: Thread[]) {
           title: saved.title,
           messages: saved.messages,
           draft: saved.draft,
+          pinned: saved.pinned === true,
         }
         if (existing) Object.assign(existing, thread)
         else threads.unshift(thread)
@@ -69,6 +76,7 @@ export function saveThread(thread: Thread, streaming?: ChatEntry) {
       JSON.stringify({
         title: thread.title,
         draft: thread.draft,
+        pinned: thread.pinned || undefined,
         messages: streaming
           ? thread.messages.map((message) =>
               message === streaming ? { ...message, stopped: true } : message,
@@ -78,5 +86,15 @@ export function saveThread(thread: Thread, streaming?: ChatEntry) {
     )
   } catch {
     // Keep the live conversation usable when storage is unavailable or full.
+  }
+}
+
+/** Forgets a conversation. A seed conversation keeps a marker so it stays gone. */
+export function deleteThread(thread: Thread, seed: boolean) {
+  try {
+    if (seed) localStorage.setItem(prefix + thread.id, JSON.stringify({ deleted: true }))
+    else localStorage.removeItem(prefix + thread.id)
+  } catch {
+    // Without storage the conversation is only gone until the page reloads.
   }
 }

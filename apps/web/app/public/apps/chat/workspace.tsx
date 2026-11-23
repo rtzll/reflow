@@ -1,9 +1,21 @@
-import { Button, ChatLayout, ChatMessage, Confirmation, Icon, InputMessage } from '@rtzll/reflow'
+import {
+  Button,
+  ChatLayout,
+  ChatMessage,
+  Confirmation,
+  Dropdown,
+  Icon,
+  InputMessage,
+  Sidebar,
+  type SidebarItem,
+  type SidebarSection,
+} from '@rtzll/reflow'
 import { Markdown } from '@rtzll/reflow/markdown'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import { replyTo, type ChatEntry, type Conversation } from './fixtures.ts'
 import {
   blankThread,
+  deleteThread,
   localThreadId,
   restoreThreads,
   saveThread,
@@ -15,6 +27,7 @@ interface ChatProps {
   conversations: Conversation[]
   initialId: string
   search: string
+  links: { reflow: string; apps: string }
 }
 
 function randomId() {
@@ -48,11 +61,11 @@ export const ChatWorkspace = clientEntry(
       messages: [...thread.messages],
       draft: '',
     }))
+    const seeds = new Set(threads.map(({ id }) => id))
     let activeId = handle.props.initialId
     if (!threads.some(({ id }) => id === activeId)) threads.unshift(blankThread(activeId))
     // Keep each opened composer mounted so its queue and editing state follow the thread.
     const opened = new Set([activeId])
-    let historyOpen = false
     let root: HTMLElement | undefined
 
     function href(id: string) {
@@ -68,22 +81,11 @@ export const ChatWorkspace = clientEntry(
       field.setSelectionRange(field.value.length, field.value.length)
     }
 
-    function closeHistory() {
-      if (!historyOpen) return
-      historyOpen = false
-      handle.queueTask(() =>
-        root?.querySelector<HTMLButtonElement>('.studio-history-toggle')?.focus(),
-      )
-      void handle.update()
-    }
-
     function select(thread: Thread, navigation: 'link' | 'new' | 'history') {
       if (navigation !== 'history' && activeId !== thread.id)
         history.pushState(history.state, '', href(thread.id))
       activeId = thread.id
       opened.add(activeId)
-      const fromMenu = historyOpen
-      historyOpen = false
       void handle.update()
       // Remix traversals can reset focus at the end of a Navigation API transition.
       if (navigation === 'history') {
@@ -96,10 +98,6 @@ export const ChatWorkspace = clientEntry(
         if (transition) void transition.finished.then(focus, () => {})
         else handle.queueTask(focus)
       } else if (thread.draft.trim() || navigation === 'new') handle.queueTask(focusComposer)
-      else if (fromMenu)
-        handle.queueTask(() =>
-          root?.querySelector<HTMLButtonElement>('.studio-history-toggle')?.focus(),
-        )
     }
 
     function create() {
@@ -111,9 +109,24 @@ export const ChatWorkspace = clientEntry(
       select(thread, 'new')
     }
 
+    function togglePin(thread: Thread) {
+      thread.pinned = !thread.pinned
+      saveThread(thread)
+      void handle.update()
+    }
+
+    function remove(thread: Thread) {
+      threads.splice(threads.indexOf(thread), 1)
+      opened.delete(thread.id)
+      deleteThread(thread, seeds.has(thread.id))
+      if (activeId === thread.id) create()
+      else void handle.update()
+    }
+
     const mount = ref((node, signal) => {
       root = node as HTMLElement
       restoreThreads(threads)
+      if (!threads.some(({ id }) => id === activeId)) threads.unshift(blankThread(activeId))
       if (new URLSearchParams(location.search).get('thread') !== activeId)
         history.replaceState(history.state, '', href(activeId))
       void handle.update()
@@ -133,96 +146,95 @@ export const ChatWorkspace = clientEntry(
       )
     })
 
-    return () => (
-      <div
-        class="studio-chat"
-        mix={[
-          mount,
-          on<HTMLDivElement, 'keydown'>('keydown', (event) => {
-            if (event.key === 'Escape' && !event.defaultPrevented && historyOpen) {
-              event.preventDefault()
-              closeHistory()
+    function row(thread: Thread): SidebarItem {
+      const draft = thread.draft.trim()
+      const label = thread.messages.length ? thread.title : draft
+      return {
+        label,
+        href: href(thread.id),
+        icon: <Icon name="message-circle" />,
+        badge: draft ? 'Draft' : undefined,
+        onClick: (event) => {
+          if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+            return
+          event.preventDefault()
+          select(thread, 'link')
+        },
+        actions: (
+          <Dropdown
+            label={`Options for ${label}`}
+            variant="bare"
+            triggerClass="rf-sidebar-action"
+            chevron={false}
+            triggerContent={<Icon name="more-horizontal" />}
+            items={[
+              { value: 'pin', label: thread.pinned ? 'Unpin' : 'Pin' },
+              { value: 'delete', label: 'Delete', separatorBefore: true },
+            ]}
+            onSelect={(value) => (value === 'pin' ? togglePin(thread) : remove(thread))}
+          />
+        ),
+      }
+    }
+
+    return () => {
+      const listed = threads.filter((thread) => thread.messages.length || thread.draft.trim())
+      const pinned = listed.filter((thread) => thread.pinned)
+      const recent = listed.filter((thread) => !thread.pinned)
+      const sections: SidebarSection[] = [
+        ...(pinned.length ? [{ label: 'Pinned', items: pinned.map(row) }] : []),
+        { label: 'Recent', items: recent.map(row) },
+      ]
+      const active = threads.find(({ id }) => id === activeId)
+      return (
+        <div class="studio-chat" mix={mount}>
+          <Sidebar
+            label="Chat history"
+            sections={sections}
+            activeHref={href(activeId)}
+            defaultWidth={256}
+            header={
+              <div class="studio-library-header">
+                <h1>Chat</h1>
+                <Button
+                  class="studio-new"
+                  variant="ghost"
+                  size="compact"
+                  leadingIcon={<Icon name="pencil" />}
+                  mix={on('click', create)}
+                >
+                  New chat
+                </Button>
+              </div>
             }
-          }),
-        ]}
-      >
-        <aside
-          class="studio-library"
-          aria-label="Conversation library"
-          data-open={historyOpen || undefined}
-        >
-          <header class="studio-library-header">
-            <button
-              type="button"
-              class="studio-history-toggle"
-              aria-label="Chat history"
-              aria-expanded={historyOpen}
-              aria-controls={`${handle.id}-history`}
-              mix={on('click', () => {
-                historyOpen = !historyOpen
-                void handle.update()
-              })}
-            >
-              <Icon name="panel-left" size={18} />
-            </button>
-            <h1>Chat</h1>
-          </header>
-          <button type="button" class="studio-new" mix={on('click', create)}>
-            <Icon name="pencil" size={16} />
-            New chat
-          </button>
-          <nav class="studio-list" aria-label="Chat history" id={`${handle.id}-history`}>
-            <h2>Your chats</h2>
-            <ul role="list">
-              {threads
-                .filter((thread) => thread.messages.length || thread.draft.trim())
-                .map((thread) => {
-                  const draft = thread.draft.trim()
-                  return (
-                    <li key={thread.id}>
-                      <a
-                        href={href(thread.id)}
-                        class="studio-thread"
-                        aria-label={thread.messages.length ? thread.title : `Draft · ${draft}`}
-                        aria-description={
-                          thread.messages.length && draft ? 'Unfinished draft' : undefined
-                        }
-                        aria-current={activeId === thread.id ? 'true' : undefined}
-                        mix={on<HTMLAnchorElement, 'click'>('click', (event) => {
-                          if (
-                            event.button ||
-                            event.metaKey ||
-                            event.ctrlKey ||
-                            event.shiftKey ||
-                            event.altKey
-                          )
-                            return
-                          event.preventDefault()
-                          select(thread, 'link')
-                        })}
-                      >
-                        <Icon name="message-circle" size={16} />
-                        <span>{thread.messages.length ? thread.title : draft}</span>
-                        {draft && <small>Draft</small>}
-                      </a>
-                    </li>
-                  )
-                })}
-            </ul>
-          </nav>
-        </aside>
-        {threads
-          .filter((thread) => opened.has(thread.id))
-          .map((thread) => (
-            <ConversationPane
-              key={thread.id}
-              thread={thread}
-              hidden={activeId !== thread.id}
-              onChange={() => void handle.update()}
-            />
-          ))}
-      </div>
-    )
+            footer={
+              <nav aria-label="App navigation" class="studio-app-nav">
+                <a href={handle.props.links.reflow} data-rmx-document="">
+                  Reflow
+                </a>
+                <a href={handle.props.links.apps} data-rmx-document="">
+                  Apps
+                </a>
+              </nav>
+            }
+            toolbar={
+              <h2 class="studio-title">{active?.messages.length ? active.title : 'New chat'}</h2>
+            }
+          >
+            {threads
+              .filter((thread) => opened.has(thread.id))
+              .map((thread) => (
+                <ConversationPane
+                  key={thread.id}
+                  thread={thread}
+                  hidden={activeId !== thread.id}
+                  onChange={() => void handle.update()}
+                />
+              ))}
+          </Sidebar>
+        </div>
+      )
+    }
   },
 )
 

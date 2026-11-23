@@ -1,3 +1,4 @@
+import { routes } from '../../../routes.ts'
 import type { ExampleApp } from '../types.ts'
 import { conversations } from './fixtures.ts'
 import { localThreadId } from './local-threads.ts'
@@ -13,6 +14,13 @@ export const chatApp: ExampleApp = {
       thread && (conversations.some(({ id }) => id === thread) || localThreadId.test(thread))
         ? thread
         : `conversation-${crypto.randomUUID()}`
-    return <ChatWorkspace conversations={conversations} initialId={initialId} search={search} />
+    return (
+      <ChatWorkspace
+        conversations={conversations}
+        initialId={initialId}
+        search={search}
+        links={{ reflow: routes.gallery.href(), apps: routes.apps.href() }}
+      />
+    )
   },
 }
