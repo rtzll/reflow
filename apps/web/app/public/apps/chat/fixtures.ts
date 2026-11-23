@@ -5,6 +5,8 @@ export interface ChatEntry {
   text: string
   /** Files sent with a message. Previews last for the session; names and types are kept. */
   attachments?: { name: string; type?: string; previewUrl?: string }[]
+  /** When a message was sent, as an ISO string. Time separators read it. */
+  sentAt?: string
   stopped?: boolean
   proofChecklist?: ConfirmationState
 }
@@ -15,7 +17,7 @@ export interface Conversation {
   messages: ChatEntry[]
 }
 
-export const conversations: Conversation[] = [
+const seeds: Conversation[] = [
   {
     id: 'fieldnotes-cover',
     title: 'Fieldnotes cover',
@@ -119,6 +121,21 @@ North landing · Last departure, 18:40
     ],
   },
 ]
+
+// Seed conversations started on fixed days in November 2026; each follow-up
+// question came four hours after the one before.
+export const conversations: Conversation[] = seeds.map((conversation, index) => {
+  const start = Date.UTC(2026, 10, 12 + index, 9, 14)
+  let asked = 0
+  return {
+    ...conversation,
+    messages: conversation.messages.map((message) =>
+      message.role === 'user'
+        ? { ...message, sentAt: new Date(start + asked++ * 4 * 60 * 60 * 1000).toISOString() }
+        : message,
+    ),
+  }
+})
 
 export function replyTo(text: string, files: readonly { name: string }[] = []) {
   if (files.length && !text.trim())

@@ -29,6 +29,7 @@ import {
 } from './local-threads.ts'
 import { ModelPicker } from '../../model-picker.tsx'
 import { skillReply, skillTriggers } from './skills.ts'
+import { startsStretch, timeLabel } from './time.ts'
 
 interface ChatProps {
   conversations: Conversation[]
@@ -79,6 +80,8 @@ export const ChatWorkspace = clientEntry(
     // Keep each opened composer mounted so its queue and editing state follow the thread.
     const opened = new Set([activeId])
     let root: HTMLElement | undefined
+    // Times read UTC until the browser can name the reader's own zone.
+    let localTime = false
 
     function href(id: string) {
       const query = new URLSearchParams(root ? location.search : handle.props.search)
@@ -137,6 +140,7 @@ export const ChatWorkspace = clientEntry(
 
     const mount = ref((node, signal) => {
       root = node as HTMLElement
+      localTime = true
       restoreThreads(threads)
       if (!threads.some(({ id }) => id === activeId)) threads.unshift(blankThread(activeId))
       if (new URLSearchParams(location.search).get('thread') !== activeId)
@@ -268,6 +272,7 @@ export const ChatWorkspace = clientEntry(
                 <ConversationPane
                   key={thread.id}
                   thread={thread}
+                  localTime={localTime}
                   hidden={activeId !== thread.id}
                   recent={listed.filter((other) => other.messages.length).slice(0, 3)}
                   onOpen={(other) => select(other, 'link')}
@@ -295,6 +300,7 @@ function ConversationPane(
   handle: Handle<{
     thread: Thread
     hidden: boolean
+    localTime: boolean
     /** Recent conversations offered on a new chat's welcome screen. */
     recent: Thread[]
     onOpen: (thread: Thread) => void
@@ -367,7 +373,12 @@ function ConversationPane(
     })
     const reply: ChatEntry = { role: 'assistant', text: '' }
     thread.messages.push(
-      { role: 'user', text, attachments: attachments.length ? attachments : undefined },
+      {
+        role: 'user',
+        text,
+        attachments: attachments.length ? attachments : undefined,
+        sentAt: new Date().toISOString(),
+      },
       reply,
     )
     stream(reply, words, () => {
@@ -552,9 +563,18 @@ function ConversationPane(
             </>
           }
         >
-          {thread.messages.map((message, index) => (
+          {thread.messages.flatMap((message, index) => [
+            ...(startsStretch(thread.messages, index) && message.sentAt
+              ? [
+                  <p key={`time-${index}`} class="studio-time">
+                    <time dateTime={message.sentAt}>
+                      {timeLabel(message.sentAt, handle.props.localTime)}
+                    </time>
+                  </p>,
+                ]
+              : []),
             <ChatMessage
-              key={index}
+              key={`message-${index}`}
               id={messageId(thread, index)}
               role={message.role}
               attachments={message.attachments}
@@ -604,8 +624,8 @@ function ConversationPane(
                 />
               )}
               {message.stopped && <span class="studio-stopped">Response stopped</span>}
-            </ChatMessage>
-          ))}
+            </ChatMessage>,
+          ])}
         </ChatLayout>
       </section>
     )

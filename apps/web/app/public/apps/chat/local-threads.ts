@@ -21,6 +21,7 @@ function isMessage(value: unknown): value is ChatEntry {
     'text' in value &&
     typeof value.text === 'string' &&
     (!('stopped' in value) || typeof value.stopped === 'boolean') &&
+    (!('sentAt' in value) || typeof value.sentAt === 'string') &&
     (!('attachments' in value) ||
       (Array.isArray(value.attachments) &&
         value.attachments.every(

@@ -375,3 +375,15 @@ it('opens a recent conversation from the welcome screen', async (t) => {
   await expect(page.getByRole('log', { name: 'Photo essay sequence' })).toBeVisible()
   await expect(page).toHaveURL(/thread=photo-sequence/)
 })
+
+it('marks when a conversation picks up again, in UTC on the server and local time after', async (t) => {
+  const page = await t.serve(showcaseServer)
+  const html = await (await page.request.get('/apps/chat?thread=fieldnotes-cover')).text()
+  expect(html).toContain('Nov 12, 09:14 UTC')
+  expect(html).toContain('Nov 12, 13:14 UTC')
+  await open(page, '/apps/chat?thread=fieldnotes-cover')
+  const times = page.getByRole('log').locator('time')
+  await expect(times).toHaveCount(2)
+  await expect(times.first()).toHaveAttribute('datetime', '2026-11-12T09:14:00.000Z')
+  await expect(times.first()).not.toContainText('UTC')
+})

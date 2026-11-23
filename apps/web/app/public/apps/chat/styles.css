@@ -146,6 +146,13 @@
   row-gap: 24px;
   padding-block: 20px;
 }
+/* The time a new stretch of the conversation started. */
+.studio-time {
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
 .studio-pane .rf-chat-message {
   min-inline-size: 0;
 }
