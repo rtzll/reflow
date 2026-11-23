@@ -316,6 +316,8 @@ export const Example = clientEntry(
           return <HoverCardDemo variant="basic" />
         case 'carousel':
           return <CarouselDemo variant={handle.props.showcase ? 'gallery' : 'playground'} />
+        case 'chat-outline':
+          return <ChatLayoutDemo variant="outline" />
         case 'chat-layout':
           return <ChatLayoutDemo variant="playground" />
         case 'avatar':

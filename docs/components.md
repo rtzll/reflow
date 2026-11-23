@@ -9,7 +9,7 @@ Reflow started as a native Remix port of the [Fluid Functionalism](https://githu
 - **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `Pagination`, `Resizable`, `Sidebar`, `Tabs`, `Toolbar`, `Tree`
 - **Menus and overlays** · `AlertDialog`, `CommandMenu`, `ContextMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
 - **Display and feedback** · `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `BarChart`, `Card`, `CodeBlock`, `DataTable`, `RoutedDataTable`, `Markdown`, `Progress`, `Skeleton`, `Spinner`, `Table`, `Toaster`
-- **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `Citation`, `Confirmation`, `FileThumbnail`, `InputMessage`, `QueuedStack`, `ThinkingIndicator`, `ThinkingSteps`, `TriggerMenu`
+- **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `ChatOutline`, `Citation`, `Confirmation`, `FileThumbnail`, `InputMessage`, `QueuedStack`, `ThinkingIndicator`, `ThinkingSteps`, `TriggerMenu`
 
 Every component has a docs page with a live preview, highlighted code and an API table; most also have a playground. Run the showcase and open `/docs`, or read the [usage examples](../apps/web/app/public/examples.tsx).
 
@@ -73,6 +73,8 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 8 | [`BarChart` (shipped)](bar-chart.md) | — | Tooltip and roving list navigation, used in Build timings and the Analytics workspace |
 | 9 | [`Confirmation` (shipped)](confirmation.md) | [Fluid Functionalism Confirmation](https://github.com/mickadesign/fluid-functionalism/blob/1f716642a455c7a66e4cc7087c917dbe109f7943/registry/default/confirmation.tsx) | Banner's fill and actions, AskUserQuestions, ChatMessage |
 | 9 | [ChatLayout scrolling: anchor a sent message at the top while its reply grows, quiet streaming announcements (shipped)](chat-layout.md) | [Fluid Functionalism MessageScroller](https://github.com/mickadesign/fluid-functionalism/blob/1f716642a455c7a66e4cc7087c917dbe109f7943/registry/default/message-scroller.tsx) | ChatLayout's pinned transcript, Button |
+| 10 | `FileThumbnail` (implemented, awaiting release) | [Fluid Functionalism FileThumbnail](https://github.com/mickadesign/fluid-functionalism/blob/1f716642a455c7a66e4cc7087c917dbe109f7943/registry/default/file-thumbnail.tsx), without the PDF page | InputMessage's previews, Badge; shared with ChatMessage |
+| 10 | [`ChatOutline` (implemented, awaiting release)](chat-outline.md) | — | Dropdown's radio rows and search, ChatLayout's scroll container |
 
 ### Decisions so far
 

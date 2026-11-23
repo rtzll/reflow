@@ -1,4 +1,4 @@
-import { AvatarGroup, ChatLayout, ChatMessage, InputMessage } from '@rtzll/reflow'
+import { AvatarGroup, ChatLayout, ChatMessage, ChatOutline, InputMessage } from '@rtzll/reflow'
 import type { Handle } from 'remix/component'
 import { play } from 'cuelume'
 
@@ -14,13 +14,25 @@ const replies = [
   'Keep the shared pieces shared: one hover that glides between items, one set of springs, one scrollbar. Consistency is what makes a library feel calm.',
 ]
 
-const history: Message[] = Array.from({ length: 9 }, (_, index) => [
-  { role: 'user' as const, text: `Question ${index + 1}: what makes an interface feel fast?` },
+const questions = [
+  'What makes an interface feel fast?',
+  'When should a button show a spinner?',
+  'How long should a hover delay be?',
+  'Why do springs feel more natural than easing curves?',
+  'How do I keep a long list readable?',
+  'What belongs in an empty state?',
+  'How much motion is too much?',
+  'Should toasts stack or replace each other?',
+  'How do I make a dense table calm?',
+]
+
+const history: Message[] = questions.flatMap((text) => [
+  { role: 'user' as const, text },
   {
     role: 'assistant' as const,
-    text: 'Responding within a frame, showing progress early, and never moving what the reader is looking at.',
+    text: 'Respond within a frame, show progress early, and never move what the reader is looking at.',
   },
-]).flat()
+])
 
 export interface ChatLayoutDemoProps {
   variant: string
@@ -33,7 +45,7 @@ export interface ChatLayoutDemoProps {
 export function ChatLayoutDemo(handle: Handle<ChatLayoutDemoProps>) {
   const variant = handle.props.variant
   let messages: Message[] =
-    variant === 'history' || variant === 'anchor'
+    variant === 'history' || variant === 'anchor' || variant === 'outline'
       ? history.map((message) => ({ ...message, animate: false }))
       : variant === 'empty' || handle.props.empty
         ? []
@@ -77,7 +89,18 @@ export function ChatLayoutDemo(handle: Handle<ChatLayoutDemoProps>) {
           scroll={variant === 'anchor' ? 'anchor' : undefined}
           busy={streaming}
           header={
-            showHeader ? (
+            variant === 'outline' ? (
+              <div class="doc-chat-header">
+                <strong>Design chat</strong>
+                <ChatOutline
+                  items={messages.flatMap((message, index) =>
+                    message.role === 'user'
+                      ? [{ id: `${handle.id}-turn-${index}`, label: message.text }]
+                      : [],
+                  )}
+                />
+              </div>
+            ) : showHeader ? (
               <div class="doc-chat-header">
                 <strong>Design chat</strong>
                 <AvatarGroup
@@ -108,6 +131,7 @@ export function ChatLayoutDemo(handle: Handle<ChatLayoutDemoProps>) {
           {messages.map((message, index) => (
             <ChatMessage
               key={index}
+              id={`${handle.id}-turn-${index}`}
               role={message.role}
               size={size}
               animate={message.animate ?? true}

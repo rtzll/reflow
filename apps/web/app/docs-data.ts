@@ -534,6 +534,38 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  'chat-outline': [
+    {
+      name: 'ChatOutline',
+      props: [
+        {
+          name: 'items',
+          type: 'readonly { id: string; label: string }[]',
+          required: true,
+          description:
+            'The turns to list, oldest first, each with the id of its message element. With none, nothing renders.',
+        },
+        {
+          name: 'label',
+          type: 'string',
+          required: false,
+          description: 'Names the trigger and the menu. Defaults to "Conversation outline".',
+        },
+        {
+          name: 'size',
+          type: '"default" | "compact"',
+          required: false,
+          description: 'Trigger size. Defaults to compact.',
+        },
+        {
+          name: 'align',
+          type: '"start" | "end"',
+          required: false,
+          description: 'Which edge of the trigger the menu aligns to. Defaults to end.',
+        },
+      ],
+    },
+  ],
   spinner: [
     {
       name: 'Spinner',
@@ -1805,6 +1837,12 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           description:
             'Matches a sent message to its originating queued message for a shared transition.',
           required: false,
+        },
+        {
+          name: 'id',
+          type: 'string',
+          required: false,
+          description: 'Put on the message element, so a ChatOutline or a link can find it.',
         },
         {
           name: 'role',

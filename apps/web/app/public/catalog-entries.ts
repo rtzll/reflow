@@ -14,6 +14,7 @@ export const components = [
   ['carousel-dots', 'CarouselDots'],
   ['chat-layout', 'ChatLayout'],
   ['chat-message', 'ChatMessage'],
+  ['chat-outline', 'ChatOutline'],
   ['checkbox', 'Checkbox'],
   ['checkbox-group', 'CheckboxGroup'],
   ['citation', 'Citation'],

@@ -171,6 +171,11 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       'The conversation screen: a transcript that stays on the newest message, with the composer docked below.',
     code: `<ChatLayout composer={<InputMessage onSend={send} />}>\n  {messages.map((message) => <ChatMessage role={message.role}>{message.text}</ChatMessage>)}\n</ChatLayout>`,
   },
+  'chat-outline': {
+    description:
+      'A menu of the turns in a conversation that marks the one in view and jumps to the one chosen.',
+    code: `<ChatLayout\n  header={<ChatOutline items={turns.map((turn) => ({ id: turn.id, label: turn.text }))} />}\n  composer={<InputMessage onSend={send} />}\n>\n  {messages.map((message) => (\n    <ChatMessage id={message.id} role={message.role}>{message.text}</ChatMessage>\n  ))}\n</ChatLayout>`,
+  },
   'chat-message': {
     description: 'A chat message with user or assistant alignment and optional attachments.',
     code: conversationCode,
