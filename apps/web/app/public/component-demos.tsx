@@ -1027,8 +1027,9 @@ function setEditing(open: boolean) {
     demo(
       'Attachments',
       'attachments',
-      `<InputMessage attachments maxFiles={3} onSend={({ text, files }) => send(text, files)} />`,
-      'Use the attachment button or drop files onto the composer.',
+      `<InputMessage files={files} onFilesChange={setFiles} maxFiles={4}
+  onSend={({ text, files }) => send(text, files)} />`,
+      'Images show a thumbnail; other files show their name and type. Remove one, use the attachment button, or drop files onto the composer.',
     ),
     demo(
       'Queued messages',
@@ -1759,6 +1760,20 @@ function icon(name: IconName = 'plus') {
   return <Icon name={name} />
 }
 
+// Example attachments for the InputMessage demo: one image, which shows a
+// thumbnail, and three files that show their name and type. A fixed
+// lastModified keeps the server and browser renders keyed alike.
+function sampleAttachments() {
+  const lastModified = Date.UTC(2026, 0, 1)
+  const sketch = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><rect width="80" height="80" fill="#dbe6ff"/><circle cx="56" cy="24" r="10" fill="#6b97ff"/><path d="M0 64 24 38l18 18 12-10 26 22v12H0z" fill="#3d5fb8"/></svg>`
+  return [
+    new File([sketch], 'landscape.svg', { type: 'image/svg+xml', lastModified }),
+    new File(['# Meeting notes'], 'meeting-notes.md', { type: 'text/markdown', lastModified }),
+    new File(['audio'], 'recording.ogg', { type: 'audio/ogg', lastModified }),
+    new File(['%PDF'], 'quarterly-report.pdf', { type: 'application/pdf', lastModified }),
+  ]
+}
+
 export function ComponentDemo(
   handle: Handle<{ slug: string; variant: string; images: ExampleImages }>,
 ) {
@@ -1773,6 +1788,7 @@ export function ComponentDemo(
   let fill = '#6B97FF'
   let streaming = true
   let lastQueuedId: string | undefined
+  let attachmentFiles = sampleAttachments()
   let timeout: ReturnType<typeof setTimeout> | undefined
   let editingNotes = true
   handle.signal.addEventListener('abort', () => clearTimeout(timeout), {
@@ -2878,7 +2894,16 @@ export function ComponentDemo(
                     />
                   ) : undefined
                 }
-                maxFiles={3}
+                maxFiles={variant === 'attachments' ? 4 : 3}
+                files={variant === 'attachments' ? attachmentFiles : undefined}
+                onFilesChange={
+                  variant === 'attachments'
+                    ? (next) => {
+                        attachmentFiles = next
+                        handle.update()
+                      }
+                    : undefined
+                }
                 disabled={variant === 'disabled'}
                 actions={
                   variant === 'actions' || variant === 'left' ? (
