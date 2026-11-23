@@ -7,7 +7,7 @@ Reflow is in early development and tracks unstable Remix APIs. [npm package](htt
 ## Install
 
 ```sh
-pnpm add --save-exact @rtzll/reflow@0.12.0 remix@3.3.0
+pnpm add --save-exact @rtzll/reflow@0.13.0 remix@3.3.0
 ```
 
 Reflow includes `@remix-run/ui@0.14.0`. See the [integration guide](docs/integration.md) for compatibility, styles, and browser setup.
