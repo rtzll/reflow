@@ -592,6 +592,40 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  'tool-calls': [
+    {
+      name: 'ToolCalls',
+      props: [
+        {
+          name: 'calls',
+          type: "readonly { id: string; label: string; status?: 'running' | 'done' | 'failed'; detail?: RemixNode }[]",
+          required: true,
+          description:
+            'The work in order. A running call shows in the closed line with a spinner; detail shows under a call while the line is open.',
+        },
+        {
+          name: 'summary',
+          type: 'string',
+          required: false,
+          description:
+            'Replaces the closed line, which otherwise counts the calls or says how long the work took.',
+        },
+        {
+          name: 'startedAt / endedAt',
+          type: 'number',
+          required: false,
+          description:
+            'Times in milliseconds. With both the line reads "Worked for 1m 12s"; with startedAt alone a running line counts the elapsed time.',
+        },
+        {
+          name: 'open / defaultOpen / onOpenChange',
+          type: 'boolean / boolean / (open: boolean) => void',
+          required: false,
+          description: 'Controls the disclosure. Closed by default.',
+        },
+      ],
+    },
+  ],
   spinner: [
     {
       name: 'Spinner',

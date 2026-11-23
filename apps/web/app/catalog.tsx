@@ -176,6 +176,11 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       'A menu of the turns in a conversation that marks the one in view and jumps to the one chosen.',
     code: `<ChatLayout\n  header={<ChatOutline items={turns.map((turn) => ({ id: turn.id, label: turn.text }))} />}\n  composer={<InputMessage onSend={send} />}\n>\n  {messages.map((message) => (\n    <ChatMessage id={message.id} role={message.role}>{message.text}</ChatMessage>\n  ))}\n</ChatLayout>`,
   },
+  'tool-calls': {
+    description:
+      "One quiet line for an assistant's tool calls that opens to each call, and shows the one running.",
+    code: `<ToolCalls\n  calls={[\n    { id: '1', label: 'Read the brief' },\n    { id: '2', label: 'Ran a command', detail: <code>pnpm test</code> },\n  ]}\n  startedAt={started}\n  endedAt={ended}\n/>`,
+  },
   'chat-message': {
     description: 'A chat message with user or assistant alignment and optional attachments.',
     code: conversationCode,

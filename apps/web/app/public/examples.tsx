@@ -94,6 +94,7 @@ import {
 import { Markdown } from '@rtzll/reflow/markdown'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import { BannerExample, BannerPreview } from './banner-example.tsx'
+import { ToolCallsExample } from './tool-calls-example.tsx'
 
 // The tile uses the same range Calendar as the docs, with smaller cells to
 // fit six weeks and one visible month when the preview itself is narrow.
@@ -277,6 +278,8 @@ export const Example = clientEntry(
               <FileThumbnail file={{ name: 'interview.ogg' }} />
             </div>
           )
+        case 'tool-calls':
+          return <ToolCallsExample />
         case 'spinner':
           return (
             <div class="example-row">

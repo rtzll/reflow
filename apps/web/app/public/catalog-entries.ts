@@ -59,6 +59,7 @@ export const components = [
   ['thinking-steps', 'ThinkingSteps'],
   ['time-grid', 'TimeGrid'],
   ['toaster', 'Toaster'],
+  ['tool-calls', 'ToolCalls'],
   ['toolbar', 'Toolbar'],
   ['tooltip', 'Tooltip'],
   ['tree', 'Tree'],
