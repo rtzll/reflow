@@ -61,8 +61,8 @@ it('accepts any file by default and names files it cannot preview', async (t) =>
   const { $, act, cleanup } = render(<InputMessage onSend={() => {}} />)
   t.after(cleanup)
   const transfer = new DataTransfer()
-  transfer.items.add(new File(['# Notes'], 'principles_cleaned.md', { type: 'text/markdown' }))
-  transfer.items.add(new File(['audio'], 'voice note.ogg', { type: 'audio/ogg' }))
+  transfer.items.add(new File(['# Notes'], 'notes.md', { type: 'text/markdown' }))
+  transfer.items.add(new File(['audio'], 'recording.ogg', { type: 'audio/ogg' }))
   transfer.items.add(new File(['%PDF'], 'report.pdf', { type: 'application/pdf' }))
   transfer.items.add(new File(['photo'], 'photo.heic', { type: 'image/heic' }))
   transfer.items.add(new File(['KEY=1'], '.env', { type: '' }))
@@ -78,8 +78,8 @@ it('accepts any file by default and names files it cannot preview', async (t) =>
     card.querySelector('.rf-badge')?.textContent ?? null,
   ])
   deepEqual(cards, [
-    ['principles_cleaned', 'MD'],
-    ['voice note', 'OGG'],
+    ['notes', 'MD'],
+    ['recording', 'OGG'],
     ['report', 'PDF'],
     ['photo', 'HEIC'],
     ['.env', null],
