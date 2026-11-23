@@ -1,5 +1,5 @@
 import { partitionFiles } from './behaviors/file-selection.ts'
-import { Badge } from './badge.tsx'
+import { FileThumbnail } from './file-thumbnail.tsx'
 import { Icon } from './icon.tsx'
 import { transitionMessage } from './systems/message-transition.ts'
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
@@ -347,7 +347,6 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
         data-size={size}
         data-dragover={dragOver || undefined}
         style={{
-          '--rf-file-preview-size': `${handle.props.filePreviewSize ?? 80}px`,
           '--rf-composer-max-rows': maxRows,
         }}
         mix={[
@@ -438,7 +437,7 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
                       finishRemoval(file)
                   })}
                 >
-                  <FilePreview file={file} />
+                  <FileThumbnail file={file} size={handle.props.filePreviewSize ?? 80} />
                   <Tooltip
                     content="Remove"
                     side="top"
@@ -617,72 +616,6 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
           </p>
         )}
       </form>
-    )
-  }
-}
-
-// Image types every current browser draws in an <img>. Others, such as HEIC
-// or TIFF, get a file card rather than a broken image.
-const previewableImages = new Set([
-  'image/png',
-  'image/jpeg',
-  'image/gif',
-  'image/webp',
-  'image/avif',
-  'image/svg+xml',
-  'image/bmp',
-])
-
-// Splits a name at its last dot into the name the card shows and the
-// extension its badge shows, upper-cased. A dotfile such as `.env` or a name
-// without a dot has no extension.
-function splitFileName(name: string) {
-  const dot = name.lastIndexOf('.')
-  return dot > 0 && dot < name.length - 1
-    ? { base: name.slice(0, dot), extension: name.slice(dot + 1).toUpperCase() }
-    : { base: name, extension: '' }
-}
-
-function FilePreview(handle: Handle<{ file: File }>) {
-  let image: HTMLImageElement | undefined
-  let previousFile: File | undefined
-  let url: string | undefined
-  function updateImage() {
-    if (!image || previousFile === handle.props.file) return
-    if (url) URL.revokeObjectURL(url)
-    previousFile = handle.props.file
-    url = URL.createObjectURL(previousFile)
-    image.src = url
-  }
-  const capture = ref((element, signal) => {
-    if (!(element instanceof HTMLImageElement)) return
-    image = element
-    updateImage()
-    signal.addEventListener(
-      'abort',
-      () => {
-        if (url) URL.revokeObjectURL(url)
-        image = undefined
-      },
-      { once: true },
-    )
-  })
-  return () => {
-    handle.queueTask(updateImage)
-    const file = handle.props.file
-    const isImage = previewableImages.has(file.type.toLowerCase())
-    const { base, extension } = splitFileName(file.name)
-    return (
-      <div class="rf-file-thumb" data-kind={isImage ? 'image' : 'file'}>
-        {isImage ? (
-          <img alt={file.name} mix={capture} />
-        ) : (
-          <div class="rf-file-card">
-            <span class="rf-file-card-name">{base}</span>
-            {extension && <Badge size="compact">{extension}</Badge>}
-          </div>
-        )}
-      </div>
     )
   }
 }

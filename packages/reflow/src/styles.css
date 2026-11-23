@@ -29,6 +29,7 @@
 @import './checkbox-group.css' layer(reflow);
 @import './radio-group.css' layer(reflow);
 @import './carousel-dots.css' layer(reflow);
+@import './file-thumbnail.css' layer(reflow);
 @import './chat-message.css' layer(reflow);
 @import './input-message.css' layer(reflow);
 @import './thinking-indicator.css' layer(reflow);

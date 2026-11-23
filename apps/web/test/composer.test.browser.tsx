@@ -73,8 +73,8 @@ it('accepts any file by default and names files it cannot preview', async (t) =>
   )
   equal($('[role=alert]'), null)
   equal($('img'), null)
-  const cards = [...document.querySelectorAll('.rf-file-card')].map((card) => [
-    card.querySelector('.rf-file-card-name')?.textContent,
+  const cards = [...document.querySelectorAll('.rf-file-thumbnail-card')].map((card) => [
+    card.querySelector('.rf-file-thumbnail-name')?.textContent,
     card.querySelector('.rf-badge')?.textContent ?? null,
   ])
   deepEqual(cards, [

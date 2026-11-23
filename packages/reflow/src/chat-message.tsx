@@ -1,4 +1,5 @@
 import { messageTransitionName } from './systems/message-transition.ts'
+import { FileThumbnail } from './file-thumbnail.tsx'
 import { ref, type Handle, type RemixNode } from 'remix/component'
 import { prefersReducedMotion } from '@remix-run/ui/animation'
 import type { ControlSize } from './systems/styling.ts'
@@ -140,29 +141,10 @@ export function ChatMessage(handle: Handle<ChatMessageProps>) {
             {attachments.map((attachment, index) => (
               <li
                 key={index}
-                class="rf-chat-thumb"
+                class="rf-chat-attachment"
                 title={attachment.detail ? `${attachment.name} (${attachment.detail})` : undefined}
               >
-                {attachment.previewUrl ? (
-                  <img src={attachment.previewUrl} alt={attachment.name} />
-                ) : (
-                  <span class="rf-chat-thumb-glyph" role="img" aria-label={attachment.name}>
-                    <svg
-                      width="22"
-                      height="22"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
-                      <path d="M14 3v5h5" />
-                    </svg>
-                  </span>
-                )}
+                <FileThumbnail file={attachment} size={64} />
                 {attachment.url && <a href={attachment.url} aria-label={attachment.name} />}
               </li>
             ))}
