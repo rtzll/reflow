@@ -1,0 +1,74 @@
+.rf-task-list {
+  display: grid;
+  gap: 6px;
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+}
+.rf-task-list-progress {
+  margin: 0;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption);
+  font-variant-numeric: tabular-nums;
+}
+.rf-task-list ol {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rf-task-list li {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  column-gap: 10px;
+  align-items: start;
+  color: var(--rf-fg);
+  transition: color var(--rf-fast);
+}
+.rf-task-list li[data-status='done'],
+.rf-task-list li[data-status='pending'] {
+  color: var(--rf-muted);
+}
+.rf-task-list-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  block-size: var(--rf-leading-body);
+}
+/* Pending is an empty ring; done fills it and draws the check on. */
+.rf-task-list-ring {
+  fill: transparent;
+  stroke: currentColor;
+  stroke-width: 1.25;
+  stroke-dasharray: 2 1.6;
+  transition:
+    fill var(--rf-fast),
+    stroke var(--rf-fast);
+}
+.rf-task-list-check {
+  fill: none;
+  stroke: var(--rf-bg);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+li[data-status='done'] .rf-task-list-ring {
+  fill: var(--rf-muted);
+  stroke: var(--rf-muted);
+  stroke-dasharray: none;
+}
+li[data-status='done'] .rf-task-list-check {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 120ms var(--rf-ease-out) 60ms;
+}
+.rf-task-list-label {
+  overflow-wrap: anywhere;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-task-list li,
+  .rf-task-list-ring,
+  li[data-status='done'] .rf-task-list-check {
+    transition: none;
+  }
+}
