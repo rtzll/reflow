@@ -86,6 +86,70 @@ it('accepts any file by default and names files it cannot preview', async (t) =>
   ])
 })
 
+it('attaches a long paste as a text file when pasteAsFile is set', async (t) => {
+  let attached: File[] = []
+  const { $, act, cleanup } = render(
+    <InputMessage
+      pasteAsFile={20}
+      onFilesChange={(files) => (attached = files)}
+      onSend={() => {}}
+    />,
+  )
+  t.after(cleanup)
+  const textarea = $('textarea') as HTMLTextAreaElement
+  function paste(text: string) {
+    const data = new DataTransfer()
+    data.setData('text/plain', text)
+    const event = new ClipboardEvent('paste', {
+      clipboardData: data,
+      bubbles: true,
+      cancelable: true,
+    })
+    textarea.dispatchEvent(event)
+    return event.defaultPrevented
+  }
+  let prevented = false
+  await act(() => {
+    prevented = paste('Short note')
+  })
+  equal(prevented, false)
+  equal(attached.length, 0)
+  const long = 'A paragraph long enough to become a file.'
+  await act(() => {
+    prevented = paste(long)
+  })
+  equal(prevented, true)
+  equal(attached.length, 1)
+  equal(attached[0].name, 'pasted-text.txt')
+  equal(attached[0].type, 'text/plain')
+  equal(await attached[0].text(), long)
+  equal($('.rf-file-thumbnail-name')?.textContent, 'pasted-text')
+})
+
+it('pastes long text as text once every attachment slot is taken', async (t) => {
+  const { $, act, cleanup } = render(
+    <InputMessage
+      pasteAsFile={20}
+      maxFiles={1}
+      files={[new File(['x'], 'notes.md')]}
+      onSend={() => {}}
+    />,
+  )
+  t.after(cleanup)
+  const data = new DataTransfer()
+  data.setData('text/plain', 'A paragraph long enough to become a file.')
+  const event = new ClipboardEvent('paste', {
+    clipboardData: data,
+    bubbles: true,
+    cancelable: true,
+  })
+  await act(() => {
+    $('textarea')!.dispatchEvent(event)
+  })
+  equal(event.defaultPrevented, false)
+  equal($('[role=alert]'), null)
+})
+
 it('filters dropped files and renders an image attachment preview', async (t) => {
   const { $, act, cleanup } = render(
     <InputMessage accept="image/png,image/jpeg,application/pdf" onSend={() => {}} />,

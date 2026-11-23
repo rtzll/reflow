@@ -3376,6 +3376,13 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           required: false,
         },
         {
+          name: 'pasteAsFile',
+          type: 'number',
+          description:
+            'Attaches pasted text of at least this many characters as pasted-text.txt instead of filling the message box.',
+          required: false,
+        },
+        {
           name: 'filePreviewSize',
           type: 'number',
           description:

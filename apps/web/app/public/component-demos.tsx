@@ -1027,9 +1027,9 @@ function setEditing(open: boolean) {
     demo(
       'Attachments',
       'attachments',
-      `<InputMessage files={files} onFilesChange={setFiles} maxFiles={4}
+      `<InputMessage files={files} onFilesChange={setFiles} maxFiles={4} pasteAsFile={1000}
   onSend={({ text, files }) => send(text, files)} />`,
-      'Images show a thumbnail; other files show their name and type. Remove one, use the attachment button, or drop files onto the composer.',
+      'Images show a thumbnail; other files show their name and type. Remove one, use the attachment button, drop files onto the composer, or paste a long text to attach it as a file.',
     ),
     demo(
       'Queued messages',
@@ -2895,6 +2895,7 @@ export function ComponentDemo(
                   ) : undefined
                 }
                 maxFiles={variant === 'attachments' ? 4 : 3}
+                pasteAsFile={variant === 'attachments' ? 1000 : undefined}
                 files={variant === 'attachments' ? attachmentFiles : undefined}
                 onFilesChange={
                   variant === 'attachments'

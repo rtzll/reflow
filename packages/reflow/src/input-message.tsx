@@ -52,6 +52,11 @@ export interface InputMessageProps {
   disabled?: boolean
   attachments?: boolean
   maxFiles?: number
+  /**
+   * Attaches pasted text of at least this many characters as a text file
+   * rather than putting it in the message box. Off unless set.
+   */
+  pasteAsFile?: number
   actions?: RemixNode
   rightActions?: RemixNode
 }
@@ -124,7 +129,7 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
     handle.update()
   }
 
-  function addFiles(incoming: FileList | null) {
+  function addFiles(incoming: Iterable<File> | null) {
     if (!incoming || handle.props.disabled || sending) return
     const limit = Math.max(1, handle.props.maxFiles ?? 5)
     const { accepted: additions, rejected } = partitionFiles(incoming, handle.props.accept)
@@ -382,9 +387,23 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
             }),
           attachments &&
             on('paste', (event) => {
-              if (!event.clipboardData?.files.length) return
+              const clipboard = event.clipboardData
+              if (!clipboard) return
+              if (clipboard.files.length) {
+                event.preventDefault()
+                addFiles(clipboard.files)
+                return
+              }
+              const text = clipboard.getData('text/plain')
+              const threshold = handle.props.pasteAsFile
+              if (!threshold || text.length < threshold) return
+              const file = new File([text], 'pasted-text.txt', { type: 'text/plain' })
+              // Text pastes as text when it cannot become a file: the accept
+              // list rejects text files, or no attachment slot is left.
+              if (!partitionFiles([file], handle.props.accept).accepted.length) return
+              if (files.length >= Math.max(1, handle.props.maxFiles ?? 5)) return
               event.preventDefault()
-              addFiles(event.clipboardData.files)
+              addFiles([file])
             }),
           attachments &&
             on('drop', (event) => {
