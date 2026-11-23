@@ -40,8 +40,26 @@ function scrollParent(element: HTMLElement) {
  */
 export function ChatOutline(handle: Handle<ChatOutlineProps>) {
   let current: string | undefined
-  let scroller: HTMLElement | null = null
+  let scroller: HTMLElement | Window | null = null
+  let listening: AbortController | undefined
   let frame = 0
+
+  // Follows the transcript the items live in. An app can swap the whole
+  // conversation, and with it the scroll container, under one outline.
+  function follow(target: HTMLElement | undefined) {
+    const next = (target && scrollParent(target)) ?? window
+    if (next === scroller) return
+    listening?.abort()
+    listening = new AbortController()
+    scroller = next
+    next.addEventListener('scroll', schedule, { passive: true, signal: listening.signal })
+  }
+
+  function box() {
+    return scroller instanceof HTMLElement
+      ? { top: scroller.getBoundingClientRect().top, height: scroller.clientHeight }
+      : { top: 0, height: window.innerHeight }
+  }
 
   function elements() {
     return handle.props.items
@@ -53,9 +71,8 @@ export function ChatOutline(handle: Handle<ChatOutlineProps>) {
     frame = 0
     const targets = elements()
     if (!targets.length) return
-    scroller ??= scrollParent(targets[0])
-    const top = scroller ? scroller.getBoundingClientRect().top : 0
-    const height = scroller ? scroller.clientHeight : window.innerHeight
+    follow(targets[0])
+    const { top, height } = box()
     const line = top + height * readingLine
     let next = targets[0].id
     for (const element of targets) {
@@ -95,12 +112,18 @@ export function ChatOutline(handle: Handle<ChatOutlineProps>) {
       },
       { signal },
     )
-    signal.addEventListener('abort', () => clearTimeout(focusTimer), { once: true })
-    const targets = elements()
-    scroller = targets.length ? scrollParent(targets[0]) : null
-    ;(scroller ?? window).addEventListener('scroll', schedule, { passive: true, signal })
+    follow(elements()[0])
     window.addEventListener('resize', schedule, { passive: true, signal })
-    signal.addEventListener('abort', () => cancelAnimationFrame(frame), { once: true })
+    signal.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(focusTimer)
+        cancelAnimationFrame(frame)
+        listening?.abort()
+        scroller = null
+      },
+      { once: true },
+    )
     schedule()
   })
 
@@ -108,9 +131,9 @@ export function ChatOutline(handle: Handle<ChatOutlineProps>) {
     const target = document.getElementById(id)
     if (!target) return
     const behavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
-    scroller ??= scrollParent(target)
-    if (scroller) {
-      const offset = target.getBoundingClientRect().top - scroller.getBoundingClientRect().top
+    follow(target)
+    if (scroller instanceof HTMLElement) {
+      const offset = target.getBoundingClientRect().top - box().top
       scroller.scrollTo({ top: scroller.scrollTop + offset - peek, behavior })
     } else target.scrollIntoView({ block: 'start', behavior })
     if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1')

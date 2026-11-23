@@ -98,3 +98,43 @@ it('adds a search field past eight turns', async (t) => {
   await open($, act)
   ok(document.querySelector('input[placeholder="Search messages…"]'))
 })
+
+it('follows its turns into another transcript', async (t) => {
+  let show: (index: number) => void = () => {}
+  function Swap(handle: import('remix/component').Handle) {
+    let active = 0
+    show = (index) => {
+      active = index
+      handle.update()
+    }
+    return () => (
+      <div>
+        <ChatOutline items={turns.map((label, index) => ({ id: `t${active}-${index}`, label }))} />
+        {[0, 1].map((pane) => (
+          <div
+            class={`pane-${pane}`}
+            hidden={pane !== active}
+            style={{ height: '300px', overflowY: 'auto' }}
+          >
+            {turns.map((label, index) => (
+              <ChatMessage id={`t${pane}-${index}`} role="user" animate={false}>
+                <div style={{ height: '600px' }}>{label}</div>
+              </ChatMessage>
+            ))}
+          </div>
+        ))}
+      </div>
+    )
+  }
+  const { $, act, cleanup } = render(<Swap />)
+  t.after(cleanup)
+  await frames()
+  await act(() => show(1))
+  await frames()
+  const second = $('.pane-1') as HTMLElement
+  second.scrollTop = 1250
+  second.dispatchEvent(new Event('scroll'))
+  await frames(3)
+  await open($, act)
+  equal(rows()[2].getAttribute('aria-checked'), 'true')
+})
