@@ -290,10 +290,14 @@
   line-height: var(--rf-leading-caption);
 }
 
+/* A badge sits right after its label; the space it frees goes after it. */
+.rf-menu-item:has(> .rf-menu-badge) > .rf-menu-label {
+  flex: 0 1 auto;
+}
 .rf-menu-badge {
   display: inline-flex;
   flex: none;
-  margin-inline-start: -2px;
+  margin-inline: -2px auto;
 }
 
 /* A row's quiet trailing text, such as a submenu's current choice. */
