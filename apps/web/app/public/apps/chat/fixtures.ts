@@ -7,6 +7,12 @@ export interface ChatEntry {
   attachments?: { name: string; type?: string; previewUrl?: string }[]
   /** When a message was sent, as an ISO string. Time separators read it. */
   sentAt?: string
+  /** The simulated work behind a reply, shown folded above it. */
+  work?: {
+    startedAt: number
+    endedAt?: number
+    calls: { label: string; status: 'running' | 'done' | 'failed' }[]
+  }
   stopped?: boolean
   proofChecklist?: ConfirmationState
 }

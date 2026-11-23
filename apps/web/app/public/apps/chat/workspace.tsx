@@ -13,6 +13,7 @@ import {
   Icon,
   InputMessage,
   Sidebar,
+  ToolCalls,
   type SidebarItem,
   type SidebarSection,
 } from '@rtzll/reflow'
@@ -347,6 +348,12 @@ function ConversationPane(
   function finish(stopped: boolean) {
     clearInterval(timer)
     if (response) response.stopped = stopped
+    // The work ends with the reply: done, or cut short when stopped.
+    if (response?.work) {
+      response.work.endedAt = Date.now()
+      for (const call of response.work.calls)
+        if (call.status === 'running') call.status = stopped ? 'failed' : 'done'
+    }
     response = undefined
     changed()
   }
@@ -375,7 +382,17 @@ function ConversationPane(
       if (previewUrl) previews.push(previewUrl)
       return { name: file.name, type: file.type, previewUrl }
     })
-    const reply: ChatEntry = { role: 'assistant', text: '' }
+    const reply: ChatEntry = {
+      role: 'assistant',
+      text: '',
+      work: {
+        startedAt: Date.now(),
+        calls: [
+          { label: 'Read the conversation so far', status: 'done' },
+          { label: skill ? `Ran ${skill.command}` : 'Writing the reply', status: 'running' },
+        ],
+      },
+    }
     thread.messages.push(
       {
         role: 'user',
@@ -414,6 +431,10 @@ function ConversationPane(
     if (response || !question || index !== thread.messages.length - 1) return
     reply.stopped = undefined
     reply.proofChecklist = undefined
+    reply.work = {
+      startedAt: Date.now(),
+      calls: [{ label: 'Writing another reply', status: 'running' }],
+    }
     stream(reply, alternateReply(question.text, question.attachments).split(' '))
   }
 
@@ -627,6 +648,13 @@ function ConversationPane(
               animate={false}
             >
               {message.role === 'assistant' && <strong class="studio-author">Reflow</strong>}
+              {message.work && (
+                <ToolCalls
+                  calls={message.work.calls.map((call, step) => ({ id: String(step), ...call }))}
+                  startedAt={message.work.startedAt}
+                  endedAt={message.work.endedAt}
+                />
+              )}
               {message.role === 'assistant' ? (
                 <Markdown source={message.text} />
               ) : message.text ? (

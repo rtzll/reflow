@@ -403,3 +403,23 @@ it('shows the outline as a rail beside the transcript on a wide screen', async (
   await expect(ticks.nth(1)).toHaveAttribute('aria-current', 'location')
   await expect(ticks.nth(1)).toBeFocused()
 })
+
+it('folds the work behind a reply into a line that opens to each step', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1280, height: 800 })
+  await open(page, '/apps/chat?thread=interview-notes')
+  await page.clock.install()
+  const field = page.getByRole('textbox', { name: 'Message' })
+  await field.fill('What should I ask next?')
+  await field.press('Enter')
+  const reply = page.getByRole('log').getByRole('article', { name: 'Assistant' }).last()
+  await expect(reply.locator('.rf-tool-calls-summary')).toContainText('Writing the reply')
+  await page.clock.runFor(8000)
+  const line = reply.getByRole('button', { name: /^Worked for \d+s$/ })
+  await expect(line).toBeVisible()
+  await line.click()
+  await expect(reply.getByRole('listitem')).toHaveText([
+    'Read the conversation so far',
+    'Writing the reply',
+  ])
+})
