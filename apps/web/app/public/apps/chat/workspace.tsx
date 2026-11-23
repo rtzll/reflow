@@ -481,6 +481,7 @@ function ConversationPane(
                         size="icon-compact"
                         variant="ghost"
                         aria-label="Stop response"
+                        data-stop=""
                         mix={on('click', stop)}
                       >
                         <Icon name="square-stop" size={14} />
