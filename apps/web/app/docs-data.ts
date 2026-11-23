@@ -3414,6 +3414,13 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           required: false,
         },
         {
+          name: 'voice',
+          type: 'boolean',
+          description:
+            'Shows a microphone button that records a voice note, with a level meter and timer, and attaches it as an audio file.',
+          required: false,
+        },
+        {
           name: 'pasteAsFile',
           type: 'number',
           description:
