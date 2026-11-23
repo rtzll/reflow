@@ -41,3 +41,27 @@ it('leaves no hover highlight behind after a tap', async (t) => {
   await track.tap()
   await expect.poll(() => tooltip.evaluate((node) => getComputedStyle(node).opacity)).toBe('0')
 })
+
+it('drops the tap flash and long-press selection on controls, not on prose', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await open(page, '/docs/pagination')
+  const control = await page
+    .locator('main .rf-pagination')
+    .first()
+    .locator('a, button')
+    .first()
+    .evaluate((node) => getComputedStyle(node).getPropertyValue('-webkit-tap-highlight-color'))
+  assert.equal(control, 'rgba(0, 0, 0, 0)')
+  await open(page, '/docs/tabs')
+  const tab = await page
+    .locator('main .rf-tab[role="tab"]')
+    .first()
+    .evaluate((node) => getComputedStyle(node).userSelect)
+  assert.equal(tab, 'none')
+  await open(page, '/docs/markdown')
+  const prose = await page
+    .locator('main .rf-markdown p')
+    .first()
+    .evaluate((node) => getComputedStyle(node).userSelect)
+  assert.equal(prose, 'auto')
+})

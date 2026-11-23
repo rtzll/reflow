@@ -217,6 +217,43 @@
   }
 }
 
+/* Touch: Reflow's controls show their own press and hover states, so the
+   browser's grey tap flash only fights them, and a long press should not
+   select a button's label as if it were text. Text links keep selection, so
+   a reader can still copy prose. Zero specificity: an app overrides it with
+   any rule of its own. */
+:where([class^='rf-'], [class*=' rf-']):where(
+  button,
+  summary,
+  a[href],
+  label,
+  [role='button'],
+  [role='tab'],
+  [role='option'],
+  [role^='menuitem'],
+  [role='radio'],
+  [role='switch']
+),
+:where([class^='rf-'], [class*=' rf-'])
+  :where(button, summary, [role='button'], [role='tab'], [role='option'], [role^='menuitem']) {
+  -webkit-tap-highlight-color: transparent;
+}
+:where([class^='rf-'], [class*=' rf-']):where(
+  button,
+  summary,
+  [role='button'],
+  [role='tab'],
+  [role='option'],
+  [role^='menuitem'],
+  [role='radio'],
+  [role='switch']
+),
+:where([class^='rf-'], [class*=' rf-'])
+  :where(button, summary, [role='button'], [role='tab'], [role='option'], [role^='menuitem']) {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 a.rf-link {
   color: var(--rf-fg);
   text-decoration: underline;
