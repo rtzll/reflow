@@ -145,3 +145,10 @@ Choose your **opening and closing frames** first. Lay them out as small prints, 
 - Use one of those details to shape your next question.`
   return 'Start by choosing **one thing** you want the reader to remember. Write it in a sentence, then pick a detail that makes it concrete. Read the two together and see which words you can take away without losing the idea.'
 }
+
+/** A second answer to the same question, for trying again. */
+export function alternateReply(text: string, files: readonly { name: string }[] = []) {
+  if (files.length && !text.trim())
+    return 'Tell me what the files are for, and I can start with the one that matters most.'
+  return `Another way in: ${replyTo(text, files).replace(/^\*\*|\*\*/g, '')}`
+}

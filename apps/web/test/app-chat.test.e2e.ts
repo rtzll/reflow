@@ -345,3 +345,22 @@ it('sends dropped files with a message and keeps their names after a reload', as
   const restored = page.getByRole('log').getByRole('article', { name: 'You' }).last()
   await expect(restored.getByRole('list', { name: 'Attachments' })).toContainText('questions')
 })
+
+it('copies a reply and tries the last one again', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1280, height: 800 })
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+  await open(page, '/apps/chat?thread=interview-notes')
+  const reply = page.getByRole('log').getByRole('article', { name: 'Assistant' }).last()
+  await reply.hover()
+  await reply.getByRole('button', { name: 'Copy reply' }).click()
+  await expect(reply.getByRole('button', { name: 'Copied' })).toBeVisible()
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain(
+    'Ask her to open the log',
+  )
+  await page.clock.install()
+  await reply.getByRole('button', { name: 'Try again' }).click()
+  await page.clock.runFor(5000)
+  await expect(reply).toContainText('Another way in:')
+  await expect(page.getByRole('log').getByRole('article', { name: 'Assistant' })).toHaveCount(1)
+})

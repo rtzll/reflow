@@ -13,7 +13,7 @@ import {
 } from '@rtzll/reflow'
 import { Markdown } from '@rtzll/reflow/markdown'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
-import { replyTo, type ChatEntry, type Conversation } from './fixtures.ts'
+import { alternateReply, replyTo, type ChatEntry, type Conversation } from './fixtures.ts'
 import {
   blankThread,
   deleteThread,
@@ -338,22 +338,59 @@ function ConversationPane(
       if (previewUrl) previews.push(previewUrl)
       return { name: file.name, type: file.type, previewUrl }
     })
-    let shown = 2
-    response = { role: 'assistant', text: words.slice(0, shown).join(' ') }
+    const reply: ChatEntry = { role: 'assistant', text: '' }
     thread.messages.push(
       { role: 'user', text, attachments: attachments.length ? attachments : undefined },
-      response,
+      reply,
     )
+    stream(reply, words, () => {
+      if (skill?.command === '/proof') reply.proofChecklist = 'requested'
+    })
+  }
+
+  // Streams words into a reply a couple at a time.
+  function stream(reply: ChatEntry, words: string[], done?: () => void) {
+    let shown = 2
+    reply.text = words.slice(0, shown).join(' ')
+    response = reply
     timer = setInterval(() => {
       if (!response) return
       shown = Math.min(shown + 2, words.length)
       response.text = words.slice(0, shown).join(' ')
       if (shown === words.length) {
-        if (skill?.command === '/proof') response.proofChecklist = 'requested'
+        done?.()
         finish(false)
       } else void handle.update()
     }, 140)
     changed()
+  }
+
+  // Answers the last question again, in other words.
+  function retry(reply: ChatEntry) {
+    const index = thread.messages.indexOf(reply)
+    const question = thread.messages[index - 1]
+    if (response || !question || index !== thread.messages.length - 1) return
+    reply.stopped = undefined
+    reply.proofChecklist = undefined
+    stream(reply, alternateReply(question.text, question.attachments).split(' '))
+  }
+
+  let copied: ChatEntry | undefined
+  let copiedTimer: ReturnType<typeof setTimeout> | undefined
+  handle.signal.addEventListener('abort', () => clearTimeout(copiedTimer), { once: true })
+  async function copy(message: ChatEntry) {
+    try {
+      await navigator.clipboard.writeText(message.text)
+    } catch {
+      return
+    }
+    copied = message
+    clearTimeout(copiedTimer)
+    copiedTimer = setTimeout(() => {
+      copied = undefined
+      void handle.update()
+    }, 1500)
+    void handle.update()
   }
 
   function answerChecklist(message: ChatEntry, answer: 'approved' | 'denied') {
@@ -474,6 +511,30 @@ function ConversationPane(
               id={messageId(thread, index)}
               role={message.role}
               attachments={message.attachments}
+              actions={
+                message.role === 'assistant' && message !== response ? (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="icon-compact"
+                      aria-label={copied === message ? 'Copied' : 'Copy reply'}
+                      mix={on('click', () => void copy(message))}
+                    >
+                      <Icon name={copied === message ? 'check' : 'copy'} />
+                    </Button>
+                    {index === thread.messages.length - 1 && (
+                      <Button
+                        variant="ghost"
+                        size="icon-compact"
+                        aria-label="Try again"
+                        mix={on('click', () => retry(message))}
+                      >
+                        <Icon name="rotate-ccw" />
+                      </Button>
+                    )}
+                  </>
+                ) : undefined
+              }
               animate={false}
             >
               {message.role === 'assistant' && <strong class="studio-author">Reflow</strong>}
