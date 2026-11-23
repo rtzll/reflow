@@ -215,6 +215,9 @@ export function Dropdown(handle: Handle<DropdownProps>) {
           {!handle.props.inline && variant !== 'bare' && (
             <Button
               class="rf-dropdown-trigger"
+              // Custom content, such as an icon, may carry no text: name the
+              // trigger by its label, as the bare trigger does.
+              aria-label={handle.props.triggerContent != null ? label : undefined}
               variant={variant === 'ghost' ? 'ghost' : 'tertiary'}
               size={size}
               trailingIcon={
