@@ -227,6 +227,9 @@ export const ChatWorkspace = clientEntry(
                 <a href={handle.props.links.apps} data-rmx-document="">
                   Apps
                 </a>
+                <span aria-current="page" class="rf-basic-sr-only">
+                  Chat
+                </span>
               </nav>
             }
             toolbar={
