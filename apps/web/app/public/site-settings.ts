@@ -185,9 +185,34 @@ export function accentCss(value: string) {
   return `light-dark(${light}, ${dark})`
 }
 
+// The browser chrome and the phone's status bar take their color from
+// theme-color: the page background, per scheme while the theme follows the system.
+export const themeColors = { light: '#fafafa', dark: '#171717' } as const
+
+export function themeColorTags(theme: string): { media?: string; content: string }[] {
+  return theme === 'light' || theme === 'dark'
+    ? [{ content: themeColors[theme] }]
+    : [
+        { media: '(prefers-color-scheme: light)', content: themeColors.light },
+        { media: '(prefers-color-scheme: dark)', content: themeColors.dark },
+      ]
+}
+
+function syncThemeColor(theme: string) {
+  for (const tag of document.querySelectorAll('meta[name="theme-color"]')) tag.remove()
+  for (const { media, content } of themeColorTags(theme)) {
+    const tag = document.createElement('meta')
+    tag.name = 'theme-color'
+    if (media) tag.media = media
+    tag.content = content
+    document.head.append(tag)
+  }
+}
+
 export function applySetting(key: SettingKey, value: string) {
   if (!validSetting(key, value)) return
   document.documentElement.dataset[key] = value
+  if (key === 'theme') syncThemeColor(value)
   if (key === 'font') {
     const family = value.startsWith('google:') ? value.slice(7) : undefined
     if (family) {

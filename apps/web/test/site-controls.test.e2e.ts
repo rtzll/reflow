@@ -486,3 +486,32 @@ it('scrolls the page from over the right rail and keeps the left rail self-conta
   await page.waitForTimeout(300)
   assert.equal(await scrollY(), 0)
 })
+
+it('colors the browser chrome to match the page in either theme', async (t) => {
+  const page = await t.serve(showcaseServer)
+  const tags = () =>
+    page
+      .locator('meta[name="theme-color"]')
+      .evaluateAll((nodes) =>
+        nodes.map(
+          (node) => `${node.getAttribute('media') ?? 'any'} ${node.getAttribute('content')}`,
+        ),
+      )
+  await open(page, '/docs?theme=system')
+  assert.deepEqual(await tags(), [
+    '(prefers-color-scheme: light) #fafafa',
+    '(prefers-color-scheme: dark) #171717',
+  ])
+  await open(page, '/docs?theme=dark')
+  assert.deepEqual(await tags(), ['any #171717'])
+  // Switching the theme in the page recolors the chrome without a reload.
+  await page.locator('body').press('t')
+  await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'dark')
+  const theme = await page.locator('html').getAttribute('data-theme')
+  assert.deepEqual(
+    await tags(),
+    theme === 'light'
+      ? ['any #fafafa']
+      : ['(prefers-color-scheme: light) #fafafa', '(prefers-color-scheme: dark) #171717'],
+  )
+})

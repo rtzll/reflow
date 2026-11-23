@@ -1,7 +1,7 @@
 import type { Handle, RemixNode } from 'remix/component'
 import { ImportMap } from 'remix/component/server'
 import type { getPageAssets } from './assets.ts'
-import { accentCss, type readSettings } from './public/site-settings.ts'
+import { accentCss, themeColorTags, type readSettings } from './public/site-settings.ts'
 import { fontStylesheet, fontWeights } from './public/google-fonts.ts'
 import { fontCatalog } from './public/google-font-catalog.ts'
 import { ShowcaseIconSprite } from './public/icon-sprite.tsx'
@@ -54,6 +54,9 @@ export function Document(handle: Handle<DocumentProps>) {
               (base) sit under Reflow, and Remix's css() styles (rmx) above it. */}
           <style>{'@layer base, reflow, rmx;'}</style>
           <meta name="color-scheme" content="light dark" />
+          {themeColorTags(settings.theme).map((tag) => (
+            <meta key={tag.media ?? 'theme'} name="theme-color" {...tag} />
+          ))}
           <meta name="description" content={description} />
           <meta property="og:type" content="website" />
           <meta property="og:site_name" content="Reflow" />
