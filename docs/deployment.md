@@ -1,6 +1,6 @@
 # Website build and deployment
 
-The Cloudflare target hosts the existing `apps/web` showcase: `/` for the gallery, `/docs` and `/docs/:slug` for documentation, `/demo` for focused examples, and `/apps` and `/apps/:slug` for example workspaces. It needs no database, account binding, or application secret. The library package and the generated starter remain independent of Cloudflare.
+The Cloudflare target hosts the existing `apps/web` showcase: `/` for the gallery, `/docs` and `/docs/:slug` for documentation, and `/apps` and `/apps/:slug` for example workspaces. It needs no database, account binding, or application secret. The library package and the generated starter remain independent of Cloudflare.
 
 ## Build and preview locally
 

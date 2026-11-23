@@ -7,7 +7,7 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Open the address printed in the terminal: `/` for the gallery, `/docs` for documentation, and `/demo` for the focused demo. The default bind address is `127.0.0.1`, with port `44100` for the showcase and `44103` for the generated starter. Override these with `HOST` and `PORT`; for example, `PORT=3000 pnpm dev`. If the port is occupied, choose another; the server does not automatically select the next port.
+Open the address printed in the terminal: `/` for the gallery, `/docs` for documentation, and `/apps` for the example apps. The default bind address is `127.0.0.1`, with port `44100` for the showcase and `44103` for the generated starter. Override these with `HOST` and `PORT`; for example, `PORT=3000 pnpm dev`. If the port is occupied, choose another; the server does not automatically select the next port.
 
 `pnpm dev` builds the library before starting the server. Run `pnpm build` after editing library source or styles. The website loads the library through the workspace package's public exports.
 

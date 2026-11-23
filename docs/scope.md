@@ -7,7 +7,7 @@ Reflow started with the Fluid Functionalism catalog and adds components of its o
 ## Deliverables
 
 1. A reusable component library covering the upstream catalog, plus shared systems and Reflow's own components. Upstream blocks map to components or examples.
-2. A Remix showcase using those same components: an interactive overview, individual component documentation and playgrounds, and a focused demo carousel.
+2. A Remix showcase using those same components: an interactive overview, individual component documentation and playgrounds, and example apps that use them together.
 3. Behavioral and visual validation across keyboard, pointer, touch, light/dark themes, compact/default sizes, reduced motion, server rendering, and hydration.
 4. A deployable showcase and a documented package installation workflow. Hosting is configured separately from source and package releases.
 
@@ -33,7 +33,7 @@ Optional adapters are the other exception, for enhancements, such as highlightin
 
 ## Architecture direction
 
-The pnpm workspace has two packages. `packages/reflow` exports ESM components, TypeScript declarations, and a stylesheet as [`@rtzll/reflow` on npm](https://www.npmjs.com/package/@rtzll/reflow). `apps/web` uses those public exports for the gallery, documentation, and focused demo.
+The pnpm workspace has two packages. `packages/reflow` exports ESM components, TypeScript declarations, and a stylesheet as [`@rtzll/reflow` on npm](https://www.npmjs.com/package/@rtzll/reflow). `apps/web` uses those public exports for the gallery, documentation, and example apps.
 
 Separate reusable geometry, color, date, and state logic from DOM measurement and Remix component lifecycle integration. Share hover, motion, focus, density, and surface behavior instead of reimplementing it in every component.
 
@@ -77,7 +77,6 @@ Check again when Remix UI updates.
 - Overview: left navigation grouped into systems and components, central interactive preview cards, and a customization rail.
 - Controls: light/dark/system theme, accent, shape/radius, density, typography, icon family, and hover mode. Persist applicable preferences. Lucide, Tabler, Phosphor, and HugeIcons use local SVG geometry. Alternate icon families are showcase assets; applications using the package can provide their own icons through the component slots.
 - Detail pages: working examples, variants, editable options, concise API guidance, and copyable usage code.
-- Focused demo: a large interactive example with previous/next controls, component navigation dots, scale-to-fit, and customization where relevant. Upstream navigation was observed changing the URL to `/demo?c=accordion`; Reflow should likewise support direct links.
 - Responsive navigation and controls must remain usable on mobile. Avoid simply squeezing the desktop columns.
 - Every delivered component must have a discoverable working demonstration. Preview state and settings must affect real library components.
 - Use Reflow branding and acknowledge the upstream project. The Radix/Base UI selector has no role in a single native Remix implementation.
@@ -117,6 +116,7 @@ The rest of that commit refines upstream's DataTable frozen columns and selectio
 - **Sidebar.** Parent rows can be links with separate expanders. On mobile the rail opens as a viewport-height modal drawer with Escape and focus return. The workspace and profile menus mark keyboard focus with a row highlight rather than the moving ring.
 - **Forms and surfaces.** AskUserQuestions can submit through a surrounding form and optionally show a completion screen. Field choice cards keep the stronger checked border. CommandMenu's shortcut footer is opt-in.
 - **Motion.** Buttons press in to 97% while held. A tooltip opens at once and without motion while another is showing or has just closed, so moving along a toolbar does not wait on every button.
+- **Showcase.** Reflow has no focused demo page. Upstream's slide-by-slide deck repeated each docs page's playground, which the gallery, the docs pages and the example apps already cover.
 - **CommandMenu.** The header line strengthens once rows scroll under it, as upstream's code intends; upstream's own line never strengthens because its scroll root clips it. Its dialog opens and closes without motion, since a shortcut summons it many times a day.
 
 ### Known gap
@@ -131,7 +131,7 @@ The upstream registry also installs seven blocks: compositions copied into an ap
 | --- | --- |
 | `queued-stack` | The QueuedStack component, exported from the package. |
 | `sidebar-app` | The Sidebar page. Its examples show workspace switching, nested projects, search and profile controls. |
-| `dialog-sidebar` | The Dialog page's "With a sidebar" example, also used on the Sidebar page, in the gallery and in the focused demo. Its sections and fields are app-specific, so it stays in the showcase. |
+| `dialog-sidebar` | The Dialog page's "With a sidebar" example, also used on the Sidebar page and in the gallery. Its sections and fields are app-specific, so it stays in the showcase. |
 | `sidebar-workspace-header`, `sidebar-user-footer` | The Sidebar page's Header & footer example, whose code includes both menus as Dropdowns with a bare `rf-sidebar-row` trigger. |
 | `sidebar-search-field`, `sidebar-inset-topbar` | Built into Sidebar: the `searchable` filter field and the collapse/mobile toolbar. Supply breadcrumbs and trailing actions through the toolbar slot. |
 
@@ -140,8 +140,8 @@ The former `/docs/app-sidebar` and `/docs/settings-dialog` pages redirect to Sid
 ## References
 
 - The [ContextMenu design note](context-menu.md) follows the upstream catalog at `13fef6966428b5b16952f1609aa3814e9bdf115b`. [Pinned registry](https://github.com/mickadesign/fluid-functionalism/blob/13fef6966428b5b16952f1609aa3814e9bdf115b/registry.json) · [ContextMenu source](https://github.com/mickadesign/fluid-functionalism/blob/13fef6966428b5b16952f1609aa3814e9bdf115b/registry/default/context-menu.tsx)
-- [Fluid Functionalism source](https://github.com/mickadesign/fluid-functionalism), initial inspected commit `7e6ae290dd8f5a7657ae4a433a42e165bac3ece4`. Breadcrumb, Dropdown's `openOnHover`, and the demo deck follow `2bfb830023e46ea9bcf5d326e015d4511ab9ef38`. The showcase shape default follows `7f5601a` and the Button spinner follows `cc276ca`. The last full sync checked `1f716642a455c7a66e4cc7087c917dbe109f7943`.
-- [Upstream showcase](https://www.fluidfunctionalism.com/) and [focused demo](https://www.fluidfunctionalism.com/demo).
+- [Fluid Functionalism source](https://github.com/mickadesign/fluid-functionalism), initial inspected commit `7e6ae290dd8f5a7657ae4a433a42e165bac3ece4`. Breadcrumb and Dropdown's `openOnHover` follow `2bfb830023e46ea9bcf5d326e015d4511ab9ef38`. The showcase shape default follows `7f5601a` and the Button spinner follows `cc276ca`. The last full sync checked `1f716642a455c7a66e4cc7087c917dbe109f7943`.
+- [Upstream showcase](https://www.fluidfunctionalism.com/).
 - [Upstream MIT license](https://github.com/mickadesign/fluid-functionalism/blob/main/LICENSE) is included in `packages/reflow/NOTICE`. The Inter font used by the website has a separate SIL Open Font License notice next to its asset.
 - [Remix rendering guide](https://docs.remix.run/rendering-ui/).
 - [Remix UI source and documentation](https://github.com/remix-run/remix/tree/main/packages/ui).

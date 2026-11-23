@@ -38,7 +38,7 @@ A new component, or a new upstream one, is done when it has all of the following
 
 **Showcase and docs**
 
-- A catalog entry, a docs page with examples and an API table, a playground where the component has options, and a gallery card and demo slide where it reads well at that size. Keep the gallery's small and wide cards balanced.
+- A catalog entry, a docs page with examples and an API table, a playground where the component has options, and a gallery card where it reads well at that size. Keep the gallery's small and wide cards balanced.
 - The docs preview follows the stage rules: content starts 48px below the header and stays put as it grows; examples that open popups get room to open into.
 - The [Reflow skill](../skills/reflow/SKILL.md) and this page mention it.
 
