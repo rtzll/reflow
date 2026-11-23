@@ -13,6 +13,7 @@ import {
   Icon,
   InputMessage,
   Sidebar,
+  TaskList,
   ToolCalls,
   type SidebarItem,
   type SidebarSection,
@@ -348,6 +349,7 @@ function ConversationPane(
   function finish(stopped: boolean) {
     clearInterval(timer)
     if (response) response.stopped = stopped
+    if (response?.tasks && !stopped) for (const task of response.tasks) task.status = 'done'
     // The work ends with the reply: done, or cut short when stopped.
     if (response?.work) {
       response.work.endedAt = Date.now()
@@ -402,6 +404,13 @@ function ConversationPane(
       },
       reply,
     )
+    // The proof skill works through its checks as the reply streams.
+    if (skill?.command === '/proof')
+      reply.tasks = words
+        .join(' ')
+        .split('\n')
+        .filter((line) => line.startsWith('- '))
+        .map((line) => ({ label: line.slice(2), status: 'pending' }))
     stream(reply, words, () => {
       if (skill?.command === '/proof') reply.proofChecklist = 'requested'
     })
@@ -416,12 +425,24 @@ function ConversationPane(
       if (!response) return
       shown = Math.min(shown + 2, words.length)
       response.text = words.slice(0, shown).join(' ')
+      trackTasks(response)
       if (shown === words.length) {
         done?.()
         finish(false)
       } else void handle.update()
     }, 140)
     changed()
+  }
+
+  // A check is done once the reply has moved past its line; the first one
+  // not done is in progress.
+  function trackTasks(reply: ChatEntry) {
+    let waiting = false
+    for (const task of reply.tasks ?? []) {
+      const done = reply.text.includes(`- ${task.label}\n`)
+      task.status = done ? 'done' : waiting ? 'pending' : 'active'
+      if (!done) waiting = true
+    }
   }
 
   // Answers the last question again, in other words.
@@ -656,7 +677,24 @@ function ConversationPane(
                 />
               )}
               {message.role === 'assistant' ? (
-                <Markdown source={message.text} />
+                <>
+                  <Markdown
+                    source={
+                      message.tasks
+                        ? message.text
+                            .split('\n')
+                            .filter((line) => !line.startsWith('- '))
+                            .join('\n')
+                        : message.text
+                    }
+                  />
+                  {message.tasks && (
+                    <TaskList
+                      label="Proof checks"
+                      tasks={message.tasks.map((task, step) => ({ id: String(step), ...task }))}
+                    />
+                  )}
+                </>
               ) : message.text ? (
                 <span>{message.text}</span>
               ) : null}

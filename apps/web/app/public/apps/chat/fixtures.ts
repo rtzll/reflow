@@ -7,6 +7,8 @@ export interface ChatEntry {
   attachments?: { name: string; type?: string; previewUrl?: string }[]
   /** When a message was sent, as an ISO string. Time separators read it. */
   sentAt?: string
+  /** Checks a reply works through, shown as a TaskList in place of its bullet lines. */
+  tasks?: { label: string; status: 'pending' | 'active' | 'done' }[]
   /** The simulated work behind a reply, shown folded above it. */
   work?: {
     startedAt: number

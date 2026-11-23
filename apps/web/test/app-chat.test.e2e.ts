@@ -423,3 +423,19 @@ it('folds the work behind a reply into a line that opens to each step', async (t
     'Writing the reply',
   ])
 })
+
+it('works through the proof checks as a task list while the reply streams', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1280, height: 800 })
+  await open(page, '/apps/chat?thread=print-proof')
+  await page.clock.install()
+  const field = page.getByRole('textbox', { name: 'Message' })
+  await field.fill('/proof the winter issue')
+  await field.press('Escape')
+  await field.press('Enter')
+  const checks = page.getByRole('list', { name: 'Proof checks' }).getByRole('listitem')
+  await expect(checks).toHaveCount(4)
+  await page.clock.runFor(10_000)
+  await expect(checks.first()).toContainText('(done)')
+  await expect(checks.last()).toContainText('(done)')
+})
