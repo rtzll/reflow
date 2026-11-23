@@ -34,7 +34,7 @@ The scroll is smooth, and instant with reduced motion. The menu keeps Dropdown's
 
 ## Reused pieces
 
-Dropdown for the menu, its radio rows and search; the `list` icon; ChatLayout's scroll container and its letting go on a manual scroll.
+Dropdown for the menu, its radio rows and search; the `menu` icon; ChatLayout's scroll container and its letting go on a manual scroll.
 
 ## Rail
 
