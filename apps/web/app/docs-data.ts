@@ -3344,13 +3344,15 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
         {
           name: 'accept',
           type: 'string',
-          description: 'Accepted file types passed to the file input.',
+          description:
+            'Accepted file types, as in the file input. Any file is accepted by default.',
           required: false,
         },
         {
           name: 'filePreviewSize',
           type: 'number',
-          description: 'Size of image attachment previews in pixels.',
+          description:
+            'Height of attachment previews in pixels. Images show a thumbnail; other files show their name and extension on a card twice as wide.',
           required: false,
         },
         {

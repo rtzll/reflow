@@ -1,5 +1,5 @@
 import { ChatMessage, InputMessage, type ComposerQueuedMessage } from '@rtzll/reflow'
-import { equal, ok } from 'remix/assert'
+import { deepEqual, equal, ok } from 'remix/assert'
 import { type Handle } from 'remix/component'
 import { render } from 'remix/component/test'
 import { it } from 'remix/test'
@@ -57,8 +57,39 @@ it('queues while streaming, dispatches on stop, and restores history drafts', as
   equal(textarea.value, 'Current draft')
 })
 
-it('filters dropped files and renders an image attachment preview', async (t) => {
+it('accepts any file by default and names files it cannot preview', async (t) => {
   const { $, act, cleanup } = render(<InputMessage onSend={() => {}} />)
+  t.after(cleanup)
+  const transfer = new DataTransfer()
+  transfer.items.add(new File(['# Notes'], 'principles_cleaned.md', { type: 'text/markdown' }))
+  transfer.items.add(new File(['audio'], 'voice note.ogg', { type: 'audio/ogg' }))
+  transfer.items.add(new File(['%PDF'], 'report.pdf', { type: 'application/pdf' }))
+  transfer.items.add(new File(['photo'], 'photo.heic', { type: 'image/heic' }))
+  transfer.items.add(new File(['KEY=1'], '.env', { type: '' }))
+  await act(() =>
+    $('form')!.dispatchEvent(
+      new DragEvent('drop', { dataTransfer: transfer, bubbles: true, cancelable: true }),
+    ),
+  )
+  equal($('[role=alert]'), null)
+  equal($('img'), null)
+  const cards = [...document.querySelectorAll('.rf-file-card')].map((card) => [
+    card.querySelector('.rf-file-card-name')?.textContent,
+    card.querySelector('.rf-badge')?.textContent ?? null,
+  ])
+  deepEqual(cards, [
+    ['principles_cleaned', 'MD'],
+    ['voice note', 'OGG'],
+    ['report', 'PDF'],
+    ['photo', 'HEIC'],
+    ['.env', null],
+  ])
+})
+
+it('filters dropped files and renders an image attachment preview', async (t) => {
+  const { $, act, cleanup } = render(
+    <InputMessage accept="image/png,image/jpeg,application/pdf" onSend={() => {}} />,
+  )
   t.after(cleanup)
   const transfer = new DataTransfer()
   transfer.items.add(new File(['image'], 'sample.png', { type: 'image/png' }))

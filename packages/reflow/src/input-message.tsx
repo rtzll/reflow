@@ -1,4 +1,5 @@
 import { partitionFiles } from './behaviors/file-selection.ts'
+import { Badge } from './badge.tsx'
 import { Icon } from './icon.tsx'
 import { transitionMessage } from './systems/message-transition.ts'
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
@@ -126,10 +127,7 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
   function addFiles(incoming: FileList | null) {
     if (!incoming || handle.props.disabled || sending) return
     const limit = Math.max(1, handle.props.maxFiles ?? 5)
-    const { accepted: additions, rejected } = partitionFiles(
-      incoming,
-      handle.props.accept ?? 'image/png,image/jpeg,application/pdf',
-    )
+    const { accepted: additions, rejected } = partitionFiles(incoming, handle.props.accept)
     const remaining = limit - files.length
     error =
       rejected.length > 0
@@ -496,7 +494,7 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
             <>
               <input
                 type="file"
-                accept={handle.props.accept ?? 'image/png,image/jpeg,application/pdf'}
+                accept={handle.props.accept}
                 multiple
                 hidden
                 mix={[
@@ -623,6 +621,28 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
   }
 }
 
+// Image types every current browser draws in an <img>. Others, such as HEIC
+// or TIFF, get a file card rather than a broken image.
+const previewableImages = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/gif',
+  'image/webp',
+  'image/avif',
+  'image/svg+xml',
+  'image/bmp',
+])
+
+// Splits a name at its last dot into the name the card shows and the
+// extension its badge shows, upper-cased. A dotfile such as `.env` or a name
+// without a dot has no extension.
+function splitFileName(name: string) {
+  const dot = name.lastIndexOf('.')
+  return dot > 0 && dot < name.length - 1
+    ? { base: name.slice(0, dot), extension: name.slice(dot + 1).toUpperCase() }
+    : { base: name, extension: '' }
+}
+
 function FilePreview(handle: Handle<{ file: File }>) {
   let image: HTMLImageElement | undefined
   let previousFile: File | undefined
@@ -650,16 +670,16 @@ function FilePreview(handle: Handle<{ file: File }>) {
   return () => {
     handle.queueTask(updateImage)
     const file = handle.props.file
+    const isImage = previewableImages.has(file.type.toLowerCase())
+    const { base, extension } = splitFileName(file.name)
     return (
-      <div class="rf-file-thumb">
-        {file.type.startsWith('image/') ? (
+      <div class="rf-file-thumb" data-kind={isImage ? 'image' : 'file'}>
+        {isImage ? (
           <img alt={file.name} mix={capture} />
         ) : (
-          <div role="img" aria-label={file.name}>
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
-              <path d="M14 3v5h5" />
-            </svg>
+          <div class="rf-file-card">
+            <span class="rf-file-card-name">{base}</span>
+            {extension && <Badge size="compact">{extension}</Badge>}
           </div>
         )}
       </div>

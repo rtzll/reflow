@@ -282,22 +282,35 @@
   height: 100%;
   object-fit: cover;
 }
-.rf-file-thumb > div {
+/* Files without an image preview: a card twice as wide as an image tile,
+   naming the file over its extension. */
+.rf-file-thumb[data-kind='file'] {
+  width: calc(var(--rf-file-preview-size, 80px) * 2);
+  background: var(--rf-bg);
+}
+.rf-file-card {
   position: absolute;
   inset: 0;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--rf-muted);
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 8px;
 }
-.rf-file-thumb svg {
-  width: max(16px, calc(var(--rf-file-preview-size, 80px) * 0.35));
-  height: max(16px, calc(var(--rf-file-preview-size, 80px) * 0.35));
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.rf-file-card-name {
+  display: -webkit-box;
+  overflow: hidden;
+  /* Keeps the name clear of the remove button. */
+  padding-inline-end: 20px;
+  color: var(--rf-fg);
+  font: var(--rf-text-caption) / var(--rf-leading-caption) var(--rf-font);
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.rf-file-card > .rf-badge {
+  flex: none;
 }
 .rf-composer-file-remove {
   position: absolute;
