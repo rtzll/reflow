@@ -5,7 +5,7 @@ import { open, showcaseServer } from './showcase-router.ts'
 it('runs page commands by click and by keyboard in each primary example', async (t) => {
   const page = await t.serve(showcaseServer)
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
-  for (const url of ['/', '/docs/command-menu', '/demo?c=command-menu']) {
+  for (const url of ['/', '/docs/command-menu']) {
     await open(page, url)
     const menu = page.locator('[aria-label="Project commands"]').first()
     const search = menu.getByRole('combobox')

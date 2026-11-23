@@ -285,28 +285,25 @@ it('plays the error cue when a CodeBlock copy fails, as InputCopy does', async (
   await expect.poll(audioStarts).toBeGreaterThan(before)
 })
 
-it('keeps the sound button working after moving between demo slides', async (t) => {
+it('keeps the sound button working after moving between docs pages', async (t) => {
   const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1440, height: 900 })
-  await open(page, '/demo?c=carousel')
+  await open(page, '/docs/carousel')
   const documentStart = await page.evaluate(() => performance.timeOrigin)
-  await page.getByRole('link', { name: 'Next slide', exact: true }).click()
-  await expect(page).toHaveURL(/c=breadcrumb/)
-  const previous = page.getByRole('link', { name: 'Previous slide', exact: true })
-  await expect(previous).toHaveAttribute('href', /[?&]c=carousel(?:&|$)/)
-  await previous.click()
-  await expect(page).toHaveURL(/c=carousel/)
-  await expect(page.getByRole('article', { name: /^Slide .*: Carousel$/ })).toBeVisible()
-  // The deck moved within the same document.
+  await page.getByRole('link', { name: 'Next: CarouselDots' }).click()
+  await expect(page).toHaveURL(/\/docs\/carousel-dots/)
+  await page.getByRole('link', { name: 'Previous: Carousel' }).click()
+  await expect(page).toHaveURL(/\/docs\/carousel$/)
+  // The pages changed within the same document.
   expect(await page.evaluate(() => performance.timeOrigin)).toBe(documentStart)
 
-  const sound = page.getByRole('button', { name: 'Showcase sound' })
+  const sound = page.locator('.site-right').getByRole('switch', { name: 'Sound effects' })
   await expect(sound).toBeEnabled()
-  const pressed = await sound.getAttribute('aria-pressed')
+  const on = await sound.isChecked()
   await sound.click()
-  await expect(sound).toHaveAttribute('aria-pressed', pressed === 'true' ? 'false' : 'true')
+  await expect(sound).toBeChecked({ checked: !on })
   await sound.click()
-  await expect(sound).toHaveAttribute('aria-pressed', pressed!)
+  await expect(sound).toBeChecked({ checked: on })
 })
 
 it('plays the navigate cue for Carousel buttons and dots, not for autoplay', async (t) => {

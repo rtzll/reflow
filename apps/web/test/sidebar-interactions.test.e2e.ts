@@ -26,33 +26,36 @@ it('aligns newly created gallery threads with the existing threads', async (t) =
   ).toHaveAttribute('aria-current', 'page')
 })
 
-it('keeps the focused Sidebar frame in place as the inset fills it', async (t) => {
+it('keeps the playground Sidebar frame in place as the inset fills it', async (t) => {
   const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 1000 })
-  await open(page, '/demo?c=sidebar')
-  const shell = page.locator('.site-demo-stage .example-sidebar-playground > .rf-sidebar-layout')
+  await open(page, '/docs/sidebar')
+  const shell = page.locator(
+    '#playground .doc-preview-stage .example-sidebar-playground > .rf-sidebar-layout',
+  )
   const main = shell.locator('.rf-sidebar-main')
   const frame = await shell.boundingBox()
-  assert.equal(frame?.width, 600)
-  assert.equal(frame?.height, 560)
   assert.equal(await shell.getAttribute('data-variant'), 'inset')
   const expanded = await main.boundingBox()
   await shell.getByRole('button', { name: 'Hide sidebar' }).click()
   await shell.getByRole('button', { name: 'Show sidebar' }).waitFor()
   await page.waitForFunction(
     () =>
-      document.querySelector('.site-demo-stage .rf-sidebar-panel')?.getBoundingClientRect()
-        .width === 0,
+      document
+        .querySelector('#playground .doc-preview-stage .rf-sidebar-panel')
+        ?.getBoundingClientRect().width === 0,
   )
   assert.deepEqual(await shell.boundingBox(), frame)
   assert.ok((await main.boundingBox())!.width > expanded!.width + 200)
 })
 
-it('uses the focused Sidebar workspace, shortcuts, section actions and user menu', async (t) => {
+it('uses the playground Sidebar workspace, shortcuts, section actions and user menu', async (t) => {
   const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 1000 })
-  await open(page, '/demo?c=sidebar')
-  const shell = page.locator('.site-demo-stage .example-sidebar-playground > .rf-sidebar-layout')
+  await open(page, '/docs/sidebar')
+  const shell = page.locator(
+    '#playground .doc-preview-stage .example-sidebar-playground > .rf-sidebar-layout',
+  )
   const workspace = shell.getByRole('button', { name: 'Switch workspace' })
   const search = shell.getByRole('searchbox', { name: 'Filter navigation' })
   const create = shell.getByRole('button', { name: 'New', exact: true })
@@ -123,8 +126,10 @@ it('uses the focused Sidebar workspace, shortcuts, section actions and user menu
 it('keeps the profile and workspace menus inside a resized rail with visible keyboard focus', async (t) => {
   const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1280, height: 1000 })
-  await open(page, '/demo?c=sidebar&theme=dark')
-  const shell = page.locator('.site-demo-stage .example-sidebar-playground > .rf-sidebar-layout')
+  await open(page, '/docs/sidebar?theme=dark')
+  const shell = page.locator(
+    '#playground .doc-preview-stage .example-sidebar-playground > .rf-sidebar-layout',
+  )
   await shell.getByRole('separator', { name: 'Resize sidebar' }).press('ArrowLeft')
   const rail = shell.locator('.rf-sidebar-panel .rf-sidebar-inner')
   const railBox = (await rail.boundingBox())!

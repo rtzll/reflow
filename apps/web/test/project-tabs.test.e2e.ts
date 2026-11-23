@@ -6,7 +6,6 @@ it('shows distinct project panels and waits for keyboard activation', async (t) 
   const page = await t.serve(showcaseServer)
   for (const [url, selector] of [
     ['/docs/tabs', '#playground'],
-    ['/demo?c=tabs', '.site-demo-stage'],
     ['/', 'article[data-component="tabs"]'],
   ]) {
     await open(page, url)

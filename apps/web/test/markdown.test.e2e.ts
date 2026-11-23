@@ -3,15 +3,17 @@ import * as assert from 'remix/assert'
 import { it } from 'remix/test'
 import { open, showcaseServer } from './showcase-router.ts'
 
-it('uses the density selected in the focused demo and serves its examples in the docs', async (t) => {
+it('uses the density selected in the playground and serves its examples in the docs', async (t) => {
   const page = await t.serve(showcaseServer)
-  await open(page, '/demo?c=markdown')
-  const stage = page.locator('.site-demo-stage')
+  await open(page, '/docs/markdown')
+  const stage = page.locator('#playground .doc-preview-stage')
   const note = stage.locator('[data-slot="markdown"]')
   await expect(note.getByRole('heading', { name: 'On the last ferry' })).toBeVisible()
   const initialSize = await note.evaluate((element) => getComputedStyle(element).fontSize)
-  await page.locator('summary[aria-label="Customize Markdown"]').click()
-  await page.getByLabel('Size', { exact: true }).selectOption('compact')
+  await page
+    .getByRole('region', { name: 'Markdown playground settings' })
+    .getByLabel('Size', { exact: true })
+    .selectOption('compact')
   await expect(note).toHaveAttribute('data-size', 'compact')
   expect(await note.evaluate((element) => getComputedStyle(element).fontSize)).not.toBe(initialSize)
 

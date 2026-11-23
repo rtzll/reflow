@@ -26,14 +26,11 @@ it('hydrates previews across docs and deep-linked demo pages', async (t) => {
     .getByRole('region', { name: 'Sidebar playground settings' })
   await expect(sidebarControls.getByRole('switch', { name: 'Searchable' })).toBeChecked()
 
-  await open(page, '/demo?c=dropdown&theme=dark')
-  await page.getByRole('button', { name: 'Email' }).click()
+  await open(page, '/docs/dropdown?theme=dark')
+  const dropdown = page.locator('#playground .doc-preview-stage')
+  await dropdown.getByRole('button', { name: 'Email' }).click()
   await page.getByRole('menuitemradio', { name: 'Notifications' }).click()
-  await page.locator('button[aria-haspopup="menu"]', { hasText: 'Notifications' }).waitFor()
-  const detail = page.getByRole('link', { name: 'View Dropdown documentation' })
-  const detailUrl = new URL((await detail.getAttribute('href'))!, page.url())
-  assert.equal(detailUrl.pathname, '/docs/dropdown')
-  assert.equal(detailUrl.search, '')
+  await dropdown.locator('button[aria-haspopup="menu"]', { hasText: 'Notifications' }).waitFor()
 
   await page.setViewportSize({ width: 390, height: 844 })
   await open(page, '/docs/input-message')
@@ -191,139 +188,10 @@ it('validates the gallery email on leaving the field and clears its error when t
   await expect(email).not.toHaveAttribute('aria-invalid')
 })
 
-it('customizes the focused Button demo and keeps the reference slide order', async (t) => {
+it('advances playground questions without focusing the title and preserves keyboard navigation in the answers', async (t) => {
   const page = await t.serve(showcaseServer)
-  await open(page, '/demo?c=button&theme=dark')
-  const slide = page.getByRole('article', { name: /^Slide 8 of \d+: Button$/ })
-  const stage = slide.locator('.site-demo-stage')
-  assert.equal(await stage.getByRole('button').count(), 1)
-  await stage.getByRole('button', { name: 'Get started', exact: true }).waitFor()
-  const trigger = slide.locator('summary[aria-label="Customize Button"]')
-  await trigger.click()
-  const panel = slide.getByRole('region', { name: 'Customize Button', exact: true })
-  await panel.getByLabel('Variant', { exact: true }).selectOption('secondary')
-  await panel.getByLabel('Label', { exact: true }).fill('Start a project')
-  assert.equal(
-    await stage.getByRole('button', { name: 'Start a project' }).getAttribute('data-variant'),
-    'secondary',
-  )
-  await page.keyboard.press('Escape')
-  assert.ok(await trigger.evaluate((element) => document.activeElement === element))
-  assert.equal(await panel.isVisible(), false)
-  await expect(page.getByRole('link', { name: 'Go to Appearance' })).toHaveCount(0)
-  const last = page.getByRole('link', { name: 'Go to BarChart' })
-  await last.hover()
-  await expect(last).toHaveAttribute('data-rf-hovered', '')
-  await last.click()
-  await expect(page.getByRole('article', { name: /^Slide (\d+) of \1: BarChart$/ })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Next slide' })).toBeDisabled()
-  await page.getByRole('link', { name: 'Previous slide', exact: true }).click()
-  await expect(page.getByRole('group', { name: 'Studio bookings' })).toBeVisible()
-  await page.getByRole('link', { name: 'Previous slide', exact: true }).click()
-  await expect(page.getByRole('article', { name: /^Slide 35 of \d+: Markdown$/ })).toBeVisible()
-  await open(page, '/demo?c=tooltip&theme=dark')
-  await page.getByRole('link', { name: 'View Tooltip documentation' }).waitFor()
-  // Breadcrumb joins the deck after the named slides, with its playground.
-  await open(page, '/demo?c=breadcrumb&theme=dark')
-  const breadcrumb = page.getByRole('article', { name: /^Slide 25 of \d+: Breadcrumb$/ })
-  await breadcrumb.locator('.site-demo-stage nav[aria-label="Breadcrumb"]').waitFor()
-  await breadcrumb.locator('summary[aria-label="Customize Breadcrumb"]').waitFor()
-})
-
-it('loads each demo with its own defaults during carousel navigation', async (t) => {
-  const page = await t.serve(showcaseServer)
-  await page.setViewportSize({ width: 1280, height: 1000 })
-  await open(page, '/demo?c=input-message&theme=dark')
-  const stage = page.locator('.site-demo-stage')
-  await expect(stage.getByRole('textbox', { name: 'Message' })).toBeEnabled()
-  const documentStart = await page.evaluate(() => performance.timeOrigin)
-  const next = page.getByRole('link', { name: 'Next slide', exact: true })
-  const button = page
-    .getByRole('article', { name: /^Slide 8 of \d+: Button$/ })
-    .locator('.site-demo-stage')
-    .getByRole('button')
-
-  await next.click()
-  await expect(stage.locator('.example-sidebar-playground > .rf-sidebar-layout')).toHaveAttribute(
-    'data-variant',
-    'inset',
-  )
-  await expect(stage.getByRole('searchbox', { name: 'Filter navigation' })).toBeVisible()
-  await expect(stage.getByRole('button', { name: 'Open user menu' })).toBeEnabled()
-  await next.click()
-  await expect(button).toHaveText('Get started')
-  await page.locator('summary[aria-label="Customize Button"]').click()
-  const label = page
-    .getByRole('region', { name: 'Customize Button', exact: true })
-    .getByLabel('Label')
-  await expect(label).toHaveValue('Get started')
-  await label.fill('Start a project')
-  await expect(button).toHaveText('Start a project')
-  await page.getByRole('link', { name: 'Scale preview to fit the card' }).click()
-  await expect(page.getByRole('link', { name: 'Show preview at actual size' })).toBeVisible()
-  await expect(button).toHaveText('Start a project')
-
-  await page.getByRole('link', { name: 'Previous slide', exact: true }).click()
-  await expect(stage.getByRole('button', { name: 'Open user menu' })).toBeEnabled()
-  await page.goBack()
-  await expect(button).toHaveText('Get started')
-  await page.goForward()
-  await expect(stage.getByRole('searchbox', { name: 'Filter navigation' })).toBeVisible()
-  assert.equal(await page.evaluate(() => performance.timeOrigin), documentStart)
-})
-
-it('routes demo arrows to the focused widget or to slide navigation', async (t) => {
-  const page = await t.serve(showcaseServer)
-  await open(page, '/demo?c=checkbox-group&theme=dark&fit=1')
-  const stage = page.locator('.site-demo-stage')
-  const bananas = stage.getByRole('checkbox', { name: 'Bananas', exact: true })
-  await bananas.click()
-  assert.ok(await bananas.isChecked())
-  assert.ok(await bananas.evaluate((input) => input === document.activeElement))
-  await page.keyboard.press('ArrowDown')
-  assert.ok(
-    await stage
-      .getByRole('checkbox', { name: 'Cherries', exact: true })
-      .evaluate(
-        (input) => input === document.activeElement && !(input as HTMLInputElement).checked,
-      ),
-  )
-  await page.keyboard.press('ArrowRight')
-  await page.getByRole('link', { name: 'View Accordion documentation' }).waitFor()
-  assert.equal(new URL(page.url()).searchParams.get('fit'), '1')
-  assert.equal(new URL(page.url()).searchParams.get('theme'), null)
-  assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark')
-
-  await open(page, '/demo?c=slider')
-  const slider = stage.getByRole('slider', { name: 'Opacity', exact: true })
-  const before = Number(await slider.inputValue())
-  await slider.press('ArrowRight')
-  assert.equal(Number(await slider.inputValue()), before + 1)
-  assert.equal(new URL(page.url()).searchParams.get('c'), 'slider')
-  await page.getByRole('link', { name: 'Next slide', exact: true }).press('ArrowDown')
-  await page.getByRole('link', { name: 'View AskUserQuestions documentation' }).waitFor()
-  await page.waitForFunction(
-    () => document.activeElement?.getAttribute('aria-label') === 'Next slide',
-    undefined,
-    { timeout: 2500 },
-  )
-
-  await open(page, '/demo?c=tabs')
-  await stage.getByRole('tab', { name: 'Files', exact: true }).press('ArrowRight')
-  assert.ok(
-    await stage
-      .getByRole('tab', { name: 'Activity', exact: true })
-      .evaluate(
-        (tab) => tab === document.activeElement && tab.getAttribute('aria-selected') === 'false',
-      ),
-  )
-  assert.equal(new URL(page.url()).searchParams.get('c'), 'tabs')
-})
-
-it('advances demo questions without focusing the title and preserves keyboard navigation in the answers', async (t) => {
-  const page = await t.serve(showcaseServer)
-  await open(page, '/demo?c=ask-user-questions')
-  const stage = page.locator('.site-demo-stage')
+  await open(page, '/docs/ask-user-questions')
+  const stage = page.locator('#playground .doc-preview-stage')
   await stage.getByRole('radio', { name: /^Designer/ }).click()
   await stage.getByText('Question 2 of 3', { exact: true }).waitFor()
   assert.ok(await page.evaluate(() => document.activeElement === document.body))
@@ -331,7 +199,7 @@ it('advances demo questions without focusing the title and preserves keyboard na
   await stage.getByText('Question 3 of 3', { exact: true }).waitFor()
   assert.ok(await page.evaluate(() => document.activeElement === document.body))
 
-  await open(page, '/demo?c=ask-user-questions')
+  await open(page, '/docs/ask-user-questions')
   await stage.getByRole('radio', { name: /^Designer/ }).press('Enter')
   const motion = stage.getByRole('radio', { name: /^Motion/ })
   await motion.waitFor()
@@ -345,10 +213,10 @@ it('advances demo questions without focusing the title and preserves keyboard na
   )
 })
 
-it('configures keyboard prompts and a native attachment picker for the InputMessage demo', async (t) => {
+it('configures keyboard prompts and a native attachment picker for the InputMessage playground', async (t) => {
   const page = await t.serve(showcaseServer)
-  await open(page, '/demo?c=input-message&theme=dark')
-  const stage = page.locator('.site-demo-stage')
+  await open(page, '/docs/input-message?theme=dark')
+  const stage = page.locator('#playground .doc-preview-stage')
   const message = stage.getByRole('textbox', { name: 'Message', exact: true })
   const prompts = stage.getByRole('listbox', { name: 'Suggested prompts', exact: true })
   const attach = stage.getByRole('button', { name: 'Attach files', exact: true })
@@ -367,13 +235,14 @@ it('configures keyboard prompts and a native attachment picker for the InputMess
   assert.equal(await message.inputValue(), suggestion)
   await page.waitForFunction(
     () => {
-      const region = document.querySelector('.site-demo-stage .rf-composer-suggestions-region')
+      const region = document.querySelector(
+        '#playground .doc-preview-stage .rf-composer-suggestions-region',
+      )
       return region?.hasAttribute('inert') && region.getBoundingClientRect().height < 1
     },
     undefined,
     { timeout: 2500 },
   )
-  assert.equal(new URL(page.url()).searchParams.get('c'), 'input-message')
 
   const chooser = page.waitForEvent('filechooser')
   await attach.click()
@@ -389,8 +258,7 @@ it('configures keyboard prompts and a native attachment picker for the InputMess
     .waitFor()
   await prompts.waitFor()
 
-  await page.locator('summary[aria-label="Customize InputMessage"]').click()
-  const customize = page.getByRole('region', { name: 'Customize InputMessage', exact: true })
+  const customize = page.getByRole('region', { name: 'InputMessage playground settings' })
   await customize.getByRole('switch', { name: 'Suggested prompts', exact: true }).uncheck()
   await prompts.waitFor({ state: 'hidden' })
   assert.ok(await attach.isVisible())

@@ -46,7 +46,7 @@ it('changes the team page without moving the table in the viewport', async (t) =
 it('pages through the component directory in place and restores its records with Back', async (t) => {
   const page = await t.serve(showcaseServer)
   await page.route('**/*.js', (route) => route.abort())
-  for (const path of ['/docs/pagination', '/demo?c=pagination']) {
+  for (const path of ['/docs/pagination']) {
     await open(page, path + (path.includes('?') ? '&' : '?') + 'page=5', { hydrate: false })
     const directory = page.getByRole('list', { name: 'Component directory' })
     const pages = page.getByRole('navigation', { name: 'Component pages' })

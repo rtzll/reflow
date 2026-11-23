@@ -1064,21 +1064,6 @@ it('fills the InputMessage playground and demo with the conversation, composer a
     '.doc-preview-stage[data-playground][data-component="input-message"]',
   )
   assert.deepEqual(playground, { top: 16, bottom: 16, height: 560 })
-
-  // The demo's conversation column is the reference's 480px, inside the card.
-  for (const width of [1280, 375]) {
-    await page.setViewportSize({ width, height: 900 })
-    await open(page, '/demo?c=input-message')
-    const fits = await page.locator('.site-demo-card').evaluate((card) => {
-      const column = card.querySelector('.doc-composer-preview')!.getBoundingClientRect()
-      const footer = card.querySelector('.site-preview-footer')!.getBoundingClientRect()
-      return {
-        height: Math.round(column.height),
-        inside: column.bottom <= footer.top,
-      }
-    })
-    assert.deepEqual(fits, { height: 480, inside: true }, `at ${width}px`)
-  }
 })
 
 it('anchors docs previews 48px below the header, as the reference does', async (t) => {
