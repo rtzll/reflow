@@ -63,6 +63,8 @@ const libraryStyles = await assets.getHref(import.meta.resolve('@rtzll/reflow/st
 
 Render `<link rel="stylesheet" href={libraryStyles} />` in the document head, before your application stylesheet. Serve the exported stylesheet through the asset server so its relative CSS imports resolve too. Reflow's rules sit in the `reflow` cascade layer, so your CSS and `css()` styles override them; keep resets in a layer before it, as [customization](customization.md#cascade-layers) shows.
 
+On phones, Reflow's controls keep their text at 16px or more so iOS does not zoom into a field, drop the browser's tap flash, and show hover states only on devices that can hover. Keep zoom enabled: do not add `user-scalable=no` or `maximum-scale=1` to the viewport tag. If your app draws edge to edge with `viewport-fit=cover`, Drawer and Toaster pad themselves clear of the notch and the home indicator; your own fixed headers and bars need `env(safe-area-inset-*)` padding too.
+
 ## Render and hydrate
 
 Import components from `@rtzll/reflow`. Put interactive examples such as the [README's Dialog](../README.md#use-a-component) in a browser-reachable module, for example `app/public/example.tsx`, and render `<Example />` from your page. The named export and function passed to `clientEntry` must match.

@@ -349,3 +349,28 @@ button.rf-drawer-handle:focus-visible {
     translate: none;
   }
 }
+
+/* Edge to edge (an app with viewport-fit=cover), the panel's content clears
+   the notch, the home indicator and the rounded corners on the sides it
+   touches. Without viewport-fit=cover the insets are 0 and nothing moves. */
+.rf-drawer {
+  --rf-drawer-pad: 24px;
+}
+[data-density='compact'] .rf-drawer {
+  --rf-drawer-pad: 16px;
+}
+.rf-drawer[data-flush] {
+  --rf-drawer-pad: 0px;
+}
+.rf-drawer:is([data-side='bottom'], [data-side='left'], [data-side='right']) {
+  padding-block-end: calc(var(--rf-drawer-pad) + env(safe-area-inset-bottom, 0px));
+}
+.rf-drawer:is([data-side='top'], [data-side='left'], [data-side='right']) {
+  padding-block-start: calc(var(--rf-drawer-pad) + env(safe-area-inset-top, 0px));
+}
+.rf-drawer[data-side='left'] {
+  padding-left: calc(var(--rf-drawer-pad) + env(safe-area-inset-left, 0px));
+}
+.rf-drawer[data-side='right'] {
+  padding-right: calc(var(--rf-drawer-pad) + env(safe-area-inset-right, 0px));
+}

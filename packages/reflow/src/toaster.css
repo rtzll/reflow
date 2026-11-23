@@ -41,18 +41,20 @@
 .rf-toaster[data-expanded] {
   block-size: var(--rf-toaster-spread-height, 0px);
 }
+/* Edge to edge (viewport-fit=cover), the pile also clears the notch and the
+   home indicator. Without it the insets are 0. */
 .rf-toaster[data-position^='top'] {
   --rf-toast-lift: 1;
-  top: var(--rf-toaster-offset);
+  top: calc(var(--rf-toaster-offset) + env(safe-area-inset-top, 0px));
 }
 .rf-toaster[data-position^='bottom'] {
-  bottom: var(--rf-toaster-offset);
+  bottom: calc(var(--rf-toaster-offset) + env(safe-area-inset-bottom, 0px));
 }
 .rf-toaster[data-position$='left'] {
-  left: var(--rf-toaster-offset);
+  left: calc(var(--rf-toaster-offset) + env(safe-area-inset-left, 0px));
 }
 .rf-toaster[data-position$='right'] {
-  right: var(--rf-toaster-offset);
+  right: calc(var(--rf-toaster-offset) + env(safe-area-inset-right, 0px));
 }
 .rf-toaster[data-position$='center'] {
   left: 50%;
