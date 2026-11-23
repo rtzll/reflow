@@ -54,11 +54,14 @@ div > .rf-highlight.rf-table-highlight {
   background: var(--rf-active);
 }
 
-.rf-table-container[data-row-hover] .rf-table-row[data-rf-hover-item]:not([data-rf-hovered]):hover,
-[data-hover='standard']
+@media (hover: hover) {
   .rf-table-container[data-row-hover]
-  .rf-table-row[data-rf-hover-item]:hover {
-  background: var(--rf-hover);
+    .rf-table-row[data-rf-hover-item]:not([data-rf-hovered]):hover,
+  [data-hover='standard']
+    .rf-table-container[data-row-hover]
+    .rf-table-row[data-rf-hover-item]:hover {
+    background: var(--rf-hover);
+  }
 }
 
 .rf-table-row[data-rf-hovered] > td {

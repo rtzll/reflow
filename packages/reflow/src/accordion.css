@@ -167,9 +167,11 @@
   visibility: visible;
 }
 
-[data-hover='standard'] .rf-accordion-trigger:not(:disabled):hover,
-.rf-accordion[data-variant='separated'] .rf-accordion-trigger:not(:disabled):hover {
-  background: var(--rf-hover);
+@media (hover: hover) {
+  [data-hover='standard'] .rf-accordion-trigger:not(:disabled):hover,
+  .rf-accordion[data-variant='separated'] .rf-accordion-trigger:not(:disabled):hover {
+    background: var(--rf-hover);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

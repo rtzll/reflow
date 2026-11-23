@@ -80,10 +80,12 @@
   color: var(--rf-fg);
   font-variation-settings: var(--rf-weight-strong);
 }
-.rf-thinking-steps[data-variant='timeline'] > summary:hover,
-.rf-thinking-timeline-content details > summary:hover {
-  background: var(--rf-hover);
-  color: var(--rf-fg);
+@media (hover: hover) {
+  .rf-thinking-steps[data-variant='timeline'] > summary:hover,
+  .rf-thinking-timeline-content details > summary:hover {
+    background: var(--rf-hover);
+    color: var(--rf-fg);
+  }
 }
 .rf-thinking-steps[data-variant='timeline'] > summary > svg {
   width: var(--rf-icon-size);

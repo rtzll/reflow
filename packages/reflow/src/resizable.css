@@ -50,9 +50,14 @@
   block-size: 2px;
 }
 
-.rf-resizable-grip:is(:hover, :focus-visible)::before,
+.rf-resizable-grip:focus-visible::before,
 .rf-resizable[data-resizing] .rf-resizable-grip::before {
   background: var(--rf-accent);
+}
+@media (hover: hover) {
+  .rf-resizable-grip:hover::before {
+    background: var(--rf-accent);
+  }
 }
 
 .rf-resizable-grip:focus-visible {

@@ -21,8 +21,10 @@
   font-size: var(--rf-text-caption);
   cursor: pointer;
 }
-.rf-queue-toggle:hover {
-  background: var(--rf-hover);
+@media (hover: hover) {
+  .rf-queue-toggle:hover {
+    background: var(--rf-hover);
+  }
 }
 .rf-queue {
   --rf-queue-row: 44px;

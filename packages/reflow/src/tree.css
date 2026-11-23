@@ -75,8 +75,10 @@
   outline-offset: -1px;
 }
 
-[data-hover='standard'] .rf-tree-row:hover {
-  background: var(--rf-hover);
+@media (hover: hover) {
+  [data-hover='standard'] .rf-tree-row:hover {
+    background: var(--rf-hover);
+  }
 }
 
 @media (forced-colors: active) {

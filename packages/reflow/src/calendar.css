@@ -92,22 +92,31 @@
   transition: stroke-width var(--rf-fast);
 }
 
-.rf-calendar-nav:not(:disabled):is(:hover, :focus-visible) svg {
+.rf-calendar-nav:not(:disabled):focus-visible svg {
   stroke-width: 2;
+}
+@media (hover: hover) {
+  .rf-calendar-nav:not(:disabled):hover svg {
+    stroke-width: 2;
+  }
 }
 
 .rf-calendar-day:has(.rf-calendar-detail) {
   gap: 8px;
 }
 
-.rf-calendar-nav:not(:disabled):hover {
-  color: var(--rf-fg);
+@media (hover: hover) {
+  .rf-calendar-nav:not(:disabled):hover {
+    color: var(--rf-fg);
+  }
 }
 
-[data-hover='standard'] .rf-calendar-nav:not(:disabled):hover,
-[data-hover='standard'] .rf-calendar-day:not([aria-disabled='true']):hover {
-  background: var(--rf-hover);
-  color: var(--rf-fg);
+@media (hover: hover) {
+  [data-hover='standard'] .rf-calendar-nav:not(:disabled):hover,
+  [data-hover='standard'] .rf-calendar-day:not([aria-disabled='true']):hover {
+    background: var(--rf-hover);
+    color: var(--rf-fg);
+  }
 }
 
 .rf-calendar-nav:disabled,

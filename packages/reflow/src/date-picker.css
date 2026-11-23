@@ -92,8 +92,10 @@
   color: var(--rf-muted);
 }
 
-[data-hover='standard'] .rf-date-trigger:hover:not(:disabled) {
-  background: var(--rf-hover);
+@media (hover: hover) {
+  [data-hover='standard'] .rf-date-trigger:hover:not(:disabled) {
+    background: var(--rf-hover);
+  }
 }
 
 .rf-date-trigger:focus-visible {
@@ -164,9 +166,13 @@
   transition: color var(--rf-fast);
 }
 
-.rf-date-presets button:hover,
 .rf-date-presets button[aria-pressed='true'] {
   color: var(--rf-fg);
+}
+@media (hover: hover) {
+  .rf-date-presets button:hover {
+    color: var(--rf-fg);
+  }
 }
 
 .rf-date-presets button:focus-visible {
@@ -251,8 +257,10 @@
   color: var(--rf-muted);
   cursor: pointer;
 }
-.rf-date-clear:hover:not(:disabled) {
-  color: var(--rf-fg);
+@media (hover: hover) {
+  .rf-date-clear:hover:not(:disabled) {
+    color: var(--rf-fg);
+  }
 }
 .rf-date-clear:focus-visible {
   outline: 1px solid var(--rf-accent);

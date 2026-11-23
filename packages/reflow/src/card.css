@@ -140,9 +140,11 @@
   pointer-events: none;
 }
 
-.rf-card[data-rf-hover-item]:not([aria-disabled='true'], [data-rf-hovered]):hover,
-[data-hover='standard'] .rf-card[data-rf-hover-item]:not([aria-disabled='true']):hover {
-  background: var(--rf-hover);
+@media (hover: hover) {
+  .rf-card[data-rf-hover-item]:not([aria-disabled='true'], [data-rf-hovered]):hover,
+  [data-hover='standard'] .rf-card[data-rf-hover-item]:not([aria-disabled='true']):hover {
+    background: var(--rf-hover);
+  }
 }
 
 .rf-card[aria-disabled='true'] {
@@ -198,8 +200,10 @@
     opacity var(--rf-fast);
 }
 
-.rf-card:has(> .rf-card-image) > .rf-card-dismiss:hover {
-  background: var(--rf-surface-3);
+@media (hover: hover) {
+  .rf-card:has(> .rf-card-image) > .rf-card-dismiss:hover {
+    background: var(--rf-surface-3);
+  }
 }
 
 .rf-card-dismiss[data-on-hover] {

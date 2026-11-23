@@ -590,8 +590,10 @@
   cursor: pointer;
 }
 
-.rf-color-remove:hover {
-  color: var(--rf-fg);
+@media (hover: hover) {
+  .rf-color-remove:hover {
+    color: var(--rf-fg);
+  }
 }
 
 .rf-color-popover-surface {

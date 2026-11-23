@@ -142,8 +142,10 @@
     border-color var(--rf-fast);
 }
 
-.rf-field-label:has(> .rf-field):hover {
-  background: var(--rf-hover);
+@media (hover: hover) {
+  .rf-field-label:has(> .rf-field):hover {
+    background: var(--rf-hover);
+  }
 }
 
 .rf-field-label:has(> .rf-field):has(:checked) {

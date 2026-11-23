@@ -61,8 +61,10 @@
   cursor: pointer;
 }
 
-.rf-picker-toggle:hover {
-  color: var(--rf-fg);
+@media (hover: hover) {
+  .rf-picker-toggle:hover {
+    color: var(--rf-fg);
+  }
 }
 
 .rf-picker-toggle:focus-visible {
@@ -226,9 +228,11 @@
     inset: -4px;
   }
 }
-.rf-picker-chip > button:hover {
-  background: var(--rf-active);
-  color: var(--rf-fg);
+@media (hover: hover) {
+  .rf-picker-chip > button:hover {
+    background: var(--rf-active);
+    color: var(--rf-fg);
+  }
 }
 .rf-picker-chip > button:focus-visible {
   outline: 1px solid var(--rf-accent);

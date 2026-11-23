@@ -207,9 +207,13 @@
   transition: font-variation-settings 100ms;
   font-variation-settings: var(--rf-weight-normal);
 }
-.rf-slider:not([data-disabled]):has(.rf-slider-track:is(:hover, [data-dragging]))
-  .rf-slider-values {
+.rf-slider:not([data-disabled]):has(.rf-slider-track[data-dragging]) .rf-slider-values {
   font-variation-settings: var(--rf-weight-strong);
+}
+@media (hover: hover) {
+  .rf-slider:not([data-disabled]):has(.rf-slider-track:hover) .rf-slider-values {
+    font-variation-settings: var(--rf-weight-strong);
+  }
 }
 .rf-slider-value-sizer {
   font-variation-settings: var(--rf-weight-strong);
@@ -265,9 +269,13 @@
   appearance: none;
 }
 
-.rf-slider-value > input:not(:disabled):hover,
 .rf-slider-value > input:focus {
   border-color: var(--rf-border);
+}
+@media (hover: hover) {
+  .rf-slider-value > input:not(:disabled):hover {
+    border-color: var(--rf-border);
+  }
 }
 .rf-slider-value > input:focus {
   background: var(--rf-bg);
@@ -313,9 +321,16 @@
 .rf-slider-hover-tooltip {
   animation: rf-slider-tooltip-in var(--rf-spring-fast) 100ms both;
 }
-.rf-slider-track:hover .rf-slider-tooltip,
+/* The value shows while a finger drags, and goes once it lifts: a tap's
+   leftover hover must not keep it up. */
+.rf-slider-track[data-dragging] .rf-slider-tooltip,
 .rf-slider-rail > input:focus-visible + .rf-slider-thumb > .rf-slider-tooltip {
   opacity: 1;
+}
+@media (hover: hover) {
+  .rf-slider-track:hover .rf-slider-tooltip {
+    opacity: 1;
+  }
 }
 .rf-slider-track[data-dragging] :is(.rf-slider-preview, .rf-slider-hover-tooltip) {
   display: none;
@@ -399,9 +414,13 @@
   }
 
   /* L1578: active means hovered or keyboard-focused (:focus-visible), so a pointer press never counts as focus. */
-  &:not([data-disabled]):is(:hover, :has(input:focus-visible))
-    :is(.rf-slider-label, .rf-slider-values) {
+  &:not([data-disabled]):has(input:focus-visible) :is(.rf-slider-label, .rf-slider-values) {
     color: var(--rf-fg);
+  }
+  @media (hover: hover) {
+    &:not([data-disabled]):hover :is(.rf-slider-label, .rf-slider-values) {
+      color: var(--rf-fg);
+    }
   }
 
   .rf-slider-track {
@@ -499,11 +518,14 @@
       background-color var(--rf-spring-fast);
   }
 
-  &:not([data-disabled]):is(:hover, :has(input:focus-visible)) .rf-slider-thumb {
+  &:not([data-disabled]):has(input:focus-visible) .rf-slider-thumb {
     height: 16px;
   }
-  &:not([data-disabled]):hover .rf-slider-thumb {
-    background: color-mix(in srgb, var(--rf-fg) 50%, transparent);
+  @media (hover: hover) {
+    &:not([data-disabled]):hover .rf-slider-thumb {
+      height: 16px;
+      background: color-mix(in srgb, var(--rf-fg) 50%, transparent);
+    }
   }
   .rf-slider-rail > input:focus-visible + .rf-slider-thumb {
     outline: none;

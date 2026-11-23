@@ -60,8 +60,13 @@
   > .rf-checkbox-mark {
   border-color: light-dark(oklch(70.8% 0 0), oklch(55.6% 0 0));
 }
-.rf-choice-group-row > .rf-checkbox:hover > input:is(:checked, :indeterminate) + .rf-checkbox-mark {
-  border-color: transparent;
+@media (hover: hover) {
+  .rf-choice-group-row
+    > .rf-checkbox:hover
+    > input:is(:checked, :indeterminate)
+    + .rf-checkbox-mark {
+    border-color: transparent;
+  }
 }
 .rf-choice-group-row:has(input:checked):has(+ .rf-choice-group-row input:checked) {
   border-end-start-radius: 0;
@@ -82,8 +87,10 @@
   color: var(--rf-muted);
   font-size: var(--rf-text-caption);
 }
-[data-hover='standard'] .rf-choice-group-row:not([aria-disabled='true']):hover {
-  background: var(--rf-hover);
+@media (hover: hover) {
+  [data-hover='standard'] .rf-choice-group-row:not([aria-disabled='true']):hover {
+    background: var(--rf-hover);
+  }
 }
 .rf-choice-group-list > [data-rf-hover-layer] {
   background: var(--rf-hover);

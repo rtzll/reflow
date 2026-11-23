@@ -29,10 +29,15 @@
   cursor: pointer;
 }
 
-.rf-pagination :is(a, button):hover,
 .rf-pagination :is(a, button)[aria-current] {
   background: var(--rf-hover);
   color: var(--rf-fg);
+}
+@media (hover: hover) {
+  .rf-pagination :is(a, button):hover {
+    background: var(--rf-hover);
+    color: var(--rf-fg);
+  }
 }
 
 .rf-pagination :is(a, button)[aria-current] {

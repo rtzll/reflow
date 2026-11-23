@@ -78,8 +78,13 @@
   background: var(--rf-bar-chart-peak, var(--rf-accent));
   box-shadow: inset 0 2px var(--rf-fg);
 }
-:is(a, button).rf-bar-chart-column:is(:hover, :focus-visible, [aria-current]) {
+:is(a, button).rf-bar-chart-column:is(:focus-visible, [aria-current]) {
   background: var(--rf-hover);
+}
+@media (hover: hover) {
+  :is(a, button).rf-bar-chart-column:hover {
+    background: var(--rf-hover);
+  }
 }
 .rf-bar-chart-column:is([aria-current], [data-current])::after {
   content: '';

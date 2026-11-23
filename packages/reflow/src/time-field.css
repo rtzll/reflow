@@ -18,8 +18,10 @@
   position: absolute;
 }
 
-[data-hover='standard'] .rf-date-time:hover {
-  background: var(--rf-hover);
+@media (hover: hover) {
+  [data-hover='standard'] .rf-date-time:hover {
+    background: var(--rf-hover);
+  }
 }
 
 .rf-date-time:has(input:focus-visible) {
