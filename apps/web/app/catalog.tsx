@@ -249,6 +249,11 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
     description: 'Related input fields with a shared hover surface and validation messages.',
     code: `<InputGroup>\n  <InputField label="Name" name="name" />\n  <InputField label="Email" name="email" type="email" />\n</InputGroup>`,
   },
+  'file-thumbnail': {
+    description:
+      'A file shown as an image preview, or as a card with its name and type when it has none.',
+    code: `<FileThumbnail file={file} />\n<FileThumbnail file={{ name: 'notes.md' }} size={64} />`,
+  },
   'input-message': {
     description: 'A message composer with an expanding text area, attachments, and a send action.',
     code: `<InputMessage onSend={({ text, files }) => send(text, files)} />`,

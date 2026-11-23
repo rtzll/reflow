@@ -71,6 +71,7 @@ import {
   Progress,
   TriggerMenu,
   NumberField,
+  FileThumbnail,
   InputMessage,
   QueuedStack,
   RadioGroup,
@@ -96,6 +97,11 @@ import { BannerExample, BannerPreview } from './banner-example.tsx'
 
 // The tile uses the same range Calendar as the docs, with smaller cells to
 // fit six weeks and one visible month when the preview itself is narrow.
+// A drawn landscape for the FileThumbnail example's image preview.
+const sampleCover = `data:image/svg+xml,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><rect width="80" height="80" fill="#dbe6ff"/><circle cx="56" cy="24" r="10" fill="#6b97ff"/><path d="M0 64 24 38l18 18 12-10 26 22v12H0z" fill="#3d5fb8"/></svg>',
+)}`
+
 function GalleryCalendar(handle: Handle) {
   let months: 1 | 2 = 2
   const today = datePickerToday()
@@ -261,6 +267,16 @@ export const Example = clientEntry(
 
     return () => {
       switch (handle.props.slug) {
+        case 'file-thumbnail':
+          return (
+            <div class="example-row">
+              <FileThumbnail
+                file={{ name: 'cover.svg', type: 'image/svg+xml', previewUrl: sampleCover }}
+              />
+              <FileThumbnail file={{ name: 'chapter-notes.md' }} />
+              <FileThumbnail file={{ name: 'interview.ogg' }} />
+            </div>
+          )
         case 'spinner':
           return (
             <div class="example-row">

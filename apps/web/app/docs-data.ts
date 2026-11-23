@@ -507,6 +507,33 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  'file-thumbnail': [
+    {
+      name: 'FileThumbnail',
+      props: [
+        {
+          name: 'file',
+          type: 'File | RemoteFile',
+          required: true,
+          description:
+            'A local File, read through an object URL, or a { name, type?, previewUrl? } description of one stored elsewhere.',
+        },
+        {
+          name: 'size',
+          type: 'number',
+          required: false,
+          description:
+            'Height in pixels. Image previews are square; name cards are twice as wide. Defaults to 80.',
+        },
+        {
+          name: 'class',
+          type: 'string',
+          required: false,
+          description: 'Additional class on the thumbnail.',
+        },
+      ],
+    },
+  ],
   spinner: [
     {
       name: 'Spinner',

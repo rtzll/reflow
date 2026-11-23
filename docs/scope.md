@@ -107,7 +107,7 @@ Checked against upstream `1f716642` on November 22, 2026. That comparison identi
 
 - **Confirmation** asks a yes or no question before something runs, such as an agent's tool call, built on Banner. It fits Reflow's conversation components.
 - **MessageScroller** follows a streamed reply while the reader is at the end, lets go on a manual scroll, glides a new user turn to the top, and offers a button back to the latest message. ChatLayout already follows, lets go and offers that button; anchoring the new turn and quiet streaming announcements extend it rather than add a component.
-- **FileThumbnail** renders the first page of a PDF with pdf.js. It is the one known gap below, and it needs a decision about that dependency first.
+- **FileThumbnail** shows an image file as a preview, and upstream also renders the first page of a PDF with pdf.js. Reflow ships FileThumbnail without the PDF page; see the known gap below.
 
 The rest of that commit refines upstream's DataTable frozen columns and selection bar, and two hover details. Reflow's fluid hover keeps one visible state rather than per-entry sessions, so a pointer entering onto a lit item already glides on. Reflow's Combobox drives its fill from its own active row, which the pointer owns while it is over the list.
 
@@ -121,7 +121,7 @@ The rest of that commit refines upstream's DataTable frozen columns and selectio
 
 ### Known gap
 
-PDF attachments show a document glyph. Upstream renders the first page, which needs a separate PDF subsystem.
+FileThumbnail shows a PDF as a card with its name and type. Upstream renders the first page, which needs a separate PDF subsystem. Files without a preview show a card rather than upstream's document glyph, so the name stays readable.
 
 ### Upstream blocks
 
