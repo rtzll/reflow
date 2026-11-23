@@ -288,8 +288,12 @@ export const ChatWorkspace = clientEntry(
 
 // The first line of a reply as plain text, for a card's summary.
 function summary(thread: Thread) {
-  const reply = thread.messages.find((message) => message.role === 'assistant')?.text ?? ''
-  return reply
+  return firstLine(thread.messages.find((message) => message.role === 'assistant')?.text ?? '')
+}
+
+// The first line of a reply as plain text, skipping headings and tables.
+function firstLine(text: string) {
+  return text
     .split('\n')
     .find((line) => line.trim() && !line.startsWith('#') && !line.startsWith('|'))
     ?.replace(/[*_`#>-]/g, '')
@@ -451,6 +455,24 @@ function ConversationPane(
           pane = node
         })}
       >
+        {thread.messages.length > 0 && (
+          <div class="studio-rail">
+            <ChatOutline
+              variant="rail"
+              items={thread.messages.flatMap((message, index) =>
+                message.role === 'user'
+                  ? [
+                      {
+                        id: messageId(thread, index),
+                        label: message.text || message.attachments?.[0]?.name || 'Files',
+                        preview: firstLine(thread.messages[index + 1]?.text ?? ''),
+                      },
+                    ]
+                  : [],
+              )}
+            />
+          </div>
+        )}
         <ChatLayout
           label={thread.title}
           scroll={hasSent ? 'anchor' : 'follow'}

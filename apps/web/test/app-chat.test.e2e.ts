@@ -306,7 +306,8 @@ it('anchors a new question, lets the reader scroll back and stops the reply in t
 
 it('lists the questions in the header outline and jumps back to one', async (t) => {
   const page = await t.serve(showcaseServer)
-  await page.setViewportSize({ width: 1280, height: 500 })
+  // Below 1100px the outline sits in the header's menu.
+  await page.setViewportSize({ width: 1000, height: 500 })
   await open(page, '/apps/chat?thread=fieldnotes-cover')
   await page.getByRole('button', { name: 'Conversation outline' }).click()
   const rows = page.getByRole('menuitemradio')
@@ -386,4 +387,19 @@ it('marks when a conversation picks up again, in UTC on the server and local tim
   await expect(times).toHaveCount(2)
   await expect(times.first()).toHaveAttribute('datetime', '2026-11-12T09:14:00.000Z')
   await expect(times.first()).not.toContainText('UTC')
+})
+
+it('shows the outline as a rail beside the transcript on a wide screen', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 1280, height: 500 })
+  await open(page, '/apps/chat?thread=fieldnotes-cover')
+  await expect(page.getByRole('button', { name: 'Conversation outline' })).toBeHidden()
+  const rail = page.getByRole('navigation', { name: 'Conversation outline' })
+  const ticks = rail.getByRole('button')
+  await expect(ticks).toHaveCount(2)
+  await ticks.nth(1).hover()
+  await expect(page.getByRole('tooltip')).toContainText('Above the wrist')
+  await ticks.nth(1).click()
+  await expect(ticks.nth(1)).toHaveAttribute('aria-current', 'location')
+  await expect(ticks.nth(1)).toBeFocused()
 })

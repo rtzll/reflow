@@ -112,6 +112,7 @@
 }
 
 .studio-pane {
+  position: relative;
   flex: 1;
   min-inline-size: 0;
   min-block-size: 0;
@@ -146,6 +147,27 @@
   row-gap: 24px;
   padding-block: 20px;
 }
+/* Wide screens show the outline as a rail beside the transcript; narrower
+   ones keep it in the header's menu. */
+.studio-rail {
+  position: absolute;
+  z-index: 1;
+  inset-block-start: 50%;
+  inset-inline-start: 12px;
+  translate: 0 -50%;
+}
+.studio-toolbar-actions .rf-chat-outline {
+  display: none;
+}
+@media (max-width: 1099px) {
+  .studio-rail {
+    display: none;
+  }
+  .studio-toolbar-actions .rf-chat-outline {
+    display: contents;
+  }
+}
+
 /* The time a new stretch of the conversation started. */
 .studio-time {
   color: var(--rf-muted);
