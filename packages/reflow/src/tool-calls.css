@@ -1,0 +1,104 @@
+.rf-tool-calls {
+  display: grid;
+  justify-items: start;
+  color: var(--rf-muted);
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+}
+/* The folded line: quiet text that turns to the foreground on hover. */
+.rf-tool-calls-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-block-size: 28px;
+  margin-inline: -6px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: var(--rf-radius);
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: color var(--rf-fast);
+}
+@media (hover: hover) {
+  .rf-tool-calls-line:hover {
+    color: var(--rf-fg);
+  }
+}
+.rf-tool-calls-line:focus-visible {
+  outline: 1px solid var(--rf-accent);
+  outline-offset: -1px;
+}
+.rf-tool-calls-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.rf-tool-calls-time {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+}
+.rf-tool-calls-chevron {
+  inline-size: 14px;
+  block-size: 14px;
+  transition: rotate var(--rf-spring-fast);
+}
+.rf-tool-calls[data-open] .rf-tool-calls-chevron {
+  rotate: 90deg;
+}
+/* The calls open by growing their row, as InputMessage's attachments do. */
+.rf-tool-calls-region {
+  display: grid;
+  grid-template-rows: 0fr;
+  justify-self: stretch;
+  opacity: 0;
+  transition:
+    grid-template-rows var(--rf-spring-moderate),
+    opacity var(--rf-spring-moderate);
+}
+.rf-tool-calls[data-open] .rf-tool-calls-region {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.rf-tool-calls-list {
+  display: grid;
+  gap: 6px;
+  min-block-size: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 4px 0 8px;
+  list-style: none;
+}
+.rf-tool-calls-list > li {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  column-gap: 8px;
+  align-items: center;
+}
+.rf-tool-calls-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.rf-tool-calls-mark svg {
+  inline-size: 14px;
+  block-size: 14px;
+}
+.rf-tool-calls-list > li[data-status='failed'] .rf-tool-calls-mark {
+  color: var(--rf-danger);
+}
+.rf-tool-calls-label {
+  overflow-wrap: anywhere;
+}
+.rf-tool-calls-detail {
+  grid-column: 2;
+  min-inline-size: 0;
+  margin-block-start: 4px;
+  color: var(--rf-fg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rf-tool-calls-chevron,
+  .rf-tool-calls-region {
+    transition: none;
+  }
+}
