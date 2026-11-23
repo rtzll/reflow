@@ -92,7 +92,7 @@ export function ToolCalls(handle: Handle<ToolCallsProps>) {
         <span class="rf-basic-sr-only" role="status">
           {running?.label ?? ''}
         </span>
-        <div class="rf-tool-calls-region" inert={!open}>
+        <div class="rf-tool-calls-region" inert={!open} aria-hidden={!open || undefined}>
           <ol id={listId} class="rf-tool-calls-list">
             {calls.map((call) => {
               const status = call.status ?? 'done'

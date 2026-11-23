@@ -42,9 +42,11 @@ it('opens to the calls with a mark for each status', async (t) => {
   equal(line.getAttribute('aria-expanded'), 'false')
   equal(line.getAttribute('aria-controls'), list.id)
   ok(($('.rf-tool-calls-region') as HTMLElement).inert, 'closed calls are out of reach')
+  equal($('.rf-tool-calls-region')?.getAttribute('aria-hidden'), 'true')
   await act(() => line.click())
   equal(line.getAttribute('aria-expanded'), 'true')
   equal(($('.rf-tool-calls-region') as HTMLElement).inert, false)
+  equal($('.rf-tool-calls-region')?.getAttribute('aria-hidden'), null)
   const rows = [...list.querySelectorAll('li')]
   equal(rows.length, 3)
   equal(rows[1].querySelector('.rf-tool-calls-detail')?.textContent, 'pnpm test')
