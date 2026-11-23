@@ -118,8 +118,52 @@
 .rf-composer-right-actions {
   margin-inline-start: auto;
 }
-.rf-composer-right-actions + .rf-composer-send {
+.rf-composer-right-actions + .rf-composer-send,
+.rf-composer-right-actions + :is(.rf-composer-voice, .rf-composer-voice-start) {
   margin-inline-start: 0;
+}
+/* The voice controls sit at the end, before send, unless right actions
+   already pushed the row there. */
+.rf-composer-voice,
+.rf-composer-voice-start {
+  margin-inline-start: auto;
+}
+:is(.rf-composer-voice, .rf-composer-voice-start) + .rf-composer-send {
+  margin-inline-start: 0;
+}
+.rf-composer-voice {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.rf-composer-voice-meter {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 16px;
+  margin-inline-end: 4px;
+}
+/* Five bars that grow with the microphone's level, the middle one most. */
+.rf-composer-voice-meter span {
+  width: 3px;
+  height: calc(4px + 12px * var(--rf-voice-level, 0) * var(--rf-bar, 1));
+  border-radius: 9999px;
+  background: var(--rf-accent);
+  transition: height 80ms linear;
+}
+.rf-composer-voice-meter span:nth-child(1),
+.rf-composer-voice-meter span:nth-child(5) {
+  --rf-bar: 0.5;
+}
+.rf-composer-voice-meter span:nth-child(2),
+.rf-composer-voice-meter span:nth-child(4) {
+  --rf-bar: 0.8;
+}
+.rf-composer-voice-time {
+  min-width: 3ch;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption);
+  font-variant-numeric: tabular-nums;
 }
 .rf-composer-error {
   color: var(--rf-danger);
@@ -315,6 +359,7 @@
     0 1px 1px -0.5px var(--rf-composer-edge);
 }
 @media (prefers-reduced-motion: reduce) {
+  .rf-composer-voice-meter span,
   .rf-composer-files-region,
   .rf-composer-files li {
     transition: none;

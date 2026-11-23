@@ -1,4 +1,9 @@
 import { partitionFiles } from './behaviors/file-selection.ts'
+import {
+  createVoiceRecording,
+  voiceRecordingSupported,
+  type VoiceRecording,
+} from './behaviors/voice-recording.ts'
 import { FileThumbnail } from './file-thumbnail.tsx'
 import { Icon } from './icon.tsx'
 import { transitionMessage } from './systems/message-transition.ts'
@@ -57,6 +62,11 @@ export interface InputMessageProps {
    * rather than putting it in the message box. Off unless set.
    */
   pasteAsFile?: number
+  /**
+   * Shows a microphone button that records a voice note and attaches it as
+   * an audio file. Needs `attachments`.
+   */
+  voice?: boolean
   actions?: RemixNode
   rightActions?: RemixNode
 }
@@ -73,12 +83,22 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
   let activeSuggestion = -1
   let hoveredSuggestion = -1
   let dragOver = false
+  // Voice notes: the recording, when it started, and the meter its level drives.
+  let voice: VoiceRecording | undefined
+  let recordingSince = 0
+  let recordingTimer: ReturnType<typeof setInterval> | undefined
+  let levelMeter: HTMLElement | undefined
+  const meterRef = ref((node) => {
+    levelMeter = node instanceof HTMLElement ? node : undefined
+  })
   const exiting = new Map<File, ReturnType<typeof setTimeout>>()
   handle.signal.addEventListener(
     'abort',
     () => {
       for (const timer of exiting.values()) clearTimeout(timer)
       exiting.clear()
+      clearInterval(recordingTimer)
+      voice?.cancel()
     },
     { once: true },
   )
@@ -101,6 +121,55 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
     if (handle.props.files === undefined) files = value
     handle.props.onFilesChange?.(value)
     handle.update()
+  }
+
+  async function startRecording() {
+    if (voice?.recording || handle.props.disabled || sending) return
+    error = ''
+    if (!voiceRecordingSupported()) {
+      error = 'Recording is not available in this browser.'
+      handle.update()
+      return
+    }
+    const recording = createVoiceRecording({
+      onLevel: (level) => levelMeter?.style.setProperty('--rf-voice-level', level.toFixed(3)),
+    })
+    try {
+      await recording.start()
+    } catch (reason) {
+      error =
+        reason instanceof DOMException && reason.name === 'NotAllowedError'
+          ? 'Microphone access was blocked.'
+          : 'Recording could not start.'
+      handle.update()
+      return
+    }
+    if (handle.signal.aborted) return recording.cancel()
+    voice = recording
+    recordingSince = Date.now()
+    recordingTimer = setInterval(() => handle.update(), 1000)
+    handle.update()
+  }
+
+  async function finishRecording(keep: boolean) {
+    const recording = voice
+    if (!recording) return
+    voice = undefined
+    clearInterval(recordingTimer)
+    if (!keep) {
+      recording.cancel()
+      handle.update()
+      return
+    }
+    const file = await recording.stop()
+    if (handle.signal.aborted) return
+    if (file) addFiles([file])
+    else handle.update()
+  }
+
+  function elapsed() {
+    const seconds = Math.floor((Date.now() - recordingSince) / 1000)
+    return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
   }
 
   function removeFile(file: File) {
@@ -536,6 +605,51 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
           )}
           {actions}
           {rightActions != null && <div class="rf-composer-right-actions">{rightActions}</div>}
+          {attachments && handle.props.voice && voice && (
+            <div class="rf-composer-voice" role="status">
+              <span class="rf-composer-voice-meter" aria-hidden="true" mix={meterRef}>
+                <span />
+                <span />
+                <span />
+                <span />
+                <span />
+              </span>
+              <span class="rf-composer-voice-time">
+                <span class="rf-basic-sr-only">Recording </span>
+                {elapsed()}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon-compact"
+                aria-label="Cancel recording"
+                mix={on('click', () => void finishRecording(false))}
+              >
+                <Icon name="x" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-compact"
+                aria-label="Attach recording"
+                mix={on('click', () => void finishRecording(true))}
+              >
+                <Icon name="check" />
+              </Button>
+            </div>
+          )}
+          {attachments && handle.props.voice && !voice && (
+            <Button
+              class="rf-composer-voice-start"
+              variant="ghost"
+              size="icon-compact"
+              aria-label="Record a voice note"
+              disabled={
+                disabled || sending || files.length >= Math.max(1, handle.props.maxFiles ?? 5)
+              }
+              mix={on('click', () => void startRecording())}
+            >
+              <Icon name="mic" />
+            </Button>
+          )}
           {status === 'streaming' && !draft.trim() && !files.length ? (
             <Button
               class="rf-composer-send"
