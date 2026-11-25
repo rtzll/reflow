@@ -275,7 +275,11 @@ function AppearancePanel(handle: Handle<{ settings: Settings; variant?: 'rail' |
                   <SettingIcon setting={row.key} value={settings[row.key]} />
                 )}
                 <span data-setting-label="">{settingLabel(settings[row.key])}</span>
-                {row.shortcut ? <Kbd size="compact">{row.shortcut}</Kbd> : null}
+                {row.shortcut ? (
+                  <Kbd size="compact" variant="outline">
+                    {row.shortcut}
+                  </Kbd>
+                ) : null}
                 {row.key === 'accent' ? (
                   <SettingIcon setting={row.key} value={settings[row.key]} />
                 ) : (
