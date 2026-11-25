@@ -404,6 +404,22 @@ it('plays the copy cue from the CodeBlock gallery card too', async (t) => {
   await expect.poll(audioStarts).toBeGreaterThan(0)
 })
 
+it('copies the DiffView patch with the copy cue and shows both additions and deletions', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+  const audioStarts = await trackAudio(page)
+  await open(page, '/docs/diff-view')
+  const diff = page.locator('figure.rf-diff-view').first()
+  await expect(diff.locator('.rf-diff-added')).toHaveText('+9')
+  await expect(diff.locator('.rf-diff-removed')).toHaveText('−4')
+  await diff.getByRole('button', { name: 'Copy patch' }).click()
+  await expect(diff.getByRole('button', { name: 'Copied' })).toBeVisible()
+  await expect.poll(audioStarts).toBeGreaterThan(0)
+  const copied = await page.evaluate(() => navigator.clipboard.readText())
+  expect(copied).toContain('-  const platform = navigator.platform')
+  expect(copied).toContain('+export function ariaShortcut')
+})
+
 it('plays the error cue when a CodeBlock copy fails, as InputCopy does', async (t) => {
   const page = await t.serve(showcaseServer)
   const audioStarts = await trackAudio(page)
