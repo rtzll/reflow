@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url'
 import { buildSync } from 'esbuild'
 import { createAssetServer } from 'remix/assets'
 import { loadConfig } from 'remix/cli'
+import { getSoundAssets } from './sound-assets.ts'
 import type { CodeSamples } from './public/code-block-example.tsx'
 
 const config = await loadConfig(fileURLToPath(new URL('../', import.meta.url)))
@@ -71,6 +72,7 @@ export async function getPageAssets(appSlug?: string) {
         ]
       : [fonts, library, site, examples],
     favicon,
+    sounds: await getSoundAssets((file) => assets.getHref(file)),
     /** The link preview image every page shares. Regenerate it with `pnpm --filter @reflow/web og:image`. */
     ogImage,
     images: { sidebarAvatar, thinkingPreview },

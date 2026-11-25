@@ -16,6 +16,7 @@ import {
   ResetSettingsButton,
   ShareSettingsButton,
 } from '../public/install-prompt.tsx'
+import { ShowcaseSoundButton } from '../public/showcase-sound-button.tsx'
 import { AccentPicker } from '../public/accent-picker.tsx'
 
 import { settingRows, settingLabel, readSettings, type Settings } from '../public/site-settings.ts'
@@ -96,31 +97,7 @@ function HeadingControls(
     let { previous, next, soundEnabled } = handle.props
     return (
       <div class="site-heading-controls">
-        <button
-          class="site-icon-button site-sound"
-          type="button"
-          data-site-sound=""
-          aria-label="Showcase sound"
-          aria-pressed={soundEnabled}
-          title={soundEnabled ? 'Mute showcase sound' : 'Enable showcase sound'}
-          disabled
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.7"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M11 5 6 9H3v6h3l5 4Z" />
-            <path class="site-sound-waves" d="M15 9a4 4 0 0 1 0 6m3-9a8 8 0 0 1 0 12" />
-            <path class="site-sound-muted" d="m16 9 5 6m0-6-5 6" />
-          </svg>
-        </button>
+        <ShowcaseSoundButton enabled={soundEnabled} />
         <nav class="site-page-arrows" aria-label="Adjacent pages">
           {(['previous', 'next'] as const).map((direction) => {
             let link = direction === 'previous' ? previous : next
@@ -412,8 +389,8 @@ function SiteCredit() {
         <a href="https://www.fluidfunctionalism.com/">Fluid Functionalism</a>
       </div>
       <div>
-        <span>Sound effects by</span>
-        <a href="https://cuelume.dev/">Cuelume</a>
+        <span>Sounds by</span>
+        <a href="https://buttons.joshwcomeau.com/">Josh W. Comeau</a>
       </div>
     </div>
   )
@@ -611,7 +588,7 @@ function Gallery(
                 data-tall={tallCards.has(entry.slug) ? '' : undefined}
                 data-right={rightCards.has(entry.slug) ? '' : undefined}
               >
-                <div class="site-preview-stage">
+                <div class="site-preview-stage" data-sound-scope="">
                   {entry.preview ?? <p class="site-preview-placeholder">{entry.description}</p>}
                 </div>
                 <footer class="site-preview-footer">

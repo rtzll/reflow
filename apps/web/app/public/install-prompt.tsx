@@ -1,4 +1,4 @@
-import { play } from 'cuelume'
+import { play } from './showcase-audio.ts'
 import { playCopyError } from './showcase-sound.ts'
 import { clientEntry, on, type Handle } from 'remix/component'
 import {

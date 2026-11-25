@@ -1,5 +1,5 @@
 import { on, type Handle } from 'remix/component'
-import { play } from 'cuelume'
+import { play } from './showcase-audio.ts'
 import {
   Button,
   Checkbox,

@@ -1,5 +1,5 @@
 import { advancedSource } from './advanced-code.ts'
-import { play } from 'cuelume'
+import { play } from './showcase-audio.ts'
 import { on, ref, type Handle } from 'remix/component'
 import {
   Avatar,

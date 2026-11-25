@@ -1,4 +1,4 @@
-import { on } from 'remix/component'
+import { on, ref } from 'remix/component'
 import type { Handle } from 'remix/component'
 import type { ControlSize } from './systems/styling.ts'
 import { onFormReset } from './behaviors/form-reset.ts'
@@ -42,6 +42,11 @@ function boundedNumber(value: number | undefined, fallback: number) {
 
 export function Slider(handle: Handle<SliderProps>) {
   let local = handle.props.defaultValue ?? handle.props.min ?? 0
+  let root: HTMLDivElement
+  const sliderRef = ref<HTMLDivElement>((node) => {
+    root = node
+  })
+  let pendingStep: { index: number; from: number } | undefined
   let pointer: { id: number; thumb: number } | undefined
   let hoverValue: number | undefined
   const editing = new Map<number, string>()
@@ -94,6 +99,21 @@ export function Slider(handle: Handle<SliderProps>) {
     const values = Array.isArray(current)
       ? current.map(snap).sort((a, b) => a - b)
       : [snap(current)]
+    // Report the value the thumb actually reached, including on controlled sliders.
+    if (pendingStep) {
+      const { index, from } = pendingStep
+      pendingStep = undefined
+      const to = values[index]
+      if (to !== undefined && to !== from)
+        handle.queueTask(() => {
+          root.dispatchEvent(
+            new CustomEvent('reflow:slider-step', {
+              bubbles: true,
+              detail: to > from ? 'forward' : 'back',
+            }),
+          )
+        })
+    }
     const isRange = values.length === 2
     const requiresCompact =
       isRange ||
@@ -149,6 +169,7 @@ export function Slider(handle: Handle<SliderProps>) {
       if (adjusted === values[index]) return
       const result: SliderValue =
         values.length === 1 ? adjusted : index === 0 ? [adjusted, values[1]] : [values[0], adjusted]
+      pendingStep = { index, from: values[index] }
       if (value === undefined) local = result
       onChange?.(result)
       handle.update()
@@ -218,6 +239,7 @@ export function Slider(handle: Handle<SliderProps>) {
 
     return (
       <div
+        mix={sliderRef}
         class={className ? 'rf-slider ' + className : 'rf-slider'}
         data-size={size}
         data-layout={layout}
@@ -251,6 +273,7 @@ export function Slider(handle: Handle<SliderProps>) {
               onFormReset(() => {
                 const current = handle.props
                 if (current.value === undefined) local = current.defaultValue ?? current.min ?? 0
+                pendingStep = undefined
                 editing.clear()
                 handle.update()
               }),

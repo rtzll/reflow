@@ -172,6 +172,26 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
   let hoverPoint: Pick<PointerEvent, 'clientX' | 'clientY'> | undefined
   let pointerAtRest = false
   let refreshHoverLayout: () => void
+  function notifyResizeStep(previous: number, next: number) {
+    if (previous === next) return
+    board.dispatchEvent(
+      new CustomEvent('reflow:time-grid-resize-step', {
+        bubbles: true,
+        detail: next > previous ? 'forward' : 'back',
+      }),
+    )
+  }
+
+  function notifyKeyboardResize(event: E, field: 'duration' | 'span', next: number) {
+    const previous = event[field] ?? 1
+    if (previous === next) return
+    // A controlled grid may reject an edit, for example an overlapping booking.
+    handle.queueTask(() => {
+      const current = handle.props.events.find((item) => item.id === event.id)
+      if (current && (current[field] ?? 1) === next) notifyResizeStep(previous, next)
+    })
+  }
+
   function pointerOverOpenTime() {
     const root = board.getRootNode() as Document | ShadowRoot
     return (
@@ -521,6 +541,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
               0,
               days.length - 1,
             )
+        const previousDuration = gesture.preview.duration
         gesture.preview =
           mode === 'resize'
             ? {
@@ -548,6 +569,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
                         Math.min(1439, limit(day) - anchor.duration),
                       ),
               }
+        if (mode === 'resize') notifyResizeStep(previousDuration, gesture.preview.duration)
       }
       return true
     }
@@ -646,6 +668,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
         const updated = { ...event, ...next }
         statusMessage = describe(updated)
         onEventChange?.(updated)
+        notifyKeyboardResize(event, 'duration', next.duration)
         handle.queueTask(() =>
           board.querySelector<HTMLButtonElement>(`[data-event="${CSS.escape(event.id)}"]`)?.focus(),
         )
@@ -683,6 +706,7 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
         const updated = { ...event, span }
         statusMessage = describe(updated)
         onEventChange(updated)
+        notifyKeyboardResize(event, 'span', span)
         handle.update()
         return
       }
@@ -734,14 +758,18 @@ export function TimeGrid<E extends TimeGridEvent>(handle: Handle<TimeGridProps<E
     function dragDay(e: PointerEvent) {
       if (!dayDrag || e.pointerId !== dayDrag.pointer) return false
       const moved = Math.round(((e.clientX - dayDrag.x) * dayDirection()) / dayDrag.dayWidth)
-      if (dayDrag.mode === 'span')
-        dayDrag.span = clamp(
+      if (dayDrag.mode === 'span') {
+        const span = clamp(
           spanOf(dayDrag.event) + moved,
           1,
           Math.max(1, days.length - dayDrag.event.day),
         )
-      // A span that runs past the last column is cut off there, as it is shown.
-      else dayDrag.day = clamp(dayDrag.event.day + moved, 0, days.length - 1)
+        notifyResizeStep(dayDrag.span, span)
+        dayDrag.span = span
+      } else {
+        // A span that runs past the last column is cut off there, as it is shown.
+        dayDrag.day = clamp(dayDrag.event.day + moved, 0, days.length - 1)
+      }
       return true
     }
 

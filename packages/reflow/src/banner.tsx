@@ -40,7 +40,7 @@ function focusNeighbour(banner: Element) {
 export function Banner(handle: Handle<BannerProps>) {
   let dismissed = false
   let root: Element | null = null
-  let wasVisible = true
+  let wasVisible = handle.props.open ?? true
   // Set when the dismiss button held focus, so the close hands it on.
   let handOff = false
   const rootRef = ref((node) => {
@@ -65,10 +65,13 @@ export function Banner(handle: Handle<BannerProps>) {
       ...props
     } = handle.props
     const visible = open ?? !dismissed
-    if (wasVisible && !visible && handOff) {
+    if (wasVisible && !visible) {
+      const moveFocus = handOff
       handOff = false
       handle.queueTask(() => {
-        if (root) focusNeighbour(root)
+        if (!root) return
+        root.dispatchEvent(new Event('reflow:banner-dismiss', { bubbles: true }))
+        if (moveFocus) focusNeighbour(root)
       })
     }
     if (visible) handOff = false

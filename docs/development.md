@@ -28,6 +28,12 @@ pnpm --filter @reflow/web exec remix doctor
 
 CI runs the Reflow checks and browser tests with no reference server. For a visual comparison, open the same component, theme, density, viewport, and interaction state in the built-in browser. [Pinned Fluid Functionalism source](https://github.com/mickadesign/fluid-functionalism/tree/7e6ae290dd8f5a7657ae4a433a42e165bac3ece4)
 
+## Showcase sound
+
+The showcase loads recordings on first use and shares one mute preference across pages. The audio dependency belongs to the web app. Its build copies the selected MP3s and their license from Josh W. Comeau’s Button Sounds package. [Sound collection](https://buttons.joshwcomeau.com/) · [Recording selection](../apps/web/app/sound-assets.ts)
+
+Sliders tick as their value changes, and calendar events tick as their length snaps to a new time slot or day. Popovers and accordions click on open. Drawers use an original swoosh on open and close. Dismissing a banner plays the same closing swoosh at the same volume. Moving a carousel forward by hand plays the rising swoosh, and moving back plays the falling one. Autoplay stays silent. Both the clicks and the swooshes use `surfaceVolume`, currently `0.2`. [Showcase sound settings](../apps/web/app/public/showcase-sound.ts)
+
 ## Verification
 
 The test suite covers keyboard and focus behavior, form values and resets, popup interactions, composer attachments and queued sends, settings, and showcase layout. The docs sweep checks hydration and horizontal overflow in desktop dark and mobile light, and documentation examples are typechecked against the public API.

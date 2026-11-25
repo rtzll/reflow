@@ -1,5 +1,6 @@
 import { Card, CardDescription, CardHeader, Icon } from '@rtzll/reflow'
 import type { Handle } from 'remix/component'
+import { ShowcaseSoundButton } from '../public/showcase-sound-button.tsx'
 import { routes } from '../routes.ts'
 import { issuesApp } from '../public/apps/issues/index.tsx'
 import { chatApp } from '../public/apps/chat/index.tsx'
@@ -15,7 +16,7 @@ export const exampleApps = [
   { ...analyticsApp, Preview: appPreviews.analytics },
 ]
 
-export function AppsIndex() {
+export function AppsIndex(handle: Handle<{ soundEnabled: boolean }>) {
   return () => (
     <div class="site-app-shelf">
       <a class="site-skip" href="#main">
@@ -34,6 +35,7 @@ export function AppsIndex() {
         <a href={routes.apps.href()} aria-current="page">
           Apps
         </a>
+        <ShowcaseSoundButton enabled={handle.props.soundEnabled} />
       </nav>
       <main id="main" class="site-app-directory">
         <h1>Example apps</h1>
@@ -69,9 +71,11 @@ export function AppsIndex() {
   )
 }
 
-export function AppWorkspace(handle: Handle<{ app: ExampleApp; search: string }>) {
+export function AppWorkspace(
+  handle: Handle<{ app: ExampleApp; search: string; soundEnabled: boolean }>,
+) {
   return () => {
-    const { app, search } = handle.props
+    const { app, search, soundEnabled } = handle.props
     return (
       <div class="site-app-workspace" data-app={app.slug}>
         <a class="site-skip" href="#main">
@@ -85,9 +89,10 @@ export function AppWorkspace(handle: Handle<{ app: ExampleApp; search: string }>
             Apps
           </a>
           <span aria-current="page">{app.name}</span>
+          {app.slug !== 'chat' && <ShowcaseSoundButton enabled={soundEnabled} />}
         </nav>
-        <main id="main" data-rmx-key={app.slug}>
-          {app.render(search)}
+        <main id="main" data-rmx-key={app.slug} data-sound-scope="">
+          {app.render(search, soundEnabled)}
         </main>
       </div>
     )

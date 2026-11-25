@@ -1,5 +1,5 @@
 import { Combobox, type ComboboxProps } from '@rtzll/reflow'
-import { play } from 'cuelume'
+import { play } from './showcase-audio.ts'
 import type { Handle } from 'remix/component'
 
 export function SoundCombobox(

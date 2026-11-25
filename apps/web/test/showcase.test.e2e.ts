@@ -354,15 +354,21 @@ it('keeps the gallery Combobox aligned and scrollable after a third choice wraps
   const list = tile.getByRole('listbox', { name: 'Components' })
   await list.getByRole('option', { name: 'Card', exact: true }).click()
 
-  const first = (await tile
-    .getByRole('button', { name: 'Remove Button', exact: true })
-    .boundingBox())!
-  const third = (await tile
-    .getByRole('button', { name: 'Remove Card', exact: true })
-    .boundingBox())!
-  const toggle = (await tile.getByRole('button', { name: 'Close options' }).boundingBox())!
-  assert.ok(third.y > first.y)
-  assert.equal(first.y + first.height / 2, toggle.y + toggle.height / 2)
+  // The field recenters as the chips wrap. Measure all three in the same frame.
+  const card = tile.getByRole('button', { name: 'Remove Card', exact: true })
+  await expect
+    .poll(() =>
+      card.evaluate((button) => {
+        const field = button.closest('.rf-picker-field')!
+        const first = field.querySelector('[aria-label="Remove Button"]')!.getBoundingClientRect()
+        const toggle = field.querySelector('[aria-label="Close options"]')!.getBoundingClientRect()
+        return {
+          wrapped: button.getBoundingClientRect().top > first.top,
+          offset: Math.abs(first.top + first.height / 2 - (toggle.top + toggle.height / 2)),
+        }
+      }),
+    )
+    .toEqual({ wrapped: true, offset: expect.closeTo(0, 0) })
   assert.equal(
     await list
       .getByRole('option', { name: 'Button', exact: true })

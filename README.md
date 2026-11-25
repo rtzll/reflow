@@ -23,6 +23,8 @@ pnpm dev
 
 Open the address printed in the terminal. The gallery is at `/`, component docs at `/docs`, and example apps at `/apps`. Each docs page has a **View as Markdown** link. Start at `/llms.txt` for the index, or append `.md` to a docs URL, such as `/docs/drawer.md`.
 
+Use the **Sound effects** switch or the speaker button to mute the showcase. Your choice carries across the gallery, docs, and example apps.
+
 To test the production website locally on Cloudflare's runtime, run `pnpm preview:web` and open the address printed in the terminal. [Website build and deployment](docs/deployment.md)
 
 ## Start a fresh app

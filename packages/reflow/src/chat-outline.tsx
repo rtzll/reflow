@@ -52,12 +52,16 @@ export function ChatOutline(handle: Handle<ChatOutlineProps>) {
   let scroller: HTMLElement | Window | null = null
   let listening: AbortController | undefined
   let frame = 0
+  let endChoice: HTMLElement | undefined
+  let wasAtEnd = false
 
   // Follows the transcript the items live in. An app can swap the whole
   // conversation, and with it the scroll container, under one outline.
   function follow(target: HTMLElement | undefined) {
     const next = (target && scrollParent(target)) ?? window
     if (next === scroller) return
+    endChoice = undefined
+    wasAtEnd = false
     listening?.abort()
     listening = new AbortController()
     scroller = next
@@ -65,9 +69,15 @@ export function ChatOutline(handle: Handle<ChatOutlineProps>) {
   }
 
   function box() {
-    return scroller instanceof HTMLElement
-      ? { top: scroller.getBoundingClientRect().top, height: scroller.clientHeight }
-      : { top: 0, height: window.innerHeight }
+    const pane = scroller instanceof HTMLElement ? scroller : null
+    const root = pane ?? document.scrollingElement ?? document.documentElement
+    const height = pane?.clientHeight ?? window.innerHeight
+    return {
+      top: pane?.getBoundingClientRect().top ?? 0,
+      height,
+      scrollTop: root.scrollTop,
+      maxScrollTop: root.scrollHeight - height,
+    }
   }
 
   function elements() {
@@ -81,12 +91,20 @@ export function ChatOutline(handle: Handle<ChatOutlineProps>) {
     const targets = elements()
     if (!targets.length) return
     follow(targets[0])
-    const { top, height } = box()
+    const { top, height, scrollTop, maxScrollTop } = box()
+    const atEnd = scrollTop >= maxScrollTop - 1
+    if (wasAtEnd && !atEnd) endChoice = undefined
+    wasAtEnd = atEnd
     const line = top + height * readingLine
     let next = targets[0].id
     for (const element of targets) {
       if (element.getBoundingClientRect().top <= line) next = element.id
       else break
+    }
+    // Several turns can share the last reachable scroll position.
+    if (atEnd && endChoice && targets.includes(endChoice)) {
+      const y = endChoice.getBoundingClientRect().top
+      if (y >= top - 1 && y < top + height) next = endChoice.id
     }
     if (next === current) return
     current = next
@@ -141,9 +159,12 @@ export function ChatOutline(handle: Handle<ChatOutlineProps>) {
     if (!target) return
     const behavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
     follow(target)
+    const { top, scrollTop, maxScrollTop } = box()
+    const inset = scroller instanceof HTMLElement ? peek : 0
+    const destination = Math.max(0, scrollTop + target.getBoundingClientRect().top - top - inset)
+    endChoice = destination >= maxScrollTop - 1 ? target : undefined
     if (scroller instanceof HTMLElement) {
-      const offset = target.getBoundingClientRect().top - box().top
-      scroller.scrollTo({ top: scroller.scrollTop + offset - peek, behavior })
+      scroller.scrollTo({ top: destination, behavior })
     } else target.scrollIntoView({ block: 'start', behavior })
     // The rail keeps focus, so its ticks can be stepped through.
     if (handle.props.variant !== 'rail') {

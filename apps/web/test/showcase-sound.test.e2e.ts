@@ -5,18 +5,11 @@ import { showcaseServer, waitForShowcase, open } from './showcase-router.ts'
 
 async function trackAudio(page: Page) {
   await page.addInitScript(() => {
-    const start = AudioScheduledSourceNode.prototype.start
-    const startBuffer = AudioBufferSourceNode.prototype.start
-    let starts = 0
-    const state = window as Window & { soundTestStarts?: number }
-    state.soundTestStarts = 0
-    AudioScheduledSourceNode.prototype.start = function (...args) {
-      state.soundTestStarts = ++starts
-      return start.apply(this, args)
-    }
+    const start = AudioBufferSourceNode.prototype.start
+    const state = Object.assign(window, { soundTestStarts: 0 })
     AudioBufferSourceNode.prototype.start = function (...args) {
-      state.soundTestStarts = ++starts
-      return startBuffer.apply(this, args)
+      state.soundTestStarts++
+      return start.apply(this, args)
     }
   })
   return () =>
@@ -39,9 +32,12 @@ it('renders the saved sound state before the browser initializes audio', async (
   await page.reload()
   await expect(sound).toBeVisible()
   await expect(sound).not.toBeChecked()
-  const credit = page.locator('.site-right').getByRole('link', { name: 'Cuelume', exact: true })
+  await expect(page.locator('.site-right').getByText('Sounds by', { exact: true })).toBeVisible()
+  const credit = page
+    .locator('.site-right')
+    .getByRole('link', { name: 'Josh W. Comeau', exact: true })
   await expect(credit).toBeVisible()
-  await expect(credit).toHaveAttribute('href', 'https://cuelume.dev/')
+  await expect(credit).toHaveAttribute('href', 'https://buttons.joshwcomeau.com/')
 
   await page.setViewportSize({ width: 390, height: 844 })
   const shortcut = page.getByRole('button', { name: 'Showcase sound' })
@@ -127,22 +123,11 @@ it('plays quiet cues on committed changes and stays silent when muted', async (t
     .getByRole('button', { name: 'Styling' })
   await cue(() => styling.press('Enter'))
   await expect(styling).toHaveAttribute('aria-expanded', 'true')
-  await cue(() => styling.press('Enter'))
+  const expanded = await audioStarts()
+  await styling.press('Enter')
   await expect(styling).toHaveAttribute('aria-expanded', 'false')
-
-  await visit('/docs/slider')
-  const stage = page.locator('.doc-preview-stage[data-playground]')
-  const track = stage.locator('.rf-slider-track')
-  await track.scrollIntoViewIfNeeded()
-  const box = (await track.boundingBox())!
-  const y = box.y + box.height / 2
-  await page.mouse.move(box.x + box.width * 0.4, y)
-  await page.mouse.down()
-  await page.mouse.move(box.x + box.width * 0.8, y, { steps: 5 })
   await settle()
-  expect(await audioStarts()).toBe(0)
-  await cue(() => page.mouse.up())
-  await cue(() => stage.getByRole('slider').press('ArrowLeft'))
+  expect(await audioStarts()).toBe(expanded)
 
   const mute = page.locator('.site-right').getByRole('switch', { name: 'Sound effects' })
   await mute.press('Space')
@@ -152,6 +137,160 @@ it('plays quiet cues on committed changes and stays silent when muted', async (t
   await expect(styling).toHaveAttribute('aria-expanded', 'true')
   await settle()
   expect(await audioStarts()).toBe(0)
+})
+
+it('loads switch recordings on demand and discards a cue muted during decode', async (t) => {
+  const page = await t.serve(showcaseServer)
+  const audioStarts = await trackAudio(page)
+  const files: URL[] = []
+  page.on('request', (request) => {
+    const url = new URL(request.url())
+    if (url.pathname.endsWith('.mp3')) files.push(url)
+  })
+  await page.addInitScript(() => {
+    const decode = AudioContext.prototype.decodeAudioData
+    const state = window as Window & { finishFirstDecode?: () => void }
+    AudioContext.prototype.decodeAudioData = async function (...args) {
+      const buffer = await decode.apply(this, args)
+      if (!state.finishFirstDecode)
+        await new Promise<void>((resolve) => {
+          state.finishFirstDecode = resolve
+        })
+      return buffer
+    }
+  })
+  await open(page, '/docs/switch')
+  expect(files).toHaveLength(0)
+  const control = page.locator('[data-playground]').getByRole('switch', { name: 'Notifications' })
+  const mute = page.locator('.site-right').getByRole('switch', { name: 'Sound effects' })
+  await control.press('Space')
+  await page.waitForFunction(() => 'finishFirstDecode' in window)
+  await mute.press('Space')
+  await mute.press('Space')
+  await expect.poll(audioStarts).toBe(1)
+  await page.evaluate(async () => {
+    const state = window as Window & { finishFirstDecode?: () => void }
+    state.finishFirstDecode!()
+    await new Promise(requestAnimationFrame)
+  })
+  expect(await audioStarts()).toBe(1)
+  await control.click()
+  await expect.poll(audioStarts).toBe(2)
+  expect(files.map((url) => url.pathname.split('/').pop())).toEqual([
+    expect.stringMatching(/^guitar-toggle-off.*\.mp3$/),
+    expect.stringMatching(/^guitar-toggle-on.*\.mp3$/),
+  ])
+  expect(files.every((url) => url.origin === new URL(page.url()).origin)).toBe(true)
+})
+
+it('ticks as a slider changes steps during a drag or keyboard adjustment', async (t) => {
+  const page = await t.serve(showcaseServer)
+  const starts = await trackAudio(page)
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await open(page, '/docs/slider')
+  const example = page.locator('#steps .rf-slider').first()
+  const thumb = example.getByRole('slider')
+  const rail = example.locator('.rf-slider-rail')
+  await rail.scrollIntoViewIfNeeded()
+  const box = (await rail.boundingBox())!
+  const move = (fraction: number) =>
+    page.mouse.move(box.x + box.width * fraction, box.y + box.height / 2)
+  await move(0.5)
+  await page.mouse.down()
+  await move(0.55)
+  await expect(thumb).toHaveValue('50')
+  expect(await starts()).toBe(0)
+  await move(0.75)
+  await expect.poll(starts).toBe(1)
+  await move(0.8)
+  await move(0.98)
+  await expect.poll(starts).toBe(2)
+  await move(0.75)
+  await expect.poll(starts).toBe(3)
+  await page.mouse.up()
+  await thumb.press('ArrowRight')
+  await expect.poll(starts).toBe(4)
+  await thumb.press('ArrowRight')
+  await expect(thumb).toHaveValue('100')
+  await page.locator('.site-right').getByRole('switch', { name: 'Sound effects' }).click()
+  await thumb.press('ArrowLeft')
+  await expect(thumb).toHaveValue('75')
+  expect(await starts()).toBe(4)
+})
+
+it('ticks as a Calendar event snaps longer or shorter during a drag', async (t) => {
+  const page = await t.serve(showcaseServer)
+  const starts = await trackAudio(page)
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await open(page, '/apps/calendar')
+  const kickoff = page.getByRole('button', { name: /^Weekly kickoff,/ })
+  const handle = kickoff.locator('.rf-time-grid-resize')
+  await handle.scrollIntoViewIfNeeded()
+  const edge = (await handle.boundingBox())!
+  const quarterHour =
+    (await page.locator('.rf-time-grid-times span').first().boundingBox())!.height / 4
+  const x = edge.x + edge.width / 2
+  const y = edge.y + edge.height / 2
+  const drag = (slots: number) => page.mouse.move(x, y + slots * quarterHour)
+  await drag(0)
+  await page.mouse.down()
+  await drag(0.2)
+  expect(await starts()).toBe(0)
+  await drag(1)
+  await expect.poll(starts).toBe(1)
+  await drag(1.2)
+  await drag(2)
+  await expect.poll(starts).toBe(2)
+  await drag(1)
+  await expect.poll(starts).toBe(3)
+  await page.mouse.up()
+  await expect(kickoff).toHaveAccessibleName('Weekly kickoff, Monday, 09:00–10:15 UTC')
+  expect(await starts()).toBe(3)
+  await kickoff.press('ArrowRight')
+  await page.getByRole('button', { name: 'Showcase sound' }).click()
+  await kickoff.press('Shift+ArrowUp')
+  await expect(kickoff).toHaveAccessibleName('Weekly kickoff, Tuesday, 09:00–10:00 UTC')
+  expect(await starts()).toBe(3)
+})
+
+it('ticks for accepted keyboard resizes in timed and all-day TimeGrid examples', async (t) => {
+  const page = await t.serve(showcaseServer)
+  const starts = await trackAudio(page)
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await open(page, '/docs/time-grid')
+  const portrait = page
+    .locator('[data-playground]')
+    .getByRole('button', { name: /^Portrait session,/ })
+  await portrait.press('Shift+ArrowDown')
+  await expect.poll(starts).toBe(1)
+  await portrait.press('Shift+ArrowDown')
+  await expect(portrait).toHaveAccessibleName('Portrait session, Friday, 09:00–10:00')
+  const freeze = page.getByRole('button', { name: /^Code freeze,/ })
+  await freeze.press('Shift+ArrowRight')
+  await expect.poll(starts).toBe(2)
+  await freeze.press('Shift+ArrowRight')
+  await freeze.press('Shift+ArrowLeft')
+  await expect.poll(starts).toBe(3)
+})
+
+it('shares sound and mute between the example workspaces and docs', async (t) => {
+  const page = await t.serve(showcaseServer)
+  const audioStarts = await trackAudio(page)
+  await open(page, '/apps/chat')
+  const field = page.getByRole('textbox', { name: 'Message' })
+  await field.fill('Try the recorded send sound')
+  await field.press('Enter')
+  await expect.poll(audioStarts).toBeGreaterThan(0)
+  await page.getByRole('button', { name: 'Showcase sound' }).click()
+  await open(page, '/apps/analytics')
+  await expect(page.getByRole('button', { name: 'Showcase sound' })).toHaveAttribute(
+    'aria-pressed',
+    'false',
+  )
+  await open(page, '/docs/switch')
+  await expect(
+    page.locator('.site-right').getByRole('switch', { name: 'Sound effects' }),
+  ).not.toBeChecked()
 })
 
 it('confirms each successful InputCopy action, including a quick repeat', async (t) => {
@@ -306,16 +445,17 @@ it('keeps the sound button working after moving between docs pages', async (t) =
   await expect(sound).toBeChecked({ checked: on })
 })
 
-it('plays the navigate cue for Carousel buttons and dots, not for autoplay', async (t) => {
+it('swooshes on manual Carousel moves and keeps autoplay silent', async (t) => {
   const page = await t.serve(showcaseServer)
   const audioStarts = await trackAudio(page)
   await open(page, '/docs/carousel', { motion: true })
   const example = page.locator('#basic')
+  const swoosh = page.waitForResponse(/surface-swoosh[^/]*\.mp3/)
   await example.getByRole('button', { name: 'Next slide' }).click()
-  await expect.poll(audioStarts).toBeGreaterThan(0)
-  const moved = await audioStarts()
-  await example.getByRole('button', { name: 'Show Keyboard care' }).click()
-  await expect.poll(audioStarts).toBeGreaterThan(moved)
+  expect((await swoosh).ok()).toBe(true)
+  await expect.poll(audioStarts).toBe(1)
+  await example.getByRole('button', { name: 'Show Fluid motion' }).click()
+  await expect.poll(audioStarts).toBe(2)
 
   // Autoplay moves on silently.
   const autoplay = page.locator('#autoplay')
@@ -330,31 +470,52 @@ it('plays the navigate cue for Carousel buttons and dots, not for autoplay', asy
   expect(await audioStarts()).toBe(before)
 })
 
-it('plays open and close cues for a Drawer', async (t) => {
+it('swooshes once on banner dismissal and stays quiet when the banner returns', async (t) => {
+  const page = await t.serve(showcaseServer)
+  const audioStarts = await trackAudio(page)
+  await open(page, '/docs/banner')
+  const example = page.locator('.doc-preview-stage[data-playground]')
+  const dismiss = example.getByRole('button', { name: 'Dismiss', exact: true })
+  const swoosh = page.waitForResponse(/surface-swoosh[^/]*\.mp3/)
+  await dismiss.press('Enter')
+  expect((await swoosh).ok()).toBe(true)
+  await expect.poll(audioStarts).toBe(1)
+  await example.getByRole('button', { name: 'Show banner' }).click()
+  await expect(dismiss).toBeVisible()
+  await dismiss.click()
+  await expect.poll(audioStarts).toBe(2)
+})
+
+it('plays one swoosh as a Drawer slides in and one as it slides out', async (t) => {
   const page = await t.serve(showcaseServer)
   const audioStarts = await trackAudio(page)
   await open(page, '/docs/drawer')
+  const swoosh = page.waitForResponse(/surface-swoosh[^/]*\.mp3/)
   await page.locator('#basic').getByRole('button', { name: 'Filters', exact: true }).click()
+  expect((await swoosh).ok()).toBe(true)
   await expect(page.getByRole('dialog', { name: 'Filters' })).toBeVisible()
-  await expect.poll(audioStarts).toBeGreaterThan(0)
-  const opened = await audioStarts()
+  await expect.poll(audioStarts).toBe(1)
   await page.keyboard.press('Escape')
   await expect(page.getByRole('dialog', { name: 'Filters' })).toBeHidden()
-  await expect.poll(audioStarts).toBeGreaterThan(opened)
+  await expect.poll(audioStarts).toBe(2)
 })
 
-it('plays open and close cues for a Popover', async (t) => {
+it('clicks only on opening a Popover', async (t) => {
   const page = await t.serve(showcaseServer)
   const audioStarts = await trackAudio(page)
   await open(page, '/docs/popover')
   const trigger = page.locator('#basic').getByRole('button', { name: 'Dimensions', exact: true })
+  const click = page.waitForResponse(/hi75-soft[^/]*\.mp3/)
   await trigger.click()
+  expect((await click).ok()).toBe(true)
   await expect(trigger).toHaveAttribute('aria-expanded', 'true')
-  await expect.poll(audioStarts).toBeGreaterThan(0)
-  const opened = await audioStarts()
+  await expect.poll(audioStarts).toBe(1)
   await page.keyboard.press('Escape')
   await expect(trigger).toHaveAttribute('aria-expanded', 'false')
-  await expect.poll(audioStarts).toBeGreaterThan(opened)
+  await page.evaluate(
+    () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+  )
+  expect(await audioStarts()).toBe(1)
 })
 
 it('keeps HoverCard previews silent', async (t) => {

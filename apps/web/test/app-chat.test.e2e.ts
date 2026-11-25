@@ -400,6 +400,10 @@ it('shows the outline as a rail beside the transcript on a wide screen', async (
   await ticks.nth(1).hover()
   await expect(page.getByRole('tooltip')).toContainText('Above the wrist')
   await ticks.nth(1).click()
+  // Let the outline recalculate from the final scroll position after the jump.
+  await page.evaluate(
+    () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
+  )
   await expect(ticks.nth(1)).toHaveAttribute('aria-current', 'location')
   await expect(ticks.nth(1)).toBeFocused()
 })

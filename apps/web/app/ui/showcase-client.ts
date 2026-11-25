@@ -1,4 +1,4 @@
-import { play } from 'cuelume'
+import { play } from '../public/showcase-audio.ts'
 import { applySetting, settingRows, type SettingKey } from '../public/site-settings.ts'
 import { enhanceShowcaseSound, playCopyError, syncSoundControls } from '../public/showcase-sound.ts'
 
