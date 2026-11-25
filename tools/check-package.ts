@@ -51,9 +51,32 @@ try {
   for (const file of files) {
     assert.match(
       file,
-      /^package\/(?:package\.json|LICENSE|NOTICE|README\.md|dist\/(?:(?:behaviors|systems)\/)?[^/]+\.(?:js|ts|css))$/,
+      /^package\/(?:package\.json|LICENSE|NOTICE|README\.md|dist\/(?:styles\.css|(?:(?:behaviors|systems)\/)?[^/]+\.(?:js|ts)))$/,
     )
   }
+  const shippedCss = extract(tarball, 'package/dist/styles.css')
+  assert.doesNotMatch(shippedCss, /@import\b/, 'dist/styles.css must be a single bundled file')
+  const sourceOrder = [
+    ...readFileSync(join(root, 'packages/reflow/src/styles.css'), 'utf8').matchAll(
+      /^@import\s+'\.\/([^']+)'\s+layer\(reflow\)\s*;$/gm,
+    ),
+  ].map(([, file]) => file)
+  let previousIndex = -1
+  for (const file of sourceOrder) {
+    const marker = `/* ${file} */`
+    const index = shippedCss.indexOf(marker)
+    assert.ok(index > previousIndex, `dist/styles.css must preserve ${file} in source order`)
+    previousIndex = index
+  }
+  const layerStart = shippedCss.indexOf('@layer reflow {')
+  assert.ok(layerStart !== -1, 'dist/styles.css must wrap its rules in @layer reflow')
+  assert.ok(shippedCss.trimEnd().endsWith('}'), 'dist/styles.css must close @layer reflow')
+  const outsideLayer = shippedCss
+    .slice(0, layerStart)
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/@property\s+[^{]+\{[^{}]*\}/g, '')
+    .trim()
+  assert.equal(outsideLayer, '', 'Only @property declarations may sit outside @layer reflow')
   assert.equal(extract(tarball, 'package/LICENSE'), readFileSync(join(root, 'LICENSE'), 'utf8'))
   // Shiki is opt-in: only the highlight entry may import it.
   for (const file of files.filter((name) => /^package\/dist\/.+\.js$/.test(name))) {
@@ -187,15 +210,24 @@ try {
   browser = await chromium.launch()
   const page = await browser.newPage({ reducedMotion: 'reduce' })
   const errors: string[] = []
+  const stylesheetRequests: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
   page.on('console', (message) => {
     if (message.type() === 'error') errors.push(message.text())
   })
   page.on('response', (response) => {
     if (response.status() >= 400) errors.push(`${response.status()}: ${response.url()}`)
+    if (response.request().resourceType() === 'stylesheet') {
+      stylesheetRequests.push(new URL(response.url()).pathname)
+    }
   })
   await page.goto(url)
   await page.locator('[data-starter-ready]').waitFor({ state: 'attached' })
+  assert.equal(
+    stylesheetRequests.length,
+    2,
+    `Starter should load only Reflow styles.css and starter.css, got ${stylesheetRequests.join(', ')}`,
+  )
   await page.getByRole('button', { name: 'Preview alert', exact: true }).click()
   await expect(page.getByRole('dialog', { name: 'Notification preview' })).toBeVisible()
   await page.keyboard.press('Escape')
@@ -226,6 +258,29 @@ try {
       '',
     true,
     'Packaged CSS must load',
+  )
+  assert.equal(
+    await page.evaluate(() =>
+      getComputedStyle(document.documentElement).getPropertyValue('--rf-drawer-drag').trim(),
+    ),
+    '0px',
+    'Packaged @property declarations must register',
+  )
+  assert.equal(
+    await page.evaluate(() => {
+      const style = document.createElement('style')
+      style.textContent = '.rf-button { border-radius: 99px; }'
+      // Prepending before the library stylesheet proves unlayered app CSS beats @layer reflow regardless of source order.
+      document.head.prepend(style)
+      try {
+        const button = document.querySelector<HTMLElement>('.rf-button')
+        return button ? getComputedStyle(button).borderRadius : ''
+      } finally {
+        style.remove()
+      }
+    }),
+    '99px',
+    'Unlayered app CSS must override packaged @layer reflow rules',
   )
   assert.deepEqual(errors, [])
   console.log(
