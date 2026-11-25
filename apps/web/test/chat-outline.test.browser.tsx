@@ -181,3 +181,34 @@ it('draws a rail of ticks that marks the turn in view and jumps without taking f
   ticks[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))
   equal(document.activeElement, ticks[2])
 })
+
+it('keeps the chosen turn when two turns share the end of the scroll range', async (t) => {
+  const { $, act, cleanup } = render(
+    <div>
+      <ChatOutline variant="rail" items={turns.map((label, i) => ({ id: `end-${i}`, label }))} />
+      <div class="scroller" style={{ height: '300px', overflowY: 'auto' }}>
+        {turns.map((label, i) => (
+          <div id={`end-${i}`} style={{ height: i === 0 ? '600px' : '40px' }}>
+            {label}
+          </div>
+        ))}
+      </div>
+    </div>,
+  )
+  t.after(cleanup)
+  const scroller = $('.scroller') as HTMLElement
+  const ticks = [...$('nav')!.querySelectorAll('button')]
+  scroller.scrollTop = scroller.scrollHeight
+  await frames(3)
+  for (const tick of ticks.slice(1)) {
+    await act(() => tick.click())
+    await frames(3)
+    equal(tick.getAttribute('aria-current'), 'location')
+  }
+  scroller.scrollTop = 0
+  await frames(3)
+  equal(ticks[0].getAttribute('aria-current'), 'location')
+  scroller.scrollTop = scroller.scrollHeight
+  await frames(3)
+  equal(ticks[0].getAttribute('aria-current'), 'location')
+})

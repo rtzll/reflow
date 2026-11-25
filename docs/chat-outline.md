@@ -26,7 +26,7 @@ The outline is a Dropdown behind an icon button, so it gets Dropdown's keyboard,
 
 Choosing a turn scrolls its message to the top of the transcript with 16 pixels of space above it, then moves focus to the message, so a keyboard or screen reader user continues reading from there. ChatLayout treats the jump like a manual scroll: it stops following the end and shows its button back to the newest message.
 
-The turn in view is the last one whose top has passed a line a third of the way down the transcript. It updates as the transcript scrolls, and is the first turn when none has passed the line.
+As you scroll, the outline marks the latest turn whose top has passed a line a third of the way down the transcript. It marks the first turn until another crosses that line. If you choose a turn near the end and the transcript runs out of room to bring it to the top, that turn stays marked. Scrolling away from the end resumes the usual tracking.
 
 ## Motion
 
