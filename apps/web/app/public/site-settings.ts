@@ -269,6 +269,17 @@ export function applySetting(key: SettingKey, value: string) {
   window.dispatchEvent(new CustomEvent('reflow:settings-change', { detail: { key, value } }))
 }
 
+export function cycleSetting(key: SettingKey) {
+  const row = settingRows.find((entry) => entry.key === key)
+  if (!row) return
+  const values: readonly string[] =
+    row.key === 'font' && document.documentElement.dataset.customFont
+      ? [...row.options, document.documentElement.dataset.customFont]
+      : row.options
+  const current = document.documentElement.dataset[row.key] ?? row.defaultValue
+  applySetting(row.key, values[(values.indexOf(current) + 1) % values.length])
+}
+
 export function setShowcaseTheme(theme: 'light' | 'dark') {
   applySetting('theme', theme)
 }

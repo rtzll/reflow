@@ -1,4 +1,4 @@
-import { Button, Icon, TimeGrid } from '@rtzll/reflow'
+import { Button, Icon, Kbd, TimeGrid } from '@rtzll/reflow'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import { persistWeekEvent, restoreWeekEvents } from './local-events.ts'
 import { EventEditor } from './event-editor.tsx'
@@ -216,7 +216,9 @@ export const WeekView = clientEntry(import.meta.url, function WeekView(handle: H
         </section>
         <p class="week-hint">
           Drag down an empty time slot to create an event. Drag an event to move it or its bottom
-          edge to resize. Use arrow keys to move, Shift + ↑ or ↓ to resize, and Enter to edit.
+          edge to resize. Use arrow keys to move, <Kbd size="compact">Shift</Kbd> +{' '}
+          <Kbd size="compact">↑</Kbd> or <Kbd size="compact">↓</Kbd> to resize, and{' '}
+          <Kbd size="compact">Enter</Kbd> to edit.
         </p>
         <span class="site-sr-only" role="status">
           {message}

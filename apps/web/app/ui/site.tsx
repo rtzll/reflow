@@ -1,4 +1,4 @@
-import { Icon as ReflowIcon, Switch, type IconName } from '@rtzll/reflow'
+import { Icon as ReflowIcon, Kbd, Switch, type IconName } from '@rtzll/reflow'
 import type { Handle, RemixNode } from 'remix/component'
 import type { ExampleImages } from '../assets.ts'
 import { samplesFor } from '../public/code-block-example.tsx'
@@ -174,11 +174,8 @@ function Sidebar(handle: Handle<SidebarProps>) {
         >
           <Icon name="search" />
           <span>Search</span>
-          <span class="site-keycaps" aria-hidden="true">
-            <kbd class="site-keycap" data-platform-key="">
-              ⌘
-            </kbd>
-            <kbd class="site-keycap">K</kbd>
+          <span class="site-search-shortcut" aria-hidden="true">
+            <Kbd keys="mod+k" size="compact" />
           </span>
         </button>
         <ul class="site-primary-nav">
@@ -278,7 +275,7 @@ function AppearancePanel(handle: Handle<{ settings: Settings; variant?: 'rail' |
                   <SettingIcon setting={row.key} value={settings[row.key]} />
                 )}
                 <span data-setting-label="">{settingLabel(settings[row.key])}</span>
-                {row.shortcut ? <kbd class="site-keycap">{row.shortcut}</kbd> : null}
+                {row.shortcut ? <Kbd size="compact">{row.shortcut}</Kbd> : null}
                 {row.key === 'accent' ? (
                   <SettingIcon setting={row.key} value={settings[row.key]} />
                 ) : (
@@ -376,7 +373,7 @@ function AppearancePanel(handle: Handle<{ settings: Settings; variant?: 'rail' |
 function ShortcutsButton() {
   return () => (
     <button class="site-shortcuts-button" type="button" data-site-shortcuts="">
-      <Icon name="menu" /> Keyboard shortcuts <kbd class="site-keycap">?</kbd>
+      <Icon name="menu" /> Keyboard shortcuts <Kbd size="compact">?</Kbd>
     </button>
   )
 }
@@ -700,10 +697,10 @@ export function introductionContent() {
           <h2>Customize with the Appearance panel</h2>
           <p>
             Try a different theme, accent, heading font, radius, size, icon family, or hover style.
-            Changes update the examples as you make them. Use <kbd>T</kbd>, <kbd>A</kbd>, and{' '}
-            <kbd>R</kbd> to cycle theme, accent, and radius from the keyboard. Your settings are
-            remembered on this device. To share a particular look, copy a link with your settings
-            from the panel.
+            Changes update the examples as you make them. Use <Kbd size="compact">T</Kbd>,{' '}
+            <Kbd size="compact">A</Kbd>, and <Kbd size="compact">R</Kbd> to cycle theme, accent, and
+            radius from the keyboard. Your settings are remembered on this device. To share a
+            particular look, copy a link with your settings from the panel.
           </p>
         </div>
       </section>

@@ -1,12 +1,13 @@
 import { routes } from '../routes.ts'
 import { FontPicker } from './font-picker.tsx'
-import { CommandMenu, Dialog, Icon } from '@rtzll/reflow'
+import { CommandMenu, Dialog, Icon, Kbd } from '@rtzll/reflow'
 import { clientEntry, ref, type Handle } from 'remix/component'
 import { buildInstallPrompt, currentShareHref } from './install-prompt.tsx'
 import { playCopyError } from './showcase-sound.ts'
 import {
   accentCss,
   applySetting,
+  cycleSetting,
   resetSettings,
   settingLabel,
   settingRows,
@@ -86,7 +87,22 @@ export const SiteControls = clientEntry(
     let recent: string[] = []
     let notice = ''
     let noticeTimer: ReturnType<typeof setTimeout> | undefined
-    let mac = true
+
+    function toggleRail(side: 'left' | 'right') {
+      if (matchMedia('(width < 1280px)').matches) {
+        const trigger =
+          side === 'left' &&
+          document.querySelector<HTMLElement>('.site-mobile[data-enhanced] > summary')
+        if (trigger) {
+          trigger.click()
+          return true
+        }
+        return false
+      }
+      if (!document.querySelector(`.site-${side}`)) return false
+      document.documentElement.toggleAttribute(`data-${side}-collapsed`)
+      return true
+    }
 
     function setOpen(kind: 'search' | 'help', open: boolean) {
       if (open) {
@@ -114,9 +130,8 @@ export const SiteControls = clientEntry(
     }
 
     const mount = ref((_node, signal) => {
-      mac = /Mac|iPhone|iPad/.test(navigator.platform)
-      void handle.update()
-      for (const cap of document.querySelectorAll('[data-platform-key]'))
+      const mac = /Mac|iPhone|iPad/.test(navigator.platform)
+      for (const cap of document.querySelectorAll('.site-search .rf-kbd-group > kbd:first-child'))
         cap.textContent = mac ? '⌘' : 'Ctrl'
       document.addEventListener(
         'click',
@@ -181,21 +196,7 @@ export const SiteControls = clientEntry(
             )
               return
             if (document.querySelector('.site-mobile-panel:modal')) return
-            const side = event.key === '[' ? 'left' : 'right'
-            if (matchMedia('(width < 1280px)').matches) {
-              const trigger =
-                side === 'left' &&
-                document.querySelector<HTMLElement>('.site-mobile[data-enhanced] > summary')
-              if (trigger) {
-                event.preventDefault()
-                trigger.click()
-              }
-              return
-            }
-            const rail = document.querySelector(`.site-${side}`)
-            if (!rail) return
-            event.preventDefault()
-            document.documentElement.toggleAttribute(`data-${side}-collapsed`)
+            if (toggleRail(event.key === '[' ? 'left' : 'right')) event.preventDefault()
           }
         },
         { capture: true, signal },
@@ -223,6 +224,18 @@ export const SiteControls = clientEntry(
         const [, key, settingValue] = value.split(':')
         const row = settingRows.find((row) => row.key === key)
         if (row) applySetting(row.key, settingValue)
+        setOpen('search', false)
+        return
+      }
+      if (value.startsWith('action:cycle:')) {
+        const key = value.slice('action:cycle:'.length)
+        const row = settingRows.find((row) => row.key === key)
+        if (row) cycleSetting(row.key)
+        setOpen('search', false)
+        return
+      }
+      if (value === 'action:toggle-left' || value === 'action:toggle-right') {
+        toggleRail(value === 'action:toggle-left' ? 'left' : 'right')
         setOpen('search', false)
         return
       }
@@ -379,6 +392,29 @@ export const SiteControls = clientEntry(
                 ),
             })),
         ),
+        ...settingRows
+          .filter((row) => row.shortcut)
+          .map((row) => ({
+            value: `action:cycle:${row.key}`,
+            label: `Cycle ${row.label.toLowerCase()}`,
+            group: 'Actions',
+            shortcut: row.shortcut,
+            icon: row.key === 'icons' ? <Icon name="square" /> : icon(icons[row.key]),
+          })),
+        {
+          value: 'action:toggle-left',
+          label: 'Toggle navigation',
+          group: 'Actions',
+          shortcut: '[',
+          icon: <Icon name="panel-left" />,
+        },
+        {
+          value: 'action:toggle-right',
+          label: 'Toggle properties',
+          group: 'Actions',
+          shortcut: ']',
+          icon: <Icon name="panel-left" />,
+        },
         {
           value: 'action:shortcuts',
           label: 'Keyboard shortcuts',
@@ -442,10 +478,7 @@ export const SiteControls = clientEntry(
               <div>
                 <Icon name="search" />
                 <span>Search</span>
-                <span class="site-keycaps">
-                  <kbd class="site-keycap">{mac ? '⌘' : 'Ctrl'}</kbd>
-                  <kbd class="site-keycap">K</kbd>
-                </span>
+                <Kbd keys="mod+k" size="compact" />
               </div>
               {settingRows
                 .filter((row) => row.shortcut)
@@ -453,23 +486,23 @@ export const SiteControls = clientEntry(
                   <div key={row.key}>
                     {row.key === 'icons' ? <Icon name="square" /> : icon(icons[row.key])}
                     <span>Cycle {row.label.toLowerCase()}</span>
-                    <kbd class="site-keycap">{row.shortcut}</kbd>
+                    <Kbd size="compact">{row.shortcut}</Kbd>
                   </div>
                 ))}
               <div>
                 <Icon name="panel-left" />
                 <span>Toggle navigation</span>
-                <kbd class="site-keycap">[</kbd>
+                <Kbd size="compact">[</Kbd>
               </div>
               <div>
                 <Icon name="panel-left" />
                 <span>Toggle properties</span>
-                <kbd class="site-keycap">]</kbd>
+                <Kbd size="compact">]</Kbd>
               </div>
               <div>
                 {icon(icons.keyboard)}
                 <span>Show shortcuts</span>
-                <kbd class="site-keycap">?</kbd>
+                <Kbd size="compact">?</Kbd>
               </div>
             </div>
           </Dialog>

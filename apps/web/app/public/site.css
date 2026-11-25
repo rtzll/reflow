@@ -1071,20 +1071,6 @@ html[data-font='geist-serif'] {
 .site-setting-icon[data-value='sharp'] .site-radius-icon {
   border-radius: 0;
 }
-.site-keycap {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  border: 0;
-  border-radius: 2px;
-  background: light-dark(rgb(23 23 23 / 8%), rgb(245 245 245 / 8%));
-  color: var(--rf-muted);
-  font: 11px / 1 var(--rf-font);
-}
 .site-setting-options {
   position: absolute;
   z-index: 80;
@@ -1184,15 +1170,9 @@ html[data-font='geist-serif'] {
 .site-search > span:first-of-type {
   flex: 1;
 }
-.site-keycaps {
+.site-search-shortcut {
   display: inline-flex;
-  gap: 2px;
   align-items: center;
-}
-.site-search .site-keycap {
-  position: static;
-  border: 0;
-  font: 11px / 1 var(--rf-font);
 }
 .site-global-controls {
   display: contents;
@@ -1275,8 +1255,8 @@ html[data-font='geist-serif'] {
   }
 }
 @media (hover: none) {
-  .site-setting summary .site-keycap,
-  .site-search .site-keycaps {
+  .site-setting summary .rf-kbd,
+  .site-search .site-search-shortcut {
     display: none;
   }
 }

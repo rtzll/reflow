@@ -1,5 +1,10 @@
 import { play } from '../public/showcase-audio.ts'
-import { applySetting, settingRows, type SettingKey } from '../public/site-settings.ts'
+import {
+  applySetting,
+  cycleSetting,
+  settingRows,
+  type SettingKey,
+} from '../public/site-settings.ts'
 import { enhanceShowcaseSound, playCopyError, syncSoundControls } from '../public/showcase-sound.ts'
 
 const keyboardWidgets = [
@@ -296,12 +301,7 @@ export function enhanceShowcase() {
     )
     if (setting && !(setting.key === 'shape' && document.querySelector('.site-app-directory'))) {
       event.preventDefault()
-      const values: readonly string[] =
-        setting.key === 'font' && document.documentElement.dataset.customFont
-          ? [...setting.options, document.documentElement.dataset.customFont]
-          : setting.options
-      const current = document.documentElement.dataset[setting.key] ?? setting.defaultValue
-      applySetting(setting.key, values[(values.indexOf(current) + 1) % values.length])
+      cycleSetting(setting.key)
       play('select')
     }
   })
