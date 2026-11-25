@@ -4,7 +4,7 @@ Tests say what a component does in terms a user would notice: its roles, states,
 
 ## Layers
 
-- **Server tests** (`*.test.ts`) run in Node: the catalog's HTTP rendering, and data such as icon sets, motion tokens and highlighting.
+- **Server tests** (`*.test.ts`) run in Node: the catalog's HTTP rendering, API prop-table alignment, stylesheet layers, and data such as icon sets, motion tokens and highlighting.
 - **Browser tests** (`*.test.browser.tsx`) mount a component in a real browser without the stylesheet. Behaviour goes here: keyboard and focus, form values and resets, state after an action.
 - **End-to-end tests** (`apps/web/test/*.test.e2e.ts`) drive the showcase in Playwright. Use them only for what needs CSS and real input: layout, geometry, pointer and touch gestures, motion, and pages working together.
 

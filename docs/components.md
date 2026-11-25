@@ -32,7 +32,7 @@ A new component, or a new upstream one, is done when it has all of the following
 
 **Code and tests**
 
-- Exported from [`index.ts`](../packages/reflow/src/index.ts) with typed, documented props, and styles in the package stylesheet.
+- Exported explicitly by name from [`index.ts`](../packages/reflow/src/index.ts) (never `export *`) with typed, documented props, API rows matching the exported declarations, and styles imported into `styles.css`.
 - Tests for every behavior. Styling and layout checks go in `*.test.e2e.ts`, because browser tests load no CSS. Write the failing test first.
 - `pnpm fmt:check`, `pnpm lint`, `pnpm check`, `pnpm test:run` and `pnpm test:deployment` pass; run `pnpm test:package` after export changes.
 
@@ -73,11 +73,11 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 8 | [`BarChart` (shipped)](bar-chart.md) | — | Tooltip and roving list navigation, used in Build timings and the Analytics workspace |
 | 9 | [`Confirmation` (shipped)](confirmation.md) | [Fluid Functionalism Confirmation](https://github.com/mickadesign/fluid-functionalism/blob/1f716642a455c7a66e4cc7087c917dbe109f7943/registry/default/confirmation.tsx) | Banner's fill and actions, AskUserQuestions, ChatMessage |
 | 9 | [ChatLayout scrolling: anchor a sent message at the top while its reply grows, quiet streaming announcements (shipped)](chat-layout.md) | [Fluid Functionalism MessageScroller](https://github.com/mickadesign/fluid-functionalism/blob/1f716642a455c7a66e4cc7087c917dbe109f7943/registry/default/message-scroller.tsx) | ChatLayout's pinned transcript, Button |
-| 10 | `FileThumbnail` (implemented, awaiting release) | [Fluid Functionalism FileThumbnail](https://github.com/mickadesign/fluid-functionalism/blob/1f716642a455c7a66e4cc7087c917dbe109f7943/registry/default/file-thumbnail.tsx), without the PDF page | InputMessage's previews, Badge; shared with ChatMessage |
-| 10 | [`ChatOutline` (implemented, awaiting release)](chat-outline.md) | — | Dropdown's radio rows and search, ChatLayout's scroll container |
-| 10 | [`ToolCalls` (implemented, awaiting release)](tool-calls.md) | — | Spinner, the attachment row's grid reveal |
-| 10 | [`TaskList` (implemented, awaiting release)](task-list.md) | — | Spinner, Dropdown's check draw |
-| 10 | [`FileChanges` (implemented, awaiting release)](file-changes.md) | — | The grid-row reveal from ToolCalls, Button |
+| 10 | `FileThumbnail` (shipped) | [Fluid Functionalism FileThumbnail](https://github.com/mickadesign/fluid-functionalism/blob/1f716642a455c7a66e4cc7087c917dbe109f7943/registry/default/file-thumbnail.tsx), without the PDF page | InputMessage's previews, Badge; shared with ChatMessage |
+| 10 | [`ChatOutline` (shipped)](chat-outline.md) | — | Dropdown's radio rows and search, ChatLayout's scroll container |
+| 10 | [`ToolCalls` (shipped)](tool-calls.md) | — | Spinner, the attachment row's grid reveal |
+| 10 | [`TaskList` (shipped)](task-list.md) | — | Spinner, Dropdown's check draw |
+| 10 | [`FileChanges` (shipped)](file-changes.md) | — | The grid-row reveal from ToolCalls, Button |
 
 ### Decisions so far
 

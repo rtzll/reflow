@@ -51,8 +51,8 @@ To anyone using the package, everything it exports is a component, a documented 
 Where code goes:
 
 - A component lives in its own file, named after it. Parts of one component, such as `CardTitle` or `FieldLabel`, stay in their component's file.
-- When a component builds on another's internals, as AlertDialog does on Dialog's surface or DatePicker on Calendar's date inputs, the internals stay in the first component's file and are exported from it. `index.ts` then lists that file's public names instead of re-exporting all of it, so the internals stay private to the package.
-- A component's styles live beside it in a stylesheet of the same name, such as `button.css`. `foundations.css` holds the tokens, and styles several components share sit in a stylesheet named for what they style, such as `menu-surface.css` or `fluid-hover.css`. `styles.css` imports them in cascade order.
+- When a component builds on another's internals, as AlertDialog does on Dialog's surface or DatePicker on Calendar's date inputs, the internals stay in the first component's file and are exported from it. `index.ts` lists every file's public names explicitly (never `export *`), so internals stay private to the package and unbundled module servers such as Remix's asset server resolve only the modules a consumer imports.
+- A component's styles live beside it in a stylesheet of the same name, such as `button.css`. `foundations.css` holds the tokens, and styles several components share sit in a stylesheet named for what they style, such as `menu-surface.css` or `fluid-hover.css`. `styles.css` imports them in cascade order, and the package build bundles those imports into a single `dist/styles.css` wrapped in `@layer reflow` with `@property` declarations hoisted above the layer.
 - A component does not write keyboard, focus or hover-timing logic inline when a primitive or behavior covers it. If two components need the same logic and neither covers it, it becomes a behavior.
 - A helper used by one component stays next to that component. Only helpers shared by two or more components move into a layer.
 - Imports point down: components import systems, behaviors and primitives; systems and behaviors never import components.
@@ -102,7 +102,7 @@ Fluid Functionalism is a reference, not a specification. Reflow checks it for ne
 
 ### Last sync
 
-Checked against upstream `1f716642` on November 22, 2026. That comparison identified three additions. The first two shipped in 0.13.0.
+Checked against upstream `1f716642` on November 22, 2026. That comparison identified three additions: the first two shipped in 0.13.0, and FileThumbnail shipped in 0.14.0.
 
 - **Confirmation** asks a yes or no question before something runs, such as an agent's tool call, built on Banner. It fits Reflow's conversation components.
 - **MessageScroller** follows a streamed reply while the reader is at the end, lets go on a manual scroll, glides a new user turn to the top, and offers a button back to the latest message. ChatLayout already follows, lets go and offers that button; anchoring the new turn and quiet streaming announcements extend it rather than add a component.
