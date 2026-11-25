@@ -27,6 +27,7 @@ export const components = [
   ['data-table', 'DataTable'],
   ['date-picker', 'DatePicker'],
   ['dialog', 'Dialog'],
+  ['diff-view', 'DiffView'],
   ['drawer', 'Drawer'],
   ['dropdown', 'Dropdown'],
   ['field', 'Field'],

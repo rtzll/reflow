@@ -825,6 +825,139 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  'diff-view': [
+    {
+      name: 'DiffView',
+      props: [
+        {
+          name: 'diff',
+          type: 'string',
+          required: false,
+          description: 'A standard unified diff string with @@ hunk headers.',
+        },
+        {
+          name: 'hunks',
+          type: 'readonly DiffHunk[]',
+          required: false,
+          description:
+            'Structured diff hunks, used instead of diff when already parsed or syntax-highlighted.',
+        },
+        {
+          name: 'filename',
+          type: 'string',
+          required: false,
+          description:
+            'File path shown in the header. Extracted from +++ b/... in diff when omitted.',
+        },
+        {
+          name: 'label',
+          type: 'string',
+          required: false,
+          description: 'Accessible name for the diff region. Defaults to filename or "Code diff".',
+        },
+        {
+          name: 'view',
+          type: '"unified" | "split"',
+          required: false,
+          description: 'Controlled diff layout.',
+        },
+        {
+          name: 'defaultView',
+          type: '"unified" | "split"',
+          required: false,
+          description: 'Initial diff layout when uncontrolled. Defaults to unified.',
+        },
+        {
+          name: 'onViewChange',
+          type: '(view: "unified" | "split") => void',
+          required: false,
+          description: 'Called when the layout changes between unified and split.',
+        },
+        {
+          name: 'viewToggle',
+          type: 'boolean',
+          required: false,
+          description: 'Shows a compact Unified / Split toggle in the header.',
+        },
+        {
+          name: 'lineNumbers',
+          type: 'boolean',
+          required: false,
+          description: 'Shows old and new line number gutters. Defaults to true.',
+        },
+        {
+          name: 'wrap',
+          type: 'boolean',
+          required: false,
+          description: 'Wraps long lines instead of scrolling horizontally.',
+        },
+        {
+          name: 'actions',
+          type: 'RemixNode',
+          required: false,
+          description: 'Trailing header controls, such as Copy patch or Revert.',
+        },
+        {
+          name: 'size',
+          type: '"default" | "compact"',
+          required: false,
+          description: 'Overrides the surrounding density.',
+        },
+      ],
+    },
+    {
+      name: 'DiffHunk',
+      props: [
+        {
+          name: 'header',
+          type: 'string',
+          required: false,
+          description: 'Optional hunk heading such as @@ -12,6 +12,8 @@.',
+        },
+        {
+          name: 'lines',
+          type: 'readonly DiffLine[]',
+          required: true,
+          description: 'Lines in the hunk.',
+        },
+      ],
+    },
+    {
+      name: 'DiffLine',
+      props: [
+        {
+          name: 'type',
+          type: '"context" | "add" | "remove"',
+          required: true,
+          description: 'Whether the line is unchanged context, added, or removed.',
+        },
+        {
+          name: 'content',
+          type: 'string',
+          required: true,
+          description: 'Plain text content of the line.',
+        },
+        {
+          name: 'oldLine',
+          type: 'number',
+          required: false,
+          description: 'Line number in the original file.',
+        },
+        {
+          name: 'newLine',
+          type: 'number',
+          required: false,
+          description: 'Line number in the updated file.',
+        },
+        {
+          name: 'tokens',
+          type: 'readonly CodeToken[]',
+          required: false,
+          description: 'Optional syntax tokens rendered in place of plain text.',
+        },
+      ],
+    },
+  ],
   spinner: [
     {
       name: 'Spinner',

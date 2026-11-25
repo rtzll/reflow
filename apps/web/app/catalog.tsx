@@ -200,6 +200,11 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       'A wall-clock time combobox with flexible parsing, step slots, durations, and form submission.',
     code: `<TimeField label="Start time" name="start" defaultValue="09:30" step={15} />\n<TimeField label="End time" name="end" after="09:30" defaultValue="11:00" end />`,
   },
+  'diff-view': {
+    description:
+      'Unified and side-by-side code diffs with dual line numbers, change counts, and optional view switching.',
+    code: `<DiffView\n  filename="src/cache.ts"\n  diff={unifiedDiff}\n  viewToggle\n/>`,
+  },
   'chat-message': {
     description: 'A chat message with user or assistant alignment and optional attachments.',
     code: conversationCode,
