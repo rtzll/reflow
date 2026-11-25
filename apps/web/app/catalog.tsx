@@ -190,6 +190,11 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       'A card that sums up an edit: the files changed, lines added and removed, and actions.',
     code: `<FileChanges\n  files={[\n    { path: 'src/cover.ts', added: 48, removed: 6, href: '/diff/cover' },\n    { path: 'src/captions.ts', added: 12, removed: 9 },\n  ]}\n  actions={<Button size="compact" variant="secondary">View changes</Button>}\n/>`,
   },
+  kbd: {
+    description:
+      'Keycaps for a single key, a platform-aware shortcut chord, or a multi-key sequence.',
+    code: `<Kbd keys="mod+k" />\n<Kbd keys={['g', 'i']} separator="then" variant="outline" />\n<Kbd variant="outline">Esc</Kbd>`,
+  },
   'chat-message': {
     description: 'A chat message with user or assistant alignment and optional attachments.',
     code: conversationCode,

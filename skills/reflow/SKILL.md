@@ -56,7 +56,7 @@ Prefer the existing form-aware controls and preserve labels, descriptions, reset
 
 ### Display, feedback, and data
 
-- Use `Card` and `CardGroup` for grouped content surfaces (clickable cards require `label`), and `Badge` for compact status or category tags.
+- Use `Card` and `CardGroup` for grouped content surfaces (clickable cards require `label`), `Badge` for compact status or category tags, and `Kbd` for single keys or platform-aware shortcut chords (`keys="mod+k"`, `variant="subtle" | "outline"`, optional `separator`).
 - Use `Banner` for lasting inline or fixed status notices. Confirm transient actions with `Toaster` and `toast()` / `toast.success()` / `toast.promise()`: place one `<Toaster>` in the app, give it an action such as Undo rather than asking first, and keep blocking problems in a `Banner` or `Dialog`.
 - Use `Avatar` for people, teams, and agents, and `AvatarGroup` for several at once; mark an avatar decorative when the name is written beside it.
 - Use `Progress` for work in flight (supply `value` and `total` when known; omit `value` when indeterminate), `Spinner` for indeterminate loading (give a standalone spinner a `label` and omit it when nearby content names the status), and `Skeleton` for decorative placeholders sized to match incoming content (set `aria-busy` on the loading region).

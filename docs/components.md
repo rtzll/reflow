@@ -8,7 +8,7 @@ Reflow started as a native Remix port of the [Fluid Functionalism](https://githu
 - **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`, `TimeGrid`
 - **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `Pagination`, `Resizable`, `Sidebar`, `Tabs`, `Toolbar`, `Tree`
 - **Menus and overlays** · `AlertDialog`, `CommandMenu`, `ContextMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
-- **Display and feedback** · `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `BarChart`, `Card`, `CodeBlock`, `DataTable`, `RoutedDataTable`, `Markdown`, `Progress`, `Skeleton`, `Spinner`, `Table`, `Toaster`
+- **Display and feedback** · `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `BarChart`, `Card`, `CodeBlock`, `DataTable`, `RoutedDataTable`, `Kbd`, `Markdown`, `Progress`, `Skeleton`, `Spinner`, `Table`, `Toaster`
 - **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `ChatOutline`, `Citation`, `Confirmation`, `FileChanges`, `FileThumbnail`, `InputMessage`, `QueuedStack`, `TaskList`, `ThinkingIndicator`, `ThinkingSteps`, `ToolCalls`, `TriggerMenu`
 
 Every component has a docs page with a live preview, highlighted code and an API table; most also have a playground. Run the showcase and open `/docs`, or read the [usage examples](../apps/web/app/public/examples.tsx).
@@ -78,6 +78,7 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 10 | [`ToolCalls` (shipped)](tool-calls.md) | — | Spinner, the attachment row's grid reveal |
 | 10 | [`TaskList` (shipped)](task-list.md) | — | Spinner, Dropdown's check draw |
 | 10 | [`FileChanges` (shipped)](file-changes.md) | — | The grid-row reveal from ToolCalls, Button |
+| 11 | [`Kbd` (implemented, awaiting release)](kbd.md) | — | `formatShortcut` and `isMacPlatform` from `behaviors/shortcut.ts`, CommandMenu keycap metrics |
 
 ### Decisions so far
 

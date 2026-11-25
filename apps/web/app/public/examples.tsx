@@ -95,6 +95,7 @@ import { Markdown } from '@rtzll/reflow/markdown'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import { BannerExample, BannerPreview } from './banner-example.tsx'
 import { FileChangesExample } from './file-changes-example.tsx'
+import { KbdExample } from './kbd-example.tsx'
 import { TaskListExample } from './task-list-example.tsx'
 import { ToolCallsExample } from './tool-calls-example.tsx'
 
@@ -282,6 +283,8 @@ export const Example = clientEntry(
           )
         case 'file-changes':
           return <FileChangesExample />
+        case 'kbd':
+          return <KbdExample />
         case 'task-list':
           return <TaskListExample />
         case 'tool-calls':

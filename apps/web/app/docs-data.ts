@@ -682,6 +682,50 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  kbd: [
+    {
+      name: 'Kbd',
+      props: [
+        {
+          name: 'keys',
+          type: 'string | readonly string[]',
+          required: false,
+          description:
+            'A shortcut string such as "mod+k" or a sequence such as ["g", "i"]. Formatted for the visitor’s platform after mount.',
+        },
+        {
+          name: 'children',
+          type: 'RemixNode',
+          required: false,
+          description: 'Single keycap content when keys is omitted.',
+        },
+        {
+          name: 'platform',
+          type: '"mac" | "other"',
+          required: false,
+          description: 'Pins Mac or non-Mac modifier labels instead of detecting after mount.',
+        },
+        {
+          name: 'variant',
+          type: '"subtle" | "outline"',
+          required: false,
+          description: 'Quiet tinted fill (default) or bordered keycap.',
+        },
+        {
+          name: 'size',
+          type: '"default" | "compact"',
+          required: false,
+          description: 'Overrides the surrounding density.',
+        },
+        {
+          name: 'separator',
+          type: 'RemixNode',
+          required: false,
+          description: 'Visual separator placed between keycaps, such as "then".',
+        },
+      ],
+    },
+  ],
   spinner: [
     {
       name: 'Spinner',
