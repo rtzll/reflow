@@ -77,6 +77,12 @@ try {
     .replace(/@property\s+[^{]+\{[^{}]*\}/g, '')
     .trim()
   assert.equal(outsideLayer, '', 'Only @property declarations may sit outside @layer reflow')
+  // Explicit named re-exports let unbundled servers resolve only imported components.
+  assert.doesNotMatch(
+    extract(tarball, 'package/dist/index.js'),
+    /^export\s*\*/m,
+    'dist/index.js must use explicit named re-exports instead of export *',
+  )
   assert.equal(extract(tarball, 'package/LICENSE'), readFileSync(join(root, 'LICENSE'), 'utf8'))
   // Shiki is opt-in: only the highlight entry may import it.
   for (const file of files.filter((name) => /^package\/dist\/.+\.js$/.test(name))) {
@@ -211,15 +217,16 @@ try {
   const page = await browser.newPage({ reducedMotion: 'reduce' })
   const errors: string[] = []
   const stylesheetRequests: string[] = []
+  const scriptRequests: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
   page.on('console', (message) => {
     if (message.type() === 'error') errors.push(message.text())
   })
   page.on('response', (response) => {
     if (response.status() >= 400) errors.push(`${response.status()}: ${response.url()}`)
-    if (response.request().resourceType() === 'stylesheet') {
-      stylesheetRequests.push(new URL(response.url()).pathname)
-    }
+    const type = response.request().resourceType()
+    if (type === 'stylesheet') stylesheetRequests.push(new URL(response.url()).pathname)
+    if (type === 'script') scriptRequests.push(new URL(response.url()).pathname)
   })
   await page.goto(url)
   await page.locator('[data-starter-ready]').waitFor({ state: 'attached' })
@@ -228,6 +235,19 @@ try {
     2,
     `Starter should load only Reflow styles.css and starter.css, got ${stylesheetRequests.join(', ')}`,
   )
+  const reflowScripts = scriptRequests
+    .map((path) => decodeURIComponent(path))
+    .filter((path) => path.includes('/@rtzll/reflow/dist/'))
+  assert.ok(
+    reflowScripts.length > 0 && reflowScripts.length <= 30,
+    `Expected direct Reflow script loads (<= 30), got ${reflowScripts.length} (all scripts: ${scriptRequests.join(', ')})`,
+  )
+  for (const unused of ['color-picker', 'time-grid', 'bar-chart', 'data-table']) {
+    assert.ok(
+      !reflowScripts.some((path) => path.includes(`/${unused}.`)),
+      `Starter should not load unused Reflow module ${unused}`,
+    )
+  }
   await page.getByRole('button', { name: 'Preview alert', exact: true }).click()
   await expect(page.getByRole('dialog', { name: 'Notification preview' })).toBeVisible()
   await page.keyboard.press('Escape')
