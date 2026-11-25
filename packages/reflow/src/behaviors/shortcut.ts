@@ -158,3 +158,23 @@ export function isMacPlatform() {
   const nav = navigator as Navigator & { userAgentData?: { platform?: string } }
   return /mac|iphone|ipad|ipod/i.test(nav.userAgentData?.platform ?? nav.platform ?? '')
 }
+
+const ariaKeyNames: Record<string, string> = {
+  ' ': 'Space',
+  arrowup: 'ArrowUp',
+  arrowdown: 'ArrowDown',
+  arrowleft: 'ArrowLeft',
+  arrowright: 'ArrowRight',
+}
+
+/** Format a shortcut as `aria-keyshortcuts` expects, such as `Alt+Shift+V` or `Control+K`. */
+export function ariaShortcut(shortcut: string) {
+  const { mod, meta, ctrl, alt, shift, key } = parseShortcut(shortcut)
+  if (!key) return ''
+  const keyName =
+    ariaKeyNames[key] ??
+    (key.length === 1 ? key.toUpperCase() : key.charAt(0).toUpperCase() + key.slice(1))
+  return [(mod || ctrl) && 'Control', meta && 'Meta', alt && 'Alt', shift && 'Shift', keyName]
+    .filter(Boolean)
+    .join('+')
+}

@@ -3,7 +3,7 @@ import { Spinner } from './spinner.tsx'
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
 import { Button } from './button.tsx'
 import { Icon } from './icon.tsx'
-import { matchesShortcut, parseShortcut } from './behaviors/shortcut.ts'
+import { ariaShortcut, matchesShortcut, parseShortcut } from './behaviors/shortcut.ts'
 import { statusIcon } from './systems/status-icon.tsx'
 
 export type ToastStatus = 'default' | 'info' | 'success' | 'warning' | 'error' | 'loading'
@@ -559,20 +559,4 @@ export function Toaster(handle: Handle<ToasterProps>) {
       </toastUi.Context>
     )
   }
-}
-
-// alt+t reads as Alt+T, the form aria-keyshortcuts expects.
-function ariaShortcut(hotkey: string) {
-  return hotkey
-    .split('+')
-    .map((part) => {
-      const lower = part.trim().toLowerCase()
-      if (lower === 'mod' || lower === 'ctrl' || lower === 'control') return 'Control'
-      if (lower === 'cmd' || lower === 'meta') return 'Meta'
-      if (lower === 'option' || lower === 'opt') return 'Alt'
-      return lower.length === 1
-        ? lower.toUpperCase()
-        : lower.charAt(0).toUpperCase() + lower.slice(1)
-    })
-    .join('+')
 }

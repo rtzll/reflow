@@ -1,5 +1,6 @@
 import { partitionFiles } from './behaviors/file-selection.ts'
 import {
+  ariaShortcut,
   formatShortcut,
   isMacPlatform,
   matchesShortcut,
@@ -85,20 +86,6 @@ export interface InputMessageProps {
 // Ctrl+Shift+V pastes plain text in Chrome on Windows and Linux, so the
 // default leaves it alone.
 const defaultVoiceShortcut = 'alt+shift+v'
-
-// The shortcut as aria-keyshortcuts writes it, such as `Alt+Shift+V`.
-function ariaKeys(shortcut: string) {
-  const { mod, meta, ctrl, alt, shift, key } = parseShortcut(shortcut)
-  const parts = [
-    mod && 'Control',
-    meta && 'Meta',
-    ctrl && 'Control',
-    alt && 'Alt',
-    shift && 'Shift',
-    key.length === 1 ? key.toUpperCase() : key,
-  ]
-  return parts.filter(Boolean).join('+')
-}
 
 export function InputMessage(handle: Handle<InputMessageProps>) {
   let draft = handle.props.defaultValue ?? ''
@@ -368,7 +355,7 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
         ? defaultVoiceShortcut
         : handle.props.voiceShortcut
     const voiceCaps = voiceShortcut ? formatShortcut(voiceShortcut, mac) : []
-    const voiceKeys = voiceShortcut ? ariaKeys(voiceShortcut) : undefined
+    const voiceKeys = voiceShortcut ? ariaShortcut(voiceShortcut) : undefined
     const showSuggestion =
       !draft &&
       Boolean(placeholderSuggestion) &&
