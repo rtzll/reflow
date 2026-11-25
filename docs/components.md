@@ -80,7 +80,7 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 10 | [`FileChanges` (shipped)](file-changes.md) | — | The grid-row reveal from ToolCalls, Button |
 | 11 | [`Kbd` (shipped)](kbd.md) | — | `formatShortcut` and `isMacPlatform` from `behaviors/shortcut.ts`, CommandMenu keycap metrics |
 | 11 | [`TimeField` (shipped)](time-field.md) | [Fluid Functionalism date-picker-core](https://github.com/mickadesign/fluid-functionalism) | Promoted from `DatePicker`'s time combobox, `@remix-run/ui/popover` and `listbox`, `onFormReset`, `containEscape` |
-| 11 | [`DiffView` (shipped)](diff-view.md) | — | `ScrollArea`, `SegmentedControl`, `CodeBlock` diff tokens, `FileChanges` counts |
+| 11 | [`DiffView` (shipped)](diff-view.md) | [`@pierre/diffs`](https://diffs.com) (optional peer at `@rtzll/reflow/diffs`) | `SegmentedControl`, `CodeBlock` token palette, `FileChanges` counts |
 
 ### Decisions so far
 

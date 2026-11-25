@@ -202,8 +202,8 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
   },
   'diff-view': {
     description:
-      'Unified and side-by-side code diffs with dual line numbers, change counts, and optional view switching.',
-    code: `<DiffView\n  filename="src/cache.ts"\n  diff={unifiedDiff}\n  viewToggle\n/>`,
+      'Unified and side-by-side code diffs powered by @pierre/diffs, with syntax highlighting, intraline changes, line selection, and inline annotations.',
+    code: `import { DiffView } from '@rtzll/reflow/diffs'\n\n<DiffView\n  filename="src/cache.ts"\n  diff={unifiedDiff}\n  viewToggle\n/>`,
   },
   'chat-message': {
     description: 'A chat message with user or assistant alignment and optional attachments.',

@@ -13,7 +13,7 @@ Reflow uses the Remix 3 component runtime. Component setup runs once and returns
 
 ## Composition
 
-Import components from `@rtzll/reflow` (or `@rtzll/reflow/markdown` for `Markdown`, `@rtzll/reflow/highlight` for `highlight()`) and load `@rtzll/reflow/styles.css` once in the document head. It ships as a single stylesheet in `@layer reflow`, so unlayered app CSS and Remix `css()` styles override it; put broad resets in an earlier layer (`@layer base, reflow, rmx, app;`).
+Import components from `@rtzll/reflow` (or `@rtzll/reflow/markdown` for `Markdown`, `@rtzll/reflow/highlight` for `highlight()`, `@rtzll/reflow/diffs` for `DiffView`) and load `@rtzll/reflow/styles.css` once in the document head. It ships as a single stylesheet in `@layer reflow`, so unlayered app CSS and Remix `css()` styles override it; put broad resets in an earlier layer (`@layer base, reflow, rmx, app;`).
 
 ### Forms and inputs
 
@@ -71,7 +71,7 @@ Prefer the existing form-aware controls and preserve labels, descriptions, reset
 - Render turns with `ChatMessage` (use `role="system"` for conversation events such as a model switch or resumed session). Use `ChatOutline` beside or above a long transcript so readers can jump between turns.
 - Use `InputMessage` for message composition with optional `attachments`, `voice` recording (`voiceShortcut`), `pasteAsFile`, caret `triggers` (or standalone `TriggerMenu` on a textarea), and message queuing (`queue` / `showQueue`) backed by `QueuedStack`.
 - Show image or file attachments with `FileThumbnail` (images preview directly; PDFs and other files render a readable card with name and type).
-- Show agent work in progress with `ThinkingIndicator` (short cycling status), `ThinkingSteps` (expandable reasoning timeline with details, sources, and images), `ToolCalls` (a folded one-line summary of tool calls with elapsed time and per-call status), `TaskList` (read-only plan steps as not started, in progress, or done), `FileChanges` (summary card of edited files with line additions/removals and show-more folding), and `DiffView` (unified or split file diffs from a unified `diff` string or structured `hunks` with dual line numbers, change counts, and optional `viewToggle`).
+- Show agent work in progress with `ThinkingIndicator` (short cycling status), `ThinkingSteps` (expandable reasoning timeline with details, sources, and images), `ToolCalls` (a folded one-line summary of tool calls with elapsed time and per-call status), `TaskList` (read-only plan steps as not started, in progress, or done), `FileChanges` (summary card of edited files with line additions/removals and show-more folding), and `DiffView` from `@rtzll/reflow/diffs` (backed by the optional `@pierre/diffs` peer dependency for syntax-highlighted unified or split diffs from `diff`, `oldFile`/`newFile`, or `fileDiff`, with intraline changes, line selection, annotations, and optional `viewToggle`).
 - Before an agent runs a command, sends something, or edits files, ask with `Confirmation` rather than a `Dialog`: phrase `title` as the question, name the buttons after the action, and use `status="warning"` for risky actions; it keeps the answer itself unless `state` is controlled, and `name` submits it with a form.
 - For multi-step structured clarification from the user, use `AskUserQuestions` (supports single/multi choice, custom answers, skipping, and form submission).
 - Cite sources in generated text with `Citation` chips right after the claim they support; give each source a title and link, and an excerpt where available.

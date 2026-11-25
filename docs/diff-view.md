@@ -1,34 +1,42 @@
 # DiffView
 
-After `FileChanges` summarizes which files changed, the reader needs to inspect the actual lines added and removed. DiffView renders a unified or side-by-side diff in the same quiet frame as `CodeBlock`, with dual line numbers, change counts, and optional view switching.
+After `FileChanges` summarizes which files changed, the reader needs to inspect the actual lines added and removed. `DiffView` wraps [`@pierre/diffs`](https://diffs.com) inside `CodeBlock`'s quiet frame, inheriting Reflow's light/dark theme, accent, density, and `--rf-code-token-*` syntax palette into the Shadow DOM.
+
+Import `DiffView` from `@rtzll/reflow/diffs`. `@pierre/diffs` is an optional peer dependency so apps that do not render diffs never install or load it.
 
 ## API
 
 ```tsx
+import { DiffView } from '@rtzll/reflow/diffs'
+
 <DiffView
-  filename="packages/reflow/src/kbd.tsx"
+  filename="packages/reflow/src/behaviors/shortcut.ts"
   diff={unifiedDiff}
   viewToggle
 />
 ```
 
-- `diff` accepts a standard unified diff string (`@@ -a,b +c,d @@` hunks with `+`, `-`, and space-prefixed lines).
-- `hunks` accepts structured `{ header?, lines }` data directly, including optional `tokens` from `CodeBlock` / `@rtzll/reflow/highlight`.
-- `filename` names the edited file in the header (muted folder path, foreground filename). When omitted with a `diff` string containing `+++ b/...`, the path is extracted automatically.
-- `label` sets the accessible name of the diff region (defaults to `filename` or `"Code diff"`).
+- `diff` accepts a standard unified diff string (`git diff` / `@@ -a,b +c,d @@` hunks).
+- `oldFile` and `newFile` accept full `{ name, contents, lang? }` file contents for computing diffs with expandable unchanged context.
+- `fileDiff` accepts pre-parsed `@pierre/diffs` `FileDiffMetadata`.
+- `prerenderedHTML` accepts pre-rendered Shadow DOM HTML from `@pierre/diffs/ssr` (`preloadPatchDiff` / `preloadFileDiff`) for zero-flash SSR hydration with `deferHydrationHighlight`.
+- `filename` names the edited file in the header (muted folder path, foreground filename). Extracted from the diff or file inputs when omitted.
+- `lang` overrides the syntax-highlighting language inferred from the filename.
 - `view`, `defaultView`, and `onViewChange` choose between `"unified"` (default) and `"split"` (side-by-side).
 - `viewToggle` shows a compact `SegmentedControl` in the header to switch between Unified and Split.
-- `lineNumbers` (default `true`) toggles the old/new line-number gutters; `wrap` (default `false`) wraps long lines instead of scrolling sideways.
-- `actions` places app controls (such as Revert or Open) at the end of the header; `size` overrides density.
+- `lineNumbers`, `wrap`, `indicators`, `lineDiffType`, `hunkSeparators`, and `expandUnchanged` control layout, intraline word highlighting, and context expansion.
+- `enableLineSelection`, `selectedLines`, `onLineSelected`, `lineAnnotations`, and `renderAnnotation` expose interactive line-range selection and inline review annotations.
+- `theme`, `themeType`, and `unsafeCSS` customize the underlying `@pierre/diffs` surface; by default Reflow registers a CSS-variable theme that matches `CodeBlock`.
+- `actions` places app controls (such as Copy patch or Revert) at the end of the header; `size` overrides density.
 
 ## Behavior
 
-The header shows the file path, total `+added −removed` counts (written out for assistive technology as in `FileChanges`), and optional view toggle and actions. In unified mode, each line shows old and new line numbers, a `+`/`−` sign in a non-selectable gutter, and screen-reader prefixes for added and removed lines. In split mode, adjacent removed and added blocks pair side by side, padding uneven runs with empty cells while keeping context lines aligned.
+On the server, `DiffView` renders the accessible `<figure>`, header path, `+added −removed` counts (written out for assistive technology as in `FileChanges`), optional view toggle, and either `prerenderedHTML` or a readable `<pre>` fallback. On the client, `@pierre/diffs` mounts lazily inside an isolated mount node, registers Reflow's CSS-variable syntax theme once, and renders syntax-highlighted unified or split diffs with intraline change spans.
 
 ## Reused pieces
 
-`ScrollArea` for overflow scrolling, `SegmentedControl` for the layout toggle, `CodeBlock`'s monospace and diff color tokens, and `FileChanges`'s accessible count pattern.
+`SegmentedControl` for the layout toggle, `CodeBlock`'s monospace and syntax token palette, `FileChanges`'s accessible count pattern, and `@pierre/diffs`'s `FileDiff` engine behind the optional `@rtzll/reflow/diffs` subpath.
 
 ## Verification
 
-Browser tests cover unified diff parsing and automatic filename extraction, dual line numbers, added/removed counts and screen-reader labels, switching between unified and split views (controlled and uncontrolled), pairing uneven remove/add runs in split view, structured `hunks` with highlighted tokens, and `lineNumbers` / `wrap` toggles.
+Browser tests cover unified diff parsing and automatic filename extraction, header counts and screen-reader labels, mounting `@pierre/diffs` inside Shadow DOM, switching between unified and split views (updating `data-diff-type`), computing diffs from `oldFile` / `newFile`, and propagating `lineNumbers` and `wrap` options. Package checks enforce that only `dist/diffs.js` imports `@pierre/diffs` and installing `@rtzll/reflow` never installs it.
