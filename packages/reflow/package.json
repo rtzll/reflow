@@ -13,6 +13,10 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./diffs": {
+      "types": "./dist/diffs.d.ts",
+      "default": "./dist/diffs.js"
+    },
     "./highlight": {
       "types": "./dist/highlight.d.ts",
       "default": "./dist/highlight.js"
@@ -28,11 +32,15 @@
     "check": "tsc -p tsconfig.json --noEmit"
   },
   "peerDependencies": {
+    "@pierre/diffs": "^1.7.0",
     "@shikijs/transformers": "^4.6.0",
     "remix": "3.3.0",
     "shiki": "^4.6.0"
   },
   "peerDependenciesMeta": {
+    "@pierre/diffs": {
+      "optional": true
+    },
     "@shikijs/transformers": {
       "optional": true
     },
@@ -41,6 +49,7 @@
     }
   },
   "devDependencies": {
+    "@pierre/diffs": "1.7.1",
     "@shikijs/transformers": "4.6.0",
     "remix": "3.3.0",
     "shiki": "4.6.0"

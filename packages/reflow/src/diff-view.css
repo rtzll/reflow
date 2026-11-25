@@ -1,12 +1,38 @@
-/* DiffView: unified and side-by-side diffs in CodeBlock's quiet frame. */
+/* DiffView: unified and side-by-side diffs powered by @pierre/diffs inside
+   CodeBlock's quiet frame. Token variables inherit into the Shadow DOM so
+   syntax colors, surfaces, density, and light/dark themes follow Reflow. */
 .rf-diff-view {
   --rf-diff-font: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --rf-diff-size: 13px;
   --rf-diff-leading: 20px;
   --rf-diff-added: light-dark(#22c55e, var(--rf-success));
   --rf-diff-removed: light-dark(#ef4444, var(--rf-danger));
-  --rf-diff-added-bg: color-mix(in oklab, var(--rf-diff-added) 13%, transparent);
-  --rf-diff-removed-bg: color-mix(in oklab, var(--rf-diff-removed) 13%, transparent);
+  --rf-diff-token-keyword: color-mix(in oklab, var(--rf-accent) 78%, var(--rf-fg));
+  --rf-diff-token-string: var(--rf-success);
+  --rf-diff-token-function: var(--rf-info);
+  --rf-diff-token-constant: var(--rf-warning);
+  --rf-diff-token-parameter: light-dark(#c2410c, #fdba74);
+  --rf-diff-token-comment: var(--rf-muted);
+  --rf-diff-token-punctuation: color-mix(in oklab, var(--rf-fg) 62%, transparent);
+  --rf-diff-token-link: var(--rf-info);
+  --rf-diff-token-inserted: var(--rf-success);
+  --rf-diff-token-deleted: var(--rf-danger);
+
+  /* @pierre/diffs host variables inherited into its Shadow DOM. */
+  --diffs-font-family: var(--rf-diff-font);
+  --diffs-header-font-family: var(--rf-font);
+  --diffs-font-size: var(--rf-diff-size);
+  --diffs-line-height: var(--rf-diff-leading);
+  --diffs-light-bg: var(--rf-surface-2);
+  --diffs-dark-bg: var(--rf-surface-2);
+  --diffs-light: var(--rf-fg);
+  --diffs-dark: var(--rf-fg);
+  --diffs-fg-number-override: var(--rf-muted);
+  --diffs-addition-color-override: var(--rf-diff-added);
+  --diffs-deletion-color-override: var(--rf-diff-removed);
+  --diffs-modified-color-override: var(--rf-accent);
+  --diffs-bg-separator-override: var(--rf-surface-3);
+
   position: relative;
   display: flex;
   flex-direction: column;
@@ -19,6 +45,7 @@
   box-shadow: inset 0 0 0 1px var(--rf-border);
   color: var(--rf-fg);
   font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+  overflow-anchor: none;
 }
 
 .rf-diff-view[data-density='compact'],
@@ -83,127 +110,60 @@
   margin-inline-start: auto;
 }
 
-.rf-diff-scroll {
+.rf-diff-stage {
+  position: relative;
+  min-inline-size: 0;
+  overflow: hidden;
+}
+
+.rf-diff-view:not([data-rf-diffs-ready]) .rf-diff-mount {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.rf-diff-mount > diffs-container {
+  display: block;
   min-inline-size: 0;
 }
 
-.rf-diff-viewport:focus-visible {
-  outline: 2px solid var(--rf-accent);
-  outline-offset: -2px;
-}
-
-.rf-diff-body {
-  inline-size: max-content;
-  min-inline-size: 100%;
-  padding: 6px 0;
+.rf-diff-fallback {
+  padding-block: 8px;
+  overflow-x: auto;
+  color: var(--rf-fg);
   font: var(--rf-diff-size) / var(--rf-diff-leading) var(--rf-diff-font);
   font-variant-ligatures: none;
   tab-size: 2;
 }
 
-.rf-diff-view[data-wrap] .rf-scroll-root .rf-scroll-content,
-.rf-diff-view[data-wrap] .rf-diff-body {
-  inline-size: 100%;
-}
-
-.rf-diff-hunk + .rf-diff-hunk {
-  margin-block-start: 4px;
-  border-block-start: 1px solid var(--rf-border);
-}
-
-.rf-diff-hunk-header {
-  padding: 4px 12px;
+.rf-diff-fallback-hunk {
+  display: flex;
+  align-items: center;
+  block-size: 32px;
+  margin-block: 8px;
+  margin-inline: 8px;
+  padding-inline: 1ch;
+  border-radius: 6px;
   background: var(--rf-surface-3);
   color: var(--rf-muted);
-  font-size: var(--rf-text-caption);
-  white-space: pre;
+  font-family: var(--rf-font);
+  white-space: nowrap;
 }
 
-.rf-diff-line {
-  display: flex;
-  align-items: stretch;
-  min-inline-size: 100%;
-  padding-inline-end: 16px;
+.rf-diff-fallback-hunk:first-child {
+  margin-block-start: 0;
 }
 
-.rf-diff-line[data-type='add'] {
-  background: var(--rf-diff-added-bg);
-  box-shadow: inset 2px 0 0 var(--rf-diff-added);
+.rf-diff-fallback-code {
+  margin: 0;
+  padding-inline: 14px;
+  font: inherit;
 }
 
-.rf-diff-line[data-type='remove'] {
-  background: var(--rf-diff-removed-bg);
-  box-shadow: inset 2px 0 0 var(--rf-diff-removed);
-}
-
-.rf-diff-num {
-  flex: none;
-  inline-size: 3.5ch;
-  padding-inline: 8px 4px;
-  color: var(--rf-muted);
-  text-align: end;
-  font-variant-numeric: tabular-nums;
-  user-select: none;
-}
-
-.rf-diff-sign {
-  flex: none;
-  inline-size: 2ch;
-  text-align: center;
-  color: var(--rf-muted);
-  user-select: none;
-}
-
-.rf-diff-line[data-type='add'] .rf-diff-sign,
-.rf-diff-split-cell[data-type='add'] .rf-diff-sign {
-  color: var(--rf-success);
-}
-
-.rf-diff-line[data-type='remove'] .rf-diff-sign,
-.rf-diff-split-cell[data-type='remove'] .rf-diff-sign {
-  color: var(--rf-danger);
-}
-
-.rf-diff-code {
-  flex: 1;
-  min-inline-size: 0;
-  white-space: pre;
-}
-
-.rf-diff-view[data-wrap] .rf-diff-code {
+.rf-diff-view[data-wrap] .rf-diff-fallback-code {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-}
-
-.rf-diff-split-row {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  min-inline-size: 100%;
-}
-
-.rf-diff-split-cell {
-  display: flex;
-  align-items: stretch;
-  min-inline-size: 0;
-  padding-inline-end: 12px;
-}
-
-.rf-diff-split-cell[data-side='new'] {
-  border-inline-start: 1px solid var(--rf-border);
-}
-
-.rf-diff-split-cell[data-type='add'] {
-  background: var(--rf-diff-added-bg);
-  box-shadow: inset 2px 0 0 var(--rf-diff-added);
-}
-
-.rf-diff-split-cell[data-type='remove'] {
-  background: var(--rf-diff-removed-bg);
-  box-shadow: inset 2px 0 0 var(--rf-diff-removed);
-}
-
-.rf-diff-split-cell[data-type='empty'] {
-  background: color-mix(in oklab, var(--rf-fg) 3%, transparent);
 }
 
 @media (forced-colors: active) {

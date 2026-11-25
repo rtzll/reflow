@@ -40,6 +40,8 @@ try {
     'README.md',
     'dist/index.js',
     'dist/index.d.ts',
+    'dist/diffs.js',
+    'dist/diffs.d.ts',
     'dist/highlight.js',
     'dist/highlight.d.ts',
     'dist/markdown.js',
@@ -90,6 +92,17 @@ try {
     const source = extract(tarball, file)
     assert.doesNotMatch(source, /from ['"](?:shiki|@shikijs\/)/, `${file} must not import Shiki`)
   }
+  // @pierre/diffs is opt-in: only the diffs entry may import it.
+  for (const file of files.filter((name) => /^package\/dist\/.+\.js$/.test(name))) {
+    if (file === 'package/dist/diffs.js') continue
+    const source = extract(tarball, file)
+    assert.doesNotMatch(source, /@pierre\/diffs/, `${file} must not import @pierre/diffs`)
+  }
+  assert.match(
+    extract(tarball, 'package/dist/diffs.js'),
+    /@pierre\/diffs/,
+    'dist/diffs.js should import @pierre/diffs',
+  )
   // marked loads only with the Markdown entry, so other pages never download it.
   for (const file of files.filter((name) => /^package\/dist\/.+\.js$/.test(name))) {
     if (file === 'package/dist/markdown.js') continue
@@ -183,6 +196,11 @@ try {
     !existsSync(join(destination, 'node_modules/shiki')) &&
       !(existsSync(store) && readdirSync(store).some((name) => name.startsWith('shiki@'))),
     'Installing Reflow must not install Shiki',
+  )
+  assert.ok(
+    !existsSync(join(destination, 'node_modules/@pierre/diffs')) &&
+      !(existsSync(store) && readdirSync(store).some((name) => name.startsWith('@pierre+diffs@'))),
+    'Installing Reflow must not install @pierre/diffs',
   )
 
   const starter = spawn(process.execPath, ['--import', 'remix/node-tsx', 'server.ts'], {
