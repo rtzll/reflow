@@ -1,4 +1,5 @@
-import { Button, DiffView } from '@rtzll/reflow'
+import { Button } from '@rtzll/reflow'
+import { DiffView } from '@rtzll/reflow/diffs'
 import type { Handle } from 'remix/component'
 
 const sampleDiff = `--- a/packages/reflow/src/behaviors/shortcut.ts

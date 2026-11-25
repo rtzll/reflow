@@ -179,6 +179,14 @@ const worker = await build({
           if (resolve(resolveDir, path) === resolve(root, 'app/code-samples.ts'))
             return { path: resolve(root, 'worker/code-samples.ts') }
         })
+        builder.onResolve({ filter: /^@pierre\/diffs(?:\/.*)?$/ }, ({ path }) => ({
+          path,
+          namespace: 'reflow-worker-diffs-stub',
+        }))
+        builder.onLoad({ filter: /.*/, namespace: 'reflow-worker-diffs-stub' }, () => ({
+          contents: 'export {}\n',
+          loader: 'js',
+        }))
         builder.onLoad({ filter: /drag-adapter\.ts$/ }, ({ path }) => {
           if (path === resolve(root, 'app/public/apps/issues/drag-adapter.ts')) {
             return {

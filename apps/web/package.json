@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "4.0.0",
+    "@pierre/diffs": "1.7.1",
     "@remix-run/ui": "0.14.0",
     "@rtzll/reflow": "workspace:*",
     "@shikijs/transformers": "4.6.0",

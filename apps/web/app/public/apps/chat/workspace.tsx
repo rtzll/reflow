@@ -9,7 +9,6 @@ import {
   ChatMessage,
   ChatOutline,
   Confirmation,
-  DiffView,
   Dropdown,
   Icon,
   InputMessage,
@@ -19,6 +18,7 @@ import {
   type SidebarItem,
   type SidebarSection,
 } from '@rtzll/reflow'
+import { DiffView } from '@rtzll/reflow/diffs'
 import { Markdown } from '@rtzll/reflow/markdown'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import { alternateReply, replyTo, type ChatEntry, type Conversation } from './fixtures.ts'
