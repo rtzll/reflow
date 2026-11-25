@@ -45,12 +45,28 @@ export interface OpenOptions {
   motion?: boolean
 }
 
+const silenced = new WeakSet<Page>()
+
 /**
  * Opens a showcase page with reduced motion and, unless told not to, waits
  * until it has hydrated. End-to-end tests navigate only through this, so none can act on
  * markup before its scripts are wired; tools/check-tests.test.ts enforces it.
  */
 export async function open(page: Page, url: string, options: OpenOptions = {}) {
+  if (!silenced.has(page)) {
+    silenced.add(page)
+    // Route Web Audio to the silent sink so headless Chromium never grabs OS audio output.
+    await page.addInitScript(() => {
+      const Native = window.AudioContext
+      if (!Native) return
+      class SilentAudioContext extends Native {
+        constructor(audioOptions?: AudioContextOptions) {
+          super({ sinkId: { type: 'none' }, ...audioOptions } as AudioContextOptions)
+        }
+      }
+      window.AudioContext = SilentAudioContext
+    })
+  }
   await page.emulateMedia({ reducedMotion: options.motion ? 'no-preference' : 'reduce' })
   const response = await page.goto(url, options.waitUntil ? { waitUntil: options.waitUntil } : {})
   if (options.hydrate !== false) await waitForShowcase(page)
