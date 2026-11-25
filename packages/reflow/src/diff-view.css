@@ -1,0 +1,214 @@
+/* DiffView: unified and side-by-side diffs in CodeBlock's quiet frame. */
+.rf-diff-view {
+  --rf-diff-font: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --rf-diff-size: 13px;
+  --rf-diff-leading: 20px;
+  --rf-diff-added: light-dark(#22c55e, var(--rf-success));
+  --rf-diff-removed: light-dark(#ef4444, var(--rf-danger));
+  --rf-diff-added-bg: color-mix(in oklab, var(--rf-diff-added) 13%, transparent);
+  --rf-diff-removed-bg: color-mix(in oklab, var(--rf-diff-removed) 13%, transparent);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-inline-size: 0;
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--rf-panel-radius);
+  background: var(--rf-surface-2);
+  box-shadow: inset 0 0 0 1px var(--rf-border);
+  color: var(--rf-fg);
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+}
+
+.rf-diff-view[data-density='compact'],
+[data-density='compact'] .rf-diff-view:not([data-density]) {
+  --rf-diff-size: 12px;
+  --rf-diff-leading: 18px;
+}
+
+.rf-diff-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  min-block-size: 40px;
+  box-sizing: border-box;
+  padding: 6px 12px;
+  border-block-end: 1px solid var(--rf-border);
+  font-size: var(--rf-text-caption);
+  line-height: var(--rf-leading-caption, 16px);
+}
+
+.rf-diff-path {
+  display: inline-flex;
+  min-inline-size: 0;
+  overflow: hidden;
+  font-family: var(--rf-diff-font);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.rf-diff-folder {
+  color: var(--rf-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rf-diff-file {
+  flex: none;
+  color: var(--rf-fg);
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.rf-diff-counts {
+  flex: none;
+  font-family: var(--rf-diff-font);
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-diff-added {
+  color: var(--rf-success);
+}
+
+.rf-diff-removed {
+  color: var(--rf-danger);
+}
+
+.rf-diff-controls {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+
+.rf-diff-scroll {
+  min-inline-size: 0;
+}
+
+.rf-diff-viewport:focus-visible {
+  outline: 2px solid var(--rf-accent);
+  outline-offset: -2px;
+}
+
+.rf-diff-body {
+  inline-size: max-content;
+  min-inline-size: 100%;
+  padding: 6px 0;
+  font: var(--rf-diff-size) / var(--rf-diff-leading) var(--rf-diff-font);
+  font-variant-ligatures: none;
+  tab-size: 2;
+}
+
+.rf-diff-view[data-wrap] .rf-scroll-root .rf-scroll-content,
+.rf-diff-view[data-wrap] .rf-diff-body {
+  inline-size: 100%;
+}
+
+.rf-diff-hunk + .rf-diff-hunk {
+  margin-block-start: 4px;
+  border-block-start: 1px solid var(--rf-border);
+}
+
+.rf-diff-hunk-header {
+  padding: 4px 12px;
+  background: var(--rf-surface-3);
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption);
+  white-space: pre;
+}
+
+.rf-diff-line {
+  display: flex;
+  align-items: stretch;
+  min-inline-size: 100%;
+  padding-inline-end: 16px;
+}
+
+.rf-diff-line[data-type='add'] {
+  background: var(--rf-diff-added-bg);
+  box-shadow: inset 2px 0 0 var(--rf-diff-added);
+}
+
+.rf-diff-line[data-type='remove'] {
+  background: var(--rf-diff-removed-bg);
+  box-shadow: inset 2px 0 0 var(--rf-diff-removed);
+}
+
+.rf-diff-num {
+  flex: none;
+  inline-size: 3.5ch;
+  padding-inline: 8px 4px;
+  color: var(--rf-muted);
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+
+.rf-diff-sign {
+  flex: none;
+  inline-size: 2ch;
+  text-align: center;
+  color: var(--rf-muted);
+  user-select: none;
+}
+
+.rf-diff-line[data-type='add'] .rf-diff-sign,
+.rf-diff-split-cell[data-type='add'] .rf-diff-sign {
+  color: var(--rf-success);
+}
+
+.rf-diff-line[data-type='remove'] .rf-diff-sign,
+.rf-diff-split-cell[data-type='remove'] .rf-diff-sign {
+  color: var(--rf-danger);
+}
+
+.rf-diff-code {
+  flex: 1;
+  min-inline-size: 0;
+  white-space: pre;
+}
+
+.rf-diff-view[data-wrap] .rf-diff-code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.rf-diff-split-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-inline-size: 100%;
+}
+
+.rf-diff-split-cell {
+  display: flex;
+  align-items: stretch;
+  min-inline-size: 0;
+  padding-inline-end: 12px;
+}
+
+.rf-diff-split-cell[data-side='new'] {
+  border-inline-start: 1px solid var(--rf-border);
+}
+
+.rf-diff-split-cell[data-type='add'] {
+  background: var(--rf-diff-added-bg);
+  box-shadow: inset 2px 0 0 var(--rf-diff-added);
+}
+
+.rf-diff-split-cell[data-type='remove'] {
+  background: var(--rf-diff-removed-bg);
+  box-shadow: inset 2px 0 0 var(--rf-diff-removed);
+}
+
+.rf-diff-split-cell[data-type='empty'] {
+  background: color-mix(in oklab, var(--rf-fg) 3%, transparent);
+}
+
+@media (forced-colors: active) {
+  .rf-diff-view {
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+}

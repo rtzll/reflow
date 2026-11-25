@@ -175,6 +175,14 @@ export {
   type CodeToken,
   type HighlightedCode,
 } from './code-block.tsx'
+export {
+  DiffView,
+  parseUnifiedDiff,
+  type DiffHunk,
+  type DiffLine,
+  type DiffLineType,
+  type DiffViewProps,
+} from './diff-view.tsx'
 export { Citation, type CitationProps, type CitationSource } from './citation.tsx'
 export { Confirmation, type ConfirmationProps, type ConfirmationState } from './confirmation.tsx'
 export { Avatar, type AvatarProps, type AvatarStatus } from './avatar.tsx'

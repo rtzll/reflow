@@ -60,6 +60,7 @@
 @import './toaster.css' layer(reflow);
 @import './drawer.css' layer(reflow);
 @import './code-block.css' layer(reflow);
+@import './diff-view.css' layer(reflow);
 @import './markdown.css' layer(reflow);
 @import './citation.css' layer(reflow);
 @import './avatar.css' layer(reflow);
