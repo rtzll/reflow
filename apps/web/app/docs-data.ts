@@ -855,6 +855,12 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           required: false,
         },
         {
+          name: 'highlight',
+          type: '"item" | "trigger"',
+          description: 'Highlight the whole expanded item or only the trigger on hover.',
+          required: false,
+        },
+        {
           name: 'headingLevel',
           type: '2 | 3 | 4 | 5 | 6',
           description: 'Semantic heading level for accordion triggers.',
@@ -2305,6 +2311,60 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           description: 'Control density or icon-button dimensions.',
           required: false,
         },
+        {
+          name: 'triggerLabel',
+          type: 'string',
+          description: 'Visible label shown beside the popover trigger tile.',
+          required: false,
+        },
+        {
+          name: 'triggerLabelPosition',
+          type: '"left" | "right"',
+          description: 'Placement of triggerLabel relative to the color tile.',
+          required: false,
+        },
+        {
+          name: 'triggerShowValue',
+          type: 'boolean',
+          description: 'Shows the six-digit hex value next to the popover trigger tile.',
+          required: false,
+        },
+        {
+          name: 'triggerShowRemove',
+          type: 'boolean',
+          description: 'Adds a clear button inside the popover trigger that calls onTriggerRemove.',
+          required: false,
+        },
+        {
+          name: 'onTriggerRemove',
+          type: '(() => void)',
+          description: 'Called when the trigger clear button is pressed.',
+          required: false,
+        },
+        {
+          name: 'placement',
+          type: '"bottom-start" | "right-start"',
+          description: 'Popover placement when variant is popover.',
+          required: false,
+        },
+        {
+          name: 'open',
+          type: 'boolean',
+          description: 'Controlled popover visibility.',
+          required: false,
+        },
+        {
+          name: 'defaultOpen',
+          type: 'boolean',
+          description: 'Initial popover visibility.',
+          required: false,
+        },
+        {
+          name: 'onOpenChange',
+          type: '((open: boolean) => void)',
+          description: 'Called when popover visibility changes.',
+          required: false,
+        },
       ],
     },
   ],
@@ -2312,6 +2372,12 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
     {
       name: 'Combobox',
       props: [
+        {
+          name: 'leadingIcon',
+          type: 'RemixNode',
+          description: 'Decorative icon rendered before the input value.',
+          required: false,
+        },
         {
           name: 'multiple',
           type: 'boolean',
@@ -2461,6 +2527,12 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           description: 'Additional text matched by filtering or typeahead.',
           required: false,
         },
+        {
+          name: 'group',
+          type: 'string',
+          description: 'Label for a contiguous group of options in Select.',
+          required: false,
+        },
       ],
     },
   ],
@@ -2588,6 +2660,12 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           required: false,
         },
         {
+          name: 'filter',
+          type: 'string',
+          description: 'Quick filter membership; defaults to the displayed group.',
+          required: false,
+        },
+        {
           name: 'keywords',
           type: 'readonly string[]',
           description: 'Additional terms matched by search.',
@@ -2609,6 +2687,12 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           name: 'icon',
           type: 'RemixNode',
           description: 'Icon content.',
+          required: false,
+        },
+        {
+          name: 'action',
+          type: 'string',
+          description: 'Overrides the highlighted command label in the Enter hint.',
           required: false,
         },
       ],
@@ -2934,6 +3018,12 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           required: false,
         },
         {
+          name: 'flush',
+          type: 'boolean',
+          description: 'Let a child composition fill the panel and visually hide the title.',
+          required: false,
+        },
+        {
           name: 'open',
           type: 'boolean',
           description: 'Controlled visibility.',
@@ -3053,6 +3143,12 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           required: true,
         },
         {
+          name: 'triggerContent',
+          type: 'RemixNode',
+          description: 'Custom content rendered inside the trigger button.',
+          required: false,
+        },
+        {
           name: 'items',
           type: 'readonly DropdownItem[]',
           description: 'Items and their content.',
@@ -3077,9 +3173,34 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           required: false,
         },
         {
+          name: 'side',
+          type: '"top" | "bottom"',
+          description: 'Which side of the trigger the menu opens on.',
+          required: false,
+        },
+        {
           name: 'variant',
-          type: '"ghost" | "outline"',
-          description: 'Visual or layout treatment.',
+          type: '"outline" | "ghost" | "bare"',
+          description:
+            'Visual or layout treatment. bare renders an unstyled trigger for custom rows.',
+          required: false,
+        },
+        {
+          name: 'triggerClass',
+          type: 'string',
+          description: 'Additional CSS class applied to the trigger button.',
+          required: false,
+        },
+        {
+          name: 'triggerMix',
+          type: 'MixInput',
+          description: 'Extra behavior attached to the trigger, such as Tooltip trigger props.',
+          required: false,
+        },
+        {
+          name: 'chevron',
+          type: 'boolean',
+          description: 'Show the trailing chevron on the trigger.',
           required: false,
         },
         {
@@ -3092,6 +3213,12 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           name: 'searchPlaceholder',
           type: 'string',
           description: 'Placeholder for the menu search field.',
+          required: false,
+        },
+        {
+          name: 'emptyMessage',
+          type: 'string',
+          description: 'Text shown when a search matches nothing.',
           required: false,
         },
         {
@@ -3203,6 +3330,12 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           name: 'legend',
           type: 'RemixNode',
           description: 'Legend for a group of form controls.',
+          required: false,
+        },
+        {
+          name: 'legendVariant',
+          type: '"legend" | "label"',
+          description: 'Visual styling of the fieldset legend.',
           required: false,
         },
       ],
@@ -3658,6 +3791,12 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           name: 'actions',
           type: 'RemixNode',
           description: 'Actions displayed beside the message or composer.',
+          required: false,
+        },
+        {
+          name: 'rightActions',
+          type: 'RemixNode',
+          description: 'Actions aligned to the trailing end of the composer toolbar.',
           required: false,
         },
       ],
@@ -4321,6 +4460,18 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           name: 'status',
           type: '"default" | "info" | "success" | "warning" | "error"',
           description: 'Banner status, such as warning for a risky action. Default default.',
+          required: false,
+        },
+        {
+          name: 'contrast',
+          type: '"low" | "high"',
+          description: 'Banner surface contrast.',
+          required: false,
+        },
+        {
+          name: 'variant',
+          type: '"inline" | "fixed"',
+          description: 'Banner placement style.',
           required: false,
         },
         {
@@ -5332,6 +5483,12 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           description: 'Additional text matched by filtering or typeahead.',
           required: false,
         },
+        {
+          name: 'group',
+          type: 'string',
+          description: 'Label for a contiguous group of options in Select.',
+          required: false,
+        },
       ],
     },
   ],
@@ -5431,6 +5588,19 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           required: false,
         },
         {
+          name: 'searchShortcut',
+          type: 'string | null',
+          description:
+            'Key hint shown in the search field on hover or focus. Pass null to drop it.',
+          required: false,
+        },
+        {
+          name: 'searchActions',
+          type: 'RemixNode',
+          description: 'Header actions shown after the search field.',
+          required: false,
+        },
+        {
           name: 'onWidthChange',
           type: '((width: number) => void)',
           description: 'Called after the sidebar is resized.',
@@ -5491,8 +5661,9 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
         {
           name: 'href',
           type: 'string',
-          description: 'Destination of the navigation link.',
-          required: true,
+          description:
+            'Destination of the navigation link. Omit on a row with children to fold and unfold them instead of navigating.',
+          required: false,
         },
         {
           name: 'badge',
@@ -5504,6 +5675,12 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           name: 'icon',
           type: 'RemixNode',
           description: 'Icon content.',
+          required: false,
+        },
+        {
+          name: 'status',
+          type: '"active" | "unread" | "idle"',
+          description: 'Status dot in the icon column: active and unread fill it, idle rings it.',
           required: false,
         },
         {
@@ -5527,7 +5704,13 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
         {
           name: 'actions',
           type: 'RemixNode',
-          description: 'Actions displayed beside the message or composer.',
+          description: 'Row actions revealed on hover or focus.',
+          required: false,
+        },
+        {
+          name: 'actionCount',
+          type: 'number',
+          description: 'How many 24px actions are in actions, so the label leaves room for them.',
           required: false,
         },
       ],
@@ -5541,6 +5724,13 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           name: 'label',
           type: 'string',
           description: 'Accessible name or visible label for the control.',
+          required: false,
+        },
+        {
+          name: 'showLabel',
+          type: 'boolean',
+          description:
+            'Shows the visible label above the slider while keeping the accessible name.',
           required: false,
         },
         {
@@ -5649,6 +5839,12 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           name: 'thumbBorderColor',
           type: 'string',
           description: 'Custom slider thumb outline.',
+          required: false,
+        },
+        {
+          name: 'trackStyle',
+          type: 'Record<string, string | number>',
+          description: 'Extra CSS on the track line, for gradients behind the thumb.',
           required: false,
         },
       ],
@@ -5793,6 +5989,12 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           name: 'description',
           type: 'RemixNode',
           description: 'Additional explanatory text.',
+          required: false,
+        },
+        {
+          name: 'action',
+          type: 'RemixNode',
+          description: 'Optional action control shown below the empty-state message.',
           required: false,
         },
       ],
