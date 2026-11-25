@@ -5,6 +5,7 @@
   --rf-diff-font: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --rf-diff-size: 13px;
   --rf-diff-leading: 20px;
+  --rf-diff-pad: 16px;
   --rf-diff-added: light-dark(#22c55e, var(--rf-success));
   --rf-diff-removed: light-dark(#ef4444, var(--rf-danger));
   --rf-diff-token-keyword: color-mix(in oklab, var(--rf-accent) 78%, var(--rf-fg));
@@ -31,6 +32,8 @@
   --diffs-addition-color-override: var(--rf-diff-added);
   --diffs-deletion-color-override: var(--rf-diff-removed);
   --diffs-modified-color-override: var(--rf-accent);
+  --diffs-bg-buffer-override: color-mix(in oklab, var(--rf-fg) 6%, transparent);
+  --diffs-bg-context-override: color-mix(in oklab, var(--rf-fg) 12%, transparent);
   --diffs-bg-separator-override: var(--rf-surface-3);
 
   position: relative;
@@ -40,9 +43,9 @@
   min-inline-size: 0;
   margin: 0;
   overflow: hidden;
+  border: 1px solid var(--rf-border);
   border-radius: var(--rf-panel-radius);
   background: var(--rf-surface-2);
-  box-shadow: inset 0 0 0 1px var(--rf-border);
   color: var(--rf-fg);
   font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
   overflow-anchor: none;
@@ -52,17 +55,19 @@
 [data-density='compact'] .rf-diff-view:not([data-density]) {
   --rf-diff-size: 12px;
   --rf-diff-leading: 18px;
+  --rf-diff-pad: 12px;
 }
 
 .rf-diff-header {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 12px;
+  gap: 8px 10px;
   min-block-size: 40px;
   box-sizing: border-box;
-  padding: 6px 12px;
+  padding: 4px 8px 4px var(--rf-diff-pad);
   border-block-end: 1px solid var(--rf-border);
+  color: var(--rf-muted);
   font-size: var(--rf-text-caption);
   line-height: var(--rf-leading-caption, 16px);
 }

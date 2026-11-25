@@ -34,7 +34,7 @@ it('renders a unified diff with @pierre/diffs, extracts filename, and announces 
   equal($('.rf-diff-file')?.textContent, 'cache.ts')
   equal($('.rf-diff-added')?.textContent, '+3')
   equal($('.rf-diff-removed')?.textContent, '−2')
-  equal($('.rf-diff-counts .rf-sr-only')?.textContent, '3 added, 2 removed')
+  equal($('.rf-diff-counts .rf-basic-sr-only')?.textContent, '3 added, 2 removed')
 
   await waitFor(() => figure.hasAttribute('data-rf-diffs-ready'))
   const container = figure.querySelector('diffs-container')

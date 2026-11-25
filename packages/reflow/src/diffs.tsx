@@ -416,7 +416,7 @@ export function DiffView(handle: Handle<DiffViewProps>) {
             )}
             {(summary.added > 0 || summary.removed > 0) && (
               <span class="rf-diff-counts">
-                <span class="rf-sr-only">{countLabel}</span>
+                <span class="rf-basic-sr-only">{countLabel}</span>
                 <span aria-hidden="true">
                   {summary.added > 0 && <span class="rf-diff-added">+{summary.added}</span>}
                   {summary.added > 0 && summary.removed > 0 && ' '}
