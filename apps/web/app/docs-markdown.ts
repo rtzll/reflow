@@ -1,3 +1,4 @@
+import { Kbd } from '@rtzll/reflow'
 import { Fragment, type RemixNode } from 'remix/component'
 import { catalog } from './catalog.tsx'
 import { apiDescription, componentReference } from './component-reference.ts'
@@ -97,6 +98,14 @@ function guideText(node: RemixNode): string {
     case 'kbd':
     case 'code':
       return inlineCode(children())
+    case Kbd: {
+      const keys = props.keys
+      if (keys !== undefined) {
+        const list = typeof keys === 'string' ? [keys] : (keys as readonly string[])
+        return inlineCode(list.join(' '))
+      }
+      return inlineCode(children())
+    }
     case 'strong':
       return `**${children()}**`
     case 'li': {
