@@ -62,7 +62,11 @@ async function show(
         title={`${app?.name ?? 'Example apps'} · Reflow`}
         url={url}
       >
-        {app ? <AppWorkspace app={app} search={query} /> : <AppsIndex />}
+        {app ? (
+          <AppWorkspace app={app} search={query} soundEnabled={settings.soundEnabled} />
+        ) : (
+          <AppsIndex soundEnabled={settings.soundEnabled} />
+        )}
       </Document>,
     )
   }

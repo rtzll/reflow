@@ -9,7 +9,7 @@ import {
   type HighlightedCode,
 } from '@rtzll/reflow'
 import type { Handle } from 'remix/component'
-import { play } from 'cuelume'
+import { play } from './showcase-audio.ts'
 import { FilePreview } from './file-preview.tsx'
 import { CodeBlockCard } from './code-block-example.tsx'
 

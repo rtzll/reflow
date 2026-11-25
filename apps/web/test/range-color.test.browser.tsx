@@ -131,6 +131,10 @@ it('moves range thumbs through discrete steps, constrains the readout, and reset
   ok(form instanceof HTMLFormElement)
   ok(min instanceof HTMLInputElement)
   ok(readout instanceof HTMLInputElement)
+  const steps: string[] = []
+  form.addEventListener('reflow:slider-step', (event) =>
+    steps.push((event as CustomEvent<string>).detail),
+  )
 
   equal(new FormData(form).get('min'), '5')
   equal(new FormData(form).get('max'), '18')
@@ -141,13 +145,18 @@ it('moves range thumbs through discrete steps, constrains the readout, and reset
 
   readout.focus()
   await act(() => edit(readout, '30'))
+  deepEqual(steps, ['forward'])
   await act(() => press(readout, 'Enter'))
   equal(new FormData(form).get('min'), '18')
   equal(readout.value, '18')
+  await act(() => press(min, 'ArrowRight'))
+  await act(() => press(min, 'ArrowLeft'))
+  equal(new FormData(form).get('min'), '10')
 
   await act(() => form.reset())
   equal(new FormData(form).get('min'), '5')
   equal(new FormData(form).get('max'), '18')
+  deepEqual(steps, ['forward', 'forward', 'back'])
 })
 
 function commit(input: HTMLInputElement, value: string) {

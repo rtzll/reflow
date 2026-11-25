@@ -29,6 +29,7 @@ import {
   saveThread,
   type Thread,
 } from './local-threads.ts'
+import { ShowcaseSoundButton } from '../../showcase-sound-button.tsx'
 import { ModelPicker } from '../../model-picker.tsx'
 import { skillReply, skillTriggers } from './skills.ts'
 import { startsStretch, timeLabel } from './time.ts'
@@ -37,6 +38,7 @@ interface ChatProps {
   conversations: Conversation[]
   initialId: string
   search: string
+  soundEnabled: boolean
   links: { reflow: string; apps: string }
 }
 
@@ -241,6 +243,7 @@ export const ChatWorkspace = clientEntry(
             toolbar={
               <div class="studio-toolbar">
                 <h2 class="studio-title">{active?.messages.length ? active.title : 'New chat'}</h2>
+                <ShowcaseSoundButton enabled={handle.props.soundEnabled} />
                 {active && active.messages.length > 0 && (
                   <div class="studio-toolbar-actions">
                     <ChatOutline

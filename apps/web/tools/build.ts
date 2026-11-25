@@ -3,6 +3,7 @@ import type { BuildOptions, Metafile, Plugin } from 'esbuild'
 import { copyFile, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { dirname, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getSoundAssets, soundFiles } from '../app/sound-assets.ts'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
 const output = resolve(root, 'build')
@@ -62,6 +63,7 @@ const [client, samples, sources] = await Promise.all([
       'app/public/entry.ts',
       ...clientEntries.keys(),
       ...styles,
+      ...soundFiles,
       ...appStyles.map(([slug, path]) => ({ in: path, out: `app-${slug}` })),
     ],
     outdir: resolve(output, 'client'),
@@ -71,7 +73,7 @@ const [client, samples, sources] = await Promise.all([
     publicPath: '/',
     platform: 'browser',
     splitting: true,
-    loader: { '.woff2': 'file' },
+    loader: { '.woff2': 'file', '.mp3': 'copy' },
   }),
   // Highlight the CodeBlock samples while bundling, so the worker never includes Shiki.
   import('../app/code-samples.ts').then(({ codeSamples }) => codeSamples()),
@@ -130,6 +132,10 @@ for (const file of [
   await mkdir(dirname(destination), { recursive: true })
   await copyFile(resolve(publicDir, file), destination)
 }
+await copyFile(
+  new URL('./LICENSE', import.meta.resolve('button-sounds/package.json')),
+  resolve(output, 'client/Button-Sounds-LICENSE.txt'),
+)
 await writeFile(
   resolve(output, 'client/_headers'),
   '/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n  X-Content-Type-Options: nosniff\n',
@@ -141,6 +147,7 @@ const manifest = {
     entry: scriptEntry('app/public/entry.ts'),
     stylesheets: styles.map(href),
     favicon: '/favicon.svg',
+    sounds: await getSoundAssets(href),
     ogImage: '/og.png',
     images: { sidebarAvatar: '/demo-avatar.svg', thinkingPreview: '/reflow-preview.png' },
   },

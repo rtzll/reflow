@@ -1,4 +1,4 @@
-import { play, setEnabled, setVolume, unlock } from 'cuelume'
+import { play, setSoundEnabled, unlockSound } from './showcase-audio.ts'
 import { readSettingCookies, settingCookie, soundPreferenceKey } from './site-settings.ts'
 
 function saveSoundCookie(value: 'on' | 'off') {
@@ -102,90 +102,11 @@ function bindCopyErrors() {
   })
 }
 
-const sliderKeys = new Set([
-  'ArrowDown',
-  'ArrowLeft',
-  'ArrowRight',
-  'ArrowUp',
-  'End',
-  'Home',
-  'PageDown',
-  'PageUp',
-])
-
-function sliderCue(slider: Element | null | undefined) {
-  if (!slider) return
-  const thumbs = [...slider.querySelectorAll<HTMLInputElement>('input[type="range"]:enabled')]
-  if (!thumbs.length) return
-  const initialValues = thumbs.map((thumb) => thumb.valueAsNumber)
-  return () => {
-    // The slider renders its new range values after handling the gesture.
-    requestAnimationFrame(() => {
-      if (!slider.isConnected) return
-      const changed = thumbs.findIndex(
-        (thumb, index) => thumb.valueAsNumber !== initialValues[index],
-      )
-      if (changed === -1) return
-      play('select', {
-        emphasis: 'subtle',
-        volume: 0.35,
-        direction: thumbs[changed].valueAsNumber > initialValues[changed] ? 'forward' : 'back',
-      })
-    })
-  }
-}
-
-function bindSliderSounds() {
-  let drag: { id: number; slider: Element; finish: () => void } | undefined
-  const keyAdjustments = new Map<string, { input: Element; finish: () => void }>()
-  const edits = new WeakMap<Element, () => void>()
-
-  document.addEventListener(
-    'pointerdown',
-    (event) => {
-      if (!event.isPrimary || event.button !== 0 || !(event.target instanceof Element)) return
-      const track = event.target.closest('.site-preview-stage .rf-slider-track')
-      const slider = track?.closest('.rf-slider')
-      const finish = sliderCue(slider)
-      if (slider && finish) drag = { id: event.pointerId, slider, finish }
-    },
-    { capture: true },
-  )
-  document.addEventListener('pointerup', (event) => {
-    if (drag?.id !== event.pointerId) return
-    drag.finish()
-    drag = undefined
-  })
-  document.addEventListener('pointercancel', (event) => {
-    if (drag?.id === event.pointerId) drag = undefined
-  })
-  document.addEventListener(
-    'keydown',
-    (event) => {
-      const input = event.target
-      if (!(input instanceof HTMLInputElement) || !sliderKeys.has(event.key) || event.repeat) return
-      if (event.altKey || event.ctrlKey || event.metaKey || input.type !== 'range') return
-      const finish = sliderCue(input.closest('.site-preview-stage .rf-slider'))
-      if (finish) keyAdjustments.set(event.key, { input, finish })
-    },
-    { capture: true },
-  )
-  document.addEventListener('keyup', (event) => {
-    const adjustment = keyAdjustments.get(event.key)
-    keyAdjustments.delete(event.key)
-    if (adjustment?.input === event.target) adjustment.finish()
-  })
-  document.addEventListener('input', (event) => {
-    const input = event.target
-    if (!(input instanceof HTMLInputElement) || input.type !== 'number' || edits.has(input)) return
-    const finish = sliderCue(input.closest('.site-preview-stage .rf-slider'))
-    if (finish) edits.set(input, finish)
-  })
-  document.addEventListener('focusout', (event) => {
-    const input = event.target
-    if (!(input instanceof HTMLInputElement)) return
-    if (input.closest('.rf-slider') !== drag?.slider) edits.get(input)?.()
-    edits.delete(input)
+function playStep(event: Event, volume: number) {
+  play('tick', {
+    emphasis: 'subtle',
+    volume,
+    direction: (event as CustomEvent<string>).detail === 'back' ? 'back' : 'forward',
   })
 }
 
@@ -210,7 +131,7 @@ function bindNumberSounds() {
     if (
       input instanceof HTMLInputElement &&
       input.type === 'number' &&
-      input.closest('.site-preview-stage') &&
+      input.closest('[data-sound-scope]') &&
       !input.closest('.rf-slider')
     )
       initial.set(input, input.valueAsNumber)
@@ -220,7 +141,7 @@ function bindNumberSounds() {
     (event) => {
       if (!event.isPrimary || event.button !== 0 || !(event.target instanceof Element)) return
       const target = event.target.closest(
-        '.site-preview-stage .rf-number-scrub, .site-preview-stage [data-slot="input-number"] button',
+        '[data-sound-scope] .rf-number-scrub, [data-sound-scope] [data-slot="input-number"] button',
       )
       const input = target
         ?.closest('.rf-field')
@@ -245,7 +166,7 @@ function bindNumberSounds() {
       if (
         !(input instanceof HTMLInputElement) ||
         input.type !== 'number' ||
-        !input.closest('.site-preview-stage') ||
+        !input.closest('[data-sound-scope]') ||
         input.closest('.rf-slider') ||
         !['ArrowUp', 'ArrowDown'].includes(event.key) ||
         event.repeat
@@ -281,7 +202,7 @@ function bindColorSquareSounds() {
     'pointerdown',
     (event) => {
       if (!event.isPrimary || event.button !== 0 || !(event.target instanceof Element)) return
-      const square = event.target.closest('.site-preview-stage .rf-color-square')
+      const square = event.target.closest('[data-sound-scope] .rf-color-square')
       if (square && square.getAttribute('tabindex') !== '-1')
         pointer = { id: event.pointerId, square, value: square.getAttribute('aria-valuetext') }
     },
@@ -304,7 +225,7 @@ function bindColorSquareSounds() {
         !(event.target instanceof Element)
       )
         return
-      const square = event.target.closest('.site-preview-stage .rf-color-square')
+      const square = event.target.closest('[data-sound-scope] .rf-color-square')
       if (square && square.getAttribute('tabindex') !== '-1')
         key = { square, value: square.getAttribute('aria-valuetext') }
     },
@@ -338,7 +259,6 @@ function changePreference(next: boolean) {
     // Keep the current setting in memory.
   }
   if (enabled) {
-    void unlock()
     play('toggle')
   }
 }
@@ -350,7 +270,7 @@ function changePreference(next: boolean) {
  */
 export function syncSoundControls() {
   if (!soundStarted) return
-  setEnabled(enabled)
+  setSoundEnabled(enabled)
   for (const shortcut of document.querySelectorAll<HTMLButtonElement>('[data-site-sound]')) {
     if (!boundSoundControls.has(shortcut)) {
       boundSoundControls.add(shortcut)
@@ -377,7 +297,6 @@ export function enhanceShowcaseSound() {
   if (!shortcut && !switches.length) return
   soundStarted = true
   enabled = readSoundEnabled()
-  setVolume(0.35)
   syncSoundControls()
 
   // Some cues follow async work. Unlock audio while the first gesture is active.
@@ -385,7 +304,7 @@ export function enhanceShowcaseSound() {
   const unlockFromGesture = (event: Event) => {
     if (!enabled || !event.isTrusted || !(event.target instanceof Element)) return
     if (event.target.closest('[data-site-sound], .site-sound-setting')) return
-    void unlock().then((ready) => {
+    void unlockSound().then((ready) => {
       if (ready) activation.abort()
     })
   }
@@ -393,31 +312,36 @@ export function enhanceShowcaseSound() {
   document.addEventListener('click', unlockFromGesture, options)
   document.addEventListener('keydown', unlockFromGesture, options)
 
-  // Carousel: the buttons and dots navigate; autoplay stays silent.
+  const surfaceVolume = 0.2
+  const surfaceSound = { emphasis: 'subtle', volume: surfaceVolume } as const
+  const playCarouselMove = (back: boolean) => play(back ? 'swooshOut' : 'swooshIn', surfaceSound)
+
+  // Read the current dot before its click changes the slide. Autoplay stays silent.
   document.addEventListener(
     'click',
     (event) => {
       const button =
         event.target instanceof Element
-          ? event.target.closest('.site-preview-stage .rf-carousel-controls button')
+          ? event.target.closest<HTMLButtonElement>(
+              '[data-sound-scope] :is(.rf-carousel-controls, .rf-carousel-dots) button',
+            )
           : null
       if (!button || button.matches('.rf-carousel-play, :disabled')) return
-      const dots = [
-        ...(button.closest('.rf-carousel-controls')?.querySelectorAll('.rf-carousel-dots button') ??
-          []),
-      ]
-      const current = dots.findIndex((dot) => dot.getAttribute('aria-current') === 'true')
-      const target = dots.indexOf(button)
-      if (target === current) return
-      const back =
-        button.getAttribute('aria-label') === 'Previous slide' || (target >= 0 && target < current)
-      play('navigate', { emphasis: 'subtle', direction: back ? 'back' : 'forward' })
+      const dots = button.closest('.rf-carousel-dots')
+      if (dots) {
+        const buttons = [...dots.querySelectorAll('button')]
+        const current = buttons.findIndex((dot) => dot.getAttribute('aria-current') === 'true')
+        const next = buttons.indexOf(button)
+        if (next !== current) playCarouselMove(next < current)
+      } else {
+        playCarouselMove(button.getAttribute('aria-label') === 'Previous slide')
+      }
     },
     { capture: true },
   )
   document.addEventListener('change', (event) => {
     const input = event.target
-    if (!(input instanceof Element) || !input.closest('.site-preview-stage')) return
+    if (!(input instanceof Element) || !input.closest('[data-sound-scope]')) return
     if (input.matches('[data-site-sound-switch]')) return
     if (input instanceof HTMLInputElement && input.type === 'checkbox') {
       play('toggle', { direction: input.checked ? 'forward' : 'back' })
@@ -425,25 +349,27 @@ export function enhanceShowcaseSound() {
       play('select')
     }
   })
+  document.addEventListener('reflow:slider-step', (event) => playStep(event, 0.35))
+  document.addEventListener('reflow:time-grid-resize-step', (event) => {
+    if (event.target instanceof Element && event.target.closest('[data-sound-scope]'))
+      playStep(event, 0.55)
+  })
   document.addEventListener('reflow:trigger-select', (event) => {
-    if (event.target instanceof Element && event.target.closest('.site-preview-stage'))
+    if (event.target instanceof Element && event.target.closest('[data-sound-scope]'))
       play('select', { emphasis: 'subtle' })
   })
   document.addEventListener('reflow:command-select', (event) => {
-    if (!(event.target instanceof Element) || !event.target.closest('.site-preview-stage')) return
+    if (!(event.target instanceof Element) || !event.target.closest('[data-sound-scope]')) return
     const dialog = event.target.closest('dialog')
     if (dialog) silentDialogClose.add(dialog)
     play('select', { emphasis: 'subtle' })
   })
   document.addEventListener('reflow:carousel-navigation', (event) => {
-    if (!(event.target instanceof Element) || !event.target.closest('.site-preview-stage')) return
-    play('navigate', {
-      emphasis: 'subtle',
-      direction: (event as CustomEvent<string>).detail === 'back' ? 'back' : 'forward',
-    })
+    if (!(event.target instanceof Element) || !event.target.closest('[data-sound-scope]')) return
+    playCarouselMove((event as CustomEvent<string>).detail === 'back')
   })
   document.addEventListener('reflow:question', (event) => {
-    if (!(event.target instanceof Element) || !event.target.closest('.site-preview-stage')) return
+    if (!(event.target instanceof Element) || !event.target.closest('[data-sound-scope]')) return
     const cue = (event as CustomEvent<string>).detail
     if (cue === 'back') play('navigate', { emphasis: 'subtle', direction: 'back' })
     else if (
@@ -456,15 +382,15 @@ export function enhanceShowcaseSound() {
       play(cue, { emphasis: 'subtle' })
   })
   document.addEventListener('reflow:message-send', (event) => {
-    if (event.target instanceof Element && event.target.closest('.site-preview-stage'))
+    if (event.target instanceof Element && event.target.closest('[data-sound-scope]'))
       play('tap', { emphasis: 'subtle' })
   })
   document.addEventListener('reflow:message-error', (event) => {
-    if (event.target instanceof Element && event.target.closest('.site-preview-stage'))
+    if (event.target instanceof Element && event.target.closest('[data-sound-scope]'))
       play('error', { emphasis: 'subtle' })
   })
   document.addEventListener('reflow:queue-reorder', (event) => {
-    if (event.target instanceof Element && event.target.closest('.site-preview-stage'))
+    if (event.target instanceof Element && event.target.closest('[data-sound-scope]'))
       play('select', { emphasis: 'subtle' })
   })
   document.addEventListener(
@@ -472,7 +398,7 @@ export function enhanceShowcaseSound() {
     (event) => {
       if (!(event.target instanceof Element)) return
       const button = event.target.closest<HTMLButtonElement>(
-        '.site-preview-stage .rf-queue-wrap button',
+        '[data-sound-scope] .rf-queue-wrap button',
       )
       if (!button || button.disabled) return
       const action = button.dataset.queueAction
@@ -491,19 +417,19 @@ export function enhanceShowcaseSound() {
     if (
       event.target instanceof Element &&
       event.target.closest(
-        '.site-preview-stage .rf-composer-send[aria-label="Stop response"]:not(:disabled)',
+        '[data-sound-scope] .rf-composer-send[aria-label="Stop response"]:not(:disabled)',
       )
     )
       play('close', { emphasis: 'subtle' })
   })
   document.addEventListener('reflow:files', (event) => {
-    if (!(event.target instanceof Element) || !event.target.closest('.site-preview-stage')) return
+    if (!(event.target instanceof Element) || !event.target.closest('[data-sound-scope]')) return
     const cue = (event as CustomEvent<string>).detail
     if (cue === 'select' || cue === 'close' || cue === 'warning' || cue === 'error')
       play(cue, { emphasis: 'subtle' })
   })
   document.addEventListener('rmx:select-change', (event) => {
-    if (event.target instanceof Element && event.target.closest('.site-preview-stage .rf-select'))
+    if (event.target instanceof Element && event.target.closest('[data-sound-scope] .rf-select'))
       play('select', { emphasis: 'subtle' })
   })
   document.addEventListener(
@@ -511,7 +437,7 @@ export function enhanceShowcaseSound() {
     (event) => {
       if (!(event.target instanceof Element)) return
       const button = event.target.closest<HTMLButtonElement>(
-        '.site-preview-stage .rf-calendar button, .site-preview-stage .rf-color-swatch, .site-preview-stage .rf-date-presets button, .site-preview-stage .rf-date-clear',
+        '[data-sound-scope] .rf-calendar button, [data-sound-scope] .rf-color-swatch, [data-sound-scope] .rf-date-presets button, [data-sound-scope] .rf-date-clear',
       )
       if (!button || button.disabled || button.getAttribute('aria-disabled') === 'true') return
       if (button.matches('.rf-calendar-nav'))
@@ -531,7 +457,7 @@ export function enhanceShowcaseSound() {
     { capture: true },
   )
   document.addEventListener('rmx:menu-select', (event) => {
-    if (!(event.target instanceof Element) || !event.target.closest('.site-preview-stage')) return
+    if (!(event.target instanceof Element) || !event.target.closest('[data-sound-scope]')) return
     const { item } = event as Event & { item: { type: string; checked?: boolean } }
     play(item.type === 'checkbox' ? 'toggle' : 'select', {
       emphasis: 'subtle',
@@ -550,7 +476,7 @@ export function enhanceShowcaseSound() {
       return
     const link =
       event.target instanceof Element
-        ? event.target.closest<HTMLAnchorElement>('.site-preview-stage .rf-pagination a')
+        ? event.target.closest<HTMLAnchorElement>('[data-sound-scope] .rf-pagination a')
         : null
     if (!link || link.getAttribute('aria-current') === 'page') return
     const current = Number(
@@ -568,40 +494,45 @@ export function enhanceShowcaseSound() {
     })
   })
   document.addEventListener('rmx:tabs-change', (event) => {
-    if (event.target instanceof Element && event.target.closest('.site-preview-stage .rf-tabs'))
+    if (event.target instanceof Element && event.target.closest('[data-sound-scope] .rf-tabs'))
       play('select', { emphasis: 'subtle' })
+  })
+  document.addEventListener('reflow:banner-dismiss', (event) => {
+    if (event.target instanceof Element && event.target.closest('[data-sound-scope]'))
+      play('swooshOut', surfaceSound)
   })
   document.addEventListener('rmx:accordion-change', (event) => {
     if (
       !(event.target instanceof Element) ||
-      !event.target.closest('.site-preview-stage .rf-accordion')
+      !event.target.closest('[data-sound-scope] .rf-accordion')
     )
       return
     const { itemValue, value } = event as HTMLElementEventMap['rmx:accordion-change']
     const opening = Array.isArray(value) ? value.includes(itemValue) : value === itemValue
-    play(opening ? 'open' : 'close', { emphasis: 'subtle' })
+    if (opening) play('select', surfaceSound)
   })
   document.addEventListener(
     'toggle',
     (event) => {
+      if (!(event instanceof ToggleEvent) || event.oldState === event.newState) return
       const dialog = event.target
       if (dialog instanceof HTMLDialogElement && dialog.matches('.rf-dialog, .rf-drawer')) {
         if (!dialog.open && silentDialogClose.delete(dialog)) return
         if (dialog.open) silentDialogClose.delete(dialog)
-        play(dialog.open ? 'open' : 'close')
+        if (dialog.matches('.rf-drawer')) play(dialog.open ? 'swooshIn' : 'swooshOut', surfaceSound)
+        else play(dialog.open ? 'open' : 'close')
       } else if (
-        event instanceof ToggleEvent &&
+        event.newState === 'open' &&
         dialog instanceof HTMLElement &&
         // Hover card previews share the surface but stay silent.
         dialog.matches('.rf-popover-surface:not(.rf-hover-card)') &&
-        dialog.closest('.site-preview-stage')
+        dialog.closest('[data-sound-scope]')
       ) {
-        play(event.newState === 'open' ? 'open' : 'close', { emphasis: 'subtle' })
+        play('select', surfaceSound)
       }
     },
     { capture: true },
   )
-  bindSliderSounds()
   bindNumberSounds()
   bindColorSquareSounds()
   bindCopyErrors()

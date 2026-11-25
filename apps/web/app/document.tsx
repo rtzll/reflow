@@ -83,6 +83,9 @@ export function Document(handle: Handle<DocumentProps>) {
           {assets.stylesheets.map((href) => (
             <link key={href} rel="stylesheet" href={href} />
           ))}
+          <script id="showcase-recordings" type="application/json">
+            {JSON.stringify(assets.sounds)}
+          </script>
           <ImportMap value={assets.entry.importMap} />
           {assets.entry.preloads.map((href) => (
             <link key={href} rel="modulepreload" href={href} />

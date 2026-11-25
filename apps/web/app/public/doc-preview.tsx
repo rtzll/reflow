@@ -210,6 +210,7 @@ export const DocPreview = clientEntry(
           >
             <div
               class="site-preview-stage doc-preview-stage"
+              data-sound-scope=""
               data-playground={!handle.props.variant ? '' : undefined}
               data-component={handle.props.slug}
               data-variant={handle.props.variant}

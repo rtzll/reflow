@@ -1,6 +1,6 @@
 import { ChatMessage, Citation, Icon, Resizable } from '@rtzll/reflow'
 import type { Handle } from 'remix/component'
-import { play } from 'cuelume'
+import { play } from './showcase-audio.ts'
 import { citationSources } from './citation-example.tsx'
 
 const references = [
