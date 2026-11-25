@@ -184,6 +184,9 @@
 .studio-pane .rf-markdown {
   font: inherit;
 }
+.studio-pane .rf-diff-view {
+  margin-block-start: 10px;
+}
 .studio-pane .rf-chat-body {
   max-inline-size: 100%;
   font-size: 15px;

@@ -17,6 +17,8 @@ export interface ChatEntry {
   }
   stopped?: boolean
   proofChecklist?: ConfirmationState
+  /** A unified diff attached to an assistant reply, rendered with DiffView. */
+  diff?: { filename?: string; patch: string }
 }
 
 export interface Conversation {
@@ -125,6 +127,60 @@ North landing · Last departure, 18:40
 - Check the sequence and page numbers.
 - Look for image crops or lettering lost in the fold.
 - Match each caption to the photograph above it.`,
+      },
+    ],
+  },
+  {
+    id: 'caption-diff',
+    title: 'Caption layout patch',
+    messages: [
+      {
+        role: 'user',
+        text: 'The captions under the wide photographs are wrapping past the image edge on narrow screens. Can you patch the issue stylesheet?',
+      },
+      {
+        role: 'assistant',
+        text: 'Here is a tight fix for the caption measure and spacing. It constrains the caption width to the photograph frame and switches the timestamp to tabular numerals.',
+        diff: {
+          filename: 'issue/captions.css',
+          patch: `--- a/issue/captions.css
++++ b/issue/captions.css
+@@ -12,7 +12,9 @@
+ .photo-caption {
+   margin-block-start: 8px;
+-  max-width: 68ch;
+   color: var(--rf-muted);
+-  font-size: 13px;
++  max-width: min(100%, 52ch);
++  font-size: var(--rf-text-caption);
+   line-height: 1.45;
++  font-variant-numeric: tabular-nums;
++  text-wrap: pretty;
+ }`,
+        },
+      },
+      {
+        role: 'user',
+        text: 'Can we also keep the departure time on one line when a caption wraps?',
+      },
+      {
+        role: 'assistant',
+        text: 'Wrapped the timestamp in its own `<time>` element so the place name wraps first while the departure time stays together.',
+        diff: {
+          filename: 'issue/caption-row.tsx',
+          patch: `--- a/issue/caption-row.tsx
++++ b/issue/caption-row.tsx
+@@ -4,7 +4,9 @@ export function CaptionRow({ place, time }: CaptionProps) {
+   return (
+     <figcaption class="photo-caption">
+-      {place} · Last departure, {time}
++      <span>{place}</span>
++      <span aria-hidden="true"> · </span>
++      <time class="photo-caption-time">Last departure, {time}</time>
+     </figcaption>
+   )
+ }`,
+        },
       },
     ],
   },

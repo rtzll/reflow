@@ -9,6 +9,7 @@ import {
   ChatMessage,
   ChatOutline,
   Confirmation,
+  DiffView,
   Dropdown,
   Icon,
   InputMessage,
@@ -695,6 +696,14 @@ function ConversationPane(
                     <TaskList
                       label="Proof checks"
                       tasks={message.tasks.map((task, step) => ({ id: String(step), ...task }))}
+                    />
+                  )}
+                  {message.diff && (
+                    <DiffView
+                      filename={message.diff.filename}
+                      diff={message.diff.patch}
+                      viewToggle
+                      size="compact"
                     />
                   )}
                 </>

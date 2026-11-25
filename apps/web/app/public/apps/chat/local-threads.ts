@@ -40,7 +40,13 @@ function isMessage(value: unknown): value is ChatEntry {
       (value.role === 'assistant' &&
         (value.proofChecklist === 'requested' ||
           value.proofChecklist === 'approved' ||
-          value.proofChecklist === 'denied')))
+          value.proofChecklist === 'denied'))) &&
+    (!('diff' in value) ||
+      (!!value.diff &&
+        typeof value.diff === 'object' &&
+        'patch' in value.diff &&
+        typeof value.diff.patch === 'string' &&
+        (!('filename' in value.diff) || typeof value.diff.filename === 'string')))
   )
 }
 
