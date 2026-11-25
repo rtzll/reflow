@@ -1,5 +1,5 @@
 import { componentApi, componentDefaults } from './docs-data.ts'
-import { componentExamples } from './public/component-demos.tsx'
+import { componentExamples } from './public/demos/examples.ts'
 import type { ShowcaseComponent } from './ui/site.tsx'
 
 export const apiDescription =

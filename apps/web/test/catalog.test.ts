@@ -1,7 +1,7 @@
 import * as assert from 'remix/assert'
 import { afterAll, it } from 'remix/test'
 import { componentApi } from '../app/docs-data.ts'
-import { componentExamples } from '../app/public/component-demos.tsx'
+import { componentExamples } from '../app/public/demos/examples.ts'
 import { catalog } from '../app/catalog.tsx'
 import { assets } from '../app/assets.ts'
 import { router } from '../app/router.ts'
