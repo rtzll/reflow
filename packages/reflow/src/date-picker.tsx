@@ -357,8 +357,9 @@ export function DatePicker(handle: Handle<DatePickerProps>) {
             <span class="rf-date-divider" aria-hidden="true" />
             <TimeField
               label={timeRange ? 'Start time' : 'Time'}
+              variant="ghost"
               value={selectedTime}
-              onChange={(next) => updateTime('start', next)}
+              onValueChange={(next) => updateTime('start', next)}
               disabled={disabled}
               step={step}
               hourCycle={hourCycle}
@@ -367,9 +368,10 @@ export function DatePicker(handle: Handle<DatePickerProps>) {
             {timeRange && (
               <TimeField
                 label="End time"
+                variant="ghost"
                 value={selectedEndTime}
                 after={selectedTime}
-                onChange={(next) => updateTime('end', next)}
+                onValueChange={(next) => updateTime('end', next)}
                 disabled={disabled}
                 step={step}
                 hourCycle={hourCycle}

@@ -112,6 +112,7 @@ export {
 } from './sidebar.tsx'
 export { Calendar, type CalendarProps, type DateRange, type DateValue } from './calendar.tsx'
 export { DatePicker, type DatePickerProps } from './date-picker.tsx'
+export { TimeField, type TimeFieldProps } from './time-field.tsx'
 export {
   CommandMenu,
   CommandShortcut,

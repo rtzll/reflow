@@ -3,6 +3,9 @@ import * as popover from '@remix-run/ui/popover'
 import * as listbox from '@remix-run/ui/listbox'
 import { Icon } from './icon.tsx'
 import { fluidHover } from './systems/fluid-hover.ts'
+import { classList, type ControlSize } from './systems/styling.ts'
+import { containEscape } from './behaviors/contain-escape.ts'
+import { onFormReset } from './behaviors/form-reset.ts'
 import { navigationIndex } from './behaviors/list-navigation.ts'
 
 // Time parsing and same-day slot behavior follow Fluid Functionalism's
@@ -33,38 +36,75 @@ export function timeDuration(minutes: number) {
   )
 }
 
-interface TimeFieldProps {
+export interface TimeFieldProps {
   label: string
-  value: string
-  onChange: (value: string) => void
+  /** Controlled 24-hour time in `HH:mm` format. */
+  value?: string
+  /** Initial 24-hour time in `HH:mm` format when uncontrolled. */
+  defaultValue?: string
+  /** Called with the committed `HH:mm` time. */
+  onValueChange?: (value: string) => void
+  /** Form field name; submits the canonical `HH:mm` value. */
+  name?: string
+  /** Minimum time in `HH:mm`; only later slots appear, with durations from this time. */
   after?: string
+  /** Minutes between generated time slots. Default 15. */
   step?: number
+  /** Clock display format. Default 12. */
   hourCycle?: 12 | 24
+  /** Display locale; defaults to `en-US` for deterministic server rendering. */
   locale?: string
+  variant?: 'outline' | 'ghost'
+  size?: ControlSize
   disabled?: boolean
+  required?: boolean
+  /** Shows an arrow icon instead of a clock when paired as the end of a range. */
   end?: boolean
+  /** Optional trailing duration label shown inside the field. */
   duration?: string
+  id?: string
+  'aria-describedby'?: string
+  'aria-invalid'?: boolean
+  class?: string
 }
 
 export function TimeField(handle: Handle<TimeFieldProps>) {
+  let internal = handle.props.defaultValue ?? ''
   let open = false
   let draft: string | null = null
   let active: string | null = null
   let input: HTMLInputElement | undefined
   let options: listbox.ListboxRef | undefined
   const highlight = fluidHover({ highlightedSelector: '[data-highlighted]' })
+  const reset = onFormReset(() => {
+    draft = null
+    if (handle.props.value === undefined) {
+      internal = handle.props.defaultValue ?? ''
+      handle.props.onValueChange?.(internal)
+    }
+    void handle.update()
+  })
 
   return () => {
     const {
-      value,
+      value: controlled,
       label,
+      name,
       disabled,
+      required,
       end,
       after,
       duration,
+      variant = 'outline',
+      size,
       hourCycle = 12,
       locale = 'en-US',
+      id,
+      'aria-describedby': describedBy,
+      'aria-invalid': invalid,
+      class: classProp,
     } = handle.props
+    const value = controlled ?? internal
     const floor = after === undefined ? -1 : (parseTime(after) ?? -1)
     const step = Number.isFinite(handle.props.step)
       ? Math.max(1, Math.round(handle.props.step!))
@@ -84,6 +124,10 @@ export function TimeField(handle: Handle<TimeFieldProps>) {
     const display = current === null ? '' : format(current)
     const listId = `${handle.id}-times`
 
+    function commit(next: string) {
+      if (controlled === undefined) internal = next
+      handle.props.onValueChange?.(next)
+    }
     function scrollActive(center = false) {
       handle.queueTask(() =>
         options?.active?.node.scrollIntoView({ block: center ? 'center' : 'nearest' }),
@@ -103,10 +147,10 @@ export function TimeField(handle: Handle<TimeFieldProps>) {
       void handle.update()
       scrollActive(true)
     }
-    function close(commit: boolean) {
-      if (commit && draft !== null) {
+    function close(shouldCommit: boolean) {
+      if (shouldCommit && draft !== null) {
         const minute = parseTime(draft)
-        if (minute !== null && minute > floor) handle.props.onChange(timeValue(minute))
+        if (minute !== null && minute > floor) commit(timeValue(minute))
       }
       draft = null
       open = false
@@ -114,7 +158,7 @@ export function TimeField(handle: Handle<TimeFieldProps>) {
     }
     function choose(next: string | null) {
       if (next === null) return
-      handle.props.onChange(next)
+      commit(next)
       close(false)
       input?.focus()
     }
@@ -122,20 +166,31 @@ export function TimeField(handle: Handle<TimeFieldProps>) {
     return (
       <popover.Context>
         <span
-          class="rf-date-time"
+          class={classList('rf-date-time', classProp)}
+          data-variant={variant}
+          data-size={size}
+          data-disabled={disabled || undefined}
+          data-invalid={invalid || undefined}
           data-rf-hover-item
           mix={popover.anchor({ placement: 'bottom-start', offset: 6 })}
         >
+          {name && (
+            <input type="hidden" name={name} value={current === null ? '' : timeValue(current)} />
+          )}
           <Icon name={end ? 'arrow-right' : 'clock'} />
           <span class="rf-date-time-field">
             <span class="rf-date-sizer" aria-hidden="true">
               {hourCycle === 12 ? '12:00 AM' : '00:00'}
             </span>
             <input
+              id={id}
               type="text"
               role="combobox"
               aria-label={label}
+              aria-describedby={describedBy}
+              aria-invalid={invalid || undefined}
               disabled={disabled}
+              required={required}
               aria-expanded={open}
               aria-controls={listId}
               aria-autocomplete="none"
@@ -153,6 +208,7 @@ export function TimeField(handle: Handle<TimeFieldProps>) {
                 ref((node) => {
                   input = node
                 }),
+                reset,
                 on('click', () => {
                   if (!open) {
                     show()
@@ -220,6 +276,7 @@ export function TimeField(handle: Handle<TimeFieldProps>) {
           class="rf-menu-surface rf-time-surface"
           data-duration={after !== undefined || undefined}
           mix={[
+            containEscape(),
             popover.surface({
               open,
               closeOnAnchorClick: false,
