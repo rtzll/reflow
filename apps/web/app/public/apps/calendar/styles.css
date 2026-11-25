@@ -190,7 +190,7 @@
   min-width: 0;
   font-weight: 550;
 }
-.week-form input,
+.week-form label > input,
 .week-form select {
   min-width: 0;
   width: 100%;
@@ -201,6 +201,11 @@
   background: var(--rf-surface-3);
   color: var(--rf-fg);
   font: inherit;
+  font-weight: normal;
+}
+.week-form .rf-date-time {
+  width: 100%;
+  background: var(--rf-surface-3);
   font-weight: normal;
 }
 .week-form label.week-form-check {

@@ -1,4 +1,4 @@
-import { Button, Dialog } from '@rtzll/reflow'
+import { Button, Dialog, TimeField } from '@rtzll/reflow'
 import { on, type Handle } from 'remix/component'
 import { calendars, days, timeLabel, type WeekEvent } from './events.ts'
 
@@ -39,7 +39,9 @@ export function EventEditor(handle: Handle<EditorProps>) {
       })
       return
     }
-    const [hour, minute] = String(data.get('start')).split(':').map(Number)
+    const [hour, minute] = String(data.get('start') || start)
+      .split(':')
+      .map(Number)
     // A timed event may run past midnight into the next day, up to 24 hours.
     const { allDay: _allDay, span: _span, ...timed } = draft
     handle.props.save({
@@ -53,6 +55,7 @@ export function EventEditor(handle: Handle<EditorProps>) {
   }
   // Whether the form edits an all-day event; set when it opens and by its checkbox.
   let allDay = false
+  let start = '09:00'
   let editing: WeekEvent | undefined
 
   return () => {
@@ -60,6 +63,7 @@ export function EventEditor(handle: Handle<EditorProps>) {
     if (draft !== editing) {
       editing = draft
       allDay = !!draft?.allDay
+      start = timeLabel(draft?.allDay ? 540 : (draft?.start ?? 540))
     }
     return (
       <Dialog
@@ -120,16 +124,22 @@ export function EventEditor(handle: Handle<EditorProps>) {
               </label>
             ) : (
               <div class="week-form-pair">
-                <label>
-                  Start (UTC)
-                  <input
+                <div class="week-form-field">
+                  <label for="week-start">Start (UTC)</label>
+                  <TimeField
+                    id="week-start"
                     name="start"
-                    type="time"
+                    label="Start (UTC)"
+                    hourCycle={24}
+                    step={15}
                     required
-                    step={900}
-                    defaultValue={timeLabel(draft.allDay ? 540 : draft.start)}
+                    value={start}
+                    onValueChange={(next) => {
+                      start = next
+                      void handle.update()
+                    }}
                   />
-                </label>
+                </div>
                 <label>
                   Duration (minutes)
                   <input
