@@ -1,12 +1,8 @@
-import {
-  formatShortcut,
-  isMacPlatform,
-  matchesShortcut,
-  parseShortcut,
-} from './behaviors/shortcut.ts'
+import { isMacPlatform, matchesShortcut, parseShortcut } from './behaviors/shortcut.ts'
 import { on, ref } from 'remix/component'
 import type { Handle, RemixNode } from 'remix/component'
 import { Button } from './button.tsx'
+import { Kbd } from './kbd.tsx'
 import { Tabs } from './tabs.tsx'
 import { fluidHover } from './systems/fluid-hover.ts'
 import { ScrollArea } from './scroll-area.tsx'
@@ -57,43 +53,6 @@ export interface CommandMenuProps {
 }
 
 const allFilter = '\u0000all'
-
-function commandShortcut(keys: string | readonly string[], mac = false) {
-  const caps = (typeof keys === 'string' ? [keys] : keys).flatMap((key) => formatShortcut(key, mac))
-  return (
-    <span class="rf-command-shortcut">
-      {caps.map((key, index) => (
-        <kbd key={index}>{key}</kbd>
-      ))}
-    </span>
-  )
-}
-
-/** Shortcut keycaps for a trigger or a custom footer: `<CommandShortcut keys="mod+p" />`. */
-export function CommandShortcut(handle: Handle<{ keys: string | readonly string[] }>) {
-  let mac = false
-  const mount = ref((node, signal) => {
-    if (!isMacPlatform()) return
-    mac = true
-    void handle.update()
-    signal.addEventListener(
-      'abort',
-      () => {
-        mac = false
-      },
-      { once: true },
-    )
-  })
-  return () => (
-    <span class="rf-command-shortcut" mix={mount}>
-      {(typeof handle.props.keys === 'string' ? [handle.props.keys] : handle.props.keys)
-        .flatMap((key) => formatShortcut(key, mac))
-        .map((key, index) => (
-          <kbd key={index}>{key}</kbd>
-        ))}
-    </span>
-  )
-}
 
 export function CommandMenu(handle: Handle<CommandMenuProps>) {
   const listId = `${handle.id}-list`
@@ -456,7 +415,9 @@ export function CommandMenu(handle: Handle<CommandMenuProps>) {
                             {item.description && <span>{item.description}</span>}
                           </span>
                         )}
-                        {item.shortcut && commandShortcut(item.shortcut, mac)}
+                        {item.shortcut && (
+                          <Kbd keys={item.shortcut} platform={mac ? 'mac' : 'other'} />
+                        )}
                       </div>
                     ))}
                   </div>
@@ -474,15 +435,23 @@ export function CommandMenu(handle: Handle<CommandMenuProps>) {
                 <footer class="rf-command-footer">{handle.props.footer}</footer>
               ) : (
                 <footer class="rf-command-footer" aria-hidden="true">
-                  <span>Select {commandShortcut(['up', 'down'], mac)}</span>
+                  <span>
+                    Select <Kbd keys={['up', 'down']} platform={mac ? 'mac' : 'other'} />
+                  </span>
                   {filters && filters.length > 0 && (
-                    <span>Tabs {commandShortcut(['left', 'right'], mac)}</span>
+                    <span>
+                      Tabs <Kbd keys={['left', 'right']} platform={mac ? 'mac' : 'other'} />
+                    </span>
                   )}
-                  {inDialog && <span>Close {commandShortcut(['esc'], mac)}</span>}
+                  {inDialog && (
+                    <span>
+                      Close <Kbd keys={['esc']} platform={mac ? 'mac' : 'other'} />
+                    </span>
+                  )}
                   {active && (
                     <span class="rf-command-footer-action">
                       <span>{active.action ?? active.label}</span>
-                      {commandShortcut(['enter'], mac)}
+                      <Kbd keys={['enter']} platform={mac ? 'mac' : 'other'} />
                     </span>
                   )}
                 </footer>

@@ -291,7 +291,7 @@ it('opens global search with Mod+K, applies commands, and shows individual short
   await input.fill('Cycle theme')
   const cycleTheme = dialog.getByRole('option', { name: /Cycle theme/ })
   await cycleTheme.waitFor()
-  assert.equal(await cycleTheme.locator('.rf-command-shortcut kbd').textContent(), 'T')
+  assert.equal(await cycleTheme.locator('kbd').textContent(), 'T')
   await input.press('Enter')
   await dialog.waitFor({ state: 'hidden' })
   assert.equal(await page.locator('html').getAttribute('data-theme'), 'system')

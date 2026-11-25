@@ -1,4 +1,4 @@
-import { CommandMenu, CommandShortcut, Icon, Select, type CommandItem } from '@rtzll/reflow'
+import { CommandMenu, Icon, Kbd, Select, type CommandItem } from '@rtzll/reflow'
 import { on, type Handle } from 'remix/component'
 
 export const projectCommands: readonly CommandItem[] = [
@@ -221,7 +221,7 @@ export function CommandVariants(
           trigger={
             variant === 'dialog' ? (
               <>
-                Open <CommandShortcut keys="mod+p" />
+                Open <Kbd keys="mod+p" />
               </>
             ) : undefined
           }

@@ -12,7 +12,7 @@
 .rf-command-dialog {
   display: contents;
 }
-.rf-command-dialog > .rf-button:has(.rf-command-shortcut) {
+.rf-command-dialog > .rf-button:has(.rf-kbd-group, .rf-kbd) {
   padding-inline-end: 12px;
 }
 .rf-command-dialog > .rf-dialog[data-position='top'] {
@@ -379,29 +379,6 @@
 }
 .rf-command-option-text > * + * {
   color: var(--rf-muted);
-}
-.rf-command-shortcut {
-  display: inline-flex;
-  flex: none;
-  gap: 2px;
-  align-items: center;
-}
-.rf-command-shortcut kbd {
-  display: grid;
-  box-sizing: border-box;
-  place-items: center;
-  min-inline-size: 20px;
-  block-size: 20px;
-  padding-inline: 4px;
-  border-radius: 5px;
-  background: var(--rf-hover);
-  color: var(--rf-muted);
-  font: var(--rf-text-micro) / var(--rf-leading-micro) var(--rf-font);
-  white-space: nowrap;
-}
-[data-density='compact'] .rf-command-shortcut kbd {
-  min-inline-size: 16px;
-  block-size: 16px;
 }
 
 .rf-command-empty {

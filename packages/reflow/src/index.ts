@@ -113,12 +113,7 @@ export {
 export { Calendar, type CalendarProps, type DateRange, type DateValue } from './calendar.tsx'
 export { DatePicker, type DatePickerProps } from './date-picker.tsx'
 export { TimeField, type TimeFieldProps } from './time-field.tsx'
-export {
-  CommandMenu,
-  CommandShortcut,
-  type CommandItem,
-  type CommandMenuProps,
-} from './command-menu.tsx'
+export { CommandMenu, type CommandItem, type CommandMenuProps } from './command-menu.tsx'
 export {
   AskUserQuestions,
   type AskUserAnswer,
