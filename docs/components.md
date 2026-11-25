@@ -5,7 +5,7 @@ Reflow started as a native Remix port of the [Fluid Functionalism](https://githu
 ## Catalog
 
 - **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `Field`, `FileInput`, `Input`, `InputCopy`, `InputGroup`, `NumberField`, `RadioGroup`, `SegmentedControl`, `Select`, `Slider`, `Switch`, `Textarea`
-- **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`, `TimeGrid`
+- **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`, `TimeField`, `TimeGrid`
 - **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `Pagination`, `Resizable`, `Sidebar`, `Tabs`, `Toolbar`, `Tree`
 - **Menus and overlays** · `AlertDialog`, `CommandMenu`, `ContextMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
 - **Display and feedback** · `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `BarChart`, `Card`, `CodeBlock`, `DataTable`, `RoutedDataTable`, `Kbd`, `Markdown`, `Progress`, `Skeleton`, `Spinner`, `Table`, `Toaster`
@@ -79,6 +79,7 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 10 | [`TaskList` (shipped)](task-list.md) | — | Spinner, Dropdown's check draw |
 | 10 | [`FileChanges` (shipped)](file-changes.md) | — | The grid-row reveal from ToolCalls, Button |
 | 11 | [`Kbd` (implemented, awaiting release)](kbd.md) | — | `formatShortcut` and `isMacPlatform` from `behaviors/shortcut.ts`, CommandMenu keycap metrics |
+| 11 | [`TimeField` (implemented, awaiting release)](time-field.md) | [Fluid Functionalism date-picker-core](https://github.com/mickadesign/fluid-functionalism) | Promoted from `DatePicker`'s time combobox, `@remix-run/ui/popover` and `listbox`, `onFormReset`, `containEscape` |
 
 ### Decisions so far
 

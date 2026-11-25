@@ -97,6 +97,7 @@ import { BannerExample, BannerPreview } from './banner-example.tsx'
 import { FileChangesExample } from './file-changes-example.tsx'
 import { KbdExample } from './kbd-example.tsx'
 import { TaskListExample } from './task-list-example.tsx'
+import { TimeFieldExample } from './time-field-example.tsx'
 import { ToolCallsExample } from './tool-calls-example.tsx'
 
 // The tile uses the same range Calendar as the docs, with smaller cells to
@@ -285,6 +286,8 @@ export const Example = clientEntry(
           return <FileChangesExample />
         case 'kbd':
           return <KbdExample />
+        case 'time-field':
+          return <TimeFieldExample />
         case 'task-list':
           return <TaskListExample />
         case 'tool-calls':

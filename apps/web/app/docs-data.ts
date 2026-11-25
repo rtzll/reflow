@@ -726,6 +726,105 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  'time-field': [
+    {
+      name: 'TimeField',
+      props: [
+        {
+          name: 'label',
+          type: 'string',
+          required: true,
+          description: 'Accessible name of the time combobox and its slot listbox.',
+        },
+        {
+          name: 'value',
+          type: 'string',
+          required: false,
+          description: 'Controlled 24-hour time in HH:mm format.',
+        },
+        {
+          name: 'defaultValue',
+          type: 'string',
+          required: false,
+          description: 'Initial 24-hour time in HH:mm format when uncontrolled.',
+        },
+        {
+          name: 'onValueChange',
+          type: '(value: string) => void',
+          required: false,
+          description: 'Called with the committed HH:mm time.',
+        },
+        {
+          name: 'name',
+          type: 'string',
+          required: false,
+          description:
+            'Form field name; submits the canonical HH:mm value and resets with the form.',
+        },
+        {
+          name: 'after',
+          type: 'string',
+          required: false,
+          description:
+            'Minimum time in HH:mm; only later slots appear, each showing its duration from this time.',
+        },
+        {
+          name: 'step',
+          type: 'number',
+          required: false,
+          description: 'Minutes between generated time slots. Default 15.',
+        },
+        {
+          name: 'hourCycle',
+          type: '12 | 24',
+          required: false,
+          description: 'Clock display format. Default 12.',
+        },
+        {
+          name: 'locale',
+          type: 'string',
+          required: false,
+          description: 'Display locale; defaults to en-US for consistent server rendering.',
+        },
+        {
+          name: 'variant',
+          type: '"outline" | "ghost"',
+          required: false,
+          description: 'Bordered standalone field (default) or borderless inline style.',
+        },
+        {
+          name: 'size',
+          type: '"default" | "compact"',
+          required: false,
+          description: 'Overrides the surrounding density.',
+        },
+        {
+          name: 'disabled',
+          type: 'boolean',
+          required: false,
+          description: 'Prevents interaction and conveys the disabled state.',
+        },
+        {
+          name: 'required',
+          type: 'boolean',
+          required: false,
+          description: 'Marks the time input as required for native form validation.',
+        },
+        {
+          name: 'end',
+          type: 'boolean',
+          required: false,
+          description: 'Shows an arrow icon instead of a clock when paired as the end of a range.',
+        },
+        {
+          name: 'duration',
+          type: 'string',
+          required: false,
+          description: 'Optional trailing duration label displayed inside the field.',
+        },
+      ],
+    },
+  ],
   spinner: [
     {
       name: 'Spinner',

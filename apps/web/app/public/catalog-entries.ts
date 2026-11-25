@@ -60,6 +60,7 @@ export const components = [
   ['textarea', 'Textarea'],
   ['thinking-indicator', 'ThinkingIndicator'],
   ['thinking-steps', 'ThinkingSteps'],
+  ['time-field', 'TimeField'],
   ['time-grid', 'TimeGrid'],
   ['toaster', 'Toaster'],
   ['tool-calls', 'ToolCalls'],

@@ -59,7 +59,7 @@ Theme, density, accent, shape, typography, and hover behavior are configurable t
 ## Components
 
 - **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `Field`, `FileInput`, `Input`, `InputCopy`, `InputGroup`, `NumberField`, `RadioGroup`, `SegmentedControl`, `Select`, `Slider`, `Switch`, `Textarea`
-- **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`, `TimeGrid`
+- **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`, `TimeField`, `TimeGrid`
 - **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `Pagination`, `Resizable`, `Sidebar`, `Tabs`, `Toolbar`, `Tree`
 - **Menus and overlays** · `AlertDialog`, `CommandMenu`, `ContextMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
 - **Display and feedback** · `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `BarChart`, `Card`, `CodeBlock`, `DataTable`, `RoutedDataTable`, `Kbd`, `Markdown`, `Progress`, `Skeleton`, `Spinner`, `Table`, `Toaster`

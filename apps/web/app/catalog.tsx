@@ -195,6 +195,11 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       'Keycaps for a single key, a platform-aware shortcut chord, or a multi-key sequence.',
     code: `<Kbd keys="mod+k" />\n<Kbd keys={['g', 'i']} separator="then" variant="outline" />\n<Kbd variant="outline">Esc</Kbd>`,
   },
+  'time-field': {
+    description:
+      'A wall-clock time combobox with flexible parsing, step slots, durations, and form submission.',
+    code: `<TimeField label="Start time" name="start" defaultValue="09:30" step={15} />\n<TimeField label="End time" name="end" after="09:30" defaultValue="11:00" end />`,
+  },
   'chat-message': {
     description: 'A chat message with user or assistant alignment and optional attachments.',
     code: conversationCode,

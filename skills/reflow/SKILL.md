@@ -29,7 +29,7 @@ Prefer the existing form-aware controls and preserve labels, descriptions, reset
 
 ### Date and color
 
-- Use `Calendar` for inline single-date or range selection (`mode="range"`), and `DatePicker` when the calendar opens from a field, with optional presets, `time`, or `timeRange`.
+- Use `Calendar` for inline single-date or range selection (`mode="range"`), `DatePicker` when the calendar opens from a field (with optional presets, `time`, or `timeRange`), and `TimeField` for standalone wall-clock times (`HH:mm` values, flexible typing, `step`, `after` with durations, `hourCycle`, and `name` form submission).
 - Use `TimeGrid` for appointments in one or more day columns. Supply stable event IDs, day indexes, and wall-clock minutes. Set `stepMinutes` to the booking increment, apply `onEventChange` to accept a move or resize, and use `onCreate` to open an editor or reserve the selected interval. Keep dates, timezones, availability checks, and persistence in the owner. Mark holidays, deadlines, and trips `allDay` (with `span` for several days) instead of giving them a 24-hour slot; an event whose duration runs past midnight continues in the next column on its own. Pass `onCreateAllDay` to let a drag across the all-day strip open your editor with the days covered.
 - Use `ColorPicker` inline or as a popover (`variant="popover"`) for hex, RGB, HSL, and OKLCH editing with swatches, opacity, and form submission (`name`).
 
