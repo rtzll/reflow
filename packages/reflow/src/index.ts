@@ -194,6 +194,7 @@ export { fluidHover, type FluidHoverOptions } from './systems/fluid-hover.ts'
 export { QueuedStack, type QueuedMessage, type QueuedStackProps } from './queued-stack.tsx'
 export { ScrollArea, type ScrollAreaProps } from './scroll-area.tsx'
 export { Icon, renderIconNodes, type IconName, type IconNode } from './icon.tsx'
+export { Kbd, type KbdProps } from './kbd.tsx'
 export { NumberField, type NumberFieldProps } from './number-field.tsx'
 export { Progress, type ProgressProps } from './progress.tsx'
 export {
