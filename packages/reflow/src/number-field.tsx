@@ -3,6 +3,7 @@ import { Field } from './field.tsx'
 import { Input } from './input.tsx'
 import type { ControlSize } from './systems/styling.ts'
 import { onFormReset } from './behaviors/form-reset.ts'
+import { scrub as scrubDrag } from './behaviors/scrub.ts'
 
 export interface NumberFieldProps {
   label: string
@@ -25,8 +26,24 @@ export interface NumberFieldProps {
 
 export function NumberField(handle: Handle<NumberFieldProps>) {
   let input: HTMLInputElement | undefined
-  let drag: { id: number; x: number; value: string; steps: number } | undefined
-  let suppressClick = false
+  const labelScrub = scrubDrag({
+    threshold: 5,
+    suppressClick: true,
+    start() {
+      if (!input || input.matches(':disabled') || input.readOnly) return undefined
+      return { value: input.value, steps: 0 }
+    },
+    move(travel, drag) {
+      if (!input || input.matches(':disabled') || input.readOnly) return
+      const steps = Math.trunc(travel / 5)
+      if (steps === drag.steps) return
+      drag.steps = steps
+      const before = input.value
+      input.value = drag.value
+      if (steps) input.stepUp(steps)
+      if (input.value !== before) input.dispatchEvent(new Event('input', { bubbles: true }))
+    },
+  })
   const reset = onFormReset(() => {
     if (!input) return
     const { value, onValueChange } = handle.props
@@ -48,49 +65,7 @@ export function NumberField(handle: Handle<NumberFieldProps>) {
     const { label, description, error, value, defaultValue, scrub, onValueChange, ...props } =
       handle.props
     const controlLabel = scrub ? (
-      <span
-        class="rf-number-scrub"
-        mix={[
-          on<HTMLSpanElement, 'pointerdown'>('pointerdown', (event) => {
-            suppressClick = false
-            if (
-              !input ||
-              input.matches(':disabled') ||
-              input.readOnly ||
-              !event.isPrimary ||
-              event.button !== 0
-            )
-              return
-            drag = { id: event.pointerId, x: event.clientX, value: input.value, steps: 0 }
-            event.currentTarget.setPointerCapture(event.pointerId)
-          }),
-          on<HTMLSpanElement, 'pointermove'>('pointermove', (event) => {
-            if (
-              !drag ||
-              drag.id !== event.pointerId ||
-              !input ||
-              input.matches(':disabled') ||
-              input.readOnly
-            )
-              return
-            const steps = Math.trunc((event.clientX - drag.x) / 5)
-            if (steps === drag.steps) return
-            drag.steps = steps
-            suppressClick = true
-            const before = input.value
-            input.value = drag.value
-            if (steps) input.stepUp(steps)
-            if (input.value !== before) input.dispatchEvent(new Event('input', { bubbles: true }))
-          }),
-          on('lostpointercapture', () => {
-            drag = undefined
-          }),
-          on('click', (event) => {
-            if (suppressClick) event.preventDefault()
-            suppressClick = false
-          }),
-        ]}
-      >
+      <span class="rf-number-scrub" mix={labelScrub}>
         {label}
       </span>
     ) : (

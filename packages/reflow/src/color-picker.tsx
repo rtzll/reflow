@@ -6,6 +6,7 @@ import type { ControlSize } from './systems/styling.ts'
 import { Icon } from './icon.tsx'
 import { onFormReset } from './behaviors/form-reset.ts'
 import { containEscape } from './behaviors/contain-escape.ts'
+import { scrub as scrubDrag } from './behaviors/scrub.ts'
 import { fluidHover } from './systems/fluid-hover.ts'
 import { Tooltip } from './tooltip.tsx'
 import { Slider } from './slider.tsx'
@@ -529,83 +530,30 @@ interface FieldProps {
   percent?: boolean
 }
 
-// The stand-in for the OS cursor while a channel scrub holds the pointer lock,
-// as in the reference: a black ↔ arrow with a white stroke and a drop shadow,
-// legible on any surface. It lives in the top layer so it also shows over a
-// ColorPicker inside a popover.
-function scrubCursor(doc: Document) {
-  let cursor = doc.querySelector<HTMLElement>(':scope > body > .rf-scrub-cursor')
-  if (cursor) return cursor
-  cursor = doc.createElement('div')
-  cursor.className = 'rf-scrub-cursor'
-  cursor.setAttribute('popover', 'manual')
-  cursor.setAttribute('aria-hidden', 'true')
-  cursor.innerHTML =
-    '<svg width="24" height="14" viewBox="0 0 24 14" fill="#000" stroke="#fff" stroke-width="1"><path d="M0.5 7l5-5v3.5h13V2l5 5-5 5V8.5h-13V12l-5-5z"/></svg>'
-  doc.body.append(cursor)
-  return cursor
-}
-
-interface Scrub {
-  id: number
-  start: number
-  /** Where the press landed, which the virtual cursor travels from. */
-  x: number
-  y: number
-  lastX: number
-  travel: number
-  moved: boolean
-  mouse: boolean
-  /** Whether the previous move came under the pointer lock. */
-  locked: boolean
-  lock?: AbortController
-}
-
 function ColorField(handle: Handle<FieldProps>) {
   let draft: string | undefined
   let editing = false
-  let scrubbing: Scrub | undefined
   let input: HTMLInputElement | null = null
 
-  // Drag travel is unbounded under the pointer lock; the drawn cursor wraps
-  // at the viewport edges instead of stopping.
-  function placeCursor(scrub: Scrub, element: HTMLElement) {
-    const doc = element.ownerDocument
-    const cursor = scrubCursor(doc)
-    const width = doc.documentElement.clientWidth
-    const x = (((scrub.x + scrub.travel) % width) + width) % width
-    cursor.style.left = `${x - 12}px`
-    cursor.style.top = `${scrub.y - 7}px`
-  }
-
-  function lockPointer(scrub: Scrub, element: HTMLElement) {
-    const doc = element.ownerDocument
-    if (scrub.lock || !scrub.mouse || !element.requestPointerLock) return
-    scrub.lock = new AbortController()
-    doc.addEventListener(
-      'pointerlockchange',
-      () => {
-        const cursor = scrubCursor(doc)
-        if (doc.pointerLockElement === element && scrubbing === scrub) {
-          placeCursor(scrub, element)
-          cursor.showPopover?.()
-        } else {
-          cursor.hidePopover?.()
-          scrub.lock?.abort()
-        }
-      },
-      { signal: scrub.lock.signal },
-    )
-    // Without the lock (refused, or unsupported) the scrub carries on with the
-    // OS cursor.
-    void Promise.resolve(element.requestPointerLock()).catch(() => scrub.lock?.abort())
-  }
-
-  function endScrub(element: HTMLElement) {
-    const doc = element.ownerDocument
-    if (doc.pointerLockElement === element) doc.exitPointerLock()
-    doc.querySelector<HTMLElement>(':scope > body > .rf-scrub-cursor')?.hidePopover?.()
-  }
+  const fieldScrub = scrubDrag({
+    start() {
+      if (handle.props.disabled || editing) return undefined
+      return numeric(handle.props.value)
+    },
+    move(travel, start) {
+      if (Number.isNaN(start)) return
+      commitNumber(start + Math.round(travel) * (handle.props.step ?? 1))
+    },
+    end(moved) {
+      if (moved) return
+      editing = true
+      handle.update()
+      handle.queueTask(() => {
+        input?.focus()
+        input?.select()
+      })
+    },
+  })
 
   const inputRef = ref((node, signal) => {
     if (!(node instanceof HTMLInputElement)) return
@@ -673,67 +621,7 @@ function ColorField(handle: Handle<FieldProps>) {
         data-editing={editing || undefined}
         data-align={scrub ? 'center' : undefined}
       >
-        <span
-          class="rf-color-field-body"
-          mix={
-            scrub
-              ? [
-                  on<HTMLSpanElement, 'pointerdown'>('pointerdown', (event) => {
-                    if (disabled || editing || !event.isPrimary || event.button !== 0) return
-                    scrubbing = {
-                      id: event.pointerId,
-                      start: numeric(value),
-                      x: event.clientX,
-                      y: event.clientY,
-                      lastX: event.clientX,
-                      travel: 0,
-                      moved: false,
-                      mouse: event.pointerType === 'mouse',
-                      locked: false,
-                    }
-                    event.currentTarget.setPointerCapture(event.pointerId)
-                  }),
-                  on<HTMLSpanElement, 'pointermove'>('pointermove', (event) => {
-                    const scrub = scrubbing
-                    if (!scrub || scrub.id !== event.pointerId) return
-                    const element = event.currentTarget
-                    // Under the pointer lock clientX stands still; movementX carries the travel.
-                    const locked = element.ownerDocument.pointerLockElement === element
-                    // The move that crosses into or out of the lock is not travel:
-                    // granting the lock can warp the cursor, and leaving it lets
-                    // clientX jump back to where the cursor really is.
-                    if (locked === scrub.locked) {
-                      scrub.travel += locked ? event.movementX : event.clientX - scrub.lastX
-                    }
-                    scrub.locked = locked
-                    scrub.lastX = event.clientX
-                    if (!scrub.moved && Math.abs(scrub.travel) < 2) return
-                    scrub.moved = true
-                    lockPointer(scrub, element)
-                    if (locked) placeCursor(scrub, element)
-                    if (Number.isNaN(scrub.start)) return
-                    commitNumber(scrub.start + Math.round(scrub.travel) * step)
-                  }),
-                  on<HTMLSpanElement, 'pointerup'>('pointerup', (event) => {
-                    const moved = scrubbing?.moved
-                    scrubbing = undefined
-                    endScrub(event.currentTarget)
-                    if (moved) return
-                    editing = true
-                    handle.update()
-                    handle.queueTask(() => {
-                      input?.focus()
-                      input?.select()
-                    })
-                  }),
-                  on<HTMLSpanElement, 'pointercancel'>('pointercancel', (event) => {
-                    scrubbing = undefined
-                    endScrub(event.currentTarget)
-                  }),
-                ]
-              : undefined
-          }
-        >
+        <span class="rf-color-field-body" mix={scrub ? fieldScrub : undefined}>
           {prefix && (
             <span class="rf-color-field-prefix" aria-hidden="true">
               {prefix}

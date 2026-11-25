@@ -19,6 +19,7 @@
 @import './table.css' layer(reflow);
 @import './input-copy.css' layer(reflow);
 @import './input-group.css' layer(reflow);
+@import './scrub.css' layer(reflow);
 @import './number-field.css' layer(reflow);
 @import './fluid-hover.css' layer(reflow);
 @import './tabs.css' layer(reflow);
