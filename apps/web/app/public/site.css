@@ -523,7 +523,7 @@ html[data-density='compact'] .site-nav a {
   }
 }
 @media (768px <= width < 1280px) {
-  .site-gallery [data-component='breadcrumb'] {
+  .site-gallery [data-component='time-field'] {
     grid-column: span 2;
   }
   .site-gallery [data-component='markdown'] {

@@ -20,7 +20,7 @@ const sampleDiff = `--- a/packages/reflow/src/behaviors/shortcut.ts
 /** The DiffView example: a unified diff with a Unified/Split toggle and actions. */
 export function DiffViewExample(_handle: Handle) {
   return () => (
-    <div style={{ width: 'min(100%, 640px)' }}>
+    <div style={{ width: 'min(100%, 760px)' }}>
       <DiffView
         diff={sampleDiff}
         viewToggle

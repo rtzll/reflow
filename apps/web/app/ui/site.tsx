@@ -447,6 +447,7 @@ const galleryOrder = [
   'time-grid',
   'bar-chart',
   'code-block',
+  'diff-view',
   'data-table',
   'avatar',
   'command-menu',
@@ -454,10 +455,12 @@ const galleryOrder = [
   'thinking-indicator',
   'sidebar',
   'radio-group',
-  'breadcrumb',
-  'thinking-steps',
+  'kbd',
   'tabs',
+  'breadcrumb',
   'segmented-control',
+  'thinking-steps',
+  'time-field',
   'ask-user-questions',
   'checkbox-group',
   'slider',
@@ -481,6 +484,9 @@ const galleryOrder = [
   'markdown',
   'citation',
 ]
+
+const fullWidthCards = new Set(['code-block', 'diff-view'])
+const halfWidthCards = new Set(['time-grid', 'bar-chart', 'breadcrumb', 'segmented-control'])
 
 const wideCards = new Set([
   'markdown',
@@ -580,10 +586,8 @@ function Gallery(
                 key={entry.slug}
                 class="site-preview-card"
                 data-component={entry.slug}
-                data-full-width={entry.slug === 'code-block' ? '' : undefined}
-                data-half-width={
-                  entry.slug === 'time-grid' || entry.slug === 'bar-chart' ? '' : undefined
-                }
+                data-full-width={fullWidthCards.has(entry.slug) ? '' : undefined}
+                data-half-width={halfWidthCards.has(entry.slug) ? '' : undefined}
                 data-wide={wideCards.has(entry.slug) ? '' : undefined}
                 data-tall={tallCards.has(entry.slug) ? '' : undefined}
                 data-right={rightCards.has(entry.slug) ? '' : undefined}

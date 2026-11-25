@@ -17,6 +17,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'time-grid',
     'bar-chart',
     'code-block',
+    'diff-view',
     'data-table',
     'avatar',
     'command-menu',
@@ -24,10 +25,12 @@ it('preserves the gallery order and keeps previews above their footers', async (
     'thinking-indicator',
     'sidebar',
     'radio-group',
-    'breadcrumb',
-    'thinking-steps',
+    'kbd',
     'tabs',
+    'breadcrumb',
     'segmented-control',
+    'thinking-steps',
+    'time-field',
     'ask-user-questions',
     'checkbox-group',
     'slider',
@@ -70,7 +73,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
     await trail.getByRole('button', { name: 'Drafts' }).waitFor()
     assert.equal(await trail.locator('[aria-current="page"]').textContent(), 'Roadmap.md')
     assert.equal(await trail.locator('a').first().textContent(), 'Home')
-    if (width !== 768) await trail.locator('li[data-ellipsis]').waitFor()
+    await trail.locator('li[data-ellipsis]').waitFor()
     assert.equal(
       await gallery.locator('[data-component="color-picker"] .rf-color-swatch').count(),
       17,
@@ -109,21 +112,49 @@ it('preserves the gallery order and keeps previews above their footers', async (
     await checkContainment()
     const tile = (slug: string) =>
       gallery.locator(`article[data-component="${slug}"]`).boundingBox()
-    const [markdown, citation, toaster, timeGrid, chart, codeBlock] = await Promise.all(
-      ['markdown', 'citation', 'toaster', 'time-grid', 'bar-chart', 'code-block'].map(tile),
+    const [
+      markdown,
+      citation,
+      toaster,
+      timeGrid,
+      chart,
+      codeBlock,
+      diffView,
+      breadcrumb,
+      segmented,
+    ] = await Promise.all(
+      [
+        'markdown',
+        'citation',
+        'toaster',
+        'time-grid',
+        'bar-chart',
+        'code-block',
+        'diff-view',
+        'breadcrumb',
+        'segmented-control',
+      ].map(tile),
     )
     const rowGap = await gallery.evaluate((node) => parseFloat(getComputedStyle(node).rowGap))
     assert.equal(timeGrid!.y, toaster!.y + toaster!.height + rowGap)
     assert.equal(codeBlock!.y, chart!.y + chart!.height + rowGap)
+    assert.equal(diffView!.y, codeBlock!.y + codeBlock!.height + rowGap)
+    assert.equal(diffView!.width, codeBlock!.width)
     if (width >= 768) {
       assert.equal(citation!.y, markdown!.y)
       assert.equal(timeGrid!.y, chart!.y)
       assert.equal(timeGrid!.x, codeBlock!.x)
       assert.equal(chart!.x + chart!.width, codeBlock!.x + codeBlock!.width)
       assert.ok(Math.abs(timeGrid!.width - chart!.width) < 1)
+      assert.equal(breadcrumb!.y, segmented!.y)
+      assert.equal(breadcrumb!.x, codeBlock!.x)
+      assert.equal(segmented!.x + segmented!.width, codeBlock!.x + codeBlock!.width)
+      assert.ok(Math.abs(breadcrumb!.width - segmented!.width) < 1)
     } else {
       assert.equal(timeGrid!.x, chart!.x)
       assert.equal(chart!.y, timeGrid!.y + timeGrid!.height + rowGap)
+      assert.equal(breadcrumb!.x, segmented!.x)
+      assert.equal(segmented!.y, breadcrumb!.y + breadcrumb!.height + rowGap)
     }
     const buildChart = gallery.getByRole('group', { name: 'Seconds by build stage' })
     await expect(buildChart.locator('.rf-bar-chart-ticks span')).toHaveText([
@@ -157,21 +188,16 @@ it('preserves the gallery order and keeps previews above their footers', async (
       await expect(
         gallery.locator('[data-component="ask-user-questions"]').getByText('Question 1 of 8'),
       ).toBeVisible()
-      const [card, dialog, datePicker, wideCalendar, segmented, thinking] = await Promise.all(
-        [
-          'card',
-          'alert-dialog',
-          'date-picker',
-          'calendar',
-          'segmented-control',
-          'thinking-steps',
-        ].map(tile),
+      const [card, dialog, datePicker, wideCalendar, timeField, thinking] = await Promise.all(
+        ['card', 'alert-dialog', 'date-picker', 'calendar', 'time-field', 'thinking-steps'].map(
+          tile,
+        ),
       )
       assert.equal(card!.y, dialog!.y)
       assert.equal(datePicker!.y, wideCalendar!.y)
       assert.ok(datePicker!.x < wideCalendar!.x)
-      assert.equal(segmented!.y, thinking!.y)
-      assert.ok(segmented!.x < thinking!.x)
+      assert.equal(timeField!.y, thinking!.y)
+      assert.ok(timeField!.x < thinking!.x)
       // The last band: a large conversation on the left, two smalls stacked beside it.
       const [chat, popover, drawer] = await Promise.all(
         ['chat-message', 'popover', 'drawer'].map(tile),
@@ -712,7 +738,7 @@ it('can reopen either gallery breadcrumb menu after switching and selecting', as
   await page.setViewportSize({ width: 1440, height: 900 })
   await open(page, '/')
   const trail = page.locator('[data-component="breadcrumb"] .rf-breadcrumb')
-  const ellipsis = trail.getByRole('button', { name: 'Show 3 hidden steps' })
+  const ellipsis = trail.getByRole('button', { name: 'Show 2 hidden steps' })
   const drafts = trail.getByRole('button', { name: 'Drafts' })
   const website = trail.getByRole('menuitem', { name: 'Website' })
   const published = trail.getByRole('menuitemradio', { name: 'Published' })
