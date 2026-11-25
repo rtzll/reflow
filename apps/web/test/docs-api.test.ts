@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import * as assert from 'remix/assert'
 import { it } from 'remix/test'
 import { componentApi } from '../app/docs-data.ts'
+import { components as catalogComponents } from '../app/public/catalog-entries.ts'
 
 interface ParsedInterface {
   kind: 'interface'
@@ -447,4 +448,21 @@ it('keeps component API tables aligned with exported TypeScript prop names and r
   }
 
   assert.deepEqual(issues, [])
+})
+
+it('mentions every catalog component in docs/components.md and skills/reflow/SKILL.md', () => {
+  const repoRoot = fileURLToPath(new URL('../../../', import.meta.url))
+  const componentsDoc = readFileSync(join(repoRoot, 'docs/components.md'), 'utf8')
+  const skillDoc = readFileSync(join(repoRoot, 'skills/reflow/SKILL.md'), 'utf8')
+  const missingFromComponents: string[] = []
+  const missingFromSkill: string[] = []
+
+  for (const [, name] of catalogComponents) {
+    const pattern = new RegExp(`\\b${name}\\b`)
+    if (!pattern.test(componentsDoc)) missingFromComponents.push(name)
+    if (!pattern.test(skillDoc)) missingFromSkill.push(name)
+  }
+
+  assert.deepEqual(missingFromComponents, [])
+  assert.deepEqual(missingFromSkill, [])
 })
