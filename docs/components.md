@@ -78,9 +78,9 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 10 | [`ToolCalls` (shipped)](tool-calls.md) | — | Spinner, the attachment row's grid reveal |
 | 10 | [`TaskList` (shipped)](task-list.md) | — | Spinner, Dropdown's check draw |
 | 10 | [`FileChanges` (shipped)](file-changes.md) | — | The grid-row reveal from ToolCalls, Button |
-| 11 | [`Kbd` (implemented, awaiting release)](kbd.md) | — | `formatShortcut` and `isMacPlatform` from `behaviors/shortcut.ts`, CommandMenu keycap metrics |
-| 11 | [`TimeField` (implemented, awaiting release)](time-field.md) | [Fluid Functionalism date-picker-core](https://github.com/mickadesign/fluid-functionalism) | Promoted from `DatePicker`'s time combobox, `@remix-run/ui/popover` and `listbox`, `onFormReset`, `containEscape` |
-| 11 | [`DiffView` (implemented, awaiting release)](diff-view.md) | — | `ScrollArea`, `SegmentedControl`, `CodeBlock` diff tokens, `FileChanges` counts |
+| 11 | [`Kbd` (shipped)](kbd.md) | — | `formatShortcut` and `isMacPlatform` from `behaviors/shortcut.ts`, CommandMenu keycap metrics |
+| 11 | [`TimeField` (shipped)](time-field.md) | [Fluid Functionalism date-picker-core](https://github.com/mickadesign/fluid-functionalism) | Promoted from `DatePicker`'s time combobox, `@remix-run/ui/popover` and `listbox`, `onFormReset`, `containEscape` |
+| 11 | [`DiffView` (shipped)](diff-view.md) | — | `ScrollArea`, `SegmentedControl`, `CodeBlock` diff tokens, `FileChanges` counts |
 
 ### Decisions so far
 
