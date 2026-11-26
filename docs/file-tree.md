@@ -39,4 +39,4 @@ import { FileTree } from '@rtzll/reflow/trees'
 
 ## Verification
 
-Server tests verify Declarative Shadow DOM output and row decorations (`trees-ssr.test.server.tsx`), browser tests cover hydration and selection (`file-tree.test.browser.tsx`), and E2E tests verify `/apps/review` and `/apps/ci` artifact browsing.
+Server tests verify Declarative Shadow DOM output and row decorations (`trees-ssr.test.tsx`), browser tests cover hydration and selection (`file-tree.test.browser.tsx`), and E2E tests verify `/apps/review` and `/apps/ci` artifact browsing.

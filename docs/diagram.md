@@ -29,4 +29,4 @@ import { Diagram } from '@rtzll/reflow/diagrams'
 
 ## Verification
 
-Server tests verify deterministic SVG output (`diagrams-ssr.test.server.tsx`), browser tests verify lazy client rendering, source toggling, and `Markdown` Mermaid fence integration (`diagram.test.browser.tsx`), and E2E tests verify live diagrams in `/apps/review`.
+Server tests verify deterministic SVG output (`diagrams-ssr.test.tsx`), browser tests verify lazy client rendering, source toggling, and `Markdown` Mermaid fence integration (`diagram.test.browser.tsx`), and E2E tests verify live diagrams in `/apps/review`.

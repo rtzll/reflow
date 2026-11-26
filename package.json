@@ -14,6 +14,8 @@
     "preview:web": "pnpm build:web && pnpm --filter @reflow/web preview",
     "test:deployment": "pnpm build:web && pnpm --filter @reflow/web test:deployment",
     "check": "pnpm build && pnpm -r check && tsc -p tsconfig.json",
+    "check:fast": "pnpm lint && pnpm fmt:check && pnpm check && pnpm test:unit && pnpm test:server",
+    "bump": "node tools/bump.ts",
     "fmt": "oxfmt . --write",
     "fmt:check": "oxfmt . --check",
     "lint": "oxlint . --max-warnings=0",
@@ -25,6 +27,7 @@
     "test:stress": "node tools/test-stress.ts",
     "test:run": "pnpm test:unit && pnpm test:browser && pnpm test:e2e",
     "test:unit": "node --test tools/*.test.ts packages/create-reflow/test/*.test.ts",
+    "test:server": "NODE_OPTIONS=\"$NODE_OPTIONS --disable-warning=DEP0205\" ./apps/web/node_modules/.bin/remix test --type server",
     "test:browser": "NODE_OPTIONS=\"$NODE_OPTIONS --disable-warning=DEP0205\" ./apps/web/node_modules/.bin/remix test --type server --type browser",
     "test:e2e": "NODE_OPTIONS=\"$NODE_OPTIONS --disable-warning=DEP0205\" ./apps/web/node_modules/.bin/remix test --type e2e --concurrency 3 --setup apps/web/test/showcase-server.ts"
   },
