@@ -1,5 +1,5 @@
 import { QueuedStack, type QueuedMessage } from '@rtzll/reflow'
-import { equal, ok } from 'remix/assert'
+import { equal } from 'remix/assert'
 import { render } from 'remix/component/test'
 import { type Handle } from 'remix/component'
 import { describe, it } from 'remix/test'

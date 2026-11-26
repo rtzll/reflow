@@ -15,7 +15,15 @@
   "plugins": ["typescript", "unicorn", "oxc", "import"],
   "ignorePatterns": ["**/*.d.ts", "**/dist/**", "**/coverage/**", "node_modules/**", ".claude/**"],
   "rules": {
-    "no-unused-vars": "off"
+    "no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_",
+        "ignoreRestSiblings": true
+      }
+    ]
   },
   "overrides": [
     {

@@ -141,7 +141,7 @@ interface SidebarProps {
 
 function Sidebar(handle: Handle<SidebarProps>) {
   return () => {
-    let { components, settings, page, slug, search } = handle.props
+    let { components, page, slug, search } = handle.props
     let systems = components.filter((component) => component.category?.toLowerCase() === 'system')
     let controls = components.filter((component) => !component.category)
     let group = (label: string, entries: readonly ShowcaseComponent[]) => (

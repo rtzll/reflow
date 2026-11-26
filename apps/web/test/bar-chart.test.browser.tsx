@@ -95,7 +95,7 @@ it('rounds the axis up to whole steps and scales bars to it', (t) => {
 })
 
 it('handles extreme finite peaks without NaN or Infinity, marks static current bars, and avoids duplicate descriptions', (t) => {
-  const { $, $$, cleanup } = render(
+  const { $$, cleanup } = render(
     <div>
       <BarChart
         label="Huge"

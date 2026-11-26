@@ -861,7 +861,6 @@ export function ColorPicker(handle: Handle<ColorPickerProps>) {
     }
 
     const parsed = buildParsed(hsv.h, hsv.s, hsv.v, hsv.a)
-    const formatted = parsed[format]
 
     function emit(next: Hsva, nextFormat = format) {
       hsv = next

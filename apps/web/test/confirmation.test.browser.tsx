@@ -1,5 +1,5 @@
 import { Confirmation, type ConfirmationState } from '@rtzll/reflow'
-import { deepEqual, equal, ok } from 'remix/assert'
+import { deepEqual, equal } from 'remix/assert'
 import type { Handle } from 'remix/component'
 import { render } from 'remix/component/test'
 import { describe, it } from 'remix/test'

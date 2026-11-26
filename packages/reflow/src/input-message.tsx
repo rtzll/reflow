@@ -560,7 +560,7 @@ export function InputMessage(handle: Handle<InputMessageProps>) {
         >
           <div>
             <ul class="rf-composer-files" aria-label="Files to send">
-              {files.map((file, index) => (
+              {files.map((file) => (
                 <li
                   key={`${file.name}-${file.size}-${file.lastModified}`}
                   data-exiting={exiting.has(file) || undefined}

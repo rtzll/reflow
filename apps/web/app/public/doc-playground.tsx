@@ -57,8 +57,6 @@ import {
   CheckboxGroup,
   ColorPicker,
   DatePicker,
-  Dropdown,
-  Field,
   Icon,
   Input,
   InputCopy,
@@ -610,13 +608,11 @@ export function PlaygroundExample(
   }>,
 ) {
   let selection = cardItems[0].title as string
-  let slide = 0
   let externalColorFormat: ColorFormat | undefined
   let previewColorFormat: ColorFormat = 'hex'
   const composerMessages = [
     { text: 'Make my input box feel less stiff', attachments: [] as { name: string }[] },
   ]
-  const icon = <Icon name="menu" />
   return () => {
     const { slug, values: v } = handle.props
     const options = ['Apple', 'Banana', 'Cherry', 'Mango'].map((label) => ({
@@ -625,7 +621,6 @@ export function PlaygroundExample(
     }))
     const density = v.size === 'compact' ? 'compact' : 'default'
     const disabled = Boolean(v.disabled)
-    const content = <p>Build thoughtful interfaces with fluid motion.</p>
     switch (slug) {
       case 'markdown':
         return <Markdown source={markdownNote} size={density} />

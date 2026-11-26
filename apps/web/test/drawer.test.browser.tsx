@@ -353,7 +353,7 @@ describe('Drawer snap points', () => {
 
 describe('Nested drawers', () => {
   it('steps the open drawer back while another opens in front of it', async (t) => {
-    const { $, $$, act, cleanup } = render(
+    const { $$, act, cleanup } = render(
       <Drawer trigger="Filters" title="Filters" defaultOpen>
         <Drawer trigger="Pick a color" title="Color">
           <div style="height: 300px">Colors</div>
