@@ -37,13 +37,14 @@ it('opens each workspace from the showcase and returns to the directory', async 
   await page.setViewportSize({ width: 1440, height: 900 })
   await open(page, '/?shape=pill')
   await page.locator('.site-left').getByRole('link', { name: 'Apps', exact: true }).click()
-  await expect(page.locator('.site-app-card')).toHaveCount(4)
+  await expect(page.locator('.site-app-card')).toHaveCount(5)
   await expect(page.locator('.site-app-card').first()).toHaveCSS('border-top-left-radius', '12px')
   const workspaces = [
     ['Issue tracker', page.getByRole('listbox', { name: 'Cycle issues' }), '.issues-insight'],
     ['Chat', page.getByRole('textbox', { name: 'Message' }), '.rf-composer'],
     ['Calendar', page.getByRole('button', { name: 'New event' }), '.week-schedule'],
     ['Analytics', page.getByRole('table', { name: 'Studio events' }), '.analytics-chart'],
+    ['Code review', page.getByRole('button', { name: 'Submit review' }), '.rf-diff-view'],
   ] as const
   for (const [name, workspaceControl, surface] of workspaces) {
     await page.getByRole('main').getByRole('link', { name }).click()
@@ -70,7 +71,7 @@ it('serves the app directory without JavaScript and rejects an unknown app', asy
   await page.route('**/*.js', (route) => route.abort())
   await open(page, '/apps', { hydrate: false })
   const links = page.getByRole('main').getByRole('link')
-  await expect(links).toHaveCount(4)
+  await expect(links).toHaveCount(5)
   const bounds = await links.evaluateAll((cards) =>
     cards.map((card) => {
       const { left, right, top, bottom } = card.getBoundingClientRect()

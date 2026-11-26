@@ -7,17 +7,26 @@ it('keeps the team table at the same height while loading', async (t) => {
   await open(page, '/')
   const tile = page.locator('[data-component="data-table"]')
   const table = tile.getByRole('table', { name: 'Team members' })
-  const frame = table.locator('xpath=..')
   const filter = tile.getByRole('searchbox')
   const toggle = tile.getByRole('switch', { name: 'Loading preview' })
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 900 })
-    const search = (await filter.boundingBox())!
-    const control = (await toggle.boundingBox())!
+    // Measure all three boxes in one frame so unrelated vertical layout above
+    // the card cannot shift y between separate Playwright round trips.
+    const { search, control, bounds } = await tile.evaluate((root) => {
+      const searchEl = root.querySelector<HTMLElement>('[role="searchbox"], input[type="search"]')!
+      const toggleEl = root.querySelector<HTMLElement>('[role="switch"]')!
+      const tableEl = root.querySelector<HTMLElement>('table')!
+      const frameEl = tableEl.parentElement!
+      const box = (el: HTMLElement) => {
+        const r = el.getBoundingClientRect()
+        return { x: r.x, y: r.y, width: r.width, height: r.height }
+      }
+      return { search: box(searchEl), control: box(toggleEl), bounds: box(frameEl) }
+    })
     // Align with the scroll container, not the table: on narrow screens the
     // table may be a few pixels wider and scroll sideways (Linux fonts are
     // wider, so CI hit this at 390px).
-    const bounds = (await frame.boundingBox())!
     expect(control.x).toBeGreaterThan(search.x + search.width)
     expect(Math.abs(control.x + control.width - (bounds.x + bounds.width))).toBeLessThanOrEqual(1)
     expect(
