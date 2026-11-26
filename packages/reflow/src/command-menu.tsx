@@ -1,7 +1,7 @@
 import { isMacPlatform, matchesShortcut, parseShortcut } from './behaviors/shortcut.ts'
 import { on, ref } from 'remix/component'
 import type { Handle, RemixNode } from 'remix/component'
-import { Button } from './button.tsx'
+import { Button, type ButtonSize } from './button.tsx'
 import { Kbd } from './kbd.tsx'
 import { Tabs } from './tabs.tsx'
 import { fluidHover } from './systems/fluid-hover.ts'
@@ -45,6 +45,8 @@ export interface CommandMenuProps {
   controls?: RemixNode
   /** Supply a trigger to open the menu in a modal. */
   trigger?: RemixNode
+  /** Size of the built-in modal trigger button. */
+  triggerSize?: ButtonSize
   /** Set when the menu is rendered inside a consumer-provided dialog. */
   inDialog?: boolean
   /** The combo that toggles a modal menu: `true` or omitted is Mod+K, `false` binds nothing. */
@@ -470,6 +472,7 @@ export function CommandMenu(handle: Handle<CommandMenuProps>) {
       >
         <Button
           variant="secondary"
+          size={handle.props.triggerSize}
           aria-haspopup="dialog"
           aria-expanded={openState}
           mix={on('click', () => setOpen(true))}

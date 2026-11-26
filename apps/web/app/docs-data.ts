@@ -497,6 +497,13 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           required: false,
           description: 'Optional decorative icon. Defaults to a folder or file.',
         },
+        {
+          name: 'trailing',
+          type: 'RemixNode',
+          required: false,
+          description:
+            'Optional trailing metadata rendered at the end of the row (e.g. diff counts or status).',
+        },
       ],
     },
   ],
@@ -3276,8 +3283,14 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
         {
           name: 'trigger',
           type: 'RemixNode',
-          description: 'Supply a trigger to open the menu in a modal.',
           required: false,
+          description: 'Supply a trigger to open the menu in a modal.',
+        },
+        {
+          name: 'triggerSize',
+          type: 'ButtonSize',
+          required: false,
+          description: 'Size of the built-in modal trigger button.',
         },
         {
           name: 'inDialog',

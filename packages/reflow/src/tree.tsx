@@ -8,6 +8,8 @@ export interface TreeItem {
   value: string
   label: string
   icon?: RemixNode
+  /** Optional trailing metadata rendered at the end of the row (e.g. diff counts or status). */
+  trailing?: RemixNode
   children?: readonly TreeItem[]
 }
 
@@ -188,6 +190,7 @@ export function Tree(handle: Handle<TreeProps>) {
               <span class="rf-tree-label" title={item.label}>
                 {item.label}
               </span>
+              {item.trailing != null && <span class="rf-tree-trailing">{item.trailing}</span>}
             </div>
             {isOpen && <ul role="group">{renderItems(item.children!, level + 1)}</ul>}
           </li>

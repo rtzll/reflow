@@ -59,10 +59,22 @@
 }
 
 .rf-tree-label {
+  flex: 1 1 auto;
   min-inline-size: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.rf-tree-trailing {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  margin-inline-start: auto;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption);
+  font-variant-numeric: tabular-nums;
 }
 
 .rf-tree [aria-selected='true'] > .rf-tree-row {
