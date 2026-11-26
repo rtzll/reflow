@@ -94,3 +94,5 @@
 @import './status-strip.css' layer(reflow);
 @import './filter-bar.css' layer(reflow);
 @import './reaction-bar.css' layer(reflow);
+@import './sparkline.css' layer(reflow);
+@import './metric-card.css' layer(reflow);

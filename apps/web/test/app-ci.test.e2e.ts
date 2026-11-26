@@ -15,7 +15,7 @@ it('inspects job DAG, runner telemetry, Datadog-style log explorer, waterfall sp
   const graphTab = page.getByRole('tabpanel', { name: 'Graph & logs' })
   await expect(graphTab.locator('.rf-pipeline-stage')).toHaveCount(4)
   await expect(graphTab.locator('.rf-pipeline-edge')).toHaveCount(8)
-  await expect(graphTab.locator('.ci-telemetry-grid .ci-metric-card')).toHaveCount(4)
+  await expect(graphTab.locator('.ci-telemetry-grid .rf-metric-card')).toHaveCount(4)
   await expect(graphTab.locator('.ci-failure-callout')).toBeVisible()
   await expect(graphTab.locator('.rf-log-histogram .rf-log-hist-bucket')).toHaveCount(3)
   await expect(graphTab.locator('[data-log-group="e2e-apps"]')).toHaveAttribute('data-open', 'true')

@@ -7,6 +7,7 @@ import {
   Icon,
   Kbd,
   LogViewer,
+  MetricCard,
   PipelineGraph,
   Resizable,
   Spinner,
@@ -45,58 +46,30 @@ function cloneRuns(runs: Record<string, CiRunData>): Record<string, CiRunData> {
   return JSON.parse(JSON.stringify(runs)) as Record<string, CiRunData>
 }
 
-function sparklinePath(samples: readonly number[], max: number, width: number, height: number) {
-  if (samples.length < 2) return { line: '', area: '' }
-  const stepX = width / (samples.length - 1)
-  const pts = samples.map((val, idx) => {
-    const x = idx * stepX
-    const y = height - Math.max(0.08, Math.min(1, val / max)) * (height - 4) - 2
-    return [Number(x.toFixed(1)), Number(y.toFixed(1))] as const
-  })
-  const line = pts.map(([x, y], i) => `${i === 0 ? 'M' : 'L'} ${x} ${y}`).join(' ')
-  const area = `${line} L ${width} ${height} L 0 ${height} Z`
-  return { line, area }
-}
-
-function TelemetrySparkline(
-  handle: Handle<{
-    samples: readonly number[]
-    max: number
-    tone: 'accent' | 'info'
-  }>,
-) {
-  return () => {
-    const props = handle.props
-    const { line, area } = sparklinePath(props.samples, props.max, 96, 26)
-    return (
-      <svg
-        class="ci-sparkline"
-        data-tone={props.tone}
-        width="96"
-        height="26"
-        viewBox="0 0 96 26"
-        aria-hidden="true"
-      >
-        <path class="ci-sparkline-area" d={area} />
-        <path class="ci-sparkline-line" d={line} />
-      </svg>
-    )
-  }
-}
-
 function TelemetryStrip(handle: Handle<{ telemetry: CiJobTelemetry }>) {
   return () => {
     const { telemetry } = handle.props
+    const deltaTone =
+      telemetry.deltaTone === 'faster'
+        ? 'positive'
+        : telemetry.deltaTone === 'slower'
+          ? 'negative'
+          : 'neutral'
     return (
       <div class="ci-telemetry-grid" aria-label="Runner telemetry">
-        <div class="ci-metric-card">
-          <span class="ci-metric-label">Runner</span>
-          <strong class="ci-metric-value">{telemetry.runner}</strong>
-          <span class="ci-metric-sub">{telemetry.arch}</span>
-        </div>
-        <div class="ci-metric-card">
-          <div class="ci-metric-head">
-            <span class="ci-metric-label">Cache</span>
+        <MetricCard
+          size="compact"
+          label="Runner"
+          value={telemetry.runner}
+          detail={telemetry.arch}
+        />
+        <MetricCard
+          size="compact"
+          label="Cache"
+          value={telemetry.cacheDetail}
+          delta={telemetry.deltaVsP50}
+          deltaTone={deltaTone}
+          badge={
             <Badge
               size="compact"
               color={
@@ -109,34 +82,22 @@ function TelemetryStrip(handle: Handle<{ telemetry: CiJobTelemetry }>) {
             >
               {telemetry.cacheStatus.toUpperCase()}
             </Badge>
-          </div>
-          <strong class="ci-metric-value">{telemetry.cacheDetail}</strong>
-          <span class="ci-metric-delta" data-tone={telemetry.deltaTone}>
-            {telemetry.deltaVsP50}
-          </span>
-        </div>
-        <div class="ci-metric-card ci-metric-spark">
-          <div class="ci-metric-text">
-            <span class="ci-metric-label">CPU</span>
-            <strong class="ci-metric-value">{telemetry.cpuPeakPct}% peak</strong>
-            <span class="ci-metric-sub">avg {telemetry.cpuAvgPct}%</span>
-          </div>
-          <TelemetrySparkline samples={telemetry.cpuSamples} max={100} tone="accent" />
-        </div>
-        <div class="ci-metric-card ci-metric-spark">
-          <div class="ci-metric-text">
-            <span class="ci-metric-label">Memory</span>
-            <strong class="ci-metric-value">
-              {telemetry.memPeakGb.toFixed(1)} / {telemetry.memLimitGb} GB
-            </strong>
-            <span class="ci-metric-sub">peak RSS</span>
-          </div>
-          <TelemetrySparkline
-            samples={telemetry.memSamples}
-            max={telemetry.memLimitGb}
-            tone="info"
-          />
-        </div>
+          }
+        />
+        <MetricCard
+          size="compact"
+          label="CPU"
+          value={`${telemetry.cpuPeakPct}% peak`}
+          detail={`avg ${telemetry.cpuAvgPct}%`}
+          sparkline={{ values: telemetry.cpuSamples, max: 100, tone: 'accent' }}
+        />
+        <MetricCard
+          size="compact"
+          label="Memory"
+          value={`${telemetry.memPeakGb.toFixed(1)} / ${telemetry.memLimitGb} GB`}
+          detail="peak RSS"
+          sparkline={{ values: telemetry.memSamples, max: telemetry.memLimitGb, tone: 'info' }}
+        />
       </div>
     )
   }

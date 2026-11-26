@@ -1,0 +1,72 @@
+.rf-sparkline {
+  --spark-color: var(--rf-accent);
+  display: block;
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+.rf-sparkline[data-tone='info'] {
+  --spark-color: var(--rf-info, var(--rf-accent));
+}
+
+.rf-sparkline[data-tone='success'] {
+  --spark-color: var(--rf-success);
+}
+
+.rf-sparkline[data-tone='warning'] {
+  --spark-color: var(--rf-warning);
+}
+
+.rf-sparkline[data-tone='danger'] {
+  --spark-color: var(--rf-danger);
+}
+
+.rf-sparkline[data-tone='neutral'] {
+  --spark-color: var(--rf-muted);
+}
+
+.rf-sparkline-area {
+  fill: color-mix(in oklab, var(--spark-color) 16%, transparent);
+}
+
+.rf-sparkline-line {
+  fill: none;
+  stroke: var(--spark-color);
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.rf-sparkline-cursor {
+  stroke: var(--rf-border);
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+}
+
+.rf-sparkline-dot {
+  fill: var(--spark-color);
+  stroke: var(--rf-surface-1);
+  stroke-width: 1.5;
+}
+
+.rf-sparkline-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--rf-item-radius);
+  cursor: crosshair;
+}
+
+.rf-sparkline-wrap:focus-visible {
+  outline: 2px solid var(--rf-accent);
+  outline-offset: 2px;
+}
+
+.rf-sparkline-readout {
+  font-family: var(--rf-font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--rf-muted);
+  white-space: nowrap;
+}
