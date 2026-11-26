@@ -959,6 +959,13 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           description: 'Caps the scrollable log viewport height (such as "420px").',
         },
         {
+          name: 'maxVisibleLines',
+          type: 'number',
+          required: false,
+          description:
+            'Maximum lines rendered per expanded group before showing a "Show more" control. Defaults to 500.',
+        },
+        {
           name: 'copyable',
           type: 'boolean',
           required: false,

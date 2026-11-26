@@ -99,3 +99,35 @@ it('auto-expands failed groups, filters by severity/regex/facets, highlights mat
   deepEqual(ranges.at(-1), { start: 2, end: 4 })
   equal($$('.rf-log-line[data-selected="true"]').length, 3)
 })
+
+it('shows removable facet chips and windows large logs with Show more controls', async (t) => {
+  const manyEntries = Array.from({ length: 12 }, (_, idx) => ({
+    text: `Step output line ${idx + 1}`,
+    source: idx % 2 === 0 ? 'worker' : 'chromium',
+  }))
+  const { $, $$, act, cleanup } = render(
+    <LogViewer title="large-run" entries={manyEntries} maxVisibleLines={5} />,
+  )
+  t.after(cleanup)
+
+  equal($$('.rf-log-line').length, 5)
+  ok($('.rf-log-load-more')?.textContent?.includes('7 hidden'))
+
+  const showAll = [...$$('.rf-log-load-btn')].find(
+    (btn) => btn.textContent === 'Show all',
+  ) as HTMLButtonElement
+  await act(() => showAll.click())
+  equal($$('.rf-log-line').length, 12)
+
+  // Click a source chip -> renders removable facet chip and filters to 6 entries.
+  const sourceChip = $('.rf-log-source-chip') as HTMLButtonElement
+  await act(() => sourceChip.click())
+  equal($$('.rf-log-facet-chip').length, 1)
+  equal($$('.rf-log-line').length, 6)
+
+  // Click × on facet chip -> clears filter and restores all 12 entries.
+  const removeFacet = $('.rf-log-facet-remove') as HTMLButtonElement
+  await act(() => removeFacet.click())
+  equal($$('.rf-log-facet-chip').length, 0)
+  equal($$('.rf-log-line').length, 12)
+})

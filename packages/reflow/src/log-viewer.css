@@ -262,6 +262,93 @@
   color: var(--rf-fg);
 }
 
+/* Datadog-style removable facet chips bar. */
+.rf-log-active-facets {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-block-end: 1px solid var(--rf-border);
+  background: color-mix(in oklab, var(--rf-surface-1) 70%, transparent);
+  font-size: 11px;
+}
+
+.rf-log-facet-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 5px 1px 7px;
+  border: 1px solid color-mix(in oklab, var(--rf-accent) 38%, transparent);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--rf-accent) 12%, transparent);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.rf-log-facet-key {
+  color: var(--rf-muted);
+}
+
+.rf-log-facet-val {
+  color: var(--rf-fg);
+}
+
+.rf-log-facet-remove {
+  display: inline-grid;
+  place-items: center;
+  padding: 1px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--rf-muted);
+  cursor: pointer;
+}
+
+.rf-log-facet-remove:hover {
+  color: var(--rf-fg);
+}
+
+.rf-log-facet-clear {
+  margin-inline-start: auto;
+  padding: 2px 6px;
+  border: 0;
+  border-radius: var(--rf-radius);
+  background: transparent;
+  color: var(--rf-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.rf-log-facet-clear:hover {
+  background: var(--rf-hover);
+  color: var(--rf-fg);
+}
+
+.rf-log-load-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-block: 1px dashed var(--rf-border);
+  background: color-mix(in oklab, var(--rf-surface-1) 60%, transparent);
+}
+
+.rf-log-load-btn {
+  padding: 3px 9px;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-radius);
+  background: var(--rf-surface-2);
+  color: var(--rf-fg);
+  font-family: var(--rf-font);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.rf-log-load-btn:hover {
+  background: var(--rf-hover);
+}
+
 /* Datadog-style log volume & error-spike density bar. */
 .rf-log-histogram {
   display: flex;

@@ -78,6 +78,8 @@ export interface LogViewerProps {
   onSelectedLinesChange?: (range: LogLineRange | null) => void
   /** Caps the scrollable log viewport height (e.g. `'420px'`). */
   maxHeight?: string
+  /** Maximum lines rendered per expanded group before showing a "Show more" control. Default `500`. */
+  maxVisibleLines?: number
   /** Shows a copy button that copies ANSI-stripped visible or selected lines. Default `true`. */
   copyable?: boolean
   /** Called after log text is copied. */
@@ -330,6 +332,7 @@ export function LogViewer(handle: Handle<LogViewerProps>) {
   let wrapLines = handle.props.wrap ?? false
   let internalSelected: LogLineRange | null = null
   let expandedEntryKeys = new Set<string>()
+  const groupLineLimits = new Map<string, number>()
   let selectionAnchor: number | null = null
   let focusedErrorIndex = -1
   let copyState: 'idle' | 'copied' | 'error' = 'idle'
@@ -860,6 +863,43 @@ export function LogViewer(handle: Handle<LogViewerProps>) {
           </div>
         </header>
 
+        {parsedQuery.facets.length > 0 && (
+          <div class="rf-log-active-facets" role="group" aria-label="Active log filters">
+            {parsedQuery.facets.map((facet) => (
+              <span key={`${facet.key}:${facet.value}`} class="rf-log-facet-chip">
+                <span class="rf-log-facet-key">{facet.key}:</span>
+                <span class="rf-log-facet-val">{facet.value}</span>
+                <button
+                  type="button"
+                  class="rf-log-facet-remove"
+                  aria-label={`Remove ${facet.key}:${facet.value} filter`}
+                  mix={on('click', () => {
+                    const target = `${facet.key}:${facet.value}`.toLowerCase()
+                    const remaining = queryValue
+                      .trim()
+                      .split(/\s+/)
+                      .filter((token) => token.toLowerCase() !== target)
+                      .join(' ')
+                    setQuery(remaining)
+                  })}
+                >
+                  <Icon name="x" size={11} />
+                </button>
+              </span>
+            ))}
+            <button
+              type="button"
+              class="rf-log-facet-clear"
+              mix={on('click', () => {
+                levelFilter = 'all'
+                setQuery('')
+              })}
+            >
+              Clear filters
+            </button>
+          </div>
+        )}
+
         {renderHistogram && histogramBuckets.length > 0 && (
           <div class="rf-log-histogram" role="group" aria-label="Log volume and severity density">
             {histogramBuckets.map((bucket) => {
@@ -954,146 +994,215 @@ export function LogViewer(handle: Handle<LogViewerProps>) {
                     </button>
                   )}
 
-                  {isOpen && (
-                    <div class="rf-log-lines" role="log" aria-live={follow ? 'polite' : 'off'}>
-                      {group.entries.map((entry) => {
-                        const isSelected =
-                          selected !== null &&
-                          entry.lineNumber >= selected.start &&
-                          entry.lineNumber <= selected.end
-                        const hasFields =
-                          entry.fields !== undefined && Object.keys(entry.fields).length > 0
-                        const isEntryOpen = hasFields && expandedEntryKeys.has(entry.key)
-                        const spans = parseAnsiLine(entry.raw)
-                        return (
-                          <div key={entry.key} class="rf-log-entry-wrap">
-                            <div
-                              class="rf-log-line"
-                              data-log-line={entry.lineNumber}
-                              data-level={entry.level}
-                              data-selected={isSelected ? 'true' : undefined}
-                              data-expandable={hasFields ? 'true' : undefined}
-                              data-expanded={isEntryOpen ? 'true' : undefined}
-                            >
-                              {lineNumbers && (
-                                <button
-                                  type="button"
-                                  class="rf-log-gutter"
-                                  aria-label={`Line ${entry.lineNumber}`}
-                                  aria-pressed={isSelected}
-                                  mix={on('click', (event) =>
-                                    handleLineClick(entry.lineNumber, event.shiftKey),
-                                  )}
-                                >
-                                  {entry.lineNumber}
-                                </button>
-                              )}
-                              <span
-                                class="rf-log-level-tag"
-                                data-level={entry.level}
-                                aria-label={entry.level}
+                  {isOpen &&
+                    (() => {
+                      const baseLimit = Math.max(1, props.maxVisibleLines ?? 500)
+                      const limit = groupLineLimits.get(group.id) ?? baseLimit
+                      const hiddenCount = Math.max(0, group.entries.length - limit)
+                      const visibleEntries =
+                        hiddenCount > 0
+                          ? follow
+                            ? group.entries.slice(-limit)
+                            : group.entries.slice(0, limit)
+                          : group.entries
+                      return (
+                        <div class="rf-log-lines" role="log" aria-live={follow ? 'polite' : 'off'}>
+                          {hiddenCount > 0 && follow && (
+                            <div class="rf-log-load-more">
+                              <button
+                                type="button"
+                                class="rf-log-load-btn"
+                                mix={on('click', () => {
+                                  groupLineLimits.set(group.id, limit + baseLimit)
+                                  void handle.update()
+                                })}
                               >
-                                {LEVEL_ABBR[entry.level]}
-                              </span>
-                              {hasAnyTimestamps && showTimestamps && (
-                                <span class="rf-log-timestamp">{entry.timestamp ?? ''}</span>
-                              )}
-                              {entry.source && (
-                                <button
-                                  type="button"
-                                  class="rf-log-source-chip"
-                                  title={`Filter source:${entry.source}`}
-                                  mix={on('click', () => addFacetFilter('source', entry.source!))}
+                                Show {Math.min(hiddenCount, baseLimit)} earlier lines ({hiddenCount}{' '}
+                                hidden)
+                              </button>
+                              <button
+                                type="button"
+                                class="rf-log-load-btn"
+                                mix={on('click', () => {
+                                  groupLineLimits.set(group.id, group.entries.length)
+                                  void handle.update()
+                                })}
+                              >
+                                Show all
+                              </button>
+                            </div>
+                          )}
+                          {visibleEntries.map((entry) => {
+                            const isSelected =
+                              selected !== null &&
+                              entry.lineNumber >= selected.start &&
+                              entry.lineNumber <= selected.end
+                            const hasFields =
+                              entry.fields !== undefined && Object.keys(entry.fields).length > 0
+                            const isEntryOpen = hasFields && expandedEntryKeys.has(entry.key)
+                            const spans = parseAnsiLine(entry.raw)
+                            return (
+                              <div key={entry.key} class="rf-log-entry-wrap">
+                                <div
+                                  class="rf-log-line"
+                                  data-log-line={entry.lineNumber}
+                                  data-level={entry.level}
+                                  data-selected={isSelected ? 'true' : undefined}
+                                  data-expandable={hasFields ? 'true' : undefined}
+                                  data-expanded={isEntryOpen ? 'true' : undefined}
                                 >
-                                  {entry.source}
-                                </button>
-                              )}
-                              <span class="rf-log-text">
-                                {spans.length === 0
-                                  ? '\u200b'
-                                  : spans.map((span, idx) => (
-                                      <span
-                                        key={idx}
-                                        class={classList(
-                                          span.color ? `rf-term-ansi-${span.color}` : undefined,
-                                          span.bold ? 'rf-term-bold' : undefined,
-                                          span.dim ? 'rf-term-dim' : undefined,
-                                          span.italic ? 'rf-term-italic' : undefined,
-                                          span.underline ? 'rf-term-underline' : undefined,
+                                  {lineNumbers && (
+                                    <button
+                                      type="button"
+                                      class="rf-log-gutter"
+                                      aria-label={`Line ${entry.lineNumber}`}
+                                      aria-pressed={isSelected}
+                                      mix={on('click', (event) =>
+                                        handleLineClick(entry.lineNumber, event.shiftKey),
+                                      )}
+                                    >
+                                      {entry.lineNumber}
+                                    </button>
+                                  )}
+                                  <span
+                                    class="rf-log-level-tag"
+                                    data-level={entry.level}
+                                    aria-label={entry.level}
+                                  >
+                                    {LEVEL_ABBR[entry.level]}
+                                  </span>
+                                  {hasAnyTimestamps && showTimestamps && (
+                                    <span class="rf-log-timestamp">{entry.timestamp ?? ''}</span>
+                                  )}
+                                  {entry.source && (
+                                    <button
+                                      type="button"
+                                      class="rf-log-source-chip"
+                                      title={`Filter source:${entry.source}`}
+                                      mix={on('click', () =>
+                                        addFacetFilter('source', entry.source!),
+                                      )}
+                                    >
+                                      {entry.source}
+                                    </button>
+                                  )}
+                                  <span class="rf-log-text">
+                                    {spans.length === 0
+                                      ? '\u200b'
+                                      : spans.map((span, idx) => (
+                                          <span
+                                            key={idx}
+                                            class={classList(
+                                              span.color ? `rf-term-ansi-${span.color}` : undefined,
+                                              span.bold ? 'rf-term-bold' : undefined,
+                                              span.dim ? 'rf-term-dim' : undefined,
+                                              span.italic ? 'rf-term-italic' : undefined,
+                                              span.underline ? 'rf-term-underline' : undefined,
+                                            )}
+                                          >
+                                            {renderHighlightedText(span.text, parsedQuery.regex)}
+                                          </span>
+                                        ))}
+                                  </span>
+                                  {hasFields && (
+                                    <button
+                                      type="button"
+                                      class="rf-log-fields-toggle"
+                                      aria-expanded={isEntryOpen}
+                                      aria-label={`Inspect structured fields for line ${entry.lineNumber}`}
+                                      mix={on('click', () => toggleEntryFields(entry.key))}
+                                    >
+                                      <span>{Object.keys(entry.fields!).length} fields</span>
+                                      <Icon name="chevron-right" size={11} />
+                                    </button>
+                                  )}
+                                </div>
+
+                                {isEntryOpen && entry.fields && (
+                                  <div
+                                    class="rf-log-fields-drawer"
+                                    data-log-fields={entry.lineNumber}
+                                  >
+                                    <div class="rf-log-fields-head">
+                                      <span>Structured attributes (click value to filter)</span>
+                                      <button
+                                        type="button"
+                                        class="rf-log-fields-copy"
+                                        mix={on(
+                                          'click',
+                                          () =>
+                                            void copyText(
+                                              JSON.stringify(
+                                                {
+                                                  line: entry.lineNumber,
+                                                  level: entry.level,
+                                                  source: entry.source,
+                                                  timestamp: entry.timestamp,
+                                                  message: entry.plain,
+                                                  ...entry.fields,
+                                                },
+                                                null,
+                                                2,
+                                              ),
+                                            ),
                                         )}
                                       >
-                                        {renderHighlightedText(span.text, parsedQuery.regex)}
-                                      </span>
-                                    ))}
-                              </span>
-                              {hasFields && (
-                                <button
-                                  type="button"
-                                  class="rf-log-fields-toggle"
-                                  aria-expanded={isEntryOpen}
-                                  aria-label={`Inspect structured fields for line ${entry.lineNumber}`}
-                                  mix={on('click', () => toggleEntryFields(entry.key))}
-                                >
-                                  <span>{Object.keys(entry.fields!).length} fields</span>
-                                  <Icon name="chevron-right" size={11} />
-                                </button>
-                              )}
-                            </div>
-
-                            {isEntryOpen && entry.fields && (
-                              <div class="rf-log-fields-drawer" data-log-fields={entry.lineNumber}>
-                                <div class="rf-log-fields-head">
-                                  <span>Structured attributes (click value to filter)</span>
-                                  <button
-                                    type="button"
-                                    class="rf-log-fields-copy"
-                                    mix={on(
-                                      'click',
-                                      () =>
-                                        void copyText(
-                                          JSON.stringify(
-                                            {
-                                              line: entry.lineNumber,
-                                              level: entry.level,
-                                              source: entry.source,
-                                              timestamp: entry.timestamp,
-                                              message: entry.plain,
-                                              ...entry.fields,
-                                            },
-                                            null,
-                                            2,
-                                          ),
-                                        ),
-                                    )}
-                                  >
-                                    Copy JSON
-                                  </button>
-                                </div>
-                                <dl class="rf-log-fields-grid">
-                                  {Object.entries(entry.fields).map(([fieldKey, fieldValue]) => (
-                                    <div key={fieldKey} class="rf-log-field-row">
-                                      <dt>{fieldKey}</dt>
-                                      <dd>
-                                        <button
-                                          type="button"
-                                          class="rf-log-field-chip"
-                                          mix={on('click', () =>
-                                            addFacetFilter(fieldKey, String(fieldValue)),
-                                          )}
-                                        >
-                                          {String(fieldValue)}
-                                        </button>
-                                      </dd>
+                                        Copy JSON
+                                      </button>
                                     </div>
-                                  ))}
-                                </dl>
+                                    <dl class="rf-log-fields-grid">
+                                      {Object.entries(entry.fields).map(
+                                        ([fieldKey, fieldValue]) => (
+                                          <div key={fieldKey} class="rf-log-field-row">
+                                            <dt>{fieldKey}</dt>
+                                            <dd>
+                                              <button
+                                                type="button"
+                                                class="rf-log-field-chip"
+                                                mix={on('click', () =>
+                                                  addFacetFilter(fieldKey, String(fieldValue)),
+                                                )}
+                                              >
+                                                {String(fieldValue)}
+                                              </button>
+                                            </dd>
+                                          </div>
+                                        ),
+                                      )}
+                                    </dl>
+                                  </div>
+                                )}
                               </div>
-                            )}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )}
+                            )
+                          })}
+                          {hiddenCount > 0 && !follow && (
+                            <div class="rf-log-load-more">
+                              <button
+                                type="button"
+                                class="rf-log-load-btn"
+                                mix={on('click', () => {
+                                  groupLineLimits.set(group.id, limit + baseLimit)
+                                  void handle.update()
+                                })}
+                              >
+                                Show {Math.min(hiddenCount, baseLimit)} more lines ({hiddenCount}{' '}
+                                hidden)
+                              </button>
+                              <button
+                                type="button"
+                                class="rf-log-load-btn"
+                                mix={on('click', () => {
+                                  groupLineLimits.set(group.id, group.entries.length)
+                                  void handle.update()
+                                })}
+                              >
+                                Show all
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })()}
                 </div>
               )
             })
