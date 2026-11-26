@@ -14,7 +14,13 @@ import {
   applyMarkdownFormat,
   type MarkdownFormatAction,
 } from '../../../packages/reflow/src/behaviors/markdown-format.ts'
+import {
+  inspectObjectTree,
+  safeJsonStringify,
+  type ObjectTreeNode,
+} from '../../../packages/reflow/src/behaviors/object-tree.ts'
 import { createRangeSelection } from '../../../packages/reflow/src/behaviors/range-selection.ts'
+import { computeSparklineGeometry } from '../../../packages/reflow/src/sparkline.tsx'
 
 // Deterministic PRNG so property runs are fast, thorough, and 100% reproducible.
 function mulberry32(seed: number) {
@@ -252,5 +258,125 @@ it('property: applyMarkdownFormat always returns in-bounds selection and preserv
     const e = Math.max(0, Math.min(text.length, Math.max(rawStart, rawEnd)))
     assert.ok(res.value.startsWith(text.slice(0, s)))
     assert.ok(res.value.endsWith(text.slice(e)))
+  }
+})
+
+it('property: object-tree handles arbitrary cyclic graphs, preserves shared siblings, and serializes valid JSON', () => {
+  const rng = mulberry32(0x5eed6)
+
+  // Explicit DAG check: shared non-cyclic sibling references must NOT be flagged circular.
+  const shared = { tag: 'edge', retries: 3n }
+  const dag = { z: shared, a: shared }
+  const dagTree = inspectObjectTree(dag, {
+    sortKeys: true,
+    isExpanded: () => true,
+  })
+  assert.equal(dagTree.kind, 'branch')
+  if (dagTree.kind === 'branch') {
+    assert.deepEqual(
+      dagTree.children.map((c) => c.key),
+      ['a', 'z'],
+      'sortKeys orders keys alphabetically',
+    )
+    assert.ok(
+      dagTree.children.every((c) => c.kind === 'branch'),
+      'shared non-cyclic siblings must expand normally without circular markers',
+    )
+  }
+  const dagJson = JSON.parse(safeJsonStringify(dag)) as {
+    a: { tag: string; retries: string }
+    z: { tag: string; retries: string }
+  }
+  assert.equal(dagJson.a.tag, 'edge')
+  assert.equal(dagJson.z.tag, 'edge')
+  assert.equal(dagJson.a.retries, '3n')
+
+  // Explicit 3-level cycle (a -> b -> c -> a) must terminate cleanly with circular marker.
+  const a: Record<string, unknown> = { id: 'a' }
+  const b: Record<string, unknown> = { id: 'b' }
+  const c: Record<string, unknown> = { id: 'c', back: a }
+  a.next = b
+  b.next = c
+  const cycleJson = JSON.parse(safeJsonStringify(a)) as {
+    next: { next: { back: string } }
+  }
+  assert.equal(cycleJson.next.next.back, '[Circular]')
+
+  function countCircular(node: ObjectTreeNode): number {
+    if (node.kind === 'circular') return 1
+    if (node.kind !== 'branch') return 0
+    return node.children.reduce((sum, child) => sum + countCircular(child), 0)
+  }
+
+  // 200 randomized graphs with arbitrary back-edges, shared refs, arrays, bigints, and throwing getters.
+  for (let trial = 0; trial < 200; trial++) {
+    const nodeCount = randomInt(rng, 2, 7)
+    const nodes: Record<string, unknown>[] = Array.from({ length: nodeCount }, (_, idx) => ({
+      id: idx,
+      flag: idx % 2 === 0,
+      big: BigInt(idx * 10),
+    }))
+    for (let i = 0; i < nodeCount; i++) {
+      const edges = randomInt(rng, 0, 3)
+      for (let e = 0; e < edges; e++) {
+        const target = nodes[randomInt(rng, 0, nodeCount - 1)]!
+        nodes[i]![`ref_${e}`] = rng() < 0.25 ? [target, null, 'leaf'] : target
+      }
+    }
+    if (trial % 10 === 0) {
+      Object.defineProperty(nodes[0]!, 'boom', {
+        enumerable: true,
+        get() {
+          throw new Error('getter boom')
+        },
+      })
+    }
+
+    const tree = inspectObjectTree(nodes[0]!, {
+      sortKeys: trial % 2 === 0,
+      isExpanded: (_path, depth) => depth < 6,
+    })
+    assert.equal(tree.kind, 'branch')
+    assert.ok(countCircular(tree) >= 0)
+
+    const serialized = safeJsonStringify(nodes[0]!)
+    assert.doesNotThrow(() => JSON.parse(serialized), `valid JSON required on trial ${trial}`)
+  }
+})
+
+it('property: computeSparklineGeometry always emits finite in-bounds coordinates for adversarial series', () => {
+  const rng = mulberry32(0x5eed7)
+  const weirdValues = [
+    0,
+    1,
+    -50,
+    1000,
+    0.001,
+    Number.NaN,
+    Number.POSITIVE_INFINITY,
+    Number.NEGATIVE_INFINITY,
+  ]
+
+  for (let trial = 0; trial < 200; trial++) {
+    const len = randomInt(rng, 0, 24)
+    const values = Array.from({ length: len }, () =>
+      rng() < 0.2 ? pick(rng, weirdValues) : (rng() - 0.3) * 200,
+    )
+    const width = randomInt(rng, 24, 240)
+    const height = randomInt(rng, 12, 80)
+    const { line, area, points } = computeSparklineGeometry(values, width, height)
+
+    assert.equal(points.length, values.length)
+    for (const [x, y] of points) {
+      assert.ok(Number.isFinite(x) && x >= 0 && x <= width, `x=${x} out of [0, ${width}]`)
+      assert.ok(Number.isFinite(y) && y >= 0 && y <= height, `y=${y} out of [0, ${height}]`)
+    }
+    if (values.length === 0) {
+      assert.equal(line, '')
+      assert.equal(area, '')
+    } else {
+      assert.ok(!line.includes('NaN') && !line.includes('Infinity'))
+      assert.ok(!area.includes('NaN') && !area.includes('Infinity'))
+    }
   }
 })

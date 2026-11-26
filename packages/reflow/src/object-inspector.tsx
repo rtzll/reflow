@@ -1,4 +1,9 @@
 import { on, type Handle, type RemixNode } from 'remix/component'
+import {
+  inspectObjectTree,
+  safeJsonStringify,
+  type ObjectTreeNode,
+} from './behaviors/object-tree.ts'
 import { Icon } from './icon.tsx'
 import { classList, type ControlSize } from './systems/styling.ts'
 
@@ -22,40 +27,6 @@ export interface ObjectInspectorProps {
   /** Controls spacing and font scale. */
   size?: ControlSize
   class?: string
-}
-
-function isExpandable(value: unknown): value is Record<string, unknown> | readonly unknown[] {
-  return typeof value === 'object' && value !== null
-}
-
-function childEntries(value: object, sortKeys: boolean): [string, unknown][] {
-  if (Array.isArray(value)) {
-    return value.map((item, idx) => [String(idx), item])
-  }
-  const entries = Object.entries(value)
-  return sortKeys ? entries.sort(([a], [b]) => a.localeCompare(b)) : entries
-}
-
-function safeJson(value: unknown): string {
-  const seen = new WeakSet<object>()
-  try {
-    return (
-      JSON.stringify(
-        value,
-        (_key, val: unknown) => {
-          if (typeof val === 'object' && val !== null) {
-            if (seen.has(val)) return '[Circular]'
-            seen.add(val)
-          }
-          if (typeof val === 'bigint') return `${val}n`
-          return val
-        },
-        2,
-      ) ?? String(value)
-    )
-  } catch {
-    return String(value)
-  }
 }
 
 function renderPrimitive(value: unknown): RemixNode {
@@ -99,17 +70,6 @@ function renderPrimitive(value: unknown): RemixNode {
   )
 }
 
-function summaryFor(value: object, entries: readonly [string, unknown][]): string {
-  if (Array.isArray(value)) {
-    return entries.length === 0
-      ? '[]'
-      : `[${entries.length} ${entries.length === 1 ? 'item' : 'items'}]`
-  }
-  return entries.length === 0
-    ? '{}'
-    : `{${entries.length} ${entries.length === 1 ? 'key' : 'keys'}}`
-}
-
 /**
  * Collapsible structured JSON and object tree inspector with type-colored
  * primitives, circular-reference protection, and one-click JSON copy.
@@ -140,7 +100,7 @@ export function ObjectInspector(handle: Handle<ObjectInspectorProps>) {
     async function copyAll() {
       clearTimeout(copyTimer)
       try {
-        await navigator.clipboard.writeText(safeJson(props.data))
+        await navigator.clipboard.writeText(safeJsonStringify(props.data))
         copyState = 'copied'
         props.onCopy?.()
       } catch {
@@ -154,37 +114,31 @@ export function ObjectInspector(handle: Handle<ObjectInspectorProps>) {
       }, 1600)
     }
 
-    function renderNode(
-      keyLabel: string | undefined,
-      value: unknown,
-      path: string,
-      depth: number,
-      ancestors: ReadonlySet<object>,
-    ): RemixNode {
-      if (!isExpandable(value)) {
+    function renderNode(node: ObjectTreeNode): RemixNode {
+      if (node.kind === 'primitive') {
         return (
-          <li key={path} class="rf-obj-row" role="treeitem" aria-selected="false">
+          <li key={node.path} class="rf-obj-row" role="treeitem" aria-selected="false">
             <span class="rf-obj-spacer" aria-hidden="true" />
-            {keyLabel !== undefined && (
+            {node.key !== undefined && (
               <>
-                <span class="rf-obj-key">{keyLabel}</span>
+                <span class="rf-obj-key">{node.key}</span>
                 <span class="rf-obj-colon" aria-hidden="true">
                   :
                 </span>
               </>
             )}
-            {renderPrimitive(value)}
+            {renderPrimitive(node.value)}
           </li>
         )
       }
 
-      if (ancestors.has(value)) {
+      if (node.kind === 'circular') {
         return (
-          <li key={path} class="rf-obj-row" role="treeitem" aria-selected="false">
+          <li key={node.path} class="rf-obj-row" role="treeitem" aria-selected="false">
             <span class="rf-obj-spacer" aria-hidden="true" />
-            {keyLabel !== undefined && (
+            {node.key !== undefined && (
               <>
-                <span class="rf-obj-key">{keyLabel}</span>
+                <span class="rf-obj-key">{node.key}</span>
                 <span class="rf-obj-colon" aria-hidden="true">
                   :
                 </span>
@@ -197,67 +151,65 @@ export function ObjectInspector(handle: Handle<ObjectInspectorProps>) {
         )
       }
 
-      const entries = childEntries(value, sortKeys)
-      const expanded = entries.length > 0 && isExpanded(path, depth)
-      const nextAncestors = new Set(ancestors)
-      nextAncestors.add(value)
-      const canExpand = entries.length > 0
-
       return (
         <li
-          key={path}
+          key={node.path}
           class="rf-obj-branch"
           role="treeitem"
-          aria-expanded={canExpand ? expanded : undefined}
+          aria-expanded={node.canExpand ? node.expanded : undefined}
           aria-selected="false"
-          data-open={expanded ? 'true' : undefined}
+          data-open={node.expanded ? 'true' : undefined}
         >
           <div class="rf-obj-row">
-            {canExpand ? (
+            {node.canExpand ? (
               <button
                 type="button"
                 class="rf-obj-toggle"
-                aria-label={`${expanded ? 'Collapse' : 'Expand'} ${keyLabel ?? 'root'}`}
-                mix={on('click', () => toggle(path, depth))}
+                aria-label={`${node.expanded ? 'Collapse' : 'Expand'} ${node.key ?? 'root'}`}
+                mix={on('click', () => toggle(node.path, node.depth))}
               >
                 <span class="rf-obj-chevron" aria-hidden="true">
                   <Icon name="chevron-right" size={12} />
                 </span>
-                {keyLabel !== undefined && (
+                {node.key !== undefined && (
                   <>
-                    <span class="rf-obj-key">{keyLabel}</span>
+                    <span class="rf-obj-key">{node.key}</span>
                     <span class="rf-obj-colon" aria-hidden="true">
                       :
                     </span>
                   </>
                 )}
-                <span class="rf-obj-summary">{summaryFor(value, entries)}</span>
+                <span class="rf-obj-summary">{node.summary}</span>
               </button>
             ) : (
               <>
                 <span class="rf-obj-spacer" aria-hidden="true" />
-                {keyLabel !== undefined && (
+                {node.key !== undefined && (
                   <>
-                    <span class="rf-obj-key">{keyLabel}</span>
+                    <span class="rf-obj-key">{node.key}</span>
                     <span class="rf-obj-colon" aria-hidden="true">
                       :
                     </span>
                   </>
                 )}
-                <span class="rf-obj-summary">{summaryFor(value, entries)}</span>
+                <span class="rf-obj-summary">{node.summary}</span>
               </>
             )}
           </div>
-          {expanded && (
+          {node.expanded && (
             <ul class="rf-obj-children" role="group">
-              {entries.map(([k, childVal]) =>
-                renderNode(k, childVal, `${path}.${k}`, depth + 1, nextAncestors),
-              )}
+              {node.children.map((child) => renderNode(child))}
             </ul>
           )}
         </li>
       )
     }
+
+    const rootNode = inspectObjectTree(props.data, {
+      name: props.name,
+      sortKeys,
+      isExpanded,
+    })
 
     return (
       <div
@@ -287,7 +239,7 @@ export function ObjectInspector(handle: Handle<ObjectInspectorProps>) {
           </div>
         )}
         <ul class="rf-obj-tree" role="tree" aria-label={props.label ?? 'Object inspector'}>
-          {renderNode(props.name, props.data, '$', 0, new Set())}
+          {renderNode(rootNode)}
         </ul>
       </div>
     )
