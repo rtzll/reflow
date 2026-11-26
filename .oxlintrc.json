@@ -44,6 +44,7 @@
           }
         ],
         "import/no-duplicates": "error",
+        "import/no-cycle": "error",
         "import/extensions": [
           "error",
           "always",
