@@ -127,7 +127,7 @@ export function Sparkline(handle: Handle<SparklineProps>) {
       </svg>
     )
 
-    if (!interactive) return svg
+    if (!interactive || points.length === 0) return svg
 
     return (
       <div
@@ -168,6 +168,8 @@ export function Sparkline(handle: Handle<SparklineProps>) {
             } else if (event.key === 'End') {
               event.preventDefault()
               setActive(points.length - 1)
+            } else if (event.key === 'Escape') {
+              setActive(null)
             }
           }),
         ]}

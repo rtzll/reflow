@@ -440,10 +440,11 @@ export function MarkdownEditor(handle: Handle<MarkdownEditorProps>) {
   return () => {
     const props = handle.props
     const value = currentValue()
-    const mode = currentMode()
+    const allowSplit = props.allowSplit ?? true
+    const rawMode = currentMode()
+    const mode: MarkdownEditorMode = !allowSplit && rawMode === 'split' ? 'write' : rawMode
     const showWrite = mode === 'write' || mode === 'split'
     const showPreview = mode === 'preview' || mode === 'split'
-    const allowSplit = props.allowSplit ?? true
 
     function runFormat(action: MarkdownFormatAction) {
       if (props.disabled) return
@@ -489,9 +490,22 @@ export function MarkdownEditor(handle: Handle<MarkdownEditorProps>) {
               setValue(event.currentTarget.value)
             }),
             on<HTMLTextAreaElement, 'keydown'>('keydown', (event) => {
-              if ((event.metaKey || event.ctrlKey) && event.key === 'Enter' && props.onSubmit) {
+              if (!(event.metaKey || event.ctrlKey) || event.altKey) return
+              if (event.key === 'Enter' && props.onSubmit) {
                 event.preventDefault()
                 submit()
+                return
+              }
+              const lower = event.key.toLowerCase()
+              if (lower === 'b') {
+                event.preventDefault()
+                runFormat('bold')
+              } else if (lower === 'i') {
+                event.preventDefault()
+                runFormat('italic')
+              } else if (lower === 'e') {
+                event.preventDefault()
+                runFormat('code')
               }
             }),
           ]}

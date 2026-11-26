@@ -41,7 +41,7 @@ export interface LineChartProps {
 
 const SERIES_COLORS = [
   'var(--rf-accent)',
-  'var(--rf-info, #3b82f6)',
+  'var(--rf-info)',
   'var(--rf-success)',
   'var(--rf-warning)',
   'var(--rf-danger)',
@@ -212,6 +212,8 @@ export function LineChart(handle: Handle<LineChartProps>) {
                   } else if (event.key === 'End') {
                     event.preventDefault()
                     setActive(count - 1)
+                  } else if (event.key === 'Escape') {
+                    setActive(null)
                   }
                 }),
               ]}

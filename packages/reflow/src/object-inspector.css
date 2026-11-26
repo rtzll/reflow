@@ -158,9 +158,11 @@
 
 .rf-obj-copy:focus-visible,
 .rf-obj-toggle:focus-visible,
-.rf-obj-row:focus-visible {
+.rf-obj-row:focus-visible,
+.rf-obj-branch:focus-visible {
   outline: 2px solid var(--rf-accent);
   outline-offset: 2px;
+  border-radius: var(--rf-item-radius);
 }
 
 @media (forced-colors: active) {
@@ -172,7 +174,8 @@
 
   .rf-obj-copy:focus-visible,
   .rf-obj-toggle:focus-visible,
-  .rf-obj-row:focus-visible {
+  .rf-obj-row:focus-visible,
+  .rf-obj-branch:focus-visible {
     outline-color: Highlight;
   }
 }

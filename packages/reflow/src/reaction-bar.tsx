@@ -50,23 +50,55 @@ const DEFAULT_OPTIONS: readonly ReactionOption[] = [
  */
 export function ReactionBar(handle: Handle<ReactionBarProps>) {
   let pickerOpen = false
+  let alignEnd = false
+  let addBtnEl: HTMLButtonElement | null = null
+  let pickerEl: HTMLDivElement | null = null
+
+  function closePicker(restoreFocus: boolean) {
+    if (!pickerOpen) return
+    pickerOpen = false
+    void handle.update()
+    if (restoreFocus) {
+      queueMicrotask(() => addBtnEl?.focus())
+    }
+  }
+
+  function openPicker() {
+    alignEnd = Boolean(
+      addBtnEl &&
+      typeof window !== 'undefined' &&
+      window.innerWidth - addBtnEl.getBoundingClientRect().left < 220,
+    )
+    pickerOpen = true
+    void handle.update()
+    queueMicrotask(() => {
+      pickerEl?.querySelector<HTMLButtonElement>('.rf-reaction-option')?.focus()
+    })
+  }
 
   const mountBar = ref<HTMLDivElement>((node, signal) => {
     const onPointerDown = (event: PointerEvent) => {
       if (!pickerOpen) return
       if (!node.contains(event.target as Node)) {
-        pickerOpen = false
-        void handle.update()
+        closePicker(false)
       }
     }
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && pickerOpen) {
-        pickerOpen = false
-        void handle.update()
+        event.preventDefault()
+        closePicker(true)
       }
     }
     document.addEventListener('pointerdown', onPointerDown, { signal })
     document.addEventListener('keydown', onKeyDown, { signal })
+  })
+
+  const mountAddBtn = ref<HTMLButtonElement>((node) => {
+    addBtnEl = node
+  })
+
+  const mountPicker = ref<HTMLDivElement>((node) => {
+    pickerEl = node
   })
 
   return () => {
@@ -123,16 +155,49 @@ export function ReactionBar(handle: Handle<ReactionBarProps>) {
               aria-label="Add reaction"
               aria-haspopup="menu"
               aria-expanded={pickerOpen}
-              mix={on('click', () => {
-                pickerOpen = !pickerOpen
-                void handle.update()
-              })}
+              mix={[
+                mountAddBtn,
+                on('click', () => {
+                  if (pickerOpen) closePicker(false)
+                  else openPicker()
+                }),
+              ]}
             >
               <Icon name="plus" size={13} />
             </button>
 
             {pickerOpen && (
-              <div class="rf-reaction-picker" role="menu" aria-label="Choose a reaction">
+              <div
+                class="rf-reaction-picker"
+                data-align={alignEnd ? 'end' : undefined}
+                role="menu"
+                aria-label="Choose a reaction"
+                mix={[
+                  mountPicker,
+                  on<HTMLDivElement, 'keydown'>('keydown', (event) => {
+                    const buttons = Array.from(
+                      event.currentTarget.querySelectorAll<HTMLButtonElement>(
+                        '.rf-reaction-option',
+                      ),
+                    )
+                    if (buttons.length === 0) return
+                    const idx = buttons.indexOf(document.activeElement as HTMLButtonElement)
+                    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+                      event.preventDefault()
+                      buttons[(idx + 1 + buttons.length) % buttons.length]?.focus()
+                    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+                      event.preventDefault()
+                      buttons[(idx - 1 + buttons.length) % buttons.length]?.focus()
+                    } else if (event.key === 'Home') {
+                      event.preventDefault()
+                      buttons[0]?.focus()
+                    } else if (event.key === 'End') {
+                      event.preventDefault()
+                      buttons[buttons.length - 1]?.focus()
+                    }
+                  }),
+                ]}
+              >
                 {available.map((opt) => {
                   const active = Boolean(byEmoji.get(opt.emoji)?.reacted)
                   return (
@@ -146,9 +211,8 @@ export function ReactionBar(handle: Handle<ReactionBarProps>) {
                       class="rf-reaction-option"
                       data-active={active ? 'true' : undefined}
                       mix={on('click', () => {
-                        pickerOpen = false
+                        closePicker(true)
                         toggle(opt.emoji)
-                        void handle.update()
                       })}
                     >
                       {opt.emoji}
