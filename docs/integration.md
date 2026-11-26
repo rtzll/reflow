@@ -91,17 +91,18 @@ const code = await highlight(source, { lang: 'tsx' })
 
 The result is plain data, so it can cross into a client entry as props, and the browser loads no highlighter. Highlight in the browser only for code that arrives later, such as a streamed reply. On platforms with a bundle size limit, such as Cloudflare Workers, highlight known code at build time; the showcase's [build](../apps/web/tools/build.ts) does this for its samples.
 
-## Optional specialist components
+## Specialist component entry points
 
-`DiffView`, `FileTree`, and `Diagram` ship on separate entry points backed by optional peer dependencies so apps that do not use them never install or bundle them:
+`Markdown`, `MarkdownEditor`, `DiffView`, `FileTree`, and `Diagram` ship on separate entry points so apps that do not use them never bundle their parsers or optional peer dependencies:
 
-| Component | Client entry | SSR helper | Standalone CSS | Optional peer(s) |
+| Component(s) | Client entry | SSR helper | Standalone CSS | Dependency |
 | --- | --- | --- | --- | --- |
-| `DiffView` | `@rtzll/reflow/diffs` | `@rtzll/reflow/diffs/ssr` (`prerenderDiff`) | `@rtzll/reflow/diffs.css` | `@pierre/diffs` |
-| `FileTree` | `@rtzll/reflow/trees` | `@rtzll/reflow/trees/ssr` (`prerenderFileTree`) | `@rtzll/reflow/trees.css` | `@pierre/trees`, `preact` |
-| `Diagram` | `@rtzll/reflow/diagrams` | `@rtzll/reflow/diagrams/ssr` (`prerenderDiagram`) | `@rtzll/reflow/diagrams.css` | `pele` |
+| `Markdown`, `MarkdownEditor` | `@rtzll/reflow/markdown` | — | `@rtzll/reflow/markdown.css` | `marked` (bundled dependency) |
+| `DiffView` | `@rtzll/reflow/diffs` | `@rtzll/reflow/diffs/ssr` (`prerenderDiff`) | `@rtzll/reflow/diffs.css` | `@pierre/diffs` (optional peer) |
+| `FileTree` | `@rtzll/reflow/trees` | `@rtzll/reflow/trees/ssr` (`prerenderFileTree`) | `@rtzll/reflow/trees.css` | `@pierre/trees`, `preact` (optional peers) |
+| `Diagram` | `@rtzll/reflow/diagrams` | `@rtzll/reflow/diagrams/ssr` (`prerenderDiagram`) | `@rtzll/reflow/diagrams.css` | `pele` (optional peer) |
 
-When importing any of these components in a Remix client entry under the source-mode asset server, add the corresponding peer package (`"@pierre/diffs"`, `"@pierre/trees"`, `"pele"`) to `assets.allowPackages` in `remix.json`.
+When importing any optional-peer component in a Remix client entry under the source-mode asset server, add the corresponding peer package (`"@pierre/diffs"`, `"@pierre/trees"`, `"pele"`) to `assets.allowPackages` in `remix.json`.
 
 ## Check the integration
 

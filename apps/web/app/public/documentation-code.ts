@@ -42,6 +42,19 @@ const sharedPlaygroundDefaults = new Set([
   'chat-layout',
   'progress',
   'carousel',
+  'file-tree',
+  'diagram',
+  'log-viewer',
+  'waterfall',
+  'pipeline-graph',
+  'status-strip',
+  'filter-bar',
+  'reaction-bar',
+  'markdown-editor',
+  'sparkline',
+  'metric-card',
+  'line-chart',
+  'object-inspector',
 ])
 
 export function defaultPreviewValues(slug: string, variant?: string) {

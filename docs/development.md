@@ -14,14 +14,13 @@ Open the address printed in the terminal: `/` for the gallery, `/docs` for docum
 Every page shares one link preview image, `apps/web/app/public/og.png`: the gallery's first band with the HoverCard open. After changing those components or the gallery's first band, start `pnpm dev` and run `pnpm --filter @reflow/web og:image` to capture it again.
 
 ```sh
-pnpm lint
-pnpm fmt:check
-pnpm check
+pnpm check:fast          # ~5s Tier 0 loop: Oxlint, Oxfmt, TypeScript, unit/invariants, server/SSR/property/dev-assets
 pnpm --filter @reflow/web exec playwright install chromium
-pnpm test
-pnpm test:deployment
-pnpm test:package
+pnpm test                # full server + browser + E2E suites
+pnpm test:deployment     # Worker peer isolation, zero-flash SSR, preview heights, desktop/mobile overflow across all routes
+pnpm test:package        # packed tarball contents, create-reflow, isolated install, starter checks
 pnpm --filter @reflow/web exec remix doctor
+pnpm bump <X.Y.Z>        # align version across manifests, install docs, and showcase prompt
 ```
 
 `pnpm lint` runs Oxlint and `pnpm lint:fix` applies its fixes. `pnpm fmt` formats files with Oxfmt and `pnpm fmt:check` checks formatting. Formatting follows the Remix repository: 100 columns, single quotes, and no semicolons. Markdown is left as written.
