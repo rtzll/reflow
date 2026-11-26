@@ -165,11 +165,15 @@ export function documentationCode(slug: string, fragment: string): string {
       .split('\n')
       .map((line) => ' '.repeat(spaces) + line)
       .join('\n')
-  // Markdown has its own entry so its parser loads only where it is used.
+  // Specialist entry points load only where they are used.
+  const specialist = new Set(['Markdown', 'FileTree', 'Diagram', 'DiffView'])
+  const coreComponents = components.filter((name) => !specialist.has(name))
   const imports = [
-    components.some((name) => name !== 'Markdown') &&
-      `import { ${components.filter((name) => name !== 'Markdown').join(', ')} } from '@rtzll/reflow'`,
+    coreComponents.length > 0 && `import { ${coreComponents.join(', ')} } from '@rtzll/reflow'`,
     components.includes('Markdown') && `import { Markdown } from '@rtzll/reflow/markdown'`,
+    components.includes('DiffView') && `import { DiffView } from '@rtzll/reflow/diffs'`,
+    components.includes('FileTree') && `import { FileTree } from '@rtzll/reflow/trees'`,
+    components.includes('Diagram') && `import { Diagram } from '@rtzll/reflow/diagrams'`,
   ].filter(Boolean)
   return `${imports.join('\n')}\nimport { type Handle${/\bon\(/.test(combined) ? ', on' : ''} } from 'remix/component'\n\nexport function Example(handle: Handle) {\n${setup.length ? indentation(setup.join('\n\n'), 2) + '\n\n' : ''}  return () => (\n    <>\n${indentation(markup, 6)}\n    </>\n  )\n}`
 }
@@ -202,6 +206,12 @@ export function playgroundFragment(slug: string, values: PlaygroundValues): stri
     'segmented-control': 'SegmentedControl',
     'thinking-indicator': 'ThinkingIndicator',
     'thinking-steps': 'ThinkingSteps',
+    'file-tree': 'FileTree',
+    diagram: 'Diagram',
+    'log-viewer': 'LogViewer',
+    waterfall: 'Waterfall',
+    'pipeline-graph': 'PipelineGraph',
+    'status-strip': 'StatusStrip',
   }
   const name = names[slug] ?? slug[0].toUpperCase() + slug.slice(1)
   const synthetic = new Set([
@@ -520,6 +530,18 @@ ${opening} sections={sections}
 ]} />`
     case 'tooltip':
       return `${opening} content="Save your changes" renderTrigger={(props) => <Button {...props}>Hover me</Button>} />`
+    case 'file-tree':
+      return `<FileTree paths={paths} gitStatus={gitStatus}${values.flattenEmptyDirectories === false ? ' flattenEmptyDirectories={false}' : ''}${values.search ? ' search' : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'diagram':
+      return `<Diagram title="Zero-flash SSR pipeline" code={mermaidSource}${values.copyable === false ? ' copyable={false}' : ' copyable'}${values.showSourceToggle === false ? '' : ' showSourceToggle'}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'log-viewer':
+      return `<LogViewer title="verify · chromium" status="failed" groups={groups}${values.showHistogram === false ? ' showHistogram={false}' : ''}${values.wrap ? ' wrap' : ''}${values.searchable === false ? ' searchable={false}' : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'waterfall':
+      return `<Waterfall label="Release timing waterfall" spans={spans}${values.highlightCriticalPath === false ? ' highlightCriticalPath={false}' : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'pipeline-graph':
+      return `<PipelineGraph label="Release workflow graph" jobs={jobs}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'status-strip':
+      return `<StatusStrip label="Recent release runs" items={runs}${values.scaleHeight === false ? ' scaleHeight={false}' : ''}${values.showReadout ? ' showReadout' : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
     default:
       return `${opening} />`
   }

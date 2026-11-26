@@ -64,7 +64,7 @@ const sampleJobs: readonly PipelineJob[] = [
 ]
 
 /** The PipelineGraph example: interactive job dependency DAG with hover path highlighting. */
-export function PipelineGraphExample(handle: Handle) {
+export function PipelineGraphExample(handle: Handle<{ size?: 'default' | 'compact' }>) {
   let selected = 'e2e'
 
   return () => (
@@ -77,7 +77,7 @@ export function PipelineGraphExample(handle: Handle) {
           selected = id
           void handle.update()
         }}
-        size="compact"
+        size={handle.props.size ?? 'compact'}
       />
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
         <span style={{ color: 'var(--rf-muted)' }}>Selected job</span>

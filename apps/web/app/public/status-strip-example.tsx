@@ -75,7 +75,13 @@ const sampleRuns: readonly StatusStripItem[] = [
 ]
 
 /** The StatusStrip example: compact duration-scaled run history with hover/selection readout. */
-export function StatusStripExample(handle: Handle) {
+export function StatusStripExample(
+  handle: Handle<{
+    size?: 'default' | 'compact'
+    scaleHeight?: boolean
+    showReadout?: boolean
+  }>,
+) {
   let selected = '4578'
 
   return () => (
@@ -87,7 +93,9 @@ export function StatusStripExample(handle: Handle) {
         selected = id
         void handle.update()
       }}
-      showReadout
+      scaleHeight={handle.props.scaleHeight ?? true}
+      showReadout={handle.props.showReadout ?? true}
+      size={handle.props.size ?? 'default'}
     />
   )
 }

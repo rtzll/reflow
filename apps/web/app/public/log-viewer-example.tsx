@@ -56,7 +56,14 @@ const sampleGroups: readonly LogGroup[] = [
 ]
 
 /** The LogViewer example: grouped CI step logs with auto-opened failures, severity filters, and line selection. */
-export function LogViewerExample(_handle: Handle) {
+export function LogViewerExample(
+  handle: Handle<{
+    size?: 'default' | 'compact'
+    showHistogram?: boolean
+    wrap?: boolean
+    searchable?: boolean
+  }>,
+) {
   return () => (
     <div style={{ width: 'min(100%, 760px)' }}>
       <LogViewer
@@ -64,8 +71,11 @@ export function LogViewerExample(_handle: Handle) {
         status="failed"
         duration="29.4s"
         groups={sampleGroups}
+        showHistogram={handle.props.showHistogram ?? true}
+        wrap={handle.props.wrap ?? false}
+        searchable={handle.props.searchable ?? true}
         maxHeight="320px"
-        size="compact"
+        size={handle.props.size ?? 'compact'}
         onCopy={playCopySuccess}
         onCopyError={playCopyError}
       />

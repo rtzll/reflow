@@ -88,6 +88,12 @@ import {
 import { Markdown } from '@rtzll/reflow/markdown'
 import type { FileTreeSsrPayload } from '@rtzll/reflow/trees'
 import { BannerExample, bannerDefaults, bannerStatuses } from './banner-example.tsx'
+import { DiagramExample } from './diagram-example.tsx'
+import { FileTreeExample } from './file-tree-example.tsx'
+import { LogViewerExample } from './log-viewer-example.tsx'
+import { PipelineGraphExample } from './pipeline-graph-example.tsx'
+import { StatusStripExample } from './status-strip-example.tsx'
+import { WaterfallExample } from './waterfall-example.tsx'
 
 export type PlaygroundValues = Record<string, string | boolean>
 interface Control {
@@ -426,6 +432,32 @@ export const playgroundControls: Record<string, readonly Control[]> = {
     choice('side', 'Placement', ['top', 'right', 'bottom', 'left']),
     choice('delayDuration', 'Delay', ['150', '0', '500', '1000']),
     toggle('followCursor', 'Follow cursor'),
+  ],
+  'file-tree': [
+    choice('size', 'Size', ['compact', 'default']),
+    toggle('flattenEmptyDirectories', 'Compact folders', true),
+    toggle('search', 'Search bar'),
+  ],
+  diagram: [
+    choice('size', 'Size', ['compact', 'default']),
+    toggle('copyable', 'Copy button', true),
+    toggle('showSourceToggle', 'Source toggle', true),
+  ],
+  'log-viewer': [
+    choice('size', 'Size', ['compact', 'default']),
+    toggle('showHistogram', 'Histogram', true),
+    toggle('wrap', 'Wrap lines'),
+    toggle('searchable', 'Search bar', true),
+  ],
+  waterfall: [
+    choice('size', 'Size', ['compact', 'default']),
+    toggle('highlightCriticalPath', 'Critical path', true),
+  ],
+  'pipeline-graph': [choice('size', 'Size', ['compact', 'default'])],
+  'status-strip': [
+    size,
+    toggle('scaleHeight', 'Scale height', true),
+    toggle('showReadout', 'Readout', true),
   ],
 }
 
@@ -1224,6 +1256,50 @@ export function PlaygroundExample(
             followCursor={Boolean(v.followCursor)}
             content="Save your changes"
             renderTrigger={(props) => <Button {...props}>Hover me</Button>}
+          />
+        )
+      case 'file-tree':
+        return (
+          <FileTreeExample
+            prerendered={handle.props.fileTree}
+            size={density}
+            flattenEmptyDirectories={Boolean(v.flattenEmptyDirectories)}
+            search={Boolean(v.search)}
+          />
+        )
+      case 'diagram':
+        return (
+          <DiagramExample
+            prerendered={handle.props.diagrams}
+            size={density}
+            copyable={Boolean(v.copyable)}
+            showSourceToggle={Boolean(v.showSourceToggle)}
+          />
+        )
+      case 'log-viewer':
+        return (
+          <LogViewerExample
+            size={density}
+            showHistogram={Boolean(v.showHistogram)}
+            wrap={Boolean(v.wrap)}
+            searchable={Boolean(v.searchable)}
+          />
+        )
+      case 'waterfall':
+        return (
+          <WaterfallExample
+            size={density}
+            highlightCriticalPath={Boolean(v.highlightCriticalPath)}
+          />
+        )
+      case 'pipeline-graph':
+        return <PipelineGraphExample size={density} />
+      case 'status-strip':
+        return (
+          <StatusStripExample
+            size={density}
+            scaleHeight={Boolean(v.scaleHeight)}
+            showReadout={Boolean(v.showReadout)}
           />
         )
     }

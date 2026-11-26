@@ -63,7 +63,12 @@ const sampleSpans: readonly WaterfallSpan[] = [
 ]
 
 /** The Waterfall example: hierarchical CI job and step durations along a shared time axis. */
-export function WaterfallExample(handle: Handle) {
+export function WaterfallExample(
+  handle: Handle<{
+    size?: 'default' | 'compact'
+    highlightCriticalPath?: boolean
+  }>,
+) {
   let selected = 'e2e-suite'
 
   return () => (
@@ -72,11 +77,12 @@ export function WaterfallExample(handle: Handle) {
         label="Release 0.17.0 timing waterfall"
         spans={sampleSpans}
         value={selected}
+        highlightCriticalPath={handle.props.highlightCriticalPath ?? true}
         onValueChange={(id) => {
           selected = id
           void handle.update()
         }}
-        size="compact"
+        size={handle.props.size ?? 'compact'}
       />
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
         <span style={{ color: 'var(--rf-muted)' }}>Inspecting span</span>
