@@ -341,10 +341,11 @@ export type CardImageProps = Omit<StyledProps<'img'>, 'role' | 'alt'> & { alt: s
 
 export function CardImage(handle: Handle<CardImageProps>) {
   return () => {
-    const { class: classProp, className, ...props } = handle.props
+    const { alt, class: classProp, className, ...props } = handle.props
     return (
       <img
         {...props}
+        alt={alt}
         class={classList('rf-card-image', classProp, className)}
         data-slot="card-image"
       />
