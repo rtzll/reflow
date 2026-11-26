@@ -277,4 +277,17 @@ export {
   type StatusStripProps,
   type StatusStripState,
 } from './status-strip.tsx'
+export {
+  FilterBar,
+  type FilterBarProps,
+  type FilterPreset,
+  type FilterSuggestion,
+} from './filter-bar.tsx'
+export {
+  ReactionBar,
+  type ReactionBarProps,
+  type ReactionItem,
+  type ReactionOption,
+} from './reaction-bar.tsx'
+export { parseFacetQuery, type FacetToken, type ParsedFacetQuery } from './behaviors/facet-query.ts'
 export { createRangeSelection } from './behaviors/range-selection.ts'

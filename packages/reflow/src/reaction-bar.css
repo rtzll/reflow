@@ -1,0 +1,129 @@
+.rf-reaction-bar {
+  position: relative;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--rf-font);
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-reaction-pill,
+.rf-reaction-add {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 9px;
+  border: 1px solid var(--rf-border);
+  border-radius: 999px;
+  background: var(--rf-surface-1);
+  color: var(--rf-fg);
+  font-family: var(--rf-font);
+  font-size: 12px;
+  cursor: pointer;
+  transition:
+    border-color var(--rf-spring-fast),
+    background-color var(--rf-spring-fast),
+    transform var(--rf-spring-fast);
+}
+
+.rf-reaction-bar[data-size='compact'] .rf-reaction-pill,
+.rf-reaction-bar[data-size='compact'] .rf-reaction-add {
+  height: 24px;
+  padding: 0 7px;
+  font-size: 11px;
+}
+
+.rf-reaction-add {
+  width: 28px;
+  padding: 0;
+  color: var(--rf-muted);
+}
+
+.rf-reaction-bar[data-size='compact'] .rf-reaction-add {
+  width: 24px;
+  padding: 0;
+}
+
+.rf-reaction-pill[data-reacted='true'] {
+  border-color: color-mix(in oklab, var(--rf-accent) 48%, var(--rf-border));
+  background: color-mix(in oklab, var(--rf-accent) 14%, var(--rf-surface-1));
+}
+
+.rf-reaction-pill:active,
+.rf-reaction-add:active {
+  transform: scale(0.95);
+}
+
+.rf-reaction-emoji {
+  line-height: 1;
+}
+
+.rf-reaction-count {
+  font-weight: 500;
+  color: var(--rf-muted);
+}
+
+.rf-reaction-pill[data-reacted='true'] .rf-reaction-count {
+  color: var(--rf-fg);
+}
+
+.rf-reaction-add-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.rf-reaction-picker {
+  position: absolute;
+  inset-block-end: calc(100% + 6px);
+  inset-inline-start: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid var(--rf-border);
+  border-radius: 999px;
+  background: var(--rf-surface-1);
+  box-shadow: var(--rf-shadow-md);
+}
+
+.rf-reaction-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font-size: 15px;
+  cursor: pointer;
+  transition:
+    background-color var(--rf-spring-fast),
+    transform var(--rf-spring-fast);
+}
+
+.rf-reaction-option[data-active='true'] {
+  background: color-mix(in oklab, var(--rf-accent) 18%, transparent);
+}
+
+@media (hover: hover) {
+  .rf-reaction-option:hover {
+    background: var(--rf-hover);
+    transform: scale(1.12);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-reaction-pill,
+  .rf-reaction-add,
+  .rf-reaction-option {
+    transition: none;
+  }
+}
