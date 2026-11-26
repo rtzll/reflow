@@ -64,6 +64,7 @@
 @import './file-tree.css' layer(reflow);
 @import './diagram.css' layer(reflow);
 @import './markdown.css' layer(reflow);
+@import './markdown-editor.css' layer(reflow);
 @import './citation.css' layer(reflow);
 @import './avatar.css' layer(reflow);
 @import './avatar-group.css' layer(reflow);

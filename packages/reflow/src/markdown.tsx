@@ -1,7 +1,16 @@
 import { Lexer, type Token, type Tokens } from 'marked'
-import type { Handle, RemixNode } from 'remix/component'
+import { on, ref, type Handle, type RemixNode } from 'remix/component'
+import { applyMarkdownFormat, type MarkdownFormatAction } from './behaviors/markdown-format.ts'
+import { Button } from './button.tsx'
 import { CodeBlock } from './code-block.tsx'
+import { Kbd } from './kbd.tsx'
+import { SegmentedControl } from './segmented-control.tsx'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './table.tsx'
+import {
+  TriggerMenu,
+  type TriggerMenuFieldProps,
+  type TriggerMenuTrigger,
+} from './trigger-menu.tsx'
 import { classList, type ControlSize } from './systems/styling.ts'
 
 export interface MarkdownCodeBlock {
@@ -337,4 +346,243 @@ function inline(tokens: readonly Token[], context: Context): RemixNode[] {
         return 'raw' in token ? token.raw : null
     }
   })
+}
+
+export type MarkdownEditorMode = 'write' | 'preview' | 'split'
+
+export interface MarkdownEditorProps {
+  /** Controlled Markdown value. */
+  value?: string
+  /** Initial Markdown value when uncontrolled. */
+  defaultValue?: string
+  /** Called whenever the editor text changes. */
+  onValueChange?: (value: string) => void
+  /** Controlled view mode (`'write' | 'preview' | 'split'`). */
+  mode?: MarkdownEditorMode
+  /** Initial view mode when uncontrolled. Default `'write'`. */
+  defaultMode?: MarkdownEditorMode
+  /** Called when the user switches between Write, Preview, and Split modes. */
+  onModeChange?: (mode: MarkdownEditorMode) => void
+  /** Shows the Split view option beside Write and Preview. Default `true`. */
+  allowSplit?: boolean
+  /** Shows the Markdown formatting toolbar (bold, italic, code, mermaid, suggestion, etc.). Default `true`. */
+  toolbar?: boolean
+  /** Optional caret triggers (`@mentions`, `#refs`, `/commands`) powered by `TriggerMenu`. */
+  triggers?: readonly TriggerMenuTrigger[]
+  /** Optional code fence renderer passed to `Markdown` preview (e.g. Pele `<Diagram>` for `mermaid` fences). */
+  renderCodeBlock?: MarkdownProps['renderCodeBlock']
+  /** Image loading policy passed to `Markdown` preview. */
+  images?: MarkdownProps['images']
+  /** Placeholder text in the textarea. */
+  placeholder?: string
+  /** Accessible name for the textarea. Default `'Markdown editor'`. */
+  label?: string
+  /** Minimum visible rows for the textarea. Default `5`. */
+  minRows?: number
+  /** Message shown in Preview mode when the editor is empty. Default `'Nothing to preview yet.'`. */
+  emptyPreview?: string
+  /** Label for the submit button when `onSubmit` is provided. Default `'Comment'`. */
+  submitLabel?: string
+  /** Called on submit button click or `Mod+Enter` shortcut when content is non-empty. */
+  onSubmit?: (value: string) => void
+  /** Disables editing and submission. */
+  disabled?: boolean
+  /** Controls spacing and typography scale. */
+  size?: ControlSize
+  class?: string
+}
+
+const TOOLBAR_ACTIONS: readonly { action: MarkdownFormatAction; label: string; title: string }[] = [
+  { action: 'bold', label: 'B', title: 'Bold' },
+  { action: 'italic', label: 'I', title: 'Italic' },
+  { action: 'code', label: '`c`', title: 'Inline code' },
+  { action: 'codeblock', label: '```', title: 'Code block' },
+  { action: 'mermaid', label: 'Mermaid', title: 'Insert Mermaid diagram' },
+  { action: 'suggestion', label: 'Suggest', title: 'Insert code suggestion' },
+  { action: 'link', label: 'Link', title: 'Insert link' },
+  { action: 'list', label: 'List', title: 'Bullet list' },
+]
+
+/**
+ * Markdown discussion composer with Write / Preview / Split modes, a formatting
+ * toolbar (including Mermaid & code suggestion snippets), optional `TriggerMenu`
+ * caret mentions, live `Markdown` preview, and `Mod+Enter` submission.
+ */
+export function MarkdownEditor(handle: Handle<MarkdownEditorProps>) {
+  let uncontrolledValue = handle.props.defaultValue ?? ''
+  let uncontrolledMode: MarkdownEditorMode = handle.props.defaultMode ?? 'write'
+  let textareaEl: HTMLTextAreaElement | null = null
+
+  function currentValue(): string {
+    return handle.props.value !== undefined ? handle.props.value : uncontrolledValue
+  }
+
+  function currentMode(): MarkdownEditorMode {
+    return handle.props.mode !== undefined ? handle.props.mode : uncontrolledMode
+  }
+
+  function setValue(next: string) {
+    if (handle.props.value === undefined) uncontrolledValue = next
+    handle.props.onValueChange?.(next)
+    void handle.update()
+  }
+
+  function setMode(next: MarkdownEditorMode) {
+    if (handle.props.mode === undefined) uncontrolledMode = next
+    handle.props.onModeChange?.(next)
+    void handle.update()
+  }
+
+  const mountTextarea = ref<HTMLTextAreaElement>((node) => {
+    textareaEl = node
+  })
+
+  return () => {
+    const props = handle.props
+    const value = currentValue()
+    const mode = currentMode()
+    const showWrite = mode === 'write' || mode === 'split'
+    const showPreview = mode === 'preview' || mode === 'split'
+    const allowSplit = props.allowSplit ?? true
+
+    function runFormat(action: MarkdownFormatAction) {
+      if (props.disabled) return
+      const start = textareaEl?.selectionStart ?? value.length
+      const end = textareaEl?.selectionEnd ?? value.length
+      const result = applyMarkdownFormat(value, start, end, action)
+      setValue(result.value)
+      if (mode === 'preview') setMode('write')
+      queueMicrotask(() => {
+        if (!textareaEl) return
+        textareaEl.focus()
+        textareaEl.setSelectionRange(result.selectionStart, result.selectionEnd)
+      })
+    }
+
+    function submit() {
+      if (props.disabled || !value.trim()) return
+      props.onSubmit?.(value)
+    }
+
+    const modeOptions = [
+      { value: 'write', label: 'Write' },
+      { value: 'preview', label: 'Preview' },
+      ...(allowSplit ? [{ value: 'split', label: 'Split' }] : []),
+    ]
+
+    const renderTextarea = (fieldProps?: TriggerMenuFieldProps) => {
+      const { mix: triggerMix, ...restFieldProps } = fieldProps ?? {}
+      const triggerMixes = triggerMix ? (Array.isArray(triggerMix) ? triggerMix : [triggerMix]) : []
+      return (
+        <textarea
+          {...restFieldProps}
+          class="rf-md-editor-textarea"
+          aria-label={props.label ?? 'Markdown editor'}
+          placeholder={props.placeholder ?? 'Write Markdown… Use **bold**, `code`, or ```mermaid'}
+          rows={props.minRows ?? 5}
+          value={value}
+          disabled={props.disabled}
+          mix={[
+            ...triggerMixes,
+            mountTextarea,
+            on<HTMLTextAreaElement, 'input'>('input', (event) => {
+              setValue(event.currentTarget.value)
+            }),
+            on<HTMLTextAreaElement, 'keydown'>('keydown', (event) => {
+              if ((event.metaKey || event.ctrlKey) && event.key === 'Enter' && props.onSubmit) {
+                event.preventDefault()
+                submit()
+              }
+            }),
+          ]}
+        />
+      )
+    }
+
+    return (
+      <div
+        class={classList('rf-md-editor', props.class)}
+        data-mode={mode}
+        data-size={props.size === 'compact' ? 'compact' : undefined}
+      >
+        <div class="rf-md-editor-head">
+          <SegmentedControl
+            label="Editor mode"
+            size="compact"
+            value={mode}
+            options={modeOptions}
+            onValueChange={(next) => {
+              setMode(next === 'preview' ? 'preview' : next === 'split' ? 'split' : 'write')
+            }}
+          />
+
+          {(props.toolbar ?? true) && (
+            <div class="rf-md-editor-toolbar" role="toolbar" aria-label="Markdown formatting">
+              {TOOLBAR_ACTIONS.map((item) => (
+                <button
+                  key={item.action}
+                  type="button"
+                  class="rf-md-editor-tool"
+                  title={item.title}
+                  aria-label={item.title}
+                  disabled={props.disabled || mode === 'preview'}
+                  mix={on('click', () => runFormat(item.action))}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div class="rf-md-editor-body">
+          {showWrite && (
+            <div class="rf-md-editor-write">
+              {props.triggers && props.triggers.length > 0 ? (
+                <TriggerMenu
+                  triggers={props.triggers}
+                  renderField={(fieldProps) => renderTextarea(fieldProps)}
+                />
+              ) : (
+                renderTextarea()
+              )}
+            </div>
+          )}
+
+          {showPreview && (
+            <div class="rf-md-editor-preview" aria-label="Markdown preview">
+              {value.trim() ? (
+                <Markdown
+                  source={value}
+                  size={props.size}
+                  images={props.images}
+                  renderCodeBlock={props.renderCodeBlock}
+                />
+              ) : (
+                <p class="rf-md-editor-empty">{props.emptyPreview ?? 'Nothing to preview yet.'}</p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {props.onSubmit && (
+          <div class="rf-md-editor-footer">
+            <span class="rf-md-editor-hint">
+              <span>Markdown & Mermaid supported ·</span>
+              <Kbd size="compact" variant="outline" keys="mod+enter" />
+              <span>to submit</span>
+            </span>
+            <Button
+              size="compact"
+              variant="primary"
+              disabled={props.disabled || !value.trim()}
+              mix={on('click', submit)}
+            >
+              {props.submitLabel ?? 'Comment'}
+            </Button>
+          </div>
+        )}
+      </div>
+    )
+  }
 }

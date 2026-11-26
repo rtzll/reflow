@@ -10,6 +10,10 @@ import {
   relatedPipelineJobIds,
   type PipelineDagJob,
 } from '../../../packages/reflow/src/behaviors/pipeline-dag.ts'
+import {
+  applyMarkdownFormat,
+  type MarkdownFormatAction,
+} from '../../../packages/reflow/src/behaviors/markdown-format.ts'
 import { createRangeSelection } from '../../../packages/reflow/src/behaviors/range-selection.ts'
 
 // Deterministic PRNG so property runs are fast, thorough, and 100% reproducible.
@@ -218,5 +222,35 @@ it('property: range selection preserves independent selections and contracts cle
       const expected = initial.has(key) || (i >= lo2 && i <= hi2)
       assert.equal(afterSecond.has(key), expected)
     }
+  }
+})
+
+it('property: applyMarkdownFormat always returns in-bounds selection and preserves prefix/suffix', () => {
+  const rng = mulberry32(0x5eed5)
+  const actions: readonly MarkdownFormatAction[] = [
+    'bold',
+    'italic',
+    'code',
+    'codeblock',
+    'mermaid',
+    'suggestion',
+    'link',
+    'list',
+  ]
+  const samples = ['', 'hello world', 'line 1\nline 2', '  padded  ', 'const x = 1;']
+
+  for (let trial = 0; trial < 200; trial++) {
+    const text = pick(rng, samples)
+    const rawStart = randomInt(rng, -3, text.length + 3)
+    const rawEnd = randomInt(rng, -3, text.length + 3)
+    const action = pick(rng, actions)
+    const res = applyMarkdownFormat(text, rawStart, rawEnd, action)
+
+    assert.ok(res.selectionStart >= 0 && res.selectionStart <= res.value.length)
+    assert.ok(res.selectionEnd >= res.selectionStart && res.selectionEnd <= res.value.length)
+    const s = Math.max(0, Math.min(text.length, Math.min(rawStart, rawEnd)))
+    const e = Math.max(0, Math.min(text.length, Math.max(rawStart, rawEnd)))
+    assert.ok(res.value.startsWith(text.slice(0, s)))
+    assert.ok(res.value.endsWith(text.slice(e)))
   }
 })

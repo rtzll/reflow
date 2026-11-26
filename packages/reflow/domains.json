@@ -32,7 +32,7 @@
   "markdown": {
     "entry": "markdown",
     "css": "markdown.css",
-    "sourceCss": ["markdown.css"],
+    "sourceCss": ["markdown.css", "markdown-editor.css"],
     "peers": ["marked"],
     "optionalPeer": false,
     "workerStub": false,
