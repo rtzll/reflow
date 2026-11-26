@@ -62,7 +62,49 @@
     {
       "files": ["packages/reflow/src/**/*.{ts,tsx}"],
       "rules": {
-        "no-console": "error"
+        "no-console": "error",
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@pierre/diffs", "@pierre/diffs/*"],
+                "message": "Optional peer @pierre/diffs may only be imported from diffs.tsx or diffs-ssr.ts."
+              },
+              {
+                "group": ["@pierre/trees", "@pierre/trees/*", "preact", "preact/*"],
+                "message": "Optional peers @pierre/trees and preact may only be imported from trees.tsx or trees-ssr.ts."
+              },
+              {
+                "group": ["pele", "pele/*"],
+                "message": "Optional peer pele may only be imported from diagrams.tsx or diagrams-ssr.ts."
+              },
+              {
+                "group": ["shiki", "shiki/*", "@shikijs/*"],
+                "message": "Optional peer shiki may only be imported from highlight.ts."
+              },
+              {
+                "group": ["marked", "marked/*"],
+                "message": "marked may only be imported from markdown.tsx."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "packages/reflow/src/diffs.tsx",
+        "packages/reflow/src/diffs-ssr.ts",
+        "packages/reflow/src/trees.tsx",
+        "packages/reflow/src/trees-ssr.ts",
+        "packages/reflow/src/diagrams.tsx",
+        "packages/reflow/src/diagrams-ssr.ts",
+        "packages/reflow/src/highlight.ts",
+        "packages/reflow/src/markdown.tsx"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
       }
     }
   ]
