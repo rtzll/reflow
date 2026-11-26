@@ -9,10 +9,6 @@
   flex: 1;
   min-block-size: 0;
 }
-/* The chat's sidebar carries the app links in its footer instead. */
-.site-app-workspace[data-app='chat'] > .site-app-nav {
-  display: none;
-}
 
 .studio-chat {
   --studio-canvas: light-dark(#fff, #101010);

@@ -88,16 +88,18 @@ export function AppWorkspace(
         <a class="site-skip" href="#main">
           Skip to content
         </a>
-        <nav aria-label="App navigation" class="site-app-nav">
-          <a href={routes.gallery.href()} data-rmx-document="">
-            Reflow
-          </a>
-          <a href={routes.apps.href()} data-rmx-document="">
-            Apps
-          </a>
-          <span aria-current="page">{app.name}</span>
-          {app.slug !== 'chat' && <ShowcaseSoundButton enabled={soundEnabled} />}
-        </nav>
+        {app.slug !== 'chat' && (
+          <nav aria-label="App navigation" class="site-app-nav">
+            <a href={routes.gallery.href()} data-rmx-document="">
+              Reflow
+            </a>
+            <a href={routes.apps.href()} data-rmx-document="">
+              Apps
+            </a>
+            <span aria-current="page">{app.name}</span>
+            <ShowcaseSoundButton enabled={soundEnabled} />
+          </nav>
+        )}
         <main id="main" data-rmx-key={app.slug} data-sound-scope="">
           {app.render(search, soundEnabled, prerenderedDiffs)}
         </main>
