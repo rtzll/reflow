@@ -30,6 +30,21 @@ assert.ok(
     path.includes('@atlaskit/pragmatic-drag-and-drop'),
   ),
 )
+assert.ok(
+  !Object.keys(metadata.worker.inputs).some(
+    (path) => path.includes('@pierre/diffs') && !path.startsWith('reflow-worker-diffs-stub:'),
+  ),
+  'Worker bundle must not include @pierre/diffs',
+)
+assert.ok(
+  !Object.keys(metadata.worker.inputs).some((path) => /(?:^|\/)(?:shiki|@shikijs)\//.test(path)),
+  'Worker bundle must not include Shiki',
+)
+
+const appSlugs = (await readdir(resolve(root, 'app/public/apps'), { withFileTypes: true }))
+  .filter((entry) => entry.isDirectory() && entry.name !== 'directory')
+  .map((entry) => entry.name)
+  .sort()
 
 const worker = await startLocalWorker()
 let browser: Browser | undefined
@@ -41,16 +56,24 @@ try {
     '/docs/button',
     '/docs/dropdown?theme=dark',
     '/apps',
-    '/apps/issues',
-    '/apps/chat',
-    '/apps/calendar',
-    '/apps/analytics',
+    ...appSlugs.map((slug) => `/apps/${slug}`),
   ]) {
     const response = await fetch(origin + path)
     assert.equal(response.status, 200, path)
     assert.match(response.headers.get('content-type') ?? '', /text\/html/)
     assert.equal(response.headers.get('cache-control'), 'private, no-store')
-    assert.ok(!(await response.text()).includes(homedir()), path)
+    const html = await response.text()
+    assert.ok(!html.includes(homedir()), path)
+    if (path === '/apps/review') {
+      assert.ok(
+        html.includes('<diffs-container><template shadowrootmode="open">'),
+        'Built Worker must serve zero-flash Declarative Shadow DOM diffs on /apps/review',
+      )
+      assert.ok(
+        !html.includes('class="rf-diff-fallback"'),
+        '/apps/review must not emit diff fallback',
+      )
+    }
   }
   for (const [path, destination] of [
     ['/docs/app-sidebar', '/docs/sidebar'],
@@ -203,44 +226,72 @@ try {
   assert.deepEqual(errors, [])
 
   const catalogStart = performance.now()
-  await page.emulateMedia({ reducedMotion: 'reduce' })
+  const concurrency = 4
   for (const { width, height, theme } of [
     { width: 1280, height: 720, theme: 'dark' },
     { width: 390, height: 844, theme: 'light' },
   ]) {
-    await page.setViewportSize({ width, height })
     const overflow: string[] = []
-    for (const path of docs) {
-      const response = await openShowcase(`${path}?theme=${theme}&density=default&font=inter`)
-      if (theme === 'dark') assert.match((await response?.text()) ?? '', /<\/html>/, path)
-      const dimensions = await page.evaluate(() => ({
-        width: document.documentElement.clientWidth,
-        scroll: document.documentElement.scrollWidth,
-      }))
-      if (dimensions.scroll > dimensions.width + 1) {
-        const elements: string[] = await page.locator('main *').evaluateAll((nodes) =>
-          nodes
-            .filter(
-              (node) =>
-                node.getBoundingClientRect().right > document.documentElement.clientWidth + 1,
-            )
-            .slice(0, 5)
-            .map((node) => `${node.tagName}.${node.className}`),
-        )
-        overflow.push(
-          `${path}: ${dimensions.scroll}px in ${dimensions.width}px, ${elements.join(', ')}`,
-        )
-      }
-      assert.deepEqual(errors, [], `${path} at ${width}px`)
-      const slug = path.split('/').at(-1) ?? ''
-      if (process.env.REFLOW_SCREENSHOT_DIR && ['button', 'skill'].includes(slug)) {
-        await page.screenshot({
-          path: join(process.env.REFLOW_SCREENSHOT_DIR, `reflow-${slug}-${width}.png`),
-          fullPage: false,
-          animations: 'disabled',
+    let cursor = 0
+    await Promise.all(
+      Array.from({ length: concurrency }, async () => {
+        const workerPage = await browser!.newPage({
+          baseURL: origin,
+          viewport: { width, height },
+          reducedMotion: 'reduce',
         })
-      }
-    }
+        const pageErrors: string[] = []
+        workerPage.on('pageerror', (error) => pageErrors.push(error.message))
+        workerPage.on('console', (message) => {
+          if (message.type() === 'error') pageErrors.push(message.text())
+        })
+        workerPage.on('response', (response) => {
+          if (response.status() >= 400) pageErrors.push(`${response.status()} ${response.url()}`)
+        })
+        try {
+          while (cursor < docs.length) {
+            const path = docs[cursor++]!
+            const response = await workerPage.goto(
+              `${path}?theme=${theme}&density=default&font=inter`,
+            )
+            assert.equal(response?.status(), 200, path)
+            await workerPage.evaluate(async (entry) => {
+              await import(entry)
+            }, manifest.page.entry.href)
+            if (theme === 'dark') assert.match((await response?.text()) ?? '', /<\/html>/, path)
+            const dimensions = await workerPage.evaluate(() => ({
+              width: document.documentElement.clientWidth,
+              scroll: document.documentElement.scrollWidth,
+            }))
+            if (dimensions.scroll > dimensions.width + 1) {
+              const elements: string[] = await workerPage.locator('main *').evaluateAll((nodes) =>
+                nodes
+                  .filter(
+                    (node) =>
+                      node.getBoundingClientRect().right > document.documentElement.clientWidth + 1,
+                  )
+                  .slice(0, 5)
+                  .map((node) => `${node.tagName}.${node.className}`),
+              )
+              overflow.push(
+                `${path}: ${dimensions.scroll}px in ${dimensions.width}px, ${elements.join(', ')}`,
+              )
+            }
+            assert.deepEqual(pageErrors, [], `${path} at ${width}px`)
+            const slug = path.split('/').at(-1) ?? ''
+            if (process.env.REFLOW_SCREENSHOT_DIR && ['button', 'skill'].includes(slug)) {
+              await workerPage.screenshot({
+                path: join(process.env.REFLOW_SCREENSHOT_DIR, `reflow-${slug}-${width}.png`),
+                fullPage: false,
+                animations: 'disabled',
+              })
+            }
+          }
+        } finally {
+          await workerPage.close()
+        }
+      }),
+    )
     assert.equal(overflow.length, 0, overflow.join('\n'))
   }
   console.log(
