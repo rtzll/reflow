@@ -249,4 +249,32 @@ export {
   type CommentSuggestion,
   type CommentThreadProps,
 } from './comment-thread.tsx'
+export {
+  LogViewer,
+  type LogEntry,
+  type LogGroup,
+  type LogLevel,
+  type LogLineRange,
+  type LogStepStatus,
+  type LogViewerProps,
+} from './log-viewer.tsx'
+export {
+  Waterfall,
+  formatDurationMs,
+  type WaterfallProps,
+  type WaterfallSpan,
+  type WaterfallStatus,
+} from './waterfall.tsx'
+export {
+  PipelineGraph,
+  type PipelineGraphProps,
+  type PipelineJob,
+  type PipelineJobStatus,
+} from './pipeline-graph.tsx'
+export {
+  StatusStrip,
+  type StatusStripItem,
+  type StatusStripProps,
+  type StatusStripState,
+} from './status-strip.tsx'
 export { createRangeSelection } from './behaviors/range-selection.ts'

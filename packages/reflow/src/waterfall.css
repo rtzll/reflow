@@ -1,0 +1,271 @@
+/* Waterfall: hierarchical Gantt / span timing visualization for CI pipelines
+   and execution traces. */
+.rf-waterfall {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-inline-size: 0;
+  overflow: hidden;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-panel-radius);
+  background: var(--rf-surface-2);
+  color: var(--rf-fg);
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+}
+
+.rf-waterfall-ruler {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(170px, 260px) minmax(220px, 1fr);
+  align-items: center;
+  block-size: 32px;
+  border-block-end: 1px solid var(--rf-border);
+  background: var(--rf-surface-2);
+  color: var(--rf-muted);
+  font-size: 11px;
+}
+
+.rf-waterfall-ruler-label {
+  padding-inline: 12px;
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.rf-waterfall-ruler-axis {
+  position: relative;
+  block-size: 100%;
+  margin-inline: 12px 16px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-waterfall-tick {
+  position: absolute;
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+.rf-waterfall-tick[data-end='true'] {
+  transform: translate(-100%, -50%);
+}
+
+.rf-waterfall-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.rf-waterfall-row {
+  display: grid;
+  grid-template-columns: minmax(170px, 260px) minmax(220px, 1fr);
+  align-items: center;
+  min-block-size: 34px;
+  outline: none;
+  cursor: pointer;
+  transition: background-color var(--rf-fast);
+}
+
+.rf-waterfall[data-density='compact'] .rf-waterfall-row,
+[data-density='compact'] .rf-waterfall:not([data-density]) .rf-waterfall-row {
+  min-block-size: 29px;
+}
+
+.rf-waterfall-row + .rf-waterfall-row {
+  border-block-start: 1px solid color-mix(in oklab, var(--rf-border) 60%, transparent);
+}
+
+@media (hover: hover) {
+  .rf-waterfall-row:hover {
+    background: var(--rf-hover);
+  }
+}
+
+.rf-waterfall-row[data-selected='true'] {
+  background: var(--rf-active);
+}
+
+.rf-waterfall-row:focus-visible {
+  outline: 1px solid var(--rf-accent);
+  outline-offset: -1px;
+}
+
+.rf-waterfall-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-inline-size: 0;
+  padding-inline-end: 10px;
+  border-inline-end: 1px solid color-mix(in oklab, var(--rf-border) 65%, transparent);
+  block-size: 100%;
+}
+
+.rf-waterfall-toggle {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: 18px;
+  block-size: 18px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--rf-radius);
+  background: transparent;
+  color: var(--rf-muted);
+  cursor: pointer;
+  transition: transform var(--rf-spring-snappy);
+}
+
+.rf-waterfall-row[aria-expanded='true'] .rf-waterfall-toggle {
+  transform: rotate(90deg);
+}
+
+.rf-waterfall-spacer {
+  flex: none;
+  inline-size: 18px;
+}
+
+.rf-waterfall-dot {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: 15px;
+  block-size: 15px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--rf-muted) 16%, transparent);
+  color: var(--rf-muted);
+}
+
+.rf-waterfall-dot[data-status='passed'] {
+  background: color-mix(in oklab, var(--rf-success) 16%, transparent);
+  color: var(--rf-success);
+}
+
+.rf-waterfall-dot[data-status='failed'] {
+  background: color-mix(in oklab, var(--rf-danger) 16%, transparent);
+  color: var(--rf-danger);
+}
+
+.rf-waterfall-dot[data-status='running'] {
+  background: color-mix(in oklab, var(--rf-accent) 16%, transparent);
+  color: var(--rf-accent);
+}
+
+.rf-waterfall-dot[data-status='cached'] {
+  background: color-mix(in oklab, var(--rf-info) 16%, transparent);
+  color: var(--rf-info);
+}
+
+.rf-waterfall-label {
+  min-inline-size: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--rf-text-caption);
+}
+
+.rf-waterfall-meta {
+  flex: none;
+  padding: 1px 5px;
+  border-radius: var(--rf-radius);
+  background: var(--rf-surface-3);
+  color: var(--rf-muted);
+  font-size: 10px;
+}
+
+.rf-waterfall-track-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  block-size: 100%;
+  margin-inline: 12px 16px;
+}
+
+.rf-waterfall-gridlines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.rf-waterfall-gridline {
+  position: absolute;
+  inset-block: 0;
+  inline-size: 1px;
+  background: color-mix(in oklab, var(--rf-border) 50%, transparent);
+}
+
+.rf-waterfall-bar-wrap {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  min-inline-size: 4px;
+  block-size: 14px;
+}
+
+.rf-waterfall-bar {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: 4px;
+  background: color-mix(in oklab, var(--rf-muted) 45%, transparent);
+}
+
+.rf-waterfall-bar[data-status='passed'] {
+  background: var(--rf-success);
+}
+
+.rf-waterfall-bar[data-status='failed'] {
+  background: var(--rf-danger);
+}
+
+.rf-waterfall-bar[data-status='cached'] {
+  background: var(--rf-info);
+}
+
+.rf-waterfall-bar[data-status='running'] {
+  background: linear-gradient(
+    90deg,
+    var(--rf-accent),
+    color-mix(in oklab, var(--rf-accent) 60%, var(--rf-fg)),
+    var(--rf-accent)
+  );
+  background-size: 200% 100%;
+  animation: rf-waterfall-shimmer 1.6s linear infinite;
+}
+
+.rf-waterfall-bar[data-critical='true'] {
+  box-shadow: 0 0 0 1.5px var(--rf-fg);
+}
+
+.rf-waterfall-bar-duration {
+  position: absolute;
+  color: var(--rf-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.rf-waterfall-bar-duration[data-side='right'] {
+  inset-inline-start: calc(100% + 6px);
+}
+
+.rf-waterfall-bar-duration[data-side='left'] {
+  inset-inline-end: calc(100% + 6px);
+}
+
+@keyframes rf-waterfall-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-waterfall-bar[data-status='running'] {
+    animation: none;
+  }
+}

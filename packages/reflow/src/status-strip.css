@@ -1,0 +1,100 @@
+/* StatusStrip: compact run-history bar strip scaled by duration and status. */
+.rf-status-strip {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 6px;
+  min-inline-size: 0;
+  font: var(--rf-text-caption) / var(--rf-leading-caption, 16px) var(--rf-font);
+}
+
+.rf-status-strip-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.rf-status-strip[data-density='compact'] .rf-status-strip-bars,
+[data-density='compact'] .rf-status-strip:not([data-density]) .rf-status-strip-bars {
+  gap: 2px;
+}
+
+.rf-status-strip-bar {
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+  inline-size: 8px;
+  block-size: 100%;
+  padding: 0 1px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+  transition: transform var(--rf-fast);
+}
+
+.rf-status-strip[data-density='compact'] .rf-status-strip-bar,
+[data-density='compact'] .rf-status-strip:not([data-density]) .rf-status-strip-bar {
+  inline-size: 6px;
+}
+
+.rf-status-strip-bar:focus-visible {
+  outline: 1px solid var(--rf-accent);
+  outline-offset: 1px;
+}
+
+@media (hover: hover) {
+  .rf-status-strip-bar:hover {
+    transform: translateY(-1px);
+  }
+}
+
+.rf-status-strip-fill {
+  display: block;
+  inline-size: 100%;
+  min-block-size: 4px;
+  border-radius: 2px;
+  background: color-mix(in oklab, var(--rf-muted) 45%, transparent);
+  transition:
+    opacity var(--rf-fast),
+    box-shadow var(--rf-fast);
+}
+
+.rf-status-strip-fill[data-status='passed'] {
+  background: var(--rf-success);
+}
+
+.rf-status-strip-fill[data-status='failed'] {
+  background: var(--rf-danger);
+}
+
+.rf-status-strip-fill[data-status='running'] {
+  background: var(--rf-accent);
+}
+
+.rf-status-strip-fill[data-status='warning'] {
+  background: var(--rf-warning);
+}
+
+.rf-status-strip-bar[data-selected='true'] .rf-status-strip-fill {
+  box-shadow: 0 0 0 1.5px var(--rf-fg);
+}
+
+.rf-status-strip-readout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 10px;
+  font-size: 11px;
+}
+
+.rf-status-strip-readout-label {
+  color: var(--rf-fg);
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.rf-status-strip-readout-detail {
+  color: var(--rf-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,197 @@
+/* PipelineGraph: interactive CI job DAG with stage columns, SVG Bezier edges,
+   and dependency-chain highlighting. */
+.rf-pipeline-graph {
+  box-sizing: border-box;
+  min-inline-size: 0;
+  overflow-x: auto;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-panel-radius);
+  background: var(--rf-surface-2);
+  color: var(--rf-fg);
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+}
+
+.rf-pipeline-canvas {
+  position: relative;
+  min-inline-size: max-content;
+  padding: 16px 18px;
+}
+
+.rf-pipeline-graph[data-density='compact'] .rf-pipeline-canvas,
+[data-density='compact'] .rf-pipeline-graph:not([data-density]) .rf-pipeline-canvas {
+  padding: 12px 14px;
+}
+
+.rf-pipeline-edges {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.rf-pipeline-edge {
+  fill: none;
+  stroke: var(--rf-border-emphasis, var(--rf-border));
+  stroke-width: 1.5;
+  transition:
+    stroke var(--rf-fast),
+    opacity var(--rf-fast),
+    stroke-width var(--rf-fast);
+}
+
+.rf-pipeline-edge[data-active='true'] {
+  stroke: var(--rf-accent);
+  stroke-width: 2;
+}
+
+.rf-pipeline-edge[data-active='true'][data-status='failed'] {
+  stroke: var(--rf-danger);
+}
+
+.rf-pipeline-edge[data-active='true'][data-status='passed'] {
+  stroke: var(--rf-success);
+}
+
+.rf-pipeline-edge[data-dimmed='true'] {
+  opacity: 0.25;
+}
+
+.rf-pipeline-stages {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 48px;
+}
+
+.rf-pipeline-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-inline-size: 184px;
+}
+
+.rf-pipeline-stage-header {
+  color: var(--rf-muted);
+  font-size: 11px;
+  font-variation-settings: var(--rf-weight-strong);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.rf-pipeline-stage-jobs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rf-pipeline-node {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  inline-size: 100%;
+  min-inline-size: 184px;
+  padding: 9px 11px;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-radius);
+  background: var(--rf-surface-1);
+  color: var(--rf-fg);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  outline: none;
+  transition:
+    border-color var(--rf-fast),
+    background-color var(--rf-fast),
+    opacity var(--rf-fast),
+    box-shadow var(--rf-fast);
+}
+
+.rf-pipeline-graph[data-density='compact'] .rf-pipeline-node,
+[data-density='compact'] .rf-pipeline-graph:not([data-density]) .rf-pipeline-node {
+  padding: 7px 9px;
+}
+
+@media (hover: hover) {
+  .rf-pipeline-node:hover {
+    border-color: var(--rf-border-emphasis, var(--rf-border));
+    background: var(--rf-hover);
+  }
+}
+
+.rf-pipeline-node:focus-visible {
+  border-color: var(--rf-accent);
+  box-shadow: 0 0 0 1px var(--rf-accent);
+}
+
+.rf-pipeline-node[data-selected='true'] {
+  border-color: var(--rf-accent);
+  background: var(--rf-active);
+}
+
+.rf-pipeline-node[data-status='failed'][data-selected='true'] {
+  border-color: var(--rf-danger);
+}
+
+.rf-pipeline-node[data-dimmed='true'] {
+  opacity: 0.52;
+}
+
+.rf-pipeline-node-dot {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: 18px;
+  block-size: 18px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--rf-muted) 16%, transparent);
+  color: var(--rf-muted);
+}
+
+.rf-pipeline-node-dot[data-status='passed'] {
+  background: color-mix(in oklab, var(--rf-success) 16%, transparent);
+  color: var(--rf-success);
+}
+
+.rf-pipeline-node-dot[data-status='failed'] {
+  background: color-mix(in oklab, var(--rf-danger) 16%, transparent);
+  color: var(--rf-danger);
+}
+
+.rf-pipeline-node-dot[data-status='running'] {
+  background: color-mix(in oklab, var(--rf-accent) 16%, transparent);
+  color: var(--rf-accent);
+}
+
+.rf-pipeline-node-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-inline-size: 0;
+  flex: 1 1 auto;
+}
+
+.rf-pipeline-node-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--rf-text-caption);
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.rf-pipeline-node-meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--rf-muted);
+  font-size: 11px;
+}
+
+.rf-pipeline-node-duration {
+  flex: none;
+  color: var(--rf-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}

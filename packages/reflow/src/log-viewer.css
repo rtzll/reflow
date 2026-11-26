@@ -1,0 +1,398 @@
+/* LogViewer: structured CI & runtime log viewer with collapsible step groups,
+   ANSI colors, severity filters, timestamps, and line-range selection. */
+.rf-log-viewer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-inline-size: 0;
+  overflow: hidden;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-panel-radius);
+  background: var(--rf-surface-2);
+  color: var(--rf-fg);
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+}
+
+.rf-log-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  min-block-size: 40px;
+  padding: 6px 10px 6px 12px;
+  border-block-end: 1px solid var(--rf-border);
+  background: var(--rf-surface-2);
+  font-size: var(--rf-text-caption);
+}
+
+.rf-log-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-inline-size: 0;
+}
+
+.rf-log-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--rf-fg);
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.rf-log-duration {
+  color: var(--rf-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-log-selection-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--rf-accent) 16%, transparent);
+  color: var(--rf-accent);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-log-selection-clear {
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.rf-log-status-dot {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: 16px;
+  block-size: 16px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--rf-muted) 16%, transparent);
+  color: var(--rf-muted);
+}
+
+.rf-log-status-dot[data-status='passed'] {
+  background: color-mix(in oklab, var(--rf-success) 16%, transparent);
+  color: var(--rf-success);
+}
+
+.rf-log-status-dot[data-status='failed'] {
+  background: color-mix(in oklab, var(--rf-danger) 16%, transparent);
+  color: var(--rf-danger);
+}
+
+.rf-log-status-dot[data-status='running'] {
+  background: color-mix(in oklab, var(--rf-accent) 16%, transparent);
+  color: var(--rf-accent);
+}
+
+.rf-log-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-inline-start: auto;
+}
+
+.rf-log-filters {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.rf-log-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  block-size: 24px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--rf-muted);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  transition:
+    background-color var(--rf-fast),
+    color var(--rf-fast),
+    border-color var(--rf-fast);
+}
+
+@media (hover: hover) {
+  .rf-log-pill:hover {
+    background: var(--rf-hover);
+    color: var(--rf-fg);
+  }
+}
+
+.rf-log-pill[aria-pressed='true'] {
+  border-color: var(--rf-border);
+  background: var(--rf-surface-3);
+  color: var(--rf-fg);
+}
+
+.rf-log-pill[data-level='error'][aria-pressed='true'] {
+  border-color: color-mix(in oklab, var(--rf-danger) 40%, transparent);
+  background: color-mix(in oklab, var(--rf-danger) 14%, transparent);
+  color: var(--rf-danger);
+}
+
+.rf-log-pill[data-level='warn'][aria-pressed='true'] {
+  border-color: color-mix(in oklab, var(--rf-warning) 40%, transparent);
+  background: color-mix(in oklab, var(--rf-warning) 14%, transparent);
+  color: var(--rf-warning);
+}
+
+.rf-log-pill-count {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+.rf-log-jump-errors {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.rf-log-search {
+  inline-size: 140px;
+  block-size: 24px;
+  padding: 0 8px;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-radius);
+  background: var(--rf-surface-1);
+  color: var(--rf-fg);
+  font: inherit;
+  font-size: 12px;
+  outline: none;
+}
+
+.rf-log-search:focus-visible {
+  border-color: var(--rf-accent);
+}
+
+.rf-log-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 24px;
+  block-size: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--rf-radius);
+  background: transparent;
+  color: var(--rf-muted);
+  cursor: pointer;
+  transition:
+    background-color var(--rf-fast),
+    color var(--rf-fast);
+}
+
+.rf-log-icon-btn:focus-visible,
+.rf-log-pill:focus-visible,
+.rf-log-group-header:focus-visible,
+.rf-log-gutter:focus-visible {
+  outline: 1px solid var(--rf-accent);
+  outline-offset: -1px;
+}
+
+@media (hover: hover) {
+  .rf-log-icon-btn:hover {
+    background: var(--rf-hover);
+    color: var(--rf-fg);
+  }
+}
+
+.rf-log-icon-btn[aria-pressed='true'] {
+  background: var(--rf-active);
+  color: var(--rf-fg);
+}
+
+.rf-log-body {
+  overflow: auto;
+  overscroll-behavior: contain;
+  font:
+    12px / 1.65 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Consolas,
+    monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-log-viewer[data-density='compact'] .rf-log-body,
+[data-density='compact'] .rf-log-viewer:not([data-density]) .rf-log-body {
+  font-size: 11.5px;
+  line-height: 1.55;
+}
+
+.rf-log-empty {
+  padding: 20px 14px;
+  color: var(--rf-muted);
+  font-family: var(--rf-font);
+  font-size: var(--rf-text-caption);
+  text-align: center;
+}
+
+.rf-log-group + .rf-log-group {
+  border-block-start: 1px solid var(--rf-border);
+}
+
+.rf-log-group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  inline-size: 100%;
+  padding: 7px 12px;
+  border: 0;
+  background: color-mix(in oklab, var(--rf-surface-3) 55%, transparent);
+  color: var(--rf-fg);
+  font-family: var(--rf-font);
+  font-size: var(--rf-text-caption);
+  text-align: start;
+  cursor: pointer;
+  transition: background-color var(--rf-fast);
+}
+
+@media (hover: hover) {
+  .rf-log-group-header:hover {
+    background: var(--rf-hover);
+  }
+}
+
+.rf-log-group-chevron {
+  display: inline-grid;
+  place-items: center;
+  color: var(--rf-muted);
+  transition: transform var(--rf-spring-snappy);
+}
+
+.rf-log-group[data-open='true'] .rf-log-group-chevron {
+  transform: rotate(90deg);
+}
+
+.rf-log-group-title {
+  min-inline-size: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.rf-log-group-badge {
+  flex: none;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.rf-log-group-badge[data-level='error'] {
+  background: color-mix(in oklab, var(--rf-danger) 16%, transparent);
+  color: var(--rf-danger);
+}
+
+.rf-log-group-badge[data-level='warn'] {
+  background: color-mix(in oklab, var(--rf-warning) 16%, transparent);
+  color: var(--rf-warning);
+}
+
+.rf-log-group-duration {
+  flex: none;
+  color: var(--rf-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+}
+
+.rf-log-lines {
+  padding-block: 4px;
+}
+
+.rf-log-line {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-inline: 8px 12px;
+  white-space: pre;
+}
+
+.rf-log-viewer[data-wrap] .rf-log-line {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.rf-log-line[data-level='error'] {
+  background: color-mix(in oklab, var(--rf-danger) 10%, transparent);
+}
+
+.rf-log-line[data-level='warn'] {
+  background: color-mix(in oklab, var(--rf-warning) 10%, transparent);
+}
+
+.rf-log-line[data-selected='true'] {
+  background: color-mix(in oklab, var(--rf-accent) 16%, transparent);
+}
+
+.rf-log-gutter {
+  flex: none;
+  min-inline-size: 32px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--rf-muted);
+  font: inherit;
+  text-align: end;
+  user-select: none;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .rf-log-gutter:hover {
+    color: var(--rf-fg);
+  }
+}
+
+.rf-log-timestamp {
+  flex: none;
+  min-inline-size: 58px;
+  color: var(--rf-muted);
+  font-size: 11px;
+  user-select: none;
+}
+
+.rf-log-text {
+  min-inline-size: 0;
+  flex: 1 1 auto;
+}
+
+.rf-log-jump-live {
+  position: absolute;
+  inset-block-end: 12px;
+  inset-inline-end: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border: 1px solid var(--rf-border);
+  border-radius: 999px;
+  background: var(--rf-surface-3);
+  color: var(--rf-fg);
+  font-family: var(--rf-font);
+  font-size: var(--rf-text-caption);
+  box-shadow: var(--rf-shadow-sm, 0 2px 8px rgb(0 0 0 / 0.16));
+  cursor: pointer;
+}
