@@ -37,6 +37,20 @@ assert.ok(
   'Worker bundle must not include @pierre/diffs',
 )
 assert.ok(
+  !Object.keys(metadata.worker.inputs).some(
+    (path) =>
+      (path.includes('@pierre/trees') || /(?:^|\/)preact(?:\/|$)/.test(path)) &&
+      !path.startsWith('reflow-worker-trees-stub:'),
+  ),
+  'Worker bundle must not include @pierre/trees or preact',
+)
+assert.ok(
+  !Object.keys(metadata.worker.inputs).some(
+    (path) => /(?:^|\/)pele(?:\/|$)/.test(path) && !path.startsWith('reflow-worker-pele-stub:'),
+  ),
+  'Worker bundle must not include pele',
+)
+assert.ok(
   !Object.keys(metadata.worker.inputs).some((path) => /(?:^|\/)(?:shiki|@shikijs)\//.test(path)),
   'Worker bundle must not include Shiki',
 )
@@ -68,6 +82,14 @@ try {
       assert.ok(
         html.includes('<diffs-container><template shadowrootmode="open">'),
         'Built Worker must serve zero-flash Declarative Shadow DOM diffs on /apps/review',
+      )
+      assert.ok(
+        html.includes('<file-tree-container id="review-files-tree"'),
+        'Built Worker must serve zero-flash Declarative Shadow DOM FileTree on /apps/review',
+      )
+      assert.ok(
+        html.includes('<svg') && html.includes('class="pele '),
+        'Built Worker must serve zero-flash Pele Mermaid SVG on /apps/review',
       )
       assert.ok(
         !html.includes('class="rf-diff-fallback"'),

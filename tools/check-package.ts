@@ -44,10 +44,23 @@ try {
     'dist/diffs.d.ts',
     'dist/diffs-ssr.js',
     'dist/diffs-ssr.d.ts',
+    'dist/diffs.css',
+    'dist/trees.js',
+    'dist/trees.d.ts',
+    'dist/trees-ssr.js',
+    'dist/trees-ssr.d.ts',
+    'dist/trees.css',
+    'dist/diagrams.js',
+    'dist/diagrams.d.ts',
+    'dist/diagrams-ssr.js',
+    'dist/diagrams-ssr.d.ts',
+    'dist/diagrams.css',
     'dist/highlight.js',
     'dist/highlight.d.ts',
     'dist/markdown.js',
     'dist/markdown.d.ts',
+    'dist/markdown.css',
+    'dist/core.css',
     'dist/styles.css',
   ]) {
     assert.ok(files.includes(`package/${name}`), `Package is missing ${name}`)
@@ -55,7 +68,7 @@ try {
   for (const file of files) {
     assert.match(
       file,
-      /^package\/(?:package\.json|LICENSE|NOTICE|README\.md|dist\/(?:styles\.css|(?:(?:behaviors|systems)\/)?[^/]+\.(?:js|ts)))$/,
+      /^package\/(?:package\.json|LICENSE|NOTICE|README\.md|dist\/(?:(?:styles|core|diffs|trees|diagrams|markdown)\.css|(?:(?:behaviors|systems)\/)?[^/]+\.(?:js|ts)))$/,
     )
   }
   const shippedCss = extract(tarball, 'package/dist/styles.css')
@@ -109,6 +122,54 @@ try {
     extract(tarball, 'package/dist/diffs-ssr.js'),
     /@pierre\/diffs\/ssr/,
     'dist/diffs-ssr.js should import @pierre/diffs/ssr',
+  )
+  // Per-domain stylesheets sit inside @layer reflow just like styles.css.
+  for (const cssFile of [
+    'package/dist/core.css',
+    'package/dist/diffs.css',
+    'package/dist/trees.css',
+    'package/dist/diagrams.css',
+    'package/dist/markdown.css',
+  ]) {
+    assert.ok(files.includes(cssFile), `Tarball must include ${cssFile}`)
+    assert.match(extract(tarball, cssFile), /@layer reflow \{/, `${cssFile} must use @layer reflow`)
+  }
+  assert.doesNotMatch(
+    extract(tarball, 'package/dist/core.css'),
+    /\.rf-diff-view|\.rf-file-tree|\.rf-diagram|\.rf-markdown/,
+    'dist/core.css must exclude specialist domain stylesheets',
+  )
+  // @pierre/trees is opt-in: only the trees entries may import it.
+  for (const file of files.filter((name) => /^package\/dist\/.+\.js$/.test(name))) {
+    if (file === 'package/dist/trees.js' || file === 'package/dist/trees-ssr.js') continue
+    const source = extract(tarball, file)
+    assert.doesNotMatch(source, /@pierre\/trees/, `${file} must not import @pierre/trees`)
+  }
+  assert.match(
+    extract(tarball, 'package/dist/trees.js'),
+    /@pierre\/trees/,
+    'dist/trees.js should import @pierre/trees',
+  )
+  assert.match(
+    extract(tarball, 'package/dist/trees-ssr.js'),
+    /@pierre\/trees\/ssr/,
+    'dist/trees-ssr.js should import @pierre/trees/ssr',
+  )
+  // pele is opt-in: only the diagrams entries may import it.
+  for (const file of files.filter((name) => /^package\/dist\/.+\.js$/.test(name))) {
+    if (file === 'package/dist/diagrams.js' || file === 'package/dist/diagrams-ssr.js') continue
+    const source = extract(tarball, file)
+    assert.doesNotMatch(source, /['"]pele(?:\/.*)?['"]/, `${file} must not import pele`)
+  }
+  assert.match(
+    extract(tarball, 'package/dist/diagrams.js'),
+    /pele\/lazy/,
+    'dist/diagrams.js should lazily import pele/lazy',
+  )
+  assert.match(
+    extract(tarball, 'package/dist/diagrams-ssr.js'),
+    /from ['"]pele['"]/,
+    'dist/diagrams-ssr.js should import pele',
   )
   // marked loads only with the Markdown entry, so other pages never download it.
   for (const file of files.filter((name) => /^package\/dist\/.+\.js$/.test(name))) {
@@ -208,6 +269,19 @@ try {
     !existsSync(join(destination, 'node_modules/@pierre/diffs')) &&
       !(existsSync(store) && readdirSync(store).some((name) => name.startsWith('@pierre+diffs@'))),
     'Installing Reflow must not install @pierre/diffs',
+  )
+  assert.ok(
+    !existsSync(join(destination, 'node_modules/@pierre/trees')) &&
+      !(
+        existsSync(store) && readdirSync(store).some((name) => name.startsWith('@pierre+trees@'))
+      ) &&
+      !(existsSync(store) && readdirSync(store).some((name) => name.startsWith('preact@'))),
+    'Installing Reflow must not install @pierre/trees or preact',
+  )
+  assert.ok(
+    !existsSync(join(destination, 'node_modules/pele')) &&
+      !(existsSync(store) && readdirSync(store).some((name) => name.startsWith('pele@'))),
+    'Installing Reflow must not install pele',
   )
 
   const starter = spawn(process.execPath, ['--import', 'remix/node-tsx', 'server.ts'], {

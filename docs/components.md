@@ -85,6 +85,8 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 12 | [`Timeline` (shipped)](timeline.md) | — | Semantic markers, commit/review metadata, detail blocks |
 | 12 | [`Terminal` (shipped)](terminal.md) | — | `CodeBlock` frame, zero-dep ANSI SGR parser, `Spinner`, filter & follow-tail |
 | 12 | [`CommentThread` (shipped)](comment-thread.md) | — | `Avatar`, `Badge`, `Button`, grid-row spring collapse, `DiffView` slotted annotations |
+| 13 | `FileTree` (shipped) | [`@pierre/trees`](https://trees.software) (optional peer at `@rtzll/reflow/trees`, `/trees/ssr`, & `/trees.css`) | Virtualized path-first tree, folder compaction, git status, colored row decorations, Declarative Shadow DOM SSR |
+| 13 | `Diagram` (shipped) | [`pele`](https://pele.run) (optional peer at `@rtzll/reflow/diagrams`, `/diagrams/ssr`, & `/diagrams.css`) | Zero-dep Mermaid-to-SVG diagrams, live `--rf-*` token theming, `Markdown` `renderCodeBlock` integration |
 
 ### Decisions so far
 
