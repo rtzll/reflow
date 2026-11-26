@@ -107,3 +107,7 @@
 @import './metadata-list.css' layer(reflow);
 @import './copy-chip.css' layer(reflow);
 @import './inline-edit.css' layer(reflow);
+@import './stack-graph.css' layer(reflow);
+@import './merge-readiness.css' layer(reflow);
+@import './diff-minimap.css' layer(reflow);
+@import './code-browser.css' layer(reflow);

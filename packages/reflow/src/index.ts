@@ -338,3 +338,27 @@ export {
 export { MetadataList, type MetadataItem, type MetadataListProps } from './metadata-list.tsx'
 export { CopyChip, type CopyChipProps } from './copy-chip.tsx'
 export { InlineEdit, type InlineEditProps } from './inline-edit.tsx'
+export {
+  StackGraph,
+  type StackCheckStatus,
+  type StackGraphProps,
+  type StackNode,
+  type StackNodeStatus,
+  type StackReviewStatus,
+} from './stack-graph.tsx'
+export {
+  MergeReadiness,
+  type MergeGate,
+  type MergeGateItem,
+  type MergeGateStatus,
+  type MergeReadinessProps,
+  type MergeReadinessStatus,
+} from './merge-readiness.tsx'
+export { DiffMinimap, type DiffMinimapFile, type DiffMinimapProps } from './diff-minimap.tsx'
+export {
+  CodeBrowser,
+  formatLineAnchor,
+  type CodeBlameLine,
+  type CodeBrowserProps,
+  type CodeLineRange,
+} from './code-browser.tsx'
