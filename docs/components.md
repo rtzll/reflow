@@ -8,8 +8,8 @@ Reflow started as a native Remix port of the [Fluid Functionalism](https://githu
 - **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`, `TimeField`, `TimeGrid`
 - **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `Pagination`, `Resizable`, `Sidebar`, `Tabs`, `Toolbar`, `Tree`
 - **Menus and overlays** · `AlertDialog`, `CommandMenu`, `ContextMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
-- **Display and feedback** · `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `BarChart`, `Card`, `CodeBlock`, `DataTable`, `RoutedDataTable`, `Kbd`, `Markdown`, `Progress`, `Skeleton`, `Spinner`, `Table`, `Toaster`
-- **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `ChatOutline`, `Citation`, `Confirmation`, `DiffView`, `FileChanges`, `FileThumbnail`, `InputMessage`, `QueuedStack`, `TaskList`, `ThinkingIndicator`, `ThinkingSteps`, `ToolCalls`, `TriggerMenu`
+- **Display and feedback** · `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `BarChart`, `Card`, `CodeBlock`, `DataTable`, `RoutedDataTable`, `EmptyState`, `Kbd`, `Markdown`, `Progress`, `Skeleton`, `Spinner`, `Table`, `Terminal`, `Timeline`, `Toaster`
+- **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `ChatOutline`, `Citation`, `CommentThread`, `Confirmation`, `DiffView`, `FileChanges`, `FileThumbnail`, `InputMessage`, `QueuedStack`, `TaskList`, `ThinkingIndicator`, `ThinkingSteps`, `ToolCalls`, `TriggerMenu`
 
 Every component has a docs page with a live preview, highlighted code and an API table; most also have a playground. Run the showcase and open `/docs`, or read the [usage examples](../apps/web/app/public/examples.tsx).
 
@@ -80,7 +80,11 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 10 | [`FileChanges` (shipped)](file-changes.md) | — | The grid-row reveal from ToolCalls, Button |
 | 11 | [`Kbd` (shipped)](kbd.md) | — | `formatShortcut` and `isMacPlatform` from `behaviors/shortcut.ts`, CommandMenu keycap metrics |
 | 11 | [`TimeField` (shipped)](time-field.md) | [Fluid Functionalism date-picker-core](https://github.com/mickadesign/fluid-functionalism) | Promoted from `DatePicker`'s time combobox, `@remix-run/ui/popover` and `listbox`, `onFormReset`, `containEscape` |
-| 11 | [`DiffView` (shipped)](diff-view.md) | [`@pierre/diffs`](https://diffs.com) (optional peer at `@rtzll/reflow/diffs`) | `SegmentedControl`, `CodeBlock` token palette, `FileChanges` counts |
+| 11 | [`DiffView` (shipped)](diff-view.md) | [`@pierre/diffs`](https://diffs.com) (optional peer at `@rtzll/reflow/diffs` & `@rtzll/reflow/diffs/ssr`) | `SegmentedControl`, `CodeBlock` token palette, `FileChanges` counts, Declarative Shadow DOM SSR |
+| 12 | [`EmptyState` (shipped)](empty-state.md) | — | Framed icon tile, heading, concise recovery actions |
+| 12 | [`Timeline` (shipped)](timeline.md) | — | Semantic markers, commit/review metadata, detail blocks |
+| 12 | [`Terminal` (shipped)](terminal.md) | — | `CodeBlock` frame, zero-dep ANSI SGR parser, `Spinner`, filter & follow-tail |
+| 12 | [`CommentThread` (shipped)](comment-thread.md) | — | `Avatar`, `Badge`, `Button`, grid-row spring collapse, `DiffView` slotted annotations |
 
 ### Decisions so far
 

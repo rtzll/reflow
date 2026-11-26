@@ -8,6 +8,7 @@ The Apps section demonstrates a complete task with seeded data. Each workspace h
 | `/apps/chat` | Start a conversation, choose a slash skill, stop a simulated reply, and return to the draft using Back or a saved conversation URL. Attach files or a voice note, pin or delete conversations from the sidebar, jump between questions with the outline, and copy or retry a reply. |
 | `/apps/calendar` | Create a timed event in a week, move it to another day, and change its duration using pointer or keyboard. Show overlapping events in one timezone. |
 | `/apps/analytics` | Follow the busiest day to its chart, open the events behind the spike, inspect a payload, and reopen the filtered log from its URL. |
+| `/apps/review` | Inspect zero-flash SSR multi-file diffs, filter files, mark files viewed, reply to and resolve inline review threads with code suggestions, inspect ANSI CI logs in a drawer, and submit a review. |
 
 Each app owns its entry, fixtures and stylesheet in `apps/web/app/public/apps/<slug>/`. Register the app in the directory with its name, description and workspace renderer. The server passes the request query string to `render(search)`. Use a Remix client entry for interactive content and pass serializable props across that boundary.
 
@@ -39,5 +40,6 @@ Calendar uses TimeGrid with fifteen-minute increments. The app supplies the week
 | Issues | The cycle summary starts collapsed on phones. Undo reverses the latest move in board or list view. | Open the board on a phone and find a ticket without scrolling. Move two tickets from different statuses together. Undo restores each to its own status. |
 | Calendar | Moving or resizing an event shows its proposed day and time range beside the pointer. Accepted changes are saved in this browser. Undo restores the previous slot. | Drag across a day boundary and read the destination time before releasing. Escape leaves the original event in place. Undo reverses a drop, and refreshing preserves an accepted edit. |
 | Analytics | The chart counts events by source for the selected dates. Each leading source links to its rows, keeping the date range and sort in the URL. | Select October 14 and follow **media imports** in the chart’s explanation. The log contains 19 of the day’s 24 events. Inspect a payload and close it with focus back on the same row. |
+| Code review | Diffs arrive pre-rendered as Declarative Shadow DOM HTML with zero fallback flash; inline `CommentThread`s slot directly into diff lines and CI checks open searchable ANSI `Terminal` logs in a `Drawer`. | Open `/apps/review`, filter to zero matches and clear from `EmptyState`, mark a file viewed, apply a suggestion and reply inline, open a CI check log, and submit an approval to see `Timeline` update. |
 
 Run each workflow with a keyboard and on a physical phone. Repeat with reduced motion enabled, and try Back, refresh, and cancellation halfway through the task.
