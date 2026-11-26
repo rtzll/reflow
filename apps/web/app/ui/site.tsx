@@ -7,6 +7,11 @@ import { PlaygroundControls } from '../public/doc-playground.tsx'
 import { ApiPropTable } from '../public/api-prop-table.tsx'
 import { DocPreview } from '../public/doc-preview.tsx'
 import { apiDescription, componentReference } from '../component-reference.ts'
+import {
+  componentGroupBySlug,
+  componentGroups,
+  type ComponentSlug,
+} from '../public/catalog-entries.ts'
 import { fontWeights } from '../public/google-fonts.ts'
 import { fontCatalog } from '../public/google-font-catalog.ts'
 import { SiteControls } from '../public/site-controls.tsx'
@@ -144,26 +149,49 @@ function Sidebar(handle: Handle<SidebarProps>) {
     let { components, page, slug, search } = handle.props
     let systems = components.filter((component) => component.category?.toLowerCase() === 'system')
     let controls = components.filter((component) => !component.category)
+    let navList = (label: string, entries: readonly ShowcaseComponent[]) => (
+      <ul aria-label={label}>
+        {entries.map((entry) => (
+          <li key={entry.slug}>
+            <a
+              href={pageHref(routes.component.href({ slug: entry.slug }))}
+              aria-current={page === 'component' && slug === entry.slug ? 'page' : undefined}
+            >
+              {entry.name}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
     let group = (label: string, entries: readonly ShowcaseComponent[]) => (
       <div class="site-nav-group">
         <h2 class="site-rail-label">
           {label}
           <span>{entries.length}</span>
         </h2>
-        <ul aria-label={label}>
-          {entries.map((entry) => (
-            <li key={entry.slug}>
-              <a
-                href={pageHref(routes.component.href({ slug: entry.slug }))}
-                aria-current={page === 'component' && slug === entry.slug ? 'page' : undefined}
-              >
-                {entry.name}
-              </a>
-            </li>
-          ))}
-        </ul>
+        {navList(label, entries)}
       </div>
     )
+    let subgroup = (id: string, label: string, entries: readonly ShowcaseComponent[]) => (
+      <details key={id} class="site-nav-subgroup" data-nav-group={id} open>
+        <summary class="site-nav-subgroup-trigger">
+          <span class="site-nav-subgroup-chevron" aria-hidden="true">
+            <Icon name="chevron" />
+          </span>
+          <span class="site-nav-subgroup-label">{label}</span>
+          <span class="site-nav-subgroup-count">{entries.length}</span>
+        </summary>
+        {navList(label, entries)}
+      </details>
+    )
+    const groupedControls = componentGroups
+      .map((section) => ({
+        ...section,
+        entries: controls.filter(
+          (component) => componentGroupBySlug[component.slug as ComponentSlug] === section.id,
+        ),
+      }))
+      .filter((section) => section.entries.length > 0)
     return (
       <nav class="site-nav" aria-label="Reflow pages">
         <button
@@ -202,7 +230,15 @@ function Sidebar(handle: Handle<SidebarProps>) {
           </li>
         </ul>
         {systems.length ? group('System', systems) : null}
-        {group('Components', controls)}
+        <div class="site-nav-group">
+          <h2 class="site-rail-label">
+            Components
+            <span>{controls.length}</span>
+          </h2>
+          <div class="site-nav-subgroups">
+            {groupedControls.map((section) => subgroup(section.id, section.label, section.entries))}
+          </div>
+        </div>
       </nav>
     )
   }

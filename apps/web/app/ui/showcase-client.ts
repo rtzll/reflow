@@ -70,7 +70,9 @@ function enhanceMobileNavigation() {
   const closeDrawer = () => {
     drawer.close()
     disclosure.open = false
-    for (const menu of drawer.querySelectorAll<HTMLDetailsElement>('details[open]'))
+    for (const menu of drawer.querySelectorAll<HTMLDetailsElement>(
+      'details[data-setting-menu][open]',
+    ))
       menu.open = false
     if (mobile.matches) trigger.focus({ preventScroll: true })
   }
@@ -247,6 +249,57 @@ function enhanceCopyButtons() {
   }
 }
 
+const navStorageKey = 'reflow_collapsed_nav_groups'
+
+function readCollapsedNavGroups(): Set<string> {
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(navStorageKey) ?? '[]')
+    return new Set(
+      Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === 'string') : [],
+    )
+  } catch {
+    return new Set()
+  }
+}
+
+function writeCollapsedNavGroups(ids: ReadonlySet<string>) {
+  try {
+    localStorage.setItem(navStorageKey, JSON.stringify([...ids]))
+  } catch {
+    // Storage may be unavailable in private browsing.
+  }
+}
+
+function restoreNavGroups() {
+  const collapsed = readCollapsedNavGroups()
+  for (const group of document.querySelectorAll<HTMLDetailsElement>('details[data-nav-group]')) {
+    const id = group.dataset.navGroup
+    if (!id) continue
+    const hasCurrent = Boolean(group.querySelector('a[aria-current="page"]'))
+    group.open = hasCurrent || !collapsed.has(id)
+  }
+}
+
+function toggleNavGroup(event: MouseEvent) {
+  if (event.defaultPrevented || !(event.target instanceof Element)) return
+  const group = event.target.closest('details[data-nav-group] > summary')?.parentElement
+  if (!(group instanceof HTMLDetailsElement) || !group.dataset.navGroup) return
+
+  // Summary activation persists the choice. Opening an active page's group only affects this page.
+  event.preventDefault()
+  const id = group.dataset.navGroup
+  const open = !group.open
+  const collapsed = readCollapsedNavGroups()
+  if (open) collapsed.delete(id)
+  else collapsed.add(id)
+  writeCollapsedNavGroups(collapsed)
+  for (const copy of document.querySelectorAll<HTMLDetailsElement>(
+    `details[data-nav-group="${CSS.escape(id)}"]`,
+  )) {
+    copy.open = open
+  }
+}
+
 /**
  * Wires what is new on the page and re-applies what enhancement changed.
  * Runs at start and after every in-page navigation, which re-applies the
@@ -254,6 +307,7 @@ function enhanceCopyButtons() {
  */
 export function refreshShowcase() {
   syncSoundControls()
+  restoreNavGroups()
   enhanceMobileNavigation()
   pinSettingsRail()
   enhanceSettingMenus()
@@ -267,6 +321,7 @@ export function enhanceShowcase() {
   started = true
   enhanceShowcaseSound()
   refreshShowcase()
+  document.addEventListener('click', toggleNavGroup)
   document.addEventListener(
     'click',
     (event) => {
