@@ -1,7 +1,8 @@
-import { BarChart, Icon } from '@rtzll/reflow'
+import { BarChart, Icon, StatusStrip } from '@rtzll/reflow'
 import { activityBars, fullRange } from '../analytics-data.ts'
 import { dayLabel } from '../public/apps/analytics/activity.ts'
 import { seedEvents, timeLabel } from '../public/apps/calendar/events.ts'
+import { ciHistoryRuns } from '../public/apps/ci/fixtures.ts'
 import { issues } from '../public/apps/issues/fixtures.ts'
 
 function IssuePreview() {
@@ -112,10 +113,27 @@ function ReviewPreview() {
   )
 }
 
+function CiPreview() {
+  return () => (
+    <div class="app-preview-sheet app-preview-ci">
+      <div class="app-preview-heading">
+        <span>Release #4578</span>
+        <span>3m 42s</span>
+      </div>
+      <StatusStrip label="Recent CI runs" items={ciHistoryRuns} size="compact" />
+      <div class="app-preview-dates">
+        <span>verify ✓</span>
+        <span>publish ✓</span>
+      </div>
+    </div>
+  )
+}
+
 export const appPreviews = {
   issues: IssuePreview,
   chat: ChatPreview,
   calendar: CalendarPreview,
   analytics: AnalyticsPreview,
   review: ReviewPreview,
+  ci: CiPreview,
 }

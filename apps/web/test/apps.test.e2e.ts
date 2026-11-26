@@ -44,6 +44,11 @@ it('opens each workspace from the showcase and returns to the directory', async 
     ['Calendar', page.getByRole('button', { name: 'New event' }), '.week-schedule'],
     ['Analytics', page.getByRole('table', { name: 'Studio events' }), '.analytics-chart'],
     ['Code review', page.getByRole('button', { name: 'Submit review' }), '.rf-diff-view'],
+    [
+      'CI Pipelines',
+      page.getByRole('button', { name: 'Re-run failed jobs' }),
+      '.rf-pipeline-graph',
+    ],
   ] as const
   await expect(page.locator('.site-app-card')).toHaveCount(workspaces.length)
   await expect(page.locator('.site-app-card').first()).toHaveCSS('border-top-left-radius', '12px')

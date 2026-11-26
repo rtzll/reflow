@@ -44,8 +44,9 @@
 }
 
 @media (hover: hover) {
-  .rf-status-strip-bar:hover {
-    transform: translateY(-1px);
+  .rf-status-strip-bar:hover .rf-status-strip-fill {
+    transform: scaleY(1.08);
+    filter: brightness(1.12);
   }
 }
 
@@ -55,8 +56,10 @@
   min-block-size: 4px;
   border-radius: 2px;
   background: color-mix(in oklab, var(--rf-muted) 45%, transparent);
+  transform-origin: bottom;
   transition:
-    opacity var(--rf-fast),
+    transform var(--rf-fast),
+    filter var(--rf-fast),
     box-shadow var(--rf-fast);
 }
 

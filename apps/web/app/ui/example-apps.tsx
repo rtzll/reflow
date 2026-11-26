@@ -6,6 +6,7 @@ import { issuesApp } from '../public/apps/issues/index.tsx'
 import { chatApp } from '../public/apps/chat/index.tsx'
 import { calendarApp } from '../public/apps/calendar/index.tsx'
 import { analyticsApp } from '../public/apps/analytics/index.tsx'
+import { ciApp } from '../public/apps/ci/index.tsx'
 import { reviewApp } from '../public/apps/review/index.tsx'
 import type { AppPrerendered, ExampleApp } from '../public/apps/types.ts'
 import { appPreviews } from './app-previews.tsx'
@@ -16,6 +17,7 @@ export const exampleApps = [
   { ...calendarApp, Preview: appPreviews.calendar },
   { ...analyticsApp, Preview: appPreviews.analytics },
   { ...reviewApp, Preview: appPreviews.review },
+  { ...ciApp, Preview: appPreviews.ci },
 ]
 
 export function AppsIndex(handle: Handle<{ soundEnabled: boolean }>) {
