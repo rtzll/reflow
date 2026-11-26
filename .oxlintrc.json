@@ -56,6 +56,7 @@
       "files": ["**/*.{ts,tsx,js,jsx}"],
       "rules": {
         "no-var": "error",
+        "eqeqeq": ["error", "always", { "null": "ignore" }],
         "arrow-body-style": ["error", "as-needed"]
       }
     },
