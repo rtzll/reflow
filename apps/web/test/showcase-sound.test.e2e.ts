@@ -568,6 +568,7 @@ it('sounds committed tree, number, queue and mention interactions', async (t) =>
   const queue = page.locator('[data-component="queued-stack"]')
   await cue(() => queue.getByRole('button', { name: '3 queued messages' }).click())
   await cue(() => queue.getByRole('button', { name: 'Move message 1 down' }).click())
+  await open(page, '/?q=input-message')
   const composer = page
     .locator('[data-component="input-message"]')
     .getByRole('textbox', { name: 'Message' })

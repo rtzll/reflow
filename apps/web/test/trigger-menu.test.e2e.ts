@@ -4,7 +4,7 @@ import { open, showcaseServer } from './showcase-router.ts'
 
 it('inserts a mention at the caret before Enter can send the message', async (t) => {
   const page = await t.serve(showcaseServer)
-  await open(page, '/')
+  await open(page, '/?q=input-message')
   const tile = page.locator('[data-component="input-message"]')
   const composer = tile.getByRole('textbox', { name: 'Message' })
   await composer.fill('Ask @gr tomorrow')

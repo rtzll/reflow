@@ -43,10 +43,12 @@ it('gives the gallery file browser its own row', async (t) => {
       return parseFloat(style.paddingLeft) + parseFloat(style.paddingRight)
     })
     expect(Math.abs(browser!.width - (gallery!.width - padding))).toBeLessThanOrEqual(1)
-    const chat = page.locator('.site-gallery [data-component="chat-message"]')
-    await expect(chat.getByRole('separator')).toHaveCount(0)
-    await expect(chat.getByText('What makes a product easy to use?')).toBeVisible()
   }
+
+  await open(page, '/?q=chat-message')
+  const chat = page.locator('.site-gallery [data-component="chat-message"]')
+  await expect(chat.getByRole('separator')).toHaveCount(0)
+  await expect(chat.getByText('What makes a product easy to use?')).toBeVisible()
 })
 
 it('opens file actions at the icon and previews the file only when its action is chosen', async (t) => {

@@ -263,11 +263,10 @@ it('configures keyboard prompts and a native attachment picker for the InputMess
   await prompts.waitFor({ state: 'hidden' })
   assert.ok(await attach.isVisible())
 
-  await open(page, '/')
-  const tile = page.locator('.site-gallery [data-component="input-message"]')
-  await tile.getByRole('textbox', { name: 'Message', exact: true }).waitFor()
-  assert.equal(await tile.getByRole('listbox').count(), 0)
-  assert.equal(await tile.getByRole('button', { name: 'Attach files', exact: true }).count(), 0)
+  await open(page, '/apps/chat')
+  const composer = page.getByRole('textbox', { name: 'Message', exact: true })
+  await composer.waitFor()
+  assert.equal(await page.getByRole('listbox', { name: 'Suggested prompts' }).count(), 0)
 })
 
 it('advances the gallery carousel through its dots, pausing over the slides', async (t) => {
