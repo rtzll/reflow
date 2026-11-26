@@ -447,8 +447,12 @@ it('keeps the sound button working after moving between docs pages', async (t) =
   const documentStart = await page.evaluate(() => performance.timeOrigin)
   await page.getByRole('link', { name: 'Next: CarouselDots' }).click()
   await expect(page).toHaveURL(/\/docs\/carousel-dots/)
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'CarouselDots', exact: true }),
+  ).toBeVisible()
   await page.getByRole('link', { name: 'Previous: Carousel' }).click()
   await expect(page).toHaveURL(/\/docs\/carousel$/)
+  await expect(page.getByRole('heading', { level: 1, name: 'Carousel', exact: true })).toBeVisible()
   // The pages changed within the same document.
   expect(await page.evaluate(() => performance.timeOrigin)).toBe(documentStart)
 
