@@ -520,7 +520,9 @@ export function enhanceShowcaseSound() {
         if (!dialog.open && silentDialogClose.delete(dialog)) return
         if (dialog.open) silentDialogClose.delete(dialog)
         if (dialog.matches('.rf-drawer')) play(dialog.open ? 'swooshIn' : 'swooshOut', surfaceSound)
-        else play(dialog.open ? 'open' : 'close')
+        else if (dialog.matches('.issue-tracker > .rf-dialog')) {
+          if (dialog.open) play('select', surfaceSound)
+        } else play(dialog.open ? 'open' : 'close')
       } else if (
         event.newState === 'open' &&
         dialog instanceof HTMLElement &&
