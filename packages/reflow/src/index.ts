@@ -437,3 +437,29 @@ export {
 } from './label-picker.tsx'
 export { EstimatePill, type EstimateOption, type EstimatePillProps } from './estimate-pill.tsx'
 export { SavedViewTabs, type SavedView, type SavedViewTabsProps } from './saved-view-tabs.tsx'
+export {
+  KanbanBoard,
+  type KanbanBoardProps,
+  type KanbanColumn,
+  type KanbanItem,
+} from './kanban-board.tsx'
+export {
+  GroupedList,
+  type GroupedListGroup,
+  type GroupedListItem,
+  type GroupedListProps,
+} from './grouped-list.tsx'
+export {
+  QuickCreateBar,
+  type QuickCreateBarProps,
+  type QuickCreateDraft,
+} from './quick-create-bar.tsx'
+export {
+  RoadmapTimeline,
+  computeTimelinePercent,
+  type RoadmapItem,
+  type RoadmapMilestone,
+  type RoadmapTimelineProps,
+  type RoadmapTone,
+  type RoadmapZoom,
+} from './roadmap-timeline.tsx'
