@@ -2,16 +2,20 @@ import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { it } from 'remix/test'
 import { catalog } from '../app/catalog.tsx'
+import { pauseClock } from './clock.ts'
 import { open, showcaseServer } from './showcase-router.ts'
 
 it('opens on a resting pointer, stays open over the card, and closes after leaving', async (t) => {
   const page = await t.serve(showcaseServer)
+  await page.clock.install()
   await page.setViewportSize({ width: 1280, height: 900 })
   await open(page, '/docs/hover-card')
+  await pauseClock(page)
   const trigger = page.locator('#basic .doc-hover-trigger')
   const card = page.locator('#basic .rf-hover-card')
   await trigger.scrollIntoViewIfNeeded()
   await trigger.hover()
+  await page.clock.runFor(500)
   await expect(card).toBeVisible()
   // Measure the rest pose, once the entry's drop and squash have settled.
   await expect.poll(() => card.evaluate((node) => getComputedStyle(node).transform)).toBe('none')
@@ -31,9 +35,10 @@ it('opens on a resting pointer, stays open over the card, and closes after leavi
   assert.deepEqual(geometry, { below: 8, placement: 'bottom', focused: false })
 
   await card.hover()
-  await page.waitForTimeout(400)
+  await page.clock.runFor(500)
   await expect(card).toBeVisible()
   await page.mouse.move(5, 5)
+  await page.clock.runFor(500)
   await expect(card).toBeHidden()
 })
 

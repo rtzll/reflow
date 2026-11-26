@@ -57,10 +57,16 @@ it('opens to the calls with a mark for each status', async (t) => {
 })
 
 it('shows the running call with a spinner and counts its time once mounted', async (t) => {
+  const realNow = Date.now
+  const fixedNow = 1_700_000_065_000
+  Date.now = () => fixedNow
+  t.after(() => {
+    Date.now = realNow
+  })
   const { $, act, cleanup } = render(
     <ToolCalls
       calls={[...calls, { id: 'c', label: 'Searching the notes', status: 'running' }]}
-      startedAt={Date.now() - 65_000}
+      startedAt={fixedNow - 65_000}
     />,
   )
   t.after(cleanup)

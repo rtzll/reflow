@@ -59,12 +59,21 @@ it('opens file actions at the icon and previews the file only when its action is
   await expect(tree.locator('[role=treeitem][tabindex="0"]')).toHaveCount(1)
   const icon = readme.locator('svg').last()
   await icon.scrollIntoViewIfNeeded()
-  const box = (await icon.boundingBox())!
   await icon.click({ button: 'right', position: { x: 3, y: 3 } })
   const menu = tile.getByRole('menu', { name: 'File actions' })
   await expect(menu).toBeFocused()
   const panel = tile.locator(':popover-open')
-  const bounds = (await panel.boundingBox())!
+  const { box, bounds } = await page.evaluate(
+    ([iconEl, panelEl]) => {
+      const a = iconEl!.getBoundingClientRect()
+      const b = panelEl!.getBoundingClientRect()
+      return {
+        box: { x: a.x, y: a.y, width: a.width, height: a.height },
+        bounds: { x: b.x, y: b.y, width: b.width, height: b.height },
+      }
+    },
+    [await icon.elementHandle(), await panel.elementHandle()],
+  )
   expect(Math.abs(bounds.x - (box.x + 3))).toBeLessThanOrEqual(2)
   expect(Math.abs(bounds.y - (box.y + 5))).toBeLessThanOrEqual(2)
   await expect(panel).toHaveCSS('transform', 'none')
@@ -87,8 +96,17 @@ it('anchors keyboard actions to the focused file and keeps them visible at the v
   const menu = tile.getByRole('menu', { name: 'File actions' })
   await expect(menu).toBeFocused()
   const panel = tile.locator(':popover-open')
-  const file = (await row.boundingBox())!
-  const bounds = (await panel.boundingBox())!
+  const { file, bounds } = await page.evaluate(
+    ([rowEl, panelEl]) => {
+      const a = rowEl!.getBoundingClientRect()
+      const b = panelEl!.getBoundingClientRect()
+      return {
+        file: { x: a.x, y: a.y, width: a.width, height: a.height },
+        bounds: { x: b.x, y: b.y, width: b.width, height: b.height },
+      }
+    },
+    [await row.elementHandle(), await panel.elementHandle()],
+  )
   expect(Math.abs(bounds.x - file.x)).toBeLessThanOrEqual(2)
   expect(Math.abs(bounds.y + bounds.height - file.y + 2)).toBeLessThanOrEqual(2)
   for (const item of await menu.getByRole('menuitem').all())

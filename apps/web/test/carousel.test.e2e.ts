@@ -144,6 +144,7 @@ it('resumes the homepage carousel while the pointer or focus stays on Play', asy
   await play.click()
   await expect(fill).toHaveCSS('animation-play-state', 'running')
   await expect(viewport).toHaveAttribute('aria-live', 'off')
+  await finishMotion(carousel.locator('.rf-carousel-dots [aria-current="true"]'))
   await expect(carousel.locator('[data-current]')).not.toHaveAttribute('aria-label', currentSlide!)
 
   await viewport.hover()

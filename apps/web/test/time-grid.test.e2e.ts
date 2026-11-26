@@ -328,11 +328,21 @@ it('keeps the complete half-hour title readable in a narrow week column', async 
     (node) => node.scrollHeight <= node.clientHeight && node.scrollWidth <= node.clientWidth,
   )
   expect(fits).toBe(true)
-  const card = (await event.boundingBox())!
-  const text = (await title.boundingBox())!
+  const { card, text, range } = await event.evaluate((node) => {
+    const titleEl = node.querySelector('strong')!
+    const timeEl = node.querySelector('.rf-time-grid-time')
+    const box = (el: Element) => {
+      const r = el.getBoundingClientRect()
+      return { x: r.x, y: r.y, width: r.width, height: r.height }
+    }
+    return {
+      card: box(node),
+      text: box(titleEl),
+      range: timeEl ? box(timeEl) : null,
+    }
+  })
   expect(text.y).toBeGreaterThanOrEqual(card.y)
   expect(text.y + text.height).toBeLessThanOrEqual(card.y + card.height + 0.5)
-  const range = await event.locator('.rf-time-grid-time').boundingBox()
   const bottom = range && range.height > 0 ? range.y + range.height : text.y + text.height
   expect(Math.abs(text.y - card.y - (card.y + card.height - bottom))).toBeLessThanOrEqual(1)
   if (range && range.height > 0) {

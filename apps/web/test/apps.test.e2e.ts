@@ -1,6 +1,7 @@
 import { expect } from 'playwright/test'
 import { setTimeout as delay } from 'node:timers/promises'
 import { it } from 'remix/test'
+import { exampleApps } from '../app/ui/example-apps.tsx'
 import { open, showcaseServer, waitForShowcase } from './showcase-router.ts'
 
 it('paints a cold workspace with its stylesheet on the first visible frame', async (t) => {
@@ -37,8 +38,6 @@ it('opens each workspace from the showcase and returns to the directory', async 
   await page.setViewportSize({ width: 1440, height: 900 })
   await open(page, '/?shape=pill')
   await page.locator('.site-left').getByRole('link', { name: 'Apps', exact: true }).click()
-  await expect(page.locator('.site-app-card')).toHaveCount(5)
-  await expect(page.locator('.site-app-card').first()).toHaveCSS('border-top-left-radius', '12px')
   const workspaces = [
     ['Issue tracker', page.getByRole('listbox', { name: 'Cycle issues' }), '.issues-insight'],
     ['Chat', page.getByRole('textbox', { name: 'Message' }), '.rf-composer'],
@@ -46,6 +45,8 @@ it('opens each workspace from the showcase and returns to the directory', async 
     ['Analytics', page.getByRole('table', { name: 'Studio events' }), '.analytics-chart'],
     ['Code review', page.getByRole('button', { name: 'Submit review' }), '.rf-diff-view'],
   ] as const
+  await expect(page.locator('.site-app-card')).toHaveCount(workspaces.length)
+  await expect(page.locator('.site-app-card').first()).toHaveCSS('border-top-left-radius', '12px')
   for (const [name, workspaceControl, surface] of workspaces) {
     await page.getByRole('main').getByRole('link', { name }).click()
     await expect(page).toHaveTitle(name + ' · Reflow')
@@ -71,7 +72,7 @@ it('serves the app directory without JavaScript and rejects an unknown app', asy
   await page.route('**/*.js', (route) => route.abort())
   await open(page, '/apps', { hydrate: false })
   const links = page.getByRole('main').getByRole('link')
-  await expect(links).toHaveCount(5)
+  await expect(links).toHaveCount(exampleApps.length)
   const bounds = await links.evaluateAll((cards) =>
     cards.map((card) => {
       const { left, right, top, bottom } = card.getBoundingClientRect()
