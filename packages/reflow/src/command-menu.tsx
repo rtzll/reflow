@@ -68,25 +68,34 @@ export function CommandMenu(handle: Handle<CommandMenuProps>) {
   let shownHeight = 0
   let mac = false
 
-  function matches(item: CommandItem) {
-    const text = [item.label, item.description, ...(item.keywords ?? [])].join(' ').toLowerCase()
-    return query
-      .trim()
-      .toLowerCase()
-      .split(/\s+/)
-      .every((term) => text.includes(term))
+  function matchScore(item: CommandItem, normalized: string, terms: readonly string[]) {
+    if (!normalized) return 1
+    const label = item.label.toLowerCase()
+    const text = [label, item.description, ...(item.keywords ?? [])].join(' ').toLowerCase()
+    if (!terms.every((term) => text.includes(term))) return 0
+    if (label === normalized) return 5
+    if (label.startsWith(normalized)) return 4
+    if (label.includes(normalized)) return 3
+    if (terms.every((term) => label.includes(term))) return 2
+    return 1
   }
 
   function visibleGroups() {
-    const groups = new Map<string, CommandItem[]>()
+    const groups = new Map<string, { item: CommandItem; score: number }[]>()
     const { items, suggestions } = handle.props
+    const normalized = query.trim().toLowerCase()
+    const terms = normalized ? normalized.split(/\s+/) : []
     const suggested =
-      !activeFilter && !query.trim() && suggestions
+      !activeFilter && !normalized && suggestions
         ? suggestions.flatMap((value) =>
             items.filter((item) => item.value === value && !item.disabled),
           )
         : []
-    if (suggested.length) groups.set(handle.props.suggestionsLabel ?? 'Suggestions', suggested)
+    if (suggested.length)
+      groups.set(
+        handle.props.suggestionsLabel ?? 'Suggestions',
+        suggested.map((item) => ({ item, score: 1 })),
+      )
     for (const item of items) {
       if (suggested.includes(item)) continue
       if (
@@ -95,13 +104,25 @@ export function CommandMenu(handle: Handle<CommandMenuProps>) {
         (item.filter ?? item.group) !== activeFilter
       )
         continue
-      if (!matches(item)) continue
+      const score = matchScore(item, normalized, terms)
+      if (!score) continue
       const group = item.group ?? ''
       const members = groups.get(group) ?? []
-      members.push(item)
+      members.push({ item, score })
       groups.set(group, members)
     }
-    return groups
+    const ordered = new Map<string, CommandItem[]>()
+    const entries = Array.from(groups.entries())
+    if (normalized) {
+      for (const [, members] of entries) members.sort((a, b) => b.score - a.score)
+      entries.sort(([, a], [, b]) => (b[0]?.score ?? 0) - (a[0]?.score ?? 0))
+    }
+    for (const [group, members] of entries)
+      ordered.set(
+        group,
+        members.map((entry) => entry.item),
+      )
+    return ordered
   }
 
   function setOpen(next: boolean) {
