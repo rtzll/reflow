@@ -1,0 +1,83 @@
+.rf-copy-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  height: 24px;
+  padding: 0 7px;
+  border: 1px solid var(--rf-border);
+  border-radius: calc(var(--rf-radius) - 2px);
+  background: var(--rf-surface-2);
+  color: var(--rf-fg);
+  font-family: var(--rf-font-mono);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color var(--rf-spring-fast),
+    border-color var(--rf-spring-fast),
+    color var(--rf-spring-fast);
+}
+
+.rf-copy-chip[data-size='compact'],
+[data-density='compact'] .rf-copy-chip:not([data-size='default']) {
+  height: 20px;
+  padding: 0 6px;
+  font-size: 11px;
+}
+
+@media (hover: hover) {
+  .rf-copy-chip:hover {
+    background: var(--rf-hover);
+    border-color: var(--rf-border-emphasis);
+  }
+}
+
+.rf-copy-chip:focus-visible {
+  outline: 2px solid var(--rf-accent);
+  outline-offset: 2px;
+}
+
+.rf-copy-chip[data-state='copied'] {
+  border-color: color-mix(in oklab, var(--rf-success) 50%, var(--rf-border));
+}
+
+.rf-copy-chip[data-state='copied'] .rf-copy-chip-icon {
+  color: var(--rf-success);
+}
+
+.rf-copy-chip[data-state='error'] .rf-copy-chip-icon {
+  color: var(--rf-danger);
+}
+
+.rf-copy-chip-prefix,
+.rf-copy-chip-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  color: var(--rf-muted);
+  flex-shrink: 0;
+}
+
+.rf-copy-chip-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (forced-colors: active) {
+  .rf-copy-chip {
+    border-color: ButtonBorder;
+  }
+
+  .rf-copy-chip:focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-copy-chip {
+    transition: none;
+  }
+}

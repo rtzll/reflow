@@ -1,0 +1,67 @@
+.rf-diff-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--rf-font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.rf-diff-stat[data-size='compact'],
+[data-density='compact'] .rf-diff-stat:not([data-size='default']) {
+  font-size: 11px;
+  gap: 5px;
+}
+
+.rf-diff-stat-counts {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+}
+
+.rf-diff-stat-add {
+  color: var(--rf-success);
+}
+
+.rf-diff-stat-rem {
+  color: var(--rf-danger);
+}
+
+.rf-diff-stat-blocks {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.rf-diff-stat-block {
+  width: 7px;
+  height: 7px;
+  border-radius: 1.5px;
+  background: var(--rf-neutral-fill);
+}
+
+.rf-diff-stat[data-size='compact'] .rf-diff-stat-block,
+[data-density='compact'] .rf-diff-stat:not([data-size='default']) .rf-diff-stat-block {
+  width: 6px;
+  height: 6px;
+}
+
+.rf-diff-stat-block[data-kind='added'] {
+  background: var(--rf-success);
+}
+
+.rf-diff-stat-block[data-kind='removed'] {
+  background: var(--rf-danger);
+}
+
+@media (forced-colors: active) {
+  .rf-diff-stat-block {
+    border: 1px solid CanvasText;
+  }
+
+  .rf-diff-stat-block[data-kind='added'] {
+    background: Highlight;
+  }
+}

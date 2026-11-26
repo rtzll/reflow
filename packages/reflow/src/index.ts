@@ -327,3 +327,14 @@ export {
   formatShortUtcDate,
   formatUtcTimestamp,
 } from './behaviors/relative-time.ts'
+export { SplitButton, type SplitButtonProps } from './split-button.tsx'
+export { DiffStat, computeDiffStatBlocks, type DiffStatProps } from './diff-stat.tsx'
+export {
+  ProportionBar,
+  type ProportionBarProps,
+  type ProportionSegment,
+  type ProportionTone,
+} from './proportion-bar.tsx'
+export { MetadataList, type MetadataItem, type MetadataListProps } from './metadata-list.tsx'
+export { CopyChip, type CopyChipProps } from './copy-chip.tsx'
+export { InlineEdit, type InlineEditProps } from './inline-edit.tsx'
