@@ -13,6 +13,7 @@ import { ToasterDemo } from './toaster-example.tsx'
 import { DrawerDemo } from './drawer-example.tsx'
 import { CodeBlockDemo } from './code-block-example.tsx'
 import { CitationDemo } from './citation-example.tsx'
+import { ConfirmationDemo } from './confirmation-example.tsx'
 import { AvatarDemo } from './avatar-example.tsx'
 import { ChatLayoutDemo } from './chat-layout-example.tsx'
 import { DesignConversation, ResizableDemo } from './resizable-example.tsx'
@@ -400,6 +401,8 @@ export const Example = clientEntry(
           )
         case 'citation':
           return <CitationDemo variant="playground" />
+        case 'confirmation':
+          return <ConfirmationDemo variant="playground" />
         case 'context-menu':
           return <ProjectTreeExample size="default" />
         case 'tree':

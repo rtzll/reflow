@@ -201,3 +201,82 @@ test('all test files under apps/web/test match remix test discovery glob', () =>
     `Unrecognized test filenames skipped by remix test (use .test.ts(x), .test.browser.tsx, or .test.e2e.ts): ${invalid.join(', ')}`,
   )
 })
+
+test('every catalog component is exported from its declared package entry point', async () => {
+  const { components, componentModule } = await import('../apps/web/app/public/catalog-entries.ts')
+  const pkg = JSON.parse(read('packages/reflow/package.json')) as {
+    exports: Record<string, unknown>
+  }
+  const indexSrc = read('packages/reflow/src/index.ts')
+  const moduleSources = new Map<string, string>([['@rtzll/reflow', indexSrc]])
+
+  function readModuleSource(mod: string): string {
+    const cached = moduleSources.get(mod)
+    if (cached !== undefined) return cached
+    assert.ok(mod.startsWith('@rtzll/reflow/'), `Unexpected module path: ${mod}`)
+    const subpath = `./${mod.slice('@rtzll/reflow/'.length)}`
+    assert.ok(subpath in pkg.exports, `Missing package.json export ${subpath} for ${mod}`)
+    const entry = mod.slice('@rtzll/reflow/'.length)
+    const tsxPath = join(root, `packages/reflow/src/${entry}.tsx`)
+    const tsPath = join(root, `packages/reflow/src/${entry}.ts`)
+    const source = existsSync(tsxPath)
+      ? readFileSync(tsxPath, 'utf8')
+      : readFileSync(tsPath, 'utf8')
+    moduleSources.set(mod, source)
+    return source
+  }
+
+  const mismatched: string[] = []
+  for (const [, name] of components) {
+    const mod = componentModule(name)
+    const source = readModuleSource(mod)
+    const exported =
+      new RegExp(`export\\s+(?:function|const|class)\\s+${name}\\b`).test(source) ||
+      new RegExp(`export\\s*\\{[^}]*\\b${name}\\b[^}]*\\}`).test(source)
+    if (!exported) {
+      mismatched.push(`${name} (expected in ${mod})`)
+    }
+  }
+  assert.deepEqual(
+    mismatched,
+    [],
+    `Catalog components missing from their declared module export: ${mismatched.join(', ')}`,
+  )
+})
+
+test('every catalog component has an Example case and every playgroundControls entry has a PlaygroundExample case', async () => {
+  const { components } = await import('../apps/web/app/public/catalog-entries.ts')
+  const examplesSrc = read('apps/web/app/public/examples.tsx')
+  const exampleCases = new Set(
+    [...examplesSrc.matchAll(/case\s+'([^']+)'\s*:/g)].map(([, slug]) => slug),
+  )
+  const missingExamples = components.map(([slug]) => slug).filter((slug) => !exampleCases.has(slug))
+  assert.deepEqual(
+    missingExamples,
+    [],
+    `Catalog slugs missing a case in apps/web/app/public/examples.tsx: ${missingExamples.join(', ')}`,
+  )
+
+  const playgroundSrc = read('apps/web/app/public/doc-playground.tsx')
+  const controlsStart = playgroundSrc.indexOf('export const playgroundControls')
+  const controlsEnd = playgroundSrc.indexOf('\nexport function questionSettings', controlsStart)
+  assert.ok(controlsStart > 0 && controlsEnd > controlsStart, 'Could not locate playgroundControls')
+  const controlsBlock = playgroundSrc.slice(controlsStart, controlsEnd)
+  const controlSlugs = [
+    ...controlsBlock.matchAll(/^\s{2}(?:'([^']+)'|([a-z][a-z0-9-]*))\s*:\s*\[/gm),
+  ].map((match) => match[1] ?? match[2]!)
+
+  const previewStart = playgroundSrc.indexOf('export function PlaygroundExample')
+  assert.ok(previewStart > 0, 'Could not locate PlaygroundExample')
+  const previewBlock = playgroundSrc.slice(previewStart)
+  const previewCases = new Set(
+    [...previewBlock.matchAll(/case\s+'([^']+)'\s*:/g)].map(([, slug]) => slug),
+  )
+
+  const missingPlaygrounds = controlSlugs.filter((slug) => !previewCases.has(slug))
+  assert.deepEqual(
+    missingPlaygrounds,
+    [],
+    `playgroundControls slugs missing a case in PlaygroundExample: ${missingPlaygrounds.join(', ')}`,
+  )
+})
