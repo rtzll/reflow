@@ -1,9 +1,9 @@
 import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { it } from 'remix/test'
-import { open, showcaseServer } from './showcase-router.ts'
+import { open, showcaseServer, waitForShowcase } from './showcase-router.ts'
 
-it('server-renders zero-flash diffs, filters with EmptyState, tracks viewed files, and handles inline threads', async (t) => {
+it('server-renders zero-flash diffs, filters with EmptyState, tracks viewed files, handles inline threads, shortcuts, and reload persistence', async (t) => {
   const page = await t.serve(showcaseServer)
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.setViewportSize({ width: 1280, height: 900 })
@@ -51,9 +51,30 @@ it('server-renders zero-flash diffs, filters with EmptyState, tracks viewed file
   await thread.getByRole('button', { name: 'Reopen', exact: true }).click()
   await expect(thread).not.toHaveAttribute('data-resolved', 'true')
 
-  // Switch between Unified and Split across all diffs.
-  await page.locator('.review-header').getByRole('radio', { name: 'Split' }).click({ force: true })
+  // Start and post a brand-new inline comment on the CSS file.
+  const cssCard = page.locator('[data-review-file="packages/reflow/src/diff-view.css"]')
+  await cssCard.getByRole('button', { name: 'Comment', exact: true }).click()
+  await cssCard
+    .getByRole('textbox', { name: 'New review comment' })
+    .fill('Border matches CodeBlock cleanly.')
+  await cssCard.getByRole('button', { name: 'Post comment' }).click()
+  await expect(cssCard.locator('.rf-comment-thread')).toContainText(
+    'Border matches CodeBlock cleanly.',
+  )
+
+  // Switch between Unified and Split with a real pointer click on the SegmentedControl label.
+  await page.locator('.review-header .rf-segmented label', { hasText: 'Split' }).click()
   await expect(firstCard.locator('.rf-diff-view')).toHaveAttribute('data-view', 'split')
+
+  // Keyboard shortcuts: u/s toggle layout, v marks the active file viewed.
+  await page.locator('.review-title-row h1').click()
+  await page.keyboard.press('u')
+  await expect(firstCard.locator('.rf-diff-view')).toHaveAttribute('data-view', 'unified')
+  await page.keyboard.press('s')
+  await expect(firstCard.locator('.rf-diff-view')).toHaveAttribute('data-view', 'split')
+  await page.keyboard.press('u')
+  await page.keyboard.press('v')
+  await expect(page.locator('.review-progress-text')).toHaveText('1 of 4 viewed')
 
   // Open a CI check log in the Drawer and filter ANSI Terminal output.
   await page.getByRole('button', { name: /test · diff-view SSR/ }).click()
@@ -77,4 +98,17 @@ it('server-renders zero-flash diffs, filters with EmptyState, tracks viewed file
     page.locator('.review-title-row').getByText('Approved', { exact: true }),
   ).toBeVisible()
   await expect(page.locator('.rf-timeline').getByText('Ship it!')).toBeVisible()
+
+  // Reload and confirm verdict, viewed count, and inline comments persisted locally.
+  await page.reload()
+  await waitForShowcase(page)
+  await expect(
+    page.locator('.review-title-row').getByText('Approved', { exact: true }),
+  ).toBeVisible()
+  await expect(page.locator('.review-progress-text')).toHaveText('1 of 4 viewed')
+  await expect(
+    page
+      .locator('[data-review-file="packages/reflow/src/diff-view.css"]')
+      .locator('.rf-comment-thread'),
+  ).toContainText('Border matches CodeBlock cleanly.')
 })
