@@ -319,7 +319,7 @@
   color: var(--rf-fg);
   font: inherit;
   font-size: var(--rf-text-caption);
-  box-shadow: var(--rf-shadow-sm);
+  box-shadow: var(--rf-elevation);
   cursor: pointer;
 }
 

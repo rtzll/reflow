@@ -89,7 +89,7 @@
   border: 1px solid var(--rf-border);
   border-radius: 999px;
   background: var(--rf-surface-1);
-  box-shadow: var(--rf-shadow-md);
+  box-shadow: var(--rf-elevation);
 }
 
 .rf-reaction-option {

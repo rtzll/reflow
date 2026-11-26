@@ -112,7 +112,7 @@
   background: transparent;
   color: var(--rf-muted);
   cursor: pointer;
-  transition: transform var(--rf-spring-snappy);
+  transition: transform var(--rf-spring-fast);
 }
 
 .rf-waterfall-row[aria-expanded='true'] .rf-waterfall-toggle {

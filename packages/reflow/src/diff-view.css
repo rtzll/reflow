@@ -96,7 +96,7 @@
 }
 
 .rf-diff-collapse svg {
-  transition: transform var(--rf-spring-snappy);
+  transition: transform var(--rf-spring-fast);
 }
 
 .rf-diff-view[data-collapsed='true'] .rf-diff-collapse svg {

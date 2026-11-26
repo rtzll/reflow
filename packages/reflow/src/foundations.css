@@ -1,6 +1,7 @@
 :root {
   --rf-accent: #6b97ff;
   --rf-font: 'Inter', system-ui, sans-serif;
+  --rf-font-mono: ui-monospace, 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
   --rf-heading-font: var(--rf-font);
 }
 

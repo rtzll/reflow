@@ -450,7 +450,7 @@
   display: inline-grid;
   place-items: center;
   color: var(--rf-muted);
-  transition: transform var(--rf-spring-snappy);
+  transition: transform var(--rf-spring-fast);
 }
 
 .rf-log-group[data-open='true'] .rf-log-group-chevron {
@@ -726,6 +726,6 @@
   color: var(--rf-fg);
   font-family: var(--rf-font);
   font-size: var(--rf-text-caption);
-  box-shadow: var(--rf-shadow-sm, 0 2px 8px rgb(0 0 0 / 0.16));
+  box-shadow: var(--rf-elevation);
   cursor: pointer;
 }

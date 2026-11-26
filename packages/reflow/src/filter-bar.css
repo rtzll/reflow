@@ -163,7 +163,7 @@
   border: 1px solid var(--rf-border);
   border-radius: var(--rf-panel-radius);
   background: var(--rf-surface-1);
-  box-shadow: var(--rf-shadow-md);
+  box-shadow: var(--rf-elevation);
   max-height: 240px;
   overflow-y: auto;
 }

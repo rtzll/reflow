@@ -280,3 +280,43 @@ test('every catalog component has an Example case and every playgroundControls e
     `playgroundControls slugs missing a case in PlaygroundExample: ${missingPlaygrounds.join(', ')}`,
   )
 })
+
+test('every var(--rf-*) referenced without fallback in packages/reflow/src/*.css is defined', () => {
+  const srcDir = join(root, 'packages/reflow/src')
+  const cssFiles = readdirSync(srcDir).filter((name) => name.endsWith('.css'))
+  const tsFiles = walkFiles(srcDir, (name) => name.endsWith('.ts') || name.endsWith('.tsx'))
+
+  const defined = new Set<string>()
+  for (const file of cssFiles) {
+    const css = readFileSync(join(srcDir, file), 'utf8')
+    for (const match of css.matchAll(/(--rf-[a-z0-9-]+)\s*:/g)) {
+      defined.add(match[1]!)
+    }
+    for (const match of css.matchAll(/@property\s+(--rf-[a-z0-9-]+)\b/g)) {
+      defined.add(match[1]!)
+    }
+  }
+  for (const file of tsFiles) {
+    const code = readFileSync(file, 'utf8')
+    for (const match of code.matchAll(/['"](--rf-[a-z0-9-]+)['"]/g)) {
+      defined.add(match[1]!)
+    }
+  }
+
+  const undefinedRefs: string[] = []
+  for (const file of cssFiles) {
+    const css = readFileSync(join(srcDir, file), 'utf8')
+    for (const match of css.matchAll(/var\(\s*(--rf-[a-z0-9-]+)\s*([,)])/g)) {
+      const [, token, sep] = match
+      if (sep === ')' && !defined.has(token!)) {
+        undefinedRefs.push(`${file}: ${token}`)
+      }
+    }
+  }
+
+  assert.deepEqual(
+    [...new Set(undefinedRefs)].sort(),
+    [],
+    'Undefined --rf-* CSS custom properties referenced without a fallback',
+  )
+})
