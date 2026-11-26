@@ -68,7 +68,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
       gallery.locator(`article[data-component="${slug}"]`).boundingBox()
     const [
       markdown,
-      citation,
+      labelPicker,
       toaster,
       timeGrid,
       chart,
@@ -79,7 +79,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
     ] = await Promise.all(
       [
         'markdown',
-        'citation',
+        'label-picker',
         'toaster',
         'time-grid',
         'bar-chart',
@@ -95,7 +95,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
     assert.equal(diffView!.y, codeBlock!.y + codeBlock!.height + rowGap)
     assert.equal(diffView!.width, codeBlock!.width)
     if (width >= 768) {
-      assert.equal(citation!.y, markdown!.y)
+      assert.equal(labelPicker!.y, markdown!.y)
       assert.equal(timeGrid!.y, chart!.y)
       assert.equal(timeGrid!.x, codeBlock!.x)
       assert.equal(chart!.x + chart!.width, codeBlock!.x + codeBlock!.width)
@@ -139,29 +139,22 @@ it('preserves the gallery order and keeps previews above their footers', async (
     assert.ok(gap >= 6, `chart label gap at ${width}px is ${gap}px`)
     assert.ok(offset < 1, `chart label is ${offset}px off its bar center at ${width}px`)
     if (width === 1440) {
-      await expect(
-        gallery.locator('[data-component="ask-user-questions"]').getByText('Question 1 of 8'),
-      ).toBeVisible()
-      const [card, dialog, datePicker, wideCalendar, timeField, thinking] = await Promise.all(
-        ['card', 'alert-dialog', 'date-picker', 'calendar', 'time-field', 'thinking-steps'].map(
-          tile,
-        ),
+      const [card, dialog, datePicker, wideCalendar] = await Promise.all(
+        ['card', 'alert-dialog', 'date-picker', 'calendar'].map(tile),
       )
       assert.equal(card!.y, dialog!.y)
       assert.equal(datePicker!.y, wideCalendar!.y)
       assert.ok(datePicker!.x < wideCalendar!.x)
-      assert.equal(timeField!.y, thinking!.y)
-      assert.ok(timeField!.x < thinking!.x)
-      // The last band: a large conversation on the left, two smalls stacked beside it.
-      const [chat, popover, drawer] = await Promise.all(
-        ['chat-message', 'popover', 'drawer'].map(tile),
+      // A tall project overview on the left, two smalls stacked beside it.
+      const [cycle, popover, drawer] = await Promise.all(
+        ['cycle-overview', 'popover', 'drawer'].map(tile),
       )
-      assert.ok(chat!.width > popover!.width * 1.9, 'the conversation spans two columns')
-      assert.equal(chat!.y, popover!.y)
-      assert.ok(popover!.x > chat!.x)
+      assert.ok(cycle!.width > popover!.width * 1.9, 'the cycle overview spans two columns')
+      assert.equal(cycle!.y, popover!.y)
+      assert.ok(popover!.x > cycle!.x)
       assert.equal(popover!.x, drawer!.x)
       assert.ok(drawer!.y > popover!.y)
-      assert.equal(Math.round(chat!.y + chat!.height), Math.round(drawer!.y + drawer!.height))
+      assert.equal(Math.round(cycle!.y + cycle!.height), Math.round(drawer!.y + drawer!.height))
       // Wide cards alternate sides down the gallery: the tall Carousel on the
       // right of the first band and Toaster on the left of the next row.
       const sides = await gallery.evaluate((node) => {
@@ -171,7 +164,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
           (card) => (card.getBoundingClientRect().left - left < 50 ? 'L' : 'R'),
         ).join('')
       })
-      assert.equal(sides, 'RLLRLRLRLRLRLRLRLRL')
+      assert.equal(sides, 'RLLRLRLRLRLRLRLRL')
       // The first band: QueuedStack and HoverCard stacked beside the Carousel.
       const [carousel, queue, hover, avatar] = await Promise.all(
         ['carousel', 'queued-stack', 'hover-card', 'avatar'].map(tile),

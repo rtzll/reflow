@@ -381,6 +381,91 @@ const previews: Record<ComponentSlug, Pick<ShowcaseComponent, 'description' | 'c
       'Compact SVG calendar heatmap for commit cadence, deploy frequency, and CI failure density with pointer and keyboard arrow scrubbing.',
     code: `import { ActivityHeatmap } from '@rtzll/reflow'\n\n<ActivityHeatmap\n  cells={dailyCommits}\n  unit="commits"\n  tone="success"\n/>`,
   },
+  'floating-action-bar': {
+    description:
+      'Contextual bottom-docked floating toolbar that elevates when one or more items are selected, with count feedback, batch actions, and Escape-to-clear.',
+    code: `import { Button, FloatingActionBar } from '@rtzll/reflow'\n\n<FloatingActionBar\n  count={selected.size}\n  onClear={clearSelection}\n  actions={<Button size="compact" variant="secondary">Move to cycle</Button>}\n/>`,
+  },
+  'view-options-popover': {
+    description:
+      'Linear-style Display configuration popover combining layout switcher, Grouping and Ordering selectors, empty-group toggle, and property visibility pills.',
+    code: `import { ViewOptionsPopover } from '@rtzll/reflow'\n\n<ViewOptionsPopover\n  layout={layout}\n  layouts={[{ value: 'list', label: 'List' }, { value: 'board', label: 'Board' }]}\n  onLayoutChange={setLayout}\n  properties={visibleProperties}\n  onToggleProperty={toggleProperty}\n/>`,
+  },
+  'inline-property-picker': {
+    description:
+      'Compact clickable property pill (Status, Priority, Assignee, Cycle) opening a searchable Dropdown inline on a list row, board card, or inspector rail.',
+    code: `import { InlinePropertyPicker } from '@rtzll/reflow'\n\n<InlinePropertyPicker\n  label="Priority"\n  value={priority}\n  options={priorityOptions}\n  onChange={setPriority}\n/>`,
+  },
+  'progress-ring': {
+    description:
+      'Radial SVG completion indicator scaling from 16px inline project rings to multi-segment cycle donuts with center readouts.',
+    code: `import { ProgressRing } from '@rtzll/reflow'\n\n<ProgressRing label="Cycle progress" value={72} max={100} size={48}>72%</ProgressRing>`,
+  },
+  'priority-indicator': {
+    description:
+      'Linear-style 4-level priority signal glyph (Urgent, High, Medium, Low, None) with accessible labels and optional inline text.',
+    code: `import { PriorityIndicator } from '@rtzll/reflow'\n\n<PriorityIndicator priority="urgent" showLabel />`,
+  },
+  'status-icon': {
+    description:
+      'Semantic workflow state glyph (Backlog, Todo, In progress, In review, Done, Cancelled) aligned with Reflow semantic tokens.',
+    code: `import { StatusIcon } from '@rtzll/reflow'\n\n<StatusIcon status="in-progress" showLabel />`,
+  },
+  'label-picker': {
+    description:
+      'Color-dot LabelChip pills paired with a multi-select searchable checkbox Dropdown supporting inline label creation.',
+    code: `import { LabelPicker } from '@rtzll/reflow'\n\n<LabelPicker options={labels} value={selected} onChange={setSelected} onCreate={createLabel} />`,
+  },
+  'estimate-pill': {
+    description:
+      'Compact effort/points selector pill (Fibonacci points, T-shirt sizes, or hours) for issue rows, board cards, and quick-create bars.',
+    code: `import { EstimatePill } from '@rtzll/reflow'\n\n<EstimatePill value={points} onChange={setPoints} />`,
+  },
+  'saved-view-tabs': {
+    description:
+      'Horizontal saved view tab bar with fluid hover, arrow-key navigation, double-click inline rename, dirty-state Save/Reset controls, and + New view.',
+    code: `import { SavedViewTabs } from '@rtzll/reflow'\n\n<SavedViewTabs views={views} activeId={activeId} onSelect={setActiveId} onSave={saveView} />`,
+  },
+  'kanban-board': {
+    description:
+      'Linear-style Kanban board with collapsible columns, WIP limit warnings, point rollups, progressive drag-and-drop, and Alt+Arrow keyboard moves.',
+    code: `import { KanbanBoard } from '@rtzll/reflow'\n\n<KanbanBoard columns={columns} items={issues} onMoveItem={moveIssue} />`,
+  },
+  'grouped-list': {
+    description:
+      'Collapsible grouped issue list with sticky section headers, fluidHover rows, j/k roving focus, and Shift-range multi-select.',
+    code: `import { GroupedList } from '@rtzll/reflow'\n\n<GroupedList groups={groups} items={issues} selectedIds={selected} onSelectedChange={setSelected} />`,
+  },
+  'quick-create-bar': {
+    description:
+      'Fast inline issue capture bar with title input, property pickers (Status, Priority, Assignee, Estimate), Create more toggle, and Enter submit.',
+    code: `import { QuickCreateBar } from '@rtzll/reflow'\n\n<QuickCreateBar onCreate={addIssue} assignees={members} />`,
+  },
+  'roadmap-timeline': {
+    description:
+      'Horizontal project roadmap Gantt with Weeks/Months/Quarters zoom, radial completion rings, duration bars, diamond milestones, and a today marker.',
+    code: `import { RoadmapTimeline } from '@rtzll/reflow'\n\n<RoadmapTimeline items={projects} today="2026-03-18" />`,
+  },
+  'cycle-overview': {
+    description:
+      'Sprint and cycle overview dashboard composing ProgressRing, click-to-filter status and assignee workload bars, and an optional scope burndown LineChart.',
+    code: `import { CycleOverview } from '@rtzll/reflow'\n\n<CycleOverview title="Cycle 14" statuses={statusCounts} assignees={workload} />`,
+  },
+  'sub-issue-list': {
+    description:
+      'Nested child-issue checklist with a radial completion ring, one-click status toggles, assignee avatars, and inline sub-issue creation.',
+    code: `import { SubIssueList } from '@rtzll/reflow'\n\n<SubIssueList items={subIssues} onToggleStatus={toggleSubIssue} onAdd={addSubIssue} />`,
+  },
+  'relation-list': {
+    description:
+      'Structured issue dependency and cross-reference list grouping Blockers, Blocked-by items, Related issues, and linked Pull Requests.',
+    code: `import { RelationList } from '@rtzll/reflow'\n\n<RelationList items={relations} onRemove={unlinkItem} />`,
+  },
+  'triage-queue': {
+    description:
+      'Incoming triage split workspace pairing a keyboard-navigable queue with an inspector pane and single-key Accept / Duplicate / Decline / Snooze actions.',
+    code: `import { TriageQueue } from '@rtzll/reflow'\n\n<TriageQueue items={incoming} onDecision={triageIssue} />`,
+  },
   'chat-message': {
     description: 'A chat message with user or assistant alignment and optional attachments.',
     code: conversationCode,

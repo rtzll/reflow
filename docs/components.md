@@ -4,11 +4,11 @@ Reflow started as a native Remix port of the [Fluid Functionalism](https://githu
 
 ## Catalog
 
-- **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `Field`, `FileInput`, `FilterBar`, `InlineEdit`, `Input`, `InputCopy`, `InputGroup`, `NumberField`, `RadioGroup`, `SegmentedControl`, `Select`, `Slider`, `SplitButton`, `Switch`, `Textarea`
-- **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`, `RelativeTime`, `TimeField`, `TimeGrid`
-- **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `DiffMinimap`, `FileTree`, `Pagination`, `Resizable`, `ResizableGroup`, `Sidebar`, `Tabs`, `Toolbar`, `Tree`, `VirtualList`
-- **Menus and overlays** · `AlertDialog`, `CommandMenu`, `ContextMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `ShortcutSheet`, `Tooltip`
-- **Display and feedback** · `ActivityHeatmap`, `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `BarChart`, `Card`, `CodeBlock`, `CodeBrowser`, `CopyChip`, `DataTable`, `Diagram`, `DiffStat`, `RoutedDataTable`, `EmptyState`, `Kbd`, `LineChart`, `LogViewer`, `Markdown`, `MatrixGrid`, `MergeQueue`, `MergeReadiness`, `MetadataList`, `MetricCard`, `ObjectInspector`, `PipelineGraph`, `Progress`, `ProportionBar`, `SizeDelta`, `Skeleton`, `Sparkline`, `Spinner`, `StackGraph`, `StatusStrip`, `Table`, `Terminal`, `TestReport`, `Timeline`, `Toaster`, `Waterfall`
+- **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `EstimatePill`, `Field`, `FileInput`, `FilterBar`, `InlineEdit`, `InlinePropertyPicker`, `Input`, `InputCopy`, `InputGroup`, `LabelChip`, `LabelPicker`, `NumberField`, `QuickCreateBar`, `RadioGroup`, `SegmentedControl`, `Select`, `Slider`, `SplitButton`, `Switch`, `Textarea`
+- **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`, `RelativeTime`, `RoadmapTimeline`, `TimeField`, `TimeGrid`
+- **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `DiffMinimap`, `FileTree`, `Pagination`, `Resizable`, `ResizableGroup`, `SavedViewTabs`, `Sidebar`, `Tabs`, `Toolbar`, `Tree`, `VirtualList`
+- **Menus and overlays** · `AlertDialog`, `CommandMenu`, `ContextMenu`, `Dialog`, `Drawer`, `Dropdown`, `FloatingActionBar`, `HoverCard`, `Popover`, `ShortcutSheet`, `Tooltip`, `ViewOptionsPopover`
+- **Display and feedback** · `ActivityHeatmap`, `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `BarChart`, `Card`, `CodeBlock`, `CodeBrowser`, `CopyChip`, `CycleOverview`, `DataTable`, `Diagram`, `DiffStat`, `RoutedDataTable`, `EmptyState`, `GroupedList`, `KanbanBoard`, `Kbd`, `LineChart`, `LogViewer`, `Markdown`, `MatrixGrid`, `MergeQueue`, `MergeReadiness`, `MetadataList`, `MetricCard`, `ObjectInspector`, `PipelineGraph`, `PriorityIndicator`, `Progress`, `ProgressRing`, `ProportionBar`, `RelationList`, `SizeDelta`, `Skeleton`, `Sparkline`, `Spinner`, `StackGraph`, `StatusIcon`, `StatusStrip`, `SubIssueList`, `Table`, `Terminal`, `TestReport`, `Timeline`, `Toaster`, `TriageQueue`, `Waterfall`
 - **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `ChatOutline`, `Citation`, `CommentThread`, `Confirmation`, `DiffView`, `FileChanges`, `FileThumbnail`, `InputMessage`, `MarkdownEditor`, `QueuedStack`, `ReactionBar`, `TaskList`, `ThinkingIndicator`, `ThinkingSteps`, `ToolCalls`, `TriggerMenu`
 
 Every component has a docs page with a live preview, highlighted code and an API table; most also have a playground. Run the showcase and open `/docs`, or read the [usage examples](../apps/web/app/public/examples.tsx).
@@ -102,6 +102,9 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 16 | `SplitButton`, `DiffStat`, `ProportionBar`, `MetadataList`, `CopyChip`, `InlineEdit` (shipped) | — | High-frequency forge micro-primitives for multi-mode actions, churn blocks, distributions, inspector rails, ref pills, and inline titles |
 | 16 | `StackGraph`, `MergeReadiness`, `DiffMinimap`, `CodeBrowser` (shipped) | — | Code review suite: stacked PR DAG, expandable merge-gate card, diff overview with unviewed/unresolved jumps, and Shift+Click `#L42-L58` file viewer with git-blame heat gutter |
 | 16 | `TestReport`, `MatrixGrid`, `MergeQueue`, `SizeDelta`, `ActivityHeatmap` (shipped) | — | CI, testing & delivery suite: flaky-test explorer, 2D OS×runtime build matrix, speculative merge train, bundle budget deltas, and keyboard-scrubbable calendar heatmap |
+| 17 | `FloatingActionBar`, `ViewOptionsPopover`, `InlinePropertyPicker`, `ProgressRing` + `behaviors/group-placement.ts` (shipped) | — | Linear-style project tracking foundation: headless grouping/reordering/undo, floating bulk toolbar, Display options popover, inline property pills, radial completion rings |
+| 17 | `PriorityIndicator`, `StatusIcon`, `LabelChip`, `LabelPicker`, `EstimatePill`, `SavedViewTabs` (shipped) | — | Project & issue micro-primitives for priority signals, workflow state icons, color-dot labels, Fibonacci/effort estimates, and custom saved views |
+| 17 | `KanbanBoard`, `GroupedList`, `QuickCreateBar`, `RoadmapTimeline`, `CycleOverview`, `SubIssueList`, `RelationList`, `TriageQueue` (shipped) | — | Complete Linear-style project tracking views: collapsible WIP boards, grouped lists with Shift-range selection, quick capture, project Gantt roadmaps, cycle dashboards, sub-issues, blockers/PR links, and keyboard triage |
 
 ### Decisions so far
 

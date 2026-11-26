@@ -9282,6 +9282,906 @@ export const componentApi: Record<ComponentSlug, readonly ApiSection[]> = {
       ],
     },
   ],
+  'floating-action-bar': [
+    {
+      name: 'FloatingActionBar',
+      props: [
+        {
+          name: 'count',
+          type: 'number',
+          description: 'Number of currently selected items. Renders nothing when <= 0.',
+          required: true,
+        },
+        {
+          name: 'selectionLabel',
+          type: 'string',
+          description: 'Optional custom selection label.',
+          required: false,
+        },
+        {
+          name: 'actions',
+          type: 'RemixNode',
+          description: 'Action buttons, pickers, or menus rendered inside the bar.',
+          required: false,
+        },
+        {
+          name: 'onClear',
+          type: '() => void',
+          description: 'Called when the clear button or Escape inside the bar is activated.',
+          required: false,
+        },
+        {
+          name: 'position',
+          type: "'sticky' | 'fixed' | 'inline'",
+          description: 'Positioning mode for the floating bar.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the toolbar region.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls height and spacing.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'view-options-popover': [
+    {
+      name: 'ViewOptionsPopover',
+      props: [
+        { name: 'layout', type: 'string', description: 'Active layout mode.', required: false },
+        {
+          name: 'layouts',
+          type: 'readonly ViewOptionChoice[]',
+          description: 'Available layout choices rendered in a SegmentedControl.',
+          required: false,
+        },
+        {
+          name: 'onLayoutChange',
+          type: '(layout: string) => void',
+          description: 'Called when layout changes.',
+          required: false,
+        },
+        { name: 'groupBy', type: 'string', description: 'Active grouping axis.', required: false },
+        {
+          name: 'groupByOptions',
+          type: 'readonly ViewOptionChoice[]',
+          description: 'Available grouping options.',
+          required: false,
+        },
+        {
+          name: 'onGroupByChange',
+          type: '(value: string) => void',
+          description: 'Called when grouping changes.',
+          required: false,
+        },
+        { name: 'orderBy', type: 'string', description: 'Active sort order.', required: false },
+        {
+          name: 'orderByOptions',
+          type: 'readonly ViewOptionChoice[]',
+          description: 'Available sort options.',
+          required: false,
+        },
+        {
+          name: 'onOrderByChange',
+          type: '(value: string) => void',
+          description: 'Called when sort order changes.',
+          required: false,
+        },
+        {
+          name: 'properties',
+          type: 'readonly ViewPropertyToggle[]',
+          description: 'Toggleable display properties.',
+          required: false,
+        },
+        {
+          name: 'onToggleProperty',
+          type: '(id: string, visible: boolean) => void',
+          description: 'Called when a display property pill is toggled.',
+          required: false,
+        },
+        {
+          name: 'showEmptyGroups',
+          type: 'boolean',
+          description: 'Whether empty columns/groups stay visible.',
+          required: false,
+        },
+        {
+          name: 'onShowEmptyGroupsChange',
+          type: '(show: boolean) => void',
+          description: 'Called when the show-empty-groups switch changes.',
+          required: false,
+        },
+        {
+          name: 'triggerLabel',
+          type: 'string',
+          description: 'Trigger button label.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls spacing and typography scale.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'inline-property-picker': [
+    {
+      name: 'InlinePropertyPicker',
+      props: [
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Property name for accessible labeling.',
+          required: true,
+        },
+        {
+          name: 'value',
+          type: 'string',
+          description: 'Currently selected option value.',
+          required: false,
+        },
+        {
+          name: 'options',
+          type: 'readonly InlinePropertyOption[]',
+          description: 'Available choices rendered in the anchored dropdown menu.',
+          required: true,
+        },
+        {
+          name: 'onChange',
+          type: '(value: string) => void',
+          description: 'Called when the user picks an option.',
+          required: false,
+        },
+        {
+          name: 'placeholder',
+          type: 'string',
+          description: 'Placeholder text when no value matches an option.',
+          required: false,
+        },
+        {
+          name: 'searchable',
+          type: 'boolean',
+          description: 'Enables search input inside the dropdown.',
+          required: false,
+        },
+        {
+          name: 'align',
+          type: "'start' | 'end'",
+          description: 'Dropdown alignment relative to the pill.',
+          required: false,
+        },
+        {
+          name: 'iconOnly',
+          type: 'boolean',
+          description: 'Renders only the icon in compact row mode.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls pill height and typography scale.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'progress-ring': [
+    {
+      name: 'ProgressRing',
+      props: [
+        {
+          name: 'value',
+          type: 'number',
+          description: 'Completion value for single-progress mode.',
+          required: false,
+        },
+        {
+          name: 'max',
+          type: 'number',
+          description: 'Maximum value for single-progress mode.',
+          required: false,
+        },
+        {
+          name: 'segments',
+          type: 'readonly ProgressRingSegment[]',
+          description: 'Multi-segment breakdown overriding value/max.',
+          required: false,
+        },
+        {
+          name: 'tone',
+          type: 'ProgressRingTone',
+          description: 'Semantic stroke color for single-progress mode.',
+          required: false,
+        },
+        { name: 'size', type: 'number', description: 'Outer diameter in pixels.', required: false },
+        {
+          name: 'strokeWidth',
+          type: 'number',
+          description: 'Ring stroke thickness in pixels.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible description for the progress indicator.',
+          required: true,
+        },
+        {
+          name: 'children',
+          type: 'RemixNode',
+          description: 'Optional center readout rendered inside larger rings.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'priority-indicator': [
+    {
+      name: 'PriorityIndicator',
+      props: [
+        { name: 'priority', type: 'IssuePriority', description: 'Priority level.', required: true },
+        {
+          name: 'showLabel',
+          type: 'boolean',
+          description: 'Renders the text label beside the icon.',
+          required: false,
+        },
+        { name: 'size', type: 'number', description: 'Icon size in pixels.', required: false },
+        {
+          name: 'decorative',
+          type: 'boolean',
+          description: 'Hides from assistive tech when adjacent text already states priority.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'status-icon': [
+    {
+      name: 'StatusIcon',
+      props: [
+        {
+          name: 'status',
+          type: 'IssueStatusKind',
+          description: 'Semantic issue workflow status.',
+          required: true,
+        },
+        {
+          name: 'showLabel',
+          type: 'boolean',
+          description: 'Renders the status label beside the icon.',
+          required: false,
+        },
+        { name: 'label', type: 'string', description: 'Custom label override.', required: false },
+        { name: 'size', type: 'number', description: 'Icon diameter in pixels.', required: false },
+        {
+          name: 'decorative',
+          type: 'boolean',
+          description: 'Hides from assistive tech when adjacent text already states status.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'label-picker': [
+    {
+      name: 'LabelPicker',
+      props: [
+        {
+          name: 'options',
+          type: 'readonly LabelOption[]',
+          description: 'Available labels to toggle.',
+          required: true,
+        },
+        {
+          name: 'value',
+          type: 'readonly string[]',
+          description: 'Currently applied label IDs.',
+          required: true,
+        },
+        {
+          name: 'onChange',
+          type: '(next: string[]) => void',
+          description: 'Called whenever the selected label IDs change.',
+          required: false,
+        },
+        {
+          name: 'onCreate',
+          type: '(label: string) => void',
+          description: 'Optional callback to create a brand-new label from search input.',
+          required: false,
+        },
+        {
+          name: 'triggerLabel',
+          type: 'string',
+          description: 'Trigger button text when no labels are selected.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls chip and trigger scale.',
+          required: false,
+        },
+      ],
+    },
+    {
+      name: 'LabelChip',
+      props: [
+        { name: 'label', type: 'string', description: 'Visible label text.', required: true },
+        {
+          name: 'color',
+          type: 'BadgeColor | string',
+          description: 'Named Reflow badge color or custom CSS color.',
+          required: false,
+        },
+        {
+          name: 'onRemove',
+          type: '() => void',
+          description: 'Optional remove handler.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls chip padding and font scale.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'estimate-pill': [
+    {
+      name: 'EstimatePill',
+      props: [
+        {
+          name: 'value',
+          type: 'string | number | null',
+          description: 'Current estimate value.',
+          required: false,
+        },
+        {
+          name: 'options',
+          type: 'readonly EstimateOption[]',
+          description: 'Choices offered in the picker.',
+          required: false,
+        },
+        {
+          name: 'onChange',
+          type: '(value: string | number | null) => void',
+          description: 'Called when the user selects or clears an estimate.',
+          required: false,
+        },
+        {
+          name: 'unit',
+          type: 'string',
+          description: 'Unit suffix shown beside numeric values.',
+          required: false,
+        },
+        {
+          name: 'readonly',
+          type: 'boolean',
+          description: 'Renders a static non-interactive pill when true.',
+          required: false,
+        },
+        { name: 'label', type: 'string', description: 'Accessible name.', required: false },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls pill padding and font scale.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'saved-view-tabs': [
+    {
+      name: 'SavedViewTabs',
+      props: [
+        {
+          name: 'views',
+          type: 'readonly SavedView[]',
+          description: 'Saved view tabs in display order.',
+          required: true,
+        },
+        { name: 'activeId', type: 'string', description: 'Active view ID.', required: true },
+        {
+          name: 'onSelect',
+          type: '(id: string) => void',
+          description: 'Called when a tab is selected.',
+          required: false,
+        },
+        {
+          name: 'onCreate',
+          type: '() => void',
+          description: 'Called when + New view is clicked.',
+          required: false,
+        },
+        {
+          name: 'onRename',
+          type: '(id: string, name: string) => void',
+          description: 'Called when an inline double-click rename commits.',
+          required: false,
+        },
+        {
+          name: 'onSave',
+          type: '(id: string) => void',
+          description: 'Called when Save is clicked on a dirty view.',
+          required: false,
+        },
+        {
+          name: 'onReset',
+          type: '(id: string) => void',
+          description: 'Called when Reset is clicked on a dirty view.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible label for the tablist.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls tab padding and font scale.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'kanban-board': [
+    {
+      name: 'KanbanBoard',
+      props: [
+        {
+          name: 'columns',
+          type: 'readonly KanbanColumn[]',
+          description: 'Ordered board columns.',
+          required: true,
+        },
+        {
+          name: 'items',
+          type: 'readonly T[]',
+          description: 'Cards placed into columns by item.columnId.',
+          required: true,
+        },
+        {
+          name: 'onSelectItem',
+          type: '(item: T) => void',
+          description: 'Called when a card is clicked or activated.',
+          required: false,
+        },
+        {
+          name: 'onMoveItem',
+          type: '(itemId: string, targetColumnId: string, beforeItemId: string | null) => void',
+          description: 'Called on drag-and-drop or Alt+Arrow keyboard moves.',
+          required: false,
+        },
+        {
+          name: 'onCreateInColumn',
+          type: '(columnId: string) => void',
+          description: 'Optional column + quick-add callback.',
+          required: false,
+        },
+        {
+          name: 'selectedIds',
+          type: 'ReadonlySet<string> | readonly string[]',
+          description: 'Controlled multi-selected item IDs.',
+          required: false,
+        },
+        {
+          name: 'onToggleSelect',
+          type: '(itemId: string, shiftKey: boolean) => void',
+          description: 'Called when selection toggles via checkbox or x.',
+          required: false,
+        },
+        {
+          name: 'renderCard',
+          type: '(item: T) => RemixNode',
+          description: 'Optional custom card renderer.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the board region.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls card padding and typography density.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'grouped-list': [
+    {
+      name: 'GroupedList',
+      props: [
+        {
+          name: 'groups',
+          type: 'readonly GroupedListGroup[]',
+          description: 'Ordered section headers.',
+          required: true,
+        },
+        {
+          name: 'items',
+          type: 'readonly T[]',
+          description: 'Items bucketed into groups by item.groupId.',
+          required: true,
+        },
+        {
+          name: 'selectedIds',
+          type: 'ReadonlySet<string> | readonly string[]',
+          description: 'Controlled multi-selected item IDs.',
+          required: false,
+        },
+        {
+          name: 'onSelectedChange',
+          type: '(next: ReadonlySet<string>) => void',
+          description: 'Called whenever multi-selection changes.',
+          required: false,
+        },
+        {
+          name: 'onSelectItem',
+          type: '(item: T) => void',
+          description: 'Called when a row is clicked or opened with Enter.',
+          required: false,
+        },
+        {
+          name: 'onCreateInGroup',
+          type: '(groupId: string) => void',
+          description: 'Optional group + quick-add callback.',
+          required: false,
+        },
+        {
+          name: 'showEmptyGroups',
+          type: 'boolean',
+          description: 'Hides empty groups when false.',
+          required: false,
+        },
+        {
+          name: 'renderRow',
+          type: '(item: T) => RemixNode',
+          description: 'Optional custom row content slot.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the list region.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls row height and typography density.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'quick-create-bar': [
+    {
+      name: 'QuickCreateBar',
+      props: [
+        {
+          name: 'onCreate',
+          type: '(draft: QuickCreateDraft) => void',
+          description: 'Called when the user submits a non-empty issue draft.',
+          required: true,
+        },
+        {
+          name: 'defaultStatus',
+          type: 'IssueStatusKind',
+          description: 'Initial status value.',
+          required: false,
+        },
+        {
+          name: 'defaultPriority',
+          type: 'IssuePriority',
+          description: 'Initial priority value.',
+          required: false,
+        },
+        {
+          name: 'assignees',
+          type: 'readonly InlinePropertyOption[]',
+          description: 'Optional assignee choices.',
+          required: false,
+        },
+        {
+          name: 'placeholder',
+          type: 'string',
+          description: 'Placeholder text for the title input.',
+          required: false,
+        },
+        {
+          name: 'submitLabel',
+          type: 'string',
+          description: 'Submit button label.',
+          required: false,
+        },
+        {
+          name: 'showCreateMore',
+          type: 'boolean',
+          description: 'Shows the Create more switch.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the quick-create form.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls spacing and typography scale.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'roadmap-timeline': [
+    {
+      name: 'RoadmapTimeline',
+      props: [
+        {
+          name: 'items',
+          type: 'readonly RoadmapItem[]',
+          description: 'Projects or initiatives displayed as horizontal bars.',
+          required: true,
+        },
+        {
+          name: 'rangeStart',
+          type: 'string',
+          description: 'Timeline window start (YYYY-MM-DD).',
+          required: false,
+        },
+        {
+          name: 'rangeEnd',
+          type: 'string',
+          description: 'Timeline window end (YYYY-MM-DD).',
+          required: false,
+        },
+        {
+          name: 'today',
+          type: 'string',
+          description: 'Vertical today marker date (YYYY-MM-DD).',
+          required: false,
+        },
+        {
+          name: 'defaultZoom',
+          type: 'RoadmapZoom',
+          description: 'Initial zoom level.',
+          required: false,
+        },
+        {
+          name: 'onSelectItem',
+          type: '(item: RoadmapItem) => void',
+          description: 'Called when a project bar is clicked.',
+          required: false,
+        },
+        {
+          name: 'onSelectMilestone',
+          type: '(item: RoadmapItem, milestone: RoadmapMilestone) => void',
+          description: 'Called when a diamond milestone marker is clicked.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the roadmap region.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls row height and density.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'cycle-overview': [
+    {
+      name: 'CycleOverview',
+      props: [
+        { name: 'title', type: 'string', description: 'Cycle heading.', required: false },
+        {
+          name: 'dateRange',
+          type: 'string',
+          description: 'Optional date window subtitle.',
+          required: false,
+        },
+        {
+          name: 'statuses',
+          type: 'readonly CycleStatusCount[]',
+          description: 'Status counts rendered in the radial ring and legend.',
+          required: true,
+        },
+        {
+          name: 'assignees',
+          type: 'readonly CycleAssigneeWorkload[]',
+          description: 'Optional assignee workload breakdown.',
+          required: false,
+        },
+        {
+          name: 'burndown',
+          type: '{ labels: readonly string[]; series: readonly LineChartSeries[] }',
+          description: 'Optional scope/completed chart series.',
+          required: false,
+        },
+        {
+          name: 'activeStatusId',
+          type: 'string | null',
+          description: 'Currently active status filter ID.',
+          required: false,
+        },
+        {
+          name: 'activeAssignee',
+          type: 'string | null',
+          description: 'Currently active assignee filter name.',
+          required: false,
+        },
+        {
+          name: 'onFilterStatus',
+          type: '(statusId: string) => void',
+          description: 'Called when a status legend row is clicked.',
+          required: false,
+        },
+        {
+          name: 'onFilterAssignee',
+          type: '(assignee: string) => void',
+          description: 'Called when an assignee workload row is clicked.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the cycle overview region.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls spacing and typography scale.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'sub-issue-list': [
+    {
+      name: 'SubIssueList',
+      props: [
+        {
+          name: 'items',
+          type: 'readonly SubIssue[]',
+          description: 'Child issues in order.',
+          required: true,
+        },
+        {
+          name: 'onToggleStatus',
+          type: '(item: SubIssue, nextStatus: IssueStatusKind) => void',
+          description: 'Called when a sub-issue status button toggles.',
+          required: false,
+        },
+        {
+          name: 'onSelect',
+          type: '(item: SubIssue) => void',
+          description: 'Called when a sub-issue title is clicked.',
+          required: false,
+        },
+        {
+          name: 'onAdd',
+          type: '(title: string) => void',
+          description: 'Optional inline add handler.',
+          required: false,
+        },
+        {
+          name: 'onRemove',
+          type: '(item: SubIssue) => void',
+          description: 'Optional remove handler.',
+          required: false,
+        },
+        { name: 'title', type: 'string', description: 'Section heading.', required: false },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls row spacing and font scale.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'relation-list': [
+    {
+      name: 'RelationList',
+      props: [
+        {
+          name: 'items',
+          type: 'readonly RelationItem[]',
+          description: 'Related issues, blockers, and linked pull requests.',
+          required: true,
+        },
+        {
+          name: 'onSelect',
+          type: '(item: RelationItem) => void',
+          description: 'Called when a linked item is clicked.',
+          required: false,
+        },
+        {
+          name: 'onRemove',
+          type: '(item: RelationItem) => void',
+          description: 'Optional unlink callback.',
+          required: false,
+        },
+        {
+          name: 'onAdd',
+          type: '() => void',
+          description: 'Optional + Link button handler.',
+          required: false,
+        },
+        { name: 'title', type: 'string', description: 'Section heading.', required: false },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls spacing and typography scale.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'triage-queue': [
+    {
+      name: 'TriageQueue',
+      props: [
+        {
+          name: 'items',
+          type: 'readonly TriageItem[]',
+          description: 'Incoming issues awaiting triage decision.',
+          required: true,
+        },
+        {
+          name: 'onDecision',
+          type: '(item: TriageItem, action: TriageAction) => void',
+          description: 'Called on Accept, Duplicate, Decline, or Snooze.',
+          required: false,
+        },
+        {
+          name: 'now',
+          type: 'string | number | Date',
+          description: 'Optional pinned reference timestamp for deterministic relative dates.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the triage workspace.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls spacing and typography density.',
+          required: false,
+        },
+      ],
+    },
+  ],
 }
 export const componentDefaults: Record<string, Record<string, string>> = {
   AskUserQuestions: { defaultCurrentIndex: '0', defaultAnswers: '{}' },

@@ -58,6 +58,25 @@ import {
   TestReportExample,
   VirtualListExample,
 } from './wave16-examples.tsx'
+import {
+  CycleOverviewExample,
+  EstimatePillExample,
+  FloatingActionBarExample,
+  GroupedListExample,
+  InlinePropertyPickerExample,
+  KanbanBoardExample,
+  LabelPickerExample,
+  PriorityIndicatorExample,
+  ProgressRingExample,
+  QuickCreateBarExample,
+  RelationListExample,
+  RoadmapTimelineExample,
+  SavedViewTabsExample,
+  StatusIconExample,
+  SubIssueListExample,
+  TriageQueueExample,
+  ViewOptionsPopoverExample,
+} from './wave17-examples.tsx'
 import { SoundCombobox } from './sound-combobox.tsx'
 import { playCopySuccess } from './showcase-sound.ts'
 import {
@@ -397,6 +416,40 @@ export const Example = clientEntry(
           return <SizeDeltaExample />
         case 'activity-heatmap':
           return <ActivityHeatmapExample />
+        case 'floating-action-bar':
+          return <FloatingActionBarExample />
+        case 'view-options-popover':
+          return <ViewOptionsPopoverExample />
+        case 'inline-property-picker':
+          return <InlinePropertyPickerExample />
+        case 'progress-ring':
+          return <ProgressRingExample />
+        case 'priority-indicator':
+          return <PriorityIndicatorExample />
+        case 'status-icon':
+          return <StatusIconExample />
+        case 'label-picker':
+          return <LabelPickerExample />
+        case 'estimate-pill':
+          return <EstimatePillExample />
+        case 'saved-view-tabs':
+          return <SavedViewTabsExample />
+        case 'kanban-board':
+          return <KanbanBoardExample />
+        case 'grouped-list':
+          return <GroupedListExample />
+        case 'quick-create-bar':
+          return <QuickCreateBarExample />
+        case 'roadmap-timeline':
+          return <RoadmapTimelineExample />
+        case 'cycle-overview':
+          return <CycleOverviewExample />
+        case 'sub-issue-list':
+          return <SubIssueListExample />
+        case 'relation-list':
+          return <RelationListExample />
+        case 'triage-queue':
+          return <TriageQueueExample />
         case 'kbd':
           return <KbdExample />
         case 'time-field':
