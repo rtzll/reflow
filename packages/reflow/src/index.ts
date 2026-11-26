@@ -292,5 +292,6 @@ export {
 export { Sparkline, type SparklineProps, type SparklineTone } from './sparkline.tsx'
 export { MetricCard, type MetricCardProps, type MetricDeltaTone } from './metric-card.tsx'
 export { LineChart, type LineChartProps, type LineChartSeries } from './line-chart.tsx'
+export { ObjectInspector, type ObjectInspectorProps } from './object-inspector.tsx'
 export { parseFacetQuery, type FacetToken, type ParsedFacetQuery } from './behaviors/facet-query.ts'
 export { createRangeSelection } from './behaviors/range-selection.ts'
