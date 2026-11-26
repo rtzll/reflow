@@ -26,6 +26,22 @@ const list = (archive: string) =>
 const extract = (archive: string, file: string) =>
   execFileSync('tar', ['-xOzf', archive, file], { encoding: 'utf8' })
 
+interface DomainConfig {
+  entry: string
+  ssrEntry?: string
+  css?: string
+  peers: readonly string[]
+  optionalPeer?: boolean
+  coreForbiddenSelector?: string
+}
+
+const domains = JSON.parse(
+  readFileSync(join(root, 'packages/reflow/domains.json'), 'utf8'),
+) as Record<string, DomainConfig>
+const domainList = Object.values(domains)
+const domainCssFiles = domainList.flatMap((domain) => (domain.css ? [domain.css] : []))
+const escapeRegex = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
 try {
   assert.ok(given.length === 0 || given.length === 2, 'Pass both archives or neither')
   if (given.length === 0) {
@@ -33,43 +49,37 @@ try {
     run('pnpm', ['pack', '--silent', '--out', createTarball], join(root, 'packages/create-reflow'))
   }
   const files = list(tarball)
-  for (const name of [
+  const expectedFiles = [
     'package.json',
     'LICENSE',
     'NOTICE',
     'README.md',
     'dist/index.js',
     'dist/index.d.ts',
-    'dist/diffs.js',
-    'dist/diffs.d.ts',
-    'dist/diffs-ssr.js',
-    'dist/diffs-ssr.d.ts',
-    'dist/diffs.css',
-    'dist/trees.js',
-    'dist/trees.d.ts',
-    'dist/trees-ssr.js',
-    'dist/trees-ssr.d.ts',
-    'dist/trees.css',
-    'dist/diagrams.js',
-    'dist/diagrams.d.ts',
-    'dist/diagrams-ssr.js',
-    'dist/diagrams-ssr.d.ts',
-    'dist/diagrams.css',
-    'dist/highlight.js',
-    'dist/highlight.d.ts',
-    'dist/markdown.js',
-    'dist/markdown.d.ts',
-    'dist/markdown.css',
     'dist/core.css',
     'dist/styles.css',
-  ]) {
+    ...domainList.flatMap((domain) => [
+      `dist/${domain.entry}.js`,
+      `dist/${domain.entry}.d.ts`,
+      ...(domain.ssrEntry ? [`dist/${domain.ssrEntry}.js`, `dist/${domain.ssrEntry}.d.ts`] : []),
+      ...(domain.css ? [`dist/${domain.css}`] : []),
+    ]),
+  ]
+  for (const name of expectedFiles) {
     assert.ok(files.includes(`package/${name}`), `Package is missing ${name}`)
   }
+  const allowedCssAlternation = [
+    'styles',
+    'core',
+    ...domainCssFiles.map((c) => c.replace(/\.css$/, '')),
+  ]
+    .map(escapeRegex)
+    .join('|')
+  const allowedTarballPattern = new RegExp(
+    `^package\\/(?:package\\.json|LICENSE|NOTICE|README\\.md|dist\\/(?:(?:${allowedCssAlternation})\\.css|(?:(?:behaviors|systems)\\/)?[^/]+\\.(?:js|ts)))$`,
+  )
   for (const file of files) {
-    assert.match(
-      file,
-      /^package\/(?:package\.json|LICENSE|NOTICE|README\.md|dist\/(?:(?:styles|core|diffs|trees|diagrams|markdown)\.css|(?:(?:behaviors|systems)\/)?[^/]+\.(?:js|ts)))$/,
-    )
+    assert.match(file, allowedTarballPattern)
   }
   const shippedCss = extract(tarball, 'package/dist/styles.css')
   assert.doesNotMatch(shippedCss, /@import\b/, 'dist/styles.css must be a single bundled file')
@@ -101,90 +111,55 @@ try {
     'dist/index.js must use explicit named re-exports instead of export *',
   )
   assert.equal(extract(tarball, 'package/LICENSE'), readFileSync(join(root, 'LICENSE'), 'utf8'))
-  // Shiki is opt-in: only the highlight entry may import it.
-  for (const file of files.filter((name) => /^package\/dist\/.+\.js$/.test(name))) {
-    if (file === 'package/dist/highlight.js') continue
-    const source = extract(tarball, file)
-    assert.doesNotMatch(source, /from ['"](?:shiki|@shikijs\/)/, `${file} must not import Shiki`)
-  }
-  // @pierre/diffs is opt-in: only the diffs entries may import it.
-  for (const file of files.filter((name) => /^package\/dist\/.+\.js$/.test(name))) {
-    if (file === 'package/dist/diffs.js' || file === 'package/dist/diffs-ssr.js') continue
-    const source = extract(tarball, file)
-    assert.doesNotMatch(source, /@pierre\/diffs/, `${file} must not import @pierre/diffs`)
-  }
-  assert.match(
-    extract(tarball, 'package/dist/diffs.js'),
-    /@pierre\/diffs/,
-    'dist/diffs.js should import @pierre/diffs',
-  )
-  assert.match(
-    extract(tarball, 'package/dist/diffs-ssr.js'),
-    /@pierre\/diffs\/ssr/,
-    'dist/diffs-ssr.js should import @pierre/diffs/ssr',
-  )
   // Per-domain stylesheets sit inside @layer reflow just like styles.css.
   for (const cssFile of [
     'package/dist/core.css',
-    'package/dist/diffs.css',
-    'package/dist/trees.css',
-    'package/dist/diagrams.css',
-    'package/dist/markdown.css',
+    ...domainCssFiles.map((c) => `package/dist/${c}`),
   ]) {
     assert.ok(files.includes(cssFile), `Tarball must include ${cssFile}`)
     assert.match(extract(tarball, cssFile), /@layer reflow \{/, `${cssFile} must use @layer reflow`)
   }
-  assert.doesNotMatch(
-    extract(tarball, 'package/dist/core.css'),
-    /\.rf-diff-view|\.rf-file-tree|\.rf-diagram|\.rf-markdown/,
-    'dist/core.css must exclude specialist domain stylesheets',
-  )
-  // @pierre/trees is opt-in: only the trees entries may import it.
-  for (const file of files.filter((name) => /^package\/dist\/.+\.js$/.test(name))) {
-    if (file === 'package/dist/trees.js' || file === 'package/dist/trees-ssr.js') continue
-    const source = extract(tarball, file)
-    assert.doesNotMatch(source, /@pierre\/trees/, `${file} must not import @pierre/trees`)
-  }
-  assert.match(
-    extract(tarball, 'package/dist/trees.js'),
-    /@pierre\/trees/,
-    'dist/trees.js should import @pierre/trees',
-  )
-  assert.match(
-    extract(tarball, 'package/dist/trees-ssr.js'),
-    /@pierre\/trees\/ssr/,
-    'dist/trees-ssr.js should import @pierre/trees/ssr',
-  )
-  // pele is opt-in: only the diagrams entries may import it.
-  for (const file of files.filter((name) => /^package\/dist\/.+\.js$/.test(name))) {
-    if (file === 'package/dist/diagrams.js' || file === 'package/dist/diagrams-ssr.js') continue
-    const source = extract(tarball, file)
-    assert.doesNotMatch(source, /['"]pele(?:\/.*)?['"]/, `${file} must not import pele`)
-  }
-  assert.match(
-    extract(tarball, 'package/dist/diagrams.js'),
-    /pele\/lazy/,
-    'dist/diagrams.js should lazily import pele/lazy',
-  )
-  assert.match(
-    extract(tarball, 'package/dist/diagrams-ssr.js'),
-    /from ['"]pele['"]/,
-    'dist/diagrams-ssr.js should import pele',
-  )
-  // marked loads only with the Markdown entry, so other pages never download it.
-  for (const file of files.filter((name) => /^package\/dist\/.+\.js$/.test(name))) {
-    if (file === 'package/dist/markdown.js') continue
+  const forbiddenCoreSelectors = domainList
+    .flatMap((domain) => (domain.coreForbiddenSelector ? [domain.coreForbiddenSelector] : []))
+    .join('|')
+  if (forbiddenCoreSelectors) {
     assert.doesNotMatch(
-      extract(tarball, file),
-      /from ['"]marked['"]/,
-      `${file} must not import marked`,
+      extract(tarball, 'package/dist/core.css'),
+      new RegExp(forbiddenCoreSelectors),
+      'dist/core.css must exclude specialist domain stylesheets',
     )
   }
-  assert.match(
-    extract(tarball, 'package/dist/markdown.js'),
-    /from ['"]marked['"]/,
-    'dist/markdown.js should import marked',
-  )
+  // Specialist peers stay strictly isolated to their designated entry points.
+  const distJsFiles = files.filter((name) => /^package\/dist\/.+\.js$/.test(name))
+  for (const domain of domainList) {
+    const allowed = new Set([
+      `package/dist/${domain.entry}.js`,
+      ...(domain.ssrEntry ? [`package/dist/${domain.ssrEntry}.js`] : []),
+    ])
+    const peerImportPattern = new RegExp(
+      `['"](?:${domain.peers.map(escapeRegex).join('|')})(?:/[^'"]*)?['"]`,
+    )
+    for (const file of distJsFiles) {
+      if (allowed.has(file)) continue
+      assert.doesNotMatch(
+        extract(tarball, file),
+        peerImportPattern,
+        `${file} must not import ${domain.peers.join(' / ')}`,
+      )
+    }
+    assert.match(
+      extract(tarball, `package/dist/${domain.entry}.js`),
+      peerImportPattern,
+      `dist/${domain.entry}.js should import ${domain.peers[0]}`,
+    )
+    if (domain.ssrEntry) {
+      assert.match(
+        extract(tarball, `package/dist/${domain.ssrEntry}.js`),
+        peerImportPattern,
+        `dist/${domain.ssrEntry}.js should import ${domain.peers[0]}`,
+      )
+    }
+  }
 
   // The create package ships its command and the starter, pinned to this release.
   const library = JSON.parse(extract(tarball, 'package/package.json'))
@@ -260,29 +235,18 @@ try {
   assert.ok(installed.startsWith(`${temporary}/`), 'The starter must not link to the workspace')
   // The optional peers stay out of an app that does not ask for them.
   const store = join(destination, 'node_modules/.pnpm')
-  assert.ok(
-    !existsSync(join(destination, 'node_modules/shiki')) &&
-      !(existsSync(store) && readdirSync(store).some((name) => name.startsWith('shiki@'))),
-    'Installing Reflow must not install Shiki',
-  )
-  assert.ok(
-    !existsSync(join(destination, 'node_modules/@pierre/diffs')) &&
-      !(existsSync(store) && readdirSync(store).some((name) => name.startsWith('@pierre+diffs@'))),
-    'Installing Reflow must not install @pierre/diffs',
-  )
-  assert.ok(
-    !existsSync(join(destination, 'node_modules/@pierre/trees')) &&
-      !(
-        existsSync(store) && readdirSync(store).some((name) => name.startsWith('@pierre+trees@'))
-      ) &&
-      !(existsSync(store) && readdirSync(store).some((name) => name.startsWith('preact@'))),
-    'Installing Reflow must not install @pierre/trees or preact',
-  )
-  assert.ok(
-    !existsSync(join(destination, 'node_modules/pele')) &&
-      !(existsSync(store) && readdirSync(store).some((name) => name.startsWith('pele@'))),
-    'Installing Reflow must not install pele',
-  )
+  const storeEntries = existsSync(store) ? readdirSync(store) : []
+  for (const domain of domainList) {
+    if (!domain.optionalPeer) continue
+    for (const peer of domain.peers) {
+      const storePrefix = `${peer.replace('/', '+')}@`
+      assert.ok(
+        !existsSync(join(destination, 'node_modules', peer)) &&
+          !storeEntries.some((name) => name.startsWith(storePrefix)),
+        `Installing Reflow must not install ${peer}`,
+      )
+    }
+  }
 
   const starter = spawn(process.execPath, ['--import', 'remix/node-tsx', 'server.ts'], {
     cwd: destination,

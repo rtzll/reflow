@@ -1,0 +1,47 @@
+{
+  "diffs": {
+    "entry": "diffs",
+    "ssrEntry": "diffs-ssr",
+    "css": "diffs.css",
+    "sourceCss": ["diff-view.css"],
+    "peers": ["@pierre/diffs"],
+    "optionalPeer": true,
+    "workerStub": true,
+    "coreForbiddenSelector": "\\.rf-diff-view"
+  },
+  "trees": {
+    "entry": "trees",
+    "ssrEntry": "trees-ssr",
+    "css": "trees.css",
+    "sourceCss": ["file-tree.css"],
+    "peers": ["@pierre/trees", "preact"],
+    "optionalPeer": true,
+    "workerStub": true,
+    "coreForbiddenSelector": "\\.rf-file-tree"
+  },
+  "diagrams": {
+    "entry": "diagrams",
+    "ssrEntry": "diagrams-ssr",
+    "css": "diagrams.css",
+    "sourceCss": ["diagram.css"],
+    "peers": ["pele"],
+    "optionalPeer": true,
+    "workerStub": true,
+    "coreForbiddenSelector": "\\.rf-diagram"
+  },
+  "markdown": {
+    "entry": "markdown",
+    "css": "markdown.css",
+    "sourceCss": ["markdown.css"],
+    "peers": ["marked"],
+    "optionalPeer": false,
+    "workerStub": false,
+    "coreForbiddenSelector": "\\.rf-markdown"
+  },
+  "highlight": {
+    "entry": "highlight",
+    "peers": ["shiki", "@shikijs"],
+    "optionalPeer": true,
+    "workerStub": false
+  }
+}

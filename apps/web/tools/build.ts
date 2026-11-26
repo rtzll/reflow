@@ -6,6 +6,15 @@ import { fileURLToPath } from 'node:url'
 import { getSoundAssets, soundFiles } from '../app/sound-assets.ts'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
+interface DomainConfig {
+  peers: readonly string[]
+  workerStub?: boolean
+}
+
+const domains = JSON.parse(
+  await readFile(resolve(root, '../../packages/reflow/domains.json'), 'utf8'),
+) as Record<string, DomainConfig>
+const workerStubDomains = Object.entries(domains).filter(([, domain]) => domain.workerStub)
 const output = resolve(root, 'build')
 const publicDir = resolve(root, 'app/public')
 const clientEntries = new Map<string, string>()
@@ -186,30 +195,17 @@ const worker = await build({
           if (resolve(resolveDir, path) === resolve(root, 'app/diff-samples.ts'))
             return { path: resolve(root, 'worker/diff-samples.ts') }
         })
-        builder.onResolve({ filter: /^@pierre\/diffs(?:\/.*)?$/ }, ({ path }) => ({
-          path,
-          namespace: 'reflow-worker-diffs-stub',
-        }))
-        builder.onLoad({ filter: /.*/, namespace: 'reflow-worker-diffs-stub' }, () => ({
-          contents: 'export {}\n',
-          loader: 'js',
-        }))
-        builder.onResolve({ filter: /^@pierre\/trees(?:\/.*)?$/ }, ({ path }) => ({
-          path,
-          namespace: 'reflow-worker-trees-stub',
-        }))
-        builder.onLoad({ filter: /.*/, namespace: 'reflow-worker-trees-stub' }, () => ({
-          contents: 'export {}\n',
-          loader: 'js',
-        }))
-        builder.onResolve({ filter: /^pele(?:\/.*)?$/ }, ({ path }) => ({
-          path,
-          namespace: 'reflow-worker-pele-stub',
-        }))
-        builder.onLoad({ filter: /.*/, namespace: 'reflow-worker-pele-stub' }, () => ({
-          contents: 'export {}\n',
-          loader: 'js',
-        }))
+        for (const [name, domain] of workerStubDomains) {
+          const namespace = `reflow-worker-${name}-stub`
+          const pattern = new RegExp(
+            `^(?:${domain.peers.map((peer) => peer.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})(?:\\/.*)?$`,
+          )
+          builder.onResolve({ filter: pattern }, ({ path }) => ({ path, namespace }))
+          builder.onLoad({ filter: /.*/, namespace }, () => ({
+            contents: 'export {}\n',
+            loader: 'js',
+          }))
+        }
         builder.onLoad({ filter: /drag-adapter\.ts$/ }, ({ path }) => {
           if (path === resolve(root, 'app/public/apps/issues/drag-adapter.ts')) {
             return {

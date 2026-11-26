@@ -7,12 +7,17 @@ import { execFileSync } from 'node:child_process'
 import { readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-const domainStyles: Record<string, readonly string[]> = {
-  'diffs.css': ['diff-view.css'],
-  'trees.css': ['file-tree.css'],
-  'diagrams.css': ['diagram.css'],
-  'markdown.css': ['markdown.css'],
+interface DomainConfig {
+  css?: string
+  sourceCss?: readonly string[]
 }
+
+const domains = JSON.parse(readFileSync('domains.json', 'utf8')) as Record<string, DomainConfig>
+const domainStyles: Record<string, readonly string[]> = Object.fromEntries(
+  Object.values(domains).flatMap((domain) =>
+    domain.css && domain.sourceCss ? [[domain.css, domain.sourceCss] as const] : [],
+  ),
+)
 
 const domainStyleFiles = new Set(Object.values(domainStyles).flat())
 

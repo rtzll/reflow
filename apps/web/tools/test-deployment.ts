@@ -30,30 +30,25 @@ assert.ok(
     path.includes('@atlaskit/pragmatic-drag-and-drop'),
   ),
 )
-assert.ok(
-  !Object.keys(metadata.worker.inputs).some(
-    (path) => path.includes('@pierre/diffs') && !path.startsWith('reflow-worker-diffs-stub:'),
-  ),
-  'Worker bundle must not include @pierre/diffs',
-)
-assert.ok(
-  !Object.keys(metadata.worker.inputs).some(
-    (path) =>
-      (path.includes('@pierre/trees') || /(?:^|\/)preact(?:\/|$)/.test(path)) &&
-      !path.startsWith('reflow-worker-trees-stub:'),
-  ),
-  'Worker bundle must not include @pierre/trees or preact',
-)
-assert.ok(
-  !Object.keys(metadata.worker.inputs).some(
-    (path) => /(?:^|\/)pele(?:\/|$)/.test(path) && !path.startsWith('reflow-worker-pele-stub:'),
-  ),
-  'Worker bundle must not include pele',
-)
-assert.ok(
-  !Object.keys(metadata.worker.inputs).some((path) => /(?:^|\/)(?:shiki|@shikijs)\//.test(path)),
-  'Worker bundle must not include Shiki',
-)
+interface DomainConfig {
+  peers: readonly string[]
+  optionalPeer?: boolean
+}
+const domains = JSON.parse(
+  await readFile(resolve(root, '../../packages/reflow/domains.json'), 'utf8'),
+) as Record<string, DomainConfig>
+for (const [name, domain] of Object.entries(domains)) {
+  if (!domain.optionalPeer) continue
+  const peerPattern = new RegExp(
+    `(?:^|/)(?:${domain.peers.map((peer) => peer.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})(?:/|$)`,
+  )
+  assert.ok(
+    !Object.keys(metadata.worker.inputs).some(
+      (path) => peerPattern.test(path) && !path.startsWith(`reflow-worker-${name}-stub:`),
+    ),
+    `Worker bundle must not include ${domain.peers.join(' or ')}`,
+  )
+}
 
 const appSlugs = (await readdir(resolve(root, 'app/public/apps'), { withFileTypes: true }))
   .filter((entry) => entry.isDirectory() && entry.name !== 'directory')
