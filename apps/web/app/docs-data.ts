@@ -832,6 +832,267 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  'file-tree': [
+    {
+      name: 'FileTree',
+      props: [
+        {
+          name: 'paths',
+          type: 'readonly string[]',
+          required: true,
+          description: 'Canonical slash-separated file and directory paths.',
+        },
+        {
+          name: 'label',
+          type: 'string',
+          required: false,
+          description: 'Accessible name for the file tree region. Defaults to "Files".',
+        },
+        {
+          name: 'value',
+          type: 'string | null',
+          required: false,
+          description: 'Controlled selected path.',
+        },
+        {
+          name: 'defaultValue',
+          type: 'string',
+          required: false,
+          description: 'Initial selected path when uncontrolled.',
+        },
+        {
+          name: 'onValueChange',
+          type: '(path: string) => void',
+          required: false,
+          description: 'Called when the active selection changes to a path.',
+        },
+        {
+          name: 'onSelectionChange',
+          type: '(paths: readonly string[]) => void',
+          required: false,
+          description: 'Called with all selected paths whenever selection changes.',
+        },
+        {
+          name: 'gitStatus',
+          type: 'readonly GitStatusEntry[]',
+          required: false,
+          description:
+            'Git status indicators per path (added, modified, deleted, renamed, untracked, ignored).',
+        },
+        {
+          name: 'rowDecorations',
+          type: 'Readonly<Record<string, FileTreeRowDecoration>>',
+          required: false,
+          description:
+            'Declarative per-path trailing decorations (SSR-safe, supports multi-color parts).',
+        },
+        {
+          name: 'renderRowDecoration',
+          type: 'FileTreeRowDecorationRenderer',
+          required: false,
+          description:
+            'Dynamic per-row decoration renderer; falls back to rowDecorations when omitted.',
+        },
+        {
+          name: 'flattenEmptyDirectories',
+          type: 'boolean',
+          required: false,
+          description:
+            'Compacts single-child folder chains (such as packages/reflow/src). Defaults to true.',
+        },
+        {
+          name: 'initialExpansion',
+          type: 'FileTreeInitialExpansion',
+          required: false,
+          description:
+            'Initial folder expansion state ("open", "closed", or depth number). Defaults to "open".',
+        },
+        {
+          name: 'initialExpandedPaths',
+          type: 'readonly string[]',
+          required: false,
+          description: 'Specific folder paths to start expanded.',
+        },
+        {
+          name: 'search',
+          type: 'boolean',
+          required: false,
+          description: 'Enables the built-in search input inside the tree. Defaults to false.',
+        },
+        {
+          name: 'searchQuery',
+          type: 'string | null',
+          required: false,
+          description: 'External controlled search query applied to the tree.',
+        },
+        {
+          name: 'searchMode',
+          type: 'FileTreeSearchMode',
+          required: false,
+          description: 'How search filters non-matching items. Defaults to "hide-non-matches".',
+        },
+        {
+          name: 'icons',
+          type: 'FileTreeIcons',
+          required: false,
+          description:
+            'Built-in icon set or custom FileTreeIconConfig. Defaults to colored standard icons.',
+        },
+        {
+          name: 'stickyFolders',
+          type: 'boolean',
+          required: false,
+          description: 'Pins open ancestor folder rows while scrolling inside a fixed-height tree.',
+        },
+        {
+          name: 'itemHeight',
+          type: 'number',
+          required: false,
+          description: 'Row height in pixels.',
+        },
+        {
+          name: 'height',
+          type: 'number | string',
+          required: false,
+          description:
+            'Explicit height for the virtualized viewport. Auto-fits visible rows up to maxHeight when omitted.',
+        },
+        {
+          name: 'maxHeight',
+          type: 'number',
+          required: false,
+          description:
+            'Maximum auto-fitted height in pixels when height is omitted. Defaults to 360.',
+        },
+        {
+          name: 'initialVisibleRowCount',
+          type: 'number',
+          required: false,
+          description:
+            'Row budget rendered during SSR and first paint before viewport measurement.',
+        },
+        {
+          name: 'prerendered',
+          type: 'FileTreeSsrPayload',
+          required: false,
+          description:
+            'Pre-rendered Declarative Shadow DOM payload from prerenderFileTree() in @rtzll/reflow/trees/ssr.',
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          required: false,
+          description: 'Controls spacing and font scale.',
+        },
+        {
+          name: 'unsafeCSS',
+          type: 'string',
+          required: false,
+          description: 'Extra CSS injected inside the @pierre/trees Shadow DOM.',
+        },
+        {
+          name: 'class',
+          type: 'string',
+          required: false,
+          description: 'Additional class name on the outer container.',
+        },
+      ],
+    },
+  ],
+  diagram: [
+    {
+      name: 'Diagram',
+      props: [
+        {
+          name: 'code',
+          type: 'string',
+          required: true,
+          description: 'Mermaid diagram source (flowchart, sequence, state, ER, class, and more).',
+        },
+        {
+          name: 'prerenderedSVG',
+          type: 'string',
+          required: false,
+          description:
+            'Pre-rendered SVG from prerenderDiagram() in @rtzll/reflow/diagrams/ssr for zero-flash SSR.',
+        },
+        {
+          name: 'title',
+          type: 'string',
+          required: false,
+          description: 'Optional title displayed in the header bar.',
+        },
+        {
+          name: 'label',
+          type: 'string',
+          required: false,
+          description:
+            'Accessible name for the diagram figure. Defaults to title or "Mermaid diagram".',
+        },
+        {
+          name: 'zoom',
+          type: "boolean | 'auto' | ZoomOptions",
+          required: false,
+          description: 'Enables Pele pan and zoom controls on the client.',
+        },
+        {
+          name: 'copyable',
+          type: 'boolean',
+          required: false,
+          description: 'Shows a button in the header to copy the Mermaid source.',
+        },
+        {
+          name: 'showSourceToggle',
+          type: 'boolean',
+          required: false,
+          description: 'Shows a toggle in the header to inspect the raw Mermaid source.',
+        },
+        {
+          name: 'responsive',
+          type: 'boolean',
+          required: false,
+          description: 'Scales the rendered SVG to fit its container width. Defaults to true.',
+        },
+        {
+          name: 'autoDirection',
+          type: 'boolean',
+          required: false,
+          description:
+            'Lets Pele switch horizontal flowcharts to vertical on narrow viewports. Defaults to true.',
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          required: false,
+          description: 'Controls padding density.',
+        },
+        {
+          name: 'actions',
+          type: 'RemixNode',
+          required: false,
+          description: 'Trailing controls rendered in the header.',
+        },
+        {
+          name: 'onRender',
+          type: '(result: RenderResult) => void',
+          required: false,
+          description: 'Called after Pele finishes rendering on the client.',
+        },
+        {
+          name: 'onError',
+          type: '(error: unknown) => void',
+          required: false,
+          description: 'Called if Pele cannot parse or render the diagram.',
+        },
+        {
+          name: 'class',
+          type: 'string',
+          required: false,
+          description: 'Additional class name on the outer figure.',
+        },
+      ],
+    },
+  ],
   'diff-view': [
     {
       name: 'DiffView',

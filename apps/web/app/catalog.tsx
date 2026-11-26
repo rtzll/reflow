@@ -205,6 +205,16 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       'Unified and side-by-side code diffs powered by @pierre/diffs, with syntax highlighting, intraline changes, line selection, and inline annotations.',
     code: `import { DiffView } from '@rtzll/reflow/diffs'\n\n<DiffView\n  filename="src/cache.ts"\n  diff={unifiedDiff}\n  viewToggle\n/>`,
   },
+  'file-tree': {
+    description:
+      'Virtualized, path-first file tree powered by @pierre/trees, with automatic folder compaction, git status badges, colored row decorations, and zero-flash Declarative Shadow DOM SSR.',
+    code: `import { FileTree } from '@rtzll/reflow/trees'\n\n<FileTree\n  paths={['packages/reflow/src/diffs.tsx', 'packages/reflow/src/trees.tsx']}\n  gitStatus={[{ path: 'packages/reflow/src/trees.tsx', status: 'added' }]}\n  size="compact"\n/>`,
+  },
+  diagram: {
+    description:
+      'Themeable Mermaid diagrams rendered to SVG by Pele, adapting live to Reflow themes, accents, and fonts with zero-flash SSR and Markdown fence integration.',
+    code: `import { Diagram } from '@rtzll/reflow/diagrams'\n\n<Diagram\n  title="SSR pipeline"\n  code={'flowchart LR\\n  SSR --> DSD[Shadow DOM] --> Hydrate'}\n  copyable\n  showSourceToggle\n/>`,
+  },
   'empty-state': {
     description:
       'A quiet centered placeholder for empty views or zero-match filters, with an icon tile, description, and recovery actions.',
