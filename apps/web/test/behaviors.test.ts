@@ -28,6 +28,11 @@ import { createKeymap } from '../../../packages/reflow/src/behaviors/keymap.ts'
 import { computeDiffStatBlocks } from '../../../packages/reflow/src/diff-stat.tsx'
 import { computeSizeDelta, formatBytes } from '../../../packages/reflow/src/size-delta.tsx'
 import { computeHeatmapLevel } from '../../../packages/reflow/src/activity-heatmap.tsx'
+import {
+  createUndoStack,
+  groupItemsBy,
+  placeGroupedItems,
+} from '../../../packages/reflow/src/behaviors/group-placement.ts'
 import { computeSparklineGeometry } from '../../../packages/reflow/src/sparkline.tsx'
 
 // Deterministic PRNG so property runs are fast, thorough, and 100% reproducible.
@@ -507,5 +512,56 @@ it('property: computeDiffStatBlocks, computeSizeDelta, and computeHeatmapLevel u
     const level = computeHeatmapLevel(count, maxCount)
     assert.ok(level >= 0 && level <= 4)
     if (count <= 0 || maxCount <= 0) assert.equal(level, 0)
+  }
+})
+
+it('property: placeGroupedItems preserves item multiset, updates target group, and undo stack reverses cleanly', () => {
+  const rng = mulberry32(0x5eed9)
+  const groups = ['backlog', 'todo', 'in_progress', 'done'] as const
+  type Group = (typeof groups)[number]
+  type Item = { id: string; group: Group }
+
+  const undo = createUndoStack<Item[]>(5)
+  for (let trial = 0; trial < 200; trial++) {
+    const count = randomInt(rng, 1, 14)
+    const items: Item[] = Array.from({ length: count }, (_, i) => ({
+      id: `ISS-${i + 1}`,
+      group: pick(rng, groups),
+    }))
+    const movingIds = new Set<string>()
+    const moveCount = randomInt(rng, 1, Math.min(4, count))
+    for (let m = 0; m < moveCount; m++) {
+      movingIds.add(items[randomInt(rng, 0, count - 1)]!.id)
+    }
+    const targetGroup = pick(rng, groups)
+    const rest = items.filter((item) => !movingIds.has(item.id))
+    const beforeId =
+      rest.length > 0 && rng() > 0.35 ? rest[randomInt(rng, 0, rest.length - 1)]!.id : null
+
+    const next = placeGroupedItems(items, {
+      movingIds,
+      targetGroup,
+      beforeId,
+      getId: (item) => item.id,
+      getGroup: (item) => item.group,
+      setGroup: (item, group) => ({ ...item, group }),
+    })
+
+    assert.equal(next.length, items.length)
+    assert.deepEqual(next.map((item) => item.id).sort(), items.map((item) => item.id).sort())
+    for (const item of next) {
+      if (movingIds.has(item.id)) assert.equal(item.group, targetGroup)
+    }
+
+    const grouped = groupItemsBy(next, groups, (item) => item.group)
+    let bucketSum = 0
+    for (const list of grouped.values()) bucketSum += list.length
+    assert.equal(bucketSum, next.length)
+
+    undo.push(items)
+    const restored = undo.undo(next)
+    assert.deepEqual(restored, items)
+    const redone = undo.redo(restored!)
+    assert.deepEqual(redone, next)
   }
 })

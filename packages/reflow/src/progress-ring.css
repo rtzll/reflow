@@ -1,0 +1,37 @@
+.rf-progress-ring {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rf-progress-ring-svg {
+  display: block;
+}
+
+.rf-progress-ring-track {
+  stroke: var(--rf-border);
+}
+
+.rf-progress-ring-arc {
+  transition: stroke-dasharray var(--rf-spring-moderate);
+}
+
+.rf-progress-ring-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-progress-ring-arc {
+    transition: none;
+  }
+}

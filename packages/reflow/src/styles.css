@@ -116,3 +116,7 @@
 @import './merge-queue.css' layer(reflow);
 @import './size-delta.css' layer(reflow);
 @import './activity-heatmap.css' layer(reflow);
+@import './floating-action-bar.css' layer(reflow);
+@import './view-options-popover.css' layer(reflow);
+@import './inline-property-picker.css' layer(reflow);
+@import './progress-ring.css' layer(reflow);

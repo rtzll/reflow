@@ -397,3 +397,28 @@ export {
   type HeatmapLevel,
   type HeatmapTone,
 } from './activity-heatmap.tsx'
+export {
+  createUndoStack,
+  groupItemsBy,
+  placeGroupedItems,
+  type PlaceGroupedItemsOptions,
+  type UndoStack,
+} from './behaviors/group-placement.ts'
+export { FloatingActionBar, type FloatingActionBarProps } from './floating-action-bar.tsx'
+export {
+  ViewOptionsPopover,
+  type ViewOptionChoice,
+  type ViewOptionsPopoverProps,
+  type ViewPropertyToggle,
+} from './view-options-popover.tsx'
+export {
+  InlinePropertyPicker,
+  type InlinePropertyOption,
+  type InlinePropertyPickerProps,
+} from './inline-property-picker.tsx'
+export {
+  ProgressRing,
+  type ProgressRingProps,
+  type ProgressRingSegment,
+  type ProgressRingTone,
+} from './progress-ring.tsx'
