@@ -11,6 +11,23 @@ export interface CiSuiteRow {
   duration: string
 }
 
+export interface CiJobTelemetry {
+  runner: string
+  arch: string
+  cacheStatus: 'hit' | 'partial' | 'miss'
+  cacheDetail: string
+  deltaVsP50: string
+  deltaTone: 'faster' | 'slower' | 'neutral'
+  cpuPeakPct: number
+  cpuAvgPct: number
+  cpuSamples: readonly number[]
+  memPeakGb: number
+  memLimitGb: number
+  memSamples: readonly number[]
+  failureLocation?: string
+  failureHeadline?: string
+}
+
 export interface CiRunData {
   id: string
   number: number
@@ -20,8 +37,11 @@ export interface CiRunData {
   status: 'passed' | 'failed' | 'running'
   duration: string
   durationMs: number
+  deltaVsP50: string
+  cacheHitPct: number
   startedAt: string
   jobs: PipelineJob[]
+  telemetryByJob: Record<string, CiJobTelemetry>
   logsByJob: Record<string, LogGroup[]>
   waterfall: WaterfallSpan[]
   suites: CiSuiteRow[]
@@ -145,7 +165,7 @@ export const artifactDecorations: Readonly<Record<string, FileTreeRowDecoration>
     parts: [{ text: '7.5 KB', color: 'var(--rf-success)' }],
   },
   'apps/web/build/worker/index.js': {
-    text: 'worker ok',
+    text: '0 peers',
     parts: [{ text: '0 peers', color: 'var(--rf-info)' }],
   },
   'test-results/apps-nav-fix.patch': {
@@ -181,6 +201,109 @@ export const failureFixDiff = `--- a/apps/web/app/ui/example-apps.tsx
          <main id="main" data-rmx-key={app.slug}>
 `
 
+const baseTelemetry: Record<string, CiJobTelemetry> = {
+  lint: {
+    runner: 'blacksmith-4vcpu-ubuntu-2404',
+    arch: 'x64 · NVMe',
+    cacheStatus: 'hit',
+    cacheDetail: 'pnpm store · 412 MB (0.7s)',
+    deltaVsP50: '−31% vs p50',
+    deltaTone: 'faster',
+    cpuPeakPct: 62,
+    cpuAvgPct: 38,
+    cpuSamples: [12, 34, 62, 54, 41, 28, 16],
+    memPeakGb: 0.9,
+    memLimitGb: 8,
+    memSamples: [0.4, 0.6, 0.9, 0.8, 0.7, 0.6, 0.5],
+  },
+  typecheck: {
+    runner: 'blacksmith-4vcpu-ubuntu-2404',
+    arch: 'x64 · NVMe',
+    cacheStatus: 'hit',
+    cacheDetail: 'tsbuildinfo · 18 MB (0.3s)',
+    deltaVsP50: '−18% vs p50',
+    deltaTone: 'faster',
+    cpuPeakPct: 79,
+    cpuAvgPct: 54,
+    cpuSamples: [18, 45, 79, 72, 61, 48, 22],
+    memPeakGb: 1.8,
+    memLimitGb: 8,
+    memSamples: [0.6, 1.1, 1.6, 1.8, 1.7, 1.4, 0.9],
+  },
+  build: {
+    runner: 'blacksmith-8vcpu-ubuntu-2404',
+    arch: 'x64 · NVMe',
+    cacheStatus: 'hit',
+    cacheDetail: 'esbuild + DSD pre-render · 84 MB',
+    deltaVsP50: '−22% vs p50',
+    deltaTone: 'faster',
+    cpuPeakPct: 88,
+    cpuAvgPct: 61,
+    cpuSamples: [24, 58, 88, 84, 72, 64, 42, 26],
+    memPeakGb: 2.4,
+    memLimitGb: 16,
+    memSamples: [0.8, 1.4, 2.1, 2.4, 2.2, 1.9, 1.5, 1.1],
+  },
+  'deploy-test': {
+    runner: 'blacksmith-4vcpu-ubuntu-2404',
+    arch: 'x64 · workerd',
+    cacheStatus: 'hit',
+    cacheDetail: 'wrangler + chromium · 290 MB',
+    deltaVsP50: '−44% vs p50',
+    deltaTone: 'faster',
+    cpuPeakPct: 74,
+    cpuAvgPct: 49,
+    cpuSamples: [22, 48, 74, 68, 62, 51, 35, 19],
+    memPeakGb: 2.1,
+    memLimitGb: 8,
+    memSamples: [0.9, 1.4, 1.9, 2.1, 2.0, 1.8, 1.4, 1.0],
+  },
+  e2e: {
+    runner: 'blacksmith-8vcpu-ubuntu-2404',
+    arch: 'x64 · NVMe · 3 shards',
+    cacheStatus: 'partial',
+    cacheDetail: 'playwright browsers · 412 MB (1.2s)',
+    deltaVsP50: '+9% vs p50',
+    deltaTone: 'slower',
+    cpuPeakPct: 94,
+    cpuAvgPct: 71,
+    cpuSamples: [28, 64, 88, 94, 86, 91, 82, 76, 68, 44],
+    memPeakGb: 4.8,
+    memLimitGb: 16,
+    memSamples: [1.4, 2.6, 3.8, 4.5, 4.8, 4.6, 4.3, 4.1, 3.6, 2.2],
+    failureLocation: 'apps/web/test/apps.test.e2e.ts:57',
+    failureHeadline: 'Strict mode violation: 2 App navigation landmarks mounted on /apps/chat',
+  },
+  pack: {
+    runner: 'blacksmith-4vcpu-ubuntu-2404',
+    arch: 'x64 · NVMe',
+    cacheStatus: 'hit',
+    cacheDetail: 'pnpm store · 412 MB',
+    deltaVsP50: '−12% vs p50',
+    deltaTone: 'faster',
+    cpuPeakPct: 58,
+    cpuAvgPct: 36,
+    cpuSamples: [15, 42, 58, 51, 44, 32, 18],
+    memPeakGb: 1.3,
+    memLimitGb: 8,
+    memSamples: [0.5, 0.9, 1.2, 1.3, 1.2, 1.0, 0.7],
+  },
+  publish: {
+    runner: 'blacksmith-4vcpu-ubuntu-2404',
+    arch: 'x64 · OIDC',
+    cacheStatus: 'hit',
+    cacheDetail: 'verified tarball artifact',
+    deltaVsP50: '0% vs p50',
+    deltaTone: 'neutral',
+    cpuPeakPct: 31,
+    cpuAvgPct: 18,
+    cpuSamples: [10, 22, 31, 24, 16, 12],
+    memPeakGb: 0.6,
+    memLimitGb: 8,
+    memSamples: [0.3, 0.5, 0.6, 0.6, 0.5, 0.4],
+  },
+}
+
 const failedRun: CiRunData = {
   id: '4577',
   number: 4577,
@@ -190,6 +313,8 @@ const failedRun: CiRunData = {
   status: 'failed',
   duration: '4m 03s',
   durationMs: 243_000,
+  deltaVsP50: '+7% vs 7d p50',
+  cacheHitPct: 92,
   startedAt: '14m ago',
   jobs: [
     {
@@ -254,6 +379,7 @@ const failedRun: CiRunData = {
       meta: 'blocked',
     },
   ],
+  telemetryByJob: baseTelemetry,
   logsByJob: {
     lint: [
       {
@@ -263,13 +389,24 @@ const failedRun: CiRunData = {
         duration: '3.1s',
         defaultOpen: true,
         entries: [
-          { text: '\x1b[2m$ oxfmt . --check\x1b[0m', timestamp: '+00:00.2' },
+          { text: '\x1b[2m$ oxfmt . --check\x1b[0m', source: 'oxfmt', timestamp: '+00:00.2' },
           {
             text: '\x1b[32m✓\x1b[0m All 491 files formatted cleanly (64ms)',
+            source: 'oxfmt',
             timestamp: '+00:00.8',
+            fields: { files: 491, duration_ms: 64, runner: 'blacksmith-4vcpu-ubuntu-2404' },
           },
-          { text: '\x1b[2m$ oxlint . --max-warnings=0\x1b[0m', timestamp: '+00:01.0' },
-          { text: '\x1b[32m✓\x1b[0m 0 warnings, 0 errors across workspace', timestamp: '+00:03.1' },
+          {
+            text: '\x1b[2m$ oxlint . --max-warnings=0\x1b[0m',
+            source: 'oxlint',
+            timestamp: '+00:01.0',
+          },
+          {
+            text: '\x1b[32m✓\x1b[0m 0 warnings, 0 errors across workspace',
+            source: 'oxlint',
+            timestamp: '+00:03.1',
+            fields: { warnings: 0, errors: 0, threads: 4 },
+          },
         ],
       },
     ],
@@ -281,9 +418,24 @@ const failedRun: CiRunData = {
         duration: '6.2s',
         defaultOpen: true,
         entries: [
-          { text: '\x1b[32m✓\x1b[0m packages/reflow check (510ms)', timestamp: '+00:01.2' },
-          { text: '\x1b[32m✓\x1b[0m packages/create-reflow check (220ms)', timestamp: '+00:01.8' },
-          { text: '\x1b[32m✓\x1b[0m apps/web check (780ms)', timestamp: '+00:06.2' },
+          {
+            text: '\x1b[32m✓\x1b[0m packages/reflow check (510ms)',
+            source: 'tsc',
+            timestamp: '+00:01.2',
+            fields: { package: '@rtzll/reflow', cache: 'hit', duration_ms: 510 },
+          },
+          {
+            text: '\x1b[32m✓\x1b[0m packages/create-reflow check (220ms)',
+            source: 'tsc',
+            timestamp: '+00:01.8',
+            fields: { package: '@rtzll/create-reflow', cache: 'hit', duration_ms: 220 },
+          },
+          {
+            text: '\x1b[32m✓\x1b[0m apps/web check (780ms)',
+            source: 'tsc',
+            timestamp: '+00:06.2',
+            fields: { package: '@reflow/web', cache: 'hit', duration_ms: 780 },
+          },
         ],
       },
     ],
@@ -297,15 +449,21 @@ const failedRun: CiRunData = {
         entries: [
           {
             text: '\x1b[36m▸\x1b[0m Emitting core.css, diffs.css, trees.css, diagrams.css, styles.css',
+            source: 'reflow',
             timestamp: '+00:01.4',
+            fields: { core_css_kb: 335, trees_css_kb: 3.2, diagrams_css_kb: 4.3 },
           },
           {
             text: '\x1b[36m▸\x1b[0m Pre-rendering Declarative Shadow DOM diffs, FileTree, and Pele SVGs',
+            source: 'ssr',
             timestamp: '+00:04.8',
+            fields: { diffs: 7, trees: 1, diagrams: 2, cache: 'hit' },
           },
           {
-            text: '\x1b[32m✓\x1b[0m Built showcase with 16 client entry modules and isolated Worker',
+            text: '\x1b[32m✓\x1b[0m Built showcase with 17 client entry modules and isolated Worker',
+            source: 'esbuild',
             timestamp: '+00:11.4',
+            fields: { client_entries: 17, worker_peers_leaked: 0 },
           },
         ],
       },
@@ -320,15 +478,21 @@ const failedRun: CiRunData = {
         entries: [
           {
             text: '\x1b[32m✓\x1b[0m Worker bundle excludes @pierre/diffs, @pierre/trees, preact, pele, and shiki',
+            source: 'worker',
             timestamp: '+00:02.1',
+            fields: { runtime: 'workerd', peers_bundled: 0 },
           },
           {
             text: '\x1b[32m✓\x1b[0m /apps/review serves zero-flash DSD diffs, FileTree, and Pele SVG',
+            source: 'worker',
             timestamp: '+00:05.4',
+            fields: { route: '/apps/review', dsd_diffs: true, dsd_tree: true, pele_svg: true },
           },
           {
-            text: '\x1b[32m✓\x1b[0m Hydrated 82 docs pages at desktop & mobile widths in 6.3s',
+            text: '\x1b[32m✓\x1b[0m Hydrated 88 docs pages at desktop & mobile widths in 8.5s',
+            source: 'chromium',
             timestamp: '+00:18.2',
+            fields: { routes: 88, concurrency: 4, duration_ms: 8500 },
           },
         ],
       },
@@ -340,15 +504,19 @@ const failedRun: CiRunData = {
         status: 'passed',
         duration: '4.1s',
         entries: [
-          { text: '\x1b[2m$ pnpm test:run\x1b[0m', timestamp: '+00:00.2' },
+          { text: '\x1b[2m$ pnpm test:run\x1b[0m', source: 'pnpm', timestamp: '+00:00.2' },
           {
             text: '\x1b[32m✓\x1b[0m Server suite: 6/6 passed (docs-api, diffs-ssr, trees-ssr, diagrams-ssr)',
+            source: 'node',
             timestamp: '+00:02.6',
+            fields: { passed: 6, failed: 0, cache: 'hit', duration_ms: 252 },
           },
           {
             text: 'WARN: 1 deprecated subdependency (node-domexception@1.0.0)',
             level: 'warn',
+            source: 'pnpm',
             timestamp: '+00:03.9',
+            fields: { package: 'node-domexception', version: '1.0.0' },
           },
         ],
       },
@@ -358,12 +526,29 @@ const failedRun: CiRunData = {
         status: 'passed',
         duration: '19.4s',
         entries: [
-          { text: '\x1b[32m✓\x1b[0m diff-view.test.browser.tsx (4 passed)', timestamp: '+00:08.1' },
-          { text: '\x1b[32m✓\x1b[0m file-tree.test.browser.tsx (1 passed)', timestamp: '+00:11.2' },
-          { text: '\x1b[32m✓\x1b[0m diagram.test.browser.tsx (2 passed)', timestamp: '+00:14.7' },
+          {
+            text: '\x1b[32m✓\x1b[0m diff-view.test.browser.tsx (4 passed)',
+            source: 'chromium',
+            timestamp: '+00:08.1',
+            fields: { suite: 'diff-view.test.browser.tsx', passed: 4, duration_ms: 562 },
+          },
+          {
+            text: '\x1b[32m✓\x1b[0m file-tree.test.browser.tsx (1 passed)',
+            source: 'chromium',
+            timestamp: '+00:11.2',
+            fields: { suite: 'file-tree.test.browser.tsx', passed: 1, duration_ms: 86 },
+          },
+          {
+            text: '\x1b[32m✓\x1b[0m diagram.test.browser.tsx (2 passed)',
+            source: 'chromium',
+            timestamp: '+00:14.7',
+            fields: { suite: 'diagram.test.browser.tsx', passed: 2, duration_ms: 107 },
+          },
           {
             text: '\x1b[32m✓\x1b[0m log-viewer / waterfall / pipeline-graph / status-strip (4 passed)',
+            source: 'chromium',
             timestamp: '+00:19.4',
+            fields: { suites: 4, passed: 4, duration_ms: 1443 },
           },
         ],
       },
@@ -373,32 +558,60 @@ const failedRun: CiRunData = {
         status: 'failed',
         duration: '1m 47s',
         entries: [
-          { text: '\x1b[32m✓\x1b[0m app-review.test.e2e.ts (3.4s)', timestamp: '+00:24.8' },
-          { text: '\x1b[32m✓\x1b[0m app-issues.test.e2e.ts (18.9s)', timestamp: '+00:46.2' },
+          {
+            text: '\x1b[32m✓\x1b[0m app-review.test.e2e.ts (3.4s)',
+            source: 'chromium',
+            timestamp: '+00:24.8',
+            fields: { suite: 'app-review.test.e2e.ts', passed: 1, duration_ms: 3410 },
+          },
+          {
+            text: '\x1b[32m✓\x1b[0m app-issues.test.e2e.ts (18.9s)',
+            source: 'chromium',
+            timestamp: '+00:46.2',
+            fields: { suite: 'app-issues.test.e2e.ts', passed: 6, duration_ms: 18900 },
+          },
           {
             text: '\x1b[31m✗\x1b[0m apps.test.e2e.ts:57 strict mode violation: getByRole("navigation", { name: "App navigation" }) resolved to 2 elements',
             level: 'error',
+            source: 'chromium',
             timestamp: '+01:58.4',
+            fields: {
+              suite: 'apps.test.e2e.ts',
+              line: 57,
+              route: '/apps/chat',
+              exit_code: 1,
+              runner: 'blacksmith-8vcpu-ubuntu-2404',
+              matched_elements: 2,
+            },
           },
           {
             text: '    1) <span aria-current="page">Chat</span> inside .site-app-nav',
             level: 'error',
+            source: 'chromium',
             timestamp: '+01:58.4',
           },
           {
             text: '    2) <span aria-current="page" class="rf-basic-sr-only">Chat</span> inside .studio-app-nav',
             level: 'error',
+            source: 'chromium',
             timestamp: '+01:58.4',
           },
           {
             text: '\x1b[33m!\x1b[0m Tip: omit .site-app-nav on /apps/chat so only one App navigation landmark exists.',
             level: 'warn',
+            source: 'diagnostics',
             timestamp: '+01:58.5',
+            fields: {
+              suggestion: 'omit .site-app-nav for chat',
+              patch: 'test-results/apps-nav-fix.patch',
+            },
           },
           {
             text: '\x1b[1;31mFAIL\x1b[0m  290 passed, 1 failed (129.4s)',
             level: 'error',
+            source: 'remix-test',
             timestamp: '+02:11.0',
+            fields: { passed: 290, failed: 1, exit_code: 1, duration_ms: 129400 },
           },
         ],
       },
@@ -413,15 +626,21 @@ const failedRun: CiRunData = {
         entries: [
           {
             text: '\x1b[32m✓\x1b[0m Per-domain CSS files wrapped in @layer reflow',
+            source: 'pack',
             timestamp: '+00:02.4',
+            fields: { css_bundles: 6, layer: 'reflow' },
           },
           {
             text: '\x1b[32m✓\x1b[0m Starter installs cleanly without @pierre/diffs, @pierre/trees, preact, pele, or shiki',
+            source: 'pack',
             timestamp: '+00:11.8',
+            fields: { isolated_peers: 5, starter_packages: 98 },
           },
           {
             text: '\x1b[32m✓\x1b[0m Starter production server & Playwright checks passed',
+            source: 'chromium',
             timestamp: '+00:16.1',
+            fields: { exit_code: 0, duration_ms: 16100 },
           },
         ],
       },
@@ -435,7 +654,9 @@ const failedRun: CiRunData = {
           {
             text: 'Skipped because upstream job `e2e` failed.',
             level: 'warn',
+            source: 'scheduler',
             timestamp: '+02:31.0',
+            fields: { blocked_by: 'e2e' },
           },
         ],
       },
@@ -583,6 +804,8 @@ const passedRun: CiRunData = {
   status: 'passed',
   duration: '3m 42s',
   durationMs: 222_000,
+  deltaVsP50: '−14% vs 7d p50',
+  cacheHitPct: 98,
   startedAt: '4m ago',
   jobs: [
     {
@@ -648,6 +871,17 @@ const passedRun: CiRunData = {
       meta: 'v0.17.0',
     },
   ],
+  telemetryByJob: {
+    ...baseTelemetry,
+    e2e: {
+      ...baseTelemetry.e2e!,
+      cacheStatus: 'hit',
+      deltaVsP50: '−11% vs p50',
+      deltaTone: 'faster',
+      failureLocation: undefined,
+      failureHeadline: undefined,
+    },
+  },
   logsByJob: {
     ...failedRun.logsByJob,
     e2e: [
@@ -660,9 +894,24 @@ const passedRun: CiRunData = {
         duration: '1m 41s',
         defaultOpen: true,
         entries: [
-          { text: '\x1b[32m✓\x1b[0m app-review.test.e2e.ts (3.4s)', timestamp: '+00:24.1' },
-          { text: '\x1b[32m✓\x1b[0m apps.test.e2e.ts (3.2s)', timestamp: '+00:29.8' },
-          { text: '\x1b[1;32mPASS\x1b[0m  291 passed, 0 failed (124.0s)', timestamp: '+02:04.0' },
+          {
+            text: '\x1b[32m✓\x1b[0m app-review.test.e2e.ts (3.4s)',
+            source: 'chromium',
+            timestamp: '+00:24.1',
+            fields: { suite: 'app-review.test.e2e.ts', passed: 1, duration_ms: 3400 },
+          },
+          {
+            text: '\x1b[32m✓\x1b[0m apps.test.e2e.ts (3.2s)',
+            source: 'chromium',
+            timestamp: '+00:29.8',
+            fields: { suite: 'apps.test.e2e.ts', passed: 4, duration_ms: 3200 },
+          },
+          {
+            text: '\x1b[1;32mPASS\x1b[0m  291 passed, 0 failed (124.0s)',
+            source: 'remix-test',
+            timestamp: '+02:04.0',
+            fields: { passed: 291, failed: 0, exit_code: 0, duration_ms: 124000 },
+          },
         ],
       },
     ],
@@ -674,12 +923,24 @@ const passedRun: CiRunData = {
         duration: '25.0s',
         defaultOpen: true,
         entries: [
-          { text: '\x1b[32m✓\x1b[0m Published @rtzll/reflow@0.17.0 to npm', timestamp: '+02:32.4' },
+          {
+            text: '\x1b[32m✓\x1b[0m Published @rtzll/reflow@0.17.0 to npm',
+            source: 'npm',
+            timestamp: '+02:32.4',
+            fields: { package: '@rtzll/reflow', version: '0.17.0', provenance: true },
+          },
           {
             text: '\x1b[32m✓\x1b[0m Published @rtzll/create-reflow@0.17.0 to npm',
+            source: 'npm',
             timestamp: '+02:41.2',
+            fields: { package: '@rtzll/create-reflow', version: '0.17.0', provenance: true },
           },
-          { text: '\x1b[32m✓\x1b[0m Created GitHub release tag v0.17.0', timestamp: '+02:49.0' },
+          {
+            text: '\x1b[32m✓\x1b[0m Created GitHub release tag v0.17.0',
+            source: 'github',
+            timestamp: '+02:49.0',
+            fields: { tag: 'v0.17.0' },
+          },
         ],
       },
     ],

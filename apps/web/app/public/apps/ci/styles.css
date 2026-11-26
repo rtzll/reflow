@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
-  max-inline-size: 1360px;
+  max-inline-size: 1380px;
   margin-inline: auto;
   padding: 20px clamp(16px, 3vw, 28px) 48px;
   font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
@@ -54,7 +54,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px 14px;
+  gap: 8px 14px;
   color: var(--rf-muted);
   font-size: var(--rf-text-caption);
 }
@@ -86,12 +86,23 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   gap: 10px 18px;
 }
 
-.ci-history-label {
+.ci-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
   color: var(--rf-muted);
   font-size: var(--rf-text-caption);
+}
+
+.ci-shortcuts > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .ci-panel-stack {
@@ -99,6 +110,354 @@
   flex-direction: column;
   gap: 16px;
   margin-block-start: 14px;
+}
+
+/* Sticky job rail + Datadog log canvas (zero scroll traps). */
+.ci-resizable {
+  min-block-size: 420px;
+  border: 0;
+  background: transparent;
+}
+
+.ci-resizable > .rf-resizable-pane {
+  overflow: visible;
+  overscroll-behavior: auto;
+}
+
+.ci-resizable > .rf-resizable-grip {
+  position: sticky;
+  align-self: start;
+  inset-block-start: 16px;
+  block-size: min(100%, calc(100dvh - 32px));
+}
+
+.ci-job-rail {
+  position: sticky;
+  inset-block-start: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-block-size: calc(100dvh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 10px;
+  margin-inline-end: 10px;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-panel-radius);
+  background: var(--rf-surface-2);
+}
+
+.ci-rail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ci-rail-toggle {
+  padding: 2px 7px;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-radius);
+  background: var(--rf-surface-1);
+  color: var(--rf-muted);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.ci-rail-toggle:hover {
+  color: var(--rf-fg);
+}
+
+.ci-job-list,
+.ci-step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ci-job-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  inline-size: 100%;
+  padding: 7px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--rf-radius);
+  background: transparent;
+  color: var(--rf-fg);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color var(--rf-fast);
+}
+
+@media (hover: hover) {
+  .ci-job-row:hover,
+  .ci-step-row:hover {
+    background: var(--rf-hover);
+  }
+}
+
+.ci-job-row[data-selected='true'] {
+  border-color: var(--rf-border);
+  background: var(--rf-active);
+}
+
+.ci-job-dot {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  inline-size: 16px;
+  block-size: 16px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--rf-muted) 16%, transparent);
+  color: var(--rf-muted);
+}
+
+.ci-job-dot[data-status='passed'] {
+  background: color-mix(in oklab, var(--rf-success) 16%, transparent);
+  color: var(--rf-success);
+}
+
+.ci-job-dot[data-status='failed'] {
+  background: color-mix(in oklab, var(--rf-danger) 16%, transparent);
+  color: var(--rf-danger);
+}
+
+.ci-job-dot[data-status='running'] {
+  background: color-mix(in oklab, var(--rf-accent) 16%, transparent);
+  color: var(--rf-accent);
+}
+
+.ci-job-info {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  flex: 1 1 auto;
+}
+
+.ci-job-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--rf-text-caption);
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.ci-job-meta {
+  color: var(--rf-muted);
+  font-size: 11px;
+}
+
+.ci-job-dur,
+.ci-step-dur {
+  flex: none;
+  color: var(--rf-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ci-step-list {
+  margin-block-start: 4px;
+  margin-inline-start: 14px;
+  padding-inline-start: 8px;
+  border-inline-start: 1px solid var(--rf-border);
+}
+
+.ci-step-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  inline-size: 100%;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: var(--rf-radius);
+  background: transparent;
+  color: var(--rf-muted);
+  font: inherit;
+  font-size: 11px;
+  text-align: start;
+  cursor: pointer;
+}
+
+.ci-step-row[data-active='true'] {
+  background: var(--rf-active);
+  color: var(--rf-fg);
+}
+
+.ci-step-dot {
+  flex: none;
+  inline-size: 6px;
+  block-size: 6px;
+  border-radius: 999px;
+  background: var(--rf-muted);
+}
+
+.ci-step-dot[data-status='passed'] {
+  background: var(--rf-success);
+}
+
+.ci-step-dot[data-status='failed'] {
+  background: var(--rf-danger);
+}
+
+.ci-step-dot[data-status='running'] {
+  background: var(--rf-accent);
+}
+
+.ci-step-title {
+  min-inline-size: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ci-log-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-inline-size: 0;
+  padding-inline-start: 10px;
+}
+
+/* Blacksmith-style runner & cache telemetry strip. */
+.ci-telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ci-metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-inline-size: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-panel-radius);
+  background: var(--rf-surface-2);
+}
+
+.ci-metric-spark {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ci-metric-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.ci-metric-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.ci-metric-label {
+  color: var(--rf-muted);
+  font-size: 11px;
+}
+
+.ci-metric-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+  font-variation-settings: var(--rf-weight-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.ci-metric-sub {
+  color: var(--rf-muted);
+  font-size: 11px;
+}
+
+.ci-metric-delta {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  color: var(--rf-muted);
+}
+
+.ci-metric-delta[data-tone='faster'] {
+  color: var(--rf-success);
+}
+
+.ci-metric-delta[data-tone='slower'] {
+  color: var(--rf-warning);
+}
+
+.ci-sparkline {
+  flex: none;
+  overflow: visible;
+}
+
+.ci-sparkline-line {
+  fill: none;
+  stroke: var(--rf-accent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ci-sparkline-area {
+  fill: color-mix(in oklab, var(--rf-accent) 16%, transparent);
+}
+
+.ci-sparkline[data-tone='info'] .ci-sparkline-line {
+  stroke: var(--rf-info);
+}
+
+.ci-sparkline[data-tone='info'] .ci-sparkline-area {
+  fill: color-mix(in oklab, var(--rf-info) 16%, transparent);
+}
+
+.ci-failure-callout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 14px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in oklab, var(--rf-danger) 40%, var(--rf-border));
+  border-radius: var(--rf-panel-radius);
+  background: color-mix(in oklab, var(--rf-danger) 8%, var(--rf-surface-2));
+}
+
+.ci-failure-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-inline-size: 0;
+  font-size: var(--rf-text-caption);
+}
+
+.ci-failure-body strong {
+  color: var(--rf-danger);
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.ci-failure-body code {
+  color: var(--rf-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+}
+
+.ci-failure-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .ci-artifacts-grid {
@@ -125,7 +484,29 @@
   font-variation-settings: var(--rf-weight-strong);
 }
 
+@media (max-width: 1040px) {
+  .ci-telemetry-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 860px) {
+  .ci-job-rail {
+    position: static;
+    max-block-size: none;
+    overflow: visible;
+    margin-inline-end: 0;
+  }
+
+  .ci-resizable > .rf-resizable-grip {
+    position: static;
+    block-size: auto;
+  }
+
+  .ci-log-column {
+    padding-inline-start: 0;
+  }
+
   .ci-artifacts-grid {
     grid-template-columns: minmax(0, 1fr);
   }

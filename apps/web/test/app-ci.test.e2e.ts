@@ -2,7 +2,7 @@ import { expect } from 'playwright/test'
 import { it } from 'remix/test'
 import { open, showcaseServer } from './showcase-router.ts'
 
-it('inspects job DAG, grouped ANSI logs, waterfall spans, artifacts, run history, and re-runs failed jobs', async (t) => {
+it('inspects job DAG, runner telemetry, Datadog-style log explorer, waterfall spans, artifacts, run history, and re-runs failed jobs', async (t) => {
   const page = await t.serve(showcaseServer)
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.setViewportSize({ width: 1280, height: 900 })
@@ -10,20 +10,28 @@ it('inspects job DAG, grouped ANSI logs, waterfall spans, artifacts, run history
   await open(page, '/apps/ci')
   await page.locator('[data-ci-ready]').waitFor()
 
-  // Initial failing run #4577 renders PipelineGraph with measured edges and auto-opened failed LogViewer step.
+  // Initial failing run #4577 renders PipelineGraph, Runner Telemetry, Failure Callout, and LogViewer histogram.
   await expect(page.locator('.ci-title-row')).toContainText('#4577')
   const graphTab = page.getByRole('tabpanel', { name: 'Graph & logs' })
   await expect(graphTab.locator('.rf-pipeline-stage')).toHaveCount(4)
   await expect(graphTab.locator('.rf-pipeline-edge')).toHaveCount(8)
+  await expect(graphTab.locator('.ci-telemetry-grid .ci-metric-card')).toHaveCount(4)
+  await expect(graphTab.locator('.ci-failure-callout')).toBeVisible()
+  await expect(graphTab.locator('.rf-log-histogram .rf-log-hist-bucket')).toHaveCount(3)
   await expect(graphTab.locator('[data-log-group="e2e-apps"]')).toHaveAttribute('data-open', 'true')
 
-  // Filter LogViewer to Errors only, then switch to Build job via PipelineGraph.
-  await graphTab.locator('.rf-log-pill[data-level="error"]').click()
-  await expect(graphTab.locator('.rf-log-line')).toHaveCount(4)
-  await graphTab.locator('.rf-log-pill[data-level="error"]').click()
+  // Inspect structured Datadog fields on the failing line and click a facet value to filter.
+  await graphTab.locator('.rf-log-fields-toggle').first().click()
+  await expect(graphTab.locator('.rf-log-fields-drawer')).toBeVisible()
 
+  // Click Filter errors on the failure callout -> applies `level:error` facet query.
+  await graphTab.getByRole('button', { name: 'Filter errors' }).click()
+  await expect(graphTab.locator('.rf-log-line')).toHaveCount(4)
+
+  // Switch to Build job via PipelineGraph -> updates telemetry & logs.
   await graphTab.locator('[data-pipeline-job="build"]').click()
   await expect(graphTab.locator('.rf-log-title')).toContainText('Build workspace')
+  await expect(graphTab.locator('.ci-failure-callout')).toBeHidden()
 
   // Switch to Waterfall tab and inspect a span.
   await page.getByRole('tab', { name: 'Waterfall' }).click()
@@ -47,5 +55,4 @@ it('inspects job DAG, grouped ANSI logs, waterfall spans, artifacts, run history
   await expect(page.locator('.ci-title-row')).toContainText('#4577')
   await page.getByRole('button', { name: 'Re-run failed jobs' }).click()
   await expect(page.locator('.ci-title-row')).toContainText('Passed')
-  await expect(page.getByRole('tab', { name: 'Graph & logs' })).toBeVisible()
 })
