@@ -258,11 +258,13 @@ try {
 
   const catalogStart = performance.now()
   const concurrency = 4
+  const crawlRoutes = [...docs, ...appSlugs.map((slug) => `/apps/${slug}`)]
   for (const { width, height, theme } of [
     { width: 1280, height: 720, theme: 'dark' },
     { width: 390, height: 844, theme: 'light' },
   ]) {
     const overflow: string[] = []
+    const collapsedPreviews: string[] = []
     let cursor = 0
     await Promise.all(
       Array.from({ length: concurrency }, async () => {
@@ -280,8 +282,8 @@ try {
           if (response.status() >= 400) pageErrors.push(`${response.status()} ${response.url()}`)
         })
         try {
-          while (cursor < docs.length) {
-            const path = docs[cursor++]!
+          while (cursor < crawlRoutes.length) {
+            const path = crawlRoutes[cursor++]!
             const response = await workerPage.goto(
               `${path}?theme=${theme}&density=default&font=inter`,
             )
@@ -308,6 +310,17 @@ try {
                 `${path}: ${dimensions.scroll}px in ${dimensions.width}px, ${elements.join(', ')}`,
               )
             }
+            if (path.startsWith('/docs/')) {
+              const stageHeight = await workerPage.evaluate(() => {
+                const content = document.querySelector<HTMLElement>(
+                  '.doc-preview-stage .doc-example-content',
+                )
+                return content ? content.getBoundingClientRect().height : null
+              })
+              if (stageHeight !== null && stageHeight < 12) {
+                collapsedPreviews.push(`${path} at ${width}px (${stageHeight}px)`)
+              }
+            }
             assert.deepEqual(pageErrors, [], `${path} at ${width}px`)
             const slug = path.split('/').at(-1) ?? ''
             if (process.env.REFLOW_SCREENSHOT_DIR && ['button', 'skill'].includes(slug)) {
@@ -324,12 +337,17 @@ try {
       }),
     )
     assert.equal(overflow.length, 0, overflow.join('\n'))
+    assert.equal(
+      collapsedPreviews.length,
+      0,
+      `Collapsed component previews: ${collapsedPreviews.join(', ')}`,
+    )
   }
   console.log(
-    `Hydrated ${docs.length} docs pages at both widths in ${((performance.now() - catalogStart) / 1000).toFixed(1)}s.`,
+    `Hydrated ${crawlRoutes.length} routes (${docs.length} docs + ${appSlugs.length} apps) at both widths in ${((performance.now() - catalogStart) / 1000).toFixed(1)}s.`,
   )
   console.log(
-    `Local Worker checks passed: ${docs.length} docs routes, assets, 404s, hydration, playgrounds, mobile, and SSR without JavaScript.`,
+    `Local Worker checks passed: ${crawlRoutes.length} routes, assets, 404s, hydration, previews, playgrounds, mobile, and SSR without JavaScript.`,
   )
 } finally {
   await browser?.close()

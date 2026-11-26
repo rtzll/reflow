@@ -26,9 +26,11 @@ const ANSI_COLORS: Record<number, string> = {
   97: 'white',
 }
 
-// Matches ANSI CSI sequences (including SGR color codes) and OSC sequences.
-// oxlint-disable-next-line no-control-regex
-const ANSI_PATTERN = /\x1b(?:\[([0-9;]*)([A-Za-z])|\][^\x07\x1b]*(?:\x07|\x1b\\))/g
+// Matches ANSI CSI sequences (including SGR color codes), OSC sequences,
+// and VT100-aborted escape prefixes immediately interrupted by another ESC.
+const ANSI_PATTERN =
+  // oxlint-disable-next-line no-control-regex
+  /\x1b(?:\[([0-9;]*)([A-Za-z])|\][^\x07\x1b]*(?:\x07|\x1b\\)|(?:\[[0-9;]*)?(?=\x1b))/g
 
 /** Removes ANSI escape codes so copied output or search queries match plain text. */
 export function stripAnsi(text: string): string {
