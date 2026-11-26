@@ -72,10 +72,15 @@ export function AppsIndex(handle: Handle<{ soundEnabled: boolean }>) {
 }
 
 export function AppWorkspace(
-  handle: Handle<{ app: ExampleApp; search: string; soundEnabled: boolean }>,
+  handle: Handle<{
+    app: ExampleApp
+    search: string
+    soundEnabled: boolean
+    prerenderedDiffs?: Record<string, string>
+  }>,
 ) {
   return () => {
-    const { app, search, soundEnabled } = handle.props
+    const { app, search, soundEnabled, prerenderedDiffs } = handle.props
     return (
       <div class="site-app-workspace" data-app={app.slug}>
         <a class="site-skip" href="#main">
@@ -92,7 +97,7 @@ export function AppWorkspace(
           {app.slug !== 'chat' && <ShowcaseSoundButton enabled={soundEnabled} />}
         </nav>
         <main id="main" data-rmx-key={app.slug} data-sound-scope="">
-          {app.render(search, soundEnabled)}
+          {app.render(search, soundEnabled, prerenderedDiffs)}
         </main>
       </div>
     )

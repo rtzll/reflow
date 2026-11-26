@@ -1,32 +1,11 @@
 import { Button, Icon } from '@rtzll/reflow'
 import { DiffView } from '@rtzll/reflow/diffs'
 import { on, type Handle } from 'remix/component'
+import { sampleDiff } from './diff-view-sample.ts'
 import { playCopyError, playCopySuccess } from './showcase-sound.ts'
 
-const sampleDiff = `--- a/packages/reflow/src/behaviors/shortcut.ts
-+++ b/packages/reflow/src/behaviors/shortcut.ts
-@@ -151,8 +151,13 @@ export function isMacPlatform() {
-   if (typeof navigator === 'undefined') return false
--  const platform = navigator.platform ?? ''
--  return /mac/i.test(platform)
-+  const nav = navigator as Navigator & { userAgentData?: { platform?: string } }
-+  const platform = nav.userAgentData?.platform ?? nav.platform ?? ''
-+  return /mac|iphone|ipad|ipod/i.test(platform)
- }
- 
--export function formatAria(shortcut: string) {
--  return shortcut.toUpperCase()
-+export function ariaShortcut(shortcut: string) {
-+  const { mod, meta, ctrl, alt, shift, key } = parseShortcut(shortcut)
-+  if (!key) return ''
-+  return [(mod || ctrl) && 'Control', meta && 'Meta', alt && 'Alt', shift && 'Shift', key.toUpperCase()]
-+    .filter(Boolean)
-+    .join('+')
- }
-`
-
 /** The DiffView example: a unified diff with a Unified/Split toggle and copyable patch. */
-export function DiffViewExample(handle: Handle) {
+export function DiffViewExample(handle: Handle<{ prerenderedHTML?: string }>) {
   let state: 'idle' | 'copied' | 'error' = 'idle'
   let timer: ReturnType<typeof setTimeout> | undefined
   handle.signal.addEventListener('abort', () => clearTimeout(timer), { once: true })
@@ -52,6 +31,7 @@ export function DiffViewExample(handle: Handle) {
     <div style={{ width: 'min(100%, 760px)' }}>
       <DiffView
         diff={sampleDiff}
+        prerenderedHTML={handle.props.prerenderedHTML}
         viewToggle
         wrap
         size="compact"

@@ -40,6 +40,7 @@ interface ChatProps {
   initialId: string
   search: string
   soundEnabled: boolean
+  prerenderedDiffs?: Record<string, string>
   links: { reflow: string; apps: string }
 }
 
@@ -281,6 +282,7 @@ export const ChatWorkspace = clientEntry(
                   localTime={localTime}
                   hidden={activeId !== thread.id}
                   recent={listed.filter((other) => other.messages.length).slice(0, 3)}
+                  prerenderedDiffs={handle.props.prerenderedDiffs}
                   onOpen={(other) => select(other, 'link')}
                   onChange={() => void handle.update()}
                 />
@@ -313,6 +315,7 @@ function ConversationPane(
     localTime: boolean
     /** Recent conversations offered on a new chat's welcome screen. */
     recent: Thread[]
+    prerenderedDiffs?: Record<string, string>
     onOpen: (thread: Thread) => void
     onChange: () => void
   }>,
@@ -702,6 +705,11 @@ function ConversationPane(
                     <DiffView
                       filename={message.diff.filename}
                       diff={message.diff.patch}
+                      prerenderedHTML={
+                        message.diff.filename
+                          ? handle.props.prerenderedDiffs?.[message.diff.filename]
+                          : undefined
+                      }
                       viewToggle
                       size="compact"
                     />

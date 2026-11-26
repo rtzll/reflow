@@ -46,6 +46,8 @@ export interface ExampleImages {
   thinkingPreview: string
   /** CodeBlock samples highlighted on the server, only on pages that show them. */
   code?: CodeSamples
+  /** DiffView HTML pre-rendered on the server for zero-flash hydration. */
+  diff?: string
 }
 
 export async function getPageAssets(appSlug?: string) {

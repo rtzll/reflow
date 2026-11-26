@@ -17,6 +17,10 @@
       "types": "./dist/diffs.d.ts",
       "default": "./dist/diffs.js"
     },
+    "./diffs/ssr": {
+      "types": "./dist/diffs-ssr.d.ts",
+      "default": "./dist/diffs-ssr.js"
+    },
     "./highlight": {
       "types": "./dist/highlight.d.ts",
       "default": "./dist/highlight.js"

@@ -2,6 +2,7 @@ import { createController } from 'remix/router'
 import { assets, getPageAssets } from '../assets.ts'
 import { catalog, galleryCatalog } from '../catalog.tsx'
 import { codeSamples, exampleSource } from '../code-samples.ts'
+import { diffSamples } from '../diff-samples.ts'
 import { docsIndex, introductionMarkdown, pageMarkdown } from '../docs-markdown.ts'
 import { Document } from '../document.tsx'
 import type { AppContext } from '../router.ts'
@@ -55,6 +56,7 @@ async function show(
     const app = exampleApps.find((entry) => entry.slug === slug)
     if (page === 'app' && !app) return new Response('App not found', { status: 404 })
     const assets = await getPageAssets(app?.slug ?? 'directory')
+    const diffs = app?.slug === 'chat' ? (await diffSamples()).chat : undefined
     return context.render(
       <Document
         assets={assets}
@@ -63,7 +65,12 @@ async function show(
         url={url}
       >
         {app ? (
-          <AppWorkspace app={app} search={query} soundEnabled={settings.soundEnabled} />
+          <AppWorkspace
+            app={app}
+            search={query}
+            soundEnabled={settings.soundEnabled}
+            prerenderedDiffs={diffs}
+          />
         ) : (
           <AppsIndex soundEnabled={settings.soundEnabled} />
         )}
@@ -75,9 +82,16 @@ async function show(
     return new Response('Component not found', { status: 404 })
   const title = page === 'gallery' ? 'Reflow' : `${component?.name ?? 'Documentation'} · Reflow`
   const pageAssets = await getPageAssets()
-  // CodeBlock's samples are highlighted on the server, for the pages that show them.
-  const samples = page === 'gallery' || slug === 'code-block' ? await codeSamples() : undefined
-  const images = slug === 'code-block' ? { ...pageAssets.images, code: samples } : pageAssets.images
+  // CodeBlock and DiffView samples are highlighted/pre-rendered on the server for zero-flash hydration.
+  const [samples, diffs] = await Promise.all([
+    page === 'gallery' || slug === 'code-block' ? codeSamples() : undefined,
+    page === 'gallery' || slug === 'diff-view' ? diffSamples() : undefined,
+  ])
+  const images = {
+    ...pageAssets.images,
+    ...(slug === 'code-block' ? { code: samples } : {}),
+    ...(slug === 'diff-view' ? { diff: diffs?.example } : {}),
+  }
   const source = page === 'component' && slug ? await exampleSource(slug) : undefined
   const components =
     page === 'gallery'
@@ -86,6 +100,7 @@ async function show(
           page === 'gallery',
           samples,
           url.searchParams,
+          diffs?.example,
         )
       : source
         ? catalog.map((entry) => (entry.slug === slug ? { ...entry, source } : entry))

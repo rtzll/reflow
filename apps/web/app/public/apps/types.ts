@@ -5,5 +5,9 @@ export interface ExampleApp {
   name: string
   description: string
   /** Render the app using the request's query string, including the leading ?. */
-  render: (search: string, soundEnabled: boolean) => RemixNode
+  render: (
+    search: string,
+    soundEnabled: boolean,
+    prerenderedDiffs?: Record<string, string>,
+  ) => RemixNode
 }

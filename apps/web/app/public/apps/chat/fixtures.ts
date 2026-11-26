@@ -170,7 +170,7 @@ North landing · Last departure, 18:40
           filename: 'issue/caption-row.tsx',
           patch: `--- a/issue/caption-row.tsx
 +++ b/issue/caption-row.tsx
-@@ -4,7 +4,9 @@ export function CaptionRow({ place, time }: CaptionProps) {
+@@ -4,6 +4,8 @@ export function CaptionRow({ place, time }: CaptionProps) {
    return (
      <figcaption class="photo-caption">
 -      {place} · Last departure, {time}

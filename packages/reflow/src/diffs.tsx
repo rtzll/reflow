@@ -1,4 +1,4 @@
-import { ref, unsafeHTML, type Handle, type RemixNode } from 'remix/component'
+import { createElement, on, ref, unsafeHTML, type Handle, type RemixNode } from 'remix/component'
 import type * as PierreDiffs from '@pierre/diffs'
 import type {
   DiffIndicators,
@@ -12,6 +12,7 @@ import type {
   SelectedLineRange,
   ThemeTypes,
 } from '@pierre/diffs'
+import { Icon } from './icon.tsx'
 import { SegmentedControl } from './segmented-control.tsx'
 import { classList, type ControlSize } from './systems/styling.ts'
 
@@ -34,7 +35,7 @@ export interface DiffViewProps {
   newFile?: DiffFile | null
   /** Pre-parsed `@pierre/diffs` metadata. */
   fileDiff?: FileDiffMetadata
-  /** Pre-rendered Shadow DOM HTML from `@pierre/diffs/ssr` for zero-flash SSR hydration. */
+  /** Pre-rendered Shadow DOM HTML from `prerenderDiff()` in `@rtzll/reflow/diffs/ssr`. */
   prerenderedHTML?: string
   /** File path shown in the header; overrides the path extracted from the diff or file inputs. */
   filename?: string
@@ -48,6 +49,24 @@ export interface DiffViewProps {
   onViewChange?: (view: 'unified' | 'split') => void
   /** Shows a Unified / Split segmented toggle in the header. */
   viewToggle?: boolean
+  /** Shows a copy icon button in the header matching `CodeBlock`. Default `false`. */
+  copyable?: boolean
+  /** Custom text copied when `copyable` is enabled; defaults to `diff` or `newFile`/`oldFile` contents. */
+  copyText?: string
+  /** Called after the diff text is copied. */
+  onCopy?: () => void
+  /** Called if copying fails. */
+  onCopyError?: () => void
+  /** Shows a chevron toggle in the header to collapse and expand the diff body. */
+  collapsible?: boolean
+  /** Controlled collapsed state. */
+  collapsed?: boolean
+  /** Initial collapsed state when uncontrolled. Default `false`. */
+  defaultCollapsed?: boolean
+  /** Called when the collapsed state changes. */
+  onCollapsedChange?: (collapsed: boolean) => void
+  /** Leading slot rendered before the file path (e.g. status badge or viewed checkbox). */
+  headerPrefix?: RemixNode
   /** Shows line numbers in the gutter. Default `true`. */
   lineNumbers?: boolean
   /** Wraps long code lines instead of scrolling horizontally. */
@@ -66,13 +85,14 @@ export interface DiffViewProps {
   selectedLines?: SelectedLineRange | null
   /** Called when the user selects or clears a line range. */
   onLineSelected?: (range: SelectedLineRange | null) => void
+  /** Shows `@pierre/diffs`'s hover `+` gutter button to act on a line or selected range. */
+  enableGutterUtility?: boolean
+  /** Called when the user clicks the hover `+` gutter utility button. */
+  onGutterUtilityClick?: (range: SelectedLineRange) => void
   /** Inline annotations attached to specific diff lines. */
   lineAnnotations?: DiffLineAnnotation<unknown>[]
-  /** Renders the DOM element for an inline line annotation. */
-  renderAnnotation?: (
-    annotation: DiffLineAnnotation<unknown>,
-    fileDiff: FileDiffMetadata,
-  ) => HTMLElement | undefined
+  /** Renders Remix UI projected into each annotated line slot inside the diff. */
+  renderAnnotation?: (annotation: DiffLineAnnotation<unknown>) => RemixNode
   /** Syntax theme name or `{ light, dark }` pair. Defaults to Reflow's CSS-variable theme. */
   theme?: string | { light: string; dark: string }
   /** Color scheme mode inside the diff surface. Default `'system'` (inherits Reflow theme). */
@@ -81,7 +101,7 @@ export interface DiffViewProps {
   unsafeCSS?: string
   /** Controls text scale and header spacing. */
   size?: ControlSize
-  /** Trailing controls rendered in the header (e.g. Copy patch). */
+  /** Trailing controls rendered in the header (e.g. Copy patch, Viewed). */
   actions?: RemixNode
   /** Accessible name for the diff figure. Defaults to `filename` or `'Code diff'`. */
   label?: string
@@ -89,6 +109,7 @@ export interface DiffViewProps {
 }
 
 type PierreModule = typeof PierreDiffs
+type CopyState = 'idle' | 'copied' | 'error'
 
 let pierrePromise: Promise<PierreModule> | undefined
 let reflowThemeRegistered = false
@@ -218,6 +239,10 @@ function fallbackBlocks(props: DiffViewProps): FallbackBlock[] {
   return []
 }
 
+function annotationSlotName(annotation: DiffLineAnnotation<unknown>) {
+  return `annotation-${annotation.side}-${annotation.lineNumber}`
+}
+
 const HOST_THEME_CSS = ':host { color-scheme: inherit; }'
 
 /**
@@ -225,20 +250,89 @@ const HOST_THEME_CSS = ':host { color-scheme: inherit; }'
  * wrapped in Reflow's frame, header, and CSS-variable syntax theme.
  *
  * Import from `@rtzll/reflow/diffs`. Requires the optional `@pierre/diffs` peer dependency.
+ * Pre-render on the server with `prerenderDiff()` from `@rtzll/reflow/diffs/ssr` for zero-flash hydration.
  * See docs/diff-view.md.
  */
 export function DiffView(handle: Handle<DiffViewProps>) {
   let internalView: 'unified' | 'split' = handle.props.defaultView ?? 'unified'
-  let ready = false
+  let internalCollapsed = handle.props.defaultCollapsed ?? false
+  let ready = Boolean(handle.props.prerenderedHTML)
   let computedCounts: { filename?: string; added: number; removed: number } | undefined
+
+  let copyState: CopyState = 'idle'
+  let copyGlyph: CopyState = 'idle'
+  let copyGlyphKey = 0
+  let copyPhase: 'exit' | 'enter' | undefined
+  let copyRequest = 0
+  let copyReset: ReturnType<typeof setTimeout> | undefined
+  let copySwapTimer: ReturnType<typeof setTimeout> | undefined
+
+  handle.signal.addEventListener(
+    'abort',
+    () => {
+      clearTimeout(copyReset)
+      clearTimeout(copySwapTimer)
+    },
+    { once: true },
+  )
 
   let pierre: PierreModule | undefined
   let instance: PierreFileDiff<unknown> | undefined
-  let stage: HTMLElement | undefined
+  let fileContainer: HTMLElement | undefined
   let hydrated = false
 
   function currentView() {
     return handle.props.view ?? internalView
+  }
+
+  function currentCollapsed() {
+    return handle.props.collapsed ?? internalCollapsed
+  }
+
+  function swapCopyGlyph() {
+    clearTimeout(copySwapTimer)
+    if (
+      typeof matchMedia !== 'undefined' &&
+      matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      copyGlyph = copyState
+      copyGlyphKey++
+      copyPhase = undefined
+      void handle.update()
+      return
+    }
+    copyPhase = 'exit'
+    void handle.update()
+    copySwapTimer = setTimeout(() => {
+      copyGlyph = copyState
+      copyGlyphKey++
+      copyPhase = 'enter'
+      void handle.update()
+    }, 115)
+  }
+
+  async function copyDiff() {
+    const props = handle.props
+    const text =
+      props.copyText ?? props.diff ?? props.newFile?.contents ?? props.oldFile?.contents ?? ''
+    const operation = ++copyRequest
+    clearTimeout(copyReset)
+    let copied = false
+    try {
+      await navigator.clipboard.writeText(text)
+      copied = true
+    } catch {
+      // Clipboard may be unavailable; surface error state.
+    }
+    if (handle.signal.aborted || operation !== copyRequest) return
+    copyState = copied ? 'copied' : 'error'
+    swapCopyGlyph()
+    copyReset = setTimeout(() => {
+      copyState = 'idle'
+      swapCopyGlyph()
+    }, 2000)
+    if (copied) props.onCopy?.()
+    else props.onCopyError?.()
   }
 
   function buildOptions(props: DiffViewProps): FileDiffOptions<unknown, undefined> {
@@ -254,7 +348,8 @@ export function DiffView(handle: Handle<DiffViewProps>) {
       expandUnchanged: props.expandUnchanged,
       enableLineSelection: props.enableLineSelection,
       onLineSelected: props.onLineSelected,
-      renderAnnotation: props.renderAnnotation,
+      enableGutterUtility: props.enableGutterUtility,
+      onGutterUtilityClick: props.onGutterUtilityClick,
       theme: props.theme ?? 'reflow',
       themeType: props.themeType ?? 'system',
       deferHydrationHighlight: Boolean(props.prerenderedHTML),
@@ -284,7 +379,7 @@ export function DiffView(handle: Handle<DiffViewProps>) {
   }
 
   function syncInstance() {
-    if (!pierre || !stage) return
+    if (!pierre || !fileContainer) return
     const props = handle.props
     const fileDiff = resolveFileDiff(pierre, props)
     if (!fileDiff) return
@@ -300,27 +395,23 @@ export function DiffView(handle: Handle<DiffViewProps>) {
     const options = buildOptions(props)
     if (!instance) {
       instance = new pierre.FileDiff(options)
-      const existingContainer = stage.querySelector<HTMLElement>('diffs-container')
-      if (props.prerenderedHTML && existingContainer && !hydrated) {
+      if (props.prerenderedHTML && !hydrated) {
         hydrated = true
         instance.hydrate({
-          fileContainer: existingContainer,
+          fileContainer,
           fileDiff,
           prerenderedHTML: props.prerenderedHTML,
           lineAnnotations: props.lineAnnotations,
         })
       } else {
         instance.render({
-          containerWrapper: stage,
+          fileContainer,
           fileDiff,
           lineAnnotations: props.lineAnnotations,
         })
       }
       if (props.selectedLines !== undefined) instance.setSelectedLines(props.selectedLines)
-      if (
-        !ready &&
-        stage.querySelector('diffs-container')?.shadowRoot?.querySelector('[data-line]')
-      ) {
+      if (!ready && fileContainer.shadowRoot?.querySelector('[data-line]')) {
         ready = true
         void handle.update()
       } else if (countsChanged) {
@@ -333,6 +424,7 @@ export function DiffView(handle: Handle<DiffViewProps>) {
     instance.setOptions(options)
     instance.render({
       forceRender,
+      fileContainer,
       fileDiff,
       lineAnnotations: props.lineAnnotations,
     })
@@ -340,8 +432,8 @@ export function DiffView(handle: Handle<DiffViewProps>) {
     if (countsChanged) void handle.update()
   }
 
-  const mountStage = ref<HTMLElement>((node, signal) => {
-    stage = node
+  const mountContainer = ref<HTMLElement>((node, signal) => {
+    fileContainer = node
     let disposed = false
     signal.addEventListener(
       'abort',
@@ -349,7 +441,7 @@ export function DiffView(handle: Handle<DiffViewProps>) {
         disposed = true
         instance?.cleanUp()
         instance = undefined
-        stage = undefined
+        fileContainer = undefined
         hydrated = false
       },
       { once: true },
@@ -367,12 +459,17 @@ export function DiffView(handle: Handle<DiffViewProps>) {
     const {
       filename: filenameProp,
       viewToggle = false,
+      copyable = false,
+      collapsible = false,
+      headerPrefix,
       lineNumbers = true,
       wrap = false,
       size,
       actions,
       label,
       prerenderedHTML,
+      lineAnnotations,
+      renderAnnotation,
       class: classProp,
     } = props
 
@@ -387,27 +484,83 @@ export function DiffView(handle: Handle<DiffViewProps>) {
           })
 
     const activeView = currentView()
+    const isCollapsed = currentCollapsed()
     const path = filenameProp ?? summary.filename
     const parts = path ? splitPath(path) : undefined
-    const showHeader = Boolean(path || summary.added || summary.removed || viewToggle || actions)
+    const showHeader = Boolean(
+      collapsible ||
+      headerPrefix != null ||
+      path ||
+      summary.added ||
+      summary.removed ||
+      viewToggle ||
+      copyable ||
+      actions,
+    )
     const countLabel = `${summary.added} added, ${summary.removed} removed`
+    const copyFeedback =
+      copyState === 'copied' ? 'Copied' : copyState === 'error' ? 'Copy failed' : ''
+    const isServer = typeof window === 'undefined'
+    const isReady = ready || Boolean(prerenderedHTML)
+    const stageId = `${handle.id}-stage`
 
-    if (pierre && stage) {
+    if (pierre && fileContainer) {
       handle.queueTask(() => syncInstance())
     }
+
+    const slottedAnnotations =
+      renderAnnotation && lineAnnotations?.length
+        ? lineAnnotations.map((annotation, index) => (
+            <div
+              key={`${annotation.side}-${annotation.lineNumber}-${index}`}
+              class="rf-diff-annotation"
+              slot={annotationSlotName(annotation)}
+            >
+              {renderAnnotation(annotation)}
+            </div>
+          ))
+        : null
+
+    const shadowTemplate =
+      isServer && prerenderedHTML
+        ? createElement('template', {
+            shadowrootmode: 'open',
+            innerHTML: unsafeHTML(prerenderedHTML),
+          })
+        : null
 
     return (
       <figure
         class={classList('rf-diff-view', classProp)}
         aria-label={label ?? path ?? 'Code diff'}
         data-view={activeView}
+        data-state={copyState}
         data-density={size === 'compact' ? 'compact' : undefined}
         data-wrap={wrap || undefined}
         data-line-numbers={lineNumbers ? undefined : 'false'}
-        data-rf-diffs-ready={ready ? '' : undefined}
+        data-collapsed={isCollapsed ? 'true' : undefined}
+        data-rf-diffs-ready={isReady ? '' : undefined}
       >
         {showHeader && (
           <figcaption class="rf-diff-header">
+            {collapsible && (
+              <button
+                type="button"
+                class="rf-diff-collapse"
+                aria-expanded={!isCollapsed}
+                aria-controls={stageId}
+                aria-label={isCollapsed ? `Expand ${path ?? 'diff'}` : `Collapse ${path ?? 'diff'}`}
+                mix={on('click', () => {
+                  const next = !isCollapsed
+                  if (props.collapsed === undefined) internalCollapsed = next
+                  props.onCollapsedChange?.(next)
+                  void handle.update()
+                })}
+              >
+                <Icon name="chevron-down" size={14} />
+              </button>
+            )}
+            {headerPrefix != null && <span class="rf-diff-prefix">{headerPrefix}</span>}
             {parts && (
               <span class="rf-diff-path" title={path}>
                 {parts.folder && <span class="rf-diff-folder">{parts.folder}</span>}
@@ -424,7 +577,7 @@ export function DiffView(handle: Handle<DiffViewProps>) {
                 </span>
               </span>
             )}
-            {(viewToggle || actions) && (
+            {(viewToggle || actions || copyable) && (
               <div class="rf-diff-controls">
                 {viewToggle && (
                   <SegmentedControl
@@ -444,12 +597,54 @@ export function DiffView(handle: Handle<DiffViewProps>) {
                   />
                 )}
                 {actions}
+                {copyable && (
+                  <>
+                    <button
+                      type="button"
+                      class="rf-diff-copy"
+                      aria-label={copyFeedback || 'Copy diff'}
+                      mix={on('click', () => void copyDiff())}
+                    >
+                      <span class="rf-copy-action" aria-hidden="true">
+                        <span
+                          class="rf-copy-glyph"
+                          key={copyGlyphKey}
+                          data-glyph={copyGlyph}
+                          data-phase={copyPhase}
+                        >
+                          {copyGlyph === 'idle' ? (
+                            <Icon name="copy" size={14} />
+                          ) : (
+                            <svg viewBox="2 4 20 16" width="14" height="14" fill="none" data-result>
+                              <path
+                                d={
+                                  copyGlyph === 'copied'
+                                    ? 'M6 12L10 16L18 8'
+                                    : 'M9 9L15 15M15 9L9 15'
+                                }
+                                pathLength="1"
+                              />
+                            </svg>
+                          )}
+                        </span>
+                      </span>
+                    </button>
+                    <span class="rf-basic-sr-only" aria-live="polite">
+                      {copyFeedback}
+                    </span>
+                  </>
+                )}
               </div>
             )}
           </figcaption>
         )}
-        <div class="rf-diff-stage">
-          {!ready && !prerenderedHTML && (
+        <div
+          id={stageId}
+          class="rf-diff-stage"
+          hidden={isCollapsed || undefined}
+          inert={isCollapsed || undefined}
+        >
+          {!isReady && (
             <div class="rf-diff-fallback">
               {fallbackBlocks(props).map((block, index) =>
                 block.kind === 'hunk' ? (
@@ -464,17 +659,14 @@ export function DiffView(handle: Handle<DiffViewProps>) {
               )}
             </div>
           )}
-          {prerenderedHTML ? (
-            <div
-              class="rf-diff-mount"
-              mix={mountStage}
-              innerHTML={unsafeHTML(
-                `<diffs-container><template shadowrootmode="open">${prerenderedHTML}</template></diffs-container>`,
-              )}
-            />
-          ) : (
-            <div class="rf-diff-mount" mix={mountStage} />
-          )}
+          <div class="rf-diff-mount">
+            {createElement(
+              'diffs-container',
+              { mix: mountContainer },
+              shadowTemplate,
+              slottedAnnotations,
+            )}
+          </div>
         </div>
       </figure>
     )

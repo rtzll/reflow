@@ -8,7 +8,7 @@ export const chatApp: ExampleApp = {
   slug: 'chat',
   name: 'Chat',
   description: 'Outline a story, draft interview questions, or proof an edit.',
-  render(search, soundEnabled) {
+  render(search, soundEnabled, prerenderedDiffs) {
     const thread = new URLSearchParams(search).get('thread')
     const initialId =
       thread && (conversations.some(({ id }) => id === thread) || localThreadId.test(thread))
@@ -20,6 +20,7 @@ export const chatApp: ExampleApp = {
         initialId={initialId}
         search={search}
         soundEnabled={soundEnabled}
+        prerenderedDiffs={prerenderedDiffs}
         links={{ reflow: routes.gallery.href(), apps: routes.apps.href() }}
       />
     )

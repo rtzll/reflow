@@ -103,3 +103,66 @@ it('computes diffs from oldFile and newFile and forwards lineNumbers and wrap op
   equal(diffRoot.getAttribute('data-overflow'), 'wrap')
   ok(diffRoot.hasAttribute('data-disable-line-numbers'))
 })
+
+it('supports collapsible diff body, headerPrefix, copyable button, and slotted Remix annotations', async (t) => {
+  const states: boolean[] = []
+  let copied = 0
+  const originalClipboard = navigator.clipboard
+  Object.defineProperty(navigator, 'clipboard', {
+    configurable: true,
+    value: { writeText: async () => {} },
+  })
+  t.after(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: originalClipboard,
+    })
+  })
+
+  const { $, act, cleanup } = render(
+    <DiffView
+      diff={sampleDiff}
+      collapsible
+      onCollapsedChange={(next) => states.push(next)}
+      headerPrefix={<span class="status-tag">M</span>}
+      copyable
+      onCopy={() => {
+        copied++
+      }}
+      lineAnnotations={[{ side: 'additions', lineNumber: 12, metadata: { author: 'Ada' } }]}
+      renderAnnotation={(annotation) => (
+        <div class="test-annotation">
+          Note on line {annotation.lineNumber} ({(annotation.metadata as { author: string }).author}
+          )
+        </div>
+      )}
+    />,
+  )
+  t.after(cleanup)
+
+  const figure = $('.rf-diff-view')!
+  await waitFor(() => figure.hasAttribute('data-rf-diffs-ready'))
+
+  equal($('.status-tag')?.textContent, 'M')
+  const annotationSlot = figure.querySelector('[slot="annotation-additions-12"]')
+  ok(annotationSlot, 'mounts Remix annotation into matching @pierre/diffs slot')
+  equal(annotationSlot.textContent, 'Note on line 12 (Ada)')
+
+  const container = figure.querySelector('diffs-container')!
+  await waitFor(
+    () => container.shadowRoot!.querySelector('slot[name="annotation-additions-12"]') !== null,
+  )
+
+  const copyButton = $('.rf-diff-copy') as HTMLButtonElement
+  await act(() => copyButton.click())
+  await waitFor(() => copied === 1)
+  equal(figure.getAttribute('data-state'), 'copied')
+
+  const collapseButton = $('.rf-diff-collapse') as HTMLButtonElement
+  equal(collapseButton.getAttribute('aria-expanded'), 'true')
+  await act(() => collapseButton.click())
+  deepEqual(states, [true])
+  equal(figure.getAttribute('data-collapsed'), 'true')
+  equal(collapseButton.getAttribute('aria-expanded'), 'false')
+  ok($('.rf-diff-stage')?.hasAttribute('hidden'))
+})

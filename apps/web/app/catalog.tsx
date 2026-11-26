@@ -415,6 +415,7 @@ export function galleryCatalog(
   gallery = false,
   samples?: CodeSamples,
   query?: URLSearchParams,
+  diff?: string,
 ) {
   return catalog.map((component) =>
     component.preview == null
@@ -435,6 +436,7 @@ export function galleryCatalog(
                   : undefined
               }
               code={component.slug === 'code-block' ? samples?.card : undefined}
+              diff={component.slug === 'diff-view' ? diff : undefined}
             />
           ),
         },

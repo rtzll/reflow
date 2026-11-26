@@ -72,6 +72,111 @@
   line-height: var(--rf-leading-caption, 16px);
 }
 
+.rf-diff-view[data-collapsed='true'] .rf-diff-header {
+  border-block-end: 0;
+}
+
+.rf-diff-collapse {
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: 24px;
+  block-size: 24px;
+  margin-inline-start: -4px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--rf-radius);
+  outline: none;
+  background: transparent;
+  color: var(--rf-muted);
+  cursor: pointer;
+  transition:
+    color var(--rf-fast),
+    background-color var(--rf-fast);
+}
+
+.rf-diff-collapse svg {
+  transition: transform var(--rf-spring-snappy);
+}
+
+.rf-diff-view[data-collapsed='true'] .rf-diff-collapse svg {
+  transform: rotate(-90deg);
+}
+
+.rf-diff-collapse:focus-visible {
+  box-shadow: 0 0 0 1px var(--rf-accent);
+}
+
+@media (hover: hover) {
+  .rf-diff-collapse:hover {
+    background: var(--rf-hover);
+    color: var(--rf-fg);
+  }
+}
+
+.rf-diff-prefix {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+}
+
+.rf-diff-copy {
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: 28px;
+  block-size: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--rf-radius);
+  outline: none;
+  background: transparent;
+  color: var(--rf-muted);
+  cursor: pointer;
+  transition:
+    color var(--rf-fast),
+    background-color var(--rf-fast);
+}
+
+.rf-diff-copy .rf-copy-action {
+  padding: 0;
+  color: inherit;
+}
+
+.rf-diff-copy:focus-visible {
+  box-shadow: 0 0 0 1px var(--rf-accent);
+}
+
+@media (hover: hover) {
+  .rf-diff-copy:hover {
+    background: var(--rf-hover);
+    color: var(--rf-fg);
+  }
+
+  .rf-diff-copy:hover .rf-copy-action svg {
+    stroke-width: 2;
+  }
+}
+
+.rf-diff-view[data-state='copied'] .rf-diff-copy {
+  color: var(--rf-fg);
+}
+
+.rf-diff-annotation {
+  padding: 10px var(--rf-diff-pad);
+  background: var(--rf-surface-1);
+  border-block: 1px solid var(--rf-border);
+  font-family: var(--rf-font);
+  white-space: normal;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-diff-collapse svg {
+    transition: none;
+  }
+}
+
 .rf-diff-path {
   display: inline-flex;
   min-inline-size: 0;

@@ -56,7 +56,7 @@ const styles = [
 const appStyles = (await readdir(resolve(publicDir, 'apps'), { withFileTypes: true }))
   .filter((entry) => entry.isDirectory())
   .map(({ name }) => [name, `app/public/apps/${name}/styles.css`] as const)
-const [client, samples, sources] = await Promise.all([
+const [client, samples, sources, diffs] = await Promise.all([
   build({
     ...common,
     entryPoints: [
@@ -78,6 +78,8 @@ const [client, samples, sources] = await Promise.all([
   // Highlight the CodeBlock samples while bundling, so the worker never includes Shiki.
   import('../app/code-samples.ts').then(({ codeSamples }) => codeSamples()),
   import('../app/code-samples.ts').then(({ exampleSources }) => exampleSources()),
+  // Pre-render showcase diffs into Declarative Shadow DOM HTML, so the worker ships zero-flash SSR diffs with no @pierre/diffs runtime.
+  import('../app/diff-samples.ts').then(({ diffSamples }) => diffSamples()),
 ])
 
 if (!client.metafile) throw new Error('esbuild returned no metafile')
@@ -165,6 +167,7 @@ const worker = await build({
     REFLOW_ASSETS: JSON.stringify(manifest),
     REFLOW_EXAMPLE_SOURCES: JSON.stringify(sources),
     REFLOW_CODE_SAMPLES: JSON.stringify(samples),
+    REFLOW_DIFF_SAMPLES: JSON.stringify(diffs),
   },
   plugins: [
     clientEntryPlugin,
@@ -178,6 +181,10 @@ const worker = await build({
         builder.onResolve({ filter: /code-samples\.ts$/ }, ({ path, resolveDir }) => {
           if (resolve(resolveDir, path) === resolve(root, 'app/code-samples.ts'))
             return { path: resolve(root, 'worker/code-samples.ts') }
+        })
+        builder.onResolve({ filter: /diff-samples\.ts$/ }, ({ path, resolveDir }) => {
+          if (resolve(resolveDir, path) === resolve(root, 'app/diff-samples.ts'))
+            return { path: resolve(root, 'worker/diff-samples.ts') }
         })
         builder.onResolve({ filter: /^@pierre\/diffs(?:\/.*)?$/ }, ({ path }) => ({
           path,

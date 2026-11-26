@@ -42,6 +42,8 @@ try {
     'dist/index.d.ts',
     'dist/diffs.js',
     'dist/diffs.d.ts',
+    'dist/diffs-ssr.js',
+    'dist/diffs-ssr.d.ts',
     'dist/highlight.js',
     'dist/highlight.d.ts',
     'dist/markdown.js',
@@ -92,9 +94,9 @@ try {
     const source = extract(tarball, file)
     assert.doesNotMatch(source, /from ['"](?:shiki|@shikijs\/)/, `${file} must not import Shiki`)
   }
-  // @pierre/diffs is opt-in: only the diffs entry may import it.
+  // @pierre/diffs is opt-in: only the diffs entries may import it.
   for (const file of files.filter((name) => /^package\/dist\/.+\.js$/.test(name))) {
-    if (file === 'package/dist/diffs.js') continue
+    if (file === 'package/dist/diffs.js' || file === 'package/dist/diffs-ssr.js') continue
     const source = extract(tarball, file)
     assert.doesNotMatch(source, /@pierre\/diffs/, `${file} must not import @pierre/diffs`)
   }
@@ -102,6 +104,11 @@ try {
     extract(tarball, 'package/dist/diffs.js'),
     /@pierre\/diffs/,
     'dist/diffs.js should import @pierre/diffs',
+  )
+  assert.match(
+    extract(tarball, 'package/dist/diffs-ssr.js'),
+    /@pierre\/diffs\/ssr/,
+    'dist/diffs-ssr.js should import @pierre/diffs/ssr',
   )
   // marked loads only with the Markdown entry, so other pages never download it.
   for (const file of files.filter((name) => /^package\/dist\/.+\.js$/.test(name))) {

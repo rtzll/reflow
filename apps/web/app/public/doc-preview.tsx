@@ -232,7 +232,11 @@ export const DocPreview = clientEntry(
                     images={handle.props.images}
                   />
                 ) : (
-                  <Example slug={handle.props.slug} query={handle.props.query} />
+                  <Example
+                    slug={handle.props.slug}
+                    query={handle.props.query}
+                    diff={handle.props.images.diff}
+                  />
                 )}
               </fieldset>
               {inspect && !codeVisible && (

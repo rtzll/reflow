@@ -228,6 +228,7 @@ export const Example = clientEntry(
       avatar?: string
       query?: string
       code?: HighlightedCode
+      diff?: string
     }>,
   ) {
     let starting = false
@@ -286,7 +287,7 @@ export const Example = clientEntry(
         case 'file-changes':
           return <FileChangesExample />
         case 'diff-view':
-          return <DiffViewExample />
+          return <DiffViewExample prerenderedHTML={handle.props.diff} />
         case 'kbd':
           return <KbdExample />
         case 'time-field':

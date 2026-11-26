@@ -857,7 +857,8 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           name: 'prerenderedHTML',
           type: 'string',
           required: false,
-          description: 'Pre-rendered Shadow DOM HTML from @pierre/diffs/ssr for SSR hydration.',
+          description:
+            'Pre-rendered Declarative Shadow DOM HTML from prerenderDiff() in @rtzll/reflow/diffs/ssr for zero-flash SSR hydration.',
         },
         {
           name: 'filename',
@@ -900,6 +901,62 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           type: 'boolean',
           required: false,
           description: 'Shows a compact Unified / Split toggle in the header.',
+        },
+        {
+          name: 'copyable',
+          type: 'boolean',
+          required: false,
+          description:
+            'Shows a copy icon button in the header matching CodeBlock. Defaults to false.',
+        },
+        {
+          name: 'copyText',
+          type: 'string',
+          required: false,
+          description:
+            'Custom text copied when copyable is enabled; defaults to diff or file contents.',
+        },
+        {
+          name: 'onCopy',
+          type: '() => void',
+          required: false,
+          description: 'Called after the diff text is copied.',
+        },
+        {
+          name: 'onCopyError',
+          type: '() => void',
+          required: false,
+          description: 'Called if copying fails.',
+        },
+        {
+          name: 'collapsible',
+          type: 'boolean',
+          required: false,
+          description: 'Shows a chevron toggle in the header to collapse and expand the diff body.',
+        },
+        {
+          name: 'collapsed',
+          type: 'boolean',
+          required: false,
+          description: 'Controlled collapsed state.',
+        },
+        {
+          name: 'defaultCollapsed',
+          type: 'boolean',
+          required: false,
+          description: 'Initial collapsed state when uncontrolled. Defaults to false.',
+        },
+        {
+          name: 'onCollapsedChange',
+          type: '(collapsed: boolean) => void',
+          required: false,
+          description: 'Called when the collapsed state changes.',
+        },
+        {
+          name: 'headerPrefix',
+          type: 'RemixNode',
+          required: false,
+          description: 'Leading slot rendered before the file path (such as a status badge).',
         },
         {
           name: 'lineNumbers',
@@ -956,6 +1013,18 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           description: 'Called when the user selects or clears a line range.',
         },
         {
+          name: 'enableGutterUtility',
+          type: 'boolean',
+          required: false,
+          description: 'Shows the hover + gutter button to act on a line or selected range.',
+        },
+        {
+          name: 'onGutterUtilityClick',
+          type: '(range: SelectedLineRange) => void',
+          required: false,
+          description: 'Called when the user clicks the hover + gutter utility button.',
+        },
+        {
           name: 'lineAnnotations',
           type: 'DiffLineAnnotation<unknown>[]',
           required: false,
@@ -963,9 +1032,9 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
         },
         {
           name: 'renderAnnotation',
-          type: '(annotation: DiffLineAnnotation<unknown>, fileDiff: FileDiffMetadata) => HTMLElement | undefined',
+          type: '(annotation: DiffLineAnnotation<unknown>) => RemixNode',
           required: false,
-          description: 'Renders the DOM element for an inline line annotation.',
+          description: 'Renders Remix UI projected into each annotated line slot inside the diff.',
         },
         {
           name: 'theme',
