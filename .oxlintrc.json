@@ -43,6 +43,7 @@
             "fixMixedExportsWithInlineTypeSpecifier": false
           }
         ],
+        "import/no-duplicates": "error",
         "import/extensions": [
           "error",
           "always",

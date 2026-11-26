@@ -2,6 +2,7 @@ import { teamTableCode } from './team-table-example.tsx'
 import { projectFileMenuCode } from './project-tree-example.tsx'
 import { bannerFragment } from './banner-example.tsx'
 import {
+  accordionItems,
   markdownNote,
   checkboxFruit,
   radioOptions,
@@ -12,7 +13,6 @@ import { carouselExampleCode } from './carousel-example.tsx'
 import { questionCode, questionPlayground } from './question-example-data.ts'
 import { requestFormCode } from './request-form-example.tsx'
 import { cardPlaygroundCode } from './card-example-code.ts'
-import { accordionItems } from './component-example-data.ts'
 import { initialPlayground, questionSettings, type PlaygroundValues } from './doc-playground.tsx'
 
 const sharedPlaygroundDefaults = new Set([

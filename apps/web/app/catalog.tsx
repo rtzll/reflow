@@ -6,12 +6,12 @@ import {
   checkboxFruit,
   markdownNote,
   radioOptions,
+  triggerMenuCode,
 } from './public/component-example-data.ts'
 import { cardPlaygroundCode } from './public/card-example-code.ts'
 import { questionCode, questionPlayground } from './public/question-example-data.ts'
 import { requestFormCode } from './public/request-form-example.tsx'
 import { carouselExampleCode } from './public/carousel-example.tsx'
-import { triggerMenuCode } from './public/component-example-data.ts'
 import { teamTableCode } from './public/team-table-example.tsx'
 import { projectFileMenuCode } from './public/project-tree-example.tsx'
 import { SystemPage } from './public/system-page.tsx'
