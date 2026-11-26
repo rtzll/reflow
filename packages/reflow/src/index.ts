@@ -362,3 +362,38 @@ export {
   type CodeBrowserProps,
   type CodeLineRange,
 } from './code-browser.tsx'
+export {
+  TestReport,
+  type TestCaseResult,
+  type TestCaseStatus,
+  type TestReportProps,
+} from './test-report.tsx'
+export {
+  MatrixGrid,
+  type MatrixAxisItem,
+  type MatrixCell,
+  type MatrixCellStatus,
+  type MatrixGridProps,
+} from './matrix-grid.tsx'
+export {
+  MergeQueue,
+  type MergeQueueEntry,
+  type MergeQueueProps,
+  type MergeQueueStatus,
+} from './merge-queue.tsx'
+export {
+  SizeDelta,
+  computeSizeDelta,
+  formatBytes,
+  type SizeDeltaItem,
+  type SizeDeltaProps,
+  type SizeDeltaTone,
+} from './size-delta.tsx'
+export {
+  ActivityHeatmap,
+  computeHeatmapLevel,
+  type ActivityHeatmapProps,
+  type HeatmapCell,
+  type HeatmapLevel,
+  type HeatmapTone,
+} from './activity-heatmap.tsx'

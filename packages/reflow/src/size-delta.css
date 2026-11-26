@@ -1,0 +1,108 @@
+.rf-size-delta {
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-panel-radius);
+  background: var(--rf-surface-1);
+  overflow: hidden;
+}
+
+.rf-size-delta-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.rf-size-delta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--rf-border);
+  font-size: 12.5px;
+}
+
+.rf-size-delta[data-size='compact'] .rf-size-delta-row,
+[data-density='compact'] .rf-size-delta:not([data-size='default']) .rf-size-delta-row {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.rf-size-delta-row:last-child {
+  border-bottom: 0;
+}
+
+.rf-size-delta-total {
+  background: var(--rf-surface-2);
+  font-weight: 600;
+}
+
+.rf-size-delta-name-wrap {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.rf-size-delta-name {
+  font-family: var(--rf-font-mono);
+  color: var(--rf-fg);
+  overflow-wrap: anywhere;
+}
+
+.rf-size-delta-encoding {
+  font-size: 11px;
+  color: var(--rf-muted);
+}
+
+.rf-size-delta-numbers {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+  margin-inline-start: auto;
+  font-family: var(--rf-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+}
+
+.rf-size-delta-range {
+  color: var(--rf-muted);
+}
+
+.rf-size-delta-range strong {
+  color: var(--rf-fg);
+  font-weight: 600;
+}
+
+.rf-size-delta-diff {
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+.rf-size-delta-diff[data-tone='success'] {
+  background: color-mix(in oklab, var(--rf-success) 14%, transparent);
+  color: var(--rf-success);
+}
+
+.rf-size-delta-diff[data-tone='neutral'] {
+  background: var(--rf-muted-bg);
+  color: var(--rf-muted);
+}
+
+.rf-size-delta-diff[data-tone='warning'] {
+  background: color-mix(in oklab, var(--rf-warning) 18%, transparent);
+  color: var(--rf-warning);
+}
+
+.rf-size-delta-diff[data-tone='danger'] {
+  background: color-mix(in oklab, var(--rf-danger) 16%, transparent);
+  color: var(--rf-danger);
+}
+
+@media (forced-colors: active) {
+  .rf-size-delta {
+    border-color: CanvasText;
+  }
+}

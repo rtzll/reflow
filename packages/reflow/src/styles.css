@@ -111,3 +111,8 @@
 @import './merge-readiness.css' layer(reflow);
 @import './diff-minimap.css' layer(reflow);
 @import './code-browser.css' layer(reflow);
+@import './test-report.css' layer(reflow);
+@import './matrix-grid.css' layer(reflow);
+@import './merge-queue.css' layer(reflow);
+@import './size-delta.css' layer(reflow);
+@import './activity-heatmap.css' layer(reflow);

@@ -1,0 +1,127 @@
+.rf-activity-heatmap {
+  --rf-heat-color: var(--rf-success);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-panel-radius);
+  background: var(--rf-surface-1);
+}
+
+.rf-activity-heatmap[data-tone='accent'] {
+  --rf-heat-color: var(--rf-accent);
+}
+
+.rf-activity-heatmap[data-tone='warning'] {
+  --rf-heat-color: var(--rf-warning);
+}
+
+.rf-activity-heatmap[data-tone='danger'] {
+  --rf-heat-color: var(--rf-danger);
+}
+
+.rf-activity-heatmap[data-size='compact'],
+[data-density='compact'] .rf-activity-heatmap:not([data-size='default']) {
+  padding: 9px 11px;
+  gap: 6px;
+}
+
+.rf-activity-heatmap-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.rf-activity-heatmap-readout {
+  color: var(--rf-fg);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-activity-heatmap-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--rf-muted);
+}
+
+.rf-activity-heatmap-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--rf-muted-bg);
+}
+
+.rf-activity-heatmap-canvas {
+  display: inline-block;
+  border-radius: var(--rf-radius);
+  padding: 2px;
+}
+
+.rf-activity-heatmap-canvas:focus-visible {
+  outline: 2px solid var(--rf-accent);
+  outline-offset: 2px;
+}
+
+.rf-activity-heatmap-svg {
+  display: block;
+}
+
+.rf-activity-heatmap-cell {
+  fill: var(--rf-muted-bg);
+  stroke: transparent;
+  stroke-width: 1.5;
+  cursor: pointer;
+  transition:
+    fill var(--rf-spring-fast),
+    stroke var(--rf-spring-fast);
+}
+
+.rf-activity-heatmap-cell[data-level='1'],
+.rf-activity-heatmap-swatch[data-level='1'] {
+  fill: color-mix(in oklab, var(--rf-heat-color) 28%, var(--rf-muted-bg));
+  background: color-mix(in oklab, var(--rf-heat-color) 28%, var(--rf-muted-bg));
+}
+
+.rf-activity-heatmap-cell[data-level='2'],
+.rf-activity-heatmap-swatch[data-level='2'] {
+  fill: color-mix(in oklab, var(--rf-heat-color) 52%, var(--rf-muted-bg));
+  background: color-mix(in oklab, var(--rf-heat-color) 52%, var(--rf-muted-bg));
+}
+
+.rf-activity-heatmap-cell[data-level='3'],
+.rf-activity-heatmap-swatch[data-level='3'] {
+  fill: color-mix(in oklab, var(--rf-heat-color) 78%, var(--rf-muted-bg));
+  background: color-mix(in oklab, var(--rf-heat-color) 78%, var(--rf-muted-bg));
+}
+
+.rf-activity-heatmap-cell[data-level='4'],
+.rf-activity-heatmap-swatch[data-level='4'] {
+  fill: var(--rf-heat-color);
+  background: var(--rf-heat-color);
+}
+
+.rf-activity-heatmap-cell[data-active='true'] {
+  stroke: var(--rf-fg);
+}
+
+@media (forced-colors: active) {
+  .rf-activity-heatmap {
+    border-color: CanvasText;
+  }
+
+  .rf-activity-heatmap-canvas:focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-activity-heatmap-cell {
+    transition: none;
+  }
+}

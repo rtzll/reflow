@@ -1,0 +1,144 @@
+.rf-matrix-grid {
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-panel-radius);
+  background: var(--rf-surface-1);
+  overflow: hidden;
+}
+
+.rf-matrix-grid-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.rf-matrix-grid-corner,
+.rf-matrix-grid-col-head {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--rf-border);
+  background: var(--rf-surface-2);
+  color: var(--rf-muted);
+  font-weight: 500;
+  font-size: 11.5px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.rf-matrix-grid-corner {
+  text-align: start;
+}
+
+.rf-matrix-grid-row-head {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--rf-border);
+  border-inline-end: 1px solid var(--rf-border);
+  background: var(--rf-surface-2);
+  color: var(--rf-fg);
+  font-weight: 500;
+  text-align: start;
+  white-space: nowrap;
+}
+
+.rf-matrix-grid-table tbody tr:last-child .rf-matrix-grid-row-head,
+.rf-matrix-grid-table tbody tr:last-child .rf-matrix-grid-td {
+  border-bottom: 0;
+}
+
+.rf-matrix-grid-td {
+  padding: 5px;
+  border-bottom: 1px solid var(--rf-border);
+  border-inline-end: 1px solid var(--rf-border);
+  text-align: center;
+}
+
+.rf-matrix-grid-td:last-child {
+  border-inline-end: 0;
+}
+
+.rf-matrix-grid-empty {
+  color: var(--rf-muted);
+  font-size: 12px;
+}
+
+.rf-matrix-grid-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  min-width: 78px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--rf-radius);
+  font: inherit;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    background-color var(--rf-spring-fast),
+    border-color var(--rf-spring-fast);
+}
+
+.rf-matrix-grid[data-size='compact'] .rf-matrix-grid-cell,
+[data-density='compact'] .rf-matrix-grid:not([data-size='default']) .rf-matrix-grid-cell {
+  padding: 4px 6px;
+  min-width: 66px;
+  font-size: 11.5px;
+}
+
+.rf-matrix-grid-cell[data-status='passed'] {
+  background: color-mix(in oklab, var(--rf-success) 12%, transparent);
+  color: var(--rf-success);
+}
+
+.rf-matrix-grid-cell[data-status='failed'] {
+  background: color-mix(in oklab, var(--rf-danger) 14%, transparent);
+  color: var(--rf-danger);
+}
+
+.rf-matrix-grid-cell[data-status='running'] {
+  background: color-mix(in oklab, var(--rf-warning) 16%, transparent);
+  color: var(--rf-warning);
+}
+
+.rf-matrix-grid-cell[data-status='pending'],
+.rf-matrix-grid-cell[data-status='skipped'],
+.rf-matrix-grid-cell[data-status='cancelled'] {
+  background: var(--rf-muted-bg);
+  color: var(--rf-muted);
+}
+
+.rf-matrix-grid-cell[data-active='true'] {
+  border-color: var(--rf-accent);
+  box-shadow: 0 0 0 1px var(--rf-accent);
+}
+
+.rf-matrix-grid-cell:focus-visible {
+  outline: 2px solid var(--rf-accent);
+  outline-offset: 1px;
+}
+
+.rf-matrix-grid-glyph {
+  display: inline-flex;
+  align-items: center;
+}
+
+.rf-matrix-grid-duration {
+  font-family: var(--rf-font-mono);
+  font-size: 11.5px;
+}
+
+@media (forced-colors: active) {
+  .rf-matrix-grid {
+    border-color: CanvasText;
+  }
+
+  .rf-matrix-grid-cell:focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-matrix-grid-cell {
+    transition: none;
+  }
+}
