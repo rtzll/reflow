@@ -194,6 +194,22 @@ const worker = await build({
           contents: 'export {}\n',
           loader: 'js',
         }))
+        builder.onResolve({ filter: /^@pierre\/trees(?:\/.*)?$/ }, ({ path }) => ({
+          path,
+          namespace: 'reflow-worker-trees-stub',
+        }))
+        builder.onLoad({ filter: /.*/, namespace: 'reflow-worker-trees-stub' }, () => ({
+          contents: 'export {}\n',
+          loader: 'js',
+        }))
+        builder.onResolve({ filter: /^pele(?:\/.*)?$/ }, ({ path }) => ({
+          path,
+          namespace: 'reflow-worker-pele-stub',
+        }))
+        builder.onLoad({ filter: /.*/, namespace: 'reflow-worker-pele-stub' }, () => ({
+          contents: 'export {}\n',
+          loader: 'js',
+        }))
         builder.onLoad({ filter: /drag-adapter\.ts$/ }, ({ path }) => {
           if (path === resolve(root, 'app/public/apps/issues/drag-adapter.ts')) {
             return {

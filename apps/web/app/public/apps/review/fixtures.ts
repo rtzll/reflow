@@ -1,5 +1,6 @@
 import type { CommentAuthor, CommentSuggestion, TimelineItem } from '@rtzll/reflow'
 import type { DiffFile } from '@rtzll/reflow/diffs'
+import type { FileTreeRowDecoration, GitStatusEntry } from '@rtzll/reflow/trees'
 
 export interface ReviewComment {
   id: string
@@ -40,6 +41,12 @@ export interface ReviewCheck {
   output: string[]
 }
 
+export const pullRequestDiagram = `flowchart LR
+  Server[prerenderDiff / SSR] --> DSD[Declarative Shadow DOM]
+  DSD --> Paint[First paint · 0ms flash]
+  Paint --> Hydrate[Client hydrate]
+  Hydrate --> Live[Slotted threads & split view]`
+
 export const pullRequest = {
   number: 142,
   title: 'Zero-flash SSR hydration for DiffView',
@@ -50,7 +57,53 @@ export const pullRequest = {
   openedAt: '42m ago',
   summary:
     'Adds `@rtzll/reflow/diffs/ssr` (`prerenderDiff()`) so server-rendered diffs emit Declarative Shadow DOM HTML and hydrate in place with zero flash, plus slotted Remix annotations and review header controls.',
+  diagram: pullRequestDiagram,
 } as const
+
+export function buildReviewTreeGitStatus(files: readonly ReviewFile[]): GitStatusEntry[] {
+  return files.map((file) => ({
+    path: file.path,
+    status: file.status,
+  }))
+}
+
+export function buildReviewTreeDecorations(
+  files: readonly ReviewFile[],
+  viewed: ReadonlySet<string>,
+  threads: readonly ReviewThread[],
+): Record<string, FileTreeRowDecoration> {
+  const decorations: Record<string, FileTreeRowDecoration> = {}
+  for (const file of files) {
+    const parts: { text: string; color?: string }[] = []
+    const textChunks: string[] = []
+    if (viewed.has(file.path)) {
+      parts.push({ text: '✓ ', color: 'var(--rf-success)' })
+      textChunks.push('viewed')
+    }
+    const unresolved = threads.filter((t) => t.filePath === file.path && !t.resolved).length
+    if (unresolved > 0) {
+      parts.push({ text: `${unresolved} · `, color: 'var(--rf-accent)' })
+      textChunks.push(`${unresolved} open`)
+    }
+    if (file.added > 0) {
+      parts.push({ text: `+${file.added}`, color: 'var(--rf-success)' })
+      textChunks.push(`+${file.added}`)
+    }
+    if (file.removed > 0) {
+      if (file.added > 0) parts.push({ text: ' ' })
+      parts.push({ text: `−${file.removed}`, color: 'var(--rf-danger)' })
+      textChunks.push(`−${file.removed}`)
+    }
+    if (parts.length > 0) {
+      decorations[file.path] = {
+        text: textChunks.join(' '),
+        title: `${file.path}: ${textChunks.join(', ')}`,
+        parts,
+      }
+    }
+  }
+  return decorations
+}
 
 export const reviewFiles: readonly ReviewFile[] = [
   {
@@ -285,7 +338,14 @@ export const seedThreads: readonly ReviewThread[] = [
         id: 'c2',
         author: { name: 'Maya Chen', role: 'Author' },
         timestamp: '11m ago',
-        body: 'Good point — applying this handles deleted files where `name` is `/dev/null`.',
+        body: `Good point — applying this handles deleted files where \`name\` is \`/dev/null\`. Here is the full SSR-to-hydration handoff for reference:
+
+\`\`\`mermaid
+flowchart LR
+  Patch[oldFile / newFile] --> SSR[prerenderDiff]
+  SSR --> Shadow[Declarative Shadow DOM]
+  Shadow --> Hydrate[DiffView hydrate]
+\`\`\``,
       },
     ],
   },

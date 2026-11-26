@@ -56,12 +56,22 @@ async function show(
     const app = exampleApps.find((entry) => entry.slug === slug)
     if (page === 'app' && !app) return new Response('App not found', { status: 404 })
     const assets = await getPageAssets(app?.slug ?? 'directory')
+    const preloaded =
+      app?.slug === 'chat' || app?.slug === 'review' ? await diffSamples() : undefined
     const diffs =
       app?.slug === 'chat'
-        ? (await diffSamples()).chat
+        ? preloaded?.chat
         : app?.slug === 'review'
-          ? (await diffSamples()).review
+          ? preloaded?.review
           : undefined
+    const prerendered =
+      app?.slug === 'review' && preloaded
+        ? {
+            diffs: preloaded.review,
+            tree: preloaded.reviewTree,
+            diagrams: preloaded.reviewDiagrams,
+          }
+        : undefined
     return context.render(
       <Document
         assets={assets}
@@ -75,6 +85,7 @@ async function show(
             search={query}
             soundEnabled={settings.soundEnabled}
             prerenderedDiffs={diffs}
+            prerendered={prerendered}
           />
         ) : (
           <AppsIndex soundEnabled={settings.soundEnabled} />

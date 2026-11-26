@@ -11,22 +11,33 @@ it('server-renders zero-flash diffs, filters with EmptyState, tracks viewed file
   await open(page, '/apps/review')
   await page.locator('[data-review-ready]').waitFor()
 
-  // Verify the raw SSR HTML contains Declarative Shadow DOM with zero fallback flash.
+  // Verify the raw SSR HTML contains Declarative Shadow DOM for diffs & file tree, plus Pele SVG, with zero fallback flash.
   const response = await page.request.get(page.url())
   const ssrHtml = await response.text()
   assert.ok(ssrHtml.includes('<diffs-container><template shadowrootmode="open">'))
+  assert.ok(ssrHtml.includes('<file-tree-container id="review-files-tree"'))
+  assert.ok(ssrHtml.includes('<svg') && ssrHtml.includes('class="pele '))
   assert.ok(!ssrHtml.includes('class="rf-diff-fallback"'))
+  assert.ok(!ssrHtml.includes('class="rf-file-tree-fallback"'))
 
-  // All 4 files render immediately ready.
+  // All 4 files render immediately ready, alongside the FileTree and seeded Pele diagram.
   await expect(page.locator('.review-file-card .rf-diff-view[data-rf-diffs-ready]')).toHaveCount(4)
+  const fileTree = page.locator('.review-tree-wrap .rf-file-tree[data-rf-trees-ready]')
+  await expect(fileTree).toBeVisible()
+  const treeBox = await fileTree.boundingBox()
+  assert.ok((treeBox?.height ?? 0) > 80, `expected FileTree to render rows, got ${treeBox?.height}`)
 
   // Header controls render a single Jump button (no nested button split) and single progress label.
   await expect(page.locator('.review-header-controls button', { hasText: 'Jump' })).toHaveCount(1)
   await expect(page.locator('.review-progress-wrap')).toHaveText('0 of 4 viewed')
 
-  // File tree renders colored +loc / -loc counts in trailing metadata.
-  const addedCount = page.locator('.review-tree-counts .review-added').first()
-  const removedCount = page.locator('.review-tree-counts .review-removed').first()
+  // FileTree renders compacted folders and colored +loc / -loc row decorations inside its shadow root.
+  const addedCount = fileTree
+    .locator('[data-item-section="decoration"] > span > span', { hasText: /^\+12$/ })
+    .first()
+  const removedCount = fileTree
+    .locator('[data-item-section="decoration"] > span > span', { hasText: /^−5$/ })
+    .first()
   await expect(addedCount).toBeVisible()
   await expect(removedCount).toBeVisible()
   const [addedColor, removedColor] = await Promise.all([
@@ -73,9 +84,10 @@ it('server-renders zero-flash diffs, filters with EmptyState, tracks viewed file
   await firstCard.getByRole('button', { name: 'Viewed' }).click()
   await expect(firstCard.locator('.rf-diff-view')).not.toHaveAttribute('data-collapsed', 'true')
 
-  // Interact with slotted CommentThread: apply suggestion, reply, resolve & reopen.
+  // Interact with slotted CommentThread: verify seeded Pele diagram, apply suggestion, reply, resolve & reopen.
   const thread = firstCard.locator('.rf-comment-thread')
   await expect(thread).toBeVisible()
+  await expect(thread.locator('.rf-diagram-canvas svg.pele')).toBeVisible()
   await thread.getByRole('button', { name: 'Apply suggestion' }).click()
   await expect(thread.getByText('Applied', { exact: true })).toBeVisible()
 
@@ -88,16 +100,17 @@ it('server-renders zero-flash diffs, filters with EmptyState, tracks viewed file
   await thread.getByRole('button', { name: 'Reopen', exact: true }).click()
   await expect(thread).not.toHaveAttribute('data-resolved', 'true')
 
-  // Start and post a brand-new inline comment on the CSS file.
+  // Start and post a brand-new inline comment with a live Mermaid diagram on the CSS file.
   const cssCard = page.locator('[data-review-file="packages/reflow/src/diff-view.css"]')
   await cssCard.getByRole('button', { name: 'Comment', exact: true }).click()
   await cssCard
     .getByRole('textbox', { name: 'New review comment' })
-    .fill('Border matches CodeBlock cleanly.')
+    .fill('Border matches CodeBlock cleanly.\n\n```mermaid\nflowchart LR\n  Card --> Diff\n```')
   await cssCard.getByRole('button', { name: 'Post comment' }).click()
   await expect(cssCard.locator('.rf-comment-thread')).toContainText(
     'Border matches CodeBlock cleanly.',
   )
+  await expect(cssCard.locator('.rf-comment-thread .rf-diagram-canvas svg.pele')).toBeVisible()
 
   // Switch between Unified and Split with a real pointer click on the SegmentedControl label.
   await page.locator('.review-header .rf-segmented label', { hasText: 'Split' }).click()
@@ -124,8 +137,9 @@ it('server-renders zero-flash diffs, filters with EmptyState, tracks viewed file
   await drawer.getByRole('button', { name: 'Close' }).click()
   await expect(drawer).toBeHidden()
 
-  // Switch to Conversation & checks, submit an approval review, verify Timeline updates.
+  // Switch to Conversation & checks, verify Architecture diagram, submit an approval review, verify Timeline updates.
   await page.getByRole('tab', { name: /Conversation & checks/ }).click()
+  await expect(page.locator('.review-conversation .rf-diagram-canvas svg.pele')).toBeVisible()
   await expect(page.locator('.rf-timeline')).toBeVisible()
   await page.getByRole('button', { name: 'Submit review' }).click()
   const popover = page.getByRole('dialog', { name: 'Submit review' })

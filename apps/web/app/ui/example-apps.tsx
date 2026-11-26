@@ -7,7 +7,7 @@ import { chatApp } from '../public/apps/chat/index.tsx'
 import { calendarApp } from '../public/apps/calendar/index.tsx'
 import { analyticsApp } from '../public/apps/analytics/index.tsx'
 import { reviewApp } from '../public/apps/review/index.tsx'
-import type { ExampleApp } from '../public/apps/types.ts'
+import type { AppPrerendered, ExampleApp } from '../public/apps/types.ts'
 import { appPreviews } from './app-previews.tsx'
 
 export const exampleApps = [
@@ -79,10 +79,11 @@ export function AppWorkspace(
     search: string
     soundEnabled: boolean
     prerenderedDiffs?: Record<string, string>
+    prerendered?: AppPrerendered
   }>,
 ) {
   return () => {
-    const { app, search, soundEnabled, prerenderedDiffs } = handle.props
+    const { app, search, soundEnabled, prerenderedDiffs, prerendered } = handle.props
     return (
       <div class="site-app-workspace" data-app={app.slug}>
         <a class="site-skip" href="#main">
@@ -101,7 +102,7 @@ export function AppWorkspace(
           </nav>
         )}
         <main id="main" data-rmx-key={app.slug} data-sound-scope="">
-          {app.render(search, soundEnabled, prerenderedDiffs)}
+          {app.render(search, soundEnabled, prerenderedDiffs, prerendered)}
         </main>
       </div>
     )

@@ -19,21 +19,24 @@ import {
   Terminal,
   Timeline,
   Toaster,
-  Tree,
   toast,
   type CommandItem,
   type TimelineItem,
-  type TreeItem,
 } from '@rtzll/reflow'
+import { Diagram } from '@rtzll/reflow/diagrams'
 import { DiffView, type DiffLineAnnotation, type SelectedLineRange } from '@rtzll/reflow/diffs'
+import { Markdown, type MarkdownCodeBlock } from '@rtzll/reflow/markdown'
+import { FileTree, type FileTreeSsrPayload } from '@rtzll/reflow/trees'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import { playCopyError, playCopySuccess } from '../../showcase-sound.ts'
-import type {
-  ReviewCheck,
-  ReviewFile,
-  ReviewThread,
-  SeedActivityEvent,
-  pullRequest as PullRequestData,
+import {
+  buildReviewTreeDecorations,
+  buildReviewTreeGitStatus,
+  type ReviewCheck,
+  type ReviewFile,
+  type ReviewThread,
+  type SeedActivityEvent,
+  type pullRequest as PullRequestData,
 } from './fixtures.ts'
 
 interface ReviewWorkspaceProps {
@@ -43,6 +46,8 @@ interface ReviewWorkspaceProps {
   checks: ReviewCheck[]
   initialActivity: SeedActivityEvent[]
   prerenderedDiffs?: Record<string, string>
+  prerenderedTree?: FileTreeSsrPayload
+  prerenderedDiagrams?: Record<string, string>
 }
 
 type Verdict = 'open' | 'approved' | 'changes-requested'
@@ -89,53 +94,6 @@ function isEditableTarget(target: EventTarget | null): boolean {
   if (target.isContentEditable) return true
   const tag = target.tagName
   return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT'
-}
-
-function buildFileTree(
-  files: readonly ReviewFile[],
-  viewed: ReadonlySet<string>,
-  threads: readonly ReviewThread[],
-): TreeItem[] {
-  const groups = new Map<string, ReviewFile[]>()
-  for (const file of files) {
-    const slash = file.path.lastIndexOf('/')
-    const folder = slash >= 0 ? file.path.slice(0, slash) : ''
-    const list = groups.get(folder) ?? []
-    list.push(file)
-    groups.set(folder, list)
-  }
-
-  return [...groups.entries()].map(([folder, folderFiles]) => ({
-    value: `dir:${folder}`,
-    label: folder || 'root',
-    children: folderFiles.map((file) => {
-      const name = file.path.slice(file.path.lastIndexOf('/') + 1)
-      const unresolved = threads.filter((t) => t.filePath === file.path && !t.resolved).length
-      const isViewed = viewed.has(file.path)
-      return {
-        value: file.path,
-        label: name,
-        trailing: (
-          <span class="review-tree-meta">
-            {isViewed && (
-              <span class="review-tree-viewed" aria-label="Viewed">
-                <Icon name="check" size={12} />
-              </span>
-            )}
-            {unresolved > 0 && (
-              <span class="review-tree-comments" aria-label={`${unresolved} open comments`}>
-                {unresolved}
-              </span>
-            )}
-            <span class="review-tree-counts">
-              {file.added > 0 && <span class="review-added">+{file.added}</span>}
-              {file.removed > 0 && <span class="review-removed">−{file.removed}</span>}
-            </span>
-          </span>
-        ),
-      }
-    }),
-  }))
 }
 
 export const ReviewWorkspace = clientEntry(
@@ -369,7 +327,14 @@ export const ReviewWorkspace = clientEntry(
     })
 
     return () => {
-      const { pullRequest: pr, files, checks, prerenderedDiffs } = handle.props
+      const {
+        pullRequest: pr,
+        files,
+        checks,
+        prerenderedDiffs,
+        prerenderedTree,
+        prerenderedDiagrams,
+      } = handle.props
       const needle = filter.trim().toLowerCase()
       const visibleFiles = files.filter(
         (file) => !needle || file.path.toLowerCase().includes(needle),
@@ -377,8 +342,22 @@ export const ReviewWorkspace = clientEntry(
       const totalAdded = files.reduce((sum, f) => sum + f.added, 0)
       const totalRemoved = files.reduce((sum, f) => sum + f.removed, 0)
       const unresolvedCount = threads.filter((t) => !t.resolved).length
-      const treeItems = buildFileTree(visibleFiles, viewed, threads)
-      const defaultExpanded = treeItems.map((item) => item.value)
+      const visiblePaths = visibleFiles.map((file) => file.path)
+      const treeGitStatus = buildReviewTreeGitStatus(visibleFiles)
+      const treeDecorations = buildReviewTreeDecorations(visibleFiles, viewed, threads)
+
+      function renderCommentCodeBlock({ code, language, size }: MarkdownCodeBlock) {
+        if (language !== 'mermaid') return undefined
+        return (
+          <Diagram
+            code={code}
+            prerenderedSVG={prerenderedDiagrams?.[code.trim()]}
+            size={size ?? 'compact'}
+            copyable
+            showSourceToggle
+          />
+        )
+      }
 
       const commands: CommandItem[] = [
         ...files.map((file) => ({
@@ -473,16 +452,21 @@ export const ReviewWorkspace = clientEntry(
                     })}
                   />
                 </div>
-                {treeItems.length > 0 ? (
+                {visiblePaths.length > 0 ? (
                   <div class="review-tree-wrap">
-                    <Tree
+                    <FileTree
                       label="Changed files tree"
-                      items={treeItems}
-                      defaultExpanded={defaultExpanded}
+                      paths={visiblePaths}
+                      gitStatus={treeGitStatus}
+                      rowDecorations={treeDecorations}
                       value={activeFilePath}
-                      onValueChange={(value) => {
-                        if (!value.startsWith('dir:')) jumpToFile(value)
+                      onValueChange={(path) => {
+                        if (files.some((file) => file.path === path)) jumpToFile(path)
                       }}
+                      prerendered={
+                        visibleFiles.length === files.length ? prerenderedTree : undefined
+                      }
+                      size="compact"
                     />
                   </div>
                 ) : (
@@ -715,18 +699,23 @@ export const ReviewWorkspace = clientEntry(
                                 resolved={thread.resolved}
                                 onResolvedChange={(next) => setThreadResolved(thread.id, next)}
                                 onReply={(body) => addReply(thread.id, body)}
-                                comments={thread.comments.map((entry) =>
-                                  entry.suggestion
+                                comments={thread.comments.map((entry) => ({
+                                  ...entry,
+                                  body: (
+                                    <Markdown
+                                      size="compact"
+                                      source={entry.body}
+                                      renderCodeBlock={renderCommentCodeBlock}
+                                    />
+                                  ),
+                                  suggestion: entry.suggestion
                                     ? {
-                                        ...entry,
-                                        suggestion: {
-                                          ...entry.suggestion,
-                                          applied: appliedSuggestions.has(entry.id),
-                                          onApply: () => applySuggestion(entry.id),
-                                        },
+                                        ...entry.suggestion,
+                                        applied: appliedSuggestions.has(entry.id),
+                                        onApply: () => applySuggestion(entry.id),
                                       }
-                                    : entry,
-                                )}
+                                    : undefined,
+                                }))}
                               />
                             )
                           }}
@@ -744,6 +733,16 @@ export const ReviewWorkspace = clientEntry(
       const conversationPanel = (
         <div class="review-conversation">
           <div class="review-conversation-main">
+            <section class="review-section">
+              <h2>Architecture</h2>
+              <Diagram
+                title="Zero-flash SSR hydration pipeline"
+                code={pr.diagram}
+                prerenderedSVG={prerenderedDiagrams?.[pr.diagram.trim()]}
+                copyable
+                showSourceToggle
+              />
+            </section>
             <section class="review-section">
               <h2>Activity</h2>
               <Timeline label="Pull request timeline" items={timelineItems} />

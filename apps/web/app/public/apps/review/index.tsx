@@ -6,7 +6,7 @@ export const reviewApp: ExampleApp = {
   slug: 'review',
   name: 'Code review',
   description: 'Inspect multi-file diffs, expand context, discuss lines inline, and check CI logs.',
-  render(_search, _soundEnabled, prerenderedDiffs) {
+  render(_search, _soundEnabled, prerenderedDiffs, prerendered) {
     return (
       <ReviewWorkspace
         pullRequest={pullRequest}
@@ -17,7 +17,9 @@ export const reviewApp: ExampleApp = {
         }))}
         checks={[...seedChecks]}
         initialActivity={[...seedActivity]}
-        prerenderedDiffs={prerenderedDiffs}
+        prerenderedDiffs={prerendered?.diffs ?? prerenderedDiffs}
+        prerenderedTree={prerendered?.tree}
+        prerenderedDiagrams={prerendered?.diagrams}
       />
     )
   },
