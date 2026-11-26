@@ -111,17 +111,28 @@ function buildFileTree(
     children: folderFiles.map((file) => {
       const name = file.path.slice(file.path.lastIndexOf('/') + 1)
       const unresolved = threads.filter((t) => t.filePath === file.path && !t.resolved).length
-      const suffix = [
-        viewed.has(file.path) ? '✓' : '',
-        unresolved > 0 ? `${unresolved} open` : '',
-        `+${file.added}`,
-        file.removed > 0 ? `−${file.removed}` : '',
-      ]
-        .filter(Boolean)
-        .join(' · ')
+      const isViewed = viewed.has(file.path)
       return {
         value: file.path,
-        label: suffix ? `${name}  (${suffix})` : name,
+        label: name,
+        trailing: (
+          <span class="review-tree-meta">
+            {isViewed && (
+              <span class="review-tree-viewed" aria-label="Viewed">
+                <Icon name="check" size={12} />
+              </span>
+            )}
+            {unresolved > 0 && (
+              <span class="review-tree-comments" aria-label={`${unresolved} open comments`}>
+                {unresolved}
+              </span>
+            )}
+            <span class="review-tree-counts">
+              {file.added > 0 && <span class="review-added">+{file.added}</span>}
+              {file.removed > 0 && <span class="review-removed">−{file.removed}</span>}
+            </span>
+          </span>
+        ),
       }
     }),
   }))
@@ -817,12 +828,9 @@ export const ReviewWorkspace = clientEntry(
               </div>
 
               <div class="review-header-controls">
-                <div class="review-progress-wrap" aria-label="Review progress">
-                  <span class="review-progress-text">
-                    {viewed.size} of {files.length} viewed
-                  </span>
+                <div class="review-progress-wrap">
                   <Progress
-                    label="Files viewed"
+                    label={`${viewed.size} of ${files.length} viewed`}
                     value={viewed.size}
                     max={files.length}
                     size="compact"
@@ -849,14 +857,12 @@ export const ReviewWorkspace = clientEntry(
                   shortcut="mod+k"
                   items={commands}
                   onSelect={runCommand}
+                  triggerSize="compact"
                   trigger={
-                    <Button
-                      size="compact"
-                      variant="secondary"
-                      trailingIcon={<Kbd size="compact" variant="outline" keys="mod+k" />}
-                    >
-                      Jump
-                    </Button>
+                    <span class="review-jump-trigger">
+                      <span>Jump</span>
+                      <Kbd size="compact" variant="outline" keys="mod+k" />
+                    </span>
                   }
                 />
 

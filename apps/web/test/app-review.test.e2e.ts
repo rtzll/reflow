@@ -20,6 +20,43 @@ it('server-renders zero-flash diffs, filters with EmptyState, tracks viewed file
   // All 4 files render immediately ready.
   await expect(page.locator('.review-file-card .rf-diff-view[data-rf-diffs-ready]')).toHaveCount(4)
 
+  // Header controls render a single Jump button (no nested button split) and single progress label.
+  await expect(page.locator('.review-header-controls button', { hasText: 'Jump' })).toHaveCount(1)
+  await expect(page.locator('.review-progress-wrap')).toHaveText('0 of 4 viewed')
+
+  // File tree renders colored +loc / -loc counts in trailing metadata.
+  const addedCount = page.locator('.review-tree-counts .review-added').first()
+  const removedCount = page.locator('.review-tree-counts .review-removed').first()
+  await expect(addedCount).toBeVisible()
+  await expect(removedCount).toBeVisible()
+  const [addedColor, removedColor] = await Promise.all([
+    addedCount.evaluate((el) => getComputedStyle(el).color),
+    removedCount.evaluate((el) => getComputedStyle(el).color),
+  ])
+  assert.notEqual(addedColor, removedColor)
+
+  // Left sidebar stays sticky inside the viewport when the page scrolls down through diffs.
+  const stickyMetrics = await page.evaluate(() => {
+    window.scrollTo(0, 600)
+    const sidebar = document.querySelector<HTMLElement>('.review-sidebar')
+    const pane = document.querySelector<HTMLElement>('.review-resizable > .rf-resizable-pane')
+    const result = {
+      scrollY: window.scrollY,
+      sidebarTop: sidebar?.getBoundingClientRect().top ?? -1,
+      sidebarPosition: sidebar ? getComputedStyle(sidebar).position : '',
+      paneOverflow: pane ? getComputedStyle(pane).overflowY : '',
+    }
+    window.scrollTo(0, 0)
+    return result
+  })
+  assert.equal(stickyMetrics.sidebarPosition, 'sticky')
+  assert.equal(stickyMetrics.paneOverflow, 'visible')
+  assert.ok(stickyMetrics.scrollY >= 400, `expected page to scroll, got ${stickyMetrics.scrollY}`)
+  assert.ok(
+    stickyMetrics.sidebarTop >= 0 && stickyMetrics.sidebarTop <= 24,
+    `expected sticky sidebar near top of viewport, got ${stickyMetrics.sidebarTop}`,
+  )
+
   // Filter files to zero matches -> EmptyState -> Clear filter.
   const filterInput = page.getByRole('searchbox', { name: 'Filter changed files' })
   await filterInput.fill('nonexistent.rs')
@@ -30,7 +67,7 @@ it('server-renders zero-flash diffs, filters with EmptyState, tracks viewed file
   // Mark the first file Viewed -> collapses it and updates progress.
   const firstCard = page.locator('[data-review-file="packages/reflow/src/diffs-ssr.ts"]')
   await firstCard.getByRole('button', { name: 'Mark viewed' }).click()
-  await expect(page.locator('.review-progress-text')).toHaveText('1 of 4 viewed')
+  await expect(page.locator('.review-progress-wrap')).toContainText('1 of 4 viewed')
   await expect(firstCard.locator('.rf-diff-view')).toHaveAttribute('data-collapsed', 'true')
   // Unmark viewed so we can interact with the inline CommentThread inside it.
   await firstCard.getByRole('button', { name: 'Viewed' }).click()
@@ -74,7 +111,7 @@ it('server-renders zero-flash diffs, filters with EmptyState, tracks viewed file
   await expect(firstCard.locator('.rf-diff-view')).toHaveAttribute('data-view', 'split')
   await page.keyboard.press('u')
   await page.keyboard.press('v')
-  await expect(page.locator('.review-progress-text')).toHaveText('1 of 4 viewed')
+  await expect(page.locator('.review-progress-wrap')).toContainText('1 of 4 viewed')
 
   // Open a CI check log in the Drawer and filter ANSI Terminal output.
   await page.getByRole('button', { name: /test · diff-view SSR/ }).click()
@@ -105,7 +142,7 @@ it('server-renders zero-flash diffs, filters with EmptyState, tracks viewed file
   await expect(
     page.locator('.review-title-row').getByText('Approved', { exact: true }),
   ).toBeVisible()
-  await expect(page.locator('.review-progress-text')).toHaveText('1 of 4 viewed')
+  await expect(page.locator('.review-progress-wrap')).toContainText('1 of 4 viewed')
   await expect(
     page
       .locator('[data-review-file="packages/reflow/src/diff-view.css"]')

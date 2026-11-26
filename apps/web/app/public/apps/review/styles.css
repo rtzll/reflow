@@ -92,14 +92,14 @@
 .review-progress-wrap {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  justify-content: center;
   min-inline-size: 132px;
 }
 
-.review-progress-text {
-  color: var(--rf-muted);
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
+.review-jump-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .review-shortcuts-bar {
@@ -131,11 +131,61 @@
   background: transparent;
 }
 
+.review-resizable > .rf-resizable-pane {
+  overflow: visible;
+  overscroll-behavior: auto;
+}
+
+.review-resizable > .rf-resizable-grip {
+  position: sticky;
+  align-self: start;
+  inset-block-start: 16px;
+  block-size: min(100%, calc(100dvh - 32px));
+}
+
 .review-sidebar {
+  position: sticky;
+  inset-block-start: 16px;
   display: flex;
   flex-direction: column;
   gap: 14px;
+  max-block-size: calc(100dvh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding-inline-end: 14px;
+}
+
+.review-tree-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.review-tree-viewed {
+  display: inline-flex;
+  color: var(--rf-success);
+}
+
+.review-tree-comments {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 16px;
+  block-size: 16px;
+  padding-inline: 4px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--rf-accent) 16%, transparent);
+  color: var(--rf-accent);
+  font-size: 10px;
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.review-tree-counts {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
 }
 
 .review-tree-wrap {
@@ -343,7 +393,15 @@
   }
 
   .review-sidebar {
+    position: static;
+    max-block-size: none;
+    overflow: visible;
     padding-inline-end: 0;
+  }
+
+  .review-resizable > .rf-resizable-grip {
+    position: static;
+    block-size: auto;
   }
 
   .review-stream {
