@@ -9,38 +9,46 @@ import type { CodeSamples } from './public/code-block-example.tsx'
 const config = await loadConfig(fileURLToPath(new URL('../', import.meta.url)))
 const production = process.env.NODE_ENV === 'production'
 if (!config.assets?.allowFiles) throw new Error('Missing asset allowlist in remix.json')
+const baseAssetOptions = {
+  ...config.assets,
+  allowFiles: config.assets.allowFiles,
+}
 
 // The element adapter and @pierre/diffs's lru_map include CommonJS modules.
 // Serve them as ESM in source mode, as the Worker build does for production.
 const dragAdapter = new URL('./public/apps/issues/drag-adapter.ts', import.meta.url)
-export const assets = createAssetServer({
-  ...config.assets,
-  allowFiles: config.assets.allowFiles,
-  scripts: {
-    loaders: [
-      (url, context, nextLoad) => {
-        if (url !== dragAdapter.href && !url.endsWith('/lru_map/dist/lru.js'))
-          return nextLoad(url, context)
-        const bundle = buildSync({
-          entryPoints: [fileURLToPath(url)],
-          bundle: true,
-          format: 'esm',
-          platform: 'browser',
-          target: 'es2022',
-          define: {
-            'process.env.NODE_ENV': JSON.stringify(production ? 'production' : 'development'),
-          },
-          minify: production,
-          write: false,
-        })
-        return { format: 'module', source: bundle.outputFiles[0]!.text, shortCircuit: true }
-      },
-    ],
-  },
-  minify: production,
-  fingerprint: production,
-  watch: !production,
-})
+
+export function createDevAssetServer(options?: { watch?: boolean }) {
+  return createAssetServer({
+    ...baseAssetOptions,
+    scripts: {
+      loaders: [
+        (url, context, nextLoad) => {
+          if (url !== dragAdapter.href && !url.endsWith('/lru_map/dist/lru.js'))
+            return nextLoad(url, context)
+          const bundle = buildSync({
+            entryPoints: [fileURLToPath(url)],
+            bundle: true,
+            format: 'esm',
+            platform: 'browser',
+            target: 'es2022',
+            define: {
+              'process.env.NODE_ENV': JSON.stringify(production ? 'production' : 'development'),
+            },
+            minify: production,
+            write: false,
+          })
+          return { format: 'module', source: bundle.outputFiles[0]!.text, shortCircuit: true }
+        },
+      ],
+    },
+    minify: production,
+    fingerprint: production,
+    watch: options?.watch ?? (!production && process.env.NODE_ENV !== 'test'),
+  })
+}
+
+export const assets = createDevAssetServer()
 
 export interface ExampleImages {
   sidebarAvatar: string
