@@ -212,10 +212,7 @@ export function ObjectInspector(handle: Handle<ObjectInspectorProps>) {
     })
 
     return (
-      <div
-        class={classList('rf-object-inspector', props.class)}
-        data-size={props.size === 'compact' ? 'compact' : undefined}
-      >
+      <div class={classList('rf-object-inspector', props.class)} data-size={props.size}>
         {(props.name || copyable) && (
           <div class="rf-obj-head">
             <span class="rf-obj-title">{props.name ?? 'JSON'}</span>

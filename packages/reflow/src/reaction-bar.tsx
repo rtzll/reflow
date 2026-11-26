@@ -84,7 +84,7 @@ export function ReactionBar(handle: Handle<ReactionBarProps>) {
     return (
       <div
         class={classList('rf-reaction-bar', props.class)}
-        data-size={props.size === 'compact' ? 'compact' : undefined}
+        data-size={props.size}
         role="group"
         aria-label={props.label ?? 'Reactions'}
         mix={[mountBar, fluidHover()]}

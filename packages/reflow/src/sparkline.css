@@ -70,3 +70,22 @@
   color: var(--rf-muted);
   white-space: nowrap;
 }
+
+@media (forced-colors: active) {
+  .rf-sparkline-line {
+    stroke: CanvasText;
+  }
+
+  .rf-sparkline-area {
+    fill: none;
+  }
+
+  .rf-sparkline-dot {
+    fill: Highlight;
+    stroke: Canvas;
+  }
+
+  .rf-sparkline-wrap:focus-visible {
+    outline-color: Highlight;
+  }
+}

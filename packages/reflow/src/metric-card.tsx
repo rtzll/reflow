@@ -36,7 +36,7 @@ export function MetricCard(handle: Handle<MetricCardProps>) {
     return (
       <div
         class={classList('rf-metric-card', props.class)}
-        data-size={props.size === 'compact' ? 'compact' : undefined}
+        data-size={props.size}
         data-sparkline={hasSpark ? 'true' : undefined}
       >
         <div class="rf-metric-body">

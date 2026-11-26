@@ -500,11 +500,7 @@ export function MarkdownEditor(handle: Handle<MarkdownEditorProps>) {
     }
 
     return (
-      <div
-        class={classList('rf-md-editor', props.class)}
-        data-mode={mode}
-        data-size={props.size === 'compact' ? 'compact' : undefined}
-      >
+      <div class={classList('rf-md-editor', props.class)} data-mode={mode} data-size={props.size}>
         <div class="rf-md-editor-head">
           <SegmentedControl
             label="Editor mode"

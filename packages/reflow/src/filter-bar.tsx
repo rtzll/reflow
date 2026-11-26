@@ -224,7 +224,7 @@ export function FilterBar(handle: Handle<FilterBarProps>) {
     return (
       <div
         class={classList('rf-filter-bar', props.class)}
-        data-size={props.size === 'compact' ? 'compact' : undefined}
+        data-size={props.size}
         data-disabled={props.disabled ? 'true' : undefined}
         mix={mountRoot}
       >

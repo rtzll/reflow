@@ -22,7 +22,8 @@
     box-shadow var(--rf-spring-fast);
 }
 
-.rf-filter-bar[data-size='compact'] .rf-filter-bar-box {
+.rf-filter-bar[data-size='compact'] .rf-filter-bar-box,
+[data-density='compact'] .rf-filter-bar:not([data-size='default']) .rf-filter-bar-box {
   min-height: 30px;
   padding: 3px 7px;
 }
@@ -57,7 +58,8 @@
   max-width: 100%;
 }
 
-.rf-filter-bar[data-size='compact'] .rf-filter-chip {
+.rf-filter-bar[data-size='compact'] .rf-filter-chip,
+[data-density='compact'] .rf-filter-bar:not([data-size='default']) .rf-filter-chip {
   padding: 1px 5px;
   font-size: 11px;
 }
@@ -115,13 +117,15 @@
   line-height: 1.4;
 }
 
-.rf-filter-bar[data-size='compact'] .rf-filter-bar-input {
+.rf-filter-bar[data-size='compact'] .rf-filter-bar-input,
+[data-density='compact'] .rf-filter-bar:not([data-size='default']) .rf-filter-bar-input {
   font-size: 13px;
 }
 
 @media (pointer: coarse) {
   .rf-filter-bar-input,
-  .rf-filter-bar[data-size='compact'] .rf-filter-bar-input {
+  .rf-filter-bar[data-size='compact'] .rf-filter-bar-input,
+  [data-density='compact'] .rf-filter-bar:not([data-size='default']) .rf-filter-bar-input {
     font-size: 16px;
   }
 }
@@ -156,7 +160,7 @@
   position: absolute;
   inset-inline: 0;
   inset-block-start: calc(100% + 4px);
-  z-index: 30;
+  z-index: var(--rf-z-popover);
   margin: 0;
   padding: 4px;
   list-style: none;
@@ -228,6 +232,32 @@
   .rf-filter-preset:hover:not(:disabled) {
     color: var(--rf-fg);
     background: var(--rf-hover);
+  }
+}
+
+.rf-filter-chip-remove:focus-visible,
+.rf-filter-bar-clear:focus-visible,
+.rf-filter-preset:focus-visible {
+  outline: 2px solid var(--rf-accent);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  .rf-filter-bar-box,
+  .rf-filter-chip,
+  .rf-filter-menu,
+  .rf-filter-preset {
+    border-color: ButtonBorder;
+  }
+
+  .rf-filter-bar-box:focus-within,
+  .rf-filter-preset[aria-pressed='true'] {
+    border-color: Highlight;
+  }
+
+  .rf-filter-option[data-active='true'] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
   }
 }
 

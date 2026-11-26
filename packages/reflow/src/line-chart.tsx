@@ -132,7 +132,7 @@ export function LineChart(handle: Handle<LineChartProps>) {
     return (
       <figure
         class={classList('rf-line-chart', props.class)}
-        data-size={props.size === 'compact' ? 'compact' : undefined}
+        data-size={props.size}
         aria-label={props.label}
       >
         {(showLegend || activeLabel !== null) && (

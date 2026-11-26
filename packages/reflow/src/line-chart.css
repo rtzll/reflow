@@ -8,7 +8,8 @@
   font-variant-numeric: tabular-nums;
 }
 
-.rf-line-chart[data-size='compact'] {
+.rf-line-chart[data-size='compact'],
+[data-density='compact'] .rf-line-chart:not([data-size='default']) {
   font-size: 11px;
   gap: 6px;
 }
@@ -154,4 +155,32 @@
   font-family: var(--rf-font-mono);
   font-size: 11px;
   white-space: nowrap;
+}
+
+@media (forced-colors: active) {
+  .rf-line-chart-line {
+    stroke: CanvasText;
+  }
+
+  .rf-line-chart-area {
+    fill: none;
+  }
+
+  .rf-line-chart-gridline {
+    stroke: GrayText;
+  }
+
+  .rf-line-chart-crosshair {
+    stroke: Highlight;
+  }
+
+  .rf-line-chart-dot,
+  .rf-line-chart-swatch {
+    border-color: CanvasText;
+    background: Highlight;
+  }
+
+  .rf-line-chart-stage:focus-visible {
+    outline-color: Highlight;
+  }
 }
