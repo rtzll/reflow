@@ -235,6 +235,26 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       'Threaded review discussions with avatars, code suggestion blocks, inline replies, and spring-collapsed Resolve/Reopen states.',
     code: `import { CommentThread } from '@rtzll/reflow'\n\n<CommentThread\n  context="src/diffs-ssr.ts:144"\n  comments={[{ id: '1', author: { name: 'Noah' }, timestamp: '12m ago', body: 'Strip leading a/ and b/ prefixes.' }]}\n  onReply={appendReply}\n  onResolvedChange={setResolved}\n/>`,
   },
+  'log-viewer': {
+    description:
+      'Structured CI and runtime log viewer with collapsible step groups, ANSI color rendering, severity filters, timestamps, error jumping, and Shift+click line selection.',
+    code: `import { LogViewer } from '@rtzll/reflow'\n\n<LogViewer\n  title="verify · chromium"\n  status="failed"\n  groups={stepGroups}\n  maxHeight="360px"\n/>`,
+  },
+  waterfall: {
+    description:
+      'Hierarchical Gantt and span timing waterfall for CI jobs, build steps, distributed traces, and agent tool runs.',
+    code: `import { Waterfall } from '@rtzll/reflow'\n\n<Waterfall\n  label="Release waterfall"\n  spans={spans}\n  onValueChange={inspectSpan}\n/>`,
+  },
+  'pipeline-graph': {
+    description:
+      'Interactive CI job dependency graph (DAG) with stage columns, measured Bezier connectors, and upstream/downstream hover highlighting.',
+    code: `import { PipelineGraph } from '@rtzll/reflow'\n\n<PipelineGraph\n  label="Release pipeline"\n  jobs={jobs}\n  onValueChange={selectJob}\n/>`,
+  },
+  'status-strip': {
+    description:
+      'Compact run-history status strip showing recent CI runs, deployments, or uptime intervals as duration-scaled, status-colored bars.',
+    code: `import { StatusStrip } from '@rtzll/reflow'\n\n<StatusStrip\n  label="Recent CI runs"\n  items={runs}\n  showReadout\n/>`,
+  },
   'chat-message': {
     description: 'A chat message with user or assistant alignment and optional attachments.',
     code: conversationCode,

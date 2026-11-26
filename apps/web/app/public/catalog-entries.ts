@@ -44,9 +44,11 @@ export const components = [
   ['input-group', 'InputGroup'],
   ['input-message', 'InputMessage'],
   ['kbd', 'Kbd'],
+  ['log-viewer', 'LogViewer'],
   ['markdown', 'Markdown'],
   ['number-field', 'NumberField'],
   ['pagination', 'Pagination'],
+  ['pipeline-graph', 'PipelineGraph'],
   ['popover', 'Popover'],
   ['progress', 'Progress'],
   ['queued-stack', 'QueuedStack'],
@@ -58,6 +60,7 @@ export const components = [
   ['skeleton', 'Skeleton'],
   ['slider', 'Slider'],
   ['spinner', 'Spinner'],
+  ['status-strip', 'StatusStrip'],
   ['switch', 'Switch'],
   ['table', 'Table'],
   ['tabs', 'Tabs'],
@@ -75,6 +78,7 @@ export const components = [
   ['tooltip', 'Tooltip'],
   ['tree', 'Tree'],
   ['trigger-menu', 'TriggerMenu'],
+  ['waterfall', 'Waterfall'],
 ] as const
 
 export const systems = [

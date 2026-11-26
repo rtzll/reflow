@@ -97,6 +97,10 @@ import { BannerExample, BannerPreview } from './banner-example.tsx'
 import { DiffViewExample } from './diff-view-example.tsx'
 import { DiagramExample } from './diagram-example.tsx'
 import { FileTreeExample } from './file-tree-example.tsx'
+import { LogViewerExample } from './log-viewer-example.tsx'
+import { PipelineGraphExample } from './pipeline-graph-example.tsx'
+import { StatusStripExample } from './status-strip-example.tsx'
+import { WaterfallExample } from './waterfall-example.tsx'
 import { EmptyStateExample } from './empty-state-example.tsx'
 import { TimelineExample } from './timeline-example.tsx'
 import { TerminalExample } from './terminal-example.tsx'
@@ -306,6 +310,14 @@ export const Example = clientEntry(
           return <TerminalExample />
         case 'comment-thread':
           return <CommentThreadExample />
+        case 'log-viewer':
+          return <LogViewerExample />
+        case 'waterfall':
+          return <WaterfallExample />
+        case 'pipeline-graph':
+          return <PipelineGraphExample />
+        case 'status-strip':
+          return <StatusStripExample />
         case 'kbd':
           return <KbdExample />
         case 'time-field':

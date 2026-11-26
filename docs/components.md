@@ -87,6 +87,10 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 12 | [`CommentThread` (shipped)](comment-thread.md) | — | `Avatar`, `Badge`, `Button`, grid-row spring collapse, `DiffView` slotted annotations |
 | 13 | `FileTree` (shipped) | [`@pierre/trees`](https://trees.software) (optional peer at `@rtzll/reflow/trees`, `/trees/ssr`, & `/trees.css`) | Virtualized path-first tree, folder compaction, git status, colored row decorations, Declarative Shadow DOM SSR |
 | 13 | `Diagram` (shipped) | [`pele`](https://pele.run) (optional peer at `@rtzll/reflow/diagrams`, `/diagrams/ssr`, & `/diagrams.css`) | Zero-dep Mermaid-to-SVG diagrams, live `--rf-*` token theming, `Markdown` `renderCodeBlock` integration |
+| 14 | `LogViewer` (shipped) | — | Reuses `Terminal`'s zero-dep ANSI SGR parser, collapsible CI step groups, severity filters, timestamps, error jumping, Shift+click line ranges |
+| 14 | `Waterfall` (shipped) | — | Hierarchical Job → Step/Span timing waterfall, sticky time ruler, critical-path outline, keyboard treegrid nav |
+| 14 | `PipelineGraph` (shipped) | — | Interactive CI job DAG with stage columns, measured SVG Bezier edges, dependency-chain hover highlighting |
+| 14 | `StatusStrip` (shipped) | — | Compact duration-scaled run-history bar strip with status semantics and hover/selection readout |
 
 ### Decisions so far
 

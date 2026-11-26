@@ -832,6 +832,374 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  'log-viewer': [
+    {
+      name: 'LogViewer',
+      props: [
+        {
+          name: 'groups',
+          type: 'readonly LogGroup[]',
+          required: false,
+          description: 'Structured collapsible log groups (such as CI job steps).',
+        },
+        {
+          name: 'entries',
+          type: 'readonly LogEntry[]',
+          required: false,
+          description: 'Flat log entries when step grouping is not needed.',
+        },
+        {
+          name: 'title',
+          type: 'string',
+          required: false,
+          description: 'Optional header title (such as the job name).',
+        },
+        {
+          name: 'status',
+          type: 'LogStepStatus',
+          required: false,
+          description: 'Overall execution status shown in the header.',
+        },
+        {
+          name: 'duration',
+          type: 'string',
+          required: false,
+          description: 'Optional total duration displayed in the header.',
+        },
+        {
+          name: 'expandedGroups',
+          type: 'readonly string[]',
+          required: false,
+          description: 'Controlled expanded group IDs.',
+        },
+        {
+          name: 'onExpandedGroupsChange',
+          type: '(ids: string[]) => void',
+          required: false,
+          description: 'Called when expanded group IDs change.',
+        },
+        {
+          name: 'activeGroupId',
+          type: 'string | null',
+          required: false,
+          description: 'Active group ID to expand and scroll into view.',
+        },
+        {
+          name: 'query',
+          type: 'string',
+          required: false,
+          description: 'Controlled search query.',
+        },
+        {
+          name: 'onQueryChange',
+          type: '(query: string) => void',
+          required: false,
+          description: 'Called when the search query changes.',
+        },
+        {
+          name: 'searchable',
+          type: 'boolean',
+          required: false,
+          description: 'Shows a filter input in the toolbar. Defaults to true.',
+        },
+        {
+          name: 'filterable',
+          type: 'boolean',
+          required: false,
+          description: 'Shows severity filter pills and error-jump controls. Defaults to true.',
+        },
+        {
+          name: 'showTimestamps',
+          type: 'boolean',
+          required: false,
+          description: 'Shows timestamps when entries include them. Defaults to true.',
+        },
+        {
+          name: 'lineNumbers',
+          type: 'boolean',
+          required: false,
+          description:
+            'Shows clickable line numbers with Shift+click range selection. Defaults to true.',
+        },
+        {
+          name: 'wrap',
+          type: 'boolean',
+          required: false,
+          description: 'Wraps long lines instead of horizontal scrolling. Defaults to false.',
+        },
+        {
+          name: 'follow',
+          type: 'boolean',
+          required: false,
+          description: 'Auto-scrolls to newest output unless the user scrolls up.',
+        },
+        {
+          name: 'selectedLines',
+          type: 'LogLineRange | null',
+          required: false,
+          description: 'Controlled selected line range.',
+        },
+        {
+          name: 'onSelectedLinesChange',
+          type: '(range: LogLineRange | null) => void',
+          required: false,
+          description: 'Called when the user selects or clears a line range.',
+        },
+        {
+          name: 'maxHeight',
+          type: 'string',
+          required: false,
+          description: 'Caps the scrollable log viewport height (such as "420px").',
+        },
+        {
+          name: 'copyable',
+          type: 'boolean',
+          required: false,
+          description:
+            'Shows a copy button that copies ANSI-stripped visible or selected lines. Defaults to true.',
+        },
+        {
+          name: 'onCopy',
+          type: '() => void',
+          required: false,
+          description: 'Called after log text is copied.',
+        },
+        {
+          name: 'onCopyError',
+          type: '() => void',
+          required: false,
+          description: 'Called if copying fails.',
+        },
+        {
+          name: 'actions',
+          type: 'RemixNode',
+          required: false,
+          description: 'Trailing controls rendered in the header.',
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          required: false,
+          description: 'Controls text scale and spacing density.',
+        },
+        {
+          name: 'label',
+          type: 'string',
+          required: false,
+          description: 'Accessible name for the log viewer region.',
+        },
+        {
+          name: 'class',
+          type: 'string',
+          required: false,
+          description: 'Additional class name on the outer container.',
+        },
+      ],
+    },
+  ],
+  waterfall: [
+    {
+      name: 'Waterfall',
+      props: [
+        {
+          name: 'label',
+          type: 'string',
+          required: true,
+          description: 'Accessible name for the timing waterfall.',
+        },
+        {
+          name: 'spans',
+          type: 'readonly WaterfallSpan[]',
+          required: true,
+          description: 'Top-level spans (jobs, stages, or root trace spans).',
+        },
+        {
+          name: 'totalMs',
+          type: 'number',
+          required: false,
+          description: 'Optional total timeline duration in ms; defaults to the latest span end.',
+        },
+        {
+          name: 'value',
+          type: 'string | null',
+          required: false,
+          description: 'Controlled selected span ID.',
+        },
+        {
+          name: 'defaultValue',
+          type: 'string',
+          required: false,
+          description: 'Initial selected span ID when uncontrolled.',
+        },
+        {
+          name: 'onValueChange',
+          type: '(id: string) => void',
+          required: false,
+          description: 'Called when a span row or timing bar is selected.',
+        },
+        {
+          name: 'expanded',
+          type: 'readonly string[]',
+          required: false,
+          description: 'Controlled expanded parent span IDs.',
+        },
+        {
+          name: 'defaultExpanded',
+          type: 'readonly string[]',
+          required: false,
+          description: 'Initial expanded parent span IDs. Defaults to all parent spans expanded.',
+        },
+        {
+          name: 'onExpandedChange',
+          type: '(ids: string[]) => void',
+          required: false,
+          description: 'Called when expanded parent span IDs change.',
+        },
+        {
+          name: 'highlightCriticalPath',
+          type: 'boolean',
+          required: false,
+          description: 'Emphasizes spans marked critical: true. Defaults to true.',
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          required: false,
+          description: 'Controls row spacing and font scale.',
+        },
+        {
+          name: 'class',
+          type: 'string',
+          required: false,
+          description: 'Additional class name on the outer container.',
+        },
+      ],
+    },
+  ],
+  'pipeline-graph': [
+    {
+      name: 'PipelineGraph',
+      props: [
+        {
+          name: 'label',
+          type: 'string',
+          required: true,
+          description: 'Accessible name for the pipeline graph.',
+        },
+        {
+          name: 'jobs',
+          type: 'readonly PipelineJob[]',
+          required: true,
+          description: 'Jobs and their upstream needs dependencies.',
+        },
+        {
+          name: 'value',
+          type: 'string | null',
+          required: false,
+          description: 'Controlled selected job ID.',
+        },
+        {
+          name: 'defaultValue',
+          type: 'string',
+          required: false,
+          description: 'Initial selected job ID when uncontrolled.',
+        },
+        {
+          name: 'onValueChange',
+          type: '(id: string) => void',
+          required: false,
+          description: 'Called when a job node is selected.',
+        },
+        {
+          name: 'stages',
+          type: 'readonly string[]',
+          required: false,
+          description: 'Explicit stage ordering when jobs specify stage labels.',
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          required: false,
+          description: 'Controls node padding and font scale.',
+        },
+        {
+          name: 'class',
+          type: 'string',
+          required: false,
+          description: 'Additional class name on the outer container.',
+        },
+      ],
+    },
+  ],
+  'status-strip': [
+    {
+      name: 'StatusStrip',
+      props: [
+        {
+          name: 'label',
+          type: 'string',
+          required: true,
+          description: 'Accessible name for the status strip.',
+        },
+        {
+          name: 'items',
+          type: 'readonly StatusStripItem[]',
+          required: true,
+          description: 'Chronological status bars (oldest to newest).',
+        },
+        {
+          name: 'value',
+          type: 'string | null',
+          required: false,
+          description: 'Controlled selected item ID.',
+        },
+        {
+          name: 'defaultValue',
+          type: 'string',
+          required: false,
+          description: 'Initial selected item ID when uncontrolled.',
+        },
+        {
+          name: 'onValueChange',
+          type: '(id: string) => void',
+          required: false,
+          description: 'Called when a bar is clicked or activated via keyboard.',
+        },
+        {
+          name: 'scaleHeight',
+          type: 'boolean',
+          required: false,
+          description:
+            'Scales bar height proportionally to item.value when provided. Defaults to true.',
+        },
+        {
+          name: 'showReadout',
+          type: 'boolean',
+          required: false,
+          description:
+            'Shows a quiet readout caption for the hovered or selected bar. Defaults to false.',
+        },
+        {
+          name: 'height',
+          type: 'number',
+          required: false,
+          description: 'Strip height in pixels. Defaults to 24 (18 when compact).',
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          required: false,
+          description: 'Controls bar sizing and spacing.',
+        },
+        {
+          name: 'class',
+          type: 'string',
+          required: false,
+          description: 'Additional class name on the outer container.',
+        },
+      ],
+    },
+  ],
   'file-tree': [
     {
       name: 'FileTree',
