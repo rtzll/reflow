@@ -40,11 +40,19 @@ it('inspects job DAG, runner telemetry, Datadog-style log explorer, waterfall sp
   await waterfallTab.locator('[data-waterfall-id="deploy-test"]').click()
   await expect(waterfallTab.locator('.rf-log-title')).toContainText('Worker smoke')
 
-  // Switch to Suites & artifacts tab and verify DataTable, FileTree, and DiffView.
+  // Switch to Suites & artifacts tab and verify DataTable, FileTree, DiffView, and per-artifact CodeBlock preview.
   await page.getByRole('tab', { name: 'Suites & artifacts' }).click()
-  await expect(page.getByRole('table', { name: 'Test suites' })).toBeVisible()
-  await expect(page.locator('.ci-tree-card .rf-file-tree[data-rf-trees-ready]')).toBeVisible()
-  await expect(page.locator('.rf-diff-view[data-rf-diffs-ready]')).toBeVisible()
+  const artifactsTab = page.getByRole('tabpanel', { name: 'Suites & artifacts' })
+  await expect(artifactsTab.getByRole('table', { name: 'Test suites' })).toBeVisible()
+  await expect(
+    artifactsTab.locator('.ci-tree-card .rf-file-tree[data-rf-trees-ready]'),
+  ).toBeVisible()
+  await expect(artifactsTab.locator('.rf-diff-view[data-rf-diffs-ready]')).toBeVisible()
+  await artifactsTab
+    .locator('.ci-tree-card [data-item-path="packages/reflow/dist/core.css"]')
+    .click()
+  await expect(artifactsTab.locator('.rf-code-block')).toBeVisible()
+  await expect(artifactsTab.locator('.rf-code-block')).toContainText('@layer reflow')
 
   // Switch to Run #4578 via StatusStrip, then back to #4577 and click Re-run failed jobs.
   await page.locator('[data-strip-id="4578"]').click()

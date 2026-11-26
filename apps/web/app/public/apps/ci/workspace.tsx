@@ -1,6 +1,7 @@
 import {
   Badge,
   Button,
+  CodeBlock,
   CommandMenu,
   DataTable,
   Icon,
@@ -24,6 +25,7 @@ import { FileTree } from '@rtzll/reflow/trees'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import { playCopyError, playCopySuccess } from '../../showcase-sound.ts'
 import {
+  artifactContents,
   artifactDecorations,
   artifactGitStatus,
   artifactPaths,
@@ -632,6 +634,8 @@ export const CiWorkspace = clientEntry(
         </div>
       )
 
+      const selectedArtifactContent = artifactContents[selectedArtifact]
+
       const artifactsPanel = (
         <div class="ci-panel-stack">
           <DataTable
@@ -659,16 +663,30 @@ export const CiWorkspace = clientEntry(
                 size="compact"
               />
             </div>
-            <DiffView
-              filename={selectedArtifact}
-              diff={failureFixDiff}
-              viewToggle
-              copyable
-              wrap
-              size="compact"
-              onCopy={playCopySuccess}
-              onCopyError={playCopyError}
-            />
+            {selectedArtifactContent?.kind === 'code' ? (
+              <CodeBlock
+                key={selectedArtifact}
+                filename={selectedArtifact}
+                language={selectedArtifactContent.language}
+                code={selectedArtifactContent.content}
+                lineNumbers
+                copyable
+                size="compact"
+                onCopy={playCopySuccess}
+              />
+            ) : (
+              <DiffView
+                key={selectedArtifact}
+                filename={selectedArtifact}
+                diff={selectedArtifactContent?.content ?? failureFixDiff}
+                viewToggle
+                copyable
+                wrap
+                size="compact"
+                onCopy={playCopySuccess}
+                onCopyError={playCopyError}
+              />
+            )}
           </div>
         </div>
       )

@@ -69,6 +69,8 @@ try {
     '/docs',
     '/docs/button',
     '/docs/dropdown?theme=dark',
+    '/docs/file-tree',
+    '/docs/diagram',
     '/apps',
     ...appSlugs.map((slug) => `/apps/${slug}`),
   ]) {
@@ -78,6 +80,18 @@ try {
     assert.equal(response.headers.get('cache-control'), 'private, no-store')
     const html = await response.text()
     assert.ok(!html.includes(homedir()), path)
+    if (path === '/docs/file-tree') {
+      assert.ok(
+        html.includes('<file-tree-container id="docs-file-tree-example"'),
+        'Built Worker must serve zero-flash Declarative Shadow DOM FileTree on /docs/file-tree',
+      )
+    }
+    if (path === '/docs/diagram') {
+      assert.ok(
+        html.includes('<svg') && html.includes('class="pele '),
+        'Built Worker must serve zero-flash Pele Mermaid SVG on /docs/diagram',
+      )
+    }
     if (path === '/apps/review') {
       assert.ok(
         html.includes('<diffs-container><template shadowrootmode="open">'),

@@ -1,37 +1,23 @@
 import { SegmentedControl } from '@rtzll/reflow'
 import { Diagram } from '@rtzll/reflow/diagrams'
 import type { Handle } from 'remix/component'
+import { sampleDiagrams } from './diagram-sample.ts'
 
-const diagrams = {
-  pipeline: {
-    title: 'Zero-flash SSR pipeline',
-    code: `flowchart LR
-  Build[Build step] --> SSR[prerenderDiff / prerenderFileTree]
-  SSR --> DSD[Declarative Shadow DOM]
-  DSD --> Paint[First paint · 0ms flash]
-  Paint --> Hydrate[Client hydrate]`,
-  },
-  sequence: {
-    title: 'Review thread lifecycle',
-    code: `sequenceDiagram
-  participant R as Reviewer
-  participant A as Author
-  participant CI as CI Runner
-  R->>A: Inline suggestion + Mermaid diagram
-  A->>CI: Apply suggestion & push
-  CI-->>R: Checks passed (4.8s)
-  R->>A: Approve & merge`,
-  },
-} as const
-
-type DiagramKey = keyof typeof diagrams
+type DiagramKey = keyof typeof sampleDiagrams
 
 /** The Diagram example: Pele-rendered Mermaid diagrams that follow Reflow's live theme tokens. */
-export function DiagramExample(handle: Handle) {
+export function DiagramExample(
+  handle: Handle<{
+    prerendered?: Record<string, string>
+    size?: 'default' | 'compact'
+    copyable?: boolean
+    showSourceToggle?: boolean
+  }>,
+) {
   let active: DiagramKey = 'pipeline'
 
   return () => {
-    const current = diagrams[active]
+    const current = sampleDiagrams[active]
     return (
       <div style={{ width: 'min(100%, 720px)', display: 'grid', gap: '12px' }}>
         <div>
@@ -52,9 +38,10 @@ export function DiagramExample(handle: Handle) {
         <Diagram
           title={current.title}
           code={current.code}
-          copyable
-          showSourceToggle
-          size="compact"
+          prerenderedSVG={handle.props.prerendered?.[current.code.trim()]}
+          copyable={handle.props.copyable ?? true}
+          showSourceToggle={handle.props.showSourceToggle ?? true}
+          size={handle.props.size ?? 'compact'}
         />
       </div>
     )

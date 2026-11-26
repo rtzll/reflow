@@ -224,6 +224,8 @@ export const DocPreview = clientEntry(
                     values={playground}
                     avatar={handle.props.images.sidebarAvatar}
                     samples={handle.props.images.code}
+                    fileTree={handle.props.images.fileTree}
+                    diagrams={handle.props.images.diagrams}
                   />
                 ) : handle.props.variant ? (
                   <ComponentDemo
@@ -236,6 +238,8 @@ export const DocPreview = clientEntry(
                     slug={handle.props.slug}
                     query={handle.props.query}
                     diff={handle.props.images.diff}
+                    fileTree={handle.props.images.fileTree}
+                    diagrams={handle.props.images.diagrams}
                   />
                 )}
               </fieldset>

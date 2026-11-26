@@ -9,10 +9,19 @@ import {
   reviewFiles,
   seedThreads,
 } from './public/apps/review/fixtures.ts'
+import { sampleDiagrams } from './public/diagram-sample.ts'
 import { sampleDiff } from './public/diff-view-sample.ts'
+import {
+  sampleFileTreeDecorations,
+  sampleFileTreeGitStatus,
+  sampleFileTreeId,
+  sampleFileTreePaths,
+} from './public/file-tree-sample.ts'
 
 export interface DiffSamples {
   example: string
+  fileTreeExample: PrerenderedFileTree
+  diagramExamples: Record<string, string>
   chat: Record<string, string>
   review: Record<string, string>
   reviewTree: PrerenderedFileTree
@@ -84,8 +93,26 @@ async function loadDiffSamples(): Promise<DiffSamples> {
     [...mermaidSources].map((code) => [code, prerenderDiagram(code).svg]),
   )
 
+  const fileTreeExample = prerenderFileTree({
+    id: sampleFileTreeId,
+    paths: sampleFileTreePaths,
+    defaultValue: sampleFileTreePaths[1],
+    gitStatus: sampleFileTreeGitStatus,
+    rowDecorations: sampleFileTreeDecorations,
+    size: 'compact',
+  })
+
+  const diagramExamples = Object.fromEntries(
+    Object.values(sampleDiagrams).map((entry) => [
+      entry.code.trim(),
+      prerenderDiagram(entry.code.trim()).svg,
+    ]),
+  )
+
   return {
     example: example.prerenderedHTML,
+    fileTreeExample,
+    diagramExamples,
     chat: Object.fromEntries(chatRendered),
     review: Object.fromEntries(reviewRendered),
     reviewTree,

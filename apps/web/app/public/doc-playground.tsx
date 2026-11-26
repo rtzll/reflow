@@ -86,6 +86,7 @@ import {
   type ColorFormat,
 } from '@rtzll/reflow'
 import { Markdown } from '@rtzll/reflow/markdown'
+import type { FileTreeSsrPayload } from '@rtzll/reflow/trees'
 import { BannerExample, bannerDefaults, bannerStatuses } from './banner-example.tsx'
 
 export type PlaygroundValues = Record<string, string | boolean>
@@ -567,7 +568,14 @@ export const PlaygroundControls = clientEntry(
 )
 
 export function PlaygroundExample(
-  handle: Handle<{ slug: string; values: PlaygroundValues; avatar: string; samples?: CodeSamples }>,
+  handle: Handle<{
+    slug: string
+    values: PlaygroundValues
+    avatar: string
+    samples?: CodeSamples
+    fileTree?: FileTreeSsrPayload
+    diagrams?: Record<string, string>
+  }>,
 ) {
   let selection = cardItems[0].title as string
   let slide = 0

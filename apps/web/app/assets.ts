@@ -3,6 +3,7 @@ import { buildSync } from 'esbuild'
 import { createAssetServer } from 'remix/assets'
 import { loadConfig } from 'remix/cli'
 import { getSoundAssets } from './sound-assets.ts'
+import type { FileTreeSsrPayload } from '@rtzll/reflow/trees'
 import type { CodeSamples } from './public/code-block-example.tsx'
 
 const config = await loadConfig(fileURLToPath(new URL('../', import.meta.url)))
@@ -48,6 +49,10 @@ export interface ExampleImages {
   code?: CodeSamples
   /** DiffView HTML pre-rendered on the server for zero-flash hydration. */
   diff?: string
+  /** FileTree DSD pre-rendered on the server for zero-flash hydration. */
+  fileTree?: FileTreeSsrPayload
+  /** Pele Diagram SVGs pre-rendered on the server for zero-flash hydration. */
+  diagrams?: Record<string, string>
 }
 
 export async function getPageAssets(appSlug?: string) {

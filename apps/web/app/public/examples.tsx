@@ -92,6 +92,7 @@ import {
   type HighlightedCode,
 } from '@rtzll/reflow'
 import { Markdown } from '@rtzll/reflow/markdown'
+import type { FileTreeSsrPayload } from '@rtzll/reflow/trees'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import { BannerExample, BannerPreview } from './banner-example.tsx'
 import { DiffViewExample } from './diff-view-example.tsx'
@@ -239,6 +240,8 @@ export const Example = clientEntry(
       query?: string
       code?: HighlightedCode
       diff?: string
+      fileTree?: FileTreeSsrPayload
+      diagrams?: Record<string, string>
     }>,
   ) {
     let starting = false
@@ -299,9 +302,9 @@ export const Example = clientEntry(
         case 'diff-view':
           return <DiffViewExample prerenderedHTML={handle.props.diff} />
         case 'file-tree':
-          return <FileTreeExample />
+          return <FileTreeExample prerendered={handle.props.fileTree} />
         case 'diagram':
-          return <DiagramExample />
+          return <DiagramExample prerendered={handle.props.diagrams} />
         case 'empty-state':
           return <EmptyStateExample />
         case 'timeline':

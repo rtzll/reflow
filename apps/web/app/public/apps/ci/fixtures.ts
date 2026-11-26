@@ -178,6 +178,12 @@ export const artifactDecorations: Readonly<Record<string, FileTreeRowDecoration>
   },
 }
 
+export interface CiArtifactContent {
+  kind: 'diff' | 'code'
+  language?: string
+  content: string
+}
+
 export const failureFixDiff = `--- a/apps/web/app/ui/example-apps.tsx
 +++ b/apps/web/app/ui/example-apps.tsx
 @@ -88,12 +88,14 @@ export function AppWorkspace(handle) {
@@ -200,6 +206,98 @@ export const failureFixDiff = `--- a/apps/web/app/ui/example-apps.tsx
 +        )}
          <main id="main" data-rmx-key={app.slug}>
 `
+
+export const artifactContents: Readonly<Record<string, CiArtifactContent>> = {
+  'packages/reflow/dist/core.css': {
+    kind: 'code',
+    language: 'css',
+    content: `/* @rtzll/reflow/core.css — 335 KB (unminified), @layer reflow */
+@layer reflow {
+  :root {
+    --rf-bg: #ffffff;
+    --rf-surface-1: #fafafa;
+    --rf-surface-2: #f4f4f5;
+    --rf-border: rgba(15, 23, 42, 0.1);
+    --rf-text: #111827;
+    --rf-muted: #6b7280;
+    --rf-accent: #6b97ff;
+    --rf-success: #16a34a;
+    --rf-warning: #d97706;
+    --rf-danger: #dc2626;
+  }
+}`,
+  },
+  'packages/reflow/dist/diffs.css': {
+    kind: 'code',
+    language: 'css',
+    content: `/* @rtzll/reflow/diffs.css — 6.6 KB, @layer reflow */
+@layer reflow {
+  .rf-diff-view {
+    border: 1px solid var(--rf-border);
+    border-radius: var(--rf-panel-radius);
+    background: var(--rf-surface-1);
+    overflow: hidden;
+  }
+}`,
+  },
+  'packages/reflow/dist/trees.css': {
+    kind: 'code',
+    language: 'css',
+    content: `/* @rtzll/reflow/trees.css — 3.2 KB, @layer reflow */
+@layer reflow {
+  .rf-file-tree {
+    display: block;
+    min-width: 0;
+    --trees-bg-override: transparent;
+    --trees-fg-override: var(--rf-text);
+    --trees-fg-muted-override: var(--rf-muted);
+    --trees-selected-bg-override: color-mix(in srgb, var(--rf-accent) 14%, transparent);
+  }
+}`,
+  },
+  'packages/reflow/dist/diagrams.css': {
+    kind: 'code',
+    language: 'css',
+    content: `/* @rtzll/reflow/diagrams.css — 4.3 KB, @layer reflow */
+@layer reflow {
+  .rf-diagram-canvas {
+    --pele-bg: transparent;
+    --pele-fg: var(--rf-text);
+    --pele-accent: var(--rf-accent);
+    --pele-surface: var(--rf-surface-2);
+    --pele-border: var(--rf-border);
+    --pele-font: var(--rf-font-sans);
+  }
+}`,
+  },
+  'packages/reflow/dist/trees.js': {
+    kind: 'code',
+    language: 'js',
+    content: `// @rtzll/reflow/trees — 9.0 KB ESM (optional peer: @pierre/trees)
+export { FileTree } from './trees-impl.js'
+// Zero-flash SSR entry: @rtzll/reflow/trees/ssr -> prerenderFileTree()`,
+  },
+  'packages/reflow/dist/diagrams.js': {
+    kind: 'code',
+    language: 'js',
+    content: `// @rtzll/reflow/diagrams — 7.5 KB ESM (optional peer: pele)
+import { renderMermaid } from 'pele/lazy'
+export { Diagram, renderMermaid }`,
+  },
+  'apps/web/build/worker/index.js': {
+    kind: 'code',
+    language: 'js',
+    content: `// Cloudflare Worker bundle — verified 0 optional peers bundled
+// Excluded: @pierre/diffs, @pierre/trees, preact, pele, shiki
+// Pre-rendered assets inlined at build time:
+//   - REFLOW_CODE_SAMPLES (Shiki HTML)
+//   - REFLOW_DIFF_SAMPLES (DSD diffs, FileTree DSD, Pele SVGs)`,
+  },
+  'test-results/apps-nav-fix.patch': {
+    kind: 'diff',
+    content: failureFixDiff,
+  },
+}
 
 const baseTelemetry: Record<string, CiJobTelemetry> = {
   lint: {

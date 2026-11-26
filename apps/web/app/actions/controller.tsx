@@ -98,15 +98,19 @@ async function show(
     return new Response('Component not found', { status: 404 })
   const title = page === 'gallery' ? 'Reflow' : `${component?.name ?? 'Documentation'} · Reflow`
   const pageAssets = await getPageAssets()
-  // CodeBlock and DiffView samples are highlighted/pre-rendered on the server for zero-flash hydration.
+  // CodeBlock, DiffView, FileTree, and Diagram samples are pre-rendered on the server for zero-flash hydration.
   const [samples, diffs] = await Promise.all([
     page === 'gallery' || slug === 'code-block' ? codeSamples() : undefined,
-    page === 'gallery' || slug === 'diff-view' ? diffSamples() : undefined,
+    page === 'gallery' || slug === 'diff-view' || slug === 'file-tree' || slug === 'diagram'
+      ? diffSamples()
+      : undefined,
   ])
   const images = {
     ...pageAssets.images,
     ...(slug === 'code-block' ? { code: samples } : {}),
     ...(slug === 'diff-view' ? { diff: diffs?.example } : {}),
+    ...(slug === 'file-tree' ? { fileTree: diffs?.fileTreeExample } : {}),
+    ...(slug === 'diagram' ? { diagrams: diffs?.diagramExamples } : {}),
   }
   const source = page === 'component' && slug ? await exampleSource(slug) : undefined
   const components =
