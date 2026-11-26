@@ -1,0 +1,150 @@
+/* Timeline: vertical connected activity and review stream. */
+.rf-timeline {
+  --rf-timeline-marker: 26px;
+  --rf-timeline-gap: 16px;
+  --rf-timeline-gutter: 12px;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--rf-fg);
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+}
+
+.rf-timeline[data-density='compact'],
+[data-density='compact'] .rf-timeline:not([data-density]) {
+  --rf-timeline-marker: 22px;
+  --rf-timeline-gap: 12px;
+  --rf-timeline-gutter: 10px;
+}
+
+.rf-timeline-item {
+  display: grid;
+  grid-template-columns: var(--rf-timeline-marker) minmax(0, 1fr);
+  column-gap: var(--rf-timeline-gutter);
+}
+
+.rf-timeline-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rf-timeline-marker {
+  display: grid;
+  flex: none;
+  place-items: center;
+  box-sizing: border-box;
+  inline-size: var(--rf-timeline-marker);
+  block-size: var(--rf-timeline-marker);
+  border: 1px solid var(--rf-border);
+  border-radius: 999px;
+  background: var(--rf-surface-2);
+  color: var(--rf-muted);
+}
+
+.rf-timeline-dot {
+  inline-size: 7px;
+  block-size: 7px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.rf-timeline-item[data-tone='accent'] .rf-timeline-marker {
+  border-color: color-mix(in oklab, var(--rf-accent) 42%, var(--rf-border));
+  background: color-mix(in oklab, var(--rf-accent) 12%, var(--rf-surface-2));
+  color: var(--rf-accent);
+}
+
+.rf-timeline-item[data-tone='success'] .rf-timeline-marker {
+  border-color: color-mix(in oklab, var(--rf-success) 42%, var(--rf-border));
+  background: color-mix(in oklab, var(--rf-success) 12%, var(--rf-surface-2));
+  color: var(--rf-success);
+}
+
+.rf-timeline-item[data-tone='warning'] .rf-timeline-marker {
+  border-color: color-mix(in oklab, var(--rf-warning) 44%, var(--rf-border));
+  background: color-mix(in oklab, var(--rf-warning) 14%, var(--rf-surface-2));
+  color: var(--rf-warning);
+}
+
+.rf-timeline-item[data-tone='danger'] .rf-timeline-marker {
+  border-color: color-mix(in oklab, var(--rf-danger) 42%, var(--rf-border));
+  background: color-mix(in oklab, var(--rf-danger) 12%, var(--rf-surface-2));
+  color: var(--rf-danger);
+}
+
+.rf-timeline-line {
+  flex: 1;
+  inline-size: 1px;
+  min-block-size: 12px;
+  margin-block: 4px;
+  background: var(--rf-border);
+}
+
+.rf-timeline-item:last-child .rf-timeline-line {
+  display: none;
+}
+
+.rf-timeline-content {
+  min-inline-size: 0;
+  padding-block: 2px var(--rf-timeline-gap);
+}
+
+.rf-timeline-item:last-child .rf-timeline-content {
+  padding-block-end: 0;
+}
+
+.rf-timeline-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  min-block-size: calc(var(--rf-timeline-marker) - 4px);
+}
+
+.rf-timeline-title {
+  color: var(--rf-fg);
+  font-size: var(--rf-text-body);
+  line-height: var(--rf-leading-body);
+}
+
+.rf-timeline-title strong {
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.rf-timeline-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rf-timeline-time {
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption);
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-timeline-action {
+  display: inline-flex;
+  align-items: center;
+  margin-inline-start: auto;
+}
+
+.rf-timeline-detail {
+  margin-block-start: 6px;
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption);
+  line-height: 1.5;
+}
+
+@media (forced-colors: active) {
+  .rf-timeline-marker {
+    border-color: CanvasText;
+  }
+
+  .rf-timeline-line {
+    background: CanvasText;
+  }
+}

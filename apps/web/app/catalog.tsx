@@ -205,6 +205,26 @@ const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 
       'Unified and side-by-side code diffs powered by @pierre/diffs, with syntax highlighting, intraline changes, line selection, and inline annotations.',
     code: `import { DiffView } from '@rtzll/reflow/diffs'\n\n<DiffView\n  filename="src/cache.ts"\n  diff={unifiedDiff}\n  viewToggle\n/>`,
   },
+  'empty-state': {
+    description:
+      'A quiet centered placeholder for empty views or zero-match filters, with an icon tile, description, and recovery actions.',
+    code: `import { Button, EmptyState, Icon } from '@rtzll/reflow'\n\n<EmptyState\n  surface="outlined"\n  icon={<Icon name="search" size={18} />}\n  title="No matching files"\n  description="Clear the filter to inspect all changed files."\n  actions={<Button size="compact" variant="secondary">Clear filter</Button>}\n/>`,
+  },
+  timeline: {
+    description:
+      'A vertical connected stream of commits, review events, and check runs with semantic markers and detail blocks.',
+    code: `import { Badge, Icon, Timeline } from '@rtzll/reflow'\n\n<Timeline\n  label="Review activity"\n  items={[\n    { id: '1', icon: <Icon name="file" size={12} />, title: 'Pushed 2 commits', meta: <Badge size="compact">a84c1bb</Badge>, timestamp: '14m ago' },\n    { id: '2', tone: 'success', icon: <Icon name="check" size={12} />, title: 'All checks passed', timestamp: '9m ago' },\n  ]}\n/>`,
+  },
+  terminal: {
+    description:
+      'Monospace command and CI log output in CodeBlock’s quiet frame, with ANSI color rendering, filtering, follow-tail scrolling, and plain-text copy.',
+    code: `import { Terminal } from '@rtzll/reflow'\n\n<Terminal\n  command="pnpm verify"\n  status="passed"\n  exitCode={0}\n  searchable\n  output={['\\x1b[32m✓\\x1b[0m All checks passed']}\n/>`,
+  },
+  'comment-thread': {
+    description:
+      'Threaded review discussions with avatars, code suggestion blocks, inline replies, and spring-collapsed Resolve/Reopen states.',
+    code: `import { CommentThread } from '@rtzll/reflow'\n\n<CommentThread\n  context="src/diffs-ssr.ts:144"\n  comments={[{ id: '1', author: { name: 'Noah' }, timestamp: '12m ago', body: 'Strip leading a/ and b/ prefixes.' }]}\n  onReply={appendReply}\n  onResolvedChange={setResolved}\n/>`,
+  },
   'chat-message': {
     description: 'A chat message with user or assistant alignment and optional attachments.',
     code: conversationCode,

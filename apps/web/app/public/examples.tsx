@@ -95,6 +95,10 @@ import { Markdown } from '@rtzll/reflow/markdown'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import { BannerExample, BannerPreview } from './banner-example.tsx'
 import { DiffViewExample } from './diff-view-example.tsx'
+import { EmptyStateExample } from './empty-state-example.tsx'
+import { TimelineExample } from './timeline-example.tsx'
+import { TerminalExample } from './terminal-example.tsx'
+import { CommentThreadExample } from './comment-thread-example.tsx'
 import { FileChangesExample } from './file-changes-example.tsx'
 import { KbdExample } from './kbd-example.tsx'
 import { TaskListExample } from './task-list-example.tsx'
@@ -288,6 +292,14 @@ export const Example = clientEntry(
           return <FileChangesExample />
         case 'diff-view':
           return <DiffViewExample prerenderedHTML={handle.props.diff} />
+        case 'empty-state':
+          return <EmptyStateExample />
+        case 'timeline':
+          return <TimelineExample />
+        case 'terminal':
+          return <TerminalExample />
+        case 'comment-thread':
+          return <CommentThreadExample />
         case 'kbd':
           return <KbdExample />
         case 'time-field':

@@ -1069,6 +1069,287 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
       ],
     },
   ],
+  'empty-state': [
+    {
+      name: 'EmptyState',
+      props: [
+        {
+          name: 'title',
+          type: 'string',
+          required: true,
+          description: 'Primary heading explaining why the view is empty.',
+        },
+        {
+          name: 'description',
+          type: 'RemixNode',
+          required: false,
+          description: 'Optional supporting copy beneath the heading.',
+        },
+        {
+          name: 'icon',
+          type: 'RemixNode',
+          required: false,
+          description: 'Optional leading icon rendered in a quiet framed tile.',
+        },
+        {
+          name: 'actions',
+          type: 'RemixNode',
+          required: false,
+          description: 'Optional action buttons or links beneath the copy.',
+        },
+        {
+          name: 'surface',
+          type: '"plain" | "outlined"',
+          required: false,
+          description: 'Surface treatment. Defaults to plain.',
+        },
+        {
+          name: 'size',
+          type: '"default" | "compact"',
+          required: false,
+          description: 'Controls spacing and icon tile scale.',
+        },
+        {
+          name: 'label',
+          type: 'string',
+          required: false,
+          description: 'Accessible name for the region; defaults to the visible title.',
+        },
+        {
+          name: 'class',
+          type: 'string',
+          required: false,
+          description: 'Additional CSS class names on the root section.',
+        },
+      ],
+    },
+  ],
+  timeline: [
+    {
+      name: 'Timeline',
+      props: [
+        {
+          name: 'items',
+          type: 'readonly TimelineItem[]',
+          required: true,
+          description: 'Chronological sequence of timeline events.',
+        },
+        {
+          name: 'label',
+          type: 'string',
+          required: false,
+          description: 'Accessible name for the timeline list. Defaults to "Timeline".',
+        },
+        {
+          name: 'size',
+          type: '"default" | "compact"',
+          required: false,
+          description: 'Controls spacing and marker scale.',
+        },
+        {
+          name: 'class',
+          type: 'string',
+          required: false,
+          description: 'Additional CSS class names on the root ordered list.',
+        },
+      ],
+    },
+  ],
+  terminal: [
+    {
+      name: 'Terminal',
+      props: [
+        {
+          name: 'output',
+          type: 'string | readonly string[]',
+          required: true,
+          description: 'Raw terminal output string or array of lines; supports ANSI SGR codes.',
+        },
+        {
+          name: 'command',
+          type: 'string',
+          required: false,
+          description: 'Command displayed in the header.',
+        },
+        {
+          name: 'title',
+          type: 'string',
+          required: false,
+          description: 'Optional header label when command is omitted.',
+        },
+        {
+          name: 'status',
+          type: '"idle" | "running" | "passed" | "failed"',
+          required: false,
+          description: 'Execution status indicator shown in the header. Defaults to idle.',
+        },
+        {
+          name: 'exitCode',
+          type: 'number',
+          required: false,
+          description: 'Optional process exit code displayed beside the status.',
+        },
+        {
+          name: 'lineNumbers',
+          type: 'boolean',
+          required: false,
+          description: 'Numbers each rendered line in a quiet gutter. Defaults to false.',
+        },
+        {
+          name: 'wrap',
+          type: 'boolean',
+          required: false,
+          description: 'Wraps long lines instead of scrolling horizontally. Defaults to false.',
+        },
+        {
+          name: 'searchable',
+          type: 'boolean',
+          required: false,
+          description: 'Shows a compact filter input in the header.',
+        },
+        {
+          name: 'follow',
+          type: 'boolean',
+          required: false,
+          description: 'Pins scroll to the newest line as output grows unless the user scrolls up.',
+        },
+        {
+          name: 'maxHeight',
+          type: 'string',
+          required: false,
+          description: 'Optional CSS max-block-size for scrollable output.',
+        },
+        {
+          name: 'copyable',
+          type: 'boolean',
+          required: false,
+          description:
+            'Shows a copy button that copies ANSI-stripped plain text. Defaults to true.',
+        },
+        {
+          name: 'onCopy',
+          type: '() => void',
+          required: false,
+          description: 'Called after the output text is copied.',
+        },
+        {
+          name: 'onCopyError',
+          type: '() => void',
+          required: false,
+          description: 'Called if copying fails.',
+        },
+        {
+          name: 'actions',
+          type: 'RemixNode',
+          required: false,
+          description: 'Trailing controls rendered in the header.',
+        },
+        {
+          name: 'size',
+          type: '"default" | "compact"',
+          required: false,
+          description: 'Controls text scale and header spacing.',
+        },
+        {
+          name: 'label',
+          type: 'string',
+          required: false,
+          description: 'Accessible name for the terminal figure.',
+        },
+        {
+          name: 'class',
+          type: 'string',
+          required: false,
+          description: 'Additional CSS class names on the root figure.',
+        },
+      ],
+    },
+  ],
+  'comment-thread': [
+    {
+      name: 'CommentThread',
+      props: [
+        {
+          name: 'comments',
+          type: 'readonly CommentEntry[]',
+          required: true,
+          description: 'Ordered comments rendered inside the thread.',
+        },
+        {
+          name: 'context',
+          type: 'RemixNode',
+          required: false,
+          description: 'Optional file or line range header label.',
+        },
+        {
+          name: 'outdated',
+          type: 'boolean',
+          required: false,
+          description: 'Marks the thread with an Outdated badge.',
+        },
+        {
+          name: 'resolved',
+          type: 'boolean',
+          required: false,
+          description: 'Controlled resolved state.',
+        },
+        {
+          name: 'defaultResolved',
+          type: 'boolean',
+          required: false,
+          description: 'Initial resolved state when uncontrolled. Defaults to false.',
+        },
+        {
+          name: 'onResolvedChange',
+          type: '(resolved: boolean) => void',
+          required: false,
+          description: 'Called when the user clicks Resolve or Reopen.',
+        },
+        {
+          name: 'onReply',
+          type: '(body: string) => void',
+          required: false,
+          description: 'Called when the user submits a reply from the inline composer.',
+        },
+        {
+          name: 'replyable',
+          type: 'boolean',
+          required: false,
+          description: 'Shows the inline reply composer. Defaults to true when onReply is set.',
+        },
+        {
+          name: 'replyPlaceholder',
+          type: 'string',
+          required: false,
+          description: 'Placeholder text for the reply composer.',
+        },
+        {
+          name: 'actions',
+          type: 'RemixNode',
+          required: false,
+          description: 'Extra trailing controls rendered in the thread header.',
+        },
+        {
+          name: 'size',
+          type: '"default" | "compact"',
+          required: false,
+          description: 'Controls text scale and padding.',
+        },
+        {
+          name: 'label',
+          type: 'string',
+          required: false,
+          description: 'Accessible name for the thread region.',
+        },
+        {
+          name: 'class',
+          type: 'string',
+          required: false,
+          description: 'Additional CSS class names on the root section.',
+        },
+      ],
+    },
+  ],
   spinner: [
     {
       name: 'Spinner',

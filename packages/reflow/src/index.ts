@@ -232,4 +232,21 @@ export {
   type BarChartSeries,
   type BarChartSeriesItem,
 } from './bar-chart.tsx'
+export { EmptyState, type EmptyStateProps } from './empty-state.tsx'
+export { Timeline, type TimelineItem, type TimelineProps, type TimelineTone } from './timeline.tsx'
+export {
+  Terminal,
+  parseAnsiLine,
+  stripAnsi,
+  type AnsiSpan,
+  type TerminalProps,
+  type TerminalStatus,
+} from './terminal.tsx'
+export {
+  CommentThread,
+  type CommentAuthor,
+  type CommentEntry,
+  type CommentSuggestion,
+  type CommentThreadProps,
+} from './comment-thread.tsx'
 export { createRangeSelection } from './behaviors/range-selection.ts'
