@@ -201,7 +201,13 @@ export {
   type TriggerMenuTrigger,
 } from './trigger-menu.tsx'
 export { FileInput, type FileInputProps } from './file-input.tsx'
-export { Resizable, type ResizableProps } from './resizable.tsx'
+export {
+  Resizable,
+  ResizableGroup,
+  type ResizableGroupProps,
+  type ResizablePane,
+  type ResizableProps,
+} from './resizable.tsx'
 export { Skeleton, type SkeletonProps } from './skeleton.tsx'
 export { Spinner, type SpinnerProps } from './spinner.tsx'
 export { Pagination, type PaginationProps } from './pagination.tsx'
@@ -295,3 +301,29 @@ export { LineChart, type LineChartProps, type LineChartSeries } from './line-cha
 export { ObjectInspector, type ObjectInspectorProps } from './object-inspector.tsx'
 export { parseFacetQuery, type FacetToken, type ParsedFacetQuery } from './behaviors/facet-query.ts'
 export { createRangeSelection } from './behaviors/range-selection.ts'
+export { VirtualList, type VirtualListProps } from './virtual-list.tsx'
+export {
+  computeVirtualRange,
+  scrollOffsetForIndex,
+  type VirtualRange,
+  type VirtualRangeOptions,
+  type VirtualScrollAlign,
+} from './behaviors/virtualizer.ts'
+export {
+  ShortcutSheet,
+  type ShortcutSheetItem,
+  type ShortcutSheetProps,
+} from './shortcut-sheet.tsx'
+export {
+  attachKeymap,
+  createKeymap,
+  isEditableTarget,
+  type KeymapBinding,
+  type KeymapOptions,
+} from './behaviors/keymap.ts'
+export { RelativeTime, type RelativeTimeProps } from './relative-time.tsx'
+export {
+  formatRelativeTime,
+  formatShortUtcDate,
+  formatUtcTimestamp,
+} from './behaviors/relative-time.ts'

@@ -25,6 +25,10 @@
   overscroll-behavior: contain;
 }
 
+.rf-resizable-pane[data-collapsed='true'] {
+  overflow: hidden;
+}
+
 .rf-resizable-grip {
   position: relative;
   display: grid;

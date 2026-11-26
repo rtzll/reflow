@@ -1,0 +1,18 @@
+.rf-relative-time {
+  font-family: var(--rf-font);
+  font-variant-numeric: tabular-nums;
+  color: var(--rf-muted);
+  white-space: nowrap;
+  border-radius: var(--rf-item-radius);
+}
+
+.rf-relative-time:focus-visible {
+  outline: 2px solid var(--rf-accent);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  .rf-relative-time:focus-visible {
+    outline-color: Highlight;
+  }
+}

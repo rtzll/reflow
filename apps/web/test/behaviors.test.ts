@@ -20,6 +20,11 @@ import {
   type ObjectTreeNode,
 } from '../../../packages/reflow/src/behaviors/object-tree.ts'
 import { createRangeSelection } from '../../../packages/reflow/src/behaviors/range-selection.ts'
+import {
+  computeVirtualRange,
+  scrollOffsetForIndex,
+} from '../../../packages/reflow/src/behaviors/virtualizer.ts'
+import { createKeymap } from '../../../packages/reflow/src/behaviors/keymap.ts'
 import { computeSparklineGeometry } from '../../../packages/reflow/src/sparkline.tsx'
 
 // Deterministic PRNG so property runs are fast, thorough, and 100% reproducible.
@@ -379,4 +384,93 @@ it('property: computeSparklineGeometry always emits finite in-bounds coordinates
       assert.ok(!area.includes('NaN') && !area.includes('Infinity'))
     }
   }
+})
+
+it('property: virtualizer ranges stay in bounds and scrollOffsetForIndex brings target into view', () => {
+  const rng = mulberry32(0x5eed8)
+  const aligns = ['auto', 'start', 'center', 'end'] as const
+
+  for (let trial = 0; trial < 200; trial++) {
+    const count = rng() < 0.08 ? 0 : randomInt(rng, 1, 5000)
+    const itemHeight = randomInt(rng, 16, 72)
+    const viewportHeight = randomInt(rng, 80, 900)
+    const overscan = randomInt(rng, 0, 12)
+    const scrollTop = randomInt(rng, -50, count * itemHeight + 200)
+
+    const range = computeVirtualRange({ count, itemHeight, scrollTop, viewportHeight, overscan })
+    assert.ok(range.start >= 0 && range.start <= count)
+    assert.ok(range.end >= range.start && range.end <= count)
+    assert.equal(range.totalHeight, count * itemHeight)
+    assert.equal(range.offsetTop, range.start * itemHeight)
+
+    if (count > 0) {
+      const targetIdx = randomInt(rng, 0, count - 1)
+      const align = pick(rng, aligns)
+      const nextScroll = scrollOffsetForIndex(
+        targetIdx,
+        count,
+        itemHeight,
+        scrollTop,
+        viewportHeight,
+        align,
+      )
+      const maxScroll = Math.max(0, count * itemHeight - viewportHeight)
+      assert.ok(nextScroll >= 0 && nextScroll <= maxScroll)
+      const afterRange = computeVirtualRange({
+        count,
+        itemHeight,
+        scrollTop: nextScroll,
+        viewportHeight,
+        overscan: 0,
+      })
+      assert.ok(
+        targetIdx >= afterRange.start && targetIdx < afterRange.end,
+        `target ${targetIdx} must be rendered after scroll (${afterRange.start}..${afterRange.end})`,
+      )
+    }
+  }
+})
+
+it('property: keymap matches single keys and multi-key chords, respects timeout, and suppresses inside inputs', () => {
+  const calls: string[] = []
+  const keymap = createKeymap(
+    [
+      { keys: 'j', label: 'Next', handler: () => calls.push('j') },
+      { keys: ['g', 'p'], label: 'Go PRs', handler: () => calls.push('gp') },
+      { keys: ['g', 'c'], label: 'Go CI', handler: () => calls.push('gc') },
+      { keys: 'mod+k', label: 'Command', handler: () => calls.push('mod+k') },
+    ],
+    { chordTimeoutMs: 500 },
+  )
+
+  const ev = (key: string, extra: Partial<Parameters<typeof keymap.handleKeyDown>[0]> = {}) => ({
+    key,
+    code: key.length === 1 && /[a-z]/i.test(key) ? `Key${key.toUpperCase()}` : key,
+    metaKey: false,
+    ctrlKey: false,
+    altKey: false,
+    shiftKey: false,
+    ...extra,
+  })
+
+  // Chord g -> p fires within timeout.
+  assert.equal(keymap.handleKeyDown(ev('g'), 1000), false)
+  assert.equal(keymap.handleKeyDown(ev('p'), 1200), true)
+  assert.deepEqual(calls, ['gp'])
+
+  // Stale prefix expires after chordTimeoutMs.
+  assert.equal(keymap.handleKeyDown(ev('g'), 2000), false)
+  assert.equal(keymap.handleKeyDown(ev('c'), 2700), false)
+  assert.deepEqual(calls, ['gp'])
+
+  // Failed chord prefix falls through cleanly to a valid single-key binding.
+  assert.equal(keymap.handleKeyDown(ev('g'), 3000), false)
+  assert.equal(keymap.handleKeyDown(ev('j'), 3100), true)
+  assert.deepEqual(calls, ['gp', 'j'])
+
+  // Single keys are suppressed inside editable inputs, while mod+k still fires.
+  const inputTarget = { tagName: 'INPUT' } as unknown as EventTarget
+  assert.equal(keymap.handleKeyDown(ev('j', { target: inputTarget }), 4000), false)
+  assert.equal(keymap.handleKeyDown(ev('k', { metaKey: true, target: inputTarget }), 4050), true)
+  assert.deepEqual(calls, ['gp', 'j', 'mod+k'])
 })
