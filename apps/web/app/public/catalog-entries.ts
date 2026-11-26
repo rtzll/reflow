@@ -89,6 +89,46 @@ export const components = [
 ] as const
 
 export type ComponentSlug = (typeof components)[number][0]
+export type ComponentName = (typeof components)[number][1]
+
+/** Specialist entry points for components outside the root `@rtzll/reflow` barrel. */
+export const specialistModules: Partial<Record<ComponentName, string>> = {
+  Diagram: '@rtzll/reflow/diagrams',
+  DiffView: '@rtzll/reflow/diffs',
+  FileTree: '@rtzll/reflow/trees',
+  Markdown: '@rtzll/reflow/markdown',
+  MarkdownEditor: '@rtzll/reflow/markdown',
+}
+
+const nameBySlug = new Map<string, string>(components)
+
+export function componentName(slug: string): string {
+  return nameBySlug.get(slug) ?? slug[0].toUpperCase() + slug.slice(1)
+}
+
+export function componentModule(name: string): string {
+  return specialistModules[name as ComponentName] ?? '@rtzll/reflow'
+}
+
+export function groupComponentImports(names: readonly string[]): string[] {
+  const byModule = new Map<string, string[]>()
+  for (const name of names) {
+    const mod = componentModule(name)
+    const list = byModule.get(mod)
+    if (list) list.push(name)
+    else byModule.set(mod, [name])
+  }
+  const core = byModule.get('@rtzll/reflow')
+  const imports: string[] = []
+  if (core && core.length > 0) {
+    imports.push(`import { ${core.join(', ')} } from '@rtzll/reflow'`)
+  }
+  for (const [mod, list] of byModule) {
+    if (mod === '@rtzll/reflow' || list.length === 0) continue
+    imports.push(`import { ${list.join(', ')} } from '${mod}'`)
+  }
+  return imports
+}
 
 export const systems = [
   [

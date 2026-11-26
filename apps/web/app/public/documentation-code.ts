@@ -1,3 +1,4 @@
+import { componentName, groupComponentImports } from './catalog-entries.ts'
 import { teamTableCode } from './team-table-example.tsx'
 import { projectFileMenuCode } from './project-tree-example.tsx'
 import { bannerFragment } from './banner-example.tsx'
@@ -166,19 +167,7 @@ export function documentationCode(slug: string, fragment: string): string {
       .map((line) => ' '.repeat(spaces) + line)
       .join('\n')
   // Specialist entry points load only where they are used.
-  const specialist = new Set(['Markdown', 'MarkdownEditor', 'FileTree', 'Diagram', 'DiffView'])
-  const coreComponents = components.filter((name) => !specialist.has(name))
-  const markdownComponents = components.filter(
-    (name) => name === 'Markdown' || name === 'MarkdownEditor',
-  )
-  const imports = [
-    coreComponents.length > 0 && `import { ${coreComponents.join(', ')} } from '@rtzll/reflow'`,
-    markdownComponents.length > 0 &&
-      `import { ${markdownComponents.join(', ')} } from '@rtzll/reflow/markdown'`,
-    components.includes('DiffView') && `import { DiffView } from '@rtzll/reflow/diffs'`,
-    components.includes('FileTree') && `import { FileTree } from '@rtzll/reflow/trees'`,
-    components.includes('Diagram') && `import { Diagram } from '@rtzll/reflow/diagrams'`,
-  ].filter(Boolean)
+  const imports = groupComponentImports(components)
   return `${imports.join('\n')}\nimport { type Handle${/\bon\(/.test(combined) ? ', on' : ''} } from 'remix/component'\n\nexport function Example(handle: Handle) {\n${setup.length ? indentation(setup.join('\n\n'), 2) + '\n\n' : ''}  return () => (\n    <>\n${indentation(markup, 6)}\n    </>\n  )\n}`
 }
 
@@ -192,39 +181,7 @@ export function playgroundFragment(slug: string, values: PlaygroundValues): stri
   if (slug === 'time-grid') return `<StudioBookings stepMinutes={${Number(values.stepMinutes)}} />`
   if (slug === 'dropdown') return dropdownPlaygroundCode(values)
   if (slug === 'date-picker') return datePickerPlaygroundCode(values)
-  const names: Record<string, string> = {
-    'ask-user-questions': 'AskUserQuestions',
-    'carousel-dots': 'CarouselDots',
-    'chat-layout': 'ChatLayout',
-    'chat-message': 'ChatMessage',
-    'code-block': 'CodeBlock',
-    'checkbox-group': 'CheckboxGroup',
-    'color-picker': 'ColorPicker',
-    'command-menu': 'CommandMenu',
-    'date-picker': 'DatePicker',
-    'input-copy': 'InputCopy',
-    'input-group': 'InputGroup',
-    'input-message': 'InputMessage',
-    'hover-card': 'HoverCard',
-    'radio-group': 'RadioGroup',
-    'segmented-control': 'SegmentedControl',
-    'thinking-indicator': 'ThinkingIndicator',
-    'thinking-steps': 'ThinkingSteps',
-    'file-tree': 'FileTree',
-    diagram: 'Diagram',
-    'log-viewer': 'LogViewer',
-    waterfall: 'Waterfall',
-    'pipeline-graph': 'PipelineGraph',
-    'status-strip': 'StatusStrip',
-    'filter-bar': 'FilterBar',
-    'reaction-bar': 'ReactionBar',
-    'markdown-editor': 'MarkdownEditor',
-    sparkline: 'Sparkline',
-    'metric-card': 'MetricCard',
-    'line-chart': 'LineChart',
-    'object-inspector': 'ObjectInspector',
-  }
-  const name = names[slug] ?? slug[0].toUpperCase() + slug.slice(1)
+  const name = componentName(slug)
   const synthetic = new Set([
     'filters',
     'descriptions',
