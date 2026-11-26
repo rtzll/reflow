@@ -96,3 +96,4 @@
 @import './reaction-bar.css' layer(reflow);
 @import './sparkline.css' layer(reflow);
 @import './metric-card.css' layer(reflow);
+@import './line-chart.css' layer(reflow);
