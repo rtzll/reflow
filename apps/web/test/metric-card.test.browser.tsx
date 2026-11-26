@@ -49,4 +49,35 @@ it('supports interactive keyboard scrubbing on Sparkline', async (t) => {
   equal(active, 2)
   ok($('.rf-sparkline-readout')?.textContent?.includes('t3 · 98'))
   ok($('.rf-sparkline-dot'))
+
+  await act(() => {
+    slider.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }))
+  })
+  equal(active, 0)
+
+  await act(() => {
+    slider.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))
+  })
+  equal(active, 3)
+
+  await act(() => {
+    slider.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+  })
+  equal(active, null)
+  equal($('.rf-sparkline-readout'), null)
+})
+
+it('handles empty and single-point Sparkline series cleanly', (t) => {
+  const empty = render(<Sparkline label="Empty" values={[]} interactive />)
+  t.after(empty.cleanup)
+  equal(
+    empty.$('.rf-sparkline-wrap'),
+    null,
+    'empty interactive sparkline is not a focusable slider',
+  )
+  equal(empty.$('.rf-sparkline-line'), null)
+
+  const single = render(<Sparkline label="Single" values={[42]} />)
+  t.after(single.cleanup)
+  ok(single.$('.rf-sparkline-line')?.getAttribute('d')?.startsWith('M 0 '))
 })

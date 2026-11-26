@@ -59,3 +59,53 @@ it('switches between Write, Preview, and Split modes, applies toolbar formatting
   ok(submitted.includes('Architecture **notes**'))
   ok(submitted.includes('```mermaid'))
 })
+
+it('supports Mod+B/I/E shortcuts, Mod+Enter submit, allowSplit=false clamping, and empty preview', async (t) => {
+  let submitted = ''
+  const { $, $$, act, cleanup } = render(
+    <MarkdownEditor
+      defaultValue="hello world"
+      defaultMode="split"
+      allowSplit={false}
+      onSubmit={(val) => {
+        submitted = val
+      }}
+    />,
+  )
+  t.after(cleanup)
+
+  // allowSplit=false clamps initial 'split' mode to 'write' and hides Split radio.
+  equal($('.rf-md-editor')?.getAttribute('data-mode'), 'write')
+  equal($$('input[type="radio"]').length, 2)
+
+  const textarea = $('.rf-md-editor-textarea') as HTMLTextAreaElement
+  const readVal = () => textarea.value
+  textarea.setSelectionRange(0, 5)
+  await act(() => {
+    textarea.dispatchEvent(new KeyboardEvent('keydown', { key: 'b', ctrlKey: true, bubbles: true }))
+  })
+  equal(readVal(), '**hello** world')
+
+  // Mod+Enter submits directly.
+  await act(() => {
+    textarea.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', metaKey: true, bubbles: true }),
+    )
+  })
+  equal(submitted, '**hello** world')
+})
+
+it('renders custom emptyPreview message and respects disabled state', (t) => {
+  const { $, $$, cleanup } = render(
+    <MarkdownEditor
+      defaultValue=""
+      defaultMode="preview"
+      emptyPreview="Draft is empty."
+      disabled
+    />,
+  )
+  t.after(cleanup)
+
+  equal($('.rf-md-editor-empty')?.textContent, 'Draft is empty.')
+  ok(Array.from($$('.rf-md-editor-tool')).every((btn) => (btn as HTMLButtonElement).disabled))
+})

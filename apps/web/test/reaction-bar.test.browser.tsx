@@ -59,3 +59,51 @@ it('toggles reaction pills and adds new reactions from the picker', async (t) =>
   equal($('.rf-reaction-picker'), null)
   equal($$('.rf-reaction-pill').length, 3)
 })
+
+it('navigates picker with arrow keys, restores focus on Escape, and filters zero-count pills', async (t) => {
+  const { $, $$, act, cleanup } = render(
+    <ReactionBar
+      reactions={[
+        { emoji: '👍', label: 'Thumbs up', count: 2, reacted: false },
+        { emoji: '👀', label: 'Eyes', count: 0, reacted: false },
+      ]}
+    />,
+  )
+  t.after(cleanup)
+
+  equal($$('.rf-reaction-pill').length, 1, 'zero-count reactions stay hidden')
+
+  const addBtn = $('.rf-reaction-add') as HTMLButtonElement
+  await act(() => {
+    addBtn.click()
+  })
+  const options = Array.from($$('.rf-reaction-option')) as HTMLButtonElement[]
+  ok(options.length >= 2)
+  equal(document.activeElement, options[0], 'opening picker focuses first reaction option')
+
+  const picker = $('.rf-reaction-picker') as HTMLElement
+  await act(() => {
+    picker.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+  })
+  equal(document.activeElement, options[1], 'ArrowRight moves focus to next option')
+
+  await act(() => {
+    picker.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))
+  })
+  equal(document.activeElement, options[options.length - 1], 'End focuses last option')
+
+  await act(() => {
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+  })
+  equal($('.rf-reaction-picker'), null)
+  equal(document.activeElement, addBtn, 'Escape restores focus to add trigger')
+})
+
+it('omits the add trigger when allowAdd is false', (t) => {
+  const { $, cleanup } = render(
+    <ReactionBar reactions={[{ emoji: '👍', label: 'Thumbs up', count: 1 }]} allowAdd={false} />,
+  )
+  t.after(cleanup)
+
+  equal($('.rf-reaction-add'), null)
+})

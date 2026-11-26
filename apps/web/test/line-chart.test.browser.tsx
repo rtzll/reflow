@@ -33,4 +33,33 @@ it('renders multi-series curves, area fills, legend, and supports keyboard cross
   equal($('.rf-line-chart-readout')?.textContent, 'Thu')
   equal($$('.rf-line-chart-dot').length, 2)
   ok($('.rf-line-chart-crosshair'))
+
+  await act(() => {
+    stage.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }))
+  })
+  equal(active, 0)
+  equal($('.rf-line-chart-readout')?.textContent, 'Mon')
+
+  await act(() => {
+    stage.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))
+  })
+  equal(active, 4)
+  equal($('.rf-line-chart-readout')?.textContent, 'Fri')
+
+  await act(() => {
+    stage.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+  })
+  equal(active, null)
+  equal($('.rf-line-chart-crosshair'), null)
+})
+
+it('respects showGrid=false, showLegend=false, and handles empty series cleanly', (t) => {
+  const { $, $$, cleanup } = render(
+    <LineChart label="Empty trend" labels={[]} series={[]} showGrid={false} showLegend={false} />,
+  )
+  t.after(cleanup)
+
+  equal($('.rf-line-chart-yaxis'), null)
+  equal($('.rf-line-chart-legend'), null)
+  equal($$('.rf-line-chart-line').length, 0)
 })

@@ -68,3 +68,63 @@ it('parses key:value facets into removable chips, pops with Backspace, autocompl
   equal(latest, '')
   equal($$('.rf-filter-chip').length, 0)
 })
+
+it('supports keyboard autocomplete, Escape dismissal, and disabled state', async (t) => {
+  let latest = ''
+  const { $, $$, act, cleanup } = render(
+    <FilterBar
+      suggestions={suggestions}
+      presets={presets}
+      onValueChange={(value) => {
+        latest = value
+      }}
+    />,
+  )
+  t.after(cleanup)
+
+  const input = $('.rf-filter-bar-input') as HTMLInputElement
+  await act(() => {
+    input.dispatchEvent(new Event('focus', { bubbles: true }))
+  })
+  ok($('.rf-filter-menu'), 'focusing opens suggestion listbox')
+  equal(input.getAttribute('aria-expanded'), 'true')
+
+  // ArrowDown to second key ("author:") and Enter to select key.
+  await act(() => {
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
+  })
+  await act(() => {
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+  })
+  const readDraft = () => input.value
+  equal(readDraft(), 'author:')
+
+  // ArrowDown to second value ("noah") and Enter to commit chip.
+  await act(() => {
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
+  })
+  await act(() => {
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+  })
+  equal(latest, 'author:noah')
+  equal($$('.rf-filter-chip').length, 1)
+
+  // Escape closes open suggestion listbox.
+  await act(() => {
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+  })
+  equal($('.rf-filter-menu'), null)
+  equal(input.getAttribute('aria-expanded'), 'false')
+})
+
+it('hides interactive controls when disabled', (t) => {
+  const { $, $$, cleanup } = render(
+    <FilterBar defaultValue="status:open" suggestions={suggestions} presets={presets} disabled />,
+  )
+  t.after(cleanup)
+
+  equal(($('.rf-filter-bar-input') as HTMLInputElement).disabled, true)
+  equal($('.rf-filter-chip-remove'), null)
+  equal($('.rf-filter-bar-clear'), null)
+  ok(Array.from($$('.rf-filter-preset')).every((btn) => (btn as HTMLButtonElement).disabled))
+})

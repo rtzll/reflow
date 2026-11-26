@@ -52,3 +52,58 @@ it('expands and collapses nested nodes, colors primitives, and handles circular 
     '2-level grandparent cycle runner.parent -> payload is caught safely',
   )
 })
+
+it('supports WAI-ARIA tree keyboard navigation, sortKeys, expandLevel=0, and copyable=false', async (t) => {
+  const { $, $$, act, cleanup } = render(
+    <ObjectInspector
+      name="cfg"
+      data={{ z: 1, a: { nested: true } }}
+      expandLevel={0}
+      sortKeys
+      copyable={false}
+    />,
+  )
+  t.after(cleanup)
+
+  equal($('.rf-obj-copy'), null)
+  equal($$('[role="treeitem"]').length, 1, 'expandLevel=0 collapses root initially')
+
+  const tree = $('.rf-obj-tree') as HTMLElement
+  const rootItem = $('[role="treeitem"]') as HTMLElement
+  equal(rootItem.getAttribute('aria-expanded'), 'false')
+
+  // ArrowRight expands collapsed root.
+  await act(() => {
+    rootItem.focus()
+    tree.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+  })
+  equal(rootItem.getAttribute('aria-expanded'), 'true')
+  const keys = Array.from($$('.rf-obj-key')).map((el) => el.textContent)
+  equal(keys[1], 'a', 'sortKeys puts "a" before "z"')
+  equal(keys[2], 'z')
+
+  // ArrowRight again enters first child ("a"), then ArrowRight expands "a".
+  await act(() => {
+    tree.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+  })
+  equal((document.activeElement as HTMLElement)?.dataset.path, '$.a')
+
+  await act(() => {
+    tree.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+  })
+  ok(Array.from($$('.rf-obj-key')).some((el) => el.textContent === 'nested'))
+
+  // ArrowLeft collapses "a", second ArrowLeft jumps back to root.
+  await act(() => {
+    tree.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }))
+  })
+  equal(
+    Array.from($$('.rf-obj-key')).some((el) => el.textContent === 'nested'),
+    false,
+  )
+
+  await act(() => {
+    tree.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }))
+  })
+  equal((document.activeElement as HTMLElement)?.dataset.path, '$')
+})
