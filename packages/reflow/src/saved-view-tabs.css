@@ -1,0 +1,122 @@
+.rf-saved-view-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.rf-saved-view-tabs-list {
+  position: relative;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-radius);
+  background: var(--rf-surface-2);
+}
+
+.rf-saved-view-tabs-hover {
+  position: absolute;
+  border-radius: calc(var(--rf-radius) - 2px);
+  background: var(--rf-hover);
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    transform var(--rf-spring-fast),
+    width var(--rf-spring-fast),
+    height var(--rf-spring-fast),
+    opacity var(--rf-spring-fast);
+}
+
+.rf-saved-view-tab {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: calc(var(--rf-radius) - 2px);
+  background: transparent;
+  color: var(--rf-muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    color var(--rf-spring-fast),
+    background-color var(--rf-spring-fast);
+}
+
+.rf-saved-view-tabs[data-size='compact'] .rf-saved-view-tab,
+[data-density='compact'] .rf-saved-view-tabs:not([data-size='default']) .rf-saved-view-tab {
+  height: 22px;
+  padding: 0 7px;
+  font-size: 11.5px;
+}
+
+.rf-saved-view-tab[data-active='true'] {
+  background: var(--rf-surface-1);
+  color: var(--rf-fg);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 8%);
+}
+
+.rf-saved-view-tab:focus-visible {
+  outline: 2px solid var(--rf-accent);
+  outline-offset: -2px;
+}
+
+.rf-saved-view-tab-count {
+  font-size: 11px;
+  color: var(--rf-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.rf-saved-view-tab-dirty {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--rf-accent);
+}
+
+.rf-saved-view-tabs-rename {
+  position: relative;
+  z-index: 2;
+  height: 26px;
+  width: 120px;
+  padding: 0 7px;
+  border: 1px solid var(--rf-accent);
+  border-radius: calc(var(--rf-radius) - 2px);
+  background: var(--rf-surface-1);
+  color: var(--rf-fg);
+  font: inherit;
+  font-size: 12px;
+}
+
+.rf-saved-view-tabs-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+@media (forced-colors: active) {
+  .rf-saved-view-tabs-list {
+    border-color: CanvasText;
+  }
+
+  .rf-saved-view-tab:focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-saved-view-tabs-hover,
+  .rf-saved-view-tab {
+    transition: none;
+  }
+}

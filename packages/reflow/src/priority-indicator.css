@@ -1,0 +1,30 @@
+.rf-priority-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--rf-muted);
+  font-size: 12px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.rf-priority-indicator[data-priority='urgent'] {
+  color: var(--rf-danger);
+}
+
+.rf-priority-indicator[data-priority='high'] {
+  color: var(--rf-warning);
+}
+
+.rf-priority-indicator[data-priority='medium'] {
+  color: var(--rf-fg);
+}
+
+.rf-priority-indicator-svg {
+  display: block;
+}
+
+.rf-priority-indicator-label {
+  color: var(--rf-fg);
+  font-weight: 500;
+}

@@ -1,0 +1,38 @@
+.rf-status-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--rf-muted);
+  font-size: 12px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.rf-status-icon[data-status='todo'] {
+  color: var(--rf-muted);
+}
+
+.rf-status-icon[data-status='in-progress'] {
+  color: var(--rf-warning);
+}
+
+.rf-status-icon[data-status='in-review'] {
+  color: var(--rf-accent);
+}
+
+.rf-status-icon[data-status='done'] {
+  color: var(--rf-success);
+}
+
+.rf-status-icon[data-status='cancelled'] {
+  color: var(--rf-muted);
+}
+
+.rf-status-icon-svg {
+  display: block;
+}
+
+.rf-status-icon-label {
+  color: var(--rf-fg);
+  font-weight: 500;
+}

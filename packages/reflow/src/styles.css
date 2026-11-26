@@ -120,3 +120,8 @@
 @import './view-options-popover.css' layer(reflow);
 @import './inline-property-picker.css' layer(reflow);
 @import './progress-ring.css' layer(reflow);
+@import './priority-indicator.css' layer(reflow);
+@import './status-icon.css' layer(reflow);
+@import './label-picker.css' layer(reflow);
+@import './estimate-pill.css' layer(reflow);
+@import './saved-view-tabs.css' layer(reflow);

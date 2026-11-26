@@ -422,3 +422,18 @@ export {
   type ProgressRingSegment,
   type ProgressRingTone,
 } from './progress-ring.tsx'
+export {
+  PriorityIndicator,
+  type IssuePriority,
+  type PriorityIndicatorProps,
+} from './priority-indicator.tsx'
+export { StatusIcon, type IssueStatusKind, type StatusIconProps } from './status-icon.tsx'
+export {
+  LabelChip,
+  LabelPicker,
+  type LabelChipProps,
+  type LabelOption,
+  type LabelPickerProps,
+} from './label-picker.tsx'
+export { EstimatePill, type EstimateOption, type EstimatePillProps } from './estimate-pill.tsx'
+export { SavedViewTabs, type SavedView, type SavedViewTabsProps } from './saved-view-tabs.tsx'
