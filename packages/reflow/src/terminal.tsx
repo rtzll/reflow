@@ -72,6 +72,7 @@ const ANSI_COLORS: Record<number, string> = {
 }
 
 // Matches ANSI CSI sequences (including SGR color codes) and OSC sequences.
+// oxlint-disable-next-line no-control-regex
 const ANSI_PATTERN = /\x1b(?:\[([0-9;]*)([A-Za-z])|\][^\x07\x1b]*(?:\x07|\x1b\\))/g
 
 /** Removes ANSI escape codes so copied output or search queries match plain text. */

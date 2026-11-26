@@ -5,17 +5,20 @@ import { open, showcaseServer } from './showcase-router.ts'
 
 const grantPointerLock = () => {
   let locked: Element | null = null
+  const setLocked = (element: Element | null) => {
+    locked = element
+  }
   Object.defineProperty(Document.prototype, 'pointerLockElement', {
     configurable: true,
     get: () => locked,
   })
   Element.prototype.requestPointerLock = function (this: Element) {
-    locked = this
+    setLocked(this)
     queueMicrotask(() => document.dispatchEvent(new Event('pointerlockchange')))
     return Promise.resolve()
   } as Element['requestPointerLock']
   Document.prototype.exitPointerLock = function () {
-    locked = null
+    setLocked(null)
     document.dispatchEvent(new Event('pointerlockchange'))
   }
 }

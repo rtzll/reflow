@@ -218,7 +218,7 @@ export const componentExamples: Record<string, readonly DocumentationExample[]> 
 
 <Calendar cellSize={56} defaultMonth="2026-11-01" dayDetail={(date) => {
   const rate = nightlyRate(date)
-  return <span style={{ color: rate <= 119 ? 'var(--rf-success)' : undefined }}>${'\$'}{rate}</span>
+  return <span style={{ color: rate <= 119 ? 'var(--rf-success)' : undefined }}>${'$'}{rate}</span>
 }} />`,
     ),
     demo(

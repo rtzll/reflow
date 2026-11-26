@@ -92,117 +92,279 @@ const fixtures: Record<string, readonly AskUserQuestion[]> = {
   ],
   multiple: [
     {
-      ...{ id: 'role', title: "What's your role?" },
+      id: 'role',
+      title: "What's your role?",
       options: [
-        { id: 'design', title: 'Designer', description: 'Visual / interaction' },
-        { id: 'eng', title: 'Engineer', description: 'Frontend / backend' },
-        { id: 'pm', title: 'PM', description: 'Product / program' },
-        { id: 'research', title: 'Researcher', description: 'User / market research' },
+        {
+          id: 'design',
+          title: 'Designer',
+          description: 'Visual / interaction',
+        },
+        {
+          id: 'eng',
+          title: 'Engineer',
+          description: 'Frontend / backend',
+        },
+        {
+          id: 'pm',
+          title: 'PM',
+          description: 'Product / program',
+        },
+        {
+          id: 'research',
+          title: 'Researcher',
+          description: 'User / market research',
+        },
       ],
     },
     {
-      ...{ id: 'tools', title: 'Which tool do you use most?' },
+      id: 'tools',
+      title: 'Which tool do you use most?',
       options: [
-        { id: 'figma', title: 'Figma', description: 'Design source of truth' },
-        { id: 'vscode', title: 'VS Code', description: 'Code editor' },
-        { id: 'linear', title: 'Linear', description: 'Issue tracker' },
-        { id: 'notion', title: 'Notion', description: 'Docs and planning' },
+        {
+          id: 'figma',
+          title: 'Figma',
+          description: 'Design source of truth',
+        },
+        {
+          id: 'vscode',
+          title: 'VS Code',
+          description: 'Code editor',
+        },
+        {
+          id: 'linear',
+          title: 'Linear',
+          description: 'Issue tracker',
+        },
+        {
+          id: 'notion',
+          title: 'Notion',
+          description: 'Docs and planning',
+        },
       ],
     },
     {
-      ...{ id: 'team', title: 'How big is your team?' },
+      id: 'team',
+      title: 'How big is your team?',
       options: [
-        { id: 'solo', title: 'Just me', description: 'Solo founder or freelancer' },
-        { id: 'small', title: '2–10', description: 'Small team or pod' },
-        { id: 'mid', title: '11–50', description: 'A few cross-functional teams' },
-        { id: 'large', title: '50+', description: 'Full org' },
+        {
+          id: 'solo',
+          title: 'Just me',
+          description: 'Solo founder or freelancer',
+        },
+        {
+          id: 'small',
+          title: '2–10',
+          description: 'Small team or pod',
+        },
+        {
+          id: 'mid',
+          title: '11–50',
+          description: 'A few cross-functional teams',
+        },
+        {
+          id: 'large',
+          title: '50+',
+          description: 'Full org',
+        },
       ],
     },
     {
-      ...{ id: 'experience', title: 'How long have you been doing this?' },
+      id: 'experience',
+      title: 'How long have you been doing this?',
       options: [
-        { id: 'lt1', title: 'Less than a year', description: 'Just getting started' },
-        { id: '1to3', title: '1–3 years', description: 'Finding your rhythm' },
-        { id: '3to7', title: '3–7 years', description: 'Comfortable in the craft' },
-        { id: 'gt7', title: '7+ years', description: 'Seasoned' },
+        {
+          id: 'lt1',
+          title: 'Less than a year',
+          description: 'Just getting started',
+        },
+        {
+          id: '1to3',
+          title: '1–3 years',
+          description: 'Finding your rhythm',
+        },
+        {
+          id: '3to7',
+          title: '3–7 years',
+          description: 'Comfortable in the craft',
+        },
+        {
+          id: 'gt7',
+          title: '7+ years',
+          description: 'Seasoned',
+        },
       ],
     },
   ],
   'multi-select': [
     {
-      ...{
-        id: 'features',
-        title: 'Which features should we prioritize?',
-        multiSelect: true,
-        nextLabel: 'Continue',
-      },
+      id: 'features',
+      title: 'Which features should we prioritize?',
+      multiSelect: true,
+      nextLabel: 'Continue',
       options: [
-        { id: 'dm', title: 'Dark mode', description: 'System-aware theme switching' },
-        { id: 'a11y', title: 'Accessibility', description: 'Screen-reader and keyboard support' },
-        { id: 'perf', title: 'Performance', description: 'Faster initial load' },
-        { id: 'i18n', title: 'Translations', description: 'Multi-language support' },
+        {
+          id: 'dm',
+          title: 'Dark mode',
+          description: 'System-aware theme switching',
+        },
+        {
+          id: 'a11y',
+          title: 'Accessibility',
+          description: 'Screen-reader and keyboard support',
+        },
+        {
+          id: 'perf',
+          title: 'Performance',
+          description: 'Faster initial load',
+        },
+        {
+          id: 'i18n',
+          title: 'Translations',
+          description: 'Multi-language support',
+        },
       ],
     },
     {
-      ...{ id: 'platforms', title: 'Which platforms do you target?', multiSelect: true },
+      id: 'platforms',
+      title: 'Which platforms do you target?',
+      multiSelect: true,
       options: [
-        { id: 'web', title: 'Web', description: 'Desktop browsers' },
-        { id: 'ios', title: 'iOS', description: 'iPhone and iPad' },
-        { id: 'android', title: 'Android', description: 'Phones and tablets' },
-        { id: 'desktop', title: 'Native desktop', description: 'macOS / Windows / Linux apps' },
+        {
+          id: 'web',
+          title: 'Web',
+          description: 'Desktop browsers',
+        },
+        {
+          id: 'ios',
+          title: 'iOS',
+          description: 'iPhone and iPad',
+        },
+        {
+          id: 'android',
+          title: 'Android',
+          description: 'Phones and tablets',
+        },
+        {
+          id: 'desktop',
+          title: 'Native desktop',
+          description: 'macOS / Windows / Linux apps',
+        },
       ],
     },
     {
-      ...{ id: 'integrations', title: 'Which integrations matter most?', multiSelect: true },
+      id: 'integrations',
+      title: 'Which integrations matter most?',
+      multiSelect: true,
       options: [
-        { id: 'slack', title: 'Slack', description: 'Notifications and approvals' },
-        { id: 'github', title: 'GitHub', description: 'PR and issue sync' },
-        { id: 'linear', title: 'Linear', description: 'Two-way ticket linking' },
-        { id: 'figma', title: 'Figma', description: 'Design hand-off' },
-        { id: 'calendar', title: 'Calendar', description: 'Schedule-aware reminders' },
+        {
+          id: 'slack',
+          title: 'Slack',
+          description: 'Notifications and approvals',
+        },
+        {
+          id: 'github',
+          title: 'GitHub',
+          description: 'PR and issue sync',
+        },
+        {
+          id: 'linear',
+          title: 'Linear',
+          description: 'Two-way ticket linking',
+        },
+        {
+          id: 'figma',
+          title: 'Figma',
+          description: 'Design hand-off',
+        },
+        {
+          id: 'calendar',
+          title: 'Calendar',
+          description: 'Schedule-aware reminders',
+        },
       ],
     },
   ],
   other: [
     {
-      ...{
-        id: 'blocker',
-        title: "What's blocking you most right now?",
-        allowOther: true,
-        otherPlaceholder: 'Describe in your own words…',
-      },
+      id: 'blocker',
+      title: "What's blocking you most right now?",
+      allowOther: true,
+      otherPlaceholder: 'Describe in your own words…',
       options: [
-        { id: 'scope', title: 'Scope', description: 'Too much on the plate' },
-        { id: 'review', title: 'Review', description: 'Waiting on feedback' },
-        { id: 'infra', title: 'Infra', description: 'Tooling slows me down' },
+        {
+          id: 'scope',
+          title: 'Scope',
+          description: 'Too much on the plate',
+        },
+        {
+          id: 'review',
+          title: 'Review',
+          description: 'Waiting on feedback',
+        },
+        {
+          id: 'infra',
+          title: 'Infra',
+          description: 'Tooling slows me down',
+        },
       ],
     },
     {
-      ...{ id: 'improve', title: 'Which area needs the most improvement?', allowOther: true },
+      id: 'improve',
+      title: 'Which area needs the most improvement?',
+      allowOther: true,
       options: [
-        { id: 'speed', title: 'Speed', description: 'Make the loop faster' },
-        { id: 'clarity', title: 'Clarity', description: 'Sharpen what good looks like' },
-        { id: 'alignment', title: 'Alignment', description: 'Get on the same page sooner' },
-        { id: 'quality', title: 'Quality', description: 'Raise the craft bar' },
+        {
+          id: 'speed',
+          title: 'Speed',
+          description: 'Make the loop faster',
+        },
+        {
+          id: 'clarity',
+          title: 'Clarity',
+          description: 'Sharpen what good looks like',
+        },
+        {
+          id: 'alignment',
+          title: 'Alignment',
+          description: 'Get on the same page sooner',
+        },
+        {
+          id: 'quality',
+          title: 'Quality',
+          description: 'Raise the craft bar',
+        },
       ],
     },
     {
-      ...{
-        id: 'easier',
-        title: 'What would make your week easier?',
-        allowOther: true,
-        otherPlaceholder: 'Anything else?',
-      },
+      id: 'easier',
+      title: 'What would make your week easier?',
+      allowOther: true,
+      otherPlaceholder: 'Anything else?',
       options: [
-        { id: 'fewer', title: 'Fewer meetings', description: 'Reclaim deep work time' },
-        { id: 'decisions', title: 'Faster decisions', description: 'Unblock without escalation' },
-        { id: 'context', title: 'More context', description: 'Know the why upfront' },
+        {
+          id: 'fewer',
+          title: 'Fewer meetings',
+          description: 'Reclaim deep work time',
+        },
+        {
+          id: 'decisions',
+          title: 'Faster decisions',
+          description: 'Unblock without escalation',
+        },
+        {
+          id: 'context',
+          title: 'More context',
+          description: 'Know the why upfront',
+        },
       ],
     },
   ],
   stacked: [
     {
-      ...{ id: 'template', title: 'Which starting template fits your project?', layout: 'stacked' },
+      id: 'template',
+      title: 'Which starting template fits your project?',
+      layout: 'stacked',
       options: [
         {
           id: 'marketing',
@@ -231,7 +393,9 @@ const fixtures: Record<string, readonly AskUserQuestion[]> = {
       ],
     },
     {
-      ...{ id: 'shape', title: 'Which shape language fits your brand?', layout: 'stacked' },
+      id: 'shape',
+      title: 'Which shape language fits your brand?',
+      layout: 'stacked',
       options: [
         {
           id: 'rounded',
@@ -248,13 +412,11 @@ const fixtures: Record<string, readonly AskUserQuestion[]> = {
       ],
     },
     {
-      ...{
-        id: 'components',
-        title: 'Which components will you reach for first?',
-        layout: 'stacked',
-        multiSelect: true,
-        nextLabel: 'Continue',
-      },
+      id: 'components',
+      title: 'Which components will you reach for first?',
+      layout: 'stacked',
+      multiSelect: true,
+      nextLabel: 'Continue',
       options: [
         {
           id: 'input',
@@ -289,13 +451,11 @@ const fixtures: Record<string, readonly AskUserQuestion[]> = {
       ],
     },
     {
-      ...{
-        id: 'drew',
-        title: 'What drew you to Reflow?',
-        layout: 'stacked',
-        allowOther: true,
-        otherPlaceholder: 'Something else? Tell us in a sentence…',
-      },
+      id: 'drew',
+      title: 'What drew you to Reflow?',
+      layout: 'stacked',
+      allowOther: true,
+      otherPlaceholder: 'Something else? Tell us in a sentence…',
       options: [
         {
           id: 'motion',
@@ -318,12 +478,10 @@ const fixtures: Record<string, readonly AskUserQuestion[]> = {
       ],
     },
     {
-      ...{
-        id: 'frameworks',
-        title: 'Where will you ship these components?',
-        layout: 'stacked',
-        multiSelect: true,
-      },
+      id: 'frameworks',
+      title: 'Where will you ship these components?',
+      layout: 'stacked',
+      multiSelect: true,
       options: [
         {
           id: 'next',
@@ -352,7 +510,9 @@ const fixtures: Record<string, readonly AskUserQuestion[]> = {
       ],
     },
     {
-      ...{ id: 'theme', title: 'How will you handle theme mode?', layout: 'stacked' },
+      id: 'theme',
+      title: 'How will you handle theme mode?',
+      layout: 'stacked',
       options: [
         {
           id: 'light',
@@ -381,15 +541,13 @@ const fixtures: Record<string, readonly AskUserQuestion[]> = {
       ],
     },
     {
-      ...{
-        id: 'missing',
-        title: "What's missing from the registry today?",
-        layout: 'stacked',
-        multiSelect: true,
-        allowOther: true,
-        otherPlaceholder: 'Tell us what to build next…',
-        nextLabel: 'Send feedback',
-      },
+      id: 'missing',
+      title: "What's missing from the registry today?",
+      layout: 'stacked',
+      multiSelect: true,
+      allowOther: true,
+      otherPlaceholder: 'Tell us what to build next…',
+      nextLabel: 'Send feedback',
       options: [
         {
           id: 'data',
@@ -412,12 +570,10 @@ const fixtures: Record<string, readonly AskUserQuestion[]> = {
       ],
     },
     {
-      ...{
-        id: 'recommend',
-        title: 'Would you recommend Reflow to a teammate?',
-        layout: 'stacked',
-        skippable: false,
-      },
+      id: 'recommend',
+      title: 'Would you recommend Reflow to a teammate?',
+      layout: 'stacked',
+      skippable: false,
       options: [
         {
           id: 'yes',
@@ -442,20 +598,32 @@ const fixtures: Record<string, readonly AskUserQuestion[]> = {
   ],
   'chip-left': [
     {
-      ...{ id: 'role', title: 'Pick your role', chipPosition: 'left' },
+      id: 'role',
+      title: 'Pick your role',
+      chipPosition: 'left',
       options: [
-        { id: 'design', title: 'Designer', description: 'Prototyping flows' },
-        { id: 'eng', title: 'Engineer', description: 'Shipping production UI' },
-        { id: 'pm', title: 'PM', description: 'Aligning the team' },
+        {
+          id: 'design',
+          title: 'Designer',
+          description: 'Prototyping flows',
+        },
+        {
+          id: 'eng',
+          title: 'Engineer',
+          description: 'Shipping production UI',
+        },
+        {
+          id: 'pm',
+          title: 'PM',
+          description: 'Aligning the team',
+        },
       ],
     },
     {
-      ...{
-        id: 'template',
-        title: 'Which starting template fits your project?',
-        chipPosition: 'left',
-        layout: 'stacked',
-      },
+      id: 'template',
+      title: 'Which starting template fits your project?',
+      chipPosition: 'left',
+      layout: 'stacked',
       options: [
         {
           id: 'marketing',
@@ -478,112 +646,181 @@ const fixtures: Record<string, readonly AskUserQuestion[]> = {
       ],
     },
     {
-      ...{
-        id: 'frameworks',
-        title: 'Where will you ship these components?',
-        chipPosition: 'left',
-        multiSelect: true,
-        nextLabel: 'Continue',
-      },
+      id: 'frameworks',
+      title: 'Where will you ship these components?',
+      chipPosition: 'left',
+      multiSelect: true,
+      nextLabel: 'Continue',
       options: [
-        { id: 'next', title: 'Next.js', description: 'App Router projects' },
-        { id: 'remix', title: 'Remix', description: 'Full-stack apps' },
-        { id: 'vite', title: 'Vite + React', description: 'SPAs and dashboards' },
-        { id: 'astro', title: 'Astro', description: 'Content-first sites' },
+        {
+          id: 'next',
+          title: 'Next.js',
+          description: 'App Router projects',
+        },
+        {
+          id: 'remix',
+          title: 'Remix',
+          description: 'Full-stack apps',
+        },
+        {
+          id: 'vite',
+          title: 'Vite + React',
+          description: 'SPAs and dashboards',
+        },
+        {
+          id: 'astro',
+          title: 'Astro',
+          description: 'Content-first sites',
+        },
       ],
     },
     {
-      ...{
-        id: 'feedback',
-        title: 'Anything else we should build?',
-        chipPosition: 'left',
-        allowOther: true,
-        otherPlaceholder: 'Tell us in a few lines…',
-      },
+      id: 'feedback',
+      title: 'Anything else we should build?',
+      chipPosition: 'left',
+      allowOther: true,
+      otherPlaceholder: 'Tell us in a few lines…',
       options: [
-        { id: 'data', title: 'Data table', description: 'Sortable, filterable rows' },
-        { id: 'calendar', title: 'Calendar', description: 'Date picker and range' },
-        { id: 'command', title: 'Command menu', description: 'Fast keyboard launcher' },
+        {
+          id: 'data',
+          title: 'Data table',
+          description: 'Sortable, filterable rows',
+        },
+        {
+          id: 'calendar',
+          title: 'Calendar',
+          description: 'Date picker and range',
+        },
+        {
+          id: 'command',
+          title: 'Command menu',
+          description: 'Fast keyboard launcher',
+        },
       ],
     },
     {
-      ...{
-        id: 'recommend',
-        title: 'Would you recommend Reflow?',
-        chipPosition: 'left',
-        skippable: false,
-      },
+      id: 'recommend',
+      title: 'Would you recommend Reflow?',
+      chipPosition: 'left',
+      skippable: false,
       options: [
-        { id: 'yes', title: 'Yes', description: 'Already have' },
-        { id: 'soon', title: 'Soon', description: 'Once it covers more ground' },
-        { id: 'unsure', title: 'Not sure yet', description: 'Still evaluating' },
+        {
+          id: 'yes',
+          title: 'Yes',
+          description: 'Already have',
+        },
+        {
+          id: 'soon',
+          title: 'Soon',
+          description: 'Once it covers more ground',
+        },
+        {
+          id: 'unsure',
+          title: 'Not sure yet',
+          description: 'Still evaluating',
+        },
       ],
     },
   ],
   text: [
     {
-      ...{
-        id: 'name',
-        title: 'What should we call your workspace?',
-        freeText: true,
-        freeTextMultiline: false,
-        freeTextPlaceholder: 'e.g. Acme Design',
-      },
+      id: 'name',
+      title: 'What should we call your workspace?',
+      freeText: true,
+      freeTextMultiline: false,
+      freeTextPlaceholder: 'e.g. Acme Design',
     },
     {
-      ...{
-        id: 'goal',
-        title: "Describe what you're hoping to build.",
-        freeText: true,
-        freeTextPlaceholder: 'A sentence or two is plenty…',
-      },
+      id: 'goal',
+      title: "Describe what you're hoping to build.",
+      freeText: true,
+      freeTextPlaceholder: 'A sentence or two is plenty…',
     },
     {
-      ...{
-        id: 'feedback',
-        title: "Anything else you'd like us to know?",
-        freeText: true,
-        skippable: false,
-        nextLabel: 'Finish',
-      },
+      id: 'feedback',
+      title: "Anything else you'd like us to know?",
+      freeText: true,
+      skippable: false,
+      nextLabel: 'Finish',
     },
   ],
   skippable: [
     {
-      ...{ id: 'experience', title: 'How long have you been using the product?' },
+      id: 'experience',
+      title: 'How long have you been using the product?',
       options: [
-        { id: 'new', title: 'Less than a week', description: 'Just getting started' },
-        { id: 'mid', title: 'A few months', description: 'Comfortable with basics' },
-        { id: 'long', title: 'Over a year', description: 'Power user' },
+        {
+          id: 'new',
+          title: 'Less than a week',
+          description: 'Just getting started',
+        },
+        {
+          id: 'mid',
+          title: 'A few months',
+          description: 'Comfortable with basics',
+        },
+        {
+          id: 'long',
+          title: 'Over a year',
+          description: 'Power user',
+        },
       ],
     },
     {
-      ...{ id: 'frequency', title: 'How often do you use it?' },
+      id: 'frequency',
+      title: 'How often do you use it?',
       options: [
-        { id: 'daily', title: 'Daily', description: 'Part of my routine' },
-        { id: 'weekly', title: 'A few times a week', description: 'When the work calls for it' },
-        { id: 'monthly', title: 'A few times a month', description: 'Occasional use' },
-        { id: 'rarely', title: 'Rarely', description: 'Once in a while' },
+        {
+          id: 'daily',
+          title: 'Daily',
+          description: 'Part of my routine',
+        },
+        {
+          id: 'weekly',
+          title: 'A few times a week',
+          description: 'When the work calls for it',
+        },
+        {
+          id: 'monthly',
+          title: 'A few times a month',
+          description: 'Occasional use',
+        },
+        {
+          id: 'rarely',
+          title: 'Rarely',
+          description: 'Once in a while',
+        },
       ],
     },
     {
-      ...{ id: 'recommend', title: 'Would you recommend it to a colleague?' },
+      id: 'recommend',
+      title: 'Would you recommend it to a colleague?',
       options: [
-        { id: 'yes', title: 'Yes', description: 'Already have' },
-        { id: 'maybe', title: 'Maybe', description: 'Depends on the role' },
-        { id: 'no', title: 'Not yet', description: 'Needs more polish first' },
+        {
+          id: 'yes',
+          title: 'Yes',
+          description: 'Already have',
+        },
+        {
+          id: 'maybe',
+          title: 'Maybe',
+          description: 'Depends on the role',
+        },
+        {
+          id: 'no',
+          title: 'Not yet',
+          description: 'Needs more polish first',
+        },
       ],
     },
   ],
   validation: [
     {
-      ...{
-        id: 'email',
-        title: 'Your work email?',
-        freeText: true,
-        freeTextMultiline: false,
-        freeTextPlaceholder: 'you@company.com',
-      },
+      id: 'email',
+      title: 'Your work email?',
+      freeText: true,
+      freeTextMultiline: false,
+      freeTextPlaceholder: 'you@company.com',
     },
   ],
 }
@@ -603,7 +840,8 @@ export function questionExample(variant: string): readonly AskUserQuestion[] {
 
 const choices = [
   {
-    ...{ id: 'role', title: 'How do you plan to use Reflow?' },
+    id: 'role',
+    title: 'How do you plan to use Reflow?',
     options: [
       {
         id: 'design',
@@ -632,7 +870,8 @@ const choices = [
     ],
   },
   {
-    ...{ id: 'drew', title: 'What drew you to Reflow?' },
+    id: 'drew',
+    title: 'What drew you to Reflow?',
     options: [
       {
         id: 'motion',
@@ -655,7 +894,8 @@ const choices = [
     ],
   },
   {
-    ...{ id: 'recommend', title: 'Would you recommend Reflow to a teammate?' },
+    id: 'recommend',
+    title: 'Would you recommend Reflow to a teammate?',
     options: [
       {
         id: 'yes',
@@ -681,25 +921,19 @@ const choices = [
 
 const text = [
   {
-    ...{
-      id: 'name',
-      title: 'What should we call your workspace?',
-      placeholder: 'e.g. Acme Design',
-    },
+    id: 'name',
+    title: 'What should we call your workspace?',
+    placeholder: 'e.g. Acme Design',
   },
   {
-    ...{
-      id: 'goal',
-      title: "Describe what you're hoping to build.",
-      placeholder: 'A sentence or two is plenty…',
-    },
+    id: 'goal',
+    title: "Describe what you're hoping to build.",
+    placeholder: 'A sentence or two is plenty…',
   },
   {
-    ...{
-      id: 'feedback',
-      title: "Anything else you'd like us to know?",
-      placeholder: 'Type your answer…',
-    },
+    id: 'feedback',
+    title: "Anything else you'd like us to know?",
+    placeholder: 'Type your answer…',
   },
 ]
 
@@ -755,7 +989,7 @@ export function questionCode(questions: readonly AskUserQuestion[]) {
   const declarations = JSON.stringify(questions, null, 2)
   const body = questions.some((question) => question.freeTextValidate)
     ? declarations.replace(
-        /(\"freeText\": true,)/,
+        /("freeText": true,)/,
         '$1\n    "freeTextValidate": ' +
           validEmail.toString().replace('(value)', '(value: string)') +
           ',',
