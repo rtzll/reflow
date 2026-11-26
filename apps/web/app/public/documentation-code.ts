@@ -166,11 +166,15 @@ export function documentationCode(slug: string, fragment: string): string {
       .map((line) => ' '.repeat(spaces) + line)
       .join('\n')
   // Specialist entry points load only where they are used.
-  const specialist = new Set(['Markdown', 'FileTree', 'Diagram', 'DiffView'])
+  const specialist = new Set(['Markdown', 'MarkdownEditor', 'FileTree', 'Diagram', 'DiffView'])
   const coreComponents = components.filter((name) => !specialist.has(name))
+  const markdownComponents = components.filter(
+    (name) => name === 'Markdown' || name === 'MarkdownEditor',
+  )
   const imports = [
     coreComponents.length > 0 && `import { ${coreComponents.join(', ')} } from '@rtzll/reflow'`,
-    components.includes('Markdown') && `import { Markdown } from '@rtzll/reflow/markdown'`,
+    markdownComponents.length > 0 &&
+      `import { ${markdownComponents.join(', ')} } from '@rtzll/reflow/markdown'`,
     components.includes('DiffView') && `import { DiffView } from '@rtzll/reflow/diffs'`,
     components.includes('FileTree') && `import { FileTree } from '@rtzll/reflow/trees'`,
     components.includes('Diagram') && `import { Diagram } from '@rtzll/reflow/diagrams'`,
@@ -212,6 +216,13 @@ export function playgroundFragment(slug: string, values: PlaygroundValues): stri
     waterfall: 'Waterfall',
     'pipeline-graph': 'PipelineGraph',
     'status-strip': 'StatusStrip',
+    'filter-bar': 'FilterBar',
+    'reaction-bar': 'ReactionBar',
+    'markdown-editor': 'MarkdownEditor',
+    sparkline: 'Sparkline',
+    'metric-card': 'MetricCard',
+    'line-chart': 'LineChart',
+    'object-inspector': 'ObjectInspector',
   }
   const name = names[slug] ?? slug[0].toUpperCase() + slug.slice(1)
   const synthetic = new Set([
@@ -542,6 +553,20 @@ ${opening} sections={sections}
       return `<PipelineGraph label="Release workflow graph" jobs={jobs}${values.size === 'compact' ? ' size="compact"' : ''} />`
     case 'status-strip':
       return `<StatusStrip label="Recent release runs" items={runs}${values.scaleHeight === false ? ' scaleHeight={false}' : ''}${values.showReadout ? ' showReadout' : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'filter-bar':
+      return `<FilterBar label="Filter discussions" defaultValue="status:open label:ssr" suggestions={suggestions}${values.showPresets === false ? '' : ' presets={presets}'}${values.clearable === false ? ' clearable={false}' : ''}${values.disabled ? ' disabled' : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'reaction-bar':
+      return `<ReactionBar label="Comment reactions" reactions={reactions}${values.allowAdd === false ? ' allowAdd={false}' : ''}${values.size === 'compact' ? ' size="compact"' : ''} onToggle={toggleReaction} />`
+    case 'markdown-editor':
+      return `<MarkdownEditor label="Discussion reply" defaultMode="${values.defaultMode}"${values.allowSplit === false ? ' allowSplit={false}' : ''}${values.toolbar === false ? ' toolbar={false}' : ''}${values.size === 'compact' ? ' size="compact"' : ''} onSubmit={postReply} />`
+    case 'sparkline':
+      return `<Sparkline label="Runner CPU" values={values} tone="${values.tone}"${values.fill === false ? ' fill={false}' : ''}${values.interactive ? ' interactive' : ''} />`
+    case 'metric-card':
+      return `<MetricCard label="p95 Build Time" value="3m 42s" delta="−18% vs 7d" deltaTone="positive"${values.showSparkline === false ? '' : " sparkline={{ values, tone: 'success' }}"}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'line-chart':
+      return `<LineChart label="Edge Worker latency" labels={labels} series={series}${values.showGrid === false ? ' showGrid={false}' : ''}${values.showLegend === false ? ' showLegend={false}' : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'object-inspector':
+      return `<ObjectInspector name="webhook" data={payload} expandLevel={${values.expandLevel}}${values.sortKeys ? ' sortKeys' : ''}${values.copyable === false ? ' copyable={false}' : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
     default:
       return `${opening} />`
   }

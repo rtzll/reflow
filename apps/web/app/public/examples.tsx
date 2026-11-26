@@ -100,6 +100,13 @@ import { LogViewerExample } from './log-viewer-example.tsx'
 import { PipelineGraphExample } from './pipeline-graph-example.tsx'
 import { StatusStripExample } from './status-strip-example.tsx'
 import { WaterfallExample } from './waterfall-example.tsx'
+import { FilterBarExample } from './filter-bar-example.tsx'
+import { ReactionBarExample } from './reaction-bar-example.tsx'
+import { MarkdownEditorExample } from './markdown-editor-example.tsx'
+import { SparklineExample } from './sparkline-example.tsx'
+import { MetricCardExample } from './metric-card-example.tsx'
+import { LineChartExample } from './line-chart-example.tsx'
+import { ObjectInspectorExample } from './object-inspector-example.tsx'
 import { EmptyStateExample } from './empty-state-example.tsx'
 import { TimelineExample } from './timeline-example.tsx'
 import { TerminalExample } from './terminal-example.tsx'
@@ -319,6 +326,20 @@ export const Example = clientEntry(
           return <PipelineGraphExample />
         case 'status-strip':
           return <StatusStripExample />
+        case 'filter-bar':
+          return <FilterBarExample />
+        case 'reaction-bar':
+          return <ReactionBarExample />
+        case 'markdown-editor':
+          return <MarkdownEditorExample />
+        case 'sparkline':
+          return <SparklineExample />
+        case 'metric-card':
+          return <MetricCardExample />
+        case 'line-chart':
+          return <LineChartExample />
+        case 'object-inspector':
+          return <ObjectInspectorExample />
         case 'kbd':
           return <KbdExample />
         case 'time-field':

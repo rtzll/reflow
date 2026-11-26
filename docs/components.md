@@ -4,12 +4,12 @@ Reflow started as a native Remix port of the [Fluid Functionalism](https://githu
 
 ## Catalog
 
-- **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `Field`, `FileInput`, `Input`, `InputCopy`, `InputGroup`, `NumberField`, `RadioGroup`, `SegmentedControl`, `Select`, `Slider`, `Switch`, `Textarea`
+- **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `Field`, `FileInput`, `FilterBar`, `Input`, `InputCopy`, `InputGroup`, `NumberField`, `RadioGroup`, `SegmentedControl`, `Select`, `Slider`, `Switch`, `Textarea`
 - **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`, `TimeField`, `TimeGrid`
 - **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `FileTree`, `Pagination`, `Resizable`, `Sidebar`, `Tabs`, `Toolbar`, `Tree`
 - **Menus and overlays** · `AlertDialog`, `CommandMenu`, `ContextMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
-- **Display and feedback** · `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `BarChart`, `Card`, `CodeBlock`, `DataTable`, `Diagram`, `RoutedDataTable`, `EmptyState`, `Kbd`, `LogViewer`, `Markdown`, `PipelineGraph`, `Progress`, `Skeleton`, `Spinner`, `StatusStrip`, `Table`, `Terminal`, `Timeline`, `Toaster`, `Waterfall`
-- **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `ChatOutline`, `Citation`, `CommentThread`, `Confirmation`, `DiffView`, `FileChanges`, `FileThumbnail`, `InputMessage`, `QueuedStack`, `TaskList`, `ThinkingIndicator`, `ThinkingSteps`, `ToolCalls`, `TriggerMenu`
+- **Display and feedback** · `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `BarChart`, `Card`, `CodeBlock`, `DataTable`, `Diagram`, `RoutedDataTable`, `EmptyState`, `Kbd`, `LineChart`, `LogViewer`, `Markdown`, `MetricCard`, `ObjectInspector`, `PipelineGraph`, `Progress`, `Skeleton`, `Sparkline`, `Spinner`, `StatusStrip`, `Table`, `Terminal`, `Timeline`, `Toaster`, `Waterfall`
+- **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `ChatOutline`, `Citation`, `CommentThread`, `Confirmation`, `DiffView`, `FileChanges`, `FileThumbnail`, `InputMessage`, `MarkdownEditor`, `QueuedStack`, `ReactionBar`, `TaskList`, `ThinkingIndicator`, `ThinkingSteps`, `ToolCalls`, `TriggerMenu`
 
 Every component has a docs page with a live preview, highlighted code and an API table; most also have a playground. Run the showcase and open `/docs`, or read the [usage examples](../apps/web/app/public/examples.tsx).
 
@@ -91,6 +91,13 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 14 | [`Waterfall` (shipped)](waterfall.md) | — | Hierarchical Job → Step/Span timing waterfall, sticky time ruler, critical-path outline, keyboard treegrid nav |
 | 14 | [`PipelineGraph` (shipped)](pipeline-graph.md) | — | Interactive CI job DAG with stage columns, measured SVG Bezier edges, dependency-chain hover highlighting |
 | 14 | [`StatusStrip` (shipped)](status-strip.md) | — | Compact duration-scaled run-history bar strip with status semantics and hover/selection readout |
+| 15 | [`FilterBar` (shipped)](filter-bar.md) | — | Reuses `behaviors/facet-query.ts` for tokenized `key:value` chips, autocomplete, and one-click presets |
+| 15 | [`ReactionBar` (shipped)](reaction-bar.md) | — | `fluidHover()` pill reactions, active toggle state, and anchored `+` picker for discussion threads |
+| 15 | [`MarkdownEditor` (shipped)](markdown-editor.md) | — | Lives in `@rtzll/reflow/markdown` with Write/Preview/Split `SegmentedControl`, `behaviors/markdown-format.ts` toolbar (including Mermaid & code suggestions), `TriggerMenu` mentions, and `Mod+Enter` submit |
+| 15 | [`Sparkline` (shipped)](sparkline.md) | — | Compact inline SVG trend line with semantic tones, translucent area fill, and pointer/keyboard scrubbing |
+| 15 | [`MetricCard` (shipped)](metric-card.md) | — | Telemetry KPI card combining tabular figures, trend deltas, badges, and inline `Sparkline` |
+| 15 | [`LineChart` (shipped)](line-chart.md) | — | Responsive multi-series time-series and area chart with Y-axis gridlines, dashed baselines, and crosshair scrubbing |
+| 15 | [`ObjectInspector` (shipped)](object-inspector.md) | — | Collapsible structured JSON/JS tree with type coloring, multi-level circular reference protection, and copy-JSON |
 
 ### Decisions so far
 

@@ -121,6 +121,8 @@ async function show(
           samples,
           url.searchParams,
           diffs?.example,
+          diffs?.fileTreeExample,
+          diffs?.diagramExamples,
         )
       : source
         ? catalog.map((entry) => (entry.slug === slug ? { ...entry, source } : entry))

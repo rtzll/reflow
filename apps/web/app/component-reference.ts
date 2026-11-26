@@ -7,6 +7,7 @@ export const apiDescription =
 
 const specialistModules: Record<string, string> = {
   Markdown: '@rtzll/reflow/markdown',
+  MarkdownEditor: '@rtzll/reflow/markdown',
   DiffView: '@rtzll/reflow/diffs',
   FileTree: '@rtzll/reflow/trees',
   Diagram: '@rtzll/reflow/diagrams',

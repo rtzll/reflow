@@ -447,8 +447,21 @@ export const galleryOrder = [
   'toaster',
   'time-grid',
   'bar-chart',
+  'line-chart',
+  'metric-card',
+  'sparkline',
   'code-block',
   'diff-view',
+  'file-tree',
+  'diagram',
+  'log-viewer',
+  'waterfall',
+  'pipeline-graph',
+  'status-strip',
+  'filter-bar',
+  'reaction-bar',
+  'markdown-editor',
+  'object-inspector',
   'data-table',
   'avatar',
   'command-menu',
@@ -486,11 +499,23 @@ export const galleryOrder = [
   'citation',
 ]
 
-const fullWidthCards = new Set(['code-block', 'diff-view'])
+const fullWidthCards = new Set([
+  'code-block',
+  'diff-view',
+  'log-viewer',
+  'waterfall',
+  'pipeline-graph',
+  'diagram',
+])
 const halfWidthCards = new Set(['time-grid', 'bar-chart', 'breadcrumb', 'segmented-control'])
 
 const wideCards = new Set([
   'markdown',
+  'markdown-editor',
+  'line-chart',
+  'metric-card',
+  'filter-bar',
+  'object-inspector',
   'input-message',
   'color-picker',
   'card',

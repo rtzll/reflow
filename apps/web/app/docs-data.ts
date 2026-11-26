@@ -7756,6 +7756,623 @@ export const componentApi: Record<ComponentSlug, readonly ApiSection[]> = {
       ],
     },
   ],
+  'filter-bar': [
+    {
+      name: 'FilterBar',
+      props: [
+        {
+          name: 'value',
+          type: 'string',
+          description: 'Controlled raw query string (e.g. "status:open author:alex timeout").',
+          required: false,
+        },
+        {
+          name: 'defaultValue',
+          type: 'string',
+          description: 'Initial query string when uncontrolled.',
+          required: false,
+        },
+        {
+          name: 'onValueChange',
+          type: '(value: string, parsed: ParsedFacetQuery) => void',
+          description:
+            'Called whenever the query changes with the serialized string and parsed tokens.',
+          required: false,
+        },
+        {
+          name: 'suggestions',
+          type: 'readonly FilterSuggestion[]',
+          description: 'Facet keys and optional values for inline autocomplete.',
+          required: false,
+        },
+        {
+          name: 'presets',
+          type: 'readonly FilterPreset[]',
+          description: 'Quick one-click filter presets rendered below the bar.',
+          required: false,
+        },
+        {
+          name: 'placeholder',
+          type: 'string',
+          description: 'Placeholder text when empty.',
+          required: false,
+        },
+        {
+          name: 'clearable',
+          type: 'boolean',
+          description: 'Shows a clear button when any facet or text is present.',
+          required: false,
+        },
+        {
+          name: 'disabled',
+          type: 'boolean',
+          description: 'Disables editing, chip removal, and preset buttons.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the filter input.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls height and chip spacing.',
+          required: false,
+        },
+      ],
+    },
+    {
+      name: 'FilterSuggestion',
+      props: [
+        {
+          name: 'key',
+          type: 'string',
+          description: 'Facet key prefix (e.g. "status", "author", "label").',
+          required: true,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Optional display label; defaults to key.',
+          required: false,
+        },
+        {
+          name: 'description',
+          type: 'string',
+          description: 'Optional description shown beside the key in autocomplete.',
+          required: false,
+        },
+        {
+          name: 'values',
+          type: 'readonly string[]',
+          description: 'Suggested values offered after typing key:.',
+          required: false,
+        },
+      ],
+    },
+    {
+      name: 'FilterPreset',
+      props: [
+        { name: 'id', type: 'string', description: 'Stable preset identifier.', required: true },
+        { name: 'label', type: 'string', description: 'Visible chip label.', required: true },
+        {
+          name: 'query',
+          type: 'string',
+          description: 'Facet query string applied on click.',
+          required: true,
+        },
+      ],
+    },
+  ],
+  'reaction-bar': [
+    {
+      name: 'ReactionBar',
+      props: [
+        {
+          name: 'reactions',
+          type: 'readonly ReactionItem[]',
+          description: 'Current reactions shown as interactive pills.',
+          required: true,
+        },
+        {
+          name: 'onToggle',
+          type: '(emoji: string, nextReacted: boolean) => void',
+          description: 'Called when a reaction pill or picker option is toggled.',
+          required: false,
+        },
+        {
+          name: 'available',
+          type: 'readonly ReactionOption[]',
+          description: 'Reactions offered inside the + add picker.',
+          required: false,
+        },
+        {
+          name: 'allowAdd',
+          type: 'boolean',
+          description: 'Shows the + picker trigger button.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the reaction group.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls pill padding and font scale.',
+          required: false,
+        },
+      ],
+    },
+    {
+      name: 'ReactionItem',
+      props: [
+        {
+          name: 'emoji',
+          type: 'string',
+          description: 'Emoji character or short symbol.',
+          required: true,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the reaction.',
+          required: true,
+        },
+        {
+          name: 'count',
+          type: 'number',
+          description: 'Number of users who reacted.',
+          required: true,
+        },
+        {
+          name: 'reacted',
+          type: 'boolean',
+          description: 'Whether the current viewer has toggled this reaction on.',
+          required: false,
+        },
+        {
+          name: 'users',
+          type: 'readonly string[]',
+          description: 'Optional names displayed in the pill tooltip.',
+          required: false,
+        },
+      ],
+    },
+    {
+      name: 'ReactionOption',
+      props: [
+        {
+          name: 'emoji',
+          type: 'string',
+          description: 'Emoji offered in the picker.',
+          required: true,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible label for the picker button.',
+          required: true,
+        },
+      ],
+    },
+  ],
+  'markdown-editor': [
+    {
+      name: 'MarkdownEditor',
+      props: [
+        {
+          name: 'value',
+          type: 'string',
+          description: 'Controlled Markdown value.',
+          required: false,
+        },
+        {
+          name: 'defaultValue',
+          type: 'string',
+          description: 'Initial Markdown value when uncontrolled.',
+          required: false,
+        },
+        {
+          name: 'onValueChange',
+          type: '(value: string) => void',
+          description: 'Called whenever the editor text changes.',
+          required: false,
+        },
+        {
+          name: 'mode',
+          type: "'write' | 'preview' | 'split'",
+          description: 'Controlled view mode.',
+          required: false,
+        },
+        {
+          name: 'defaultMode',
+          type: "'write' | 'preview' | 'split'",
+          description: 'Initial view mode when uncontrolled.',
+          required: false,
+        },
+        {
+          name: 'onModeChange',
+          type: "(mode: 'write' | 'preview' | 'split') => void",
+          description: 'Called when switching between Write, Preview, and Split modes.',
+          required: false,
+        },
+        {
+          name: 'allowSplit',
+          type: 'boolean',
+          description: 'Shows the Split view option beside Write and Preview.',
+          required: false,
+        },
+        {
+          name: 'toolbar',
+          type: 'boolean',
+          description:
+            'Shows the Markdown formatting toolbar (bold, italic, code, mermaid, suggestion, link, list).',
+          required: false,
+        },
+        {
+          name: 'triggers',
+          type: 'readonly TriggerMenuTrigger[]',
+          description:
+            'Optional caret triggers (@mentions, #refs, /commands) powered by TriggerMenu.',
+          required: false,
+        },
+        {
+          name: 'renderCodeBlock',
+          type: '(block: MarkdownCodeBlock) => RemixNode | undefined',
+          description:
+            'Optional code fence renderer passed to Markdown preview (e.g. Diagram for mermaid).',
+          required: false,
+        },
+        {
+          name: 'images',
+          type: 'boolean | ((src: string) => boolean)',
+          description: 'Image loading policy passed to Markdown preview.',
+          required: false,
+        },
+        {
+          name: 'placeholder',
+          type: 'string',
+          description: 'Placeholder text in the textarea.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the textarea.',
+          required: false,
+        },
+        {
+          name: 'minRows',
+          type: 'number',
+          description: 'Minimum visible rows for the textarea.',
+          required: false,
+        },
+        {
+          name: 'emptyPreview',
+          type: 'string',
+          description: 'Message shown in Preview mode when the editor is empty.',
+          required: false,
+        },
+        {
+          name: 'submitLabel',
+          type: 'string',
+          description: 'Label for the submit button when onSubmit is provided.',
+          required: false,
+        },
+        {
+          name: 'onSubmit',
+          type: '(value: string) => void',
+          description: 'Called on submit button click or Mod+Enter when content is non-empty.',
+          required: false,
+        },
+        {
+          name: 'disabled',
+          type: 'boolean',
+          description: 'Disables editing and submission.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls spacing and typography scale.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  sparkline: [
+    {
+      name: 'Sparkline',
+      props: [
+        {
+          name: 'values',
+          type: 'readonly number[]',
+          description: 'Numeric series samples plotted left to right.',
+          required: true,
+        },
+        {
+          name: 'labels',
+          type: 'readonly string[]',
+          description: 'Optional per-sample labels for hover/keyboard scrubbing.',
+          required: false,
+        },
+        {
+          name: 'min',
+          type: 'number',
+          description: 'Explicit lower Y bound; defaults to 0 or series minimum if negative.',
+          required: false,
+        },
+        {
+          name: 'max',
+          type: 'number',
+          description: 'Explicit upper Y bound; defaults to series maximum.',
+          required: false,
+        },
+        {
+          name: 'width',
+          type: 'number',
+          description: 'SVG viewport width in pixels.',
+          required: false,
+        },
+        {
+          name: 'height',
+          type: 'number',
+          description: 'SVG viewport height in pixels.',
+          required: false,
+        },
+        {
+          name: 'tone',
+          type: "'accent' | 'info' | 'success' | 'warning' | 'danger' | 'neutral'",
+          description: 'Semantic color tone.',
+          required: false,
+        },
+        {
+          name: 'fill',
+          type: 'boolean',
+          description: 'Renders a subtle translucent area fill beneath the stroke.',
+          required: false,
+        },
+        {
+          name: 'interactive',
+          type: 'boolean',
+          description: 'Enables pointer hover and keyboard arrow scrubbing across samples.',
+          required: false,
+        },
+        {
+          name: 'onActiveIndexChange',
+          type: '(index: number | null) => void',
+          description: 'Called when the hovered or focused sample index changes (null on leave).',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name when meaningful standalone; omitted renders decorative.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'metric-card': [
+    {
+      name: 'MetricCard',
+      props: [
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Short metric label (e.g. "CPU", "p95 latency").',
+          required: true,
+        },
+        { name: 'value', type: 'RemixNode', description: 'Primary metric value.', required: true },
+        {
+          name: 'detail',
+          type: 'RemixNode',
+          description: 'Optional secondary detail line below the value.',
+          required: false,
+        },
+        {
+          name: 'delta',
+          type: 'string',
+          description: 'Optional trend delta text (e.g. "−18% vs 7d").',
+          required: false,
+        },
+        {
+          name: 'deltaTone',
+          type: "'positive' | 'negative' | 'neutral'",
+          description: 'Semantic tone for the trend delta.',
+          required: false,
+        },
+        {
+          name: 'badge',
+          type: 'RemixNode',
+          description: 'Optional trailing header slot (such as a Badge).',
+          required: false,
+        },
+        {
+          name: 'sparkline',
+          type: "Omit<SparklineProps, 'class'>",
+          description: 'Optional inline Sparkline rendered beside the KPI values.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls card padding and font scale.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'line-chart': [
+    {
+      name: 'LineChart',
+      props: [
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the chart region.',
+          required: true,
+        },
+        {
+          name: 'labels',
+          type: 'readonly string[]',
+          description: 'X-axis category or timestamp labels aligned with each series.',
+          required: true,
+        },
+        {
+          name: 'series',
+          type: 'readonly LineChartSeries[]',
+          description: 'One or more numeric series to plot.',
+          required: true,
+        },
+        {
+          name: 'min',
+          type: 'number',
+          description: 'Explicit lower Y-axis bound.',
+          required: false,
+        },
+        {
+          name: 'max',
+          type: 'number',
+          description: 'Explicit upper Y-axis bound.',
+          required: false,
+        },
+        { name: 'height', type: 'number', description: 'Plot height in pixels.', required: false },
+        {
+          name: 'showGrid',
+          type: 'boolean',
+          description: 'Shows horizontal gridlines and Y-axis tick labels.',
+          required: false,
+        },
+        {
+          name: 'showLegend',
+          type: 'boolean',
+          description: 'Shows the series legend.',
+          required: false,
+        },
+        {
+          name: 'formatValue',
+          type: '(value: number) => string',
+          description: 'Formats Y-axis ticks and active readout values.',
+          required: false,
+        },
+        {
+          name: 'onActiveIndexChange',
+          type: '(index: number | null) => void',
+          description: 'Called when the hovered or keyboard-focused X index changes.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls spacing and typography scale.',
+          required: false,
+        },
+      ],
+    },
+    {
+      name: 'LineChartSeries',
+      props: [
+        { name: 'id', type: 'string', description: 'Stable series identifier.', required: true },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Display name in legend and readout.',
+          required: true,
+        },
+        {
+          name: 'values',
+          type: 'readonly number[]',
+          description: 'Numeric data points aligned with labels.',
+          required: true,
+        },
+        {
+          name: 'color',
+          type: 'string',
+          description: 'Optional CSS color override.',
+          required: false,
+        },
+        {
+          name: 'area',
+          type: 'boolean',
+          description: 'Fills a translucent area beneath the line.',
+          required: false,
+        },
+        {
+          name: 'dashed',
+          type: 'boolean',
+          description: 'Renders a dashed comparison line (e.g. baseline).',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'object-inspector': [
+    {
+      name: 'ObjectInspector',
+      props: [
+        {
+          name: 'data',
+          type: 'unknown',
+          description: 'Any JSON-compatible or JavaScript value to inspect.',
+          required: true,
+        },
+        {
+          name: 'name',
+          type: 'string',
+          description: 'Optional root key label (e.g. "payload", "webhook").',
+          required: false,
+        },
+        {
+          name: 'expandLevel',
+          type: 'number',
+          description: 'Initial auto-expand depth (0 collapses root, 1 expands root children).',
+          required: false,
+        },
+        {
+          name: 'sortKeys',
+          type: 'boolean',
+          description: 'Alphabetically sorts object keys when true.',
+          required: false,
+        },
+        {
+          name: 'copyable',
+          type: 'boolean',
+          description: 'Shows a copy-JSON button in the header.',
+          required: false,
+        },
+        {
+          name: 'onCopy',
+          type: '() => void',
+          description: 'Called after serialized JSON is copied.',
+          required: false,
+        },
+        {
+          name: 'onCopyError',
+          type: '() => void',
+          description: 'Called if clipboard copying fails.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the inspector tree.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls spacing and font scale.',
+          required: false,
+        },
+      ],
+    },
+  ],
 }
 export const componentDefaults: Record<string, Record<string, string>> = {
   AskUserQuestions: { defaultCurrentIndex: '0', defaultAnswers: '{}' },
@@ -7875,4 +8492,22 @@ export const componentDefaults: Record<string, Record<string, string>> = {
   Textarea: { autoResize: 'true', rows: '3' },
   ThinkingIndicator: { interval: '4000' },
   Tooltip: { side: 'top', sideOffset: '8', delayDuration: '200' },
+  FilterBar: { clearable: 'true', label: 'Filter' },
+  ReactionBar: { allowAdd: 'true', label: 'Reactions' },
+  MarkdownEditor: {
+    defaultMode: 'write',
+    allowSplit: 'true',
+    toolbar: 'true',
+    minRows: '5',
+    submitLabel: 'Comment',
+  },
+  Sparkline: { width: '96', height: '28', tone: 'accent', fill: 'true', interactive: 'false' },
+  MetricCard: { deltaTone: 'neutral' },
+  LineChart: { height: '180', showGrid: 'true' },
+  ObjectInspector: {
+    expandLevel: '1',
+    sortKeys: 'false',
+    copyable: 'true',
+    label: 'Object inspector',
+  },
 }

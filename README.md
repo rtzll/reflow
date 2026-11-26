@@ -58,12 +58,12 @@ Theme, density, accent, shape, typography, and hover behavior are configurable t
 
 ## Components
 
-- **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `Field`, `FileInput`, `Input`, `InputCopy`, `InputGroup`, `NumberField`, `RadioGroup`, `SegmentedControl`, `Select`, `Slider`, `Switch`, `Textarea`
+- **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `Field`, `FileInput`, `FilterBar`, `Input`, `InputCopy`, `InputGroup`, `NumberField`, `RadioGroup`, `SegmentedControl`, `Select`, `Slider`, `Switch`, `Textarea`
 - **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`, `TimeField`, `TimeGrid`
 - **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `FileTree`, `Pagination`, `Resizable`, `Sidebar`, `Tabs`, `Toolbar`, `Tree`
 - **Menus and overlays** · `AlertDialog`, `CommandMenu`, `ContextMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
-- **Display and feedback** · `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `BarChart`, `Card`, `CodeBlock`, `DataTable`, `Diagram`, `RoutedDataTable`, `EmptyState`, `Kbd`, `LogViewer`, `Markdown`, `PipelineGraph`, `Progress`, `Skeleton`, `Spinner`, `StatusStrip`, `Table`, `Terminal`, `Timeline`, `Toaster`, `Waterfall`
-- **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `ChatOutline`, `Citation`, `CommentThread`, `Confirmation`, `DiffView`, `FileChanges`, `FileThumbnail`, `InputMessage`, `QueuedStack`, `TaskList`, `ThinkingIndicator`, `ThinkingSteps`, `ToolCalls`, `TriggerMenu`
+- **Display and feedback** · `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `BarChart`, `Card`, `CodeBlock`, `DataTable`, `Diagram`, `RoutedDataTable`, `EmptyState`, `Kbd`, `LineChart`, `LogViewer`, `Markdown`, `MetricCard`, `ObjectInspector`, `PipelineGraph`, `Progress`, `Skeleton`, `Sparkline`, `Spinner`, `StatusStrip`, `Table`, `Terminal`, `Timeline`, `Toaster`, `Waterfall`
+- **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `ChatOutline`, `Citation`, `CommentThread`, `Confirmation`, `DiffView`, `FileChanges`, `FileThumbnail`, `InputMessage`, `MarkdownEditor`, `QueuedStack`, `ReactionBar`, `TaskList`, `ThinkingIndicator`, `ThinkingSteps`, `ToolCalls`, `TriggerMenu`
 
 Browse the [component catalog and roadmap](docs/components.md) and [usage examples](apps/web/app/public/examples.tsx) directly in the repository, or run the showcase and visit `/docs` for props, examples, and playgrounds.
 

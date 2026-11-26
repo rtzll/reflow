@@ -18,6 +18,7 @@ import { SystemPage } from './public/system-page.tsx'
 import { SkillPage } from './public/skill-page.tsx'
 import { Example } from './public/examples.tsx'
 import type { CodeSamples } from './public/code-block-example.tsx'
+import type { FileTreeSsrPayload } from '@rtzll/reflow/trees'
 import type { ShowcaseComponent } from './ui/site.tsx'
 
 const previews: Record<ComponentSlug, Pick<ShowcaseComponent, 'description' | 'code' | 'props'>> = {
@@ -255,6 +256,41 @@ const previews: Record<ComponentSlug, Pick<ShowcaseComponent, 'description' | 'c
       'Compact run-history status strip showing recent CI runs, deployments, or uptime intervals as duration-scaled, status-colored bars.',
     code: `import { StatusStrip } from '@rtzll/reflow'\n\n<StatusStrip\n  label="Recent CI runs"\n  items={runs}\n  showReadout\n/>`,
   },
+  'filter-bar': {
+    description:
+      'Tokenized key:value facet filter bar with inline autocomplete, removable chips, free-text search, and one-click presets.',
+    code: `import { FilterBar } from '@rtzll/reflow'\n\n<FilterBar\n  label="Filter discussions"\n  defaultValue="status:open label:ssr"\n  suggestions={suggestions}\n  presets={presets}\n/>`,
+  },
+  'reaction-bar': {
+    description:
+      'Compact pill reaction strip with fluid hover, active toggle state, and an anchored + picker for threads and reviews.',
+    code: `import { ReactionBar } from '@rtzll/reflow'\n\n<ReactionBar\n  reactions={reactions}\n  onToggle={toggleReaction}\n/>`,
+  },
+  'markdown-editor': {
+    description:
+      'Discussion and review Markdown composer with Write / Preview / Split modes, formatting toolbar (including Mermaid & code suggestions), @mentions, and Mod+Enter submit.',
+    code: `import { MarkdownEditor } from '@rtzll/reflow/markdown'\n\n<MarkdownEditor\n  label="Discussion reply"\n  defaultMode="write"\n  onSubmit={postReply}\n/>`,
+  },
+  sparkline: {
+    description:
+      'Compact inline SVG sparkline with semantic tones, translucent area fill, and optional pointer/keyboard sample scrubbing.',
+    code: `import { Sparkline } from '@rtzll/reflow'\n\n<Sparkline\n  label="Runner CPU"\n  values={[28, 34, 42, 58, 79, 86, 72]}\n  interactive\n/>`,
+  },
+  'metric-card': {
+    description:
+      'Telemetry and KPI summary card combining tabular figures, trend deltas, status badges, and an optional inline Sparkline.',
+    code: `import { MetricCard } from '@rtzll/reflow'\n\n<MetricCard\n  label="p95 Build Time"\n  value="3m 42s"\n  delta="−18% vs 7d"\n  deltaTone="positive"\n  sparkline={{ values: [268, 255, 244, 232, 222], tone: 'success' }}\n/>`,
+  },
+  'line-chart': {
+    description:
+      'Responsive multi-series time-series and area chart with Y-axis gridlines, dashed baselines, and pointer/keyboard crosshair scrubbing.',
+    code: `import { LineChart } from '@rtzll/reflow'\n\n<LineChart\n  label="Edge Worker latency"\n  labels={timestamps}\n  series={series}\n  formatValue={(v) => \`\${Math.round(v)}ms\`}\n/>`,
+  },
+  'object-inspector': {
+    description:
+      'Collapsible structured JSON and JavaScript object tree with type-colored primitives, circular-reference protection, and one-click JSON copy.',
+    code: `import { ObjectInspector } from '@rtzll/reflow'\n\n<ObjectInspector\n  name="webhook"\n  data={payload}\n  expandLevel={1}\n/>`,
+  },
   'chat-message': {
     description: 'A chat message with user or assistant alignment and optional attachments.',
     code: conversationCode,
@@ -466,6 +502,8 @@ export function galleryCatalog(
   samples?: CodeSamples,
   query?: URLSearchParams,
   diff?: string,
+  fileTree?: FileTreeSsrPayload,
+  diagrams?: Record<string, string>,
 ) {
   return catalog.map((component) =>
     component.preview == null
@@ -487,6 +525,8 @@ export function galleryCatalog(
               }
               code={component.slug === 'code-block' ? samples?.card : undefined}
               diff={component.slug === 'diff-view' ? diff : undefined}
+              fileTree={component.slug === 'file-tree' ? fileTree : undefined}
+              diagrams={component.slug === 'diagram' ? diagrams : undefined}
             />
           ),
         },

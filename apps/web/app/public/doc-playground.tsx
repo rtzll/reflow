@@ -82,8 +82,9 @@ import {
   type BadgeColor,
   type ButtonVariant,
   type ColorFormat,
+  type SparklineTone,
 } from '@rtzll/reflow'
-import { Markdown } from '@rtzll/reflow/markdown'
+import { Markdown, type MarkdownEditorMode } from '@rtzll/reflow/markdown'
 import type { FileTreeSsrPayload } from '@rtzll/reflow/trees'
 import { BannerExample, bannerDefaults, bannerStatuses } from './banner-example.tsx'
 import { DiagramExample } from './diagram-example.tsx'
@@ -92,6 +93,13 @@ import { LogViewerExample } from './log-viewer-example.tsx'
 import { PipelineGraphExample } from './pipeline-graph-example.tsx'
 import { StatusStripExample } from './status-strip-example.tsx'
 import { WaterfallExample } from './waterfall-example.tsx'
+import { FilterBarExample } from './filter-bar-example.tsx'
+import { ReactionBarExample } from './reaction-bar-example.tsx'
+import { MarkdownEditorExample } from './markdown-editor-example.tsx'
+import { SparklineExample } from './sparkline-example.tsx'
+import { MetricCardExample } from './metric-card-example.tsx'
+import { LineChartExample } from './line-chart-example.tsx'
+import { ObjectInspectorExample } from './object-inspector-example.tsx'
 
 export type PlaygroundValues = Record<string, string | boolean>
 interface Control {
@@ -456,6 +464,32 @@ export const playgroundControls: Record<string, readonly Control[]> = {
     size,
     toggle('scaleHeight', 'Scale height', true),
     toggle('showReadout', 'Readout', true),
+  ],
+  'filter-bar': [
+    size,
+    toggle('showPresets', 'Presets', true),
+    toggle('clearable', 'Clearable', true),
+    disabled,
+  ],
+  'reaction-bar': [size, toggle('allowAdd', 'Add picker', true)],
+  'markdown-editor': [
+    size,
+    choice('defaultMode', 'Mode', ['write', 'preview', 'split']),
+    toggle('allowSplit', 'Split mode', true),
+    toggle('toolbar', 'Toolbar', true),
+  ],
+  sparkline: [
+    choice('tone', 'Tone', ['accent', 'info', 'success', 'warning', 'danger', 'neutral']),
+    toggle('fill', 'Area fill', true),
+    toggle('interactive', 'Interactive', true),
+  ],
+  'metric-card': [size, toggle('showSparkline', 'Sparkline', true)],
+  'line-chart': [size, toggle('showGrid', 'Gridlines', true), toggle('showLegend', 'Legend', true)],
+  'object-inspector': [
+    size,
+    choice('expandLevel', 'Expand depth', ['1', '0', '2', '3']),
+    toggle('sortKeys', 'Sort keys'),
+    toggle('copyable', 'Copy button', true),
   ],
 }
 
@@ -1295,6 +1329,55 @@ export function PlaygroundExample(
             size={density}
             scaleHeight={Boolean(v.scaleHeight)}
             showReadout={Boolean(v.showReadout)}
+          />
+        )
+      case 'filter-bar':
+        return (
+          <FilterBarExample
+            size={density}
+            showPresets={Boolean(v.showPresets)}
+            clearable={Boolean(v.clearable)}
+            disabled={disabled}
+          />
+        )
+      case 'reaction-bar':
+        return <ReactionBarExample size={density} allowAdd={Boolean(v.allowAdd)} />
+      case 'markdown-editor':
+        return (
+          <MarkdownEditorExample
+            key={String(v.defaultMode)}
+            size={density}
+            defaultMode={v.defaultMode as MarkdownEditorMode}
+            allowSplit={Boolean(v.allowSplit)}
+            toolbar={Boolean(v.toolbar)}
+          />
+        )
+      case 'sparkline':
+        return (
+          <SparklineExample
+            tone={v.tone as SparklineTone}
+            fill={Boolean(v.fill)}
+            interactive={Boolean(v.interactive)}
+          />
+        )
+      case 'metric-card':
+        return <MetricCardExample size={density} showSparkline={Boolean(v.showSparkline)} />
+      case 'line-chart':
+        return (
+          <LineChartExample
+            size={density}
+            showGrid={Boolean(v.showGrid)}
+            showLegend={Boolean(v.showLegend)}
+          />
+        )
+      case 'object-inspector':
+        return (
+          <ObjectInspectorExample
+            key={`${v.expandLevel}-${v.sortKeys}`}
+            size={density}
+            expandLevel={Number(v.expandLevel)}
+            sortKeys={Boolean(v.sortKeys)}
+            copyable={Boolean(v.copyable)}
           />
         )
     }
