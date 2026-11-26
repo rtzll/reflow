@@ -58,6 +58,12 @@
         "no-var": "error",
         "arrow-body-style": ["error", "as-needed"]
       }
+    },
+    {
+      "files": ["packages/reflow/src/**/*.{ts,tsx}"],
+      "rules": {
+        "no-console": "error"
+      }
     }
   ]
 }
