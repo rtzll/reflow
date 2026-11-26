@@ -13,7 +13,15 @@
       "app/ui/showcase-client.ts",
       "../../packages/reflow/dist/**"
     ],
-    "allowPackages": ["remix", "@remix-run/ui", "@rtzll/reflow", "@pierre/diffs", "button-sounds"],
+    "allowPackages": [
+      "remix",
+      "@remix-run/ui",
+      "@rtzll/reflow",
+      "@pierre/diffs",
+      "@pierre/trees",
+      "pele",
+      "button-sounds"
+    ],
     "denyFiles": ["**/*.test.*", "**/*.d.ts"],
     "files": { "extensions": [".ttf", ".woff2", ".svg", ".png", ".txt", ".mp3"] }
   }
