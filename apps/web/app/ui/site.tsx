@@ -440,7 +440,7 @@ function previewImages(images: ExampleImages, variant: string | undefined): Exam
   return images.code ? { ...images, code: samplesFor(images.code, variant) } : images
 }
 
-const galleryOrder = [
+export const galleryOrder = [
   'carousel',
   'queued-stack',
   'hover-card',
