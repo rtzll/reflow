@@ -21,6 +21,25 @@
       "types": "./dist/diffs-ssr.d.ts",
       "default": "./dist/diffs-ssr.js"
     },
+    "./diffs.css": "./dist/diffs.css",
+    "./trees": {
+      "types": "./dist/trees.d.ts",
+      "default": "./dist/trees.js"
+    },
+    "./trees/ssr": {
+      "types": "./dist/trees-ssr.d.ts",
+      "default": "./dist/trees-ssr.js"
+    },
+    "./trees.css": "./dist/trees.css",
+    "./diagrams": {
+      "types": "./dist/diagrams.d.ts",
+      "default": "./dist/diagrams.js"
+    },
+    "./diagrams/ssr": {
+      "types": "./dist/diagrams-ssr.d.ts",
+      "default": "./dist/diagrams-ssr.js"
+    },
+    "./diagrams.css": "./dist/diagrams.css",
     "./highlight": {
       "types": "./dist/highlight.d.ts",
       "default": "./dist/highlight.js"
@@ -29,6 +48,8 @@
       "types": "./dist/markdown.d.ts",
       "default": "./dist/markdown.js"
     },
+    "./markdown.css": "./dist/markdown.css",
+    "./core.css": "./dist/core.css",
     "./styles.css": "./dist/styles.css"
   },
   "scripts": {
@@ -37,7 +58,9 @@
   },
   "peerDependencies": {
     "@pierre/diffs": "^1.7.0",
+    "@pierre/trees": "^1.0.0",
     "@shikijs/transformers": "^4.6.0",
+    "pele": "^1.13.0",
     "remix": "3.3.0",
     "shiki": "^4.6.0"
   },
@@ -45,7 +68,13 @@
     "@pierre/diffs": {
       "optional": true
     },
+    "@pierre/trees": {
+      "optional": true
+    },
     "@shikijs/transformers": {
+      "optional": true
+    },
+    "pele": {
       "optional": true
     },
     "shiki": {
@@ -54,7 +83,9 @@
   },
   "devDependencies": {
     "@pierre/diffs": "1.7.1",
+    "@pierre/trees": "1.0.0",
     "@shikijs/transformers": "4.6.0",
+    "pele": "1.13.0",
     "remix": "3.3.0",
     "shiki": "4.6.0"
   },

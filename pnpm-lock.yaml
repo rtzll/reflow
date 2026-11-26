@@ -202,6 +202,9 @@ importers:
       '@pierre/diffs':
         specifier: 1.7.1
         version: 1.7.1(@shikijs/themes@4.6.0)
+      '@pierre/trees':
+        specifier: 1.0.0
+        version: 1.0.0(@pierre/theme@2.1.0)(@shikijs/themes@4.6.0)(shiki@4.6.0)
       '@remix-run/ui':
         specifier: 0.14.0
         version: 0.14.0
@@ -214,6 +217,9 @@ importers:
       button-sounds:
         specifier: 1.0.0
         version: 1.0.0
+      pele:
+        specifier: 1.13.0
+        version: 1.13.0
       remix:
         specifier: 3.3.0
         version: 3.3.0(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(playwright@1.65.1)
@@ -245,9 +251,15 @@ importers:
       '@pierre/diffs':
         specifier: 1.7.1
         version: 1.7.1(@shikijs/themes@4.6.0)
+      '@pierre/trees':
+        specifier: 1.0.0
+        version: 1.0.0(@pierre/theme@2.1.0)(@shikijs/themes@4.6.0)(shiki@4.6.0)
       '@shikijs/transformers':
         specifier: 4.6.0
         version: 4.6.0
+      pele:
+        specifier: 1.13.0
+        version: 1.13.0
       remix:
         specifier: 3.3.0
         version: 3.3.0(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.3)(playwright@1.65.1)
@@ -1445,6 +1457,17 @@ packages:
       shiki:
         optional: true
 
+  '@pierre/trees@1.0.0':
+    resolution: {integrity: sha512-skHNPs4LK1nScFrSvMwN4LnZyHfFf1M7I9ivWePecFqWSYYJYdgKUFCaxPBL0MPY/Z8c3q0yhl8bkkzdDfotug==}
+    peerDependencies:
+      react: ^18.3.1 || ^19.0.0
+      react-dom: ^18.3.1 || ^19.0.0
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
+
   '@poppinss/colors@4.1.6':
     resolution: {integrity: sha512-H9xkIdFswbS8n1d6vmRd8+c10t2Qe+rZITbbDHHkQixH5+2x1FDGmi/0K+WgWiqQFKPSlIYB7jlH6Kpfn6Fleg==}
 
@@ -2248,6 +2271,10 @@ packages:
   pathe@2.0.3:
     resolution: {integrity: sha512-WUjGcAqP1gQacoQe+OBJsFA7Ld4DyXuUIjZ5cc75cLHvJ7dtNsTugphxIADwspS+AraAUePCKrSVtPLFj/F88w==}
 
+  pele@1.13.0:
+    resolution: {integrity: sha512-Ie8UKY9x00MsuR3jO6AzUwzK2Z6MIV3Tf4EDdITiuk8Uaz8K7g0R082WqsqNaSU8DdgkrRvZThzhit83mi/uiw==}
+    engines: {node: '>=20'}
+
   picomatch@4.0.7:
     resolution: {integrity: sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==}
     engines: {node: '>=12'}
@@ -2261,6 +2288,14 @@ packages:
     resolution: {integrity: sha512-vJ1FuoOrNwOKHUIVEvSt3jT1L+wjjDpwhwIstKtfvTh8XIG4FG4bIFuvNdMxi81LGfAhUgUZleVFaOLY4RIUUw==}
     engines: {node: '>=20'}
     hasBin: true
+
+  preact-render-to-string@6.6.5:
+    resolution: {integrity: sha512-O6MHzYNIKYaiSX3bOw0gGZfEbOmlIDtDfWwN1JJdc/T3ihzRT6tGGSEWE088dWrEDGa1u7101q+6fzQnO9XCPA==}
+    peerDependencies:
+      preact: '>=10 || >= 11.0.0-0'
+
+  preact@11.0.0-beta.0:
+    resolution: {integrity: sha512-IcODoASASYwJ9kxz7+MJeiJhvLriwSb4y4mHIyxdgaRZp6kPUud7xytrk/6GZw8U3y6EFJaRb5wi9SrEK+8+lg==}
 
   property-information@7.2.0:
     resolution: {integrity: sha512-IAtzIB6sUiWaJYrX9smp3V46pBGbBeLFRGdh25kg1334VcBlD8HzhPeNIWQH9zhGmo2itIe25EHt9dQP7G5hmg==}
@@ -3116,6 +3151,16 @@ snapshots:
       '@pierre/theme': 2.1.0
       '@shikijs/themes': 4.6.0
       shiki: 4.6.0
+
+  '@pierre/trees@1.0.0(@pierre/theme@2.1.0)(@shikijs/themes@4.6.0)(shiki@4.6.0)':
+    dependencies:
+      '@pierre/theming': 1.0.2(@pierre/theme@2.1.0)(@shikijs/themes@4.6.0)(shiki@4.6.0)
+      preact: 11.0.0-beta.0
+      preact-render-to-string: 6.6.5(preact@11.0.0-beta.0)
+    transitivePeerDependencies:
+      - '@pierre/theme'
+      - '@shikijs/themes'
+      - shiki
 
   '@poppinss/colors@4.1.6':
     dependencies:
@@ -4080,6 +4125,8 @@ snapshots:
 
   pathe@2.0.3: {}
 
+  pele@1.13.0: {}
+
   picomatch@4.0.7: {}
 
   playwright-core@1.65.1: {}
@@ -4087,6 +4134,12 @@ snapshots:
   playwright@1.65.1:
     dependencies:
       playwright-core: 1.65.1
+
+  preact-render-to-string@6.6.5(preact@11.0.0-beta.0):
+    dependencies:
+      preact: 11.0.0-beta.0
+
+  preact@11.0.0-beta.0: {}
 
   property-information@7.2.0: {}
 

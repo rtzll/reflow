@@ -16,10 +16,12 @@
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "4.0.0",
     "@pierre/diffs": "1.7.1",
+    "@pierre/trees": "1.0.0",
     "@remix-run/ui": "0.14.0",
     "@rtzll/reflow": "workspace:*",
     "@shikijs/transformers": "4.6.0",
     "button-sounds": "1.0.0",
+    "pele": "1.13.0",
     "remix": "3.3.0",
     "shiki": "4.6.0"
   },

@@ -7,22 +7,21 @@ import { execFileSync } from 'node:child_process'
 import { readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-function bundleStyles(sourceDir: string) {
-  const entry = readFileSync(join(sourceDir, 'styles.css'), 'utf8')
-  const imports = [...entry.matchAll(/^@import\s+'\.\/([^']+)'\s+layer\(reflow\)\s*;$/gm)]
-  const remainder = entry
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/^@import\s+'\.\/([^']+)'\s+layer\(reflow\)\s*;$/gm, '')
-    .trim()
-  if (remainder !== '') {
-    throw new Error(`Unexpected CSS in styles.css outside layer(reflow) imports:\n${remainder}`)
-  }
+const domainStyles: Record<string, readonly string[]> = {
+  'diffs.css': ['diff-view.css'],
+  'trees.css': ['file-tree.css'],
+  'diagrams.css': ['diagram.css'],
+  'markdown.css': ['markdown.css'],
+}
 
+const domainStyleFiles = new Set(Object.values(domainStyles).flat())
+
+function buildLayerBundle(sourceDir: string, files: readonly string[], header: string) {
   const properties: string[] = []
   const sections: string[] = []
   const propertyRule = /@property\s+[^{]+\{[^{}]*\}/g
 
-  for (const [, file] of imports) {
+  for (const file of files) {
     const css = readFileSync(join(sourceDir, file), 'utf8')
     if (/@(?:import|charset|namespace)\b/.test(css)) {
       throw new Error(`Nested @import/@charset/@namespace is not supported in ${file}`)
@@ -36,10 +35,34 @@ function bundleStyles(sourceDir: string) {
     sections.push(`/* ${file} */\n${layered}`)
   }
 
-  const header =
-    '/* Reflow stylesheet. Every rule sits in the `reflow` cascade layer so app CSS and Remix css() styles override it. */'
   const propertyBlock = properties.length > 0 ? `\n\n${properties.join('\n\n')}` : ''
   return `${header}${propertyBlock}\n\n@layer reflow {\n${sections.join('\n\n')}\n}\n`
+}
+
+function bundleStyles(sourceDir: string) {
+  const entry = readFileSync(join(sourceDir, 'styles.css'), 'utf8')
+  const imports = [...entry.matchAll(/^@import\s+'\.\/([^']+)'\s+layer\(reflow\)\s*;$/gm)]
+  const remainder = entry
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/^@import\s+'\.\/([^']+)'\s+layer\(reflow\)\s*;$/gm, '')
+    .trim()
+  if (remainder !== '') {
+    throw new Error(`Unexpected CSS in styles.css outside layer(reflow) imports:\n${remainder}`)
+  }
+
+  const allFiles = imports.map(([, file]) => file!)
+  const coreFiles = allFiles.filter((file) => !domainStyleFiles.has(file))
+  const header =
+    '/* Reflow stylesheet. Every rule sits in the `reflow` cascade layer so app CSS and Remix css() styles override it. */'
+
+  const bundles: Record<string, string> = {
+    'styles.css': buildLayerBundle(sourceDir, allFiles, header),
+    'core.css': buildLayerBundle(sourceDir, coreFiles, header),
+  }
+  for (const [outputFile, files] of Object.entries(domainStyles)) {
+    bundles[outputFile] = buildLayerBundle(sourceDir, files, header)
+  }
+  return bundles
 }
 
 const next = 'dist.next'
@@ -48,7 +71,9 @@ const previous = 'dist.previous'
 rmSync(next, { recursive: true, force: true })
 rmSync(previous, { recursive: true, force: true })
 execFileSync('tsc', ['-p', 'tsconfig.json', '--outDir', next], { stdio: 'inherit' })
-writeFileSync(join(next, 'styles.css'), bundleStyles('src'))
+for (const [file, contents] of Object.entries(bundleStyles('src'))) {
+  writeFileSync(join(next, file), contents)
+}
 
 try {
   renameSync('dist', previous)
