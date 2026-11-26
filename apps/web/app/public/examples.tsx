@@ -38,6 +38,26 @@ import {
   composerTriggers,
 } from './component-example-data.ts'
 import { RequestFormExample } from './request-form-example.tsx'
+import {
+  ActivityHeatmapExample,
+  CodeBrowserExample,
+  CopyChipExample,
+  DiffMinimapExample,
+  DiffStatExample,
+  InlineEditExample,
+  MatrixGridExample,
+  MergeQueueExample,
+  MergeReadinessExample,
+  MetadataListExample,
+  ProportionBarExample,
+  RelativeTimeExample,
+  ShortcutSheetExample,
+  SizeDeltaExample,
+  SplitButtonExample,
+  StackGraphExample,
+  TestReportExample,
+  VirtualListExample,
+} from './wave16-examples.tsx'
 import { SoundCombobox } from './sound-combobox.tsx'
 import { playCopySuccess } from './showcase-sound.ts'
 import {
@@ -341,6 +361,42 @@ export const Example = clientEntry(
           return <LineChartExample />
         case 'object-inspector':
           return <ObjectInspectorExample />
+        case 'virtual-list':
+          return <VirtualListExample />
+        case 'shortcut-sheet':
+          return <ShortcutSheetExample />
+        case 'relative-time':
+          return <RelativeTimeExample />
+        case 'split-button':
+          return <SplitButtonExample />
+        case 'diff-stat':
+          return <DiffStatExample />
+        case 'proportion-bar':
+          return <ProportionBarExample />
+        case 'metadata-list':
+          return <MetadataListExample />
+        case 'copy-chip':
+          return <CopyChipExample />
+        case 'inline-edit':
+          return <InlineEditExample />
+        case 'stack-graph':
+          return <StackGraphExample />
+        case 'merge-readiness':
+          return <MergeReadinessExample />
+        case 'diff-minimap':
+          return <DiffMinimapExample />
+        case 'code-browser':
+          return <CodeBrowserExample />
+        case 'test-report':
+          return <TestReportExample />
+        case 'matrix-grid':
+          return <MatrixGridExample />
+        case 'merge-queue':
+          return <MergeQueueExample />
+        case 'size-delta':
+          return <SizeDeltaExample />
+        case 'activity-heatmap':
+          return <ActivityHeatmapExample />
         case 'kbd':
           return <KbdExample />
         case 'time-field':

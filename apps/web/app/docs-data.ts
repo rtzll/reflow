@@ -5301,6 +5301,66 @@ export const componentApi: Record<ComponentSlug, readonly ApiSection[]> = {
         },
       ],
     },
+    {
+      name: 'ResizableGroup',
+      props: [
+        {
+          name: 'label',
+          type: 'string',
+          required: true,
+          description: 'Accessible label prefix for separators.',
+        },
+        {
+          name: 'panes',
+          type: 'readonly ResizablePane[]',
+          required: true,
+          description: 'Two or more ordered panes (e.g. FileTree | DiffView | Review Inspector).',
+        },
+        {
+          name: 'orientation',
+          type: "'horizontal' | 'vertical'",
+          required: false,
+          description: 'Horizontal lays panes side by side.',
+        },
+        {
+          name: 'values',
+          type: 'readonly number[]',
+          required: false,
+          description: 'Controlled pane sizes as percentages summing to 100.',
+        },
+        {
+          name: 'onValuesChange',
+          type: '(values: readonly number[]) => void',
+          required: false,
+          description: 'Called while dragging or nudging any separator.',
+        },
+        {
+          name: 'onValuesCommit',
+          type: '(values: readonly number[]) => void',
+          required: false,
+          description: 'Called on pointer release or keyboard commit.',
+        },
+        {
+          name: 'collapsed',
+          type: 'readonly string[]',
+          required: false,
+          description: 'Controlled collapsed pane IDs.',
+        },
+        {
+          name: 'onCollapsedChange',
+          type: '(collapsed: readonly string[]) => void',
+          required: false,
+          description: 'Called when a collapsible pane toggles collapsed state.',
+        },
+        { name: 'step', type: 'number', required: false, description: 'Keyboard step percentage.' },
+        {
+          name: 'class',
+          type: 'string',
+          required: false,
+          description: 'Class on the multi-pane container.',
+        },
+      ],
+    },
   ],
   'file-input': [
     {
@@ -8373,6 +8433,855 @@ export const componentApi: Record<ComponentSlug, readonly ApiSection[]> = {
       ],
     },
   ],
+  'virtual-list': [
+    {
+      name: 'VirtualList',
+      props: [
+        {
+          name: 'items',
+          type: 'readonly T[]',
+          description: 'Full array of items to virtualize.',
+          required: true,
+        },
+        {
+          name: 'itemHeight',
+          type: 'number',
+          description: 'Fixed row height in pixels.',
+          required: true,
+        },
+        {
+          name: 'height',
+          type: 'number | string',
+          description: 'Viewport height in pixels or CSS length.',
+          required: true,
+        },
+        {
+          name: 'overscan',
+          type: 'number',
+          description: 'Extra rows rendered above and below the viewport.',
+          required: false,
+        },
+        {
+          name: 'renderItem',
+          type: '(item: T, index: number) => RemixNode',
+          description: 'Renders a single visible row.',
+          required: true,
+        },
+        {
+          name: 'getKey',
+          type: '(item: T, index: number) => string | number',
+          description: 'Optional stable key extractor.',
+          required: false,
+        },
+        {
+          name: 'scrollToIndex',
+          type: 'number',
+          description: 'Programmatically scrolls this zero-based index into view.',
+          required: false,
+        },
+        {
+          name: 'empty',
+          type: 'RemixNode',
+          description: 'Content rendered when items is empty.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the scrollable list region.',
+          required: false,
+        },
+        {
+          name: 'role',
+          type: "'list' | 'listbox' | 'feed'",
+          description: 'Semantic ARIA role for the virtualized container.',
+          required: false,
+        },
+        {
+          name: 'onRangeChange',
+          type: "(range: Pick<VirtualRange, 'start' | 'end'>) => void",
+          description: 'Called whenever the rendered index window changes.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'shortcut-sheet': [
+    {
+      name: 'ShortcutSheet',
+      props: [
+        {
+          name: 'shortcuts',
+          type: 'readonly ShortcutSheetItem[]',
+          description: 'Shortcuts displayed and searchable inside the sheet.',
+          required: true,
+        },
+        { name: 'open', type: 'boolean', description: 'Controlled open state.', required: false },
+        {
+          name: 'defaultOpen',
+          type: 'boolean',
+          description: 'Initial open state when uncontrolled.',
+          required: false,
+        },
+        {
+          name: 'onOpenChange',
+          type: '(open: boolean) => void',
+          description: 'Called whenever the sheet opens or closes.',
+          required: false,
+        },
+        {
+          name: 'trigger',
+          type: 'RemixNode',
+          description: 'Optional visible trigger rendered inline.',
+          required: false,
+        },
+        {
+          name: 'hotkey',
+          type: 'string | false',
+          description: 'Global hotkey that toggles the sheet outside editable fields.',
+          required: false,
+        },
+        { name: 'title', type: 'string', description: 'Dialog heading.', required: false },
+        {
+          name: 'searchable',
+          type: 'boolean',
+          description: 'Shows a search input to filter shortcuts.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls spacing and typography scale.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'relative-time': [
+    {
+      name: 'RelativeTime',
+      props: [
+        {
+          name: 'date',
+          type: 'string | number | Date',
+          description: 'Timestamp as ISO string, epoch milliseconds, or Date.',
+          required: true,
+        },
+        {
+          name: 'now',
+          type: 'string | number | Date',
+          description: 'Optional deterministic reference timestamp.',
+          required: false,
+        },
+        {
+          name: 'live',
+          type: 'boolean',
+          description:
+            'Refreshes the relative label every 30s on the client when now is not pinned.',
+          required: false,
+        },
+        {
+          name: 'tooltip',
+          type: 'boolean',
+          description: 'Wraps <time> with a Tooltip showing the exact UTC timestamp.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'split-button': [
+    {
+      name: 'SplitButton',
+      props: [
+        { name: 'label', type: 'RemixNode', description: 'Primary action label.', required: true },
+        {
+          name: 'onClick',
+          type: '() => void',
+          description: 'Called when the primary button is activated.',
+          required: false,
+        },
+        {
+          name: 'items',
+          type: 'readonly DropdownItem[]',
+          description: 'Secondary actions opened from the attached chevron menu.',
+          required: true,
+        },
+        {
+          name: 'onSelect',
+          type: '(value: string, checked?: boolean) => void',
+          description: 'Called when an option in the dropdown menu is selected.',
+          required: false,
+        },
+        {
+          name: 'variant',
+          type: "Exclude<ButtonVariant, 'ghost'>",
+          description: 'Visual variant shared across both halves.',
+          required: false,
+        },
+        {
+          name: 'leadingIcon',
+          type: 'RemixNode',
+          description: 'Optional leading icon on the primary button.',
+          required: false,
+        },
+        {
+          name: 'menuLabel',
+          type: 'string',
+          description: 'Accessible name for the chevron dropdown trigger.',
+          required: false,
+        },
+        {
+          name: 'align',
+          type: "'start' | 'end'",
+          description: 'Dropdown alignment relative to the chevron trigger.',
+          required: false,
+        },
+        {
+          name: 'disabled',
+          type: 'boolean',
+          description: 'Disables both the primary action and the dropdown trigger.',
+          required: false,
+        },
+        {
+          name: 'loading',
+          type: 'boolean',
+          description: 'Shows loading state on the primary action and disables menu opening.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls height and spacing.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'diff-stat': [
+    {
+      name: 'DiffStat',
+      props: [
+        { name: 'added', type: 'number', description: 'Number of added lines.', required: true },
+        {
+          name: 'removed',
+          type: 'number',
+          description: 'Number of removed lines.',
+          required: true,
+        },
+        {
+          name: 'blocks',
+          type: 'number',
+          description: 'Number of proportional squares rendered beside the counts.',
+          required: false,
+        },
+        {
+          name: 'showCounts',
+          type: 'boolean',
+          description: 'Shows numeric +N -M counts beside the blocks.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible description for the diff stat.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls spacing and typography scale.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'proportion-bar': [
+    {
+      name: 'ProportionBar',
+      props: [
+        {
+          name: 'segments',
+          type: 'readonly ProportionSegment[]',
+          description: 'Ordered segments whose relative values fill the bar.',
+          required: true,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the distribution bar.',
+          required: true,
+        },
+        {
+          name: 'showLegend',
+          type: 'boolean',
+          description: 'Shows the compact swatch legend below the bar.',
+          required: false,
+        },
+        {
+          name: 'formatValue',
+          type: '(value: number, percent: number) => string',
+          description: "Formats each segment's legend readout.",
+          required: false,
+        },
+        {
+          name: 'height',
+          type: 'number',
+          description: 'Bar thickness in pixels.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls spacing and typography scale.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'metadata-list': [
+    {
+      name: 'MetadataList',
+      props: [
+        {
+          name: 'items',
+          type: 'readonly MetadataItem[]',
+          description: 'Ordered key/value metadata sections.',
+          required: true,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the metadata list.',
+          required: false,
+        },
+        {
+          name: 'orientation',
+          type: "'stacked' | 'inline'",
+          description: 'Layout direction for each row.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls spacing and typography scale.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'copy-chip': [
+    {
+      name: 'CopyChip',
+      props: [
+        {
+          name: 'value',
+          type: 'string',
+          description: 'Exact text copied to the clipboard on click.',
+          required: true,
+        },
+        {
+          name: 'display',
+          type: 'RemixNode',
+          description: 'Optional display text such as a short commit SHA.',
+          required: false,
+        },
+        {
+          name: 'prefix',
+          type: 'RemixNode',
+          description: 'Optional leading icon or glyph.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the copy button.',
+          required: false,
+        },
+        {
+          name: 'onCopy',
+          type: '() => void',
+          description: 'Called after the value is copied.',
+          required: false,
+        },
+        {
+          name: 'onCopyError',
+          type: '() => void',
+          description: 'Called if clipboard access fails.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls padding and font scale.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'inline-edit': [
+    {
+      name: 'InlineEdit',
+      props: [
+        { name: 'value', type: 'string', description: 'Controlled text value.', required: false },
+        {
+          name: 'defaultValue',
+          type: 'string',
+          description: 'Initial value when uncontrolled.',
+          required: false,
+        },
+        {
+          name: 'onCommit',
+          type: '(value: string) => void',
+          description: 'Called when the user commits a non-empty edit via Enter or Save.',
+          required: false,
+        },
+        {
+          name: 'onCancel',
+          type: '() => void',
+          description: 'Called when the user cancels editing via Escape or Cancel.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the editable field.',
+          required: true,
+        },
+        {
+          name: 'placeholder',
+          type: 'string',
+          description: 'Placeholder shown when the value is empty.',
+          required: false,
+        },
+        {
+          name: 'disabled',
+          type: 'boolean',
+          description: 'Disables entering edit mode.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls spacing and font scale.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'stack-graph': [
+    {
+      name: 'StackGraph',
+      props: [
+        {
+          name: 'nodes',
+          type: 'readonly StackNode[]',
+          description: 'Ordered nodes from base to tip of the PR stack.',
+          required: true,
+        },
+        {
+          name: 'currentId',
+          type: 'string',
+          description: 'Active node ID in the stack.',
+          required: false,
+        },
+        {
+          name: 'onSelect',
+          type: '(node: StackNode) => void',
+          description: 'Called when a stack node is clicked or activated.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the stack list.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls row height and density.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'merge-readiness': [
+    {
+      name: 'MergeReadiness',
+      props: [
+        {
+          name: 'status',
+          type: 'MergeReadinessStatus',
+          description: 'Overall mergeability state of the pull request.',
+          required: true,
+        },
+        { name: 'title', type: 'string', description: 'Headline override.', required: false },
+        {
+          name: 'summary',
+          type: 'string',
+          description: 'Optional secondary rollup summary.',
+          required: false,
+        },
+        {
+          name: 'gates',
+          type: 'readonly MergeGate[]',
+          description: 'Individual merge gates (approvals, required checks, conflicts).',
+          required: true,
+        },
+        {
+          name: 'action',
+          type: 'RemixNode',
+          description: 'Trailing action slot such as a SplitButton.',
+          required: false,
+        },
+        {
+          name: 'defaultExpanded',
+          type: 'boolean',
+          description: 'Expands expandable gates on initial render.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls card padding and row density.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'diff-minimap': [
+    {
+      name: 'DiffMinimap',
+      props: [
+        {
+          name: 'files',
+          type: 'readonly DiffMinimapFile[]',
+          description: 'Files in diff order.',
+          required: true,
+        },
+        {
+          name: 'activeId',
+          type: 'string',
+          description: 'Currently focused or visible file ID.',
+          required: false,
+        },
+        {
+          name: 'onSelect',
+          type: '(file: DiffMinimapFile) => void',
+          description: 'Called when a file bar or jump button selects a file.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the navigation region.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls bar density.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'code-browser': [
+    {
+      name: 'CodeBrowser',
+      props: [
+        {
+          name: 'code',
+          type: 'string | HighlightedCode',
+          description: 'Plain source text or highlight() output.',
+          required: true,
+        },
+        { name: 'filename', type: 'string', description: 'Repository file path.', required: true },
+        {
+          name: 'refName',
+          type: 'string',
+          description: 'Optional branch, tag, or commit ref shown as a CopyChip.',
+          required: false,
+        },
+        {
+          name: 'language',
+          type: 'string',
+          description: 'Optional language label when code is plain text.',
+          required: false,
+        },
+        { name: 'startLine', type: 'number', description: 'First line number.', required: false },
+        {
+          name: 'selectedRange',
+          type: 'CodeLineRange | null',
+          description: 'Controlled selected line range.',
+          required: false,
+        },
+        {
+          name: 'defaultSelectedRange',
+          type: 'CodeLineRange | null',
+          description: 'Uncontrolled initial selected range.',
+          required: false,
+        },
+        {
+          name: 'onSelectRange',
+          type: '(range: CodeLineRange | null) => void',
+          description: 'Called when the user selects or clears a line/range.',
+          required: false,
+        },
+        {
+          name: 'blame',
+          type: 'readonly CodeBlameLine[]',
+          description: 'Optional git-blame annotations keyed by line number.',
+          required: false,
+        },
+        {
+          name: 'defaultShowBlame',
+          type: 'boolean',
+          description: 'Whether the blame gutter is shown initially.',
+          required: false,
+        },
+        {
+          name: 'wrap',
+          type: 'boolean',
+          description: 'Wraps long lines instead of scrolling horizontally.',
+          required: false,
+        },
+        {
+          name: 'headerActions',
+          type: 'RemixNode',
+          description: 'Extra trailing controls in the file header.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls header and code row density.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'test-report': [
+    {
+      name: 'TestReport',
+      props: [
+        {
+          name: 'cases',
+          type: 'readonly TestCaseResult[]',
+          description: 'Test case execution results.',
+          required: true,
+        },
+        {
+          name: 'defaultFilter',
+          type: "TestCaseStatus | 'all'",
+          description: 'Initial status filter tab.',
+          required: false,
+        },
+        {
+          name: 'onInspectLog',
+          type: '(testCase: TestCaseResult) => void',
+          description: 'Called when the user clicks Inspect log on a test case.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the test report region.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls padding and typography density.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'matrix-grid': [
+    {
+      name: 'MatrixGrid',
+      props: [
+        {
+          name: 'rows',
+          type: 'readonly MatrixAxisItem[]',
+          description: 'Matrix rows (e.g. OS targets).',
+          required: true,
+        },
+        {
+          name: 'columns',
+          type: 'readonly MatrixAxisItem[]',
+          description: 'Matrix columns (e.g. Node versions or browsers).',
+          required: true,
+        },
+        {
+          name: 'cells',
+          type: 'readonly MatrixCell[]',
+          description: 'Populated cells keyed by (rowId, columnId).',
+          required: true,
+        },
+        {
+          name: 'activeCell',
+          type: '{ rowId: string; columnId: string } | null',
+          description: 'Currently selected matrix cell.',
+          required: false,
+        },
+        {
+          name: 'onSelectCell',
+          type: '(cell: MatrixCell) => void',
+          description: 'Called when a matrix cell button is activated.',
+          required: false,
+        },
+        {
+          name: 'rowHeaderLabel',
+          type: 'string',
+          description: 'Top-left header label describing the axes.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the matrix table.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls cell padding and font scale.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'merge-queue': [
+    {
+      name: 'MergeQueue',
+      props: [
+        {
+          name: 'entries',
+          type: 'readonly MergeQueueEntry[]',
+          description: 'Ordered pull requests in the merge queue.',
+          required: true,
+        },
+        {
+          name: 'onSelect',
+          type: '(entry: MergeQueueEntry) => void',
+          description: 'Called when an entry row is selected.',
+          required: false,
+        },
+        {
+          name: 'onRemove',
+          type: '(entry: MergeQueueEntry) => void',
+          description: 'Optional dequeue handler.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the merge queue region.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls spacing and typography scale.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'size-delta': [
+    {
+      name: 'SizeDelta',
+      props: [
+        {
+          name: 'items',
+          type: 'readonly SizeDeltaItem[]',
+          description: 'Build artifact size comparisons.',
+          required: true,
+        },
+        {
+          name: 'warnThresholdPct',
+          type: 'number',
+          description: 'Percentage growth that escalates a row to warning.',
+          required: false,
+        },
+        {
+          name: 'dangerThresholdPct',
+          type: 'number',
+          description: 'Percentage growth that escalates a row to danger.',
+          required: false,
+        },
+        {
+          name: 'showTotal',
+          type: 'boolean',
+          description: 'Appends an aggregate Total row when more than one item is provided.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the artifact delta region.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls spacing and typography scale.',
+          required: false,
+        },
+      ],
+    },
+  ],
+  'activity-heatmap': [
+    {
+      name: 'ActivityHeatmap',
+      props: [
+        {
+          name: 'cells',
+          type: 'readonly HeatmapCell[]',
+          description: 'Chronological daily cells grouped into 7-day weekly columns.',
+          required: true,
+        },
+        {
+          name: 'unit',
+          type: 'string',
+          description: 'Noun shown in readouts (e.g. commits, deploys).',
+          required: false,
+        },
+        {
+          name: 'tone',
+          type: 'HeatmapTone',
+          description: 'Semantic color ramp for non-zero levels.',
+          required: false,
+        },
+        {
+          name: 'onSelectCell',
+          type: '(cell: HeatmapCell) => void',
+          description: 'Called when a cell is clicked or activated.',
+          required: false,
+        },
+        {
+          name: 'showLegend',
+          type: 'boolean',
+          description: 'Shows the Less…More intensity legend.',
+          required: false,
+        },
+        {
+          name: 'label',
+          type: 'string',
+          description: 'Accessible name for the heatmap region.',
+          required: false,
+        },
+        {
+          name: 'size',
+          type: "'default' | 'compact'",
+          description: 'Controls tile size and spacing.',
+          required: false,
+        },
+      ],
+    },
+  ],
 }
 export const componentDefaults: Record<string, Record<string, string>> = {
   AskUserQuestions: { defaultCurrentIndex: '0', defaultAnswers: '{}' },
@@ -8510,4 +9419,21 @@ export const componentDefaults: Record<string, Record<string, string>> = {
     copyable: 'true',
     label: 'Object inspector',
   },
+  ResizableGroup: { orientation: 'horizontal', step: '5' },
+  VirtualList: { overscan: '5', role: 'list' },
+  ShortcutSheet: { hotkey: '?', title: 'Keyboard shortcuts', searchable: 'true' },
+  RelativeTime: { live: 'true', tooltip: 'true' },
+  SplitButton: { variant: 'primary', menuLabel: 'More options', align: 'end' },
+  DiffStat: { blocks: '5', showCounts: 'true' },
+  ProportionBar: { showLegend: 'true', height: '8' },
+  MetadataList: { orientation: 'stacked' },
+  StackGraph: { label: 'Pull request stack' },
+  MergeReadiness: { defaultExpanded: 'false' },
+  DiffMinimap: { label: 'Diff overview' },
+  CodeBrowser: { startLine: '1', defaultShowBlame: 'false', wrap: 'false' },
+  TestReport: { defaultFilter: 'all', label: 'Test report' },
+  MatrixGrid: { rowHeaderLabel: 'Target', label: 'Build matrix' },
+  MergeQueue: { label: 'Merge queue' },
+  SizeDelta: { warnThresholdPct: '5', dangerThresholdPct: '15', showTotal: 'true' },
+  ActivityHeatmap: { unit: 'events', tone: 'success', showLegend: 'true' },
 }

@@ -291,6 +291,96 @@ const previews: Record<ComponentSlug, Pick<ShowcaseComponent, 'description' | 'c
       'Collapsible structured JSON and JavaScript object tree with type-colored primitives, circular-reference protection, and one-click JSON copy.',
     code: `import { ObjectInspector } from '@rtzll/reflow'\n\n<ObjectInspector\n  name="webhook"\n  data={payload}\n  expandLevel={1}\n/>`,
   },
+  'virtual-list': {
+    description:
+      'Fixed-height virtualized list rendering only the visible viewport slice plus overscan, preserving native scrolling and deterministic SSR.',
+    code: `import { VirtualList } from '@rtzll/reflow'\n\n<VirtualList\n  label="Commit history"\n  items={commits}\n  itemHeight={36}\n  height={320}\n  renderItem={(row) => <div>{row.message}</div>}\n/>`,
+  },
+  'shortcut-sheet': {
+    description:
+      'Searchable keyboard shortcut reference dialog with grouped chord display and an optional global ? hotkey toggle.',
+    code: `import { ShortcutSheet } from '@rtzll/reflow'\n\n<ShortcutSheet\n  shortcuts={[\n    { keys: ['g', 'p'], label: 'Go to pull requests', group: 'Navigation' },\n    { keys: 'mod+k', label: 'Open command menu', group: 'Navigation' },\n  ]}\n/>`,
+  },
+  'relative-time': {
+    description:
+      'Hydration-safe <time> element that renders a deterministic UTC date on the server, upgrades cleanly to a live relative label, and shows the exact UTC timestamp in a Tooltip.',
+    code: `import { RelativeTime } from '@rtzll/reflow'\n\n<RelativeTime date="2026-11-26T11:56:00Z" />`,
+  },
+  'split-button': {
+    description:
+      'Joined primary action button and attached dropdown menu for multi-mode actions such as Squash and merge, Approve, or Re-run failed jobs.',
+    code: `import { SplitButton } from '@rtzll/reflow'\n\n<SplitButton\n  label="Squash and merge"\n  onClick={merge}\n  onSelect={setMethod}\n  items={[\n    { value: 'squash', label: 'Squash and merge' },\n    { value: 'rebase', label: 'Rebase and merge' },\n  ]}\n/>`,
+  },
+  'diff-stat': {
+    description:
+      'Compact Git-style diff churn indicator showing +added −removed line counts beside five proportional green/red/neutral blocks.',
+    code: `import { DiffStat } from '@rtzll/reflow'\n\n<DiffStat added={142} removed={28} />`,
+  },
+  'proportion-bar': {
+    description:
+      'Multi-segment proportional distribution bar for repository languages, test pass/fail/flaky breakdowns, and storage usage.',
+    code: `import { ProportionBar } from '@rtzll/reflow'\n\n<ProportionBar\n  label="Repository languages"\n  segments={[\n    { id: 'ts', label: 'TypeScript', value: 78, tone: 'accent' },\n    { id: 'css', label: 'CSS', value: 16, tone: 'info' },\n    { id: 'md', label: 'Markdown', value: 6, tone: 'neutral' },\n  ]}\n/>`,
+  },
+  'metadata-list': {
+    description:
+      'Semantic key/value inspector rail for pull requests, issues, and CI runs with inline action slots for reviewers, labels, refs, and timestamps.',
+    code: `import { MetadataList } from '@rtzll/reflow'\n\n<MetadataList\n  label="Pull request metadata"\n  items={[\n    { id: 'reviewers', label: 'Reviewers', value: 'Ada Lovelace' },\n    { id: 'branch', label: 'Branch', value: 'feat/forge' },\n  ]}\n/>`,
+  },
+  'copy-chip': {
+    description:
+      'Compact inline copyable pill for commit SHAs, branch refs, and PR identifiers with in-place clipboard feedback and zero layout shift.',
+    code: `import { CopyChip } from '@rtzll/reflow'\n\n<CopyChip value="cef8e3891a20b9c441e82" display="cef8e38" />`,
+  },
+  'inline-edit': {
+    description:
+      'Click-to-edit inline text control for pull request titles, issue headings, and saved view names with Enter-to-save and Escape-to-cancel.',
+    code: `import { InlineEdit } from '@rtzll/reflow'\n\n<InlineEdit\n  label="Pull request title"\n  defaultValue="feat(forge): add stacked PR review primitives"\n  onCommit={saveTitle}\n/>`,
+  },
+  'stack-graph': {
+    description:
+      'Stacked PR and branch commit DAG visualizer with vertical rails, CI and review status indicators, diff stats, and keyboard navigation.',
+    code: `import { StackGraph } from '@rtzll/reflow'\n\n<StackGraph\n  currentId="pr-402"\n  nodes={stackNodes}\n  onSelect={openPr}\n/>`,
+  },
+  'merge-readiness': {
+    description:
+      'Expandable pull request merge-gate card combining approval requirements, required CI checks rollup, conflict status, and a trailing merge action slot.',
+    code: `import { MergeReadiness, SplitButton } from '@rtzll/reflow'\n\n<MergeReadiness\n  status="ready"\n  summary="2 approvals · 14/14 checks passed"\n  gates={gates}\n  action={<SplitButton label="Squash and merge" items={mergeModes} />}\n/>`,
+  },
+  'diff-minimap': {
+    description:
+      'Diff review overview strip visualizing file change density, unresolved comment pins, viewed progress, and Next unviewed / Next unresolved jumps.',
+    code: `import { DiffMinimap } from '@rtzll/reflow'\n\n<DiffMinimap\n  files={changedFiles}\n  activeId={activeFileId}\n  onSelect={jumpToFile}\n/>`,
+  },
+  'code-browser': {
+    description:
+      'Repository file viewer with Shiki-compatible syntax rendering, Shift+Click line range selection (#L42-L58), copyable permalink anchor, and a toggleable git-blame gutter.',
+    code: `import { CodeBrowser } from '@rtzll/reflow'\n\n<CodeBrowser\n  filename="packages/reflow/src/virtual-list.tsx"\n  refName="main"\n  code={source}\n  blame={blameLines}\n/>`,
+  },
+  'test-report': {
+    description:
+      'Structured CI test and flaky-test explorer composing ProportionBar with status filters, search, expandable failure diffs and stack traces, and jump-to-log actions.',
+    code: `import { TestReport } from '@rtzll/reflow'\n\n<TestReport\n  cases={testCases}\n  onInspectLog={openLog}\n/>`,
+  },
+  'matrix-grid': {
+    description:
+      '2D CI build-matrix grid (OS × runtime × browser) with semantic status cells, duration readouts, and 2D arrow-key focus navigation.',
+    code: `import { MatrixGrid } from '@rtzll/reflow'\n\n<MatrixGrid\n  rows={osTargets}\n  columns={nodeVersions}\n  cells={matrixCells}\n  onSelectCell={inspectJob}\n/>`,
+  },
+  'merge-queue': {
+    description:
+      'Live speculative CI merge train visualizer showing ordered queue positions, batch headers, author avatars, check progress meters, and ETAs.',
+    code: `import { MergeQueue } from '@rtzll/reflow'\n\n<MergeQueue\n  entries={queuedPrs}\n  onSelect={openPr}\n/>`,
+  },
+  'size-delta': {
+    description:
+      'Build artifact and bundle-size delta list showing before/after bytes, signed deltas, percentage change, and semantic budget threshold warnings.',
+    code: `import { SizeDelta } from '@rtzll/reflow'\n\n<SizeDelta items={artifacts} />`,
+  },
+  'activity-heatmap': {
+    description:
+      'Compact SVG calendar heatmap for commit cadence, deploy frequency, and CI failure density with pointer and keyboard arrow scrubbing.',
+    code: `import { ActivityHeatmap } from '@rtzll/reflow'\n\n<ActivityHeatmap\n  cells={dailyCommits}\n  unit="commits"\n  tone="success"\n/>`,
+  },
   'chat-message': {
     description: 'A chat message with user or assistant alignment and optional attachments.',
     code: conversationCode,

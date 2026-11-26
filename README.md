@@ -58,11 +58,11 @@ Theme, density, accent, shape, typography, and hover behavior are configurable t
 
 ## Components
 
-- **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `Field`, `FileInput`, `FilterBar`, `Input`, `InputCopy`, `InputGroup`, `NumberField`, `RadioGroup`, `SegmentedControl`, `Select`, `Slider`, `Switch`, `Textarea`
-- **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`, `TimeField`, `TimeGrid`
-- **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `FileTree`, `Pagination`, `Resizable`, `Sidebar`, `Tabs`, `Toolbar`, `Tree`
-- **Menus and overlays** · `AlertDialog`, `CommandMenu`, `ContextMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
-- **Display and feedback** · `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `BarChart`, `Card`, `CodeBlock`, `DataTable`, `Diagram`, `RoutedDataTable`, `EmptyState`, `Kbd`, `LineChart`, `LogViewer`, `Markdown`, `MetricCard`, `ObjectInspector`, `PipelineGraph`, `Progress`, `Skeleton`, `Sparkline`, `Spinner`, `StatusStrip`, `Table`, `Terminal`, `Timeline`, `Toaster`, `Waterfall`
+- **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `Field`, `FileInput`, `FilterBar`, `InlineEdit`, `Input`, `InputCopy`, `InputGroup`, `NumberField`, `RadioGroup`, `SegmentedControl`, `Select`, `Slider`, `SplitButton`, `Switch`, `Textarea`
+- **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`, `RelativeTime`, `TimeField`, `TimeGrid`
+- **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `DiffMinimap`, `FileTree`, `Pagination`, `Resizable`, `ResizableGroup`, `Sidebar`, `Tabs`, `Toolbar`, `Tree`, `VirtualList`
+- **Menus and overlays** · `AlertDialog`, `CommandMenu`, `ContextMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `ShortcutSheet`, `Tooltip`
+- **Display and feedback** · `ActivityHeatmap`, `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `BarChart`, `Card`, `CodeBlock`, `CodeBrowser`, `CopyChip`, `DataTable`, `Diagram`, `DiffStat`, `RoutedDataTable`, `EmptyState`, `Kbd`, `LineChart`, `LogViewer`, `Markdown`, `MatrixGrid`, `MergeQueue`, `MergeReadiness`, `MetadataList`, `MetricCard`, `ObjectInspector`, `PipelineGraph`, `Progress`, `ProportionBar`, `SizeDelta`, `Skeleton`, `Sparkline`, `Spinner`, `StackGraph`, `StatusStrip`, `Table`, `Terminal`, `TestReport`, `Timeline`, `Toaster`, `Waterfall`
 - **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `ChatOutline`, `Citation`, `CommentThread`, `Confirmation`, `DiffView`, `FileChanges`, `FileThumbnail`, `InputMessage`, `MarkdownEditor`, `QueuedStack`, `ReactionBar`, `TaskList`, `ThinkingIndicator`, `ThinkingSteps`, `ToolCalls`, `TriggerMenu`
 
 Browse the [component catalog and roadmap](docs/components.md) and [usage examples](apps/web/app/public/examples.tsx) directly in the repository, or run the showcase and visit `/docs` for props, examples, and playgrounds.

@@ -28,6 +28,7 @@ export function computeDiffStatBlocks(
   const r = Math.max(0, Number.isFinite(removed) ? removed : 0)
   const total = a + r
   if (total === 0) return Array.from({ length: count }, () => 'neutral')
+  if (count === 1) return [a >= r ? 'added' : 'removed']
 
   let addBlocks = Math.round((a / total) * count)
   let remBlocks = Math.round((r / total) * count)

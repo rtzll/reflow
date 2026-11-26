@@ -25,6 +25,9 @@ import {
   scrollOffsetForIndex,
 } from '../../../packages/reflow/src/behaviors/virtualizer.ts'
 import { createKeymap } from '../../../packages/reflow/src/behaviors/keymap.ts'
+import { computeDiffStatBlocks } from '../../../packages/reflow/src/diff-stat.tsx'
+import { computeSizeDelta, formatBytes } from '../../../packages/reflow/src/size-delta.tsx'
+import { computeHeatmapLevel } from '../../../packages/reflow/src/activity-heatmap.tsx'
 import { computeSparklineGeometry } from '../../../packages/reflow/src/sparkline.tsx'
 
 // Deterministic PRNG so property runs are fast, thorough, and 100% reproducible.
@@ -473,4 +476,36 @@ it('property: keymap matches single keys and multi-key chords, respects timeout,
   assert.equal(keymap.handleKeyDown(ev('j', { target: inputTarget }), 4000), false)
   assert.equal(keymap.handleKeyDown(ev('k', { metaKey: true, target: inputTarget }), 4050), true)
   assert.deepEqual(calls, ['gp', 'j', 'mod+k'])
+})
+
+it('property: computeDiffStatBlocks, computeSizeDelta, and computeHeatmapLevel uphold invariants on adversarial inputs', () => {
+  const rng = mulberry32(0x5eed8)
+  for (let trial = 0; trial < 200; trial++) {
+    const added = randomInt(rng, 0, 500)
+    const removed = randomInt(rng, 0, 500)
+    const blockCount = randomInt(rng, 0, 10)
+    const blocks = computeDiffStatBlocks(added, removed, blockCount)
+    assert.equal(blocks.length, blockCount)
+    if (blockCount > 0 && added === 0 && removed === 0) {
+      assert.ok(blocks.every((b) => b === 'neutral'))
+    }
+    if (blockCount >= 2 && added > 0 && removed > 0) {
+      assert.ok(blocks.includes('added') && blocks.includes('removed'))
+    }
+
+    const before = randomInt(rng, 0, 2_000_000)
+    const after = randomInt(rng, 0, 2_000_000)
+    const budget = randomInt(rng, 1000, 1_500_000)
+    const delta = computeSizeDelta(before, after, { budgetBytes: budget })
+    assert.equal(delta.diffBytes, after - before)
+    assert.equal(delta.overBudget, after > budget)
+    if (after > budget) assert.equal(delta.tone, 'danger')
+    assert.ok(formatBytes(after).length > 0)
+
+    const maxCount = randomInt(rng, 0, 100)
+    const count = randomInt(rng, -5, maxCount + 20)
+    const level = computeHeatmapLevel(count, maxCount)
+    assert.ok(level >= 0 && level <= 4)
+    if (count <= 0 || maxCount <= 0) assert.equal(level, 0)
+  }
 })

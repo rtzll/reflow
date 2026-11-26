@@ -19,7 +19,7 @@ Import components from `@rtzll/reflow` (or specialist entries: `@rtzll/reflow/ma
 
 Prefer the existing form-aware controls and preserve labels, descriptions, reset behavior, disabled options, keyboard navigation, and focus return.
 
-- Use `Button` for actions and links (`href`), `Field` / `FieldSet` for accessible label, description, and error wiring, `Input` and `Textarea` for text entry, and `InputGroup` / `InputField` for grouped fields.
+- Use `Button` for actions and links (`href`), `SplitButton` for a joined primary action and attached `Dropdown` menu (e.g. Squash and merge / Rebase), `InlineEdit` for click-to-edit titles with Enter/Escape semantics, `Field` / `FieldSet` for accessible label, description, and error wiring, `Input` and `Textarea` for text entry, and `InputGroup` / `InputField` for grouped fields.
 - Use `InputCopy` for copyable values (API keys, commands, URLs) so clipboard feedback stays inside the field.
 - Use `Checkbox` and `Switch` for single booleans (`Switch` supports dragging as well as clicks), `CheckboxGroup` for multi-select lists, and `RadioGroup` for mutually exclusive lists with descriptions.
 - For one choice among a few short options in a row, such as a view or time range, use `SegmentedControl`; `Tabs` switch between panels.
@@ -43,7 +43,11 @@ Prefer the existing form-aware controls and preserve labels, descriptions, reset
 - Use `Pagination` with a one-based `page` and an `href` function returning real URLs (keep current-page state in the route for bookmarks and history), or `onPageChange` for local paging.
 - Use `Toolbar` for grouped actions that share a single tab stop; arrow keys move between buttons or links while text fields keep their own tab stops.
 - Use `Tree` for expandable hierarchies with selection. Give every item a unique `value` and use the selected leaf to drive an adjacent preview.
-- Use `Resizable` for two panes that share space. Name its separator, supply an initial percentage and bounds for the first pane, and use `onValueCommit` to save a layout after resizing.
+- Use `Resizable` for two panes that share space, or `ResizableGroup` for 3+ panes (e.g. FileTree | DiffView | Inspector) with collapsible side panels that remember their restored width. Name separators, supply bounds, and use `onValueCommit` / `onValuesCommit` to persist layouts.
+- Use `VirtualList` (backed by `computeVirtualRange` / `scrollOffsetForIndex`) for large fixed-height commit lists, PR queues, or log tables with deterministic SSR and native scrolling.
+- Use `ShortcutSheet` (backed by `createKeymap` / `attachKeymap` for single keys and `g p`-style chords) for a searchable keyboard shortcut dialog toggled via `?`.
+- Use `RelativeTime` for hydration-safe `<time>` labels that render deterministic UTC dates on the server, live relative timestamps on the client, and exact UTC timestamps in a `Tooltip`.
+- Build GitHub-class code review and CI screens with `DiffStat`, `ProportionBar`, `MetadataList`, `CopyChip`, `StackGraph` (stacked PR DAG), `MergeReadiness` (expandable PR merge-gate card), `DiffMinimap` (viewed progress + Next unviewed / Next unresolved jumps), `CodeBrowser` (Shift+Click `#L42-L58` line anchors + toggleable git-blame heat gutter), `TestReport` (pass/fail/flaky explorer with diffs and stack traces), `MatrixGrid` (2D OS × runtime CI matrix with arrow-key nav), `MergeQueue` (speculative merge train), `SizeDelta` (bundle/artifact budget deltas), and `ActivityHeatmap` (SVG calendar heatmap with keyboard scrubbing).
 - Use `Carousel` for a row of slides rather than a hand-built slider: it scrolls natively, snaps, drags with momentum for mice, and autoplays through `CarouselDots` with a pause button; name slides with `slideLabels`.
 
 ### Menus and overlays

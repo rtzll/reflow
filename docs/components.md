@@ -4,11 +4,11 @@ Reflow started as a native Remix port of the [Fluid Functionalism](https://githu
 
 ## Catalog
 
-- **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `Field`, `FileInput`, `FilterBar`, `Input`, `InputCopy`, `InputGroup`, `NumberField`, `RadioGroup`, `SegmentedControl`, `Select`, `Slider`, `Switch`, `Textarea`
-- **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`, `TimeField`, `TimeGrid`
-- **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `FileTree`, `Pagination`, `Resizable`, `Sidebar`, `Tabs`, `Toolbar`, `Tree`
-- **Menus and overlays** · `AlertDialog`, `CommandMenu`, `ContextMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `Tooltip`
-- **Display and feedback** · `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `BarChart`, `Card`, `CodeBlock`, `DataTable`, `Diagram`, `RoutedDataTable`, `EmptyState`, `Kbd`, `LineChart`, `LogViewer`, `Markdown`, `MetricCard`, `ObjectInspector`, `PipelineGraph`, `Progress`, `Skeleton`, `Sparkline`, `Spinner`, `StatusStrip`, `Table`, `Terminal`, `Timeline`, `Toaster`, `Waterfall`
+- **Forms** · `Button`, `Checkbox`, `CheckboxGroup`, `Combobox`, `Field`, `FileInput`, `FilterBar`, `InlineEdit`, `Input`, `InputCopy`, `InputGroup`, `NumberField`, `RadioGroup`, `SegmentedControl`, `Select`, `Slider`, `SplitButton`, `Switch`, `Textarea`
+- **Date and color** · `Calendar`, `ColorPicker`, `DatePicker`, `RelativeTime`, `TimeField`, `TimeGrid`
+- **Navigation and disclosure** · `Accordion`, `Breadcrumb`, `Carousel`, `CarouselDots`, `DiffMinimap`, `FileTree`, `Pagination`, `Resizable`, `ResizableGroup`, `Sidebar`, `Tabs`, `Toolbar`, `Tree`, `VirtualList`
+- **Menus and overlays** · `AlertDialog`, `CommandMenu`, `ContextMenu`, `Dialog`, `Drawer`, `Dropdown`, `HoverCard`, `Popover`, `ShortcutSheet`, `Tooltip`
+- **Display and feedback** · `ActivityHeatmap`, `Avatar`, `AvatarGroup`, `Badge`, `Banner`, `BarChart`, `Card`, `CodeBlock`, `CodeBrowser`, `CopyChip`, `DataTable`, `Diagram`, `DiffStat`, `RoutedDataTable`, `EmptyState`, `Kbd`, `LineChart`, `LogViewer`, `Markdown`, `MatrixGrid`, `MergeQueue`, `MergeReadiness`, `MetadataList`, `MetricCard`, `ObjectInspector`, `PipelineGraph`, `Progress`, `ProportionBar`, `SizeDelta`, `Skeleton`, `Sparkline`, `Spinner`, `StackGraph`, `StatusStrip`, `Table`, `Terminal`, `TestReport`, `Timeline`, `Toaster`, `Waterfall`
 - **Conversation** · `AskUserQuestions`, `ChatLayout`, `ChatMessage`, `ChatOutline`, `Citation`, `CommentThread`, `Confirmation`, `DiffView`, `FileChanges`, `FileThumbnail`, `InputMessage`, `MarkdownEditor`, `QueuedStack`, `ReactionBar`, `TaskList`, `ThinkingIndicator`, `ThinkingSteps`, `ToolCalls`, `TriggerMenu`
 
 Every component has a docs page with a live preview, highlighted code and an API table; most also have a playground. Run the showcase and open `/docs`, or read the [usage examples](../apps/web/app/public/examples.tsx).
@@ -98,6 +98,10 @@ Built in this order, one component at a time, with a short design note (API, beh
 | 15 | [`MetricCard` (shipped)](metric-card.md) | — | Telemetry KPI card combining tabular figures, trend deltas, badges, and inline `Sparkline` |
 | 15 | [`LineChart` (shipped)](line-chart.md) | — | Responsive multi-series time-series and area chart with Y-axis gridlines, dashed baselines, and crosshair scrubbing |
 | 15 | [`ObjectInspector` (shipped)](object-inspector.md) | — | Collapsible structured JSON/JS tree with type coloring, multi-level circular reference protection, and copy-JSON |
+| 16 | `VirtualList`, `ShortcutSheet`, `ResizableGroup`, `RelativeTime` (shipped) | — | Forge core primitives: fixed-height `behaviors/virtualizer.ts`, multi-key chord `behaviors/keymap.ts`, 3+ collapsible workspace panes, hydration-safe `<time>` with `Tooltip` |
+| 16 | `SplitButton`, `DiffStat`, `ProportionBar`, `MetadataList`, `CopyChip`, `InlineEdit` (shipped) | — | High-frequency forge micro-primitives for multi-mode actions, churn blocks, distributions, inspector rails, ref pills, and inline titles |
+| 16 | `StackGraph`, `MergeReadiness`, `DiffMinimap`, `CodeBrowser` (shipped) | — | Code review suite: stacked PR DAG, expandable merge-gate card, diff overview with unviewed/unresolved jumps, and Shift+Click `#L42-L58` file viewer with git-blame heat gutter |
+| 16 | `TestReport`, `MatrixGrid`, `MergeQueue`, `SizeDelta`, `ActivityHeatmap` (shipped) | — | CI, testing & delivery suite: flaky-test explorer, 2D OS×runtime build matrix, speculative merge train, bundle budget deltas, and keyboard-scrubbable calendar heatmap |
 
 ### Decisions so far
 

@@ -497,6 +497,13 @@ export const galleryOrder = [
   'filter-bar',
   'reaction-bar',
   'object-inspector',
+  'code-browser',
+  'merge-readiness',
+  'stack-graph',
+  'test-report',
+  'matrix-grid',
+  'merge-queue',
+  'activity-heatmap',
 ]
 
 const fullWidthCards = new Set([
@@ -507,6 +514,13 @@ const fullWidthCards = new Set([
   'pipeline-graph',
   'diagram',
   'object-inspector',
+  'code-browser',
+  'merge-readiness',
+  'stack-graph',
+  'test-report',
+  'matrix-grid',
+  'merge-queue',
+  'activity-heatmap',
 ])
 const halfWidthCards = new Set(['time-grid', 'bar-chart', 'breadcrumb', 'segmented-control'])
 
