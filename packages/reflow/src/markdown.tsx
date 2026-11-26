@@ -4,6 +4,15 @@ import { CodeBlock } from './code-block.tsx'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './table.tsx'
 import { classList, type ControlSize } from './systems/styling.ts'
 
+export interface MarkdownCodeBlock {
+  /** Raw code inside the fenced or indented block. */
+  code: string
+  /** Optional language tag from the opening fence (e.g. `'ts'`, `'mermaid'`). */
+  language?: string
+  /** Surrounding density inherited from `Markdown`. */
+  size?: ControlSize
+}
+
 export interface MarkdownProps {
   /** Markdown source, including partial text while a reply is streaming. */
   source: string
@@ -17,6 +26,12 @@ export interface MarkdownProps {
    * safe source. Refused images stay links.
    */
   images?: boolean | ((src: string) => boolean)
+  /**
+   * Optional renderer for fenced code blocks (for example to render `mermaid`
+   * fences with `<Diagram>` from `@rtzll/reflow/diagrams`). Returning `undefined`
+   * falls back to the default `CodeBlock`.
+   */
+  renderCodeBlock?: (block: MarkdownCodeBlock) => RemixNode | undefined
 }
 
 /** CommonMark and GitHub Flavored Markdown, with CodeBlock fences and Table for pipe tables. */
@@ -27,6 +42,7 @@ export function Markdown(handle: Handle<MarkdownProps>) {
       prefix: handle.id,
       tasks: 0,
       images: handle.props.images,
+      renderCodeBlock: handle.props.renderCodeBlock,
     }
     return (
       <div
@@ -47,6 +63,7 @@ interface Context {
   prefix: string
   tasks: number
   images: MarkdownProps['images']
+  renderCodeBlock: MarkdownProps['renderCodeBlock']
 }
 
 // Whether a safe, decoded image source may load: same-site paths for `true`,
@@ -159,15 +176,16 @@ function block(token: Token, key: number, context: Context): RemixNode {
     // Unwrapped text in a tight list item.
     case 'text':
       return token.tokens ? inline(token.tokens, context) : decode(token.text)
-    case 'code':
-      return (
-        <CodeBlock
-          key={key}
-          size={context.size}
-          code={token.text}
-          language={(token.lang ?? '').trim().split(/\s+/)[0] || undefined}
-        />
-      )
+    case 'code': {
+      const language = (token.lang ?? '').trim().split(/\s+/)[0] || undefined
+      const custom = context.renderCodeBlock?.({
+        code: token.text,
+        language,
+        size: context.size,
+      })
+      if (custom !== undefined) return <div key={key}>{custom}</div>
+      return <CodeBlock key={key} size={context.size} code={token.text} language={language} />
+    }
     case 'blockquote':
       return <blockquote key={key}>{blocks(token.tokens ?? [], context)}</blockquote>
     case 'list': {

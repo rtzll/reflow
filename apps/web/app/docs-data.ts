@@ -5277,6 +5277,13 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
             'Which images load inline. By default every image is a link, so rendering loads nothing. true loads same-site paths; a function decides for each safe source. Refused images stay links.',
         },
         {
+          name: 'renderCodeBlock',
+          type: '(block: MarkdownCodeBlock) => RemixNode | undefined',
+          required: false,
+          description:
+            'Optional renderer for fenced code blocks (e.g. rendering mermaid fences with Diagram from @rtzll/reflow/diagrams). Returning undefined falls back to CodeBlock.',
+        },
+        {
           name: 'class',
           type: 'string',
           required: false,

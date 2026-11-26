@@ -1,0 +1,178 @@
+/* Diagram: Mermaid diagrams rendered to themeable SVG by Pele.
+   Reflow design tokens map directly onto Pele's --pele-* CSS variables so
+   light/dark themes, accents, fonts, and radius adapt live without re-rendering. */
+.rf-diagram {
+  --pele-bg: var(--rf-surface-2);
+  --pele-fg: var(--rf-fg);
+  --pele-muted: var(--rf-muted);
+  --pele-line: color-mix(in oklab, var(--rf-fg) 42%, transparent);
+  --pele-surface: var(--rf-surface-3);
+  --pele-surface-alt: var(--rf-surface-2);
+  --pele-border: var(--rf-border-emphasis, var(--rf-border));
+  --pele-accent: var(--rf-accent);
+  --pele-font: var(--rf-font);
+  --pele-radius: var(--rf-radius);
+  --pele-series-1: var(--rf-accent);
+  --pele-series-2: var(--rf-info);
+  --pele-series-3: var(--rf-success);
+  --pele-series-4: var(--rf-warning);
+  --pele-series-5: var(--rf-danger);
+  --pele-series-6: color-mix(in oklab, var(--rf-accent) 68%, var(--rf-fg));
+  --pele-series-7: color-mix(in oklab, var(--rf-success) 68%, var(--rf-info));
+  --pele-series-8: color-mix(in oklab, var(--rf-warning) 68%, var(--rf-danger));
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-inline-size: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-panel-radius);
+  background: var(--rf-surface-2);
+  color: var(--rf-fg);
+  font: var(--rf-text-body) / var(--rf-leading-body) var(--rf-font);
+}
+
+.rf-diagram-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  min-block-size: 38px;
+  box-sizing: border-box;
+  padding: 4px 8px 4px 14px;
+  border-block-end: 1px solid var(--rf-border);
+  color: var(--rf-muted);
+  font-size: var(--rf-text-caption);
+  line-height: var(--rf-leading-caption, 16px);
+}
+
+.rf-diagram-title {
+  min-inline-size: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--rf-fg);
+  font-variation-settings: var(--rf-weight-strong);
+}
+
+.rf-diagram-type {
+  flex: none;
+  color: var(--rf-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+}
+
+.rf-diagram-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-inline-start: auto;
+}
+
+.rf-diagram-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-inline-size: 28px;
+  block-size: 28px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: var(--rf-radius);
+  outline: none;
+  background: transparent;
+  color: var(--rf-muted);
+  font: inherit;
+  font-size: var(--rf-text-caption);
+  cursor: pointer;
+  transition:
+    color var(--rf-fast),
+    background-color var(--rf-fast);
+}
+
+.rf-diagram-action:focus-visible {
+  box-shadow: 0 0 0 1px var(--rf-accent);
+}
+
+@media (hover: hover) {
+  .rf-diagram-action:hover {
+    background: var(--rf-hover);
+    color: var(--rf-fg);
+  }
+}
+
+.rf-diagram-action[aria-pressed='true'] {
+  background: var(--rf-active);
+  color: var(--rf-fg);
+}
+
+.rf-diagram-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 84px;
+  padding: 16px;
+  overflow-x: auto;
+}
+
+.rf-diagram[data-density='compact'] .rf-diagram-stage,
+[data-density='compact'] .rf-diagram:not([data-density]) .rf-diagram-stage {
+  padding: 12px;
+}
+
+.rf-diagram-canvas {
+  display: flex;
+  justify-content: center;
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.rf-diagram-canvas svg {
+  display: block;
+  max-inline-size: 100%;
+  block-size: auto;
+}
+
+.rf-diagram-source {
+  margin: 0;
+  padding: 14px 16px;
+  overflow-x: auto;
+  background: var(--rf-surface-2);
+  color: var(--rf-fg);
+  font:
+    12px / 1.55 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Consolas,
+    monospace;
+}
+
+.rf-diagram-error {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  inline-size: 100%;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in oklab, var(--rf-danger) 35%, transparent);
+  border-radius: var(--rf-radius);
+  background: color-mix(in oklab, var(--rf-danger) 8%, transparent);
+  color: var(--rf-danger);
+  font-size: var(--rf-text-caption);
+}
+
+.rf-diagram-error pre {
+  margin: 0;
+  overflow-x: auto;
+  color: var(--rf-muted);
+  font:
+    11px / 1.45 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Consolas,
+    monospace;
+}
