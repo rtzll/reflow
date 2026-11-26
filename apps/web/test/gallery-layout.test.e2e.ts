@@ -171,7 +171,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
           (card) => (card.getBoundingClientRect().left - left < 50 ? 'L' : 'R'),
         ).join('')
       })
-      assert.equal(sides, 'RLLRLRLRLRLRLRL')
+      assert.equal(sides, 'RLLRLRLRLRLRLRLRLRL')
       // The first band: QueuedStack and HoverCard stacked beside the Carousel.
       const [carousel, queue, hover, avatar] = await Promise.all(
         ['carousel', 'queued-stack', 'hover-card', 'avatar'].map(tile),

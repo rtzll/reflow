@@ -447,21 +447,8 @@ export const galleryOrder = [
   'toaster',
   'time-grid',
   'bar-chart',
-  'line-chart',
-  'metric-card',
-  'sparkline',
   'code-block',
   'diff-view',
-  'file-tree',
-  'diagram',
-  'log-viewer',
-  'waterfall',
-  'pipeline-graph',
-  'status-strip',
-  'filter-bar',
-  'reaction-bar',
-  'markdown-editor',
-  'object-inspector',
   'data-table',
   'avatar',
   'command-menu',
@@ -497,6 +484,19 @@ export const galleryOrder = [
   'combobox',
   'markdown',
   'citation',
+  'log-viewer',
+  'waterfall',
+  'pipeline-graph',
+  'diagram',
+  'markdown-editor',
+  'file-tree',
+  'line-chart',
+  'sparkline',
+  'metric-card',
+  'status-strip',
+  'filter-bar',
+  'reaction-bar',
+  'object-inspector',
 ]
 
 const fullWidthCards = new Set([
@@ -506,6 +506,7 @@ const fullWidthCards = new Set([
   'waterfall',
   'pipeline-graph',
   'diagram',
+  'object-inspector',
 ])
 const halfWidthCards = new Set(['time-grid', 'bar-chart', 'breadcrumb', 'segmented-control'])
 
@@ -515,7 +516,6 @@ const wideCards = new Set([
   'line-chart',
   'metric-card',
   'filter-bar',
-  'object-inspector',
   'input-message',
   'color-picker',
   'card',
@@ -549,6 +549,8 @@ const rightCards = new Set([
   'banner',
   'carousel',
   'calendar',
+  'markdown-editor',
+  'metric-card',
 ])
 
 function sortEntries(entries: readonly ShowcaseComponent[], order: readonly string[]) {
