@@ -280,6 +280,52 @@
   font-size: 10px;
   color: var(--preview-muted);
 }
+.app-preview-review {
+  inline-size: min(90%, 260px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.app-preview-review .app-preview-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+}
+.app-preview-diff-counts {
+  display: inline-flex;
+  gap: 6px;
+}
+.app-preview-diff-counts b {
+  color: var(--rf-success);
+  font-weight: 600;
+}
+.app-preview-diff-counts i {
+  color: var(--rf-danger);
+  font-style: normal;
+}
+.app-preview-diff-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  line-height: 1.5;
+}
+.app-preview-diff-line {
+  padding: 2px 6px;
+  border-radius: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.app-preview-diff-line[data-kind='add'] {
+  background: color-mix(in oklab, var(--rf-success) 16%, transparent);
+}
+.app-preview-diff-line[data-kind='remove'] {
+  background: color-mix(in oklab, var(--rf-danger) 14%, transparent);
+}
 @media (max-width: 767px) {
   .site-app-card .rf-card-description {
     font-size: 16px;

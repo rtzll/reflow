@@ -56,7 +56,12 @@ async function show(
     const app = exampleApps.find((entry) => entry.slug === slug)
     if (page === 'app' && !app) return new Response('App not found', { status: 404 })
     const assets = await getPageAssets(app?.slug ?? 'directory')
-    const diffs = app?.slug === 'chat' ? (await diffSamples()).chat : undefined
+    const diffs =
+      app?.slug === 'chat'
+        ? (await diffSamples()).chat
+        : app?.slug === 'review'
+          ? (await diffSamples()).review
+          : undefined
     return context.render(
       <Document
         assets={assets}

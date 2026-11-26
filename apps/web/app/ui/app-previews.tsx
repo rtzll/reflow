@@ -88,9 +88,34 @@ function AnalyticsPreview() {
   )
 }
 
+function ReviewPreview() {
+  return () => (
+    <div class="app-preview-sheet app-preview-review">
+      <div class="app-preview-heading">
+        <span>src/diffs-ssr.ts</span>
+        <span class="app-preview-diff-counts">
+          <b>+29</b> <i>−0</i>
+        </span>
+      </div>
+      <div class="app-preview-diff-lines">
+        <div class="app-preview-diff-line" data-kind="remove">
+          − let ready = false
+        </div>
+        <div class="app-preview-diff-line" data-kind="add">
+          + let ready = Boolean(prerenderedHTML)
+        </div>
+        <div class="app-preview-diff-line" data-kind="add">
+          + return preloadDiffHTML(&#123; fileDiff &#125;)
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export const appPreviews = {
   issues: IssuePreview,
   chat: ChatPreview,
   calendar: CalendarPreview,
   analytics: AnalyticsPreview,
+  review: ReviewPreview,
 }

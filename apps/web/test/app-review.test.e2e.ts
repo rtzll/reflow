@@ -1,0 +1,80 @@
+import { expect } from 'playwright/test'
+import * as assert from 'remix/assert'
+import { it } from 'remix/test'
+import { open, showcaseServer } from './showcase-router.ts'
+
+it('server-renders zero-flash diffs, filters with EmptyState, tracks viewed files, and handles inline threads', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.setViewportSize({ width: 1280, height: 900 })
+
+  await open(page, '/apps/review')
+  await page.locator('[data-review-ready]').waitFor()
+
+  // Verify the raw SSR HTML contains Declarative Shadow DOM with zero fallback flash.
+  const response = await page.request.get(page.url())
+  const ssrHtml = await response.text()
+  assert.ok(ssrHtml.includes('<diffs-container><template shadowrootmode="open">'))
+  assert.ok(!ssrHtml.includes('class="rf-diff-fallback"'))
+
+  // All 4 files render immediately ready.
+  await expect(page.locator('.review-file-card .rf-diff-view[data-rf-diffs-ready]')).toHaveCount(4)
+
+  // Filter files to zero matches -> EmptyState -> Clear filter.
+  const filterInput = page.getByRole('searchbox', { name: 'Filter changed files' })
+  await filterInput.fill('nonexistent.rs')
+  await expect(page.locator('.rf-empty-state')).toBeVisible()
+  await page.getByRole('button', { name: 'Clear filter' }).click()
+  await expect(page.locator('.review-file-card')).toHaveCount(4)
+
+  // Mark the first file Viewed -> collapses it and updates progress.
+  const firstCard = page.locator('[data-review-file="packages/reflow/src/diffs-ssr.ts"]')
+  await firstCard.getByRole('button', { name: 'Mark viewed' }).click()
+  await expect(page.locator('.review-progress-text')).toHaveText('1 of 4 viewed')
+  await expect(firstCard.locator('.rf-diff-view')).toHaveAttribute('data-collapsed', 'true')
+  // Unmark viewed so we can interact with the inline CommentThread inside it.
+  await firstCard.getByRole('button', { name: 'Viewed' }).click()
+  await expect(firstCard.locator('.rf-diff-view')).not.toHaveAttribute('data-collapsed', 'true')
+
+  // Interact with slotted CommentThread: apply suggestion, reply, resolve & reopen.
+  const thread = firstCard.locator('.rf-comment-thread')
+  await expect(thread).toBeVisible()
+  await thread.getByRole('button', { name: 'Apply suggestion' }).click()
+  await expect(thread.getByText('Applied', { exact: true })).toBeVisible()
+
+  await thread.getByRole('textbox', { name: 'Reply to thread' }).fill('Looks solid now!')
+  await thread.getByRole('button', { name: 'Reply', exact: true }).click()
+  await expect(thread.getByText('Looks solid now!')).toBeVisible()
+
+  await thread.getByRole('button', { name: 'Resolve', exact: true }).click()
+  await expect(thread).toHaveAttribute('data-resolved', 'true')
+  await thread.getByRole('button', { name: 'Reopen', exact: true }).click()
+  await expect(thread).not.toHaveAttribute('data-resolved', 'true')
+
+  // Switch between Unified and Split across all diffs.
+  await page.locator('.review-header').getByRole('radio', { name: 'Split' }).click({ force: true })
+  await expect(firstCard.locator('.rf-diff-view')).toHaveAttribute('data-view', 'split')
+
+  // Open a CI check log in the Drawer and filter ANSI Terminal output.
+  await page.getByRole('button', { name: /test · diff-view SSR/ }).click()
+  const drawer = page.getByRole('dialog')
+  await expect(drawer).toBeVisible()
+  const terminal = drawer.locator('.rf-terminal')
+  await expect(terminal).toBeVisible()
+  await terminal.getByRole('searchbox', { name: 'Filter terminal output' }).fill('PASS')
+  await expect(terminal.locator('.rf-terminal-line')).toHaveCount(1)
+  await drawer.getByRole('button', { name: 'Close' }).click()
+  await expect(drawer).toBeHidden()
+
+  // Switch to Conversation & checks, submit an approval review, verify Timeline updates.
+  await page.getByRole('tab', { name: /Conversation & checks/ }).click()
+  await expect(page.locator('.rf-timeline')).toBeVisible()
+  await page.getByRole('button', { name: 'Submit review' }).click()
+  const popover = page.getByRole('dialog', { name: 'Submit review' })
+  await popover.getByRole('textbox', { name: 'Review summary' }).fill('Ship it!')
+  await popover.getByRole('button', { name: 'Submit review' }).click()
+  await expect(
+    page.locator('.review-title-row').getByText('Approved', { exact: true }),
+  ).toBeVisible()
+  await expect(page.locator('.rf-timeline').getByText('Ship it!')).toBeVisible()
+})
