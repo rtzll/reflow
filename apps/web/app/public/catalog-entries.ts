@@ -81,6 +81,8 @@ export const components = [
   ['waterfall', 'Waterfall'],
 ] as const
 
+export type ComponentSlug = (typeof components)[number][0]
+
 export const systems = [
   [
     'fluid-hover',

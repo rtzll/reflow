@@ -1,6 +1,6 @@
 import * as assert from 'remix/assert'
 import { afterAll, it } from 'remix/test'
-import { componentApi } from '../app/docs-data.ts'
+import { getComponentApi } from '../app/docs-data.ts'
 import { componentExamples } from '../app/public/demos/examples.ts'
 import { catalog } from '../app/catalog.tsx'
 import { assets } from '../app/assets.ts'
@@ -81,7 +81,7 @@ it('publishes every docs page as a discoverable, complete Markdown document', as
     for (const example of componentExamples[slug] ?? []) {
       assert.ok(md.includes('## ' + example.title + '\n'), href + ' ' + example.title)
     }
-    for (const group of componentApi[slug] ?? []) {
+    for (const group of getComponentApi(slug)) {
       assert.ok(md.includes('### ' + group.name + '\n'), href)
       for (const prop of group.props)
         assert.ok(md.includes('- `' + prop.name + '` ('), href + ' ' + prop.name)

@@ -1,13 +1,20 @@
-import { componentApi, componentDefaults } from './docs-data.ts'
+import { componentDefaults, getComponentApi } from './docs-data.ts'
 import { componentExamples } from './public/demos/examples.ts'
 import type { ShowcaseComponent } from './ui/site.tsx'
 
 export const apiDescription =
   'Public props for the Reflow implementation. Native controls also accept their standard HTML attributes and Remix event mixes.'
 
+const specialistModules: Record<string, string> = {
+  Markdown: '@rtzll/reflow/markdown',
+  DiffView: '@rtzll/reflow/diffs',
+  FileTree: '@rtzll/reflow/trees',
+  Diagram: '@rtzll/reflow/diagrams',
+}
+
 export function componentReference(component: ShowcaseComponent) {
   const { name, slug, source } = component
-  const module = name === 'Markdown' ? '@rtzll/reflow/markdown' : '@rtzll/reflow'
+  const module = specialistModules[name] ?? '@rtzll/reflow'
   const importCode = `import { ${name} } from '${module}'`
   const title =
     {
@@ -28,7 +35,7 @@ export function componentReference(component: ShowcaseComponent) {
     slug,
     source: ['command-menu', 'tabs'].includes(slug) ? source : undefined,
   }))
-  const api = (componentApi[slug] ?? []).map((section) => ({
+  const api = getComponentApi(slug).map((section) => ({
     name: section.name,
     props: section.props.map((prop) => ({
       ...prop,

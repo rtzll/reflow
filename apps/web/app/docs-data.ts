@@ -1,4 +1,6 @@
 // API descriptions reflect the public Reflow component interfaces.
+import type { ComponentSlug } from './public/catalog-entries.ts'
+
 export interface ApiProperty {
   name: string
   type: string
@@ -103,7 +105,11 @@ const menuItemApi: ApiSection = {
   ],
 }
 
-export const componentApi: Record<string, readonly ApiSection[]> = {
+export function getComponentApi(slug: string): readonly ApiSection[] {
+  return (componentApi as Record<string, readonly ApiSection[] | undefined>)[slug] ?? []
+}
+
+export const componentApi: Record<ComponentSlug, readonly ApiSection[]> = {
   pagination: [
     {
       name: 'Pagination',

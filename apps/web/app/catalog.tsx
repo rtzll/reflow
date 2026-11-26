@@ -1,4 +1,4 @@
-import { components, systems } from './public/catalog-entries.ts'
+import { components, systems, type ComponentSlug } from './public/catalog-entries.ts'
 import { bannerDefaults, bannerFragment } from './public/banner-example.tsx'
 import { conversationCode } from './public/chat-example.tsx'
 import {
@@ -20,7 +20,7 @@ import { Example } from './public/examples.tsx'
 import type { CodeSamples } from './public/code-block-example.tsx'
 import type { ShowcaseComponent } from './ui/site.tsx'
 
-const previews: Record<string, Pick<ShowcaseComponent, 'description' | 'code' | 'props'>> = {
+const previews: Record<ComponentSlug, Pick<ShowcaseComponent, 'description' | 'code' | 'props'>> = {
   accordion: {
     description: 'Expandable sections with arrow-key navigation and a shared hover highlight.',
     code: `const items = ${JSON.stringify(accordionItems, null, 2)}\n\n<Accordion defaultValue="item-1" items={items} />`,

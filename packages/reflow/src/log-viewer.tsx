@@ -1,8 +1,9 @@
 import { on, ref, type Handle, type RemixNode } from 'remix/component'
+import { parseAnsiLine, stripAnsi } from './behaviors/ansi.ts'
+import { parseFacetQuery, type FacetToken, type ParsedFacetQuery } from './behaviors/facet-query.ts'
 import { Icon } from './icon.tsx'
 import { Spinner } from './spinner.tsx'
 import { classList, type ControlSize } from './systems/styling.ts'
-import { parseAnsiLine, stripAnsi } from './terminal.tsx'
 
 export type LogLevel = 'info' | 'warn' | 'error' | 'debug'
 export type LogStepStatus = 'pending' | 'running' | 'passed' | 'failed' | 'skipped'
@@ -118,13 +119,6 @@ interface NumberedGroup {
   warnCount: number
 }
 
-interface ParsedQuery {
-  facets: { key: string; value: string }[]
-  freeText: string
-  regex: RegExp | null
-  regexError: boolean
-}
-
 const LEVEL_ABBR: Record<LogLevel, string> = {
   error: 'ERR',
   warn: 'WRN',
@@ -132,49 +126,9 @@ const LEVEL_ABBR: Record<LogLevel, string> = {
   debug: 'DBG',
 }
 
-function escapeRegExp(text: string): string {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-}
-
-function parseLogQuery(raw: string, regexMode: boolean, caseSensitive: boolean): ParsedQuery {
-  const facets: { key: string; value: string }[] = []
-  const freeParts: string[] = []
-  const trimmed = raw.trim()
-
-  if (!trimmed) {
-    return { facets, freeText: '', regex: null, regexError: false }
-  }
-
-  for (const token of trimmed.split(/\s+/)) {
-    const colon = token.indexOf(':')
-    if (!regexMode && colon > 0 && colon < token.length - 1) {
-      const key = token.slice(0, colon).toLowerCase()
-      const value = token.slice(colon + 1)
-      if (/^[a-z0-9_.-]+$/i.test(key)) {
-        facets.push({ key, value })
-        continue
-      }
-    }
-    freeParts.push(token)
-  }
-
-  const freeText = freeParts.join(' ')
-  if (!freeText) {
-    return { facets, freeText: '', regex: null, regexError: false }
-  }
-
-  try {
-    const pattern = regexMode ? freeText : escapeRegExp(freeText)
-    const flags = caseSensitive ? 'g' : 'gi'
-    return { facets, freeText, regex: new RegExp(pattern, flags), regexError: false }
-  } catch {
-    return { facets, freeText, regex: null, regexError: true }
-  }
-}
-
 function entryMatchesFacet(
   entry: NumberedEntry,
-  facet: { key: string; value: string },
+  facet: FacetToken,
   caseSensitive: boolean,
 ): boolean {
   const norm = (s: string) => (caseSensitive ? s : s.toLowerCase())
@@ -197,7 +151,7 @@ function entryMatchesFacet(
 
 function entryMatchesQuery(
   entry: NumberedEntry,
-  parsed: ParsedQuery,
+  parsed: ParsedFacetQuery,
   caseSensitive: boolean,
 ): boolean {
   for (const facet of parsed.facets) {
@@ -456,7 +410,7 @@ export function LogViewer(handle: Handle<LogViewerProps>) {
     }
 
     const queryValue = props.query !== undefined ? props.query : internalQuery
-    const parsedQuery = parseLogQuery(queryValue, regexMode, caseSensitive)
+    const parsedQuery = parseFacetQuery(queryValue, regexMode, caseSensitive)
     const hasQuery = queryValue.trim().length > 0
     const hasAnyTimestamps = groups.some((g) => g.entries.some((e) => Boolean(e.timestamp)))
     const totalErrors = groups.reduce((sum, g) => sum + g.errorCount, 0)
