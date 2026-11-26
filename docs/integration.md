@@ -61,7 +61,7 @@ Resolve the CSS package export through that asset server in your document action
 const libraryStyles = await assets.getHref(import.meta.resolve('@rtzll/reflow/styles.css'))
 ```
 
-Render `<link rel="stylesheet" href={libraryStyles} />` in the document head, before your application stylesheet. Reflow's rules sit in the `reflow` cascade layer, so your CSS and `css()` styles override them; keep resets in a layer before it, as [customization](customization.md#cascade-layers) shows.
+Render `<link rel="stylesheet" href={libraryStyles} />` in the document head, before your application stylesheet. If you want only the styles for domains you use, load `@rtzll/reflow/core.css` alongside any of `@rtzll/reflow/diffs.css`, `@rtzll/reflow/trees.css`, `@rtzll/reflow/diagrams.css`, or `@rtzll/reflow/markdown.css`. Every stylesheet sits in the `reflow` cascade layer, so your CSS and `css()` styles override them; keep resets in a layer before it, as [customization](customization.md#cascade-layers) shows.
 
 On phones, Reflow's controls keep their text at 16px or more so iOS does not zoom into a field, drop the browser's tap flash, and show hover states only on devices that can hover. Keep zoom enabled: do not add `user-scalable=no` or `maximum-scale=1` to the viewport tag. If your app draws edge to edge with `viewport-fit=cover`, Drawer and Toaster pad themselves clear of the notch and the home indicator; your own fixed headers and bars need `env(safe-area-inset-*)` padding too.
 
@@ -90,6 +90,18 @@ const code = await highlight(source, { lang: 'tsx' })
 ```
 
 The result is plain data, so it can cross into a client entry as props, and the browser loads no highlighter. Highlight in the browser only for code that arrives later, such as a streamed reply. On platforms with a bundle size limit, such as Cloudflare Workers, highlight known code at build time; the showcase's [build](../apps/web/tools/build.ts) does this for its samples.
+
+## Optional specialist components
+
+`DiffView`, `FileTree`, and `Diagram` ship on separate entry points backed by optional peer dependencies so apps that do not use them never install or bundle them:
+
+| Component | Client entry | SSR helper | Standalone CSS | Optional peer(s) |
+| --- | --- | --- | --- | --- |
+| `DiffView` | `@rtzll/reflow/diffs` | `@rtzll/reflow/diffs/ssr` (`prerenderDiff`) | `@rtzll/reflow/diffs.css` | `@pierre/diffs` |
+| `FileTree` | `@rtzll/reflow/trees` | `@rtzll/reflow/trees/ssr` (`prerenderFileTree`) | `@rtzll/reflow/trees.css` | `@pierre/trees`, `preact` |
+| `Diagram` | `@rtzll/reflow/diagrams` | `@rtzll/reflow/diagrams/ssr` (`prerenderDiagram`) | `@rtzll/reflow/diagrams.css` | `pele` |
+
+When importing any of these components in a Remix client entry under the source-mode asset server, add the corresponding peer package (`"@pierre/diffs"`, `"@pierre/trees"`, `"pele"`) to `assets.allowPackages` in `remix.json`.
 
 ## Check the integration
 
