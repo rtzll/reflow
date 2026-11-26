@@ -909,6 +909,13 @@ export const componentApi: Record<string, readonly ApiSection[]> = {
           description: 'Shows severity filter pills and error-jump controls. Defaults to true.',
         },
         {
+          name: 'showHistogram',
+          type: 'boolean',
+          required: false,
+          description:
+            'Shows a compact log-volume and error-spike density bar above the stream. Defaults to true when multiple entries exist.',
+        },
+        {
           name: 'showTimestamps',
           type: 'boolean',
           required: false,

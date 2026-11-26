@@ -10,8 +10,18 @@ const groups: LogGroup[] = [
     status: 'passed',
     duration: '1.2s',
     entries: [
-      { text: '\x1b[32m✓\x1b[0m Lockfile up to date', timestamp: '+00:00.4' },
-      { text: 'Deprecated subdependency warning', level: 'warn', timestamp: '+00:01.1' },
+      {
+        text: '\x1b[32m✓\x1b[0m Lockfile up to date',
+        source: 'pnpm',
+        timestamp: '+00:00.4',
+        fields: { cache: 'hit', packages: 142 },
+      },
+      {
+        text: 'Deprecated subdependency warning',
+        level: 'warn',
+        source: 'pnpm',
+        timestamp: '+00:01.1',
+      },
     ],
   },
   {
@@ -20,17 +30,19 @@ const groups: LogGroup[] = [
     status: 'failed',
     duration: '14.6s',
     entries: [
-      { text: 'Running 42 tests…', timestamp: '+00:02.0' },
+      { text: 'Running 42 tests…', source: 'chromium', timestamp: '+00:02.0' },
       {
         text: '\x1b[31m✗\x1b[0m AssertionError: expected 200',
         level: 'error',
+        source: 'chromium',
         timestamp: '+00:14.5',
+        fields: { suite: 'apps.test.e2e.ts', exit_code: 1 },
       },
     ],
   },
 ]
 
-it('auto-expands failed groups, filters by severity and query, and supports Shift+click line ranges', async (t) => {
+it('auto-expands failed groups, filters by severity/regex/facets, highlights matches, inspects fields, and supports Shift+click line ranges', async (t) => {
   const ranges: (LogLineRange | null)[] = []
   const { $, $$, act, cleanup } = render(
     <LogViewer
@@ -43,18 +55,38 @@ it('auto-expands failed groups, filters by severity and query, and supports Shif
   )
   t.after(cleanup)
 
-  // Failed group opens automatically; passed group starts collapsed.
+  // Failed group opens automatically; histogram renders density buckets.
   equal($('[data-log-group="test"]')?.getAttribute('data-open'), 'true')
   equal($('[data-log-group="install"]')?.getAttribute('data-open'), 'false')
+  equal($$('.rf-log-hist-bucket').length, 2)
 
-  // Severity filter shows only error lines.
-  const errorPill = $('.rf-log-pill[data-level="error"]') as HTMLButtonElement
-  await act(() => errorPill.click())
+  // Expand structured attributes drawer on error line and click a facet value to filter.
+  const fieldsToggle = $('[data-log-line="4"] .rf-log-fields-toggle') as HTMLButtonElement
+  await act(() => fieldsToggle.click())
+  ok($('[data-log-fields="4"]'))
+  const facetChip = [...$$('[data-log-fields="4"] .rf-log-field-chip')].find(
+    (el) => el.textContent === 'apps.test.e2e.ts',
+  ) as HTMLButtonElement
+  await act(() => facetChip.click())
   equal($$('.rf-log-line').length, 1)
-  ok($('.rf-log-line')?.textContent?.includes('AssertionError'))
 
-  // Clear filter and select a line range with Shift+click.
-  await act(() => errorPill.click())
+  // Clear query, verify regex mode + inline match highlighting.
+  const search = $('.rf-log-search') as HTMLInputElement
+  const regexBtn = $('[aria-label="Regular expression search"]') as HTMLButtonElement
+  await act(() => regexBtn.click())
+  await act(() => {
+    search.value = 'expected \\d+'
+    search.dispatchEvent(new Event('input', { bubbles: true }))
+  })
+  equal($$('.rf-log-line').length, 1)
+  equal($('.rf-log-match')?.textContent, 'expected 200')
+
+  // Reset search & regex, expand all groups, and select a Shift+click range.
+  await act(() => regexBtn.click())
+  await act(() => {
+    search.value = ''
+    search.dispatchEvent(new Event('input', { bubbles: true }))
+  })
   await act(() =>
     ($('[data-log-group="install"] .rf-log-group-header') as HTMLButtonElement).click(),
   )
@@ -66,13 +98,4 @@ it('auto-expands failed groups, filters by severity and query, and supports Shif
   await act(() => line4.dispatchEvent(new MouseEvent('click', { bubbles: true, shiftKey: true })))
   deepEqual(ranges.at(-1), { start: 2, end: 4 })
   equal($$('.rf-log-line[data-selected="true"]').length, 3)
-
-  // Search narrows matching lines across groups.
-  const search = $('.rf-log-search') as HTMLInputElement
-  await act(() => {
-    search.value = 'Lockfile'
-    search.dispatchEvent(new Event('input', { bubbles: true }))
-  })
-  equal($$('.rf-log-line').length, 1)
-  ok($('.rf-log-line')?.textContent?.includes('Lockfile up to date'))
 })

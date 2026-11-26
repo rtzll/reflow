@@ -13,8 +13,12 @@ export interface LogEntry {
   text: string
   /** Severity level for visual emphasis and filtering. Default `'info'`. */
   level?: LogLevel
+  /** Optional service/source tag chip (e.g. `'chromium'`, `'worker'`, `'pnpm'`). */
+  source?: string
   /** Optional timestamp string (e.g. `'+00:14.2'` or `'09:05:12'`). */
   timestamp?: string
+  /** Optional structured key-value attributes shown in an expandable inspector row. */
+  fields?: Readonly<Record<string, string | number | boolean>>
   /** Optional explicit 1-based line number; numbered sequentially when omitted. */
   line?: number
 }
@@ -50,14 +54,16 @@ export interface LogViewerProps {
   onExpandedGroupsChange?: (ids: string[]) => void
   /** Active group ID to expand and scroll into view. */
   activeGroupId?: string | null
-  /** Controlled search query. */
+  /** Controlled search query (supports free text, regex mode, and `key:value` facets). */
   query?: string
   /** Called when the search query changes. */
   onQueryChange?: (query: string) => void
-  /** Shows a filter input in the toolbar. Default `true`. */
+  /** Shows a filter input with regex & case toggles in the toolbar. Default `true`. */
   searchable?: boolean
   /** Shows severity filter pills (All, Errors, Warnings) and error-jump controls. Default `true`. */
   filterable?: boolean
+  /** Shows a compact log-volume & error-spike histogram bar above the stream. Defaults to `true` when multiple entries exist. */
+  showHistogram?: boolean
   /** Shows timestamps when entries include them. Default `true`. */
   showTimestamps?: boolean
   /** Shows clickable line numbers with Shift+click range selection. Default `true`. */
@@ -92,7 +98,9 @@ interface NumberedEntry {
   groupId: string
   lineNumber: number
   level: LogLevel
+  source?: string
   timestamp?: string
+  fields?: Readonly<Record<string, string | number | boolean>>
   raw: string
   plain: string
 }
@@ -106,6 +114,138 @@ interface NumberedGroup {
   entries: NumberedEntry[]
   errorCount: number
   warnCount: number
+}
+
+interface ParsedQuery {
+  facets: { key: string; value: string }[]
+  freeText: string
+  regex: RegExp | null
+  regexError: boolean
+}
+
+const LEVEL_ABBR: Record<LogLevel, string> = {
+  error: 'ERR',
+  warn: 'WRN',
+  info: 'INF',
+  debug: 'DBG',
+}
+
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function parseLogQuery(raw: string, regexMode: boolean, caseSensitive: boolean): ParsedQuery {
+  const facets: { key: string; value: string }[] = []
+  const freeParts: string[] = []
+  const trimmed = raw.trim()
+
+  if (!trimmed) {
+    return { facets, freeText: '', regex: null, regexError: false }
+  }
+
+  for (const token of trimmed.split(/\s+/)) {
+    const colon = token.indexOf(':')
+    if (!regexMode && colon > 0 && colon < token.length - 1) {
+      const key = token.slice(0, colon).toLowerCase()
+      const value = token.slice(colon + 1)
+      if (/^[a-z0-9_.-]+$/i.test(key)) {
+        facets.push({ key, value })
+        continue
+      }
+    }
+    freeParts.push(token)
+  }
+
+  const freeText = freeParts.join(' ')
+  if (!freeText) {
+    return { facets, freeText: '', regex: null, regexError: false }
+  }
+
+  try {
+    const pattern = regexMode ? freeText : escapeRegExp(freeText)
+    const flags = caseSensitive ? 'g' : 'gi'
+    return { facets, freeText, regex: new RegExp(pattern, flags), regexError: false }
+  } catch {
+    return { facets, freeText, regex: null, regexError: true }
+  }
+}
+
+function entryMatchesFacet(
+  entry: NumberedEntry,
+  facet: { key: string; value: string },
+  caseSensitive: boolean,
+): boolean {
+  const norm = (s: string) => (caseSensitive ? s : s.toLowerCase())
+  const target = norm(facet.value)
+  if (facet.key === 'level' || facet.key === 'status') {
+    return norm(entry.level).includes(target)
+  }
+  if (facet.key === 'source' || facet.key === 'service') {
+    return entry.source ? norm(entry.source).includes(target) : false
+  }
+  if (entry.fields) {
+    for (const [k, v] of Object.entries(entry.fields)) {
+      if (k.toLowerCase() === facet.key) {
+        return norm(String(v)).includes(target)
+      }
+    }
+  }
+  return false
+}
+
+function entryMatchesQuery(
+  entry: NumberedEntry,
+  parsed: ParsedQuery,
+  caseSensitive: boolean,
+): boolean {
+  for (const facet of parsed.facets) {
+    if (!entryMatchesFacet(entry, facet, caseSensitive)) return false
+  }
+  if (!parsed.freeText) return true
+  if (parsed.regex) {
+    parsed.regex.lastIndex = 0
+    if (parsed.regex.test(entry.plain)) return true
+    if (entry.source) {
+      parsed.regex.lastIndex = 0
+      if (parsed.regex.test(entry.source)) return true
+    }
+    if (entry.fields) {
+      for (const [k, v] of Object.entries(entry.fields)) {
+        parsed.regex.lastIndex = 0
+        if (parsed.regex.test(`${k}=${String(v)}`)) return true
+      }
+    }
+    return false
+  }
+  return false
+}
+
+function renderHighlightedText(text: string, regex: RegExp | null): RemixNode {
+  if (!regex || !text) return text
+  const parts: RemixNode[] = []
+  regex.lastIndex = 0
+  let lastIndex = 0
+  let match: RegExpExecArray | null
+  let guard = 0
+  while ((match = regex.exec(text)) !== null && guard < 100) {
+    guard += 1
+    if (match[0].length === 0) {
+      regex.lastIndex += 1
+      continue
+    }
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index))
+    }
+    parts.push(
+      <mark key={`${match.index}-${guard}`} class="rf-log-match">
+        {match[0]}
+      </mark>,
+    )
+    lastIndex = match.index + match[0].length
+  }
+  if (parts.length === 0) return text
+  if (lastIndex < text.length) parts.push(text.slice(lastIndex))
+  return parts
 }
 
 function normalizeGroups(props: LogViewerProps): NumberedGroup[] {
@@ -137,7 +277,9 @@ function normalizeGroups(props: LogViewerProps): NumberedGroup[] {
         groupId: group.id,
         lineNumber,
         level,
+        source: entry.source,
         timestamp: entry.timestamp,
+        fields: entry.fields,
         raw: entry.text,
         plain: stripAnsi(entry.text),
       }
@@ -171,17 +313,23 @@ function statusIcon(status?: LogStepStatus) {
 }
 
 /**
- * Structured CI and runtime log viewer with collapsible step groups, ANSI SGR
- * color rendering, toggleable timestamps, severity filtering, error jumping,
- * line-range selection, and follow-tail scrolling.
+ * Structured CI and runtime log explorer with collapsible step groups,
+ * ANSI SGR colors, severity stripes & badges, inline match highlighting,
+ * regex/case/facet (`key:value`) querying, log-volume histogram, expandable
+ * structured attribute inspection, Shift+click line ranges, and follow-tail.
  */
 export function LogViewer(handle: Handle<LogViewerProps>) {
   const seedGroups = normalizeGroups(handle.props)
   let internalExpanded = new Set<string>(initialExpanded(seedGroups))
+  let userCollapsedAll = false
   let internalQuery = ''
+  let regexMode = false
+  let caseSensitive = false
   let levelFilter: 'all' | 'error' | 'warn' = 'all'
   let showTimestamps = handle.props.showTimestamps ?? true
+  let wrapLines = handle.props.wrap ?? false
   let internalSelected: LogLineRange | null = null
+  let expandedEntryKeys = new Set<string>()
   let selectionAnchor: number | null = null
   let focusedErrorIndex = -1
   let copyState: 'idle' | 'copied' | 'error' = 'idle'
@@ -191,21 +339,22 @@ export function LogViewer(handle: Handle<LogViewerProps>) {
   let lastLineCount = 0
   let lastActiveGroupId: string | null | undefined = undefined
   let bodyNode: HTMLDivElement | undefined
+  let searchInputNode: HTMLInputElement | undefined
 
   handle.signal.addEventListener('abort', () => clearTimeout(copyTimer), { once: true })
 
   function currentExpanded(groups: readonly NumberedGroup[]): Set<string> {
     if (handle.props.expandedGroups !== undefined) return new Set(handle.props.expandedGroups)
-    // Auto-open newly failing or running groups unless user explicitly interacted.
     const valid = new Set(groups.map((g) => g.id))
     const next = new Set([...internalExpanded].filter((id) => valid.has(id)))
-    if (next.size === 0 && groups.length > 0) {
+    if (next.size === 0 && !userCollapsedAll && groups.length > 0) {
       for (const id of initialExpanded(groups)) next.add(id)
     }
     return next
   }
 
   function updateExpanded(next: Set<string>) {
+    userCollapsedAll = next.size === 0
     const ids = [...next]
     if (handle.props.expandedGroups === undefined) internalExpanded = next
     handle.props.onExpandedGroupsChange?.(ids)
@@ -257,6 +406,17 @@ export function LogViewer(handle: Handle<LogViewerProps>) {
     )
   })
 
+  const mountSearch = ref<HTMLInputElement>((node, signal) => {
+    searchInputNode = node
+    signal.addEventListener(
+      'abort',
+      () => {
+        searchInputNode = undefined
+      },
+      { once: true },
+    )
+  })
+
   return () => {
     const props = handle.props
     const {
@@ -266,8 +426,8 @@ export function LogViewer(handle: Handle<LogViewerProps>) {
       activeGroupId,
       searchable = true,
       filterable = true,
+      showHistogram,
       lineNumbers = true,
-      wrap = false,
       follow = false,
       maxHeight,
       copyable = true,
@@ -285,6 +445,7 @@ export function LogViewer(handle: Handle<LogViewerProps>) {
       if (!expanded.has(activeGroupId)) {
         const next = new Set(expanded)
         next.add(activeGroupId)
+        userCollapsedAll = false
         if (props.expandedGroups === undefined) internalExpanded = next
         props.onExpandedGroupsChange?.([...next])
       }
@@ -292,12 +453,14 @@ export function LogViewer(handle: Handle<LogViewerProps>) {
     }
 
     const queryValue = props.query !== undefined ? props.query : internalQuery
-    const needle = queryValue.trim().toLowerCase()
+    const parsedQuery = parseLogQuery(queryValue, regexMode, caseSensitive)
+    const hasQuery = queryValue.trim().length > 0
     const hasAnyTimestamps = groups.some((g) => g.entries.some((e) => Boolean(e.timestamp)))
     const totalErrors = groups.reduce((sum, g) => sum + g.errorCount, 0)
     const totalWarnings = groups.reduce((sum, g) => sum + g.warnCount, 0)
-    const allErrors = groups.flatMap((g) => g.entries.filter((e) => e.level === 'error'))
-    const totalLines = groups.reduce((sum, g) => sum + g.entries.length, 0)
+    const allEntries = groups.flatMap((g) => g.entries)
+    const allErrors = allEntries.filter((e) => e.level === 'error')
+    const totalLines = allEntries.length
     const selected = currentSelected()
 
     const filteredGroups = groups
@@ -307,15 +470,17 @@ export function LogViewer(handle: Handle<LogViewerProps>) {
           if (levelFilter === 'warn' && entry.level !== 'warn' && entry.level !== 'error') {
             return false
           }
-          if (needle && !entry.plain.toLowerCase().includes(needle)) return false
+          if (hasQuery && !entryMatchesQuery(entry, parsedQuery, caseSensitive)) return false
           return true
         })
         return { ...group, entries }
       })
       .filter((group) => {
-        if (!needle && levelFilter === 'all') return true
+        if (!hasQuery && levelFilter === 'all') return true
         return group.entries.length > 0
       })
+
+    const matchedLineCount = filteredGroups.reduce((sum, g) => sum + g.entries.length, 0)
 
     if (follow && totalLines !== lastLineCount) {
       lastLineCount = totalLines
@@ -327,6 +492,19 @@ export function LogViewer(handle: Handle<LogViewerProps>) {
       }
     } else {
       lastLineCount = totalLines
+    }
+
+    function setQuery(next: string) {
+      if (props.query === undefined) internalQuery = next
+      props.onQueryChange?.(next)
+      void handle.update()
+    }
+
+    function addFacetFilter(key: string, value: string) {
+      const token = `${key}:${value}`
+      const current = queryValue.trim()
+      if (current.split(/\s+/).includes(token)) return
+      setQuery(current ? `${current} ${token}` : token)
     }
 
     function jumpError(delta: 1 | -1) {
@@ -347,13 +525,8 @@ export function LogViewer(handle: Handle<LogViewerProps>) {
       scrollToLine(target.lineNumber)
     }
 
-    async function copyLogs() {
+    async function copyText(payload: string) {
       clearTimeout(copyTimer)
-      const visible = filteredGroups.flatMap((g) => g.entries)
-      const linesToCopy = selected
-        ? visible.filter((e) => e.lineNumber >= selected.start && e.lineNumber <= selected.end)
-        : visible
-      const payload = linesToCopy.map((e) => e.plain).join('\n')
       try {
         await navigator.clipboard.writeText(payload)
         copyState = 'copied'
@@ -367,6 +540,14 @@ export function LogViewer(handle: Handle<LogViewerProps>) {
         copyState = 'idle'
         void handle.update()
       }, 1800)
+    }
+
+    async function copyLogs() {
+      const visible = filteredGroups.flatMap((g) => g.entries)
+      const linesToCopy = selected
+        ? visible.filter((e) => e.lineNumber >= selected.start && e.lineNumber <= selected.end)
+        : visible
+      await copyText(linesToCopy.map((e) => e.plain).join('\n'))
     }
 
     function handleLineClick(lineNumber: number, shiftKey: boolean) {
@@ -384,9 +565,50 @@ export function LogViewer(handle: Handle<LogViewerProps>) {
       }
     }
 
+    function toggleEntryFields(key: string) {
+      const next = new Set(expandedEntryKeys)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      expandedEntryKeys = next
+      void handle.update()
+    }
+
     const isGrouped = Boolean(props.groups?.length)
+    const allOpen = isGrouped && groups.every((g) => expanded.has(g.id))
     const copyFeedback =
       copyState === 'copied' ? 'Copied' : copyState === 'error' ? 'Copy failed' : ''
+
+    // Log-volume & error-spike histogram buckets (one bucket per group, or chunked lines).
+    const renderHistogram = showHistogram ?? (groups.length > 1 || totalLines >= 6)
+    const histogramBuckets = isGrouped
+      ? groups.map((group) => ({
+          id: group.id,
+          label: group.title ?? group.id,
+          total: group.entries.length,
+          errors: group.errorCount,
+          warns: group.warnCount,
+          groupId: group.id,
+          firstLine: group.entries[0]?.lineNumber ?? 1,
+        }))
+      : (() => {
+          const count = Math.min(12, Math.max(1, totalLines))
+          const step = Math.ceil(totalLines / count)
+          const buckets = []
+          for (let i = 0; i < totalLines; i += step) {
+            const slice = allEntries.slice(i, i + step)
+            buckets.push({
+              id: `b-${i}`,
+              label: `Lines ${slice[0]?.lineNumber}–${slice[slice.length - 1]?.lineNumber}`,
+              total: slice.length,
+              errors: slice.filter((e) => e.level === 'error').length,
+              warns: slice.filter((e) => e.level === 'warn').length,
+              groupId: slice[0]?.groupId ?? '__default__',
+              firstLine: slice[0]?.lineNumber ?? 1,
+            })
+          }
+          return buckets
+        })()
+    const maxBucketTotal = Math.max(1, ...histogramBuckets.map((b) => b.total))
 
     return (
       <section
@@ -394,7 +616,7 @@ export function LogViewer(handle: Handle<LogViewerProps>) {
         aria-label={label ?? title ?? 'Log output'}
         data-status={status}
         data-density={size === 'compact' ? 'compact' : undefined}
-        data-wrap={wrap || undefined}
+        data-wrap={wrapLines || undefined}
         mix={on('keydown', (event) => {
           const target = event.target
           if (
@@ -403,12 +625,23 @@ export function LogViewer(handle: Handle<LogViewerProps>) {
           ) {
             return
           }
-          if (event.key === 'n') {
+          if (event.key === '/' && searchable && searchInputNode) {
+            event.preventDefault()
+            searchInputNode.focus()
+          } else if (event.key === 'n') {
             event.preventDefault()
             jumpError(1)
           } else if (event.key === 'p') {
             event.preventDefault()
             jumpError(-1)
+          } else if (event.key === 'w') {
+            event.preventDefault()
+            wrapLines = !wrapLines
+            void handle.update()
+          } else if (event.key === 't' && hasAnyTimestamps) {
+            event.preventDefault()
+            showTimestamps = !showTimestamps
+            void handle.update()
           }
         })}
       >
@@ -421,6 +654,11 @@ export function LogViewer(handle: Handle<LogViewerProps>) {
             )}
             {title && <span class="rf-log-title">{title}</span>}
             {duration && <span class="rf-log-duration">{duration}</span>}
+            <span class="rf-log-match-summary">
+              {hasQuery || levelFilter !== 'all'
+                ? `${matchedLineCount} / ${totalLines} lines`
+                : `${totalLines} lines`}
+            </span>
             {selected && (
               <span class="rf-log-selection-pill">
                 {selected.start === selected.end
@@ -484,6 +722,11 @@ export function LogViewer(handle: Handle<LogViewerProps>) {
 
             {filterable && allErrors.length > 0 && (
               <div class="rf-log-jump-errors" role="group" aria-label="Jump between errors">
+                {focusedErrorIndex >= 0 && (
+                  <span class="rf-log-error-counter">
+                    {focusedErrorIndex + 1}/{allErrors.length}
+                  </span>
+                )}
                 <button
                   type="button"
                   class="rf-log-icon-btn"
@@ -506,20 +749,79 @@ export function LogViewer(handle: Handle<LogViewerProps>) {
             )}
 
             {searchable && (
-              <input
-                type="search"
-                class="rf-log-search"
-                aria-label="Filter log lines"
-                placeholder="Filter logs…"
-                value={queryValue}
-                mix={on('input', (event) => {
-                  const next = (event.currentTarget as HTMLInputElement).value
-                  if (props.query === undefined) internalQuery = next
-                  props.onQueryChange?.(next)
-                  void handle.update()
-                })}
-              />
+              <div
+                class="rf-log-search-group"
+                data-invalid={parsedQuery.regexError ? 'true' : undefined}
+              >
+                <input
+                  type="search"
+                  class="rf-log-search"
+                  aria-label="Filter log lines"
+                  placeholder="Filter logs or key:value…"
+                  value={queryValue}
+                  mix={[
+                    mountSearch,
+                    on('input', (event) =>
+                      setQuery((event.currentTarget as HTMLInputElement).value),
+                    ),
+                  ]}
+                />
+                <button
+                  type="button"
+                  class="rf-log-mode-btn"
+                  aria-pressed={caseSensitive}
+                  aria-label="Case sensitive search"
+                  title="Match case"
+                  mix={on('click', () => {
+                    caseSensitive = !caseSensitive
+                    void handle.update()
+                  })}
+                >
+                  Aa
+                </button>
+                <button
+                  type="button"
+                  class="rf-log-mode-btn"
+                  aria-pressed={regexMode}
+                  aria-label="Regular expression search"
+                  title="Use regular expression"
+                  mix={on('click', () => {
+                    regexMode = !regexMode
+                    void handle.update()
+                  })}
+                >
+                  .*
+                </button>
+              </div>
             )}
+
+            {isGrouped && (
+              <button
+                type="button"
+                class="rf-log-icon-btn"
+                aria-label={allOpen ? 'Collapse all steps' : 'Expand all steps'}
+                title={allOpen ? 'Collapse all steps' : 'Expand all steps'}
+                mix={on('click', () => {
+                  updateExpanded(allOpen ? new Set() : new Set(groups.map((g) => g.id)))
+                })}
+              >
+                <Icon name="chevrons-up-down" size={13} />
+              </button>
+            )}
+
+            <button
+              type="button"
+              class="rf-log-icon-btn"
+              aria-pressed={wrapLines}
+              aria-label="Toggle line wrap"
+              title="Toggle line wrap (w)"
+              mix={on('click', () => {
+                wrapLines = !wrapLines
+                void handle.update()
+              })}
+            >
+              <Icon name="arrow-right" size={13} />
+            </button>
 
             {hasAnyTimestamps && (
               <button
@@ -527,7 +829,7 @@ export function LogViewer(handle: Handle<LogViewerProps>) {
                 class="rf-log-icon-btn"
                 aria-pressed={showTimestamps}
                 aria-label="Toggle timestamps"
-                title="Toggle timestamps"
+                title="Toggle timestamps (t)"
                 mix={on('click', () => {
                   showTimestamps = !showTimestamps
                   void handle.update()
@@ -558,17 +860,51 @@ export function LogViewer(handle: Handle<LogViewerProps>) {
           </div>
         </header>
 
+        {renderHistogram && histogramBuckets.length > 0 && (
+          <div class="rf-log-histogram" role="group" aria-label="Log volume and severity density">
+            {histogramBuckets.map((bucket) => {
+              const heightPct = Math.max(20, Math.round((bucket.total / maxBucketTotal) * 100))
+              const tone = bucket.errors > 0 ? 'error' : bucket.warns > 0 ? 'warn' : 'info'
+              return (
+                <button
+                  key={bucket.id}
+                  type="button"
+                  class="rf-log-hist-bucket"
+                  title={`${bucket.label} · ${bucket.total} lines${bucket.errors ? `, ${bucket.errors} errors` : ''}${bucket.warns ? `, ${bucket.warns} warnings` : ''}`}
+                  aria-label={`Jump to ${bucket.label}`}
+                  mix={on('click', () => {
+                    if (!expanded.has(bucket.groupId)) {
+                      const next = new Set(expanded)
+                      next.add(bucket.groupId)
+                      updateExpanded(next)
+                    }
+                    scrollToLine(bucket.firstLine)
+                  })}
+                >
+                  <span
+                    class="rf-log-hist-bar"
+                    data-tone={tone}
+                    style={{ blockSize: `${heightPct}%` }}
+                  />
+                </button>
+              )
+            })}
+          </div>
+        )}
+
         <div
           class="rf-log-body"
           style={maxHeight ? { maxBlockSize: maxHeight } : undefined}
           mix={mountBody}
         >
           {filteredGroups.length === 0 ? (
-            <div class="rf-log-empty">No matching log lines</div>
+            <div class="rf-log-empty">
+              {parsedQuery.regexError ? 'Invalid regular expression' : 'No matching log lines'}
+            </div>
           ) : (
             filteredGroups.map((group) => {
               const isOpen =
-                !isGrouped || Boolean(needle) || levelFilter !== 'all' || expanded.has(group.id)
+                !isGrouped || hasQuery || levelFilter !== 'all' || expanded.has(group.id)
               return (
                 <div
                   key={group.id}
@@ -625,49 +961,134 @@ export function LogViewer(handle: Handle<LogViewerProps>) {
                           selected !== null &&
                           entry.lineNumber >= selected.start &&
                           entry.lineNumber <= selected.end
+                        const hasFields =
+                          entry.fields !== undefined && Object.keys(entry.fields).length > 0
+                        const isEntryOpen = hasFields && expandedEntryKeys.has(entry.key)
                         const spans = parseAnsiLine(entry.raw)
                         return (
-                          <div
-                            key={entry.key}
-                            class="rf-log-line"
-                            data-log-line={entry.lineNumber}
-                            data-level={entry.level}
-                            data-selected={isSelected ? 'true' : undefined}
-                          >
-                            {lineNumbers && (
-                              <button
-                                type="button"
-                                class="rf-log-gutter"
-                                aria-label={`Line ${entry.lineNumber}`}
-                                aria-pressed={isSelected}
-                                mix={on('click', (event) =>
-                                  handleLineClick(entry.lineNumber, event.shiftKey),
-                                )}
+                          <div key={entry.key} class="rf-log-entry-wrap">
+                            <div
+                              class="rf-log-line"
+                              data-log-line={entry.lineNumber}
+                              data-level={entry.level}
+                              data-selected={isSelected ? 'true' : undefined}
+                              data-expandable={hasFields ? 'true' : undefined}
+                              data-expanded={isEntryOpen ? 'true' : undefined}
+                            >
+                              {lineNumbers && (
+                                <button
+                                  type="button"
+                                  class="rf-log-gutter"
+                                  aria-label={`Line ${entry.lineNumber}`}
+                                  aria-pressed={isSelected}
+                                  mix={on('click', (event) =>
+                                    handleLineClick(entry.lineNumber, event.shiftKey),
+                                  )}
+                                >
+                                  {entry.lineNumber}
+                                </button>
+                              )}
+                              <span
+                                class="rf-log-level-tag"
+                                data-level={entry.level}
+                                aria-label={entry.level}
                               >
-                                {entry.lineNumber}
-                              </button>
-                            )}
-                            {hasAnyTimestamps && showTimestamps && (
-                              <span class="rf-log-timestamp">{entry.timestamp ?? ''}</span>
-                            )}
-                            <span class="rf-log-text">
-                              {spans.length === 0
-                                ? '\u200b'
-                                : spans.map((span, idx) => (
-                                    <span
-                                      key={idx}
-                                      class={classList(
-                                        span.color ? `rf-term-ansi-${span.color}` : undefined,
-                                        span.bold ? 'rf-term-bold' : undefined,
-                                        span.dim ? 'rf-term-dim' : undefined,
-                                        span.italic ? 'rf-term-italic' : undefined,
-                                        span.underline ? 'rf-term-underline' : undefined,
-                                      )}
-                                    >
-                                      {span.text}
-                                    </span>
+                                {LEVEL_ABBR[entry.level]}
+                              </span>
+                              {hasAnyTimestamps && showTimestamps && (
+                                <span class="rf-log-timestamp">{entry.timestamp ?? ''}</span>
+                              )}
+                              {entry.source && (
+                                <button
+                                  type="button"
+                                  class="rf-log-source-chip"
+                                  title={`Filter source:${entry.source}`}
+                                  mix={on('click', () => addFacetFilter('source', entry.source!))}
+                                >
+                                  {entry.source}
+                                </button>
+                              )}
+                              <span class="rf-log-text">
+                                {spans.length === 0
+                                  ? '\u200b'
+                                  : spans.map((span, idx) => (
+                                      <span
+                                        key={idx}
+                                        class={classList(
+                                          span.color ? `rf-term-ansi-${span.color}` : undefined,
+                                          span.bold ? 'rf-term-bold' : undefined,
+                                          span.dim ? 'rf-term-dim' : undefined,
+                                          span.italic ? 'rf-term-italic' : undefined,
+                                          span.underline ? 'rf-term-underline' : undefined,
+                                        )}
+                                      >
+                                        {renderHighlightedText(span.text, parsedQuery.regex)}
+                                      </span>
+                                    ))}
+                              </span>
+                              {hasFields && (
+                                <button
+                                  type="button"
+                                  class="rf-log-fields-toggle"
+                                  aria-expanded={isEntryOpen}
+                                  aria-label={`Inspect structured fields for line ${entry.lineNumber}`}
+                                  mix={on('click', () => toggleEntryFields(entry.key))}
+                                >
+                                  <span>{Object.keys(entry.fields!).length} fields</span>
+                                  <Icon name="chevron-right" size={11} />
+                                </button>
+                              )}
+                            </div>
+
+                            {isEntryOpen && entry.fields && (
+                              <div class="rf-log-fields-drawer" data-log-fields={entry.lineNumber}>
+                                <div class="rf-log-fields-head">
+                                  <span>Structured attributes (click value to filter)</span>
+                                  <button
+                                    type="button"
+                                    class="rf-log-fields-copy"
+                                    mix={on(
+                                      'click',
+                                      () =>
+                                        void copyText(
+                                          JSON.stringify(
+                                            {
+                                              line: entry.lineNumber,
+                                              level: entry.level,
+                                              source: entry.source,
+                                              timestamp: entry.timestamp,
+                                              message: entry.plain,
+                                              ...entry.fields,
+                                            },
+                                            null,
+                                            2,
+                                          ),
+                                        ),
+                                    )}
+                                  >
+                                    Copy JSON
+                                  </button>
+                                </div>
+                                <dl class="rf-log-fields-grid">
+                                  {Object.entries(entry.fields).map(([fieldKey, fieldValue]) => (
+                                    <div key={fieldKey} class="rf-log-field-row">
+                                      <dt>{fieldKey}</dt>
+                                      <dd>
+                                        <button
+                                          type="button"
+                                          class="rf-log-field-chip"
+                                          mix={on('click', () =>
+                                            addFacetFilter(fieldKey, String(fieldValue)),
+                                          )}
+                                        >
+                                          {String(fieldValue)}
+                                        </button>
+                                      </dd>
+                                    </div>
                                   ))}
-                            </span>
+                                </dl>
+                              </div>
+                            )}
                           </div>
                         )
                       })}

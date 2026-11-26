@@ -1,5 +1,6 @@
-/* LogViewer: structured CI & runtime log viewer with collapsible step groups,
-   ANSI colors, severity filters, timestamps, and line-range selection. */
+/* LogViewer: Datadog-grade structured CI & runtime log explorer with collapsible
+   step groups, severity stripes, inline match highlighting, regex/facet search,
+   volume histogram, expandable JSON attributes, and Shift+click line ranges. */
 .rf-log-viewer {
   position: relative;
   display: flex;
@@ -29,6 +30,7 @@
 
 .rf-log-heading {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   min-inline-size: 0;
@@ -42,7 +44,9 @@
   font-variation-settings: var(--rf-weight-strong);
 }
 
-.rf-log-duration {
+.rf-log-duration,
+.rf-log-match-summary,
+.rf-log-error-counter {
   color: var(--rf-muted);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 11px;
@@ -168,21 +172,54 @@
   gap: 2px;
 }
 
-.rf-log-search {
-  inline-size: 140px;
+.rf-log-search-group {
+  display: inline-flex;
+  align-items: center;
   block-size: 24px;
-  padding: 0 8px;
+  padding-inline-end: 2px;
   border: 1px solid var(--rf-border);
   border-radius: var(--rf-radius);
   background: var(--rf-surface-1);
+}
+
+.rf-log-search-group:focus-within {
+  border-color: var(--rf-accent);
+}
+
+.rf-log-search-group[data-invalid='true'] {
+  border-color: var(--rf-danger);
+}
+
+.rf-log-search {
+  inline-size: 158px;
+  block-size: 100%;
+  padding: 0 6px 0 8px;
+  border: 0;
+  background: transparent;
   color: var(--rf-fg);
   font: inherit;
-  font-size: 12px;
+  font-size: 11.5px;
   outline: none;
 }
 
-.rf-log-search:focus-visible {
-  border-color: var(--rf-accent);
+.rf-log-mode-btn {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: 20px;
+  block-size: 18px;
+  padding: 0 3px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--rf-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.rf-log-mode-btn[aria-pressed='true'] {
+  background: color-mix(in oklab, var(--rf-accent) 18%, transparent);
+  color: var(--rf-accent);
 }
 
 .rf-log-icon-btn {
@@ -204,7 +241,11 @@
 .rf-log-icon-btn:focus-visible,
 .rf-log-pill:focus-visible,
 .rf-log-group-header:focus-visible,
-.rf-log-gutter:focus-visible {
+.rf-log-gutter:focus-visible,
+.rf-log-mode-btn:focus-visible,
+.rf-log-fields-toggle:focus-visible,
+.rf-log-field-chip:focus-visible,
+.rf-log-source-chip:focus-visible {
   outline: 1px solid var(--rf-accent);
   outline-offset: -1px;
 }
@@ -219,6 +260,51 @@
 .rf-log-icon-btn[aria-pressed='true'] {
   background: var(--rf-active);
   color: var(--rf-fg);
+}
+
+/* Datadog-style log volume & error-spike density bar. */
+.rf-log-histogram {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  block-size: 24px;
+  padding: 4px 12px;
+  border-block-end: 1px solid var(--rf-border);
+  background: color-mix(in oklab, var(--rf-surface-1) 65%, transparent);
+}
+
+.rf-log-hist-bucket {
+  display: flex;
+  align-items: flex-end;
+  flex: 1 1 0;
+  block-size: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.rf-log-hist-bar {
+  display: block;
+  inline-size: 100%;
+  min-block-size: 3px;
+  border-radius: 2px;
+  background: color-mix(in oklab, var(--rf-muted) 36%, transparent);
+  transition: opacity var(--rf-fast);
+}
+
+.rf-log-hist-bar[data-tone='warn'] {
+  background: color-mix(in oklab, var(--rf-warning) 75%, transparent);
+}
+
+.rf-log-hist-bar[data-tone='error'] {
+  background: var(--rf-danger);
+}
+
+@media (hover: hover) {
+  .rf-log-hist-bucket:hover .rf-log-hist-bar {
+    opacity: 0.78;
+  }
 }
 
 .rf-log-body {
@@ -325,8 +411,9 @@
 .rf-log-line {
   display: flex;
   align-items: baseline;
-  gap: 10px;
-  padding-inline: 8px 12px;
+  gap: 8px;
+  padding-inline: 6px 12px;
+  border-inline-start: 3px solid transparent;
   white-space: pre;
 }
 
@@ -336,20 +423,27 @@
 }
 
 .rf-log-line[data-level='error'] {
+  border-inline-start-color: var(--rf-danger);
   background: color-mix(in oklab, var(--rf-danger) 10%, transparent);
 }
 
 .rf-log-line[data-level='warn'] {
-  background: color-mix(in oklab, var(--rf-warning) 10%, transparent);
+  border-inline-start-color: var(--rf-warning);
+  background: color-mix(in oklab, var(--rf-warning) 9%, transparent);
+}
+
+.rf-log-line[data-level='debug'] {
+  color: var(--rf-muted);
 }
 
 .rf-log-line[data-selected='true'] {
-  background: color-mix(in oklab, var(--rf-accent) 16%, transparent);
+  border-inline-start-color: var(--rf-accent);
+  background: color-mix(in oklab, var(--rf-accent) 15%, transparent);
 }
 
 .rf-log-gutter {
   flex: none;
-  min-inline-size: 32px;
+  min-inline-size: 30px;
   padding: 0 4px;
   border: 0;
   background: transparent;
@@ -366,17 +460,169 @@
   }
 }
 
+.rf-log-level-tag {
+  flex: none;
+  inline-size: 28px;
+  border-radius: 3px;
+  font-size: 9.5px;
+  line-height: 1.5;
+  text-align: center;
+  letter-spacing: 0.03em;
+  color: var(--rf-muted);
+  background: color-mix(in oklab, var(--rf-muted) 12%, transparent);
+  user-select: none;
+}
+
+.rf-log-level-tag[data-level='error'] {
+  color: var(--rf-danger);
+  background: color-mix(in oklab, var(--rf-danger) 16%, transparent);
+}
+
+.rf-log-level-tag[data-level='warn'] {
+  color: var(--rf-warning);
+  background: color-mix(in oklab, var(--rf-warning) 16%, transparent);
+}
+
+.rf-log-level-tag[data-level='info'] {
+  color: var(--rf-info);
+  background: color-mix(in oklab, var(--rf-info) 12%, transparent);
+}
+
 .rf-log-timestamp {
   flex: none;
-  min-inline-size: 58px;
+  min-inline-size: 56px;
   color: var(--rf-muted);
   font-size: 11px;
   user-select: none;
 }
 
+.rf-log-source-chip {
+  flex: none;
+  padding: 0 5px;
+  border: 1px solid var(--rf-border);
+  border-radius: 4px;
+  background: var(--rf-surface-1);
+  color: var(--rf-muted);
+  font: inherit;
+  font-size: 10.5px;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .rf-log-source-chip:hover {
+    border-color: var(--rf-accent);
+    color: var(--rf-fg);
+  }
+}
+
 .rf-log-text {
   min-inline-size: 0;
   flex: 1 1 auto;
+}
+
+.rf-log-match {
+  padding: 0 2px;
+  border-radius: 2px;
+  background: color-mix(in oklab, var(--rf-warning) 35%, transparent);
+  color: inherit;
+}
+
+.rf-log-fields-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: none;
+  padding: 0 6px;
+  border: 1px solid var(--rf-border);
+  border-radius: 999px;
+  background: var(--rf-surface-1);
+  color: var(--rf-muted);
+  font-family: var(--rf-font);
+  font-size: 10px;
+  line-height: 1.6;
+  cursor: pointer;
+}
+
+.rf-log-line[data-expanded='true'] .rf-log-fields-toggle svg {
+  transform: rotate(90deg);
+}
+
+.rf-log-fields-drawer {
+  margin: 2px 12px 6px 46px;
+  padding: 8px 10px;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-radius);
+  background: var(--rf-surface-1);
+  font-family: var(--rf-font);
+  font-size: 11px;
+}
+
+.rf-log-fields-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-block-end: 6px;
+  color: var(--rf-muted);
+}
+
+.rf-log-fields-copy {
+  padding: 2px 7px;
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-radius);
+  background: var(--rf-surface-2);
+  color: var(--rf-fg);
+  font: inherit;
+  font-size: 10.5px;
+  cursor: pointer;
+}
+
+.rf-log-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 4px 12px;
+  margin: 0;
+}
+
+.rf-log-field-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-inline-size: 0;
+}
+
+.rf-log-field-row dt {
+  flex: none;
+  color: var(--rf-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.rf-log-field-row dd {
+  margin: 0;
+  min-inline-size: 0;
+}
+
+.rf-log-field-chip {
+  max-inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 5px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--rf-surface-2);
+  color: var(--rf-fg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .rf-log-field-chip:hover {
+    background: color-mix(in oklab, var(--rf-accent) 18%, transparent);
+    color: var(--rf-accent);
+  }
 }
 
 .rf-log-jump-live {
