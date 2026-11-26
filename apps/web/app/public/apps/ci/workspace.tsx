@@ -3,16 +3,20 @@ import {
   Button,
   CodeBlock,
   CommandMenu,
+  CopyChip,
   DataTable,
   Icon,
   Kbd,
   LogViewer,
+  MatrixGrid,
   MetricCard,
   PipelineGraph,
   Resizable,
+  SizeDelta,
   Spinner,
   StatusStrip,
   Tabs,
+  TestReport,
   Toaster,
   Waterfall,
   toast,
@@ -606,6 +610,99 @@ export const CiWorkspace = clientEntry(
             rowKey={(row) => row.id}
             size="compact"
           />
+          <TestReport
+            size="compact"
+            onInspectLog={() => {
+              selectJob('e2e')
+              tab = 'graph'
+              logQuery = 'level:error'
+              void handle.update()
+            }}
+            cases={[
+              {
+                id: 'ci-t1',
+                suite: 'app-issues.test.e2e.ts',
+                name: 'preserves selection after bulk move and Undo',
+                status: 'passed',
+                durationMs: 920,
+              },
+              {
+                id: 'ci-t2',
+                suite: 'apps.test.e2e.ts',
+                name: 'navigates between example apps without stale scroll',
+                status: run.status === 'failed' ? 'failed' : 'passed',
+                durationMs: 1_480,
+                message:
+                  run.status === 'failed'
+                    ? 'Expected /apps/ci scrollTop to reset to 0 after navigation'
+                    : undefined,
+                expected: run.status === 'failed' ? '0' : undefined,
+                actual: run.status === 'failed' ? '412' : undefined,
+                stack:
+                  run.status === 'failed' ? 'at apps/web/test/apps.test.e2e.ts:52:12' : undefined,
+              },
+              {
+                id: 'ci-t3',
+                suite: 'gallery-layout.test.e2e.ts',
+                name: 'fans out queued stack on pointer drag',
+                status: 'flaky',
+                durationMs: 880,
+                flakyRate: 9,
+                message: 'Passed on retry 1 of 1',
+              },
+            ]}
+          />
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: '12px',
+            }}
+          >
+            <MatrixGrid
+              size="compact"
+              rowHeaderLabel="Runner / Node"
+              rows={[
+                { id: 'linux', label: 'Ubuntu 24.04' },
+                { id: 'macos', label: 'macOS 15' },
+              ]}
+              columns={[
+                { id: 'node24', label: 'Node 24' },
+                { id: 'node26', label: 'Node 26' },
+              ]}
+              cells={[
+                { rowId: 'linux', columnId: 'node24', status: 'passed', durationMs: 22_400 },
+                {
+                  rowId: 'linux',
+                  columnId: 'node26',
+                  status: run.status === 'failed' ? 'failed' : 'passed',
+                  durationMs: 28_100,
+                },
+                { rowId: 'macos', columnId: 'node24', status: 'passed', durationMs: 31_200 },
+                { rowId: 'macos', columnId: 'node26', status: 'passed', durationMs: 29_700 },
+              ]}
+            />
+            <SizeDelta
+              size="compact"
+              items={[
+                {
+                  id: 'core-js',
+                  name: 'dist/index.js',
+                  beforeBytes: 42_800,
+                  afterBytes: 44_200,
+                  budgetBytes: 51_200,
+                  encoding: 'gzip',
+                },
+                {
+                  id: 'core-css',
+                  name: 'dist/core.css',
+                  beforeBytes: 24_600,
+                  afterBytes: 23_900,
+                  encoding: 'gzip',
+                },
+              ]}
+            />
+          </div>
           <div class="ci-artifacts-grid">
             <div class="ci-tree-card">
               <h2 class="ci-section-heading">Build artifacts & patches</h2>
@@ -665,7 +762,12 @@ export const CiWorkspace = clientEntry(
                 </div>
                 <div class="ci-meta-row">
                   <code>{run.branch}</code>
-                  <code>{run.sha}</code>
+                  <CopyChip
+                    value={run.sha}
+                    size="compact"
+                    onCopy={playCopySuccess}
+                    onCopyError={playCopyError}
+                  />
                   <span>Duration {run.duration}</span>
                   <span>{run.deltaVsP50}</span>
                   <span>Cache {run.cacheHitPct}% hit</span>

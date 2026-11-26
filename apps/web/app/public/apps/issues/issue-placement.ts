@@ -1,3 +1,4 @@
+import { placeGroupedItems } from '@rtzll/reflow'
 import type { Issue, Status } from './fixtures.ts'
 
 // Read the settled grid positions. A card animating away from the pointer must
@@ -29,14 +30,14 @@ export function placeIssues(
   status: Status,
   beforeId: string | null,
 ) {
-  const ids = new Set(moving.map((issue) => issue.id))
-  const rest = issues.filter((issue) => !ids.has(issue.id))
-  const index = rest.findIndex((issue) => issue.id === beforeId)
-  const next = rest.toSpliced(
-    index < 0 ? rest.length : index,
-    0,
-    ...moving.map((issue) => ({ ...issue, status })),
-  )
+  const next = placeGroupedItems(issues, {
+    movingIds: new Set(moving.map((issue) => issue.id)),
+    targetGroup: status,
+    beforeId,
+    getId: (issue) => issue.id,
+    getGroup: (issue) => issue.status,
+    setGroup: (issue, nextStatus) => ({ ...issue, status: nextStatus }),
+  })
   const group = issues.filter((issue) => issue.status === status)
   const nextGroup = next.filter((issue) => issue.status === status)
   if (group.length === nextGroup.length && group.every((issue, i) => issue.id === nextGroup[i]!.id))

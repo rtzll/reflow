@@ -1,4 +1,4 @@
-import { Avatar, Icon } from '@rtzll/reflow'
+import { Avatar, Icon, ProgressRing, StatusIcon, type IssueStatusKind } from '@rtzll/reflow'
 import { on, type Handle } from 'remix/component'
 import { statuses, type Issue, type Status } from './fixtures.ts'
 
@@ -10,6 +10,12 @@ interface OverviewProps {
   onFilter: (filter: IssueFilter) => void
 }
 
+function toStatusKind(status: Status): IssueStatusKind {
+  if (status === 'Done') return 'done'
+  if (status === 'In progress') return 'in-progress'
+  return 'todo'
+}
+
 export function CycleOverview(handle: Handle<OverviewProps>) {
   let expanded = false
   const panelId = handle.id + '-insights'
@@ -18,8 +24,6 @@ export function CycleOverview(handle: Handle<OverviewProps>) {
     const count = (status: Status) => issues.filter((issue) => issue.status === status).length
     const percent = (value: number) => (issues.length ? (value / issues.length) * 100 : 0)
     const completion = Math.round(percent(count('Done'))) + '%'
-    const todo = percent(count('Todo'))
-    const started = todo + percent(count('In progress'))
     const owners = Array.from(new Set(issues.map((issue) => issue.owner)), (name) => ({
       name,
       assigned: issues.filter((issue) => issue.owner === name),
@@ -49,19 +53,24 @@ export function CycleOverview(handle: Handle<OverviewProps>) {
               <span>{issues.length} issues</span>
             </div>
             <div class="issues-distribution">
-              <div
-                class="issues-ring"
-                style={
-                  issues.length
-                    ? { '--todo-end': todo + '%', '--started-end': started + '%' }
-                    : { background: 'var(--rf-muted-bg)' }
-                }
+              <ProgressRing
+                label={`Cycle progress ${completion} complete`}
+                size={92}
+                strokeWidth={10}
+                segments={[
+                  { id: 'done', label: 'Done', value: count('Done'), tone: 'success' },
+                  {
+                    id: 'in-progress',
+                    label: 'In progress',
+                    value: count('In progress'),
+                    tone: 'warning',
+                  },
+                  { id: 'todo', label: 'Todo', value: count('Todo'), tone: 'neutral' },
+                ]}
               >
-                <div>
-                  <strong>{completion}</strong>
-                  <span>complete</span>
-                </div>
-              </div>
+                <strong style={{ fontSize: '15px', lineHeight: 1 }}>{completion}</strong>
+                <span style={{ fontSize: '11px', color: 'var(--rf-muted)' }}>complete</span>
+              </ProgressRing>
               <div class="issues-legend">
                 {statuses.map((status) => (
                   <button
@@ -72,7 +81,7 @@ export function CycleOverview(handle: Handle<OverviewProps>) {
                     aria-pressed={filter?.field === 'status' && filter.value === status}
                     mix={on('click', () => onFilter({ field: 'status', value: status }))}
                   >
-                    <span class="issues-status-mark" data-status={status} />
+                    <StatusIcon status={toStatusKind(status)} size={13} decorative />
                     <span>{status}</span>
                     <strong>{count(status)}</strong>
                   </button>

@@ -6,9 +6,20 @@ import {
   Dialog,
   Dropdown,
   Icon,
+  LabelChip,
+  MetadataList,
+  QuickCreateBar,
+  RelationList,
+  RoadmapTimeline,
   SegmentedControl,
+  StatusIcon,
+  SubIssueList,
   Toolbar,
+  TriageQueue,
   createRangeSelection,
+  type IssueStatusKind,
+  type SubIssue,
+  type TriageItem,
 } from '@rtzll/reflow'
 import { clientEntry, on, ref, type Handle } from 'remix/component'
 import { CycleOverview, type IssueFilter } from './cycle-overview.tsx'
@@ -37,6 +48,55 @@ export const IssueTracker = clientEntry(
     let filter: IssueFilter | undefined
     let layout = 'board'
     let detailId: string | undefined
+    let triageItems: TriageItem[] = [
+      {
+        id: 'AT-151',
+        key: 'AT-151',
+        title: 'Cache offline trail tiles across app restarts',
+        description:
+          'Walkers lose cached vector tiles after a cold restart on low-storage devices.',
+        reporter: 'Sam Reed',
+        createdAt: '2026-11-26T10:20:00Z',
+        priority: 'high',
+        source: 'Field report',
+        labels: [{ id: 'offline', label: 'Offline', color: 'amber' }],
+      },
+      {
+        id: 'AT-152',
+        key: 'AT-152',
+        title: 'Export GPX waypoints with photo captions',
+        description: 'Include field note captions in exported GPX waypoint descriptions.',
+        reporter: 'Iris Chen',
+        createdAt: '2026-11-26T09:15:00Z',
+        priority: 'medium',
+        source: 'Community',
+        labels: [{ id: 'notes', label: 'Field notes', color: 'blue' }],
+      },
+    ]
+    let subIssues: SubIssue[] = [
+      {
+        id: 'sub-1',
+        key: 'SUB-1',
+        title: 'Audit current map viewport reset',
+        status: 'done',
+        assignee: 'Mina Ortiz',
+      },
+      {
+        id: 'sub-2',
+        key: 'SUB-2',
+        title: 'Preserve zoom level on pin focus',
+        status: 'in-progress',
+        assignee: 'Leo Park',
+      },
+      {
+        id: 'sub-3',
+        key: 'SUB-3',
+        title: 'Add keyboard focus regression test',
+        status: 'todo',
+        assignee: 'Iris Chen',
+      },
+    ]
+    let nextNumber = 143
     let reset: HTMLButtonElement | undefined
     let list: HTMLDivElement | undefined
     const mountList = ref<HTMLDivElement>((element) => {
@@ -465,7 +525,17 @@ export const IssueTracker = clientEntry(
                         mix={mountDropTarget}
                       >
                         <div class="issues-group-heading" aria-hidden="true">
-                          <span class="issues-status-mark" data-status={status} />
+                          <StatusIcon
+                            status={
+                              status === 'Done'
+                                ? 'done'
+                                : status === 'In progress'
+                                  ? 'in-progress'
+                                  : 'todo'
+                            }
+                            size={13}
+                            decorative
+                          />
                           <strong>{status}</strong>
                           <span class="issues-count">{group.length}</span>
                         </div>
@@ -598,6 +668,99 @@ export const IssueTracker = clientEntry(
               {announcement}
             </p>
           </section>
+
+          <section
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+              marginTop: '20px',
+            }}
+            aria-label="Planning and triage"
+          >
+            <QuickCreateBar
+              label="Quick create issue"
+              placeholder="Capture a new issue for Cycle 12…"
+              assignees={[
+                { value: 'Mina Ortiz', label: 'Mina Ortiz' },
+                { value: 'Leo Park', label: 'Leo Park' },
+                { value: 'Iris Chen', label: 'Iris Chen' },
+                { value: 'Sam Reed', label: 'Sam Reed' },
+              ]}
+              onCreate={(draft) => {
+                const status: Status =
+                  draft.status === 'done'
+                    ? 'Done'
+                    : draft.status === 'in-progress' || draft.status === 'in-review'
+                      ? 'In progress'
+                      : 'Todo'
+                const created: Issue = {
+                  id: `AT-${nextNumber++}`,
+                  title: draft.title,
+                  description: 'Captured via QuickCreateBar in Cycle 12.',
+                  status,
+                  area: 'Maps',
+                  owner: draft.assignee ?? 'Mina Ortiz',
+                }
+                issues = [created, ...issues]
+                announcement = `Created ${created.id}.`
+                void handle.update()
+              }}
+            />
+
+            <RoadmapTimeline
+              label="Cycle 12 – 14 Roadmap"
+              rangeStart="2026-10-01"
+              rangeEnd="2027-02-28"
+              today="2026-11-26"
+              items={[
+                {
+                  id: 'rm-maps',
+                  title: 'Dusk & offline maps',
+                  owner: 'Mina Ortiz',
+                  startDate: '2026-10-10',
+                  endDate: '2026-12-20',
+                  progress: 68,
+                  tone: 'accent',
+                  milestones: [{ id: 'ms-dusk', label: 'Dusk contrast GA', date: '2026-12-05' }],
+                },
+                {
+                  id: 'rm-notes',
+                  title: 'Field notes & captions',
+                  owner: 'Leo Park',
+                  startDate: '2026-11-01',
+                  endDate: '2027-01-25',
+                  progress: 42,
+                  tone: 'success',
+                  milestones: [{ id: 'ms-gpx', label: 'GPX export beta', date: '2027-01-10' }],
+                },
+              ]}
+            />
+
+            <TriageQueue
+              label="Incoming triage"
+              now="2026-11-26T12:00:00Z"
+              items={triageItems}
+              onDecision={(item, action) => {
+                triageItems = triageItems.filter((entry) => entry.id !== item.id)
+                if (action === 'accept') {
+                  issues = [
+                    {
+                      id: item.key,
+                      title: item.title,
+                      description: item.description ?? '',
+                      status: 'Todo',
+                      area: item.labels?.[0]?.label ?? 'Maps',
+                      owner: item.reporter,
+                    },
+                    ...issues,
+                  ]
+                }
+                void handle.update()
+              }}
+            />
+          </section>
+
           <Dialog
             title={detail?.title ?? 'Issue details'}
             description={detail?.description}
@@ -613,22 +776,82 @@ export const IssueTracker = clientEntry(
             }}
           >
             {detail && (
-              <dl class="issues-properties">
-                <dt>Issue</dt>
-                <dd class="issues-id">{detail.id}</dd>
-                <dt>Status</dt>
-                <dd>
-                  <span class="issues-status-mark" data-status={detail.status} />
-                  {detail.status}
-                </dd>
-                <dt>Assignee</dt>
-                <dd>
-                  <Avatar name={detail.owner} size={22} decorative />
-                  {detail.owner}
-                </dd>
-                <dt>Area</dt>
-                <dd>{detail.area}</dd>
-              </dl>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <MetadataList
+                  orientation="inline"
+                  size="compact"
+                  items={[
+                    { id: 'id', label: 'Issue', value: <span class="issues-id">{detail.id}</span> },
+                    {
+                      id: 'status',
+                      label: 'Status',
+                      value: (
+                        <StatusIcon
+                          status={
+                            detail.status === 'Done'
+                              ? 'done'
+                              : detail.status === 'In progress'
+                                ? 'in-progress'
+                                : 'todo'
+                          }
+                          label={detail.status}
+                          showLabel
+                          size={13}
+                        />
+                      ),
+                    },
+                    {
+                      id: 'assignee',
+                      label: 'Assignee',
+                      value: (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                          <Avatar name={detail.owner} size={20} decorative />
+                          <span>{detail.owner}</span>
+                        </span>
+                      ),
+                    },
+                    {
+                      id: 'area',
+                      label: 'Area',
+                      value: <LabelChip label={detail.area} color="blue" size="compact" />,
+                    },
+                  ]}
+                />
+                <SubIssueList
+                  size="compact"
+                  items={subIssues}
+                  onToggleStatus={(item, nextStatus: IssueStatusKind) => {
+                    subIssues = subIssues.map((entry) =>
+                      entry.id === item.id ? { ...entry, status: nextStatus } : entry,
+                    )
+                    void handle.update()
+                  }}
+                  onAdd={(title) => {
+                    subIssues = [
+                      ...subIssues,
+                      {
+                        id: `sub-${subIssues.length + 1}`,
+                        key: `SUB-${subIssues.length + 1}`,
+                        title,
+                        status: 'todo',
+                      },
+                    ]
+                    void handle.update()
+                  }}
+                />
+                <RelationList
+                  size="compact"
+                  items={[
+                    {
+                      id: 'rel-pr',
+                      kind: 'pull-request',
+                      ref: '#142',
+                      title: 'Preserve viewport bounds on selection',
+                      prState: 'open',
+                    },
+                  ]}
+                />
+              </div>
             )}
           </Dialog>
         </article>

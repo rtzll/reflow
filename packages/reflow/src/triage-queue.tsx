@@ -79,15 +79,14 @@ export function TriageQueue(handle: Handle<TriageQueueProps>) {
           {items.length === 0 ? (
             <div class="rf-triage-empty">Inbox zero — nothing awaiting triage.</div>
           ) : (
-            <div class="rf-triage-list" role="listbox" aria-label="Incoming issues">
+            <div class="rf-triage-list" role="group" aria-label="Incoming issues">
               {items.map((item, index) => {
                 const selected = item.id === active?.id
                 return (
                   <button
                     key={item.id}
                     type="button"
-                    role="option"
-                    aria-selected={selected ? 'true' : 'false'}
+                    aria-current={selected ? 'true' : undefined}
                     class="rf-triage-row"
                     data-selected={selected ? 'true' : undefined}
                     mix={[

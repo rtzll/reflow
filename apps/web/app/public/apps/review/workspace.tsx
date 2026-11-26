@@ -4,17 +4,23 @@ import {
   Button,
   CommandMenu,
   CommentThread,
+  CopyChip,
+  DiffMinimap,
+  DiffStat,
   Drawer,
   EmptyState,
   FileChanges,
   Icon,
   Input,
   Kbd,
+  MergeReadiness,
   Popover,
   Progress,
   RadioGroup,
   Resizable,
   SegmentedControl,
+  SplitButton,
+  StackGraph,
   Tabs,
   Terminal,
   Timeline,
@@ -504,6 +510,21 @@ export const ReviewWorkspace = clientEntry(
             }
             second={
               <div class="review-stream" aria-label="Diff stream">
+                <DiffMinimap
+                  size="compact"
+                  activeId={activeFilePath}
+                  files={files.map((file) => ({
+                    id: file.path,
+                    path: file.path,
+                    additions: file.added,
+                    deletions: file.removed,
+                    viewed: viewed.has(file.path),
+                    unresolvedComments: threads.filter(
+                      (t) => t.filePath === file.path && !t.resolved,
+                    ).length,
+                  }))}
+                  onSelect={(file) => jumpToFile(file.id)}
+                />
                 {visibleFiles.length === 0 ? (
                   <EmptyState
                     surface="outlined"
@@ -734,6 +755,103 @@ export const ReviewWorkspace = clientEntry(
         <div class="review-conversation">
           <div class="review-conversation-main">
             <section class="review-section">
+              <h2>Merge readiness</h2>
+              <MergeReadiness
+                status={
+                  verdict === 'changes-requested'
+                    ? 'blocked'
+                    : verdict === 'approved'
+                      ? 'ready'
+                      : 'pending'
+                }
+                summary={
+                  verdict === 'approved'
+                    ? `Approved · ${checks.length}/${checks.length} checks passed · No conflicts`
+                    : `${checks.length}/${checks.length} checks passed · ${unresolvedCount} unresolved`
+                }
+                action={
+                  <SplitButton
+                    size="compact"
+                    label="Squash and merge"
+                    disabled={verdict === 'changes-requested'}
+                    onClick={() => toast.success(`Queued #${pr.number} for squash merge`)}
+                    onSelect={(mode) => toast(`Selected merge strategy: ${mode}`)}
+                    items={[
+                      { value: 'squash', label: 'Squash and merge' },
+                      { value: 'merge', label: 'Create a merge commit' },
+                      { value: 'rebase', label: 'Rebase and merge' },
+                    ]}
+                  />
+                }
+                gates={[
+                  {
+                    id: 'reviews',
+                    label: 'Code reviews',
+                    required: true,
+                    status:
+                      verdict === 'approved'
+                        ? 'passed'
+                        : verdict === 'changes-requested'
+                          ? 'failed'
+                          : 'pending',
+                    detail:
+                      verdict === 'approved'
+                        ? 'Approved'
+                        : verdict === 'changes-requested'
+                          ? 'Changes requested'
+                          : 'Review pending',
+                  },
+                  {
+                    id: 'checks',
+                    label: 'Required checks',
+                    required: true,
+                    status: 'passed',
+                    detail: `${checks.length}/${checks.length} passed`,
+                    items: checks.map((check) => ({
+                      id: check.id,
+                      label: check.name,
+                      status: check.status === 'passed' ? 'passed' : 'failed',
+                      detail: check.duration,
+                      onClick: () => {
+                        activeCheck = check
+                        void handle.update()
+                      },
+                    })),
+                  },
+                ]}
+              />
+            </section>
+            <section class="review-section">
+              <h2>PR Stack</h2>
+              <StackGraph
+                size="compact"
+                currentId="pr-142"
+                nodes={[
+                  {
+                    id: 'pr-141',
+                    ref: '#141',
+                    title: 'Add Declarative Shadow DOM helper',
+                    status: 'merged',
+                    checks: 'passed',
+                    review: 'approved',
+                    additions: 64,
+                    deletions: 8,
+                  },
+                  {
+                    id: 'pr-142',
+                    ref: `#${pr.number}`,
+                    title: pr.title,
+                    parentId: 'pr-141',
+                    status: 'open',
+                    checks: 'passed',
+                    review: verdict === 'approved' ? 'approved' : 'review-required',
+                    additions: totalAdded,
+                    deletions: totalRemoved,
+                  },
+                ]}
+              />
+            </section>
+            <section class="review-section">
               <h2>Architecture</h2>
               <Diagram
                 title="Zero-flash SSR hydration pipeline"
@@ -813,12 +931,15 @@ export const ReviewWorkspace = clientEntry(
                 </div>
                 <div class="review-meta-row">
                   <span class="review-branch">
-                    <code>{pr.branch}</code> → <code>{pr.base}</code>
+                    <CopyChip
+                      value={pr.branch}
+                      size="compact"
+                      onCopy={playCopySuccess}
+                      onCopyError={playCopyError}
+                    />{' '}
+                    → <code>{pr.base}</code>
                   </span>
-                  <span class="review-counts">
-                    <span class="review-added">+{totalAdded}</span>{' '}
-                    <span class="review-removed">−{totalRemoved}</span>
-                  </span>
+                  <DiffStat added={totalAdded} removed={totalRemoved} size="compact" />
                   <span class="review-open-threads">
                     {unresolvedCount} unresolved {unresolvedCount === 1 ? 'thread' : 'threads'}
                   </span>
