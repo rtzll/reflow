@@ -644,7 +644,7 @@ function ScrollProblem() {
         </figcaption>
       </figure>
       <figure>
-        <ScrollArea className="system-scroll-comparison-area" label="Scrollable example" fade>
+        <ScrollArea class="system-scroll-comparison-area" label="Scrollable example" fade>
           <ReleaseRows />
         </ScrollArea>
         <figcaption>
@@ -664,7 +664,7 @@ function ScrollDemo(handle: Handle<{ horizontal?: boolean; fade?: boolean; both?
         : 'vertical'
     return (
       <ScrollArea
-        className={`system-scroll system-scroll-${orientation}`}
+        class={`system-scroll system-scroll-${orientation}`}
         orientation={orientation}
         fade={handle.props.fade}
         label="Scrollable example"

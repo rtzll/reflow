@@ -362,7 +362,7 @@ export function CommandMenu(handle: Handle<CommandMenuProps>) {
                 </div>
               )
             )}
-            <ScrollArea label="Commands" fade={32} tabIndex={-1} className="rf-command-scroll">
+            <ScrollArea label="Commands" fade={32} tabIndex={-1} class="rf-command-scroll">
               <div
                 id={listId}
                 class="rf-command-results"

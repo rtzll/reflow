@@ -216,7 +216,7 @@ export function CodeBlock(handle: Handle<CodeBlockProps>) {
           label={label}
           orientation="horizontal"
           tabIndex={0}
-          className="rf-code-scroll"
+          class="rf-code-scroll"
           viewportClassName="rf-code-viewport"
           fade={false}
         >

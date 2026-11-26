@@ -1,5 +1,6 @@
 import { ref, type Handle, type RemixNode } from 'remix/component'
 import { scrollFade } from './systems/motion.ts'
+import { classList } from './systems/styling.ts'
 
 export interface ScrollAreaProps {
   children: RemixNode
@@ -7,6 +8,7 @@ export interface ScrollAreaProps {
   orientation?: 'vertical' | 'horizontal' | 'both'
   fade?: boolean | number
   tabIndex?: number
+  class?: string
   className?: string
   viewportClassName?: string
   style?: Record<string, string | number | undefined>
@@ -226,7 +228,8 @@ export function ScrollArea(handle: Handle<ScrollAreaProps>) {
       orientation = 'vertical',
       label = 'Scrollable content',
       children,
-      className = '',
+      class: classProp,
+      className,
       viewportClassName = '',
       style,
       fade,
@@ -237,7 +240,7 @@ export function ScrollArea(handle: Handle<ScrollAreaProps>) {
     return (
       <div
         key={orientation}
-        class={`rf-scroll-root ${className}`}
+        class={classList('rf-scroll-root', classProp, className)}
         data-orientation={orientation}
         style={style}
         mix={lifecycle}

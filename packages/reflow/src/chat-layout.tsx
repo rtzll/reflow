@@ -187,7 +187,7 @@ export function ChatLayout(handle: Handle<ChatLayoutProps>) {
         <div class="rf-chat-layout-body">
           <ScrollArea
             label={label}
-            className="rf-chat-layout-scroll"
+            class="rf-chat-layout-scroll"
             viewportClassName="rf-chat-layout-viewport"
           >
             <div

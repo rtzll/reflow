@@ -138,7 +138,7 @@ function SidebarNavigation(handle: Handle<NavigationProps>) {
             )}
           </div>
         )}
-        <ScrollArea className="rf-sidebar-scroll" label={`${label} scroll area`} fade tabIndex={-1}>
+        <ScrollArea class="rf-sidebar-scroll" label={`${label} scroll area`} fade tabIndex={-1}>
           <nav
             class="rf-sidebar-nav"
             aria-label={label}

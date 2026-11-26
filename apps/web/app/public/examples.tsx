@@ -337,7 +337,7 @@ export const Example = clientEntry(
           return <ProjectTreeExample toolbar />
         case 'button':
           return (
-            <div className="example-stack">
+            <div class="example-stack">
               {handle.props.showcase ? (
                 <Toolbar class="example-row" label="Button variants">
                   <Button size="compact" loading={starting} mix={on('click', start)}>
@@ -407,7 +407,7 @@ export const Example = clientEntry(
         case 'dropdown':
           if (handle.props.gallery) {
             return (
-              <div className="example-combobox">
+              <div class="example-combobox">
                 <Dropdown
                   label="Component features"
                   inline
@@ -449,7 +449,7 @@ export const Example = clientEntry(
           if (handle.props.showcase) {
             const current = lastAction || 'Email'
             return (
-              <div className="example-stack">
+              <div class="example-stack">
                 <Dropdown
                   label={current}
                   variant="ghost"
@@ -505,14 +505,14 @@ export const Example = clientEntry(
                     handle.update()
                   }}
                 />
-                <span className="example-status" role="status">
+                <span class="example-status" role="status">
                   {lastAction && `Selected ${lastAction}`}
                 </span>
               </div>
             )
           }
           return (
-            <div className="example-stack">
+            <div class="example-stack">
               <Dropdown
                 label="Options"
                 searchable
@@ -526,20 +526,20 @@ export const Example = clientEntry(
                   handle.update()
                 }}
               />
-              <span className="example-status" role="status">
+              <span class="example-status" role="status">
                 {lastAction ? `Selected ${lastAction}` : ''}
               </span>
             </div>
           )
         case 'accordion':
           return (
-            <div className="example-accordion">
+            <div class="example-accordion">
               <Accordion defaultValue="item-1" items={accordionItems} />
             </div>
           )
         case 'ask-user-questions':
           return (
-            <div className="example-questions" data-showcase={handle.props.showcase || undefined}>
+            <div class="example-questions" data-showcase={handle.props.showcase || undefined}>
               <AskUserQuestions
                 questions={
                   handle.props.showcase ? questionExample('example') : questionPlayground()
@@ -549,7 +549,7 @@ export const Example = clientEntry(
                   handle.update()
                 }}
               />
-              <div className="example-note" role="status">
+              <div class="example-note" role="status">
                 {lastAction}
               </div>
             </div>
@@ -557,7 +557,7 @@ export const Example = clientEntry(
         case 'badge':
           if (handle.props.showcase)
             return (
-              <div className="example-row">
+              <div class="example-row">
                 <Badge variant="dot" color="blue">
                   Published
                 </Badge>
@@ -570,7 +570,7 @@ export const Example = clientEntry(
               </div>
             )
           return (
-            <div className="example-row">
+            <div class="example-row">
               {badgeGenres.map(([color, text]) => (
                 <Badge key={color} color={color}>
                   {text}
@@ -597,7 +597,7 @@ export const Example = clientEntry(
         case 'card':
           if (handle.props.showcase)
             return (
-              <div className="example-block" style={{ width: '100%' }}>
+              <div class="example-block" style={{ width: '100%' }}>
                 <CardGroup orientation="inline">
                   {['Fluid motion', 'Accessible', 'Yours to theme', 'Fluid hover'].map((title) => (
                     <Card
@@ -616,7 +616,7 @@ export const Example = clientEntry(
               </div>
             )
           return (
-            <div className="example-block" style={{ width: 'min(100%, 560px)' }}>
+            <div class="example-block" style={{ width: 'min(100%, 560px)' }}>
               <CardGroup columns={2}>
                 {cardItems.slice(0, 4).map(({ icon, title, description }) => (
                   <Card
@@ -648,7 +648,7 @@ export const Example = clientEntry(
         case 'chat-message':
           if (handle.props.gallery) return <DesignConversation showResume />
           return handle.props.showcase ? (
-            <div className="example-chat-tile">
+            <div class="example-chat-tile">
               <ChatMessage role="user" size="compact" animate={false}>
                 Why is every other input box so stiff?
               </ChatMessage>
@@ -664,7 +664,7 @@ export const Example = clientEntry(
         case 'checkbox-group':
           if (handle.props.gallery)
             return (
-              <div className="example-checklist">
+              <div class="example-checklist">
                 <CheckboxGroup
                   label="Features"
                   hideLabel
@@ -680,7 +680,7 @@ export const Example = clientEntry(
               </div>
             )
           return (
-            <div className="example-checklist">
+            <div class="example-checklist">
               <CheckboxGroup
                 label="Fruit"
                 hideLabel
@@ -726,14 +726,14 @@ export const Example = clientEntry(
           return <RequestFormExample />
         case 'input':
           return (
-            <div className="example-block" style={{ width: 'min(100%, 320px)' }}>
+            <div class="example-block" style={{ width: 'min(100%, 320px)' }}>
               <Input type="email" aria-label="Email" placeholder="Email" />
             </div>
           )
         case 'input-copy':
           return (
             <div
-              className="example-block"
+              class="example-block"
               style={{ width: handle.props.showcase ? 'min(100%, 420px)' : 'min(100%, 288px)' }}
             >
               <InputCopy
@@ -779,7 +779,7 @@ export const Example = clientEntry(
           )
         case 'input-group':
           return (
-            <div className="example-block" style={{ width: 'min(100%, 320px)' }}>
+            <div class="example-block" style={{ width: 'min(100%, 320px)' }}>
               <InputGroup>
                 {handle.props.showcase ? (
                   <>
@@ -829,7 +829,7 @@ export const Example = clientEntry(
           )
         case 'input-message':
           return (
-            <div className="example-composer example-chat">
+            <div class="example-composer example-chat">
               <InputMessage
                 attachments={!handle.props.showcase}
                 triggers={composerTriggers}
@@ -846,7 +846,7 @@ export const Example = clientEntry(
         case 'radio-group':
           if (handle.props.gallery)
             return (
-              <div className="example-checklist">
+              <div class="example-checklist">
                 <RadioGroup
                   label="Animation"
                   hideLabel
@@ -862,7 +862,7 @@ export const Example = clientEntry(
               </div>
             )
           return (
-            <div className="example-checklist">
+            <div class="example-checklist">
               <RadioGroup label="Options" hideLabel defaultValue="0" options={radioOptions} />
             </div>
           )
@@ -896,7 +896,7 @@ export const Example = clientEntry(
           if (handle.props.showcase && handle.props.slug === 'sidebar' && handle.props.avatar)
             return <GallerySidebar avatar={handle.props.avatar} />
           return (
-            <div className="example-wide">
+            <div class="example-wide">
               <Sidebar
                 label="Studio workspace"
                 defaultWidth={165}
@@ -947,7 +947,7 @@ export const Example = clientEntry(
                   },
                 ]}
               >
-                <p className="example-sidebar-content">
+                <p class="example-sidebar-content">
                   {lastAction === '#inbox'
                     ? 'Inbox'
                     : lastAction === '#preferences'
@@ -959,9 +959,9 @@ export const Example = clientEntry(
           )
         case 'slider':
           return (
-            <div className="example-slider">
-              <div className="example-slider-opacity">
-                <div className="example-slider-readout">
+            <div class="example-slider">
+              <div class="example-slider-opacity">
+                <div class="example-slider-readout">
                   <span>Opacity</span>
                   <span>{opacity}</span>
                 </div>
@@ -986,7 +986,7 @@ export const Example = clientEntry(
           )
         case 'switch':
           return (
-            <div className="example-chat">
+            <div class="example-chat">
               <Switch label="Notifications" defaultChecked />
               <Switch label="Sound effects" />
             </div>
@@ -1003,7 +1003,7 @@ export const Example = clientEntry(
           return <TeamTableExample showcase={handle.props.showcase} />
         case 'textarea':
           return (
-            <div className="example-block" style={{ width: 'min(100%, 384px)' }}>
+            <div class="example-block" style={{ width: 'min(100%, 384px)' }}>
               <Textarea
                 autoResize
                 aria-label="Message"
@@ -1086,7 +1086,7 @@ export const Example = clientEntry(
         case 'queued-stack':
           return (
             <div
-              className="example-queue-chat"
+              class="example-queue-chat"
               mix={[
                 on('pointerenter', () => {
                   queueHovered = true
@@ -1146,7 +1146,7 @@ export const Example = clientEntry(
           )
         case 'motion':
           return (
-            <div className="example-chat">
+            <div class="example-chat">
               <Switch label="Drag or toggle" />
               <CarouselDots
                 count={4}
@@ -1160,7 +1160,7 @@ export const Example = clientEntry(
           )
         case 'reveal':
           return (
-            <div className="example-chat">
+            <div class="example-chat">
               <Button
                 variant="tertiary"
                 mix={on('click', () => {
@@ -1178,7 +1178,7 @@ export const Example = clientEntry(
         case 'scrollbars':
           return (
             <div
-              className="example-block rf-scroll-area example-scroll"
+              class="example-block rf-scroll-area example-scroll"
               role="region"
               aria-label="Scrollable items"
               tabIndex={0}
@@ -1190,7 +1190,7 @@ export const Example = clientEntry(
           )
         case 'sizes':
           return (
-            <div className="example-row">
+            <div class="example-row">
               <Button>Default</Button>
               <Button size="compact" variant="secondary">
                 Compact
@@ -1199,7 +1199,7 @@ export const Example = clientEntry(
           )
         case 'surfaces':
           return (
-            <div className="example-block example-surfaces">
+            <div class="example-block example-surfaces">
               {Array.from({ length: 8 }, (_, index) => (
                 <span key={index} style={{ backgroundColor: `var(--rf-surface-${index + 1})` }}>
                   {index + 1}
@@ -1209,7 +1209,7 @@ export const Example = clientEntry(
           )
         case 'typography':
           return (
-            <div className="example-block">
+            <div class="example-block">
               <div style={{ fontSize: 'var(--rf-text-display)' }}>Display</div>
               <p style={{ fontSize: 'var(--rf-text-title)' }}>Title</p>
               <p>Body text</p>
