@@ -2,14 +2,7 @@ import { reveal, scrollFade } from '@rtzll/reflow'
 import { equal, ok } from 'remix/assert'
 import { render } from 'remix/component/test'
 import { it } from 'remix/test'
-
-async function waitFor(check: () => boolean) {
-  for (let index = 0; index < 60; index++) {
-    if (check()) return
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
-  }
-  ok(check(), 'The system interaction did not settle')
-}
+import { waitFor } from './browser-helpers.ts'
 
 it('fades only overflowing edges and removes the fade after content shrinks', async (t) => {
   const { $, cleanup } = render(

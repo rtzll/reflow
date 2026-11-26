@@ -2,6 +2,10 @@ import { DiffView } from '@rtzll/reflow/diffs'
 import { deepEqual, equal, ok } from 'remix/assert'
 import { render } from 'remix/component/test'
 import { it } from 'remix/test'
+import { waitFor as pollUntil } from './browser-helpers.ts'
+
+const waitFor = (predicate: () => boolean, timeout = 5000) =>
+  pollUntil(predicate, { timeout, message: 'Timed out waiting for DiffView to mount' })
 
 const sampleDiff = `--- a/src/cache.ts
 +++ b/src/cache.ts
@@ -14,15 +18,6 @@ const sampleDiff = `--- a/src/cache.ts
 +  return entry.value
  }
 `
-
-async function waitFor(predicate: () => boolean, timeout = 5000) {
-  const deadline = Date.now() + timeout
-  while (Date.now() < deadline) {
-    if (predicate()) return
-    await new Promise((resolve) => setTimeout(resolve, 20))
-  }
-  throw new Error('Timed out waiting for DiffView to mount')
-}
 
 it('renders a unified diff with @pierre/diffs, extracts filename, and announces change counts', async (t) => {
   const { $, cleanup } = render(<DiffView diff={sampleDiff} />)

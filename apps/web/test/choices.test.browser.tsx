@@ -3,17 +3,10 @@ import { equal, ok } from 'remix/assert'
 import { render } from 'remix/component/test'
 import { on, type Handle } from 'remix/component'
 import { it } from 'remix/test'
+import { waitFor } from './browser-helpers.ts'
 
 function press(node: Element, key: string) {
   node.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }))
-}
-
-async function waitFor(check: () => boolean) {
-  for (let i = 0; i < 90; i++) {
-    if (check()) return
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
-  }
-  ok(check(), 'Expected choice state did not settle')
 }
 
 const options = [

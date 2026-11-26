@@ -3,15 +3,9 @@ import { equal, ok } from 'remix/assert'
 import type { Handle } from 'remix/component'
 import { render } from 'remix/component/test'
 import { it } from 'remix/test'
+import { frames } from './browser-helpers.ts'
 
 const turns = ['First question', 'Second question', 'Third question']
-
-function frames(count = 2) {
-  return new Promise<void>((resolve) => {
-    const step = (left: number) => (left ? requestAnimationFrame(() => step(left - 1)) : resolve())
-    step(count)
-  })
-}
 
 // A transcript without the stylesheet: a scrolling box of tall messages.
 function Transcript() {

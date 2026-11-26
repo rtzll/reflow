@@ -2,14 +2,7 @@ import { Banner } from '@rtzll/reflow'
 import { equal, ok } from 'remix/assert'
 import { render } from 'remix/component/test'
 import { describe, it } from 'remix/test'
-
-async function waitFor(check: () => boolean) {
-  for (let i = 0; i < 60; i++) {
-    if (check()) return
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
-  }
-  ok(check(), 'Expected state did not settle')
-}
+import { waitFor } from './browser-helpers.ts'
 
 // As in the reference: a banner that closes while holding keyboard focus
 // hands it on instead of dropping it on the document body.

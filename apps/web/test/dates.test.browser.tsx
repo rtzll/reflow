@@ -2,6 +2,7 @@ import { Calendar, DatePicker } from '@rtzll/reflow'
 import { equal, ok } from 'remix/assert'
 import { render } from 'remix/component/test'
 import { describe, it } from 'remix/test'
+import { waitFor } from './browser-helpers.ts'
 
 function press(node: Element, key: string, shiftKey = false) {
   node.dispatchEvent(
@@ -12,14 +13,6 @@ function press(node: Element, key: string, shiftKey = false) {
       cancelable: true,
     }),
   )
-}
-
-async function waitFor(check: () => boolean) {
-  for (let i = 0; i < 60; i++) {
-    if (check()) return
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
-  }
-  ok(check(), 'Expected calendar state did not settle')
 }
 
 describe('Reflow dates', () => {

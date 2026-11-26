@@ -3,14 +3,7 @@ import { equal, ok } from 'remix/assert'
 import { render } from 'remix/component/test'
 import { on, type Handle } from 'remix/component'
 import { describe, it } from 'remix/test'
-
-async function waitFor(check: () => boolean, message = 'Expected popover state did not settle') {
-  for (let i = 0; i < 60; i++) {
-    if (check()) return
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
-  }
-  ok(check(), message)
-}
+import { waitFor } from './browser-helpers.ts'
 
 function press(node: Element, key: string) {
   node.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }))

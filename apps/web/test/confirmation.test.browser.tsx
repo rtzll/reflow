@@ -3,14 +3,7 @@ import { deepEqual, equal, ok } from 'remix/assert'
 import type { Handle } from 'remix/component'
 import { render } from 'remix/component/test'
 import { describe, it } from 'remix/test'
-
-async function waitFor(check: () => boolean, message = 'Expected state did not settle') {
-  for (let i = 0; i < 60; i++) {
-    if (check()) return
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
-  }
-  ok(check(), message)
-}
+import { waitFor } from './browser-helpers.ts'
 
 describe('Confirmation', () => {
   it('asks in a named group and keeps the answer itself, moving focus to it', async (t) => {

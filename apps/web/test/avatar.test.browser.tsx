@@ -2,14 +2,7 @@ import { Avatar, AvatarGroup } from '@rtzll/reflow'
 import { deepEqual, equal, notEqual, ok } from 'remix/assert'
 import { render } from 'remix/component/test'
 import { describe, it } from 'remix/test'
-
-async function waitFor(check: () => boolean, frames = 60) {
-  for (let i = 0; i < frames; i++) {
-    if (check()) return
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
-  }
-  ok(check(), 'Expected avatar state did not settle')
-}
+import { waitFor } from './browser-helpers.ts'
 
 const pixel =
   'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3Crect width="1" height="1" fill="%236b97ff"/%3E%3C/svg%3E'

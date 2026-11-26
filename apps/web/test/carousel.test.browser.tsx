@@ -2,14 +2,7 @@ import { Carousel } from '@rtzll/reflow'
 import { equal, ok } from 'remix/assert'
 import { render } from 'remix/component/test'
 import { describe, it } from 'remix/test'
-
-async function waitFor(check: () => boolean, frames = 60) {
-  for (let i = 0; i < frames; i++) {
-    if (check()) return
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
-  }
-  ok(check(), 'Expected carousel state did not settle')
-}
+import { waitFor } from './browser-helpers.ts'
 
 const slides = ['Inbox', 'Drafts', 'Sent']
 

@@ -2,16 +2,7 @@ import { Toaster, toast, type ToasterProps } from '@rtzll/reflow'
 import { equal, ok } from 'remix/assert'
 import { render } from 'remix/component/test'
 import { describe, it } from 'remix/test'
-
-async function waitFor(check: () => boolean, frames = 90) {
-  for (let i = 0; i < frames; i++) {
-    if (check()) return
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
-  }
-  ok(check(), 'Expected toaster state did not settle')
-}
-
-const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+import { pause, waitFor } from './browser-helpers.ts'
 
 // Every test starts and ends with an empty store.
 async function mount(props: ToasterProps = {}) {
