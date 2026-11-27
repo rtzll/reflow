@@ -67,6 +67,69 @@ it('supports interactive keyboard scrubbing on Sparkline', async (t) => {
   equal($('.rf-sparkline-readout'), null)
 })
 
+it('maps pointer scrubbing 1:1 to the Sparkline SVG without shifting layout width', async (t) => {
+  let active: number | null = null
+  const { $, act, cleanup } = render(
+    <Sparkline
+      label="Runner CPU"
+      values={[10, 20, 30, 40, 50]}
+      labels={['12:00', '12:05', '12:10', '12:15', '12:20']}
+      width={160}
+      height={32}
+      interactive
+      onActiveIndexChange={(idx) => {
+        active = idx
+      }}
+    />,
+  )
+  t.after(cleanup)
+
+  const wrap = $('.rf-sparkline-wrap') as HTMLElement
+  const svg = $('.rf-sparkline')!
+  const widthBefore = wrap.getBoundingClientRect().width
+  const rect = svg.getBoundingClientRect()
+
+  await act(() => {
+    wrap.dispatchEvent(
+      new PointerEvent('pointermove', { clientX: rect.left, clientY: rect.top + 8, bubbles: true }),
+    )
+  })
+  equal(active, 0)
+  ok($('.rf-sparkline-readout'))
+  equal(
+    wrap.getBoundingClientRect().width,
+    widthBefore,
+    'floating readout must not change wrapper width on hover',
+  )
+
+  await act(() => {
+    wrap.dispatchEvent(
+      new PointerEvent('pointermove', {
+        clientX: rect.left + rect.width * 0.5,
+        clientY: rect.top + 8,
+        bubbles: true,
+      }),
+    )
+  })
+  equal(active, 2)
+
+  await act(() => {
+    wrap.dispatchEvent(
+      new PointerEvent('pointermove', {
+        clientX: rect.right,
+        clientY: rect.top + 8,
+        bubbles: true,
+      }),
+    )
+  })
+  equal(active, 4)
+
+  await act(() => {
+    wrap.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true }))
+  })
+  equal(active, null)
+})
+
 it('handles empty and single-point Sparkline series cleanly', (t) => {
   const empty = render(<Sparkline label="Empty" values={[]} interactive />)
   t.after(empty.cleanup)

@@ -1,4 +1,4 @@
-import { on, type Handle } from 'remix/component'
+import { on, ref, type Handle } from 'remix/component'
 import { classList } from './systems/styling.ts'
 
 export type SparklineTone = 'accent' | 'info' | 'success' | 'warning' | 'danger' | 'neutral'
@@ -73,6 +73,18 @@ export function computeSparklineGeometry(
  */
 export function Sparkline(handle: Handle<SparklineProps>) {
   let activeIndex: number | null = null
+  let svgEl: SVGSVGElement | null = null
+
+  const mountSvg = ref<SVGSVGElement>((el, signal) => {
+    svgEl = el
+    signal.addEventListener(
+      'abort',
+      () => {
+        if (svgEl === el) svgEl = null
+      },
+      { once: true },
+    )
+  })
 
   function setActive(next: number | null) {
     if (activeIndex === next) return
@@ -109,6 +121,7 @@ export function Sparkline(handle: Handle<SparklineProps>) {
         role={props.label ? 'img' : undefined}
         aria-label={props.label}
         aria-hidden={props.label ? undefined : 'true'}
+        mix={interactive ? mountSvg : undefined}
       >
         {fill && area && <path class="rf-sparkline-area" d={area} />}
         {line && <path class="rf-sparkline-line" d={line} />}
@@ -146,7 +159,7 @@ export function Sparkline(handle: Handle<SparklineProps>) {
         mix={[
           on<HTMLDivElement, 'pointermove'>('pointermove', (event) => {
             if (points.length === 0) return
-            const rect = event.currentTarget.getBoundingClientRect()
+            const rect = (svgEl ?? event.currentTarget).getBoundingClientRect()
             if (rect.width <= 0) return
             const ratio = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width))
             setActive(Math.round(ratio * (points.length - 1)))
@@ -175,8 +188,12 @@ export function Sparkline(handle: Handle<SparklineProps>) {
         ]}
       >
         {svg}
-        {activeVal !== undefined && (
-          <span class="rf-sparkline-readout" aria-live="polite">
+        {activeVal !== undefined && activePoint && (
+          <span
+            class="rf-sparkline-readout"
+            aria-live="polite"
+            style={{ left: `${Math.max(0, Math.min(100, (activePoint[0] / width) * 100))}%` }}
+          >
             {activeLabel ? `${activeLabel} · ` : ''}
             {activeVal}
           </span>
