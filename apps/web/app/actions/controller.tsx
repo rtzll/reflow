@@ -78,6 +78,7 @@ async function show(
         settings={{ ...settings, shape: 'rounded' }}
         title={`${app?.name ?? 'Example apps'} · Reflow`}
         url={url}
+        workspaceToaster={app?.slug === 'admin'}
       >
         {app ? (
           <AppWorkspace

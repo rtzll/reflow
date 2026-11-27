@@ -14,6 +14,7 @@ interface DocumentProps {
   settings: ReturnType<typeof readSettings>
   title: string
   markdownHref?: string
+  workspaceToaster?: boolean
   /** The requested page; link previews need absolute URLs. */
   url: URL
 }
@@ -22,7 +23,7 @@ const description = 'Fluid components for Remix.'
 
 export function Document(handle: Handle<DocumentProps>) {
   return () => {
-    const { assets, children, settings, title, url, markdownHref } = handle.props
+    const { assets, children, settings, title, url, markdownHref, workspaceToaster } = handle.props
     // Preference parameters only change the look, so the shared link drops them.
     const pageUrl = new URL(url.pathname, url.origin).href
     const customFont = settings.font.startsWith('google:')
@@ -95,7 +96,7 @@ export function Document(handle: Handle<DocumentProps>) {
         <body>
           <ShowcaseIconSprite />
           <div data-rf-drawer-background>{children}</div>
-          <SiteToaster />
+          {!workspaceToaster && <SiteToaster />}
         </body>
       </html>
     )
