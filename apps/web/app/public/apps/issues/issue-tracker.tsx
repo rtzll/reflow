@@ -5,17 +5,21 @@ import {
   ContextMenu,
   Dialog,
   Dropdown,
+  EstimatePill,
   Icon,
   LabelChip,
   MetadataList,
+  PriorityIndicator,
   QuickCreateBar,
   RelationList,
   RoadmapTimeline,
+  SavedViewTabs,
   SegmentedControl,
   StatusIcon,
   SubIssueList,
   Toolbar,
   TriageQueue,
+  ViewOptionsPopover,
   createRangeSelection,
   type IssueStatusKind,
   type SubIssue,
@@ -46,6 +50,14 @@ export const IssueTracker = clientEntry(
     let announcement = ''
     let lastMove: LastMove | undefined
     let filter: IssueFilter | undefined
+    let savedView: 'all' | 'active' | 'priority' = 'all'
+    let showEmptyGroups = true
+    let displayProps: Record<string, boolean> = {
+      priority: true,
+      area: true,
+      estimate: true,
+      assignee: true,
+    }
     let layout = 'board'
     let detailId: string | undefined
     let triageItems: TriageItem[] = [
@@ -203,9 +215,17 @@ export const IssueTracker = clientEntry(
       }))
     }
 
+    function matchesSavedView(issue: Issue, view = savedView) {
+      if (view === 'active') return issue.status !== 'Done'
+      if (view === 'priority') return issue.priority === 'urgent' || issue.priority === 'high'
+      return true
+    }
+
     function orderedIssues() {
       const scope = filter
-      const visible = scope ? issues.filter((issue) => issue[scope.field] === scope.value) : issues
+      const visible = issues.filter(
+        (issue) => matchesSavedView(issue) && (!scope || issue[scope.field] === scope.value),
+      )
       return statuses.flatMap((status) => visible.filter((issue) => issue.status === status))
     }
 
@@ -421,24 +441,80 @@ export const IssueTracker = clientEntry(
           </header>
           <CycleOverview issues={issues} filter={filter} onFilter={setFilter} />
           <section class="issues-work" aria-labelledby={handle.id + '-title'}>
+            <div class="issues-saved-views">
+              <SavedViewTabs
+                label="Saved issue views"
+                size="compact"
+                activeId={savedView}
+                views={[
+                  { id: 'all', label: 'All issues', count: issues.length },
+                  {
+                    id: 'active',
+                    label: 'Active',
+                    count: issues.filter((issue) => matchesSavedView(issue, 'active')).length,
+                  },
+                  {
+                    id: 'priority',
+                    label: 'High priority',
+                    count: issues.filter((issue) => matchesSavedView(issue, 'priority')).length,
+                  },
+                ]}
+                onSelect={(id) => {
+                  savedView = id === 'active' || id === 'priority' ? id : 'all'
+                  range.reset()
+                  selected.clear()
+                  active = orderedIssues()[0]?.id
+                  void handle.update()
+                }}
+              />
+            </div>
             <div class="issues-board-heading">
               <div class="issues-board-title">
                 <h2 id={handle.id + '-title'}>Cycle issues</h2>
                 <span class="issues-count">{visible.length}</span>
               </div>
-              <SegmentedControl
-                label="Issue layout"
-                size="compact"
-                value={layout}
-                options={[
-                  { value: 'board', label: 'Board' },
-                  { value: 'list', label: 'List' },
-                ]}
-                onValueChange={(value) => {
-                  layout = value
-                  void handle.update()
-                }}
-              />
+              <div class="issues-board-controls">
+                <ViewOptionsPopover
+                  size="compact"
+                  layout={layout}
+                  layouts={[
+                    { value: 'board', label: 'Board' },
+                    { value: 'list', label: 'List' },
+                  ]}
+                  onLayoutChange={(value) => {
+                    layout = value
+                    void handle.update()
+                  }}
+                  showEmptyGroups={showEmptyGroups}
+                  onShowEmptyGroupsChange={(show) => {
+                    showEmptyGroups = show
+                    void handle.update()
+                  }}
+                  properties={[
+                    { id: 'priority', label: 'Priority', visible: displayProps.priority },
+                    { id: 'area', label: 'Area', visible: displayProps.area },
+                    { id: 'estimate', label: 'Estimate', visible: displayProps.estimate },
+                    { id: 'assignee', label: 'Assignee', visible: displayProps.assignee },
+                  ]}
+                  onToggleProperty={(id, visible) => {
+                    displayProps = { ...displayProps, [id]: visible }
+                    void handle.update()
+                  }}
+                />
+                <SegmentedControl
+                  label="Issue layout"
+                  size="compact"
+                  value={layout}
+                  options={[
+                    { value: 'board', label: 'Board' },
+                    { value: 'list', label: 'List' },
+                  ]}
+                  onValueChange={(value) => {
+                    layout = value
+                    void handle.update()
+                  }}
+                />
+              </div>
             </div>
             {filter && (
               <div class="issues-filter">
@@ -507,7 +583,13 @@ export const IssueTracker = clientEntry(
                 ]}
               >
                 {statuses
-                  .filter((status) => filter?.field !== 'status' || filter.value === status)
+                  .filter(
+                    (status) =>
+                      (filter?.field !== 'status' || filter.value === status) &&
+                      (showEmptyGroups ||
+                        visible.some((issue) => issue.status === status) ||
+                        placement?.status === status),
+                  )
                   .map((status) => {
                     const group = visible.filter((issue) => issue.status === status)
                     const destination = placement?.status === status ? placement : undefined
@@ -587,7 +669,16 @@ export const IssueTracker = clientEntry(
                                 on('keydown', (event) => navigate(event, issue.id)),
                               ]}
                             >
-                              <span class="issues-id">{issue.id}</span>
+                              <span class="issues-id-meta">
+                                {displayProps.priority && issue.priority && (
+                                  <PriorityIndicator
+                                    priority={issue.priority}
+                                    size={13}
+                                    decorative
+                                  />
+                                )}
+                                <span class="issues-id">{issue.id}</span>
+                              </span>
                               <span
                                 class="issues-check"
                                 aria-hidden="true"
@@ -596,8 +687,13 @@ export const IssueTracker = clientEntry(
                                 {selected.has(issue.id) && <Icon name="check" size={12} />}
                               </span>
                               <strong class="issues-title">{issue.title}</strong>
-                              <span class="issues-area">{issue.area}</span>
-                              <Avatar name={issue.owner} size={22} />
+                              <span class="issues-tags">
+                                {displayProps.area && <span class="issues-area">{issue.area}</span>}
+                                {displayProps.estimate && issue.estimate !== undefined && (
+                                  <EstimatePill value={issue.estimate} size="compact" />
+                                )}
+                              </span>
+                              {displayProps.assignee && <Avatar name={issue.owner} size={22} />}
                             </div>
                           ))}
                           {destination &&
@@ -701,6 +797,8 @@ export const IssueTracker = clientEntry(
                   status,
                   area: 'Maps',
                   owner: draft.assignee ?? 'Mina Ortiz',
+                  priority: draft.priority,
+                  estimate: 2,
                 }
                 issues = [created, ...issues]
                 announcement = `Created ${created.id}.`
@@ -815,6 +913,26 @@ export const IssueTracker = clientEntry(
                       label: 'Area',
                       value: <LabelChip label={detail.area} color="blue" size="compact" />,
                     },
+                    ...(detail.priority
+                      ? [
+                          {
+                            id: 'priority',
+                            label: 'Priority',
+                            value: (
+                              <PriorityIndicator priority={detail.priority} showLabel size={13} />
+                            ),
+                          },
+                        ]
+                      : []),
+                    ...(detail.estimate !== undefined
+                      ? [
+                          {
+                            id: 'estimate',
+                            label: 'Estimate',
+                            value: <EstimatePill value={detail.estimate} size="compact" />,
+                          },
+                        ]
+                      : []),
                   ]}
                 />
                 <SubIssueList

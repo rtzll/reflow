@@ -624,3 +624,36 @@ it('keeps the current filter and drops hidden selections when undoing from the d
   await expect(list.getByRole('option', { selected: true })).toHaveCount(1)
   await expect(stationary).toHaveAttribute('aria-selected', 'true')
 })
+
+it('filters via SavedViewTabs, toggles card properties via ViewOptionsPopover, and captures via QuickCreateBar & TriageQueue', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await open(page, '/apps/issues')
+  const list = page.getByRole('listbox', { name: 'Cycle issues' })
+  const views = page.getByRole('tablist', { name: 'Saved issue views' })
+
+  await expect(list.getByRole('option')).toHaveCount(10)
+  await views.getByRole('tab', { name: /Active/ }).click()
+  await expect(list.getByRole('option')).toHaveCount(7)
+  await views.getByRole('tab', { name: /High priority/ }).click()
+  await expect(list.getByRole('option')).toHaveCount(5)
+  await views.getByRole('tab', { name: /All issues/ }).click()
+  await expect(list.getByRole('option')).toHaveCount(10)
+
+  await expect(list.locator('.rf-estimate-pill').first()).toBeVisible()
+  await page.getByRole('button', { name: 'Display' }).click()
+  await page.getByRole('button', { name: 'Estimate', exact: true }).click()
+  await expect(list.locator('.rf-estimate-pill')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Estimate', exact: true }).click()
+  await expect(list.locator('.rf-estimate-pill').first()).toBeVisible()
+  await page.keyboard.press('Escape')
+
+  const input = page.getByRole('textbox', { name: 'Issue title' })
+  await input.fill('Verify offline cache eviction')
+  await page.getByRole('button', { name: 'Create issue', exact: true }).click()
+  await expect(list.getByRole('option')).toHaveCount(11)
+  await expect(list.getByRole('option', { name: /AT-143/ })).toBeVisible()
+
+  await page.getByRole('button', { name: /Accept/ }).click()
+  await expect(list.getByRole('option')).toHaveCount(12)
+  await expect(list.getByRole('option', { name: /AT-151/ })).toBeVisible()
+})

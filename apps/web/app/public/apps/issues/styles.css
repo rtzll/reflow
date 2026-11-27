@@ -210,8 +210,17 @@
   margin-top: clamp(23px, 3vw, 36px);
   position: relative;
 }
+.issues-saved-views {
+  margin-bottom: 12px;
+}
 .issues-board-heading {
   margin-bottom: 16px;
+}
+.issues-board-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 .issues-board-title h2 {
   font-size: 1.15rem;
@@ -274,8 +283,14 @@
   background: color-mix(in oklab, var(--issue-done) 9%, var(--rf-surface-3));
   border-color: var(--issue-done);
 }
-.issues-row .issues-id {
+.issues-row .issues-id-meta {
   grid-area: id;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.issues-row .issues-id {
   font-variant-numeric: tabular-nums;
   font-family: ui-monospace, monospace;
 }
@@ -285,9 +300,15 @@
   font-size: 0.91rem;
   line-height: 1.4;
 }
-.issues-area {
+.issues-tags {
   grid-area: area;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
   justify-self: start;
+}
+.issues-area {
   border: 1px solid var(--rf-border);
   border-radius: 5px;
   padding: 0 6px;
@@ -357,7 +378,7 @@
   gap: 0;
 }
 .issues-collection[data-layout='list'] .issues-row {
-  grid-template-columns: 15px 4.1rem minmax(0, 1fr) 6rem 22px;
+  grid-template-columns: 15px 5.4rem minmax(0, 1fr) auto 22px;
   grid-template-areas: 'check id title area avatar';
   border-radius: 0;
   padding-block: 10px;

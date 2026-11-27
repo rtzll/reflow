@@ -1,3 +1,5 @@
+import type { IssuePriority } from '@rtzll/reflow'
+
 export const statuses = ['Todo', 'In progress', 'Done'] as const
 export type Status = (typeof statuses)[number]
 
@@ -8,6 +10,8 @@ export interface Issue {
   status: Status
   area: string
   owner: string
+  priority?: IssuePriority
+  estimate?: number
 }
 
 export const issues: Issue[] = [
@@ -19,6 +23,8 @@ export const issues: Issue[] = [
     status: 'Todo',
     area: 'Maps',
     owner: 'Mina Ortiz',
+    priority: 'urgent',
+    estimate: 3,
   },
   {
     id: 'AT-139',
@@ -28,6 +34,8 @@ export const issues: Issue[] = [
     status: 'Todo',
     area: 'Field notes',
     owner: 'Leo Park',
+    priority: 'high',
+    estimate: 5,
   },
   {
     id: 'AT-138',
@@ -37,6 +45,8 @@ export const issues: Issue[] = [
     status: 'Todo',
     area: 'Maps',
     owner: 'Iris Chen',
+    priority: 'medium',
+    estimate: 2,
   },
   {
     id: 'AT-137',
@@ -45,6 +55,8 @@ export const issues: Issue[] = [
     status: 'Todo',
     area: 'Offline',
     owner: 'Sam Reed',
+    priority: 'low',
+    estimate: 1,
   },
   {
     id: 'AT-136',
@@ -54,6 +66,8 @@ export const issues: Issue[] = [
     status: 'In progress',
     area: 'Maps',
     owner: 'Iris Chen',
+    priority: 'high',
+    estimate: 3,
   },
   {
     id: 'AT-131',
@@ -63,6 +77,8 @@ export const issues: Issue[] = [
     status: 'In progress',
     area: 'Offline',
     owner: 'Mina Ortiz',
+    priority: 'high',
+    estimate: 2,
   },
   {
     id: 'AT-130',
@@ -71,6 +87,8 @@ export const issues: Issue[] = [
     status: 'In progress',
     area: 'Field notes',
     owner: 'Mina Ortiz',
+    priority: 'medium',
+    estimate: 2,
   },
   {
     id: 'AT-128',
@@ -80,6 +98,8 @@ export const issues: Issue[] = [
     status: 'Done',
     area: 'Collections',
     owner: 'Leo Park',
+    priority: 'medium',
+    estimate: 3,
   },
   {
     id: 'AT-127',
@@ -88,6 +108,8 @@ export const issues: Issue[] = [
     status: 'Done',
     area: 'Maps',
     owner: 'Mina Ortiz',
+    priority: 'high',
+    estimate: 5,
   },
   {
     id: 'AT-125',
@@ -97,5 +119,7 @@ export const issues: Issue[] = [
     status: 'Done',
     area: 'Maps',
     owner: 'Iris Chen',
+    priority: 'low',
+    estimate: 1,
   },
 ]
