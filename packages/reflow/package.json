@@ -49,6 +49,9 @@
       "default": "./dist/markdown.js"
     },
     "./markdown.css": "./dist/markdown.css",
+    "./chat.css": "./dist/chat.css",
+    "./code.css": "./dist/code.css",
+    "./projects.css": "./dist/projects.css",
     "./core.css": "./dist/core.css",
     "./styles.css": "./dist/styles.css"
   },

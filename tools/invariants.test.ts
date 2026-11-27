@@ -149,6 +149,22 @@ test('specialist domains align with package.json exports and Remix dev allowPack
       )
     }
   }
+
+  const styleBundles = JSON.parse(read('packages/reflow/style-bundles.json')) as Record<
+    string,
+    { css: string; sourceCss: readonly string[] }
+  >
+  const srcCss = new Set(
+    readdirSync(join(root, 'packages/reflow/src')).filter(
+      (name) => name.endsWith('.css') && name !== 'styles.css',
+    ),
+  )
+  for (const [name, bundle] of Object.entries(styleBundles)) {
+    assert.ok(`./${bundle.css}` in pkg.exports, `Missing ./${bundle.css} export for ${name}`)
+    for (const file of bundle.sourceCss) {
+      assert.ok(srcCss.has(file), `style-bundles.json (${name}) references missing CSS ${file}`)
+    }
+  }
 })
 
 test('every example app is documented in docs/example-apps.md and covered by an E2E suite', () => {

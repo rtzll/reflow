@@ -13,8 +13,12 @@ interface DomainConfig {
 }
 
 const domains = JSON.parse(readFileSync('domains.json', 'utf8')) as Record<string, DomainConfig>
+const styleBundles = JSON.parse(readFileSync('style-bundles.json', 'utf8')) as Record<
+  string,
+  DomainConfig
+>
 const domainStyles: Record<string, readonly string[]> = Object.fromEntries(
-  Object.values(domains).flatMap((domain) =>
+  [...Object.values(domains), ...Object.values(styleBundles)].flatMap((domain) =>
     domain.css && domain.sourceCss ? [[domain.css, domain.sourceCss] as const] : [],
   ),
 )

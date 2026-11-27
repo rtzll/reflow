@@ -1,0 +1,68 @@
+{
+  "chat": {
+    "css": "chat.css",
+    "sourceCss": [
+      "confirmation.css",
+      "chat-message.css",
+      "chat-outline.css",
+      "tool-calls.css",
+      "task-list.css",
+      "file-changes.css",
+      "input-message.css",
+      "thinking-indicator.css",
+      "thinking-steps.css",
+      "queued-stack.css",
+      "message-transition.css",
+      "ask-user-questions.css",
+      "citation.css",
+      "chat-layout.css"
+    ],
+    "coreForbiddenSelector": "\\.rf-chat-layout|\\.rf-thinking-steps"
+  },
+  "code": {
+    "css": "code.css",
+    "sourceCss": [
+      "code-block.css",
+      "terminal.css",
+      "comment-thread.css",
+      "log-viewer.css",
+      "waterfall.css",
+      "pipeline-graph.css",
+      "status-strip.css",
+      "object-inspector.css",
+      "diff-stat.css",
+      "stack-graph.css",
+      "merge-readiness.css",
+      "diff-minimap.css",
+      "code-browser.css",
+      "test-report.css",
+      "matrix-grid.css",
+      "merge-queue.css",
+      "size-delta.css"
+    ],
+    "coreForbiddenSelector": "\\.rf-pipeline-graph|\\.rf-log-viewer|\\.rf-code-browser"
+  },
+  "projects": {
+    "css": "projects.css",
+    "sourceCss": [
+      "floating-action-bar.css",
+      "view-options-popover.css",
+      "inline-property-picker.css",
+      "progress-ring.css",
+      "priority-indicator.css",
+      "status-icon.css",
+      "label-picker.css",
+      "estimate-pill.css",
+      "saved-view-tabs.css",
+      "kanban-board.css",
+      "grouped-list.css",
+      "quick-create-bar.css",
+      "roadmap-timeline.css",
+      "cycle-overview.css",
+      "sub-issue-list.css",
+      "relation-list.css",
+      "triage-queue.css"
+    ],
+    "coreForbiddenSelector": "\\.rf-kanban-board|\\.rf-roadmap-timeline|\\.rf-triage-queue"
+  }
+}

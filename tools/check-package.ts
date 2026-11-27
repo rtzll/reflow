@@ -35,11 +35,24 @@ interface DomainConfig {
   coreForbiddenSelector?: string
 }
 
+interface StyleBundleConfig {
+  css: string
+  sourceCss: readonly string[]
+  coreForbiddenSelector?: string
+}
+
 const domains = JSON.parse(
   readFileSync(join(root, 'packages/reflow/domains.json'), 'utf8'),
 ) as Record<string, DomainConfig>
+const styleBundles = JSON.parse(
+  readFileSync(join(root, 'packages/reflow/style-bundles.json'), 'utf8'),
+) as Record<string, StyleBundleConfig>
 const domainList = Object.values(domains)
-const domainCssFiles = domainList.flatMap((domain) => (domain.css ? [domain.css] : []))
+const styleBundleList = Object.values(styleBundles)
+const domainCssFiles = [
+  ...domainList.flatMap((domain) => (domain.css ? [domain.css] : [])),
+  ...styleBundleList.map((bundle) => bundle.css),
+]
 const escapeRegex = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 try {
@@ -64,6 +77,7 @@ try {
       ...(domain.ssrEntry ? [`dist/${domain.ssrEntry}.js`, `dist/${domain.ssrEntry}.d.ts`] : []),
       ...(domain.css ? [`dist/${domain.css}`] : []),
     ]),
+    ...styleBundleList.map((bundle) => `dist/${bundle.css}`),
   ]
   for (const name of expectedFiles) {
     assert.ok(files.includes(`package/${name}`), `Package is missing ${name}`)
@@ -119,7 +133,7 @@ try {
     assert.ok(files.includes(cssFile), `Tarball must include ${cssFile}`)
     assert.match(extract(tarball, cssFile), /@layer reflow \{/, `${cssFile} must use @layer reflow`)
   }
-  const forbiddenCoreSelectors = domainList
+  const forbiddenCoreSelectors = [...domainList, ...styleBundleList]
     .flatMap((domain) => (domain.coreForbiddenSelector ? [domain.coreForbiddenSelector] : []))
     .join('|')
   if (forbiddenCoreSelectors) {
