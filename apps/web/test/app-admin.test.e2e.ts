@@ -83,10 +83,29 @@ it('updates workspace settings, manages RBAC roles, and stays overflow-free on m
   await page.getByRole('button', { name: 'Save changes', exact: true }).click()
   await expect(page.getByText('Unsaved workspace changes')).toHaveCount(0)
 
-  // Team & access tab: filter by missing MFA and change a member's role.
+  // Team & access tab: verify aligned columns, filter by missing MFA, and change a member's role.
   await page.getByRole('tab', { name: /^Team & access/ }).click()
   const members = page.getByRole('list', { name: 'Workspace members' })
   await expect(members.locator('li')).toHaveCount(5)
+  const columnXs = await members.locator('li').evaluateAll((rows) =>
+    rows.map((row) => {
+      const badges = row.querySelectorAll<HTMLElement>('.rf-badge')
+      const seen = row.querySelector<HTMLElement>('.admin-member-seen')!
+      const select = row.querySelector<HTMLElement>('.rf-select')!
+      return {
+        mfaX: Math.round(badges[0].getBoundingClientRect().left),
+        roleX: Math.round(badges[1].getBoundingClientRect().left),
+        seenRight: Math.round(seen.getBoundingClientRect().right),
+        selectX: Math.round(select.getBoundingClientRect().left),
+      }
+    }),
+  )
+  for (const row of columnXs.slice(1)) {
+    expect(Math.abs(row.mfaX - columnXs[0].mfaX)).toBeLessThanOrEqual(1)
+    expect(Math.abs(row.roleX - columnXs[0].roleX)).toBeLessThanOrEqual(1)
+    expect(Math.abs(row.seenRight - columnXs[0].seenRight)).toBeLessThanOrEqual(1)
+    expect(Math.abs(row.selectX - columnXs[0].selectX)).toBeLessThanOrEqual(1)
+  }
   await page.getByRole('button', { name: 'Missing MFA', exact: true }).click()
   await expect(members.locator('li')).toHaveCount(1)
   await expect(members).toContainText('Sam Reed')

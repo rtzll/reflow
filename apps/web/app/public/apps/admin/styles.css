@@ -246,11 +246,10 @@
 }
 
 .admin-member-row {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) 114px 86px 72px 136px;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 12px 14px;
   padding: 12px 14px;
   border: 1px solid var(--rf-border);
   border-radius: var(--rf-panel-radius);
@@ -275,16 +274,27 @@
 }
 
 .admin-member-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
+  display: contents;
+}
+
+.admin-member-controls > .rf-badge {
+  justify-self: start;
+}
+
+.admin-member-controls > .rf-select {
+  width: 100%;
+}
+
+.admin-member-controls > .rf-select .rf-picker-trigger {
+  width: 100%;
 }
 
 .admin-member-seen {
   font-size: 12px;
   color: var(--rf-muted);
-  min-width: 68px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .admin-audit-split {
@@ -392,6 +402,26 @@
   .admin-settings-grid,
   .admin-audit-split {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-member-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  .admin-member-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .admin-member-controls > .rf-select {
+    width: auto;
+  }
+  .admin-member-seen {
+    text-align: left;
   }
 }
 
