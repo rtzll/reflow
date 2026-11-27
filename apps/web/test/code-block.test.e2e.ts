@@ -21,7 +21,7 @@ it('shows the gallery card its own source, highlighted on the server', async (t)
   await page.setViewportSize({ width: 1440, height: 900 })
   // No script: the colours arrive with the page.
   await page.route('**/*.{js,mjs}', (route) => route.abort())
-  await open(page, '/?theme=dark', { hydrate: false })
+  await open(page, '/?q=code-block&theme=dark', { hydrate: false })
   const card = page.locator('.site-gallery [data-component="code-block"]')
   const code = card.locator('code')
   assert.equal(await code.textContent(), cardSource())

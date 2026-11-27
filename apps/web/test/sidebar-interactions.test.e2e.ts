@@ -5,7 +5,7 @@ import { open, showcaseServer } from './showcase-router.ts'
 
 it('aligns newly created gallery threads with the existing threads', async (t) => {
   const page = await t.serve(showcaseServer)
-  await open(page, '/?theme=dark')
+  await open(page, '/?q=sidebar&theme=dark')
   const sidebar = page.locator('.site-gallery [data-component="sidebar"]')
   const create = sidebar.getByRole('link', { name: 'New thread', exact: true })
   await create.click()

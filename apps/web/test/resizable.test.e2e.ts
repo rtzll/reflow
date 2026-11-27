@@ -4,7 +4,7 @@ import { open, showcaseServer } from './showcase-router.ts'
 
 it('resizes the gallery file browser with the keyboard and pointer', async (t) => {
   const page = await t.serve(showcaseServer)
-  await open(page, '/')
+  await open(page, '/?q=code-block')
   const tile = page.locator('[data-component="code-block"]')
   const separator = tile.getByRole('separator', { name: 'Resize project files' })
   await separator.press('ArrowLeft')

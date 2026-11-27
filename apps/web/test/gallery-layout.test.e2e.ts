@@ -24,7 +24,6 @@ it('preserves the gallery order and keeps previews above their footers', async (
       gallerySections.length,
     )
     assert.equal(await page.locator('.site-gallery-chapters a').count(), gallerySections.length)
-    assert.equal(await gallery.locator('[data-component="card"] .rf-card').count(), 4)
     // The Breadcrumb card fits its trail to the card: middle steps fold behind
     // the ellipsis, while the first step, the section menu and the page stay.
     // In a small card the page name truncates, as in the reference.
@@ -33,10 +32,6 @@ it('preserves the gallery order and keeps previews above their footers', async (
     assert.equal(await trail.locator('[aria-current="page"]').textContent(), 'Roadmap.md')
     assert.equal(await trail.locator('a').first().textContent(), 'Home')
     await trail.locator('li[data-ellipsis]').waitFor()
-    assert.equal(
-      await gallery.locator('[data-component="color-picker"] .rf-color-swatch').count(),
-      17,
-    )
     const calendar = gallery.locator('[data-component="calendar"]')
     await calendar
       .locator(`.example-gallery-calendar[data-months="${width < 768 ? 1 : 2}"]`)
@@ -73,22 +68,22 @@ it('preserves the gallery order and keeps previews above their footers', async (
       gallery.locator(`article[data-component="${slug}"]`).boundingBox()
     const [
       markdown,
-      timeField,
+      markdownEditor,
       toaster,
+      dataTable,
       timeGrid,
       chart,
-      codeBlock,
       diffView,
       breadcrumb,
       segmented,
     ] = await Promise.all(
       [
         'markdown',
-        'time-field',
+        'markdown-editor',
         'toaster',
+        'data-table',
         'time-grid',
         'bar-chart',
-        'code-block',
         'diff-view',
         'breadcrumb',
         'segmented-control',
@@ -98,19 +93,17 @@ it('preserves the gallery order and keeps previews above their footers', async (
       .locator('.site-gallery-grid')
       .first()
       .evaluate((node) => parseFloat(getComputedStyle(node).rowGap))
-    assert.equal(diffView!.y, codeBlock!.y + codeBlock!.height + rowGap)
-    assert.equal(diffView!.width, codeBlock!.width)
-    if (width >= 1280) {
-      assert.equal(timeField!.y, markdown!.y)
-    }
+    assert.equal(timeGrid!.y, dataTable!.y + dataTable!.height + rowGap)
+    assert.equal(diffView!.width, dataTable!.width)
     if (width >= 768) {
+      assert.equal(markdownEditor!.y, markdown!.y)
       assert.equal(timeGrid!.y, chart!.y)
-      assert.equal(timeGrid!.x, codeBlock!.x)
-      assert.equal(chart!.x + chart!.width, codeBlock!.x + codeBlock!.width)
+      assert.equal(timeGrid!.x, diffView!.x)
+      assert.equal(chart!.x + chart!.width, diffView!.x + diffView!.width)
       assert.ok(Math.abs(timeGrid!.width - chart!.width) < 1)
       assert.equal(breadcrumb!.y, segmented!.y)
-      assert.equal(breadcrumb!.x, codeBlock!.x)
-      assert.equal(segmented!.x + segmented!.width, codeBlock!.x + codeBlock!.width)
+      assert.equal(breadcrumb!.x, diffView!.x)
+      assert.equal(segmented!.x + segmented!.width, diffView!.x + diffView!.width)
       assert.ok(Math.abs(breadcrumb!.width - segmented!.width) < 1)
     } else {
       assert.equal(timeGrid!.x, chart!.x)
@@ -147,10 +140,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
     assert.ok(gap >= 6, `chart label gap at ${width}px is ${gap}px`)
     assert.ok(offset < 1, `chart label is ${offset}px off its bar center at ${width}px`)
     if (width === 1440) {
-      const [card, dialog, datePicker, wideCalendar] = await Promise.all(
-        ['card', 'alert-dialog', 'date-picker', 'calendar'].map(tile),
-      )
-      assert.equal(card!.y, dialog!.y)
+      const [datePicker, wideCalendar] = await Promise.all(['date-picker', 'calendar'].map(tile))
       assert.equal(datePicker!.y, wideCalendar!.y)
       assert.ok(datePicker!.x < wideCalendar!.x)
       // A tall project overview on the left, two smalls stacked beside it.
@@ -173,7 +163,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
           card.getBoundingClientRect().left - left < 50 ? 'L' : 'R',
         ).join('')
       })
-      assert.equal(sides, 'RLRLRLRLRLL')
+      assert.equal(sides, 'RLRRL')
       // The first band: QueuedStack and HoverCard stacked beside the Carousel.
       const [carousel, queue, hover, avatar] = await Promise.all(
         ['carousel', 'queued-stack', 'hover-card', 'avatar'].map(tile),

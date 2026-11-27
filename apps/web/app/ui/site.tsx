@@ -496,19 +496,15 @@ export const gallerySections: readonly GallerySection[] = [
       'toaster',
       'avatar',
       'command-menu',
-      'select',
       'dropdown',
-      'sidebar',
       'tabs',
       'kbd',
-      'banner',
-      'popover',
+      'alert-dialog',
+      'drawer',
       'breadcrumb',
       'segmented-control',
-      'card',
-      'alert-dialog',
+      'banner',
       'accordion',
-      'drawer',
     ],
   },
   {
@@ -516,19 +512,18 @@ export const gallerySections: readonly GallerySection[] = [
     title: 'Inputs & Content',
     description: 'Native form semantics, scrubbable controls, pickers, and rich text.',
     slugs: [
-      'color-picker',
-      'switch',
-      'combobox',
       'date-picker',
       'calendar',
+      'switch',
+      'combobox',
       'input-group',
       'slider',
       'button',
+      'input-copy',
       'radio-group',
       'checkbox-group',
-      'input-copy',
-      'markdown',
       'time-field',
+      'markdown',
       'markdown-editor',
     ],
   },
@@ -538,6 +533,7 @@ export const gallerySections: readonly GallerySection[] = [
     description: 'Schedules, tables, project tracking, and interactive telemetry.',
     action: { label: 'Open Issue tracker', href: '/apps/issues', document: true },
     slugs: [
+      'data-table',
       'time-grid',
       'bar-chart',
       'line-chart',
@@ -547,7 +543,6 @@ export const gallerySections: readonly GallerySection[] = [
       'cycle-overview',
       'sparkline',
       'label-picker',
-      'data-table',
       'kanban-board',
       'roadmap-timeline',
     ],
@@ -558,7 +553,6 @@ export const gallerySections: readonly GallerySection[] = [
     description: 'Syntax-highlighted diffs, pipelines, traces, and streaming logs.',
     action: { label: 'Open Code review & CI', href: '/apps', document: true },
     slugs: [
-      'code-block',
       'diff-view',
       'merge-readiness',
       'stack-graph',
@@ -573,7 +567,6 @@ export const gallerySections: readonly GallerySection[] = [
 export const galleryOrder = gallerySections.flatMap((section) => section.slugs)
 
 const fullWidthCards = new Set([
-  'markdown-editor',
   'data-table',
   'kanban-board',
   'roadmap-timeline',
@@ -587,6 +580,10 @@ const fullWidthCards = new Set([
 const halfWidthCards = new Set([
   'breadcrumb',
   'segmented-control',
+  'banner',
+  'accordion',
+  'markdown',
+  'markdown-editor',
   'time-grid',
   'bar-chart',
   'line-chart',
@@ -602,17 +599,13 @@ const wideCards = new Set([
   'toaster',
   'command-menu',
   'sidebar',
-  'banner',
-  'card',
-  'accordion',
   'color-picker',
   'calendar',
-  'markdown',
   'cycle-overview',
 ])
 
 const tallCards = new Set(['carousel', 'command-menu', 'sidebar', 'color-picker', 'cycle-overview'])
-const rightCards = new Set(['carousel', 'command-menu', 'banner', 'accordion', 'calendar'])
+const rightCards = new Set(['carousel', 'command-menu', 'calendar'])
 
 function sortEntries(entries: readonly ShowcaseComponent[], order: readonly string[]) {
   let rank = new Map(order.map((slug, index) => [slug, index]))

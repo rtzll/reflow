@@ -4,7 +4,7 @@ import { open, showcaseServer } from './showcase-router.ts'
 
 it('opens a file from the gallery tree without moving focus into its preview', async (t) => {
   const page = await t.serve(showcaseServer)
-  await open(page, '/')
+  await open(page, '/?q=code-block')
   const tile = page.locator('[data-component="code-block"]')
   const tree = tile.getByRole('tree', { name: 'Project files' })
   const source = tree.getByRole('treeitem', { name: 'code-block-example.tsx' })
@@ -32,7 +32,7 @@ it('gives the gallery file browser its own row', async (t) => {
   const page = await t.serve(showcaseServer)
   for (const width of [1440, 768, 390]) {
     await page.setViewportSize({ width, height: 900 })
-    await open(page, '/')
+    await open(page, '/?q=code-block')
     const tile = page.locator('.site-gallery [data-component="code-block"]')
     const [browser, gallery] = await Promise.all([
       tile.boundingBox(),
@@ -54,7 +54,7 @@ it('gives the gallery file browser its own row', async (t) => {
 it('opens file actions at the icon and previews the file only when its action is chosen', async (t) => {
   const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1440, height: 900 })
-  await open(page, '/')
+  await open(page, '/?q=code-block')
   const tile = page.locator('[data-component="code-block"]')
   const tree = tile.getByRole('tree', { name: 'Project files' })
   const readme = tree.getByRole('treeitem', { name: 'README.md' })
@@ -89,11 +89,14 @@ it('opens file actions at the icon and previews the file only when its action is
 it('anchors keyboard actions to the focused file and keeps them visible at the viewport edge', async (t) => {
   const page = await t.serve(showcaseServer)
   await page.setViewportSize({ width: 1100, height: 680 })
-  await open(page, '/')
+  await open(page, '/?q=code-block')
   const tile = page.locator('[data-component="code-block"]')
   const row = tile.getByRole('treeitem', { name: 'README.md' })
   await row.focus()
-  await row.evaluate((node) => node.scrollIntoView({ block: 'end', behavior: 'instant' }))
+  await row.evaluate((node) => {
+    document.body.style.paddingTop = '400px'
+    node.scrollIntoView({ block: 'end', behavior: 'instant' })
+  })
   await row.press('ContextMenu')
   const menu = tile.getByRole('menu', { name: 'File actions' })
   await expect(menu).toBeFocused()
@@ -120,7 +123,7 @@ it('anchors keyboard actions to the focused file and keeps them visible at the v
 
 it('continues through the project tree in either direction when tabbing out of file actions', async (t) => {
   const page = await t.serve(showcaseServer)
-  await open(page, '/')
+  await open(page, '/?q=code-block')
   const tile = page.locator('[data-component="code-block"]')
   const row = tile.getByRole('treeitem', { name: 'README.md' })
   await row.focus()
@@ -140,7 +143,7 @@ it('continues through the project tree in either direction when tabbing out of f
 it('copies a file path from its menu shortcut without opening the menu', async (t) => {
   const page = await t.serve(showcaseServer)
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
-  await open(page, '/')
+  await open(page, '/?q=code-block')
   const tile = page.locator('[data-component="code-block"]')
   const readme = tile
     .getByRole('tree', { name: 'Project files' })
