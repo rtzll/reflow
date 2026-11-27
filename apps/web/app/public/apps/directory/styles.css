@@ -326,6 +326,34 @@
 .app-preview-diff-line[data-kind='remove'] {
   background: color-mix(in oklab, var(--rf-danger) 14%, transparent);
 }
+.app-preview-admin {
+  inline-size: min(90%, 260px);
+  display: grid;
+  gap: 8px;
+}
+.app-preview-admin .app-preview-heading {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+}
+.app-preview-secret {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 8px;
+  border: 1px solid var(--preview-line);
+  border-radius: 6px;
+  background: light-dark(#f6f5fa, #302e39);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10.5px;
+}
+.app-preview-secret span {
+  font-family: var(--rf-font);
+  font-size: 10px;
+  color: var(--rf-accent);
+  font-weight: 550;
+}
 @media (max-width: 767px) {
   .site-app-card .rf-card-description {
     font-size: 16px;

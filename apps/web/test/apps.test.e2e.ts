@@ -49,6 +49,7 @@ it('opens each workspace from the showcase and returns to the directory', async 
       page.getByRole('button', { name: 'Re-run failed jobs' }),
       '.rf-pipeline-graph',
     ],
+    ['Admin Console', page.getByRole('button', { name: 'Create API key' }), '.admin-key-card'],
   ] as const
   await expect(page.locator('.site-app-card')).toHaveCount(workspaces.length)
   await expect(page.locator('.site-app-card').first()).toHaveCSS('border-top-left-radius', '12px')

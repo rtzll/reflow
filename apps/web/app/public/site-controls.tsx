@@ -324,6 +324,13 @@ export const SiteControls = clientEntry(
           description: 'Daily activity spikes and shareable event inspection',
           href: routes.app.href({ slug: 'analytics' }),
         },
+        {
+          name: 'Admin console',
+          slug: 'apps/admin',
+          description:
+            'Click-to-reveal API keys, workspace security settings, RBAC, and audit logs',
+          href: routes.app.href({ slug: 'admin' }),
+        },
       ]
       const docs = handle.props.pages.map((page) => ({
         ...page,

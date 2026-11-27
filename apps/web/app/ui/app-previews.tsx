@@ -129,6 +129,25 @@ function CiPreview() {
   )
 }
 
+function AdminPreview() {
+  return () => (
+    <div class="app-preview-sheet app-preview-admin">
+      <div class="app-preview-heading">
+        <span>API keys</span>
+        <span>SSO · MFA</span>
+      </div>
+      <div class="app-preview-secret">
+        <code>rf_live_••••••9f2c</code>
+        <span>Reveal</span>
+      </div>
+      <div class="app-preview-dates">
+        <span>api_key.rotated</span>
+        <span>2m ago</span>
+      </div>
+    </div>
+  )
+}
+
 export const appPreviews = {
   issues: IssuePreview,
   chat: ChatPreview,
@@ -136,4 +155,5 @@ export const appPreviews = {
   analytics: AnalyticsPreview,
   review: ReviewPreview,
   ci: CiPreview,
+  admin: AdminPreview,
 }
