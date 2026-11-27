@@ -538,31 +538,54 @@ it('clicks only on opening a Popover', async (t) => {
   expect(await audioStarts()).toBe(1)
 })
 
-it('plays a quiet cue on opening issue details by mouse or keyboard and dismisses silently', async (t) => {
+it('plays a quiet surface cue on opening any Dialog and dismisses silently', async (t) => {
   const page = await t.serve(showcaseServer)
   const audioStarts = await trackAudio(page)
   const lockRequests: string[] = []
   page.on('request', (request) => {
-    if (/lock-(open|closed)\.mp3$/.test(request.url())) lockRequests.push(request.url())
+    if (/lock-(open|closed)[^/]*\.mp3$/.test(request.url())) lockRequests.push(request.url())
   })
   await open(page, '/apps/issues')
   const issue = page.getByRole('option', { name: /AT-139/ })
-  const dialog = page.getByRole('dialog', { name: 'Restore an unfinished field note' })
+  const issueDialog = page.getByRole('dialog', { name: 'Restore an unfinished field note' })
   const click = page.waitForResponse(/hi75-soft[^/]*\.mp3/)
   await issue.click()
   expect((await click).ok()).toBe(true)
-  await expect(dialog).toBeVisible()
+  await expect(issueDialog).toBeVisible()
   await expect.poll(audioStarts).toBe(1)
 
-  await dialog.getByRole('button', { name: 'Close dialog' }).click()
-  await expect(dialog).toBeHidden()
+  await issueDialog.getByRole('button', { name: 'Close dialog' }).click()
+  await expect(issueDialog).toBeHidden()
   await expect(issue).toBeFocused()
   await issue.press('Enter')
-  await expect(dialog).toBeVisible()
+  await expect(issueDialog).toBeVisible()
   await expect.poll(audioStarts).toBe(2)
 
   await page.keyboard.press('Escape')
-  await expect(dialog).toBeHidden()
+  await expect(issueDialog).toBeHidden()
+  await page.evaluate(
+    () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+  )
+  expect(await audioStarts()).toBe(2)
+
+  await open(page, '/docs/dialog')
+  const docsDialog = page.getByRole('dialog', { name: 'Small dialog' })
+  await page.locator('#sizes').getByRole('button', { name: 'Small', exact: true }).click()
+  await expect(docsDialog).toBeVisible()
+  await expect.poll(audioStarts).toBe(1)
+  await page.keyboard.press('Escape')
+  await expect(docsDialog).toBeHidden()
+  await page.evaluate(
+    () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+  )
+  expect(await audioStarts()).toBe(1)
+
+  await page.locator('body').press('ControlOrMeta+k')
+  const searchDialog = page.getByRole('dialog', { name: 'Search Reflow' })
+  await expect(searchDialog).toBeVisible()
+  await expect.poll(audioStarts).toBe(2)
+  await page.keyboard.press('Escape')
+  await expect(searchDialog).toBeHidden()
   await page.evaluate(
     () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
   )

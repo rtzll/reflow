@@ -246,7 +246,6 @@ function bindColorSquareSounds() {
 let enabled = true
 let soundStarted = false
 const boundSoundControls = new WeakSet<Element>()
-const silentDialogClose = new WeakSet<HTMLDialogElement>()
 
 function changePreference(next: boolean) {
   enabled = next
@@ -360,8 +359,6 @@ export function enhanceShowcaseSound() {
   })
   document.addEventListener('reflow:command-select', (event) => {
     if (!(event.target instanceof Element) || !event.target.closest('[data-sound-scope]')) return
-    const dialog = event.target.closest('dialog')
-    if (dialog) silentDialogClose.add(dialog)
     play('select', { emphasis: 'subtle' })
   })
   document.addEventListener('reflow:carousel-navigation', (event) => {
@@ -517,12 +514,8 @@ export function enhanceShowcaseSound() {
       if (!(event instanceof ToggleEvent) || event.oldState === event.newState) return
       const dialog = event.target
       if (dialog instanceof HTMLDialogElement && dialog.matches('.rf-dialog, .rf-drawer')) {
-        if (!dialog.open && silentDialogClose.delete(dialog)) return
-        if (dialog.open) silentDialogClose.delete(dialog)
         if (dialog.matches('.rf-drawer')) play(dialog.open ? 'swooshIn' : 'swooshOut', surfaceSound)
-        else if (dialog.matches('.issue-tracker > .rf-dialog')) {
-          if (dialog.open) play('select', surfaceSound)
-        } else play(dialog.open ? 'open' : 'close')
+        else if (dialog.open) play('select', surfaceSound)
       } else if (
         event.newState === 'open' &&
         dialog instanceof HTMLElement &&
