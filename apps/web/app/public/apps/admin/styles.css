@@ -72,7 +72,7 @@
 .admin-toolbar-row {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
 }
@@ -80,6 +80,10 @@
 .admin-toolbar-row .rf-filter-bar {
   flex: 1 1 220px;
   min-width: 0;
+}
+
+.admin-toolbar-row > .rf-button {
+  flex-shrink: 0;
 }
 
 .admin-key-list,

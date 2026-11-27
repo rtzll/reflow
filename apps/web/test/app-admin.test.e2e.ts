@@ -19,6 +19,18 @@ it('reveals, hides, creates, rotates, and revokes API keys while logging every a
   await deployCard.getByRole('button', { name: 'Hide secret for CI Production Deployer' }).click()
   await expect(secretCode).toHaveText('rf_live_••••••••••••9f2c')
 
+  // Filter input box and Create API key button stay top-aligned.
+  const [filterBox, createBox] = await Promise.all([
+    page.getByRole('tabpanel').locator('.admin-toolbar-row .rf-filter-bar-box').boundingBox(),
+    page.getByRole('button', { name: 'Create API key', exact: true }).boundingBox(),
+  ])
+  expect(filterBox).not.toBeNull()
+  expect(createBox).not.toBeNull()
+  expect(Math.abs(filterBox!.y - createBox!.y)).toBeLessThanOrEqual(2)
+  expect(
+    Math.abs(filterBox!.y + filterBox!.height / 2 - (createBox!.y + createBox!.height / 2)),
+  ).toBeLessThanOrEqual(2)
+
   // Create a new API key via Dialog and verify one-time secret banner.
   await page.getByRole('button', { name: 'Create API key', exact: true }).click()
   const dialog = page.getByRole('dialog', { name: 'Create API key' })
