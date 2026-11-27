@@ -1,7 +1,7 @@
 import { expect } from 'playwright/test'
 import * as assert from 'remix/assert'
 import { it } from 'remix/test'
-import { galleryOrder } from '../app/ui/site.tsx'
+import { galleryOrder, gallerySections } from '../app/ui/site.tsx'
 import { pauseClock } from './clock.ts'
 import { open, showcaseServer } from './showcase-router.ts'
 
@@ -15,10 +15,15 @@ it('preserves the gallery order and keeps previews above their footers', async (
     await gallery.getByRole('link', { name: 'View DatePicker documentation' }).waitFor()
     assert.deepEqual(
       await gallery
-        .locator(':scope > article')
+        .locator('article[data-component]')
         .evaluateAll((tiles) => tiles.map((tile) => tile.dataset.component)),
       galleryOrder,
     )
+    assert.equal(
+      await gallery.locator(':scope > section.site-gallery-section').count(),
+      gallerySections.length,
+    )
+    assert.equal(await page.locator('.site-gallery-chapters a').count(), gallerySections.length)
     assert.equal(await gallery.locator('[data-component="card"] .rf-card').count(), 4)
     // The Breadcrumb card fits its trail to the card: middle steps fold behind
     // the ellipsis, while the first step, the section menu and the page stay.
@@ -68,7 +73,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
       gallery.locator(`article[data-component="${slug}"]`).boundingBox()
     const [
       markdown,
-      labelPicker,
+      timeField,
       toaster,
       timeGrid,
       chart,
@@ -79,7 +84,7 @@ it('preserves the gallery order and keeps previews above their footers', async (
     ] = await Promise.all(
       [
         'markdown',
-        'label-picker',
+        'time-field',
         'toaster',
         'time-grid',
         'bar-chart',
@@ -89,13 +94,16 @@ it('preserves the gallery order and keeps previews above their footers', async (
         'segmented-control',
       ].map(tile),
     )
-    const rowGap = await gallery.evaluate((node) => parseFloat(getComputedStyle(node).rowGap))
-    assert.equal(timeGrid!.y, toaster!.y + toaster!.height + rowGap)
-    assert.equal(codeBlock!.y, chart!.y + chart!.height + rowGap)
+    const rowGap = await gallery
+      .locator('.site-gallery-grid')
+      .first()
+      .evaluate((node) => parseFloat(getComputedStyle(node).rowGap))
     assert.equal(diffView!.y, codeBlock!.y + codeBlock!.height + rowGap)
     assert.equal(diffView!.width, codeBlock!.width)
+    if (width >= 1280) {
+      assert.equal(timeField!.y, markdown!.y)
+    }
     if (width >= 768) {
-      assert.equal(labelPicker!.y, markdown!.y)
       assert.equal(timeGrid!.y, chart!.y)
       assert.equal(timeGrid!.x, codeBlock!.x)
       assert.equal(chart!.x + chart!.width, codeBlock!.x + codeBlock!.width)
@@ -146,25 +154,26 @@ it('preserves the gallery order and keeps previews above their footers', async (
       assert.equal(datePicker!.y, wideCalendar!.y)
       assert.ok(datePicker!.x < wideCalendar!.x)
       // A tall project overview on the left, two smalls stacked beside it.
-      const [cycle, popover, drawer] = await Promise.all(
-        ['cycle-overview', 'popover', 'drawer'].map(tile),
+      const [cycle, sparkline, labelPicker] = await Promise.all(
+        ['cycle-overview', 'sparkline', 'label-picker'].map(tile),
       )
-      assert.ok(cycle!.width > popover!.width * 1.9, 'the cycle overview spans two columns')
-      assert.equal(cycle!.y, popover!.y)
-      assert.ok(popover!.x > cycle!.x)
-      assert.equal(popover!.x, drawer!.x)
-      assert.ok(drawer!.y > popover!.y)
-      assert.equal(Math.round(cycle!.y + cycle!.height), Math.round(drawer!.y + drawer!.height))
-      // Wide cards alternate sides down the gallery: the tall Carousel on the
-      // right of the first band and Toaster on the left of the next row.
+      assert.ok(cycle!.width > sparkline!.width * 1.9, 'the cycle overview spans two columns')
+      assert.equal(cycle!.y, sparkline!.y)
+      assert.ok(sparkline!.x > cycle!.x)
+      assert.equal(sparkline!.x, labelPicker!.x)
+      assert.ok(labelPicker!.y > sparkline!.y)
+      assert.equal(
+        Math.round(cycle!.y + cycle!.height),
+        Math.round(labelPicker!.y + labelPicker!.height),
+      )
+      // Wide cards alternate sides within each gallery section.
       const sides = await gallery.evaluate((node) => {
         const left = node.getBoundingClientRect().left
-        return Array.from(
-          node.querySelectorAll<HTMLElement>(':scope > article[data-wide]'),
-          (card) => (card.getBoundingClientRect().left - left < 50 ? 'L' : 'R'),
+        return Array.from(node.querySelectorAll<HTMLElement>('article[data-wide]'), (card) =>
+          card.getBoundingClientRect().left - left < 50 ? 'L' : 'R',
         ).join('')
       })
-      assert.equal(sides, 'RLLRLRLRLRLRLRLRL')
+      assert.equal(sides, 'RLRLRLRLRLL')
       // The first band: QueuedStack and HoverCard stacked beside the Carousel.
       const [carousel, queue, hover, avatar] = await Promise.all(
         ['carousel', 'queued-stack', 'hover-card', 'avatar'].map(tile),

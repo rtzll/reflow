@@ -476,129 +476,143 @@ function previewImages(images: ExampleImages, variant: string | undefined): Exam
   return images.code ? { ...images, code: samplesFor(images.code, variant) } : images
 }
 
-export const galleryOrder = [
-  'carousel',
-  'queued-stack',
-  'hover-card',
-  'toaster',
-  'time-grid',
-  'bar-chart',
-  'code-block',
-  'diff-view',
-  'data-table',
-  'avatar',
-  'command-menu',
-  'select',
-  'priority-indicator',
-  'sidebar',
-  'radio-group',
-  'kbd',
-  'tabs',
-  'breadcrumb',
-  'segmented-control',
-  'banner',
-  'time-field',
-  'accordion',
-  'checkbox-group',
-  'quick-create-bar',
-  'slider',
-  'card',
-  'alert-dialog',
-  'dropdown',
-  'input-copy',
-  'input-group',
-  'button',
-  'status-icon',
-  'estimate-pill',
-  'calendar',
-  'date-picker',
-  'cycle-overview',
-  'popover',
-  'drawer',
-  'color-picker',
-  'switch',
-  'combobox',
-  'markdown',
-  'label-picker',
-  'kanban-board',
-  'grouped-list',
-  'roadmap-timeline',
-  'triage-queue',
-  'code-browser',
-  'merge-readiness',
-  'stack-graph',
-  'test-report',
-  'matrix-grid',
-  'merge-queue',
-  'log-viewer',
-  'waterfall',
-  'pipeline-graph',
-  'diagram',
-  'markdown-editor',
-  'file-tree',
-  'line-chart',
-  'sparkline',
-  'metric-card',
-  'status-strip',
-  'filter-bar',
-  'reaction-bar',
-  'activity-heatmap',
-  'object-inspector',
+export interface GallerySection {
+  id: string
+  title: string
+  description: string
+  action?: { label: string; href: string; document?: boolean }
+  slugs: readonly string[]
+}
+
+export const gallerySections: readonly GallerySection[] = [
+  {
+    id: 'core-motion',
+    title: 'Core & Motion',
+    description: 'Spring-driven surfaces, menus, navigation, and tactile feedback.',
+    slugs: [
+      'carousel',
+      'queued-stack',
+      'hover-card',
+      'toaster',
+      'avatar',
+      'command-menu',
+      'select',
+      'dropdown',
+      'sidebar',
+      'tabs',
+      'kbd',
+      'banner',
+      'popover',
+      'breadcrumb',
+      'segmented-control',
+      'card',
+      'alert-dialog',
+      'accordion',
+      'drawer',
+    ],
+  },
+  {
+    id: 'inputs-content',
+    title: 'Inputs & Content',
+    description: 'Native form semantics, scrubbable controls, pickers, and rich text.',
+    slugs: [
+      'color-picker',
+      'switch',
+      'combobox',
+      'date-picker',
+      'calendar',
+      'input-group',
+      'slider',
+      'button',
+      'radio-group',
+      'checkbox-group',
+      'input-copy',
+      'markdown',
+      'time-field',
+      'markdown-editor',
+    ],
+  },
+  {
+    id: 'planning-data',
+    title: 'Planning & Data',
+    description: 'Schedules, tables, project tracking, and interactive telemetry.',
+    action: { label: 'Open Issue tracker', href: '/apps/issues', document: true },
+    slugs: [
+      'time-grid',
+      'bar-chart',
+      'line-chart',
+      'metric-card',
+      'filter-bar',
+      'quick-create-bar',
+      'cycle-overview',
+      'sparkline',
+      'label-picker',
+      'data-table',
+      'kanban-board',
+      'roadmap-timeline',
+    ],
+  },
+  {
+    id: 'code-ci',
+    title: 'Code, Review & CI',
+    description: 'Syntax-highlighted diffs, pipelines, traces, and streaming logs.',
+    action: { label: 'Open Code review & CI', href: '/apps', document: true },
+    slugs: [
+      'code-block',
+      'diff-view',
+      'merge-readiness',
+      'stack-graph',
+      'pipeline-graph',
+      'waterfall',
+      'log-viewer',
+      'diagram',
+    ],
+  },
 ]
 
+export const galleryOrder = gallerySections.flatMap((section) => section.slugs)
+
 const fullWidthCards = new Set([
+  'markdown-editor',
+  'data-table',
+  'kanban-board',
+  'roadmap-timeline',
   'code-block',
   'diff-view',
-  'kanban-board',
-  'grouped-list',
-  'roadmap-timeline',
-  'triage-queue',
-  'log-viewer',
-  'waterfall',
   'pipeline-graph',
+  'waterfall',
+  'log-viewer',
   'diagram',
-  'object-inspector',
-  'code-browser',
-  'merge-readiness',
-  'stack-graph',
-  'test-report',
-  'matrix-grid',
-  'merge-queue',
-  'activity-heatmap',
 ])
-const halfWidthCards = new Set(['time-grid', 'bar-chart', 'breadcrumb', 'segmented-control'])
-
-const wideCards = new Set([
-  'markdown',
-  'markdown-editor',
+const halfWidthCards = new Set([
+  'breadcrumb',
+  'segmented-control',
+  'time-grid',
+  'bar-chart',
   'line-chart',
   'metric-card',
   'filter-bar',
   'quick-create-bar',
-  'color-picker',
-  'card',
+  'merge-readiness',
+  'stack-graph',
+])
+
+const wideCards = new Set([
+  'carousel',
+  'toaster',
   'command-menu',
   'sidebar',
   'banner',
+  'card',
   'accordion',
-  'carousel',
-  'data-table',
+  'color-picker',
   'calendar',
+  'markdown',
   'cycle-overview',
-  'toaster',
 ])
 
-const tallCards = new Set(['color-picker', 'command-menu', 'sidebar', 'carousel', 'cycle-overview'])
-const rightCards = new Set([
-  'quick-create-bar',
-  'color-picker',
-  'command-menu',
-  'banner',
-  'carousel',
-  'calendar',
-  'markdown-editor',
-  'metric-card',
-])
+const tallCards = new Set(['carousel', 'command-menu', 'sidebar', 'color-picker', 'cycle-overview'])
+const rightCards = new Set(['carousel', 'command-menu', 'banner', 'accordion', 'calendar'])
 
 function sortEntries(entries: readonly ShowcaseComponent[], order: readonly string[]) {
   let rank = new Map(order.map((slug, index) => [slug, index]))
@@ -629,6 +643,41 @@ function Gallery(
           const entry = bySlug.get(slug)
           return entry?.preview != null ? [entry] : []
         })
+    const renderCard = (entry: ShowcaseComponent) => (
+      <article
+        key={entry.slug}
+        class="site-preview-card"
+        data-component={entry.slug}
+        data-full-width={fullWidthCards.has(entry.slug) ? '' : undefined}
+        data-half-width={halfWidthCards.has(entry.slug) ? '' : undefined}
+        data-wide={wideCards.has(entry.slug) ? '' : undefined}
+        data-tall={tallCards.has(entry.slug) ? '' : undefined}
+        data-right={rightCards.has(entry.slug) ? '' : undefined}
+      >
+        <div class="site-preview-stage" data-sound-scope="">
+          {entry.preview ?? <p class="site-preview-placeholder">{entry.description}</p>}
+        </div>
+        <footer class="site-preview-footer">
+          <a
+            href={pageHref(routes.component.href({ slug: entry.slug }))}
+            aria-label={`View ${entry.name} documentation`}
+          >
+            {entry.name}
+          </a>
+        </footer>
+      </article>
+    )
+    const sections = term
+      ? []
+      : gallerySections
+          .map((section) => ({
+            ...section,
+            entries: section.slugs.flatMap((slug) => {
+              const entry = bySlug.get(slug)
+              return entry?.preview != null ? [entry] : []
+            }),
+          }))
+          .filter((section) => section.entries.length > 0)
     return (
       <>
         <header class="site-gallery-heading">
@@ -653,33 +702,48 @@ function Gallery(
               Markdown index
             </a>
           </div>
+          {!term && sections.length > 1 && (
+            <nav class="site-gallery-chapters" aria-label="Showcase sections">
+              {sections.map((section) => (
+                <a key={section.id} href={`#${section.id}`}>
+                  {section.title}
+                </a>
+              ))}
+            </nav>
+          )}
         </header>
         {entries.length ? (
           <div class="site-gallery" data-search-results={term ? true : undefined}>
-            {entries.map((entry) => (
-              <article
-                key={entry.slug}
-                class="site-preview-card"
-                data-component={entry.slug}
-                data-full-width={fullWidthCards.has(entry.slug) ? '' : undefined}
-                data-half-width={halfWidthCards.has(entry.slug) ? '' : undefined}
-                data-wide={wideCards.has(entry.slug) ? '' : undefined}
-                data-tall={tallCards.has(entry.slug) ? '' : undefined}
-                data-right={rightCards.has(entry.slug) ? '' : undefined}
-              >
-                <div class="site-preview-stage" data-sound-scope="">
-                  {entry.preview ?? <p class="site-preview-placeholder">{entry.description}</p>}
-                </div>
-                <footer class="site-preview-footer">
-                  <a
-                    href={pageHref(routes.component.href({ slug: entry.slug }))}
-                    aria-label={`View ${entry.name} documentation`}
-                  >
-                    {entry.name}
-                  </a>
-                </footer>
-              </article>
-            ))}
+            {term ? (
+              <div class="site-gallery-grid">{entries.map(renderCard)}</div>
+            ) : (
+              sections.map((section) => (
+                <section
+                  key={section.id}
+                  id={section.id}
+                  class="site-gallery-section"
+                  aria-labelledby={`gallery-section-${section.id}`}
+                >
+                  <header class="site-gallery-section-head">
+                    <div>
+                      <h2 id={`gallery-section-${section.id}`}>{section.title}</h2>
+                      <p>{section.description}</p>
+                    </div>
+                    {section.action && (
+                      <a
+                        class="site-gallery-section-link"
+                        href={section.action.href}
+                        data-rmx-document={section.action.document ? '' : undefined}
+                      >
+                        {section.action.label}
+                        <Icon name="arrow" />
+                      </a>
+                    )}
+                  </header>
+                  <div class="site-gallery-grid">{section.entries.map(renderCard)}</div>
+                </section>
+              ))
+            )}
           </div>
         ) : (
           <p class="site-empty">
