@@ -512,12 +512,12 @@ export const AdminWorkspace = clientEntry(
             />
             <Button
               size="compact"
+              leadingIcon={<Icon name="plus" size={14} />}
               mix={on('click', () => {
                 createKeyOpen = true
                 void handle.update()
               })}
             >
-              <Icon name="plus" size={14} />
               Create API key
             </Button>
           </div>
@@ -577,6 +577,7 @@ export const AdminWorkspace = clientEntry(
                             <Button
                               size="compact"
                               variant="ghost"
+                              leadingIcon={<Icon name={isRevealed ? 'lock' : 'shield'} size={14} />}
                               aria-pressed={isRevealed}
                               aria-label={
                                 isRevealed
@@ -585,7 +586,6 @@ export const AdminWorkspace = clientEntry(
                               }
                               mix={on('click', () => toggleRevealKey(record))}
                             >
-                              <Icon name={isRevealed ? 'lock' : 'shield'} size={14} />
                               {isRevealed ? 'Hide' : 'Reveal'}
                             </Button>
                             <CopyChip
@@ -829,12 +829,12 @@ export const AdminWorkspace = clientEntry(
             />
             <Button
               size="compact"
+              leadingIcon={<Icon name="plus" size={14} />}
               mix={on('click', () => {
                 inviteOpen = true
                 void handle.update()
               })}
             >
-              <Icon name="plus" size={14} />
               Invite member
             </Button>
           </div>

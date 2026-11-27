@@ -223,11 +223,12 @@
   text-box: trim-both cap alphabetic;
 }
 
-/* An SVG has no text baseline to trim. Center its box directly. */
-.rf-button:is([data-size='icon'], [data-size='icon-compact']) .rf-button-label:has(> svg) {
-  display: flex;
+/* An SVG has no text baseline to trim. Align it with any label text and keep the button gap. */
+.rf-button-label:has(> svg) {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: inherit;
   text-box-trim: none;
 }
 

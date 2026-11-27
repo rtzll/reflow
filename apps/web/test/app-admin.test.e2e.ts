@@ -12,8 +12,22 @@ it('reveals, hides, creates, rotates, and revokes API keys while logging every a
   await expect(secretCode).toHaveText('rf_live_••••••••••••9f2c')
   await expect(secretCode).toHaveAttribute('data-revealed', 'false')
 
-  // Click to reveal and hide the secret.
-  await deployCard.getByRole('button', { name: 'Reveal secret for CI Production Deployer' }).click()
+  // Click to reveal and hide the secret, verifying icon/label alignment on the Reveal button.
+  const revealBtn = deployCard.getByRole('button', {
+    name: 'Reveal secret for CI Production Deployer',
+  })
+  const [iconBox, labelBox] = await Promise.all([
+    revealBtn.locator('.rf-button-icon').boundingBox(),
+    revealBtn.locator('.rf-button-label').boundingBox(),
+  ])
+  expect(iconBox).not.toBeNull()
+  expect(labelBox).not.toBeNull()
+  expect(labelBox!.x - (iconBox!.x + iconBox!.width)).toBeGreaterThanOrEqual(4)
+  expect(
+    Math.abs(iconBox!.y + iconBox!.height / 2 - (labelBox!.y + labelBox!.height / 2)),
+  ).toBeLessThanOrEqual(2)
+
+  await revealBtn.click()
   await expect(secretCode).toHaveText('rf_live_98d4c1f7e2a0b6c39f2c')
   await expect(secretCode).toHaveAttribute('data-revealed', 'true')
   await deployCard.getByRole('button', { name: 'Hide secret for CI Production Deployer' }).click()
