@@ -61,7 +61,21 @@ Resolve the CSS package export through that asset server in your document action
 const libraryStyles = await assets.getHref(import.meta.resolve('@rtzll/reflow/styles.css'))
 ```
 
-Render `<link rel="stylesheet" href={libraryStyles} />` in the document head, before your application stylesheet. If you want only the styles for domains you use, load `@rtzll/reflow/core.css` alongside any opt-in domain sheets you need: `@rtzll/reflow/chat.css` (AI & chat), `@rtzll/reflow/code.css` (code, review & CI), `@rtzll/reflow/projects.css` (boards, timelines & issue tracking), or the specialist peer sheets `@rtzll/reflow/diffs.css`, `@rtzll/reflow/trees.css`, `@rtzll/reflow/diagrams.css`, and `@rtzll/reflow/markdown.css`. Every stylesheet sits in the `reflow` cascade layer, so your CSS and `css()` styles override them; keep resets in a layer before it, as [customization](customization.md#cascade-layers) shows.
+Render `<link rel="stylesheet" href={libraryStyles} />` in the document head, before your application stylesheet. If you want only the styles for domains you use, load `@rtzll/reflow/core.css` alongside any opt-in domain sheets you need:
+
+| Stylesheet export | Size (raw / gzip) | Included components |
+| --- | --- | --- |
+| `@rtzll/reflow/styles.css` | ~492 KB / ~79 KB | All components (zero-config default) |
+| `@rtzll/reflow/core.css` | ~292 KB / ~51 KB | Foundations, tokens, forms, overlays, navigation, charts, calendar, data table |
+| `@rtzll/reflow/chat.css` | ~54 KB / ~11 KB | AI & chat (`ChatLayout`, `ChatMessage`, `InputMessage`, `ThinkingSteps`, `ToolCalls`, `AskUserQuestions`, etc.) |
+| `@rtzll/reflow/code.css` | ~85 KB / ~12 KB | Code review & CI (`CodeBlock`, `CodeBrowser`, `Terminal`, `LogViewer`, `Waterfall`, `PipelineGraph`, `StackGraph`, `MergeReadiness`, `TestReport`, `MatrixGrid`, `MergeQueue`, etc.) |
+| `@rtzll/reflow/projects.css` | ~41 KB / ~5 KB | Project tracking (`KanbanBoard`, `GroupedList`, `RoadmapTimeline`, `CycleOverview`, `TriageQueue`, `QuickCreateBar`, `ViewOptionsPopover`, `SavedViewTabs`, etc.) |
+| `@rtzll/reflow/diffs.css` | ~7 KB / ~2 KB | `DiffView` |
+| `@rtzll/reflow/trees.css` | ~3 KB / ~1 KB | `FileTree` |
+| `@rtzll/reflow/diagrams.css` | ~4 KB / ~1 KB | `Diagram` |
+| `@rtzll/reflow/markdown.css` | ~7 KB / ~2 KB | `Markdown`, `MarkdownEditor` |
+
+Every stylesheet sits in the `reflow` cascade layer, so your CSS and `css()` styles override them; keep resets in a layer before it, as [customization](customization.md#cascade-layers) shows.
 
 On phones, Reflow's controls keep their text at 16px or more so iOS does not zoom into a field, drop the browser's tap flash, and show hover states only on devices that can hover. Keep zoom enabled: do not add `user-scalable=no` or `maximum-scale=1` to the viewport tag. If your app draws edge to edge with `viewport-fit=cover`, Drawer and Toaster pad themselves clear of the notch and the home indicator; your own fixed headers and bars need `env(safe-area-inset-*)` padding too.
 
@@ -106,6 +120,6 @@ When importing any optional-peer component in a Remix client entry under the sou
 
 ## Check the integration
 
-Run your app's typecheck and open a page using the installed package. Confirm that styles load, the Dialog opens with pointer and keyboard, Escape closes it, and focus returns to its trigger. Check the console and network panel for hydration errors and missing assets. For forms, verify submitted values and reset behavior in your own composition.
+Run your app's typecheck and open a page using the installed package. Confirm that styles load, the Dialog opens with pointer and keyboard, Escape closes it, and focus returns to its trigger. Check the console and network panel for hydration errors and missing assets. For native `<form>` wiring, `FormData` keys, server validation, and reset behavior, see [forms & progressive enhancement](forms.md).
 
 For component APIs, follow the [public exports](../packages/reflow/src/index.ts) to their prop types and read the [showcase examples](../apps/web/app/public/examples.tsx). These work as repository documentation without a running server. The [component catalog](components.md) lists what ships; run the showcase for interactive API tables and playgrounds.
