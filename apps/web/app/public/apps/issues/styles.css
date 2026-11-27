@@ -214,6 +214,8 @@
   margin-bottom: 12px;
 }
 .issues-board-heading {
+  flex-wrap: wrap;
+  gap: 10px 16px;
   margin-bottom: 16px;
 }
 .issues-board-controls {
@@ -378,10 +380,19 @@
   gap: 0;
 }
 .issues-collection[data-layout='list'] .issues-row {
-  grid-template-columns: 15px 5.4rem minmax(0, 1fr) auto 22px;
+  grid-template-columns: 15px 6.2rem minmax(0, 1fr) 8.6rem 22px;
   grid-template-areas: 'check id title area avatar';
   border-radius: 0;
   padding-block: 10px;
+}
+.issues-collection[data-layout='list'] .issues-tags {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 2.75rem;
+  align-items: center;
+  justify-items: end;
+  gap: 8px;
+  width: 100%;
+  flex-wrap: nowrap;
 }
 .issues-collection[data-layout='list'] .issues-row + .issues-row {
   margin-top: -1px;
@@ -502,7 +513,7 @@
     grid-template-areas: 'check id avatar' 'check title avatar';
     row-gap: 2px;
   }
-  .issues-collection[data-layout='list'] .issues-area {
+  .issues-collection[data-layout='list'] .issues-tags {
     display: none;
   }
   .issues-title {
@@ -563,7 +574,7 @@
   min-height: 40px;
   padding-block: 8px;
 }
-.issues-drag-stack[data-layout='list'] :is(.issues-area, .rf-avatar) {
+.issues-drag-stack[data-layout='list'] :is(.issues-tags, .rf-avatar) {
   display: none;
 }
 .issues-drag-count {

@@ -27,7 +27,7 @@
 }
 .analytics-controls {
   justify-content: flex-start;
-  gap: 4px;
+  gap: 8px;
 }
 .analytics-section-heading p,
 .analytics-hint,
@@ -38,7 +38,7 @@
 }
 .analytics-metrics {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
   border-block: 1px solid var(--rf-border);
   padding-block: 12px;

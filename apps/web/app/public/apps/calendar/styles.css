@@ -57,6 +57,7 @@
   background: var(--rf-surface-2);
 }
 .week-toolbar {
+  flex-wrap: wrap;
   padding: 14px 18px;
 }
 .week-toolbar h2 {
@@ -130,6 +131,7 @@
   font-size: 18px;
   font-weight: 560;
   letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
 }
 .week-zone {
   align-self: center;

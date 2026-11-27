@@ -256,6 +256,8 @@
 .ci-job-dur,
 .ci-step-dur {
   flex: none;
+  min-inline-size: 3rem;
+  text-align: end;
   color: var(--rf-muted);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 11px;
@@ -457,6 +459,7 @@
 .ci-failure-actions {
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
   gap: 6px;
 }
 

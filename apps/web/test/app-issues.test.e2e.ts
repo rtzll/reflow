@@ -656,4 +656,29 @@ it('filters via SavedViewTabs, toggles card properties via ViewOptionsPopover, a
   await page.getByRole('button', { name: /Accept/ }).click()
   await expect(list.getByRole('option')).toHaveCount(12)
   await expect(list.getByRole('option', { name: /AT-151/ })).toBeVisible()
+
+  // Switch to List view and verify area, estimate, and avatar columns align across rows.
+  await page.getByRole('radio', { name: 'Board' }).press('ArrowRight')
+  await expect(list).toHaveAttribute('data-layout', 'list')
+  const rowCols = await list.getByRole('option').evaluateAll((rows) =>
+    rows.slice(0, 8).map((row) => {
+      const area = row.querySelector<HTMLElement>('.issues-area')!
+      const estimate = row.querySelector<HTMLElement>('.rf-estimate-pill')
+      const avatar = row.querySelector<HTMLElement>('.rf-avatar')!
+      return {
+        areaRight: Math.round(area.getBoundingClientRect().right),
+        estimateRight: estimate ? Math.round(estimate.getBoundingClientRect().right) : null,
+        avatarLeft: Math.round(avatar.getBoundingClientRect().left),
+      }
+    }),
+  )
+  const estimateCols = rowCols.filter((row) => row.estimateRight !== null)
+  expect(estimateCols.length).toBeGreaterThan(2)
+  for (const row of rowCols.slice(1)) {
+    expect(Math.abs(row.areaRight - rowCols[0].areaRight)).toBeLessThanOrEqual(1)
+    expect(Math.abs(row.avatarLeft - rowCols[0].avatarLeft)).toBeLessThanOrEqual(1)
+  }
+  for (const row of estimateCols.slice(1)) {
+    expect(Math.abs(row.estimateRight! - estimateCols[0].estimateRight!)).toBeLessThanOrEqual(1)
+  }
 })
