@@ -186,7 +186,7 @@ export interface CiArtifactContent {
 
 export const failureFixDiff = `--- a/apps/web/app/ui/example-apps.tsx
 +++ b/apps/web/app/ui/example-apps.tsx
-@@ -88,12 +88,14 @@ export function AppWorkspace(handle) {
+@@ -88,10 +88,12 @@ export function AppWorkspace(handle) {
          <a class="site-skip" href="#main">
            Skip to content
          </a>
