@@ -354,18 +354,21 @@ const initialKanban: KanbanItem[] = [
   },
 ]
 
-export function KanbanBoardExample(handle: Handle) {
+export function KanbanBoardExample(
+  handle: Handle<{ size?: 'default' | 'compact'; wipLimit?: boolean }>,
+) {
   let items = initialKanban
   let selected = new Set<string>()
   return () => (
     <div style={{ width: 'min(100%, 860px)' }}>
       <KanbanBoard
+        size={handle.props.size}
         columns={[
           { id: 'todo', title: 'Todo', icon: <StatusIcon status="todo" size={13} decorative /> },
           {
             id: 'in-progress',
             title: 'In progress',
-            wipLimit: 2,
+            wipLimit: handle.props.wipLimit === false ? undefined : 2,
             icon: <StatusIcon status="in-progress" size={13} decorative />,
           },
           { id: 'done', title: 'Done', icon: <StatusIcon status="done" size={13} decorative /> },
@@ -395,11 +398,15 @@ export function KanbanBoardExample(handle: Handle) {
   )
 }
 
-export function GroupedListExample(handle: Handle) {
+export function GroupedListExample(
+  handle: Handle<{ size?: 'default' | 'compact'; showEmptyGroups?: boolean }>,
+) {
   let selected: ReadonlySet<string> = new Set(['g2'])
   return () => (
     <div style={{ width: 'min(100%, 660px)' }}>
       <GroupedList
+        size={handle.props.size}
+        showEmptyGroups={handle.props.showEmptyGroups ?? true}
         selectedIds={selected}
         onSelectedChange={(next) => {
           selected = next
@@ -412,6 +419,11 @@ export function GroupedListExample(handle: Handle) {
             icon: <StatusIcon status="in-progress" size={13} decorative />,
           },
           { id: 'todo', title: 'Todo', icon: <StatusIcon status="todo" size={13} decorative /> },
+          {
+            id: 'backlog',
+            title: 'Backlog',
+            icon: <StatusIcon status="backlog" size={13} decorative />,
+          },
           { id: 'done', title: 'Done', icon: <StatusIcon status="done" size={13} decorative /> },
         ]}
         items={[
@@ -463,13 +475,22 @@ export function GroupedListExample(handle: Handle) {
   )
 }
 
-export function QuickCreateBarExample(handle: Handle) {
+export function QuickCreateBarExample(
+  handle: Handle<{
+    size?: 'default' | 'compact'
+    showCreateMore?: boolean
+    defaultPriority?: 'urgent' | 'high' | 'medium' | 'low' | 'none'
+  }>,
+) {
   let recent: string[] = []
   return () => (
     <div
       style={{ width: 'min(100%, 560px)', display: 'flex', flexDirection: 'column', gap: '8px' }}
     >
       <QuickCreateBar
+        size={handle.props.size}
+        showCreateMore={handle.props.showCreateMore ?? true}
+        defaultPriority={handle.props.defaultPriority ?? 'medium'}
         assignees={[
           { value: 'ada', label: 'Ada Lovelace' },
           { value: 'noah', label: 'Noah Kim' },
@@ -489,14 +510,22 @@ export function QuickCreateBarExample(handle: Handle) {
   )
 }
 
-export function RoadmapTimelineExample() {
+export function RoadmapTimelineExample(
+  handle: Handle<{
+    size?: 'default' | 'compact'
+    defaultZoom?: 'weeks' | 'months' | 'quarters'
+    showToday?: boolean
+  }>,
+) {
   return () => (
     <div style={{ width: 'min(100%, 720px)' }}>
       <RoadmapTimeline
+        size={handle.props.size}
+        defaultZoom={handle.props.defaultZoom}
         label="H1 Platform Roadmap"
         rangeStart="2026-01-01"
         rangeEnd="2026-06-30"
-        today="2026-03-18"
+        today={handle.props.showToday === false ? undefined : '2026-03-18'}
         items={[
           {
             id: 'rm-1',
@@ -536,12 +565,19 @@ export function RoadmapTimelineExample() {
   )
 }
 
-export function CycleOverviewExample(handle: Handle) {
+export function CycleOverviewExample(
+  handle: Handle<{
+    size?: 'default' | 'compact'
+    showAssignees?: boolean
+    showBurndown?: boolean
+  }>,
+) {
   let activeStatus: string | null = null
   let activeAssignee: string | null = null
   return () => (
     <div style={{ width: 'min(100%, 660px)' }}>
       <CycleOverview
+        size={handle.props.size}
         title="Cycle 14 · Forge & Projects"
         dateRange="Nov 18 – Dec 2"
         activeStatusId={activeStatus}
@@ -559,18 +595,36 @@ export function CycleOverviewExample(handle: Handle) {
           { id: 'in-progress', label: 'In progress', count: 4, tone: 'warning' },
           { id: 'todo', label: 'Todo', count: 3, tone: 'neutral' },
         ]}
-        assignees={[
-          { name: 'Ada', total: 6, completed: 4, inProgress: 1 },
-          { name: 'Noah', total: 5, completed: 3, inProgress: 2 },
-          { name: 'Lin', total: 5, completed: 2, inProgress: 1 },
-        ]}
-        burndown={{
-          labels: ['Day 1', 'Day 3', 'Day 5', 'Day 7', 'Day 9', 'Day 11', 'Day 14'],
-          series: [
-            { id: 'scope', label: 'Scope', values: [14, 15, 15, 16, 16, 16, 16], dashed: true },
-            { id: 'done', label: 'Completed', values: [1, 3, 5, 7, 9, 12, 14], area: true },
-          ],
-        }}
+        assignees={
+          handle.props.showAssignees === false
+            ? undefined
+            : [
+                { name: 'Ada', total: 6, completed: 4, inProgress: 1 },
+                { name: 'Noah', total: 5, completed: 3, inProgress: 2 },
+                { name: 'Lin', total: 5, completed: 2, inProgress: 1 },
+              ]
+        }
+        burndown={
+          handle.props.showBurndown === false
+            ? undefined
+            : {
+                labels: ['Day 1', 'Day 3', 'Day 5', 'Day 7', 'Day 9', 'Day 11', 'Day 14'],
+                series: [
+                  {
+                    id: 'scope',
+                    label: 'Scope',
+                    values: [14, 15, 15, 16, 16, 16, 16],
+                    dashed: true,
+                  },
+                  {
+                    id: 'done',
+                    label: 'Completed',
+                    values: [1, 3, 5, 7, 9, 12, 14],
+                    area: true,
+                  },
+                ],
+              }
+        }
       />
     </div>
   )
@@ -703,11 +757,12 @@ const initialTriage: TriageItem[] = [
   },
 ]
 
-export function TriageQueueExample(handle: Handle) {
+export function TriageQueueExample(handle: Handle<{ size?: 'default' | 'compact' }>) {
   let items = initialTriage
   return () => (
     <div style={{ width: 'min(100%, 680px)' }}>
       <TriageQueue
+        size={handle.props.size}
         items={items}
         now="2026-11-26T12:00:00Z"
         onDecision={(item) => {

@@ -334,11 +334,12 @@ export function InlineEditExample(handle: Handle) {
   )
 }
 
-export function StackGraphExample(handle: Handle) {
+export function StackGraphExample(handle: Handle<{ size?: 'default' | 'compact' }>) {
   let currentId = 'pr-402'
   return () => (
     <div style={{ width: 'min(100%, 540px)' }}>
       <StackGraph
+        size={handle.props.size}
         currentId={currentId}
         onSelect={(node) => {
           currentId = node.id
@@ -397,57 +398,91 @@ export function StackGraphExample(handle: Handle) {
   )
 }
 
-export function MergeReadinessExample() {
-  return () => (
-    <div style={{ width: 'min(100%, 580px)' }}>
-      <MergeReadiness
-        status="ready"
-        summary="2 approvals · 14/14 required checks passed · No conflicts"
-        action={
-          <SplitButton
-            label="Squash and merge"
-            size="compact"
-            items={[
-              { value: 'merge', label: 'Create a merge commit' },
-              { value: 'rebase', label: 'Rebase and merge' },
-            ]}
-          />
-        }
-        gates={[
-          {
-            id: 'reviews',
-            label: 'Code reviews',
-            status: 'passed',
-            required: true,
-            detail: '2 of 2 required approvals',
-          },
-          {
-            id: 'checks',
-            label: 'Required checks',
-            status: 'passed',
-            required: true,
-            detail: '14/14 passed',
-            items: [
-              { id: 'lint', label: 'oxlint + oxfmt', status: 'passed', detail: '4s' },
-              { id: 'tsc', label: 'TypeScript check', status: 'passed', detail: '9s' },
-              {
-                id: 'playwright',
-                label: 'Playwright browser + E2E',
-                status: 'passed',
-                detail: '38s',
-              },
-            ],
-          },
-          {
-            id: 'conflicts',
-            label: 'Branch up to date',
-            status: 'passed',
-            detail: 'No conflicts with main',
-          },
-        ]}
-      />
-    </div>
-  )
+export function MergeReadinessExample(
+  handle: Handle<{
+    size?: 'default' | 'compact'
+    status?: 'ready' | 'blocked' | 'pending' | 'draft' | 'merged'
+    defaultExpanded?: boolean
+  }>,
+) {
+  return () => {
+    const status = handle.props.status ?? 'ready'
+    const summary =
+      status === 'blocked'
+        ? '1 review requested · 1 failing required check'
+        : status === 'pending'
+          ? '2 approvals · 11/14 checks running'
+          : status === 'draft'
+            ? 'Work in progress · Mark ready for review to merge'
+            : status === 'merged'
+              ? 'Squashed and merged into main'
+              : '2 approvals · 14/14 required checks passed · No conflicts'
+    const checksStatus =
+      status === 'blocked' ? 'failed' : status === 'pending' ? 'pending' : 'passed'
+    return (
+      <div style={{ width: 'min(100%, 580px)' }}>
+        <MergeReadiness
+          size={handle.props.size}
+          status={status}
+          defaultExpanded={handle.props.defaultExpanded}
+          summary={summary}
+          action={
+            <SplitButton
+              label={status === 'merged' ? 'Merged' : 'Squash and merge'}
+              size="compact"
+              disabled={status !== 'ready'}
+              items={[
+                { value: 'merge', label: 'Create a merge commit' },
+                { value: 'rebase', label: 'Rebase and merge' },
+              ]}
+            />
+          }
+          gates={[
+            {
+              id: 'reviews',
+              label: 'Code reviews',
+              status: status === 'blocked' ? 'failed' : status === 'draft' ? 'pending' : 'passed',
+              required: true,
+              detail:
+                status === 'blocked'
+                  ? 'Changes requested by @ada'
+                  : status === 'draft'
+                    ? 'Waiting for ready-for-review'
+                    : '2 of 2 required approvals',
+            },
+            {
+              id: 'checks',
+              label: 'Required checks',
+              status: checksStatus,
+              required: true,
+              detail:
+                status === 'blocked'
+                  ? '13/14 passed · 1 failed'
+                  : status === 'pending'
+                    ? '11/14 completed'
+                    : '14/14 passed',
+              items: [
+                { id: 'lint', label: 'oxlint + oxfmt', status: 'passed', detail: '4s' },
+                { id: 'tsc', label: 'TypeScript check', status: 'passed', detail: '9s' },
+                {
+                  id: 'playwright',
+                  label: 'Playwright browser + E2E',
+                  status: checksStatus,
+                  detail: status === 'pending' ? 'running' : '38s',
+                },
+              ],
+            },
+            {
+              id: 'conflicts',
+              label: 'Branch up to date',
+              status: 'passed',
+              detail: 'No conflicts with main',
+            },
+          ]}
+        />
+      </div>
+    )
+  }
 }
 
 const minimapFiles = [
@@ -520,11 +555,18 @@ const sampleBrowserCode = [
   '}',
 ].join('\n')
 
-export function CodeBrowserExample(handle: Handle) {
+export function CodeBrowserExample(
+  handle: Handle<{
+    size?: 'default' | 'compact'
+    defaultShowBlame?: boolean
+    wrap?: boolean
+  }>,
+) {
   let selectedRange: CodeLineRange | null = { start: 4, end: 8 }
   return () => (
     <div style={{ width: 'min(100%, 640px)' }}>
       <CodeBrowser
+        size={handle.props.size}
         filename="packages/reflow/src/virtual-list.tsx"
         refName="main"
         language="tsx"
@@ -534,7 +576,8 @@ export function CodeBrowserExample(handle: Handle) {
           selectedRange = next
           void handle.update()
         }}
-        defaultShowBlame
+        defaultShowBlame={handle.props.defaultShowBlame ?? true}
+        wrap={handle.props.wrap}
         blame={[
           { line: 1, sha: '7845cb2', author: 'Ada', date: '2026-11-25T14:00:00Z', heat: 0.9 },
           { line: 2, sha: '7845cb2', author: 'Ada', date: '2026-11-25T14:00:00Z', heat: 0.9 },
@@ -552,10 +595,17 @@ export function CodeBrowserExample(handle: Handle) {
   )
 }
 
-export function TestReportExample() {
+export function TestReportExample(
+  handle: Handle<{
+    size?: 'default' | 'compact'
+    defaultFilter?: 'all' | 'failed' | 'flaky' | 'passed' | 'skipped'
+  }>,
+) {
   return () => (
     <div style={{ width: 'min(100%, 620px)' }}>
       <TestReport
+        size={handle.props.size}
+        defaultFilter={handle.props.defaultFilter}
         cases={[
           {
             id: 't1',
@@ -678,10 +728,25 @@ const initialQueueEntries: readonly MergeQueueEntry[] = [
   },
 ]
 
-export function MergeQueueExample() {
+export function MergeQueueExample(
+  handle: Handle<{ size?: 'default' | 'compact'; removable?: boolean }>,
+) {
+  let entries: readonly MergeQueueEntry[] = initialQueueEntries
   return () => (
     <div style={{ width: 'min(100%, 600px)' }}>
-      <MergeQueue entries={initialQueueEntries} />
+      <MergeQueue
+        size={handle.props.size}
+        entries={entries}
+        onRemove={
+          handle.props.removable
+            ? (entry) => {
+                entries = entries.filter((item) => item.id !== entry.id)
+                if (entries.length === 0) entries = initialQueueEntries
+                void handle.update()
+              }
+            : undefined
+        }
+      />
     </div>
   )
 }
@@ -728,10 +793,22 @@ const heatmapCells = Array.from({ length: 14 * 7 }, (_, index) => {
   return { date: iso, count }
 })
 
-export function ActivityHeatmapExample() {
+export function ActivityHeatmapExample(
+  handle: Handle<{
+    size?: 'default' | 'compact'
+    tone?: 'success' | 'accent' | 'warning' | 'danger'
+    showLegend?: boolean
+  }>,
+) {
   return () => (
     <div style={{ width: 'min(100%, 540px)' }}>
-      <ActivityHeatmap cells={heatmapCells} unit="commits" tone="success" />
+      <ActivityHeatmap
+        size={handle.props.size}
+        cells={heatmapCells}
+        unit="commits"
+        tone={handle.props.tone ?? 'success'}
+        showLegend={handle.props.showLegend ?? true}
+      />
     </div>
   )
 }

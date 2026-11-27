@@ -100,6 +100,22 @@ import { SparklineExample } from './sparkline-example.tsx'
 import { MetricCardExample } from './metric-card-example.tsx'
 import { LineChartExample } from './line-chart-example.tsx'
 import { ObjectInspectorExample } from './object-inspector-example.tsx'
+import {
+  ActivityHeatmapExample,
+  CodeBrowserExample,
+  MergeQueueExample,
+  MergeReadinessExample,
+  StackGraphExample,
+  TestReportExample,
+} from './wave16-examples.tsx'
+import {
+  CycleOverviewExample,
+  GroupedListExample,
+  KanbanBoardExample,
+  QuickCreateBarExample,
+  RoadmapTimelineExample,
+  TriageQueueExample,
+} from './wave17-examples.tsx'
 
 export type PlaygroundValues = Record<string, string | boolean>
 interface Control {
@@ -490,6 +506,45 @@ export const playgroundControls: Record<string, readonly Control[]> = {
     choice('expandLevel', 'Expand depth', ['1', '0', '2', '3']),
     toggle('sortKeys', 'Sort keys'),
     toggle('copyable', 'Copy button', true),
+  ],
+  'code-browser': [
+    size,
+    toggle('defaultShowBlame', 'Blame gutter', true),
+    toggle('wrap', 'Wrap lines'),
+  ],
+  'merge-readiness': [
+    size,
+    choice('status', 'Status', ['ready', 'blocked', 'pending', 'draft', 'merged']),
+    toggle('defaultExpanded', 'Expand gates'),
+  ],
+  'stack-graph': [size],
+  'test-report': [
+    size,
+    choice('defaultFilter', 'Filter', ['all', 'failed', 'flaky', 'passed', 'skipped']),
+  ],
+  'merge-queue': [size, toggle('removable', 'Dequeue button')],
+  'activity-heatmap': [
+    size,
+    choice('tone', 'Tone', ['success', 'accent', 'warning', 'danger']),
+    toggle('showLegend', 'Legend', true),
+  ],
+  'kanban-board': [size, toggle('wipLimit', 'WIP limit', true)],
+  'grouped-list': [size, toggle('showEmptyGroups', 'Empty groups', true)],
+  'roadmap-timeline': [
+    size,
+    choice('defaultZoom', 'Zoom', ['months', 'quarters', 'weeks']),
+    toggle('showToday', 'Today line', true),
+  ],
+  'cycle-overview': [
+    size,
+    toggle('showAssignees', 'Workload', true),
+    toggle('showBurndown', 'Burndown', true),
+  ],
+  'triage-queue': [size],
+  'quick-create-bar': [
+    size,
+    choice('defaultPriority', 'Priority', ['medium', 'urgent', 'high', 'low', 'none']),
+    toggle('showCreateMore', 'Create more', true),
   ],
 }
 
@@ -1378,6 +1433,76 @@ export function PlaygroundExample(
             expandLevel={Number(v.expandLevel)}
             sortKeys={Boolean(v.sortKeys)}
             copyable={Boolean(v.copyable)}
+          />
+        )
+      case 'code-browser':
+        return (
+          <CodeBrowserExample
+            key={String(v.defaultShowBlame)}
+            size={density}
+            defaultShowBlame={Boolean(v.defaultShowBlame)}
+            wrap={Boolean(v.wrap)}
+          />
+        )
+      case 'merge-readiness':
+        return (
+          <MergeReadinessExample
+            key={`${v.status}-${v.defaultExpanded}`}
+            size={density}
+            status={v.status as 'ready' | 'blocked' | 'pending' | 'draft' | 'merged'}
+            defaultExpanded={Boolean(v.defaultExpanded)}
+          />
+        )
+      case 'stack-graph':
+        return <StackGraphExample size={density} />
+      case 'test-report':
+        return (
+          <TestReportExample
+            key={String(v.defaultFilter)}
+            size={density}
+            defaultFilter={v.defaultFilter as 'all' | 'failed' | 'flaky' | 'passed' | 'skipped'}
+          />
+        )
+      case 'merge-queue':
+        return <MergeQueueExample size={density} removable={Boolean(v.removable)} />
+      case 'activity-heatmap':
+        return (
+          <ActivityHeatmapExample
+            size={density}
+            tone={v.tone as 'success' | 'accent' | 'warning' | 'danger'}
+            showLegend={Boolean(v.showLegend)}
+          />
+        )
+      case 'kanban-board':
+        return <KanbanBoardExample size={density} wipLimit={Boolean(v.wipLimit)} />
+      case 'grouped-list':
+        return <GroupedListExample size={density} showEmptyGroups={Boolean(v.showEmptyGroups)} />
+      case 'roadmap-timeline':
+        return (
+          <RoadmapTimelineExample
+            key={String(v.defaultZoom)}
+            size={density}
+            defaultZoom={v.defaultZoom as 'weeks' | 'months' | 'quarters'}
+            showToday={Boolean(v.showToday)}
+          />
+        )
+      case 'cycle-overview':
+        return (
+          <CycleOverviewExample
+            size={density}
+            showAssignees={Boolean(v.showAssignees)}
+            showBurndown={Boolean(v.showBurndown)}
+          />
+        )
+      case 'triage-queue':
+        return <TriageQueueExample size={density} />
+      case 'quick-create-bar':
+        return (
+          <QuickCreateBarExample
+            key={String(v.defaultPriority)}
+            size={density}
+            defaultPriority={v.defaultPriority as 'urgent' | 'high' | 'medium' | 'low' | 'none'}
+            showCreateMore={Boolean(v.showCreateMore)}
           />
         )
     }

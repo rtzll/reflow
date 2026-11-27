@@ -537,6 +537,30 @@ ${opening} sections={sections}
       return `<LineChart label="Edge Worker latency" labels={labels} series={series}${values.showGrid === false ? ' showGrid={false}' : ''}${values.showLegend === false ? ' showLegend={false}' : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
     case 'object-inspector':
       return `<ObjectInspector name="webhook" data={payload} expandLevel={${values.expandLevel}}${values.sortKeys ? ' sortKeys' : ''}${values.copyable === false ? ' copyable={false}' : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'code-browser':
+      return `<CodeBrowser filename="packages/reflow/src/virtual-list.tsx" refName="main" code={source} blame={blame}${values.defaultShowBlame === false ? '' : ' defaultShowBlame'}${values.wrap ? ' wrap' : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'merge-readiness':
+      return `<MergeReadiness status="${values.status}" gates={gates}${values.defaultExpanded ? ' defaultExpanded' : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'stack-graph':
+      return `<StackGraph nodes={stack} currentId={currentId} onSelect={selectPr}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'test-report':
+      return `<TestReport cases={cases}${values.defaultFilter && values.defaultFilter !== 'all' ? ` defaultFilter="${values.defaultFilter}"` : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'merge-queue':
+      return `<MergeQueue entries={entries}${values.removable ? ' onRemove={dequeue}' : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'activity-heatmap':
+      return `<ActivityHeatmap cells={cells} unit="commits" tone="${values.tone}"${values.showLegend === false ? ' showLegend={false}' : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'kanban-board':
+      return `<KanbanBoard columns={${values.wipLimit === false ? 'columns' : 'columnsWithWipLimit'}} items={items} onMoveItem={moveItem}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'grouped-list':
+      return `<GroupedList groups={groups} items={items}${values.showEmptyGroups === false ? ' showEmptyGroups={false}' : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'roadmap-timeline':
+      return `<RoadmapTimeline items={initiatives} rangeStart="2026-01-01" rangeEnd="2026-06-30"${values.showToday === false ? '' : ' today="2026-03-18"'}${values.defaultZoom && values.defaultZoom !== 'months' ? ` defaultZoom="${values.defaultZoom}"` : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'cycle-overview':
+      return `<CycleOverview title="Cycle 14" statuses={statuses}${values.showAssignees === false ? '' : ' assignees={assignees}'}${values.showBurndown === false ? '' : ' burndown={burndown}'}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'triage-queue':
+      return `<TriageQueue items={incoming} onDecision={handleDecision}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'quick-create-bar':
+      return `<QuickCreateBar assignees={assignees}${values.defaultPriority && values.defaultPriority !== 'medium' ? ` defaultPriority="${values.defaultPriority}"` : ''}${values.showCreateMore === false ? ' showCreateMore={false}' : ''}${values.size === 'compact' ? ' size="compact"' : ''} onCreate={createIssue} />`
     default:
       return `${opening} />`
   }
