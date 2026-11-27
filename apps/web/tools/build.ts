@@ -3,6 +3,7 @@ import type { BuildOptions, Metafile, Plugin } from 'esbuild'
 import { copyFile, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { dirname, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { adminStyles, showcaseStyles } from '../app/page-styles.ts'
 import { getSoundAssets, soundFiles } from '../app/sound-assets.ts'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
@@ -56,33 +57,40 @@ const common: BuildOptions = {
   define: { 'process.env.NODE_ENV': '"production"' },
   plugins: [clientEntryPlugin],
 }
-const styles = [
-  'app/public/fonts.css',
-  '../../packages/reflow/dist/styles.css',
-  'app/public/site.css',
-  'app/public/examples.css',
-]
 const appStyles = (await readdir(resolve(publicDir, 'apps'), { withFileTypes: true }))
   .filter((entry) => entry.isDirectory())
   .map(({ name }) => [name, `app/public/apps/${name}/styles.css`] as const)
-const [client, samples, sources, diffs] = await Promise.all([
+const pageEntry = 'app/public/entry.ts'
+const adminWorkspace = resolve(publicDir, 'apps/admin/workspace.tsx')
+const browserOptions: BuildOptions = {
+  ...common,
+  outdir: resolve(output, 'client'),
+  assetNames: 'assets/[name]-[hash]',
+  publicPath: '/',
+  platform: 'browser',
+  splitting: true,
+  loader: { '.woff2': 'file', '.mp3': 'copy' },
+}
+const [client, adminClient, samples, sources, diffs] = await Promise.all([
   build({
-    ...common,
+    ...browserOptions,
     entryPoints: [
-      'app/public/entry.ts',
-      ...clientEntries.keys(),
-      ...styles,
+      pageEntry,
+      ...[...clientEntries.keys()].filter((path) => path !== adminWorkspace),
+      ...new Set([...showcaseStyles, ...adminStyles]),
       ...soundFiles,
       ...appStyles.map(([slug, path]) => ({ in: path, out: `app-${slug}` })),
     ],
-    outdir: resolve(output, 'client'),
     entryNames: 'assets/[name]-[hash]',
     chunkNames: 'assets/chunk-[hash]',
-    assetNames: 'assets/[name]-[hash]',
-    publicPath: '/',
-    platform: 'browser',
-    splitting: true,
-    loader: { '.woff2': 'file', '.mp3': 'copy' },
+  }),
+  // Admin uses document navigation and owns its toaster. A separate browser graph
+  // can share Remix within Admin without fetching all the showcase components.
+  build({
+    ...browserOptions,
+    entryPoints: [pageEntry, adminWorkspace],
+    entryNames: 'assets/admin-[name]-[hash]',
+    chunkNames: 'assets/admin-chunk-[hash]',
   }),
   // Highlight the CodeBlock samples while bundling, so the worker never includes Shiki.
   import('../app/code-samples.ts').then(({ codeSamples }) => codeSamples()),
@@ -91,11 +99,12 @@ const [client, samples, sources, diffs] = await Promise.all([
   import('../app/diff-samples.ts').then(({ diffSamples }) => diffSamples()),
 ])
 
-if (!client.metafile) throw new Error('esbuild returned no metafile')
-const clientMeta: Metafile = client.metafile
+if (!client.metafile || !adminClient.metafile) throw new Error('esbuild returned no metafile')
+const clientOutputs = client.metafile.outputs
+const adminOutputs = adminClient.metafile.outputs
 
-function outputOf(source: string) {
-  const entry = Object.entries(clientMeta.outputs).find(
+function outputOf(source: string, outputs: Metafile['outputs']) {
+  const entry = Object.entries(outputs).find(
     ([, value]) => value.entryPoint && resolve(root, value.entryPoint) === resolve(root, source),
   )
   if (!entry) throw new Error(`Missing browser output for ${source}`)
@@ -105,25 +114,25 @@ function publicHref(file: string) {
   return '/' + relative(resolve(output, 'client'), resolve(root, file)).replaceAll('\\', '/')
 }
 function href(source: string) {
-  return publicHref(outputOf(source))
+  return publicHref(outputOf(source, clientOutputs))
 }
 // Every chunk a module imports statically, however deep. Preloading them lets
 // the browser fetch a page's scripts at once instead of one import level per
 // round trip, which on a slow connection costs seconds before hydration.
-function staticImports(file: string, found = new Set<string>()) {
-  for (const { path, kind, external } of clientMeta.outputs[file]?.imports ?? []) {
+function staticImports(file: string, outputs: Metafile['outputs'], found = new Set<string>()) {
+  for (const { path, kind, external } of outputs[file]?.imports ?? []) {
     if (kind !== 'import-statement' || external || found.has(path)) continue
     found.add(path)
-    staticImports(path, found)
+    staticImports(path, outputs, found)
   }
   return found
 }
-function scriptEntry(source: string) {
-  const file = outputOf(source)
+function scriptEntry(source: string, outputs = clientOutputs) {
+  const file = outputOf(source, outputs)
   return {
     href: publicHref(file),
     importMap: { imports: {} },
-    preloads: [file, ...staticImports(file)].map(publicHref),
+    preloads: [file, ...staticImports(file, outputs)].map(publicHref),
   }
 }
 
@@ -153,16 +162,23 @@ await writeFile(
 )
 
 const manifest = {
+  adminEntry: scriptEntry(pageEntry, adminOutputs),
+  adminStylesheets: adminStyles.map(href),
   appStyles: Object.fromEntries(appStyles.map(([slug, path]) => [slug, href(path)])),
   page: {
-    entry: scriptEntry('app/public/entry.ts'),
-    stylesheets: styles.map(href),
+    entry: scriptEntry(pageEntry),
+    stylesheets: showcaseStyles.map(href),
     favicon: '/favicon.svg',
     sounds: await getSoundAssets(href),
     ogImage: '/og.png',
     images: { sidebarAvatar: '/demo-avatar.svg', thinkingPreview: '/reflow-preview.png' },
   },
-  entries: Object.fromEntries([...clientEntries].map(([path, id]) => [id, scriptEntry(path)])),
+  entries: Object.fromEntries(
+    [...clientEntries].map(([path, id]) => [
+      id,
+      scriptEntry(path, path === adminWorkspace ? adminOutputs : clientOutputs),
+    ]),
+  ),
 }
 const worker = await build({
   ...common,
@@ -222,6 +238,10 @@ const worker = await build({
 await writeFile(resolve(output, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n')
 await writeFile(
   resolve(output, 'metadata.json'),
-  JSON.stringify({ client: client.metafile, worker: worker.metafile }, null, 2) + '\n',
+  JSON.stringify(
+    { client: client.metafile, admin: adminClient.metafile, worker: worker.metafile },
+    null,
+    2,
+  ) + '\n',
 )
 console.log(`Built showcase with ${clientEntries.size} client entry modules.`)

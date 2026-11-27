@@ -4,7 +4,7 @@ import { homedir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
-import type { Browser } from 'playwright'
+import type { Browser, Page } from 'playwright'
 import { expect } from 'playwright/test'
 import { startLocalWorker } from './local-worker.ts'
 
@@ -150,7 +150,9 @@ try {
   const manifest = JSON.parse(await readFile(resolve(root, 'build/manifest.json'), 'utf8'))
   const assets: [string, RegExp][] = [
     [manifest.page.entry.href, /javascript/],
+    [manifest.adminEntry.href, /javascript/],
     ...manifest.page.stylesheets.map((href: string): [string, RegExp] => [href, /text\/css/]),
+    ...manifest.adminStylesheets.map((href: string): [string, RegExp] => [href, /text\/css/]),
     ...Object.values(manifest.appStyles as Record<string, string>).map((href): [string, RegExp] => [
       href,
       /text\/css/,
@@ -168,13 +170,16 @@ try {
 
   browser = await chromium.launch()
   const page = await browser.newPage({ baseURL: origin })
+  function hydrate(page: Page) {
+    // The page entry waits for Remix hydration before it finishes evaluating.
+    return page.locator('head script[type="module"][src]').evaluate(async (script) => {
+      await import((script as HTMLScriptElement).src)
+    })
+  }
   async function openShowcase(path: string) {
     const response = await page.goto(path)
     assert.equal(response?.status(), 200, path)
-    // The entry waits for Remix hydration before it finishes evaluating.
-    await page.evaluate(async (entry) => {
-      await import(entry)
-    }, manifest.page.entry.href)
+    await hydrate(page)
     return response
   }
   const errors: string[] = []
@@ -243,6 +248,12 @@ try {
   await expect(page.getByRole('heading', { name: 'Example apps', exact: true })).toBeVisible()
   await openShowcase('/apps/issues')
   await expect(page.getByRole('heading', { name: 'Issue tracker', exact: true })).toBeVisible()
+  await openShowcase('/apps/admin')
+  await expect(page.locator('head script[type="module"][src]')).toHaveAttribute(
+    'src',
+    manifest.adminEntry.href,
+  )
+  await expect(page.getByRole('region', { name: 'Notifications' })).toHaveCount(1)
 
   await page.setViewportSize({ width: 390, height: 844 })
   await openShowcase('/docs/input-message')
@@ -288,9 +299,7 @@ try {
               `${path}?theme=${theme}&density=default&font=inter`,
             )
             assert.equal(response?.status(), 200, path)
-            await workerPage.evaluate(async (entry) => {
-              await import(entry)
-            }, manifest.page.entry.href)
+            await hydrate(workerPage)
             if (theme === 'dark') assert.match((await response?.text()) ?? '', /<\/html>/, path)
             const dimensions = await workerPage.evaluate(() => ({
               width: document.documentElement.clientWidth,

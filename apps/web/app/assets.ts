@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url'
 import { buildSync } from 'esbuild'
 import { createAssetServer } from 'remix/assets'
 import { loadConfig } from 'remix/cli'
+import { adminStyles, showcaseStyles } from './page-styles.ts'
 import { getSoundAssets } from './sound-assets.ts'
 import type { FileTreeSsrPayload } from '@rtzll/reflow/trees'
 import type { CodeSamples } from './public/code-block-example.tsx'
@@ -64,29 +65,22 @@ export interface ExampleImages {
 }
 
 export async function getPageAssets(appSlug?: string) {
-  const [entry, fonts, library, site, examples, favicon, sidebarAvatar, thinkingPreview, ogImage] =
-    await Promise.all([
-      assets.getScriptEntry('app/public/entry.ts'),
-      assets.getHref('app/public/fonts.css'),
-      assets.getHref('../../packages/reflow/dist/styles.css'),
-      assets.getHref('app/public/site.css'),
-      assets.getHref('app/public/examples.css'),
-      assets.getHref('app/public/favicon.svg'),
-      assets.getHref('app/public/demo-avatar.svg'),
-      assets.getHref('app/public/reflow-preview.png'),
-      assets.getHref('app/public/og.png'),
-    ])
+  const styles = appSlug === 'admin' ? adminStyles : showcaseStyles
+  const [entry, stylesheets, favicon, sidebarAvatar, thinkingPreview, ogImage] = await Promise.all([
+    assets.getScriptEntry('app/public/entry.ts'),
+    Promise.all(
+      (appSlug ? [...styles, `app/public/apps/${appSlug}/styles.css`] : styles).map((file) =>
+        assets.getHref(file),
+      ),
+    ),
+    assets.getHref('app/public/favicon.svg'),
+    assets.getHref('app/public/demo-avatar.svg'),
+    assets.getHref('app/public/reflow-preview.png'),
+    assets.getHref('app/public/og.png'),
+  ])
   return {
     entry,
-    stylesheets: appSlug
-      ? [
-          fonts,
-          library,
-          site,
-          examples,
-          await assets.getHref(`app/public/apps/${appSlug}/styles.css`),
-        ]
-      : [fonts, library, site, examples],
+    stylesheets,
     favicon,
     sounds: await getSoundAssets((file) => assets.getHref(file)),
     /** The link preview image every page shares. Regenerate it with `pnpm --filter @reflow/web og:image`. */

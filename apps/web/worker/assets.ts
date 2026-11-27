@@ -4,6 +4,8 @@ import type { getPageAssets as getDevelopmentPageAssets } from '../app/assets.ts
 // Replaced by the build with public URLs only, never filesystem paths.
 declare const REFLOW_ASSETS: {
   page: Awaited<ReturnType<typeof getDevelopmentPageAssets>>
+  adminEntry: ScriptEntry
+  adminStylesheets: string[]
   appStyles: Record<string, string>
   entries: Record<string, ScriptEntry>
 }
@@ -25,5 +27,12 @@ export async function getPageAssets(appSlug?: string) {
   if (!appSlug) return page
   const style = REFLOW_ASSETS.appStyles[appSlug]
   if (!style) throw new Error(`Unknown app stylesheet: ${appSlug}`)
+  if (appSlug === 'admin') {
+    return {
+      ...page,
+      entry: REFLOW_ASSETS.adminEntry,
+      stylesheets: [...REFLOW_ASSETS.adminStylesheets, style],
+    }
+  }
   return { ...page, stylesheets: [...page.stylesheets, style] }
 }
