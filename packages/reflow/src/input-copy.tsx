@@ -12,10 +12,31 @@ export type InputCopyProps = Omit<StyledProps<'div'>, 'children'> & {
   variant?: 'icon' | 'button'
   align?: 'left' | 'right'
   size?: ControlSize
+  /** Masks the displayed value (still copies the real `value`) and renders a reveal toggle. */
+  masked?: boolean
+  /** Controlled revealed state when `masked` is true. */
+  revealed?: boolean
+  /** Initial revealed state when `masked` is true and uncontrolled. */
+  defaultRevealed?: boolean
+  /** Called when the user toggles reveal/hide in `masked` mode. */
+  onRevealChange?: (revealed: boolean) => void
+  /** Custom formatter for the masked display value. */
+  maskValue?: (value: string) => string
+}
+
+function defaultMaskValue(value: string): string {
+  if (value.length >= 16) {
+    return `${value.slice(0, 8)}${'•'.repeat(12)}${value.slice(-4)}`
+  }
+  if (value.length >= 8) {
+    return `${value.slice(0, 2)}${'•'.repeat(8)}${value.slice(-2)}`
+  }
+  return '•'.repeat(Math.max(value.length, 6))
 }
 
 export function InputCopy(handle: Handle<InputCopyProps>) {
   let state: 'idle' | 'copied' | 'error' = 'idle'
+  let uncontrolledRevealed = Boolean(handle.props.defaultRevealed)
   // "idle" = normal tooltip behaviour, "copied" = forced open, "suppressed" = forced closed.
   let tooltipState: 'idle' | 'copied' | 'suppressed' = 'idle'
   let tooltipVisible = false
@@ -98,11 +119,36 @@ export function InputCopy(handle: Handle<InputCopyProps>) {
       size,
       variant = 'icon',
       align = 'right',
+      masked,
+      revealed: controlledRevealed,
+      defaultRevealed: _defaultRevealed,
+      onRevealChange,
+      maskValue,
       ...props
     } = handle.props
+    const isRevealed = masked ? (controlledRevealed ?? uncontrolledRevealed) : true
+    const displayedValue =
+      masked && !isRevealed ? (maskValue ? maskValue(value) : defaultMaskValue(value)) : value
     const valueId = handle.id + '-value'
     const buttonLabel = label ? 'Copy ' + label : 'Copy value'
+    const revealLabel = isRevealed
+      ? label
+        ? 'Hide ' + label
+        : 'Hide value'
+      : label
+        ? 'Reveal ' + label
+        : 'Reveal value'
     const feedback = state === 'copied' ? 'Copied' : state === 'error' ? 'Copy failed' : 'Copy'
+
+    function toggleReveal() {
+      if (disabled || !masked) return
+      const next = !isRevealed
+      if (controlledRevealed === undefined) {
+        uncontrolledRevealed = next
+      }
+      onRevealChange?.(next)
+      handle.update()
+    }
     const action = (
       <span class="rf-copy-action" aria-hidden="true">
         <span class="rf-copy-glyph" key={glyphKey} data-glyph={glyph} data-phase={phase}>
@@ -135,69 +181,90 @@ export function InputCopy(handle: Handle<InputCopyProps>) {
         data-state={state}
         data-align={align}
         data-disabled={disabled || undefined}
+        data-masked={masked || undefined}
+        data-revealed={masked ? (isRevealed ? 'true' : 'false') : undefined}
       >
         {label && <span class="rf-copy-label">{label}</span>}
-        {(() => {
-          const row = (extra?: { 'aria-describedby': string; mix: MixInput }) => (
+        <div class="rf-copy-line">
+          {(() => {
+            const row = (extra?: { 'aria-describedby': string; mix: MixInput }) => (
+              <button
+                type="button"
+                class="rf-copy-row"
+                aria-label={
+                  state === 'copied' ? 'Copied' : state === 'error' ? 'Copy failed' : buttonLabel
+                }
+                aria-describedby={extra ? valueId + ' ' + extra['aria-describedby'] : valueId}
+                disabled={disabled}
+                mix={[
+                  // Captured before the tooltip closes on press.
+                  on('pointerdown', () => {
+                    tooltipWasVisible = tooltipVisible
+                  }),
+                  on('pointerenter', () => {
+                    if (tooltipState === 'suppressed') {
+                      tooltipState = 'idle'
+                      handle.update()
+                    }
+                  }),
+                  on('pointerleave', () => {
+                    if (tooltipState === 'copied') {
+                      tooltipState = 'suppressed'
+                      handle.update()
+                    }
+                  }),
+                  on('click', copy),
+                  ...(extra ? [extra.mix] : []),
+                ]}
+              >
+                {align === 'left' && action}
+                <span id={valueId} class="rf-copy-value">
+                  <mark>{displayedValue}</mark>
+                </span>
+                {align === 'right' && action}
+              </button>
+            )
+            return variant === 'icon' ? (
+              <Tooltip
+                content={
+                  tooltipState === 'idle'
+                    ? 'Copy to clipboard'
+                    : state === 'error'
+                      ? 'Copy failed'
+                      : 'Copied'
+                }
+                open={
+                  tooltipState === 'copied'
+                    ? true
+                    : tooltipState === 'suppressed'
+                      ? false
+                      : undefined
+                }
+                onOpenChange={(open) => {
+                  tooltipVisible = open
+                }}
+                delayDuration={500}
+                sideOffset={2}
+                renderTrigger={row}
+              />
+            ) : (
+              row()
+            )
+          })()}
+          {masked && (
             <button
               type="button"
-              class="rf-copy-row"
-              aria-label={
-                state === 'copied' ? 'Copied' : state === 'error' ? 'Copy failed' : buttonLabel
-              }
-              aria-describedby={extra ? valueId + ' ' + extra['aria-describedby'] : valueId}
+              class="rf-copy-reveal"
+              aria-pressed={isRevealed}
+              aria-label={revealLabel}
               disabled={disabled}
-              mix={[
-                // Captured before the tooltip closes on press.
-                on('pointerdown', () => {
-                  tooltipWasVisible = tooltipVisible
-                }),
-                on('pointerenter', () => {
-                  if (tooltipState === 'suppressed') {
-                    tooltipState = 'idle'
-                    handle.update()
-                  }
-                }),
-                on('pointerleave', () => {
-                  if (tooltipState === 'copied') {
-                    tooltipState = 'suppressed'
-                    handle.update()
-                  }
-                }),
-                on('click', copy),
-                ...(extra ? [extra.mix] : []),
-              ]}
+              mix={on('click', toggleReveal)}
             >
-              {align === 'left' && action}
-              <span id={valueId} class="rf-copy-value">
-                <mark>{value}</mark>
-              </span>
-              {align === 'right' && action}
+              <Icon name={isRevealed ? 'lock' : 'shield'} size={14} />
+              <span>{isRevealed ? 'Hide' : 'Reveal'}</span>
             </button>
-          )
-          return variant === 'icon' ? (
-            <Tooltip
-              content={
-                tooltipState === 'idle'
-                  ? 'Copy to clipboard'
-                  : state === 'error'
-                    ? 'Copy failed'
-                    : 'Copied'
-              }
-              open={
-                tooltipState === 'copied' ? true : tooltipState === 'suppressed' ? false : undefined
-              }
-              onOpenChange={(open) => {
-                tooltipVisible = open
-              }}
-              delayDuration={500}
-              sideOffset={2}
-              renderTrigger={row}
-            />
-          ) : (
-            row()
-          )
-        })()}
+          )}
+        </div>
         <span class="rf-basic-sr-only" role="status">
           {state === 'idle' ? '' : feedback}
         </span>

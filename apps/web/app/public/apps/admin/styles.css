@@ -223,16 +223,6 @@
   border-top: 1px solid var(--rf-border);
 }
 
-.admin-webhook-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--rf-muted);
-}
-
 .admin-form-actions,
 .admin-dialog-actions {
   display: flex;

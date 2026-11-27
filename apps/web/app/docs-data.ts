@@ -4796,6 +4796,37 @@ export const componentApi: Record<ComponentSlug, readonly ApiSection[]> = {
           description: 'Control density or icon-button dimensions.',
           required: false,
         },
+        {
+          name: 'masked',
+          type: 'boolean',
+          description:
+            'Masks the displayed text while keeping the real value on copy, and shows a click-to-reveal toggle.',
+          required: false,
+        },
+        {
+          name: 'revealed',
+          type: 'boolean',
+          description: 'Controlled revealed state when masked is enabled.',
+          required: false,
+        },
+        {
+          name: 'defaultRevealed',
+          type: 'boolean',
+          description: 'Initial revealed state when masked is enabled and uncontrolled.',
+          required: false,
+        },
+        {
+          name: 'onRevealChange',
+          type: '((revealed: boolean) => void)',
+          description: 'Called when the user toggles reveal or hide in masked mode.',
+          required: false,
+        },
+        {
+          name: 'maskValue',
+          type: '((value: string) => string)',
+          description: 'Custom formatter for the masked preview string.',
+          required: false,
+        },
       ],
     },
   ],

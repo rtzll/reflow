@@ -110,7 +110,6 @@ export const AdminWorkspace = clientEntry(
     let audit: AuditEvent[] = [...handle.props.initialAudit]
 
     let revealedKeys = new Set<string>()
-    let revealWebhookSecret = false
     let freshSecret: { name: string; secret: string; action: 'created' | 'rotated' } | null = null
 
     let keyQuery = ''
@@ -777,29 +776,10 @@ export const AdminWorkspace = clientEntry(
               </div>
 
               <div class="admin-webhook-secret">
-                <div class="admin-webhook-head">
-                  <span>Webhook signing secret</span>
-                  <Button
-                    type="button"
-                    size="compact"
-                    variant="ghost"
-                    aria-pressed={revealWebhookSecret}
-                    mix={on('click', () => {
-                      revealWebhookSecret = !revealWebhookSecret
-                      void handle.update()
-                    })}
-                  >
-                    <Icon name={revealWebhookSecret ? 'lock' : 'shield'} size={14} />
-                    {revealWebhookSecret ? 'Hide' : 'Reveal'}
-                  </Button>
-                </div>
                 <InputCopy
-                  aria-label="Webhook signing secret"
-                  value={
-                    revealWebhookSecret
-                      ? settings.webhookSecret
-                      : maskSecret(settings.webhookSecret)
-                  }
+                  label="Webhook signing secret"
+                  value={settings.webhookSecret}
+                  masked
                   size="compact"
                   onCopy={playCopySuccess}
                 />

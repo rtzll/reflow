@@ -466,7 +466,7 @@ ${opening} label="Components" placeholder="${values.multiple ? 'Add componentsâ€
     case 'input':
       return `${opening} aria-label="Input"${values.invalid ? ' aria-invalid="true"' : ''} placeholder="Enter a value" />`
     case 'input-copy':
-      return `${opening} value="pnpm install remix @remix-run/ui" />`
+      return `${opening} value="${values.masked ? 'rf_live_98d4c1f7e2a0b6c39f2c' : 'pnpm install remix @remix-run/ui'}" />`
     case 'input-group':
       return `<InputGroup>${values.multiple ? '<InputField label="Name" placeholder="Your name" />' : ''}<InputField label="Email" placeholder="you@company.com"${values.error ? ' error="Enter a valid email address."' : ''} /></InputGroup>`
     case 'input-message': {

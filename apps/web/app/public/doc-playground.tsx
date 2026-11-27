@@ -306,6 +306,7 @@ export const playgroundControls: Record<string, readonly Control[]> = {
   'input-copy': [
     choice('variant', 'Variant', ['icon', 'button']),
     choice('align', 'Action', ['right', 'left']),
+    toggle('masked', 'Masked secret'),
     disabled,
     size,
   ],
@@ -1177,10 +1178,11 @@ export function PlaygroundExample(
       case 'input-copy':
         return (
           <InputCopy
-            value="pnpm install remix @remix-run/ui"
+            value={v.masked ? 'rf_live_98d4c1f7e2a0b6c39f2c' : 'pnpm install remix @remix-run/ui'}
             onCopy={playCopySuccess}
             variant={v.variant === 'button' ? 'button' : 'icon'}
             align={v.align === 'left' ? 'left' : 'right'}
+            masked={Boolean(v.masked)}
             disabled={disabled}
             size={density}
           />

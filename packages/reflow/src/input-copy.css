@@ -17,8 +17,17 @@
   font-variation-settings: var(--rf-weight-normal);
 }
 
+.rf-copy-line {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
 .rf-copy-row {
   display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
   align-items: center;
   width: 100%;
   box-sizing: border-box;
@@ -30,6 +39,45 @@
   font: inherit;
   text-align: start;
   cursor: pointer;
+}
+
+.rf-copy-reveal {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+  padding: var(--rf-copy-py) 8px;
+  border: 0;
+  border-radius: var(--rf-radius);
+  background: transparent;
+  color: var(--rf-muted);
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color var(--rf-fast),
+    background-color var(--rf-fast);
+}
+
+.rf-copy-reveal:focus-visible {
+  outline: 1px solid var(--rf-accent);
+  color: var(--rf-fg);
+}
+
+.rf-copy-reveal:disabled {
+  cursor: default;
+}
+
+@media (hover: hover) {
+  .rf-copy-reveal:hover:not(:disabled) {
+    background: var(--rf-hover);
+    color: var(--rf-fg);
+  }
+}
+
+.rf-input-copy[data-masked][data-revealed='true'] .rf-copy-value > mark {
+  background: color-mix(in oklab, var(--rf-accent) 10%, transparent);
+  border-radius: 3px;
 }
 
 .rf-copy-row:focus-visible {

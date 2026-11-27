@@ -595,6 +595,15 @@ export function FormDemos(handle: Handle<{ slug: string; variant: string }>) {
           )
         if (variant === 'disabled')
           return narrow(<InputCopy label="Invite code" value="ABCD-1234-EFGH" disabled />)
+        if (variant === 'masked')
+          return narrow(
+            <InputCopy
+              label="API secret"
+              value="rf_live_98d4c1f7e2a0b6c39f2c"
+              masked
+              onCopy={playCopySuccess}
+            />,
+          )
         if (variant === 'callback')
           return (
             <div class="doc-demo-copy doc-demo-stack">

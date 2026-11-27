@@ -855,6 +855,11 @@ function setEditing(open: boolean) {
       `<InputCopy label="Invite code" value="ABCD-1234-EFGH" disabled />`,
     ),
     demo(
+      'Masked Secret',
+      'masked',
+      `<InputCopy label="API secret" value="rf_live_98d4c1f7e2a0b6c39f2c" masked />`,
+    ),
+    demo(
       'Copy Callback',
       'callback',
       `<InputCopy label="Share link" value="https://reflow.example/r/input-copy" onCopy={() => count++} />`,

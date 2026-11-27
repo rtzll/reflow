@@ -78,7 +78,7 @@ it('updates workspace settings, manages RBAC roles, and stays overflow-free on m
   await expect(page.getByText('Unsaved workspace changes')).toBeVisible()
   const webhookValue = page.locator('.admin-webhook-secret .rf-copy-value')
   await expect(webhookValue).toHaveText(/whsec_7f•+d914/)
-  await page.getByRole('button', { name: 'Reveal', exact: true }).click()
+  await page.getByRole('button', { name: 'Reveal Webhook signing secret', exact: true }).click()
   await expect(webhookValue).toHaveText('whsec_7f9c41a8e20b3d559a1e4c80f6b2d914')
   await page.getByRole('button', { name: 'Save changes', exact: true }).click()
   await expect(page.getByText('Unsaved workspace changes')).toHaveCount(0)
