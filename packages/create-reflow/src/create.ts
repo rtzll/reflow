@@ -11,17 +11,29 @@ import {
 } from 'node:fs'
 import { basename, join, resolve } from 'node:path'
 import { parseArgs } from 'node:util'
+import {
+  applyTemplateVariant,
+  cssBundles,
+  defaultCssForTemplate,
+  templateNames,
+  type CssBundle,
+  type TemplateName,
+} from './templates.ts'
 
-export const usage = `Usage: create-reflow <directory> [--no-install]
+export const usage = `Usage: create-reflow <directory> [--template <starter|form|minimal>] [--css <styles|core>] [--no-install]
 
 Creates a Remix 3 app that uses Reflow components.
 
-  --no-install  Copy the files without running pnpm install
-  --help        Show this message`
+  -t, --template  Starter template: starter (default), form (POST FormData), or minimal
+  --css           Reflow stylesheet: styles (all domains) or core (smaller core bundle)
+  --no-install    Copy the files without running pnpm install
+  --help          Show this message`
 
 export interface Options {
   directory: string
   install: boolean
+  template?: TemplateName
+  css?: CssBundle
   /** A packed @rtzll/reflow to use instead of the npm release, for testing. */
   tarball?: string
 }
@@ -33,15 +45,30 @@ export function readOptions(args: string[]): Options | 'help' {
     allowNegative: true,
     options: {
       install: { type: 'boolean', default: true },
+      template: { type: 'string', short: 't' },
+      css: { type: 'string' },
       tarball: { type: 'string' },
       help: { type: 'boolean', short: 'h' },
     },
   })
   if (values.help) return 'help'
   if (positionals.length !== 1) throw new Error('Name one directory to create.')
+
+  const template = (values.template ?? 'starter') as TemplateName
+  if (!templateNames.includes(template)) {
+    throw new Error(`Unknown template "${values.template}". Choose ${templateNames.join(', ')}.`)
+  }
+
+  const css = (values.css ?? defaultCssForTemplate(template)) as CssBundle
+  if (!cssBundles.includes(css)) {
+    throw new Error(`Unknown css bundle "${values.css}". Choose ${cssBundles.join(', ')}.`)
+  }
+
   return {
     directory: positionals[0],
     install: values.install,
+    template,
+    css,
     tarball: values.tarball && resolve(values.tarball),
   }
 }
@@ -83,6 +110,9 @@ export function create(
   mkdirSync(destination, { recursive: true })
   cpSync(template, destination, { recursive: true })
   renameSync(join(destination, '_gitignore'), join(destination, '.gitignore'))
+  const templateName = options.template ?? 'starter'
+  const cssBundle = options.css ?? defaultCssForTemplate(templateName)
+  applyTemplateVariant(destination, templateName, cssBundle)
 
   const file = join(destination, 'package.json')
   const manifest = JSON.parse(readFileSync(file, 'utf8'))

@@ -21,16 +21,36 @@ test('reads the directory and flags', () => {
   assert.deepEqual(readOptions(['my-app']), {
     directory: 'my-app',
     install: true,
+    template: 'starter',
+    css: 'styles',
     tarball: undefined,
   })
   assert.deepEqual(readOptions(['my-app', '--no-install']), {
     directory: 'my-app',
     install: false,
+    template: 'starter',
+    css: 'styles',
+    tarball: undefined,
+  })
+  assert.deepEqual(readOptions(['my-app', '--template', 'form']), {
+    directory: 'my-app',
+    install: true,
+    template: 'form',
+    css: 'core',
+    tarball: undefined,
+  })
+  assert.deepEqual(readOptions(['my-app', '-t', 'minimal', '--css', 'styles']), {
+    directory: 'my-app',
+    install: true,
+    template: 'minimal',
+    css: 'styles',
     tarball: undefined,
   })
   assert.equal(readOptions(['--help']), 'help')
   assert.throws(() => readOptions([]), /one directory/)
   assert.throws(() => readOptions(['a', 'b']), /one directory/)
+  assert.throws(() => readOptions(['a', '--template', 'nope']), /Unknown template/)
+  assert.throws(() => readOptions(['a', '--css', 'nope']), /Unknown css bundle/)
   assert.throws(() => readOptions(['a', '--unknown']))
 })
 
@@ -108,5 +128,35 @@ test('accepts an empty directory but never overwrites files', () => {
   assert.throws(
     () => create({ directory: file, install: false }, template, noInstall),
     /already exists/,
+  )
+})
+
+test('scaffolds form and minimal templates and supports --css core', () => {
+  const formDir = join(temporary, 'form-app')
+  create({ directory: formDir, install: false, template: 'form' }, template, noInstall)
+  assert.ok(existsSync(join(formDir, 'app/public/form-workspace.tsx')))
+  assert.ok(!existsSync(join(formDir, 'app/public/settings.tsx')))
+  const formController = readFileSync(join(formDir, 'app/actions/controller.tsx'), 'utf8')
+  assert.match(formController, /@rtzll\/reflow\/core\.css/)
+  assert.match(formController, /request\.formData\(\)/)
+
+  const minimalDir = join(temporary, 'minimal-app')
+  create({ directory: minimalDir, install: false, template: 'minimal' }, template, noInstall)
+  assert.ok(existsSync(join(minimalDir, 'app/public/app.tsx')))
+  assert.ok(!existsSync(join(minimalDir, 'app/public/settings.tsx')))
+  assert.match(
+    readFileSync(join(minimalDir, 'app/actions/controller.tsx'), 'utf8'),
+    /@rtzll\/reflow\/core\.css/,
+  )
+
+  const coreStarterDir = join(temporary, 'core-starter')
+  create(
+    { directory: coreStarterDir, install: false, template: 'starter', css: 'core' },
+    template,
+    noInstall,
+  )
+  assert.match(
+    readFileSync(join(coreStarterDir, 'app/actions/controller.tsx'), 'utf8'),
+    /@rtzll\/reflow\/core\.css/,
   )
 })
