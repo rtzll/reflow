@@ -561,6 +561,46 @@ ${opening} sections={sections}
       return `<TriageQueue items={incoming} onDecision={handleDecision}${values.size === 'compact' ? ' size="compact"' : ''} />`
     case 'quick-create-bar':
       return `<QuickCreateBar assignees={assignees}${values.defaultPriority && values.defaultPriority !== 'medium' ? ` defaultPriority="${values.defaultPriority}"` : ''}${values.showCreateMore === false ? ' showCreateMore={false}' : ''}${values.size === 'compact' ? ' size="compact"' : ''} onCreate={createIssue} />`
+    case 'alert-dialog':
+      return `<AlertDialog trigger="Revoke API key" title="Revoke production key?" description="Requests signed with this key will fail immediately." confirmLabel="Revoke key" confirmVariant="${values.confirmVariant}"${values.size === 'compact' ? ' triggerSize="compact"' : ''} onConfirm={revokeKey} />`
+    case 'split-button':
+      return `<SplitButton label="Squash and merge" variant="${values.variant}"${values.loading ? ' loading' : ''}${values.disabled ? ' disabled' : ''}${values.size === 'compact' ? ' size="compact"' : ''} items={mergeOptions} onClick={merge} onSelect={selectMode} />`
+    case 'number-field':
+      return `<NumberField label="Retry attempts" defaultValue={3} min={0} max={50} step={${values.step}}${values.scrub === false ? '' : ' scrub'}${values.disabled ? ' disabled' : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'pagination':
+      return `<Pagination page={page} pageCount={${values.pageCount}}${values.size === 'compact' ? ' size="compact"' : ''} onPageChange={setPage} />`
+    case 'empty-state':
+      return `<EmptyState title="No matching audit events" description="Clear your active filter facets."${values.surface === 'outlined' ? ' surface="outlined"' : ''}${values.showActions ? ' actions={<Button variant="secondary">Clear filters</Button>}' : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'inline-edit':
+      return `<InlineEdit label="Document title" value={title}${values.disabled ? ' disabled' : ''}${values.size === 'compact' ? ' size="compact"' : ''} onCommit={setTitle} />`
+    case 'copy-chip':
+      return `<CopyChip value="3f1976a9b2c4e801d7"${values.shortDisplay ? ' display="3f1976a"' : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'kbd':
+      return `<Kbd keys="mod+shift+p" variant="${values.variant}" platform="${values.platform}"${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'skeleton':
+      return `<Skeleton shape="${values.shape}" width="${values.shape === 'circle' ? '44px' : '100%'}" height="${values.shape === 'circle' ? '44px' : '14px'}"${values.animate === false ? ' animate={false}' : ''} />`
+    case 'spinner':
+      return `<Spinner label="Loading builds" size="${values.diameter}" />`
+    case 'progress-ring':
+      return `<ProgressRing label="Cycle completion" value={${values.value}} tone="${values.tone}" size={${values.diameter}} />`
+    case 'proportion-bar':
+      return `<ProportionBar label="Test outcomes" segments={segments} height={${values.height}}${values.showLegend === false ? ' showLegend={false}' : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'priority-indicator':
+      return `<PriorityIndicator priority="${values.priority}"${values.showLabel ? ' showLabel' : ''} />`
+    case 'status-icon':
+      return `<StatusIcon status="${values.status}"${values.showLabel ? ' showLabel' : ''} />`
+    case 'estimate-pill':
+      return `<EstimatePill value={3} unit="${values.unit}"${values.readonly ? ' readonly' : ''}${values.size === 'compact' ? ' size="compact"' : ''} onChange={setEstimate} />`
+    case 'diff-stat':
+      return `<DiffStat added={142} removed={38} blocks={${values.blocks}}${values.showCounts === false ? ' showCounts={false}' : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'size-delta':
+      return `<SizeDelta items={artifacts}${values.showTotal === false ? ' showTotal={false}' : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'saved-view-tabs':
+      return `<SavedViewTabs views={views} activeId={activeId}${values.size === 'compact' ? ' size="compact"' : ''} onSelect={setActiveId} onCreate={createView} />`
+    case 'metadata-list':
+      return `<MetadataList label="Pull request metadata" orientation="${values.orientation}" items={items}${values.size === 'compact' ? ' size="compact"' : ''} />`
+    case 'file-input':
+      return `<FileInput label="Attach diagnostic logs"${values.multiple ? ' multiple' : ''}${values.disabled ? ' disabled' : ''}${values.size === 'compact' ? ' size="compact"' : ''} />`
     default:
       return `${opening} />`
   }

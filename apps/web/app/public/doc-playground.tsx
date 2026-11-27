@@ -42,6 +42,7 @@ import { clientEntry, on, ref, type Handle } from 'remix/component'
 import {
   ChatLayout,
   Accordion,
+  AlertDialog,
   AskUserQuestions,
   Badge,
   Button,
@@ -56,17 +57,32 @@ import {
   Checkbox,
   CheckboxGroup,
   ColorPicker,
+  CopyChip,
   DatePicker,
+  DiffStat,
+  EmptyState,
+  FileInput,
   Icon,
   Input,
   InputCopy,
   InputField,
   InputGroup,
+  Kbd,
+  MetadataList,
+  NumberField,
+  PriorityIndicator,
   Progress,
+  ProgressRing,
+  ProportionBar,
   InputMessage,
   RadioGroup,
   Select,
+  SizeDelta,
+  Skeleton,
   Slider,
+  Spinner,
+  SplitButton,
+  StatusIcon,
   Switch,
   Table,
   TableBody,
@@ -82,6 +98,9 @@ import {
   type BadgeColor,
   type ButtonVariant,
   type ColorFormat,
+  type IssuePriority,
+  type IssueStatusKind,
+  type ProgressRingTone,
   type SparklineTone,
 } from '@rtzll/reflow'
 import { Markdown, type MarkdownEditorMode } from '@rtzll/reflow/markdown'
@@ -116,6 +135,12 @@ import {
   RoadmapTimelineExample,
   TriageQueueExample,
 } from './wave17-examples.tsx'
+import {
+  EstimatePillPlayground,
+  InlineEditPlayground,
+  PaginationPlayground,
+  SavedViewTabsPlayground,
+} from './core-playground-examples.tsx'
 
 export type PlaygroundValues = Record<string, string | boolean>
 interface Control {
@@ -547,6 +572,68 @@ export const playgroundControls: Record<string, readonly Control[]> = {
     choice('defaultPriority', 'Priority', ['medium', 'urgent', 'high', 'low', 'none']),
     toggle('showCreateMore', 'Create more', true),
   ],
+  'alert-dialog': [
+    choice('confirmVariant', 'Confirm style', ['destructive', 'primary', 'secondary']),
+    size,
+  ],
+  'split-button': [
+    choice('variant', 'Variant', ['primary', 'secondary', 'destructive']),
+    toggle('loading', 'Loading'),
+    disabled,
+    size,
+  ],
+  'number-field': [
+    choice('step', 'Step', ['1', '5', '10']),
+    toggle('scrub', 'Label scrub', true),
+    disabled,
+    size,
+  ],
+  pagination: [choice('pageCount', 'Pages', ['7', '12', '3']), size],
+  'empty-state': [
+    choice('surface', 'Surface', ['plain', 'outlined']),
+    toggle('showActions', 'Action button', true),
+    size,
+  ],
+  'inline-edit': [disabled, size],
+  'copy-chip': [toggle('shortDisplay', 'Short SHA display', true), size],
+  kbd: [
+    choice('variant', 'Variant', ['subtle', 'outline']),
+    choice('platform', 'Platform', ['mac', 'other']),
+    size,
+  ],
+  skeleton: [choice('shape', 'Shape', ['rounded', 'circle']), toggle('animate', 'Shimmer', true)],
+  spinner: [choice('diameter', 'Diameter', ['16px', '24px', '32px'])],
+  'progress-ring': [
+    choice('tone', 'Tone', ['accent', 'success', 'warning', 'danger', 'info']),
+    choice('value', 'Value', ['72', '35', '100']),
+    choice('diameter', 'Diameter', ['44', '28', '60']),
+  ],
+  'proportion-bar': [
+    toggle('showLegend', 'Legend', true),
+    choice('height', 'Thickness', ['8', '12', '6']),
+    size,
+  ],
+  'priority-indicator': [
+    choice('priority', 'Priority', ['urgent', 'high', 'medium', 'low', 'none']),
+    toggle('showLabel', 'Label', true),
+  ],
+  'status-icon': [
+    choice('status', 'Status', [
+      'in-progress',
+      'backlog',
+      'todo',
+      'in-review',
+      'done',
+      'cancelled',
+    ]),
+    toggle('showLabel', 'Label', true),
+  ],
+  'estimate-pill': [choice('unit', 'Unit', ['pts', 'h']), toggle('readonly', 'Read-only'), size],
+  'diff-stat': [choice('blocks', 'Blocks', ['5', '8']), toggle('showCounts', 'Counts', true), size],
+  'size-delta': [toggle('showTotal', 'Total row', true), size],
+  'saved-view-tabs': [toggle('dirty', 'Unsaved state'), size],
+  'metadata-list': [choice('orientation', 'Layout', ['stacked', 'inline']), size],
+  'file-input': [toggle('multiple', 'Multiple files', true), disabled, size],
 }
 
 export function questionSettings(values: PlaygroundValues) {
@@ -1506,6 +1593,223 @@ export function PlaygroundExample(
             defaultPriority={v.defaultPriority as 'urgent' | 'high' | 'medium' | 'low' | 'none'}
             showCreateMore={Boolean(v.showCreateMore)}
           />
+        )
+      case 'alert-dialog':
+        return (
+          <AlertDialog
+            trigger="Revoke API key"
+            triggerVariant={v.confirmVariant === 'destructive' ? 'destructive' : 'secondary'}
+            triggerSize={density}
+            title="Revoke production key?"
+            description="Requests signed with rf_live_98d4 will fail immediately. This action cannot be undone."
+            confirmLabel="Revoke key"
+            confirmVariant={v.confirmVariant as ButtonVariant}
+            onConfirm={() => {}}
+          />
+        )
+      case 'split-button':
+        return (
+          <SplitButton
+            label="Squash and merge"
+            variant={v.variant as 'primary' | 'secondary' | 'destructive'}
+            loading={Boolean(v.loading)}
+            disabled={disabled}
+            size={density}
+            items={[
+              { value: 'squash', label: 'Squash and merge' },
+              { value: 'merge', label: 'Create a merge commit' },
+              { value: 'rebase', label: 'Rebase and merge' },
+            ]}
+            onClick={() => {}}
+            onSelect={() => {}}
+          />
+        )
+      case 'number-field':
+        return (
+          <NumberField
+            key={String(v.step)}
+            label="Retry attempts"
+            defaultValue={3}
+            min={0}
+            max={50}
+            step={Number(v.step)}
+            scrub={Boolean(v.scrub)}
+            disabled={disabled}
+            size={density}
+          />
+        )
+      case 'pagination':
+        return <PaginationPlayground pageCount={Number(v.pageCount)} size={density} />
+      case 'empty-state':
+        return (
+          <EmptyState
+            title="No matching audit events"
+            description="Clear your active filter facets or widen the time range."
+            surface={v.surface === 'outlined' ? 'outlined' : 'plain'}
+            size={density}
+            actions={
+              v.showActions ? (
+                <Button size="compact" variant="secondary">
+                  Clear filters
+                </Button>
+              ) : undefined
+            }
+          />
+        )
+      case 'inline-edit':
+        return <InlineEditPlayground disabled={disabled} size={density} />
+      case 'copy-chip':
+        return (
+          <CopyChip
+            value="3f1976a9b2c4e801d7"
+            display={v.shortDisplay ? '3f1976a' : undefined}
+            size={density}
+            onCopy={playCopySuccess}
+          />
+        )
+      case 'kbd':
+        return (
+          <Kbd
+            keys="mod+shift+p"
+            variant={v.variant === 'outline' ? 'outline' : 'subtle'}
+            platform={v.platform === 'other' ? 'other' : 'mac'}
+            size={density}
+          />
+        )
+      case 'skeleton':
+        return v.shape === 'circle' ? (
+          <Skeleton shape="circle" width="44px" height="44px" animate={Boolean(v.animate)} />
+        ) : (
+          <div style={{ display: 'grid', gap: '8px', width: '240px' }}>
+            <Skeleton width="70%" height="14px" animate={Boolean(v.animate)} />
+            <Skeleton width="100%" height="12px" animate={Boolean(v.animate)} />
+            <Skeleton width="85%" height="12px" animate={Boolean(v.animate)} />
+          </div>
+        )
+      case 'spinner':
+        return <Spinner label="Loading builds" size={String(v.diameter)} />
+      case 'progress-ring': {
+        const val = Number(v.value)
+        const dia = Number(v.diameter)
+        return (
+          <ProgressRing
+            label="Cycle completion"
+            value={val}
+            tone={v.tone as ProgressRingTone}
+            size={dia}
+          >
+            {dia >= 44 ? `${val}%` : undefined}
+          </ProgressRing>
+        )
+      }
+      case 'proportion-bar':
+        return (
+          <div style={{ width: 'min(100%, 340px)' }}>
+            <ProportionBar
+              label="Test outcomes"
+              showLegend={Boolean(v.showLegend)}
+              height={Number(v.height)}
+              size={density}
+              segments={[
+                { id: 'pass', label: 'Passed', value: 284, tone: 'success' },
+                { id: 'flaky', label: 'Flaky', value: 11, tone: 'warning' },
+                { id: 'fail', label: 'Failed', value: 6, tone: 'danger' },
+              ]}
+            />
+          </div>
+        )
+      case 'priority-indicator':
+        return (
+          <PriorityIndicator
+            priority={v.priority as IssuePriority}
+            showLabel={Boolean(v.showLabel)}
+          />
+        )
+      case 'status-icon':
+        return <StatusIcon status={v.status as IssueStatusKind} showLabel={Boolean(v.showLabel)} />
+      case 'estimate-pill':
+        return (
+          <EstimatePillPlayground
+            unit={String(v.unit)}
+            readonly={Boolean(v.readonly)}
+            size={density}
+          />
+        )
+      case 'diff-stat':
+        return (
+          <DiffStat
+            added={142}
+            removed={38}
+            blocks={Number(v.blocks)}
+            showCounts={Boolean(v.showCounts)}
+            size={density}
+          />
+        )
+      case 'size-delta':
+        return (
+          <div style={{ width: 'min(100%, 420px)' }}>
+            <SizeDelta
+              showTotal={Boolean(v.showTotal)}
+              size={density}
+              items={[
+                {
+                  id: 'core',
+                  name: 'dist/core.css',
+                  beforeBytes: 64_200,
+                  afterBytes: 51_400,
+                  encoding: 'gzip',
+                },
+                {
+                  id: 'index',
+                  name: 'dist/index.js',
+                  beforeBytes: 28_100,
+                  afterBytes: 30_900,
+                  encoding: 'gzip',
+                },
+              ]}
+            />
+          </div>
+        )
+      case 'saved-view-tabs':
+        return <SavedViewTabsPlayground dirty={Boolean(v.dirty)} size={density} />
+      case 'metadata-list':
+        return (
+          <div style={{ width: 'min(100%, 340px)' }}>
+            <MetadataList
+              label="Pull request metadata"
+              orientation={v.orientation === 'inline' ? 'inline' : 'stacked'}
+              size={density}
+              items={[
+                {
+                  id: 'commit',
+                  label: 'Commit',
+                  value: <CopyChip value="3f1976a" size="compact" />,
+                },
+                {
+                  id: 'status',
+                  label: 'Status',
+                  value: (
+                    <Badge color="green" size="compact">
+                      Ready
+                    </Badge>
+                  ),
+                },
+                { id: 'branch', label: 'Branch', value: <code>feat/masked-copy</code> },
+              ]}
+            />
+          </div>
+        )
+      case 'file-input':
+        return (
+          <div style={{ width: 'min(100%, 340px)' }}>
+            <FileInput
+              label="Attach diagnostic logs"
+              description="Upload .json, .log, or .har archives."
+              multiple={Boolean(v.multiple)}
+              disabled={disabled}
+              size={density}
+            />
+          </div>
         )
     }
     return null
