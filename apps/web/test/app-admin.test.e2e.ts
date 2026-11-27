@@ -134,3 +134,29 @@ it('updates workspace settings, manages RBAC roles, and stays overflow-free on m
   )
   expect(overflow).toBeLessThanOrEqual(0)
 })
+
+it('keeps Admin navigation and audit details reachable at narrow widths', async (t) => {
+  const page = await t.serve(showcaseServer)
+  await page.setViewportSize({ width: 320, height: 720 })
+  await open(page, '/apps/admin')
+
+  const title = page.locator('.admin-title-row .rf-inline-edit-text')
+  expect(await title.evaluate((element) => element.scrollWidth - element.clientWidth)).toBe(0)
+  const tabs = page.getByRole('tablist', { name: 'Admin console sections' })
+  expect(await tabs.evaluate((element) => element.scrollWidth - element.clientWidth)).toBe(0)
+  await tabs.getByRole('tab', { name: /^Audit log/ }).click()
+
+  const event = page.getByRole('button', { name: /settings\.sso_enforced/ })
+  await event.click()
+  const detail = page.getByRole('complementary', { name: 'Selected audit event details' })
+  await expect(detail).toBeFocused()
+  await expect(detail.getByRole('heading', { name: 'settings.sso_enforced' })).toBeInViewport()
+  await detail.getByRole('button', { name: 'Back to events' }).click()
+  await expect(event).toBeFocused()
+  await expect(event).toBeInViewport()
+
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await expect(detail.getByRole('button', { name: 'Back to events' })).toBeHidden()
+  await event.click()
+  await expect(event).toBeFocused()
+})

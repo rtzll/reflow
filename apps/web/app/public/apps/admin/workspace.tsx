@@ -33,7 +33,7 @@ import {
   toast,
   type BadgeColor,
 } from '@rtzll/reflow'
-import { clientEntry, on, type Handle } from 'remix/component'
+import { clientEntry, on, ref, type Handle } from 'remix/component'
 import { playCopyError, playCopySuccess } from '../../showcase-sound.ts'
 import {
   PINNED_NOW,
@@ -116,6 +116,11 @@ export const AdminWorkspace = clientEntry(
     let teamQuery = ''
     let auditQuery = ''
     let selectedAuditId = audit[0]?.id ?? ''
+    const auditDetailId = `${handle.id}-audit-detail`
+    let auditDetail: HTMLElement | undefined
+    const mountAuditDetail = ref<HTMLElement>((node) => {
+      auditDetail = node
+    })
 
     // Create key dialog state
     let createKeyOpen = false
@@ -956,9 +961,16 @@ export const AdminWorkspace = clientEntry(
                         type="button"
                         class="admin-audit-item"
                         aria-current={active ? 'true' : undefined}
+                        aria-controls={auditDetailId}
                         mix={on('click', () => {
                           selectedAuditId = entry.id
                           void handle.update()
+                          if (matchMedia('(max-width: 960px)').matches) {
+                            handle.queueTask(() => {
+                              auditDetail?.focus({ preventScroll: true })
+                              auditDetail?.scrollIntoView({ block: 'start' })
+                            })
+                          }
                         })}
                       >
                         <div class="admin-audit-item-top">
@@ -980,7 +992,26 @@ export const AdminWorkspace = clientEntry(
               </ul>
 
               {selectedAudit && (
-                <aside class="admin-audit-detail" aria-label="Selected audit event details">
+                <aside
+                  id={auditDetailId}
+                  class="admin-audit-detail"
+                  aria-label="Selected audit event details"
+                  tabIndex={-1}
+                  mix={mountAuditDetail}
+                >
+                  <Button
+                    class="admin-audit-back"
+                    size="compact"
+                    variant="ghost"
+                    leadingIcon={<Icon name="chevron-left" />}
+                    mix={on('click', () =>
+                      auditDetail?.parentElement
+                        ?.querySelector<HTMLButtonElement>('.admin-audit-item[aria-current="true"]')
+                        ?.focus(),
+                    )}
+                  >
+                    Back to events
+                  </Button>
                   <div class="admin-audit-detail-head">
                     <h3>{selectedAudit.action}</h3>
                     <Badge color={outcomeColor(selectedAudit.outcome)} size="compact">
